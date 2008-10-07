@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            id="clojuredev.category.new"
+            name="Clojure">
+      </category>
+      <wizard
+            category="clojuredev.category.new"
+            class="org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard:clojuredev.nature"
+            id="clojuredev.project.new.wizard"
+            name="New Clojure Project"
+            project="true">
+      </wizard>
+   </extension>
+   <extension 
+   	id="clojuredev.nature" 
+   	name="Clojure Nature" 
+   	point="org.eclipse.core.resources.natures"> 
+      <runtime> 
+         <run class="clojuredev.ClojureNature"/> 
+      </runtime> 
+      <builder id="clojuredev.builder"/>
+      <requires-nature
+            id="org.eclipse.jdt.core.javanature">
+      </requires-nature> 
+   </extension> 
+   <extension 
+   	id="clojuredev.builder" 
+   	name="Clojure Builder" 
+   	point="org.eclipse.core.resources.builders"> 
+      <builder hasNature="true"> 
+         <run class="clojuredev.ClojureBuilder"/>
+      </builder> 
+   </extension> 
+   <extension point="org.eclipse.debug.core.launchConfigurationTypes">
+      <launchConfigurationType
+	   	   id="clojuredev.launching.clojure"
+		   name="Clojure"
+		   delegate="clojuredev.launching.ClojureLaunchConfigurationDelegate"
+		   modes= "run, debug">
+         <fileExtension extension="clj" default="true"/>
+      </launchConfigurationType>
+   </extension>
+
+   <extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+      <launchConfigurationTabGroup
+        type="clojuredev.launching.clojure"
+        class="clojuredev.launching.ClojureTabGroup"
+        id="clojuredev.launching.clojure.launchConfigurationTabGroup">
+      </launchConfigurationTabGroup>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchShortcuts">
+      <shortcut
+            class="clojuredev.launching.ClojureLaunchShortcut"
+            id="clojuredev.launching.clojureShortcut"
+            label="Clojure"
+            modes="run, debug">
+         <contextualLaunch>
+            <enablement>
+               <with
+                     variable="selection">
+                  <count
+                        value="1">
+                  </count>
+                  <iterate>
+                     <or>
+                        <test
+                              property="org.eclipse.debug.ui.matchesPattern"
+                              value="*.clj">
+                        </test>
+                     </or>
+                  </iterate>
+               </with>
+            </enablement>
+         </contextualLaunch>
+      </shortcut>
+   </extension>
+</plugin>
