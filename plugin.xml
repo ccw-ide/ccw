@@ -9,7 +9,7 @@
       </category>
       <wizard
             category="clojuredev.category.new"
-            class="org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard:clojuredev.nature"
+            class="clojuredev.NewClojureProjectWizard"
             id="clojuredev.project.new.wizard"
             name="New Clojure Project"
             project="true">
@@ -31,7 +31,9 @@
    	id="clojuredev.builder" 
    	name="Clojure Builder" 
    	point="org.eclipse.core.resources.builders"> 
-      <builder hasNature="true"> 
+      <builder
+            callOnEmptyDelta="false"
+            hasNature="true"> 
          <run class="clojuredev.ClojureBuilder"/>
       </builder> 
    </extension> 
@@ -69,6 +71,7 @@
                   <iterate>
                      <or>
                         <test
+                              forcePluginActivation="true"
                               property="org.eclipse.debug.ui.matchesPattern"
                               value="*.clj">
                         </test>
