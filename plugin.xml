@@ -82,4 +82,11 @@
          </contextualLaunch>
       </shortcut>
    </extension>
+   <extension
+         point="org.eclipse.ui.console.consoleFactories">
+      <consoleFactory
+            class="clojuredev.console.ClojureConsoleFactory"
+            label="Clojure REPL">
+      </consoleFactory>
+   </extension>
 </plugin>

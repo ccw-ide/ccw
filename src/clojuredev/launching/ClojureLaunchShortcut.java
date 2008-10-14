@@ -3,16 +3,34 @@ package clojuredev.launching;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.debug.ui.ILaunchShortcut;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.console.ConsolePlugin;
+import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.part.FileEditorInput;
+
+import clojuredev.console.ClojureConsole;
 
 public class ClojureLaunchShortcut implements ILaunchShortcut {
 
 	@Override
 	public void launch(ISelection selection, String mode) {
-		System.out.println("launch:" + selection.toString());
+		ClojureConsole clojureCons = null;
+		for (IConsole console : ConsolePlugin.getDefault().getConsoleManager().getConsoles()) {
+			if (console instanceof ClojureConsole) {
+				clojureCons = (ClojureConsole)console;
+			}
+		}
+		
+		if (selection instanceof IStructuredSelection) {
+			IStructuredSelection structuredSel = (IStructuredSelection)selection;
+			for (Object selObj : structuredSel.toList()) {
+				if (selObj instanceof IFile) {
+					clojureCons.evalFile((IFile)selObj);
+				}
+			}
+		}
 	}
 
 	@Override
@@ -22,9 +40,10 @@ public class ClojureLaunchShortcut implements ILaunchShortcut {
 			IFile file = ((FileEditorInput)input).getFile();
 			
 			try {
-				Object result = clojure.lang.Compiler.loadFile(file.getLocation().toFile().toString());
-				if (result != null) {
-					System.out.println(result.toString());
+				for (IConsole console : ConsolePlugin.getDefault().getConsoleManager().getConsoles()) {
+					if (console instanceof ClojureConsole) {
+						((ClojureConsole)console).evalFile(file);
+					}
 				}
 			}
 			catch (Exception e) {
