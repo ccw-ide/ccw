@@ -10,6 +10,8 @@
       <wizard
             category="clojuredev.category.new"
             class="clojuredev.NewClojureProjectWizard"
+            descriptionImage="icons/clojure42x42.png"
+            icon="icons/clojure16x16.png"
             id="clojuredev.project.new.wizard"
             name="New Clojure Project"
             project="true">
@@ -58,6 +60,7 @@
          point="org.eclipse.debug.ui.launchShortcuts">
       <shortcut
             class="clojuredev.launching.ClojureLaunchShortcut"
+            icon="icons/clojure16x16.png"
             id="clojuredev.launching.clojureShortcut"
             label="Clojure"
             modes="run, debug">
@@ -86,6 +89,7 @@
          point="org.eclipse.ui.console.consoleFactories">
       <consoleFactory
             class="clojuredev.console.ClojureConsoleFactory"
+            icon="icons/clojure16x16.png"
             label="Clojure REPL">
       </consoleFactory>
    </extension>
