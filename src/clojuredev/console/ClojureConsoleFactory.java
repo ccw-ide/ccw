@@ -8,36 +8,36 @@ import org.eclipse.ui.console.IConsoleManager;
 
 public class ClojureConsoleFactory implements IConsoleFactory {
 
-	private IConsoleManager fConsoleManager;
+    private IConsoleManager fConsoleManager;
     private ClojureConsole fConsole;
-	
-	public ClojureConsoleFactory() {
+
+    public ClojureConsoleFactory() {
         fConsoleManager = ConsolePlugin.getDefault().getConsoleManager();
         fConsoleManager.addConsoleListener(new IConsoleListener() {
 
-			public void consolesAdded(IConsole[] consoles) {
+            public void consolesAdded(IConsole[] consoles) {
             }
 
             public void consolesRemoved(IConsole[] consoles) {
                 for (int i = 0; i < consoles.length; i++) {
-                    if(consoles[i] == fConsole) {
-//                        fConsole.saveDocument();
+                    if (consoles[i] == fConsole) {
+                        // fConsole.saveDocument();
                         fConsole = null;
                     }
                 }
             }
-        
+
         });
-	}
-	
-	@Override
-	public void openConsole() {
+    }
+
+    @Override
+    public void openConsole() {
         if (fConsole == null) {
-            fConsole = new ClojureConsole(); 
-//            fConsole.initializeDocument();
-	        fConsoleManager.addConsoles(new IConsole[]{fConsole});
+            fConsole = new ClojureConsole();
+            // fConsole.initializeDocument();
+            fConsoleManager.addConsoles(new IConsole[] { fConsole });
         }
         fConsoleManager.showConsoleView(fConsole);
-	}
+    }
 
 }

@@ -9,12 +9,26 @@
       </category>
       <wizard
             category="clojuredev.category.new"
-            class="clojuredev.NewClojureProjectWizard"
-            descriptionImage="icons/clojure42x42.png"
+            class="clojuredev.wizards.NewClojureProjectWizard"
+            hasPages="true"
             icon="icons/clojure16x16.png"
             id="clojuredev.project.new.wizard"
             name="New Clojure Project"
             project="true">
+      </wizard>
+      <wizard
+            category="clojuredev.category.new"
+            class="clojuredev.wizards.NewClojureFileWizard"
+            icon="icons/clojure16x16.png"
+            id="clojuredev.newClojureFileWizard"
+            name="Clojure File"
+            project="false">
+         <description>
+            Create a Clojure file
+         </description>
+         <selection
+               class="java.lang.Object">
+         </selection>
       </wizard>
    </extension>
    <extension 
@@ -92,5 +106,16 @@
             icon="icons/clojure16x16.png"
             label="Clojure REPL">
       </consoleFactory>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="clojuredev.editors.ClojureEditor"
+            default="false"
+            extensions="clj"
+            icon="icons/clojure16x16.png"
+            id="clojuredev.editor"
+            name="Clojure Editor">
+      </editor>
    </extension>
 </plugin>

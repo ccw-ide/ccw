@@ -19,45 +19,50 @@ import org.eclipse.swt.widgets.Text;
  * Heavily adapted from JDT's java launcher tabs.
  * 
  * @author cmarshal
- *
+ * 
  */
 public class ClojureMainTab extends AbstractJavaMainTab {
 
-	@Override
-	public void createControl(Composite parent) {
-		Composite comp = SWTFactory.createComposite(parent, parent.getFont(), 1, 1, GridData.FILL_BOTH);
-		((GridLayout)comp.getLayout()).verticalSpacing = 0;
-		createProjectEditor(comp);
-		createVerticalSpacer(comp, 1);
-		createFileEditor(comp, "Clojure File");
-		setControl(comp);
-	}
+    @Override
+    public void createControl(Composite parent) {
+        Composite comp = SWTFactory.createComposite(parent, parent.getFont(),
+                1, 1, GridData.FILL_BOTH);
+        ((GridLayout) comp.getLayout()).verticalSpacing = 0;
+        createProjectEditor(comp);
+        createVerticalSpacer(comp, 1);
+        createFileEditor(comp, "Clojure File");
+        setControl(comp);
+    }
 
-	private void createFileEditor(Composite comp, String string) {
-		// TODO Auto-generated method stub
-		
-	}
+    private void createFileEditor(Composite comp, String string) {
+        // TODO Auto-generated method stub
 
-	@Override
-	public String getName() {
-		return "Clojure";
-	}
+    }
 
-	@Override
-	public void performApply(ILaunchConfigurationWorkingCopy config) {
-		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, fProjText.getText().trim());
-		mapResources(config);
-	}
+    @Override
+    public String getName() {
+        return "Clojure";
+    }
 
-	@Override
-	public void setDefaults(ILaunchConfigurationWorkingCopy config) {
-		IJavaElement javaElement = getContext();
-		if (javaElement != null) {
-			initializeJavaProject(javaElement, config);
-		}
-		else {
-			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, EMPTY_STRING);
-		}
-	}
+    @Override
+    public void performApply(ILaunchConfigurationWorkingCopy config) {
+        config.setAttribute(
+                IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, fProjText
+                        .getText().trim());
+        mapResources(config);
+    }
+
+    @Override
+    public void setDefaults(ILaunchConfigurationWorkingCopy config) {
+        IJavaElement javaElement = getContext();
+        if (javaElement != null) {
+            initializeJavaProject(javaElement, config);
+        }
+        else {
+            config.setAttribute(
+                    IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
+                    EMPTY_STRING);
+        }
+    }
 
 }

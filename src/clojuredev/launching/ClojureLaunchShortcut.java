@@ -14,42 +14,44 @@ import clojuredev.console.ClojureConsole;
 
 public class ClojureLaunchShortcut implements ILaunchShortcut {
 
-	@Override
-	public void launch(ISelection selection, String mode) {
-		ClojureConsole clojureCons = null;
-		for (IConsole console : ConsolePlugin.getDefault().getConsoleManager().getConsoles()) {
-			if (console instanceof ClojureConsole) {
-				clojureCons = (ClojureConsole)console;
-			}
-		}
-		
-		if (selection instanceof IStructuredSelection) {
-			IStructuredSelection structuredSel = (IStructuredSelection)selection;
-			for (Object selObj : structuredSel.toList()) {
-				if (selObj instanceof IFile) {
-					clojureCons.evalFile((IFile)selObj);
-				}
-			}
-		}
-	}
+    @Override
+    public void launch(ISelection selection, String mode) {
+        ClojureConsole clojureCons = null;
+        for (IConsole console : ConsolePlugin.getDefault().getConsoleManager()
+                .getConsoles()) {
+            if (console instanceof ClojureConsole) {
+                clojureCons = (ClojureConsole) console;
+            }
+        }
 
-	@Override
-	public void launch(IEditorPart editor, String mode) {
-		IEditorInput input = editor.getEditorInput();
-		if (input instanceof FileEditorInput) {
-			IFile file = ((FileEditorInput)input).getFile();
-			
-			try {
-				for (IConsole console : ConsolePlugin.getDefault().getConsoleManager().getConsoles()) {
-					if (console instanceof ClojureConsole) {
-						((ClojureConsole)console).evalFile(file);
-					}
-				}
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-	}
+        if (selection instanceof IStructuredSelection) {
+            IStructuredSelection structuredSel = (IStructuredSelection) selection;
+            for (Object selObj : structuredSel.toList()) {
+                if (selObj instanceof IFile) {
+                    clojureCons.evalFile((IFile) selObj);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void launch(IEditorPart editor, String mode) {
+        IEditorInput input = editor.getEditorInput();
+        if (input instanceof FileEditorInput) {
+            IFile file = ((FileEditorInput) input).getFile();
+
+            try {
+                for (IConsole console : ConsolePlugin.getDefault()
+                        .getConsoleManager().getConsoles()) {
+                    if (console instanceof ClojureConsole) {
+                        ((ClojureConsole) console).evalFile(file);
+                    }
+                }
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
 }
