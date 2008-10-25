@@ -1,4 +1,4 @@
-package clojuredev.text;
+package clojuredev.editors;
 
 import org.eclipse.jface.text.rules.IWordDetector;
 

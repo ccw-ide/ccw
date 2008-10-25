@@ -5,7 +5,7 @@
  *
  * Status: done
  */
-package clojuredev.text;
+package clojuredev.editors;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,7 +29,7 @@ import org.eclipse.swt.widgets.Display;
  * 
  * An abstract base class for all our scala code scanners
  */
-public class ClojureScanner extends RuleBasedScanner {
+public class ClojureCodeScanner extends RuleBasedScanner {
 	
     private final String[] specialForms = { 
             "def", "if", "do", "let", "quote", "var", "fn", "loop",
@@ -39,7 +39,7 @@ public class ClojureScanner extends RuleBasedScanner {
 
 	protected final HashMap<String,Token> tokens = new HashMap<String,Token>();
 
-	public ClojureScanner() {
+	public ClojureCodeScanner() {
         Color defaultColor = new Color(Display.getCurrent(), 0, 0, 0);
 	    TextAttribute defaultAttribute = new TextAttribute(defaultColor);
 	    IToken defaultToken = new Token(defaultAttribute);
