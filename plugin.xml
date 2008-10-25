@@ -118,4 +118,13 @@
             name="Clojure Editor">
       </editor>
    </extension>
+   <extension
+         point="org.eclipse.ui.editors.documentProviders">
+      <provider
+            class="clojuredev.editors.ClojureDocumentProvider"
+            extensions="clj"
+            id="clojuredev.document.provider"
+            inputTypes="org.eclipse.ui.part.FileEditorInput">
+      </provider>
+   </extension>
 </plugin>
