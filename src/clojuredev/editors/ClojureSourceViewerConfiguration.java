@@ -1,9 +1,12 @@
-/*                     __                                               *\
+/*
+ * Adapted from the...
 **     ________ ___   / /  ___     Scala Plugin for Eclipse             **
 **    / __/ __// _ | / /  / _ |    (c) 2004-2005, LAMP/EPFL             **
 **  __\ \/ /__/ __ |/ /__/ __ |                                         **
 ** /____/\___/_/ |_/____/_/ | |                                         **
 **                          |/                                          **
+*
+* by Casey Marshall for the Clojure plugin, clojuredev
 \*                                                                      */
 
 // Created on 2004-11-08 by Marc Moser

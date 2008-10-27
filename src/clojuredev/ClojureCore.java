@@ -1,10 +1,13 @@
-/*                     __                                               *\
- **     ________ ___   / /  ___     Scala Plugin for Eclipse             **
- **    / __/ __// _ | / /  / _ |    (c) 2004-2005, LAMP/EPFL             **
- **  __\ \/ /__/ __ |/ /__/ __ |                                         **
- ** /____/\___/_/ |_/____/_/ | |                                         **
- **                          |/                                          **
- \*                                                                      */
+/*
+ * Adapted from the...
+**     ________ ___   / /  ___     Scala Plugin for Eclipse             **
+**    / __/ __// _ | / /  / _ |    (c) 2004-2005, LAMP/EPFL             **
+**  __\ \/ /__/ __ |/ /__/ __ |                                         **
+** /____/\___/_/ |_/____/_/ | |                                         **
+**                          |/                                          **
+*
+* by Casey Marshall for the Clojure plugin, clojuredev
+\*                                                                      */
 
 // Created on 2004-10-25 by Thierry Monney
 //$Id: ScalaCore.java,v 1.3 2006/02/03 12:41:22 mcdirmid Exp $

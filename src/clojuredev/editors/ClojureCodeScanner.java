@@ -1,10 +1,3 @@
-/*
- * AbstractScalaScanner.java
- * 
- * Created on 04.11.2004
- *
- * Status: done
- */
 package clojuredev.editors;
 
 import java.util.ArrayList;
@@ -24,11 +17,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 
-/**
- * @author Marc Moser
- * 
- * An abstract base class for all our scala code scanners
- */
 public class ClojureCodeScanner extends RuleBasedScanner {
 	
     private final String[] specialForms = { 
