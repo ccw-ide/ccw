@@ -22,7 +22,7 @@ public class ClojurePartitionScanner extends RuleBasedPartitionScanner {
         IToken slineCmt = new Token(SINGLE_LINE_COMMENT);
         
         List<IPredicateRule> rules = new ArrayList<IPredicateRule>();
-        rules.add(new MultiLineRule("(", ")", sexp));
+        rules.add(new SexpRule(sexp));
         rules.add(new MultiLineRule("[", "]", funargs));
         rules.add(new SingleLineRule(";", "", slineCmt));
         

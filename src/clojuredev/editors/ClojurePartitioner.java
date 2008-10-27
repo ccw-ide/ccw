@@ -9,7 +9,7 @@ public class ClojurePartitioner extends FastPartitioner {
 
     public ClojurePartitioner() {
         super(new ClojurePartitionScanner(), new String[]{
-//            ClojurePartitionScanner.SEXP,
+            ClojurePartitionScanner.SEXP,
             ClojurePartitionScanner.FUNARGS,
             ClojurePartitionScanner.SINGLE_LINE_COMMENT});
     }

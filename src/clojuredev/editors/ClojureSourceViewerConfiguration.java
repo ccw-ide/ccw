@@ -141,8 +141,8 @@ public class ClojureSourceViewerConfiguration extends SourceViewerConfiguration 
 	    PresentationReconciler reconciler= new PresentationReconciler();
 	    
         DefaultDamagerRepairer dr = new DefaultDamagerRepairer(new ClojureCodeScanner());
-        reconciler.setDamager(dr, IDocument.DEFAULT_CONTENT_TYPE);
-        reconciler.setRepairer(dr, IDocument.DEFAULT_CONTENT_TYPE);
+        reconciler.setDamager(dr, ClojurePartitionScanner.SEXP);
+        reconciler.setRepairer(dr, ClojurePartitionScanner.SEXP);
         
         dr = new DefaultDamagerRepairer(new RuleBasedScanner(){
             {
