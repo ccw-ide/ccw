@@ -1,6 +1,9 @@
 package clojuredev;
 
 import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
@@ -16,6 +19,9 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
 
     static public final String BUILDER_ID = "clojuredev.builder";
 
+    public ClojureBuilder() {
+    }
+    
     @Override
     protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
             throws CoreException {
@@ -29,12 +35,12 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
         if (delta != null && delta.getResource() instanceof IFile) {
             IFile deltaFile = (IFile) delta.getResource();
             monitor.beginTask(
-                    "Evaluating " + delta.getFullPath().lastSegment(),
+                    "Evaluating " + deltaFile.getName(),
                     IProgressMonitor.UNKNOWN);
-
+            Reader fr = null;
             try {
-                ParseIterator parser = new ParseIterator(new FileReader(
-                        deltaFile.getLocation().toFile()));
+            	fr = new InputStreamReader(deltaFile.getContents());
+                ParseIterator parser = new ParseIterator(fr);
 
                 while (parser.hasNext()) {
                     Object exp = parser.next();
@@ -51,6 +57,12 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
                 System.out.println("eval " + delta.getFullPath().lastSegment()
                         + " failed:");
                 e.printStackTrace(System.out);
+            } finally {
+            	if (fr != null) {
+            		try {
+						fr.close();
+					} catch (IOException e) {}
+            	}
             }
         }
     }

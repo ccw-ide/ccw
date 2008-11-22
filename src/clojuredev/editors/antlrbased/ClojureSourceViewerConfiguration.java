@@ -59,30 +59,4 @@ public class ClojureSourceViewerConfiguration extends TextSourceViewerConfigurat
 				ClojurePartitionScannerFactory.CLOJURE_STRING };
 	}
 
-//	@Override
-//	public IAutoEditStrategy[] getAutoEditStrategies(ISourceViewer sourceViewer, String contentType) {
-//		IAutoEditStrategy[] strategies = {new YmlTextAutoEditStrategy()};
-//		return strategies;
-//	}
-//
-//	@Override
-//	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType) {
-//		return new YmlTextHover(tokenScanner.getTokens());
-//	}
-//
-//	/**
-//	 * 
-//	 * @param sourceViewer
-//	 * @return
-//	 */
-//	static IInformationControlCreator getMyInformationControl(ISourceViewer sourceViewer){
-//	    return new IInformationControlCreator() {
-//			@SuppressWarnings("deprecation")
-//			public IInformationControl createInformationControl(Shell parent) {
-//	    		return new DefaultInformationControl(parent,  SWT.RESIZE | SWT.TOOL, SWT.V_SCROLL | SWT.H_SCROLL, new InformationControl());
-//	    	}
-//	    };
-//   }
-
-
 }
