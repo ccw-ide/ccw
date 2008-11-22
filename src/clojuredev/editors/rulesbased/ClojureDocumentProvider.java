@@ -1,4 +1,4 @@
-package clojuredev.editors;
+package clojuredev.editors.rulesbased;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.IDocument;

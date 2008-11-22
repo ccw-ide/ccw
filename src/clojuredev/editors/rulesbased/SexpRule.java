@@ -1,4 +1,4 @@
-package clojuredev.editors;
+package clojuredev.editors.rulesbased;
 
 import org.eclipse.jface.text.rules.ICharacterScanner;
 import org.eclipse.jface.text.rules.IPredicateRule;

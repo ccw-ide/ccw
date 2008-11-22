@@ -1,4 +1,4 @@
-package clojuredev.editors;
+package clojuredev.editors.rulesbased;
 
 import java.util.ArrayList;
 import java.util.List;

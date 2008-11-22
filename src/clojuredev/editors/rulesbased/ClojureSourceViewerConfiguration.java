@@ -12,7 +12,7 @@
 // Created on 2004-11-08 by Marc Moser
 // $Id: ScalaSourceViewerConfiguration.java,v 1.3 2006/02/03 12:42:08 mcdirmid Exp $
 
-package clojuredev.editors;
+package clojuredev.editors.rulesbased;
 
 import java.util.ArrayList;
 import java.util.List;

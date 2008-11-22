@@ -110,21 +110,39 @@
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            class="clojuredev.editors.ClojureEditor"
+            class="clojuredev.editors.rulesbased.ClojureEditor"
             default="false"
             extensions="clj"
             icon="icons/clojure16x16.png"
             id="clojuredev.editor"
+            name="Clojure Editor (old)">
+      </editor>
+      <editor
+            class="clojuredev.editors.antlrbased.AntlrBasedClojureEditor"
+            default="true"
+            extensions="clj"
+            icon="icons/clojure16x16.png"
+            id="clojuredev.antlrbasededitor"
             name="Clojure Editor">
       </editor>
    </extension>
    <extension
          point="org.eclipse.ui.editors.documentProviders">
       <provider
-            class="clojuredev.editors.ClojureDocumentProvider"
+            class="clojuredev.editors.rulesbased.ClojureDocumentProvider"
             extensions="clj"
             id="clojuredev.document.provider"
             inputTypes="org.eclipse.ui.part.FileEditorInput">
       </provider>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="clojuredev.PreferenceInitializer">
+      </initializer>
+      <scope
+            class="org.eclipse.core.runtime.preferences.DefaultScope"
+            name="default">
+      </scope>
    </extension>
 </plugin>

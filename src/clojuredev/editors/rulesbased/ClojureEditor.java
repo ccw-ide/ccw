@@ -1,4 +1,4 @@
-package clojuredev.editors;
+package clojuredev.editors.rulesbased;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.ui.IEditorInput;
