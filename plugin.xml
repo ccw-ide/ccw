@@ -121,6 +121,7 @@
             class="clojuredev.editors.antlrbased.AntlrBasedClojureEditor"
             default="true"
             extensions="clj"
+            contributorClass="clojuredev.editors.antlrbased.BasicClojureEditorActionContributor"
             icon="icons/clojure16x16.png"
             id="clojuredev.antlrbasededitor"
             name="Clojure Editor">
@@ -145,4 +146,48 @@
             name="default">
       </scope>
    </extension>
+   
+<!-- =========================================================================== -->
+<!-- CLOJUREDEV command definitions                                              -->
+<!-- =========================================================================== -->
+
+   <extension
+         point="org.eclipse.ui.contexts">
+      <context
+            name="context.editingClojureSource.name"
+            description="context.editingClojureSource.description"
+            parentId="org.eclipse.ui.textEditorScope"
+            id="clojuredev.ui.clojureEditorScope">
+      </context>
+   </extension>
+
+   <extension
+         point="org.eclipse.ui.commands">
+<!-- navigate -->
+	   <!--keyConfiguration
+	      name="Clojure dev configuration"
+	      parent="org.eclipse.ui.defaultAcceleratorConfiguration"
+	      description="This is a simple configuration"
+	      id="org.eclipse.faq.sampleConfiguration">
+	   </keyConfiguration-->
+
+      <command
+            name="ActionDefinition.gotoMatchingBracket.name"
+            description="ActionDefinition.gotoMatchingBracket.description"
+            categoryId="org.eclipse.ui.category.navigate"
+            id="clojuredev.ui.edit.text.clojure.goto.matching.bracket">
+      </command>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.bindings">
+      <!--  win32:  M1=CTRL,    M2=SHIFT, M3=ALT, M4=-
+            carbon: M1=COMMAND, M2=SHIFT, M3=ALT, M4=CTRL -->
+<!-- navigate -->  
+      <key
+            sequence="M1+M2+P"
+            contextId="clojuredev.ui.clojureEditorScope"
+            commandId="clojuredev.ui.edit.text.clojure.goto.matching.bracket"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+	</extension>
 </plugin>
