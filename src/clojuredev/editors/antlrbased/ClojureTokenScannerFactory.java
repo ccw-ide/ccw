@@ -34,9 +34,9 @@ public final class ClojureTokenScannerFactory {
 				u.addTokenType(ClojureLexer.BOOLEAN, IJavaColorConstants.JAVA_STRING);
 				u.addTokenType(ClojureLexer.SYMBOL, IJavaColorConstants.JAVA_DEFAULT);
 				u.addBoldToken(ClojureLexer.SPECIAL_FORM, IJavaColorConstants.JAVA_KEYWORD);
-				u.addTokenType(ClojureLexer.T21, IJavaColorConstants.JAVA_DEFAULT);//'&'=20
-				u.addTokenType(ClojureLexer.T22, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT);//'('=21
-				u.addTokenType(ClojureLexer.T23, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT);//')'=22
+				u.addTokenType(ClojureLexer.T23, IJavaColorConstants.JAVA_DEFAULT);//'&'=20
+				u.addTokenType(ClojureLexer.OPEN_PAREN, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT);//'('=21
+				u.addTokenType(ClojureLexer.CLOSE_PAREN, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT);//')'=22
 				u.addTokenType(ClojureLexer.T24, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT);//'['=23
 				u.addTokenType(ClojureLexer.T25, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT);//']'=24
 				u.addTokenType(ClojureLexer.T26, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT);//'{'=25

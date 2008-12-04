@@ -110,14 +110,6 @@
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            class="clojuredev.editors.rulesbased.ClojureEditor"
-            default="false"
-            extensions="clj"
-            icon="icons/clojure16x16.png"
-            id="clojuredev.editor"
-            name="Clojure Editor (old)">
-      </editor>
-      <editor
             class="clojuredev.editors.antlrbased.AntlrBasedClojureEditor"
             default="true"
             extensions="clj"
@@ -164,18 +156,23 @@
    <extension
          point="org.eclipse.ui.commands">
 <!-- navigate -->
-	   <!--keyConfiguration
-	      name="Clojure dev configuration"
-	      parent="org.eclipse.ui.defaultAcceleratorConfiguration"
-	      description="This is a simple configuration"
-	      id="org.eclipse.faq.sampleConfiguration">
-	   </keyConfiguration-->
-
       <command
             name="ActionDefinition.gotoMatchingBracket.name"
             description="ActionDefinition.gotoMatchingBracket.description"
             categoryId="org.eclipse.ui.category.navigate"
             id="clojuredev.ui.edit.text.clojure.goto.matching.bracket">
+      </command>
+      <command
+            name="ActionDefinition.gotoNextMember.name"
+            description="ActionDefinition.gotoNextMember.description"
+            categoryId="org.eclipse.ui.category.navigate"
+            id="clojuredev.ui.edit.text.clojure.goto.next.member">
+      </command>
+      <command
+            name="ActionDefinition.gotoPreviousMember.name"
+            description="ActionDefinition.gotoPreviousMember.description"
+            categoryId="org.eclipse.ui.category.navigate"
+            id="clojuredev.ui.edit.text.clojure.goto.previous.member">
       </command>
    </extension>
    
@@ -188,6 +185,18 @@
             sequence="M1+M2+P"
             contextId="clojuredev.ui.clojureEditorScope"
             commandId="clojuredev.ui.edit.text.clojure.goto.matching.bracket"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+<!--            sequence="M1+M2+ARROW_UP" -->
+      <key
+            sequence="M1+M2+E"
+            contextId="clojuredev.ui.clojureEditorScope"
+            commandId="clojuredev.ui.edit.text.clojure.goto.previous.member"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+<!--            sequence="M1+M2+ARROW_DOWN" -->
+      <key
+            sequence="M1+M2+A"
+            contextId="clojuredev.ui.clojureEditorScope"
+            commandId="clojuredev.ui.edit.text.clojure.goto.next.member"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
 	</extension>
 </plugin>

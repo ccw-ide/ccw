@@ -82,9 +82,7 @@ abstract public class AntlrBasedTokenScanner implements ITokenScanner {
 	public final IToken nextToken() {
 		int nextIndex = currentTokenIndex + 1;
 		if ( nextIndex >= tokensData.size() ) {
-			ClojuredevPlugin.logError("nextToken called but no more token ! Returning EOF (Last non EOF token:" + tokensData.get(currentTokenIndex) + ")");
-			System.err.println("nextToken called but no more token ! Returning EOF (Last non EOF token:" + tokensData.get(currentTokenIndex) + ")");
-			return org.eclipse.jface.text.rules.Token.EOF;//.UNDEFINED;
+			return org.eclipse.jface.text.rules.Token.EOF;
 		}
 		currentTokenIndex = nextIndex;
 		TokenData token = tokensData.get(currentTokenIndex);
@@ -92,7 +90,6 @@ abstract public class AntlrBasedTokenScanner implements ITokenScanner {
 			return token.iToken;
 		} else {
 			ClojuredevPlugin.logError("nextToken called but null token retrieved ? ! Returning UNDEFINED");
-			System.err.println("nextToken called but null token retrieved ? !");
 			return org.eclipse.jface.text.rules.Token.UNDEFINED;
 		}
 	}
@@ -103,13 +100,15 @@ abstract public class AntlrBasedTokenScanner implements ITokenScanner {
 			tokensData.clear();
 			currentTokenIndex = -1;
 			text = document.get();
+			
 			lexer.setCharStream(new ANTLRStringStream(text));
+
 			while (true) {
 				Token token = lexer.nextToken();
-				addTokenInfo((CommonToken) token);
 				if( token.getType() == ANTLR_EOF ){
 					break;
 				}
+				addTokenInfo((CommonToken) token);
 			}
 		}
 		repositionCurrentTokenAtOffset(offset);
@@ -120,7 +119,7 @@ abstract public class AntlrBasedTokenScanner implements ITokenScanner {
 			TokenData tokenInfo = tokensData.get(i);
 			if( tokenInfo.offset < offset ){
 				currentTokenIndex = i;
-				return;
+				break;
 			}
 		}
 	}
@@ -129,7 +128,6 @@ abstract public class AntlrBasedTokenScanner implements ITokenScanner {
 		assert token != null;
 		IToken retToken = antlrTokenTypeToJFaceToken.get(token.getType());
 		if( retToken == null ) {
-			System.err.println("addTokenInfo " + token);
 			retToken = org.eclipse.jface.text.rules.Token.UNDEFINED; 
 		}
 		tokensData.add(new TokenData(token, retToken));

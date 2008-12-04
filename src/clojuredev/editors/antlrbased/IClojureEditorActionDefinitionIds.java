@@ -34,23 +34,23 @@ public interface IClojureEditorActionDefinitionIds extends ITextEditorActionDefi
 	 * @since 2.1
 	 */
 	public static final String GOTO_MATCHING_BRACKET= "clojuredev.ui.edit.text.clojure.goto.matching.bracket"; //$NON-NLS-1$
-//
-//	/**
-//	 * Action definition ID of the edit -> go to next member action
-//	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.goto.next.member"</code>).
-//	 *
-//	 * @since 2.1
-//	 */
-//	public static final String GOTO_NEXT_MEMBER= "org.eclipse.jdt.ui.edit.text.java.goto.next.member"; //$NON-NLS-1$
-//
-//	/**
-//	 * Action definition ID of the edit -> go to previous member action
-//	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.goto.previous.member"</code>).
-//	 *
-//	 * @since 2.1
-//	 */
-//	public static final String GOTO_PREVIOUS_MEMBER= "org.eclipse.jdt.ui.edit.text.java.goto.previous.member"; //$NON-NLS-1$
-//	
+
+	/**
+	 * Action definition ID of the edit -> go to next member action
+	 * (value <code>"clojuredev.ui.edit.text.clojure.goto.matching.bracket"</code>).
+	 *
+	 * @since 2.1
+	 */
+	public static final String GOTO_NEXT_MEMBER= "clojuredev.ui.edit.text.clojure.goto.next.member"; //$NON-NLS-1$
+
+	/**
+	 * Action definition ID of the edit -> go to previous member action
+	 * (value <code>"clojuredev.ui.edit.text.clojure.goto.previous.member"</code>).
+	 *
+	 * @since 2.1
+	 */
+	public static final String GOTO_PREVIOUS_MEMBER= "clojuredev.ui.edit.text.clojure.goto.previous.member"; //$NON-NLS-1$
+	
 //	/**
 //	 * Action definition ID of the edit -> select enclosing action
 //	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.select.enclosing"</code>).

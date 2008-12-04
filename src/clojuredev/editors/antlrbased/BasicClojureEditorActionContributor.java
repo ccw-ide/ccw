@@ -36,6 +36,8 @@ public class BasicClojureEditorActionContributor extends BasicTextEditorActionCo
 	private List<RetargetAction> partListeners= new ArrayList<RetargetAction>();
 
 	private RetargetTextEditorAction gotoMatchingBracket;
+	private RetargetTextEditorAction gotoPreviousMember;
+	private RetargetTextEditorAction gotoNextMember;
 	
 	public BasicClojureEditorActionContributor() {
 		super();
@@ -44,6 +46,12 @@ public class BasicClojureEditorActionContributor extends BasicTextEditorActionCo
 
 		gotoMatchingBracket= new RetargetTextEditorAction( b, "GotoMatchingBracket."); //$NON-NLS-1$
 		gotoMatchingBracket.setActionDefinitionId(IClojureEditorActionDefinitionIds.GOTO_MATCHING_BRACKET);
+		
+		gotoNextMember= new RetargetTextEditorAction( b, "GotoNextMember."); //$NON-NLS-1$
+		gotoNextMember.setActionDefinitionId(IClojureEditorActionDefinitionIds.GOTO_NEXT_MEMBER);
+
+		gotoPreviousMember= new RetargetTextEditorAction( b, "GotoPreviousMember."); //$NON-NLS-1$
+		gotoPreviousMember.setActionDefinitionId(IClojureEditorActionDefinitionIds.GOTO_PREVIOUS_MEMBER);
 	}
 
 	protected final void markAsPartListener(RetargetAction action) {

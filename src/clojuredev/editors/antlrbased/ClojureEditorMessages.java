@@ -36,6 +36,7 @@ final class ClojureEditorMessages extends NLS {
 		// Do not instantiate
 	}
 
+	
 //	public static String AddImportOnSelection_label;
 //	public static String AddImportOnSelection_tooltip;
 //	public static String AddImportOnSelection_description;
@@ -99,8 +100,8 @@ final class ClojureEditorMessages extends NLS {
 //	public static String StructureSelectHistory_tooltip;
 //	public static String StructureSelectHistory_description;
 //	public static String ExpandSelectionMenu_label;
-//	public static String GotoNextMember_label;
-//	public static String GotoPreviousMember_label;
+	public static String GotoNextMember_label;
+	public static String GotoPreviousMember_label;
 	public static String GotoMatchingBracket_label;
 	public static String GotoMatchingBracket_error_invalidSelection;
 	public static String GotoMatchingBracket_error_noMatchingBracket;

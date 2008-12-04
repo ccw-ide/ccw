@@ -12,6 +12,7 @@ package clojuredev.editors.antlrbased;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentExtension3;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
@@ -30,22 +31,26 @@ public class ClojureSourceViewerConfiguration extends TextSourceViewerConfigurat
 	@Override
 	public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer) {
 		PresentationReconciler reconciler= new PresentationReconciler();
-		
+
 		reconciler.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
 
-		addDamagerRepairerForContentType(reconciler, IDocument.DEFAULT_CONTENT_TYPE); // TODO see if this is really necessary
-		addDamagerRepairerForContentType(reconciler, ClojurePartitionScannerFactory.CLOJURE_CODE);		
-		addDamagerRepairerForContentType(reconciler, ClojurePartitionScannerFactory.CLOJURE_COMMENT);		
-		addDamagerRepairerForContentType(reconciler, ClojurePartitionScannerFactory.CLOJURE_STRING);
+		addDamagerRepairerForContentType(reconciler, IDocument.DEFAULT_CONTENT_TYPE);
 
 		return reconciler;
 	}
-
+	
+	@Override
+	public String getConfiguredDocumentPartitioning(ISourceViewer sourceViewer) {
+		return IDocumentExtension3.DEFAULT_PARTITIONING;
+	}
+	
 	private void addDamagerRepairerForContentType(PresentationReconciler reconciler, String contentType) {
 		DefaultDamagerRepairer dr= new DefaultDamagerRepairer(tokenScanner);
+
 		reconciler.setDamager(dr, contentType);
 		reconciler.setRepairer(dr, contentType);	
 	}
+	
 	@Override
 	public int getTabWidth(ISourceViewer sourceViewer) {
 		return 2;
@@ -53,10 +58,8 @@ public class ClojureSourceViewerConfiguration extends TextSourceViewerConfigurat
 	
 	public String[] getConfiguredContentTypes(ISourceViewer sourceViewer) {
 		return new String[] { 
-				IDocument.DEFAULT_CONTENT_TYPE, // FIXME normally not necessary, see if we can remove this  
-				ClojurePartitionScannerFactory.CLOJURE_CODE,
-				ClojurePartitionScannerFactory.CLOJURE_COMMENT,
-				ClojurePartitionScannerFactory.CLOJURE_STRING };
+				IDocument.DEFAULT_CONTENT_TYPE
+		};
 	}
 
 }

@@ -4,14 +4,12 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.rules.FastPartitioner;
+import org.eclipse.jface.text.rules.IPartitionTokenScanner;
 
 public class ClojurePartitioner extends FastPartitioner {
 
-    public ClojurePartitioner() {
-        super(new ClojurePartitionScanner(), new String[]{
-            ClojurePartitionScanner.SEXP,
-            ClojurePartitionScanner.FUNARGS,
-            ClojurePartitionScanner.SINGLE_LINE_COMMENT});
+    public ClojurePartitioner(IPartitionTokenScanner scanner, String[] legalContentTypes) {
+    	super(scanner, legalContentTypes);
     }
     
     @Override

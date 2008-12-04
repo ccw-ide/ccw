@@ -12,10 +12,12 @@ package clojuredev.editors.antlrbased;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewerExtension5;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.source.DefaultCharacterPairMatcher;
 import org.eclipse.jface.text.source.ICharacterPairMatcher;
 import org.eclipse.jface.text.source.ISourceViewer;
@@ -28,36 +30,33 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.editors.text.FileDocumentProvider;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 
 import clojuredev.ClojuredevPlugin;
+import clojuredev.editors.rulesbased.ClojurePartitionScanner;
 
 public class AntlrBasedClojureEditor extends TextEditor {
 	/** Preference key for matching brackets */
 	//PreferenceConstants.EDITOR_MATCHING_BRACKETS;
-	
+
 	/** Preference key for matching brackets color */
 	//PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR;
 
 	protected final static char[] PAIRS= { '{', '}', '(', ')', '[', ']' };
 	
-	private DefaultCharacterPairMatcher pairsMatcher = new DefaultCharacterPairMatcher(PAIRS,ClojurePartitionScannerFactory.CLOJURE_CODE);
+	private DefaultCharacterPairMatcher pairsMatcher = new DefaultCharacterPairMatcher(PAIRS, ClojurePartitionScanner.CLOJURE_PARTITIONING);
 
 	/** The projection support */
 	private ProjectionSupport fProjectionSupport;
 
 	public AntlrBasedClojureEditor() {
-        setDocumentProvider(new FileDocumentProvider());
 		setSourceViewerConfiguration(new ClojureSourceViewerConfiguration());
 		setPreferenceStore(ClojuredevPlugin.getDefault().getPreferenceStore());
 	}
 	
 	@Override
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
-        setDocumentProvider(new FileDocumentProvider());
-		setSourceViewerConfiguration(new ClojureSourceViewerConfiguration());
 		super.init(site, input);
 	}
 	
@@ -104,6 +103,14 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		Action action= new GotoMatchingBracketAction(this);
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.GOTO_MATCHING_BRACKET);
 		setAction(GotoMatchingBracketAction.ID, action);
+		
+		action = new GotoNextMemberAction(this);
+		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.GOTO_NEXT_MEMBER);
+		setAction(GotoNextMemberAction.ID, action);
+
+		action = new GotoPreviousMemberAction(this);
+		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.GOTO_PREVIOUS_MEMBER);
+		setAction(GotoPreviousMemberAction.ID, action);
 	}
 	
 	/**
@@ -168,6 +175,169 @@ public class AntlrBasedClojureEditor extends TextEditor {
 
 		sourceViewer.setSelectedRange(targetOffset, selection.getLength());
 		sourceViewer.revealRange(targetOffset, selection.getLength());
+	}
+
+	/**
+	 * Move to beginning of current or preceding defun (beginning-of-defun).
+	 */
+	/*
+	 * place 0 in variable currentLevel, and 0 in variable highest level
+	 *         and -1 in variable highest level open paren
+	 * repeat until found beginning of file:
+	 *   move backward until you find a left or right paren (or attain the beginning
+	 *   of the file)
+	 *   update currentChar position with the position of the paren
+	 *   if open paren
+	 *     increment currentLevel. 
+	 *      if currentLevel > highest level
+	 *        highest level <- currentLevel
+	 *        highest level open paren <- currentChar position
+	 *     else if close paren
+	 *       decrement currentLevel      
+	 * if beginning of file
+	 *   if highest level still 0 : no solution
+	 *   else return highest level open paren
+	 *   
+	 * Note: the found paren must be in the correct partition (code, not string or comment)
+	 */
+	public void gotoPreviousMember() {
+		ISourceViewer sourceViewer= getSourceViewer();
+		IDocument document= sourceViewer.getDocument();
+
+		if (document == null)
+			return;
+
+		IRegion selection= getSignedSelection(sourceViewer);
+
+		int selectionLength= Math.abs(selection.getLength());
+		if (selectionLength > 0) {
+			setStatusLineErrorMessage(ClojureEditorMessages.GotoMatchingBracket_error_invalidSelection);
+			sourceViewer.getTextWidget().getDisplay().beep();
+			return;
+		}
+
+//		// #26314
+		int sourceCaretOffset= selection.getOffset() + selection.getLength();
+		
+		int currentLevel = 0;
+		int highestLevel = 0;
+		int highestLevelCaretOffset = -1;
+		int nextParenOffset = sourceCaretOffset - 1;
+		
+		try {
+			while (nextParenOffset >= 0) {
+				nextParenOffset = nextCharInContentTypeMatching(nextParenOffset, 
+						IDocument.DEFAULT_CONTENT_TYPE, 
+						new char[] {'(',')'}, false);
+				if (nextParenOffset == -1) break;
+				if (document.getChar(nextParenOffset) == '(')
+					currentLevel += 1;
+				else if (document.getChar(nextParenOffset) == ')')
+					currentLevel -= 1;
+
+				if (currentLevel > highestLevel) {
+					highestLevel = currentLevel;
+					highestLevelCaretOffset = nextParenOffset;
+				} else if (currentLevel == 0 && highestLevelCaretOffset == -1) {
+					highestLevelCaretOffset = nextParenOffset;
+				}
+				
+				nextParenOffset--;
+			}
+			
+			if (highestLevelCaretOffset < 0) 
+				return;
+			else {
+				selectAndReveal(highestLevelCaretOffset, 0);
+			}
+		} catch (BadLocationException e) {
+		}
+	}
+	
+	/**
+	 * Move to end of current or following defun (end-of-defun).
+	 */
+	public void gotoEndOfMember() {
+		ISourceViewer sourceViewer= getSourceViewer();
+		IDocument document= sourceViewer.getDocument();
+
+		if (document == null)
+			return;
+
+		IRegion selection= getSignedSelection(sourceViewer);
+
+		int selectionLength= Math.abs(selection.getLength());
+		if (selectionLength > 0) {
+			setStatusLineErrorMessage(ClojureEditorMessages.GotoMatchingBracket_error_invalidSelection);
+			sourceViewer.getTextWidget().getDisplay().beep();
+			return;
+		}
+
+//		// #26314
+		int sourceCaretOffset= selection.getOffset() + selection.getLength();
+		
+		int currentLevel = 0;
+		int highestLevel = 0;
+		int highestLevelCaretOffset = -1;
+		int nextParenOffset = sourceCaretOffset;
+		
+		try {
+			while (nextParenOffset < document.getLength()) {
+				nextParenOffset = nextCharInContentTypeMatching(nextParenOffset, 
+						IDocument.DEFAULT_CONTENT_TYPE, 
+						new char[] {'(',')'}, true);
+				if (nextParenOffset == -1) break;
+				if (document.getChar(nextParenOffset) == '(')
+					currentLevel -= 1;
+				else if (document.getChar(nextParenOffset) == ')')
+					currentLevel += 1;
+
+				if (currentLevel > highestLevel) {
+					highestLevel = currentLevel;
+					highestLevelCaretOffset = nextParenOffset;
+				} else if (currentLevel == 0 && highestLevelCaretOffset == -1)
+					highestLevelCaretOffset = nextParenOffset;
+				
+				nextParenOffset++;
+			}
+			
+			if (highestLevelCaretOffset < 0) {
+				return;
+			} else {
+				if ((highestLevelCaretOffset + 1) < document.getLength())
+					highestLevelCaretOffset++;
+				selectAndReveal(highestLevelCaretOffset, 0);
+			}
+		} catch (BadLocationException e) {
+		}
+	}
+
+	private int nextCharInContentTypeMatching(int currentOffset, String contentType, char[] charsToMatch, boolean searchForward) throws BadLocationException {
+		ISourceViewer sourceViewer= getSourceViewer();
+		IDocument document= sourceViewer.getDocument();
+		
+		int offset = currentOffset;
+		while ( !( TextUtilities.getContentType(document, 
+						ClojurePartitionScanner.CLOJURE_PARTITIONING, offset, false).equals(contentType) 
+				   && matchChar(document.getChar(offset), charsToMatch) ) ) {
+			if (searchForward) {
+				offset++;
+				if (offset >= document.getLength())
+					return -1;
+			} else {
+				offset--;
+				if (offset < 0)
+					return -1;
+			}
+		}
+		return offset;
+	}
+	
+	private boolean matchChar(char c, char[] charsToMatch) {
+		for (char ctm: charsToMatch)
+			if (c == ctm)
+				return true;
+		return false;
 	}
 
 	/**
@@ -236,4 +406,5 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		}
 		
 		return super.getAdapter(required);
-	}}
+	}
+}

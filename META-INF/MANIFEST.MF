@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Clojuredev Plug-in
 Bundle-SymbolicName: clojuredev;singleton:=true
-Bundle-Version: 1.0.0
+Bundle-Version: 0.0.1
 Bundle-Activator: clojuredev.ClojuredevPlugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
@@ -12,14 +12,14 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jdt.debug.ui,
  org.eclipse.debug.ui,
  org.eclipse.jdt.ui,
- clojure,
  org.eclipse.ui.console,
  org.eclipse.ui.editors,
- org.eclipse.jface.text
+ org.eclipse.jface.text,
+ clojure;bundle-version="0.0.1"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: clojuredev,
  clojuredev.launching
-Bundle-ClassPath: lib/clojure.jar,
- .,
+Bundle-ClassPath: .,
  lib/antlr-runtime-3.0.1.jar
+Bundle-Vendor: clojure-dev team
