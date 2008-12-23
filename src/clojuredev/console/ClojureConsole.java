@@ -3,6 +3,7 @@ package clojuredev.console;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -12,6 +13,7 @@ import org.eclipse.ui.console.IOConsole;
 import org.eclipse.ui.console.IOConsoleInputStream;
 import org.eclipse.ui.console.IOConsoleOutputStream;
 
+import clojure.lang.Compiler;
 import clojure.lang.LineNumberingPushbackReader;
 import clojure.lang.LispReader;
 import clojure.lang.RT;
@@ -24,13 +26,20 @@ public class ClojureConsole extends IOConsole implements Runnable {
     final static Color INPUT_COLOUR = new Color(null, 0, 180, 180); // cyan
 
     static final Symbol USER = Symbol.create("user");
-    static final Symbol CLOJURE = Symbol.create("clojure");
+    static final Symbol CLOJURE = Symbol.create("clojure.core");
 
-    static final Var in_ns = RT.var("clojure", "in-ns");
-    static final Var refer = RT.var("clojure", "refer");
-    static final Var ns = RT.var("clojure", "*ns*");
-    static final Var warn_on_reflection = RT.var("clojure",
-            "*warn-on-reflection*");
+    static final Var in_ns = RT.var("clojure.core", "in-ns");
+    static final Var refer = RT.var("clojure.core", "refer");
+    static final Var ns = RT.var("clojure.core", "*ns*");
+    static final Var compile_path = RT.var("clojure.core", "*compile-path*");
+    static final Var warn_on_reflection = RT.var("clojure.core", "*warn-on-reflection*");
+    static final Var print_meta = RT.var("clojure.core", "*print-meta*");
+    static final Var print_length = RT.var("clojure.core", "*print-length*");
+    static final Var print_level = RT.var("clojure.core", "*print-level*");
+    static final Var star1 = RT.var("clojure.core", "*1");
+    static final Var star2 = RT.var("clojure.core", "*2");
+    static final Var star3 = RT.var("clojure.core", "*3");
+    static final Var stare = RT.var("clojure.core", "*e");
 
     private PrintStream out;
     private PrintStream info;
@@ -76,15 +85,25 @@ public class ClojureConsole extends IOConsole implements Runnable {
         err = new PrintStream(ioErr);
 
         try {
-            // *ns* must be thread-bound for in-ns to work
-            // thread-bind *warn-on-reflection* so it can be set!
-            // must have corresponding popThreadBindings in finally clause
-            Var.pushThreadBindings(RT.map(ns, ns.get(), warn_on_reflection,
-                    warn_on_reflection.get()));
+    		//*ns* must be thread-bound for in-ns to work
+    		//thread-bind *warn-on-reflection* so it can be set!
+    		//thread-bind *1,*2,*3,*e so each repl has its own history
+    		//must have corresponding popThreadBindings in finally clause
+    		Var.pushThreadBindings(
+    				RT.map(ns, ns.get(),
+    				       warn_on_reflection, warn_on_reflection.get(),
+    				       print_meta, print_meta.get(),
+    				       print_length, print_length.get(),
+    				       print_level, print_level.get(),
+    				       compile_path, "classes",
+    				       star1, null,
+    				       star2, null,
+    				       star3, null,
+    				       stare, null));
 
-            // create and move into the user namespace
-            in_ns.invoke(USER);
-            refer.invoke(CLOJURE);
+    		//create and move into the user namespace
+    		in_ns.invoke(USER);
+    		refer.invoke(CLOJURE);
 
             // repl IO support
             final LineNumberingPushbackReader rdr = new LineNumberingPushbackReader(
@@ -122,8 +141,8 @@ public class ClojureConsole extends IOConsole implements Runnable {
             w.write("Clojure\n");
             for (;;) {
                 try {
-                    w.write("=> ");
-                    w.flush();
+    				w.write("=> "); // TODO HAVE NS
+    				w.flush();
 
                     Object r = queue.take();
                     Object ret;
@@ -137,19 +156,23 @@ public class ClojureConsole extends IOConsole implements Runnable {
                     RT.print(ret, w);
                     w.write('\n');
                     w.flush();
+    				star3.set(star2.get());
+    				star2.set(star1.get());
+    				star1.set(ret);
                 }
                 catch (Throwable e) {
                     Throwable c = e;
                     while (c.getCause() != null) {
                         c = c.getCause();
                     }
-                    err.println(c);
-                    e.printStackTrace(err);
+                    err.println(e instanceof Compiler.CompilerException ? e : c);
+//                    e.printStackTrace(err);
+                    stare.set(e);
                 }
             }
         }
         catch (Exception e) {
-            e.printStackTrace(err);
+            e.printStackTrace((PrintWriter) RT.ERR.get());
         }
         finally {
             Var.popThreadBindings();

@@ -31,6 +31,8 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.editors.text.TextEditor;
+import org.eclipse.ui.texteditor.ContentAssistAction;
+import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 
 import clojuredev.ClojuredevPlugin;
@@ -111,6 +113,12 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		action = new GotoPreviousMemberAction(this);
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.GOTO_PREVIOUS_MEMBER);
 		setAction(GotoPreviousMemberAction.ID, action);
+		
+		action = new ContentAssistAction(ClojureEditorMessages.getBundleForConstructedKeys(), "ContentAssistProposal.", this); 
+		String id = ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS;
+		action.setActionDefinitionId(id);
+		setAction("ContentAssistProposal", action); 
+		markAsStateDependentAction("ContentAssistProposal", true);
 	}
 	
 	/**
@@ -389,6 +397,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
 	 * @param required the required type
 	 * @return an adapter for the required type or <code>null</code>
 	 */ 
+	@Override
 	public Object getAdapter(Class required) {
 //		if (IContentOutlinePage.class.equals(required)) {
 //			if (fOutlinePage == null) {
