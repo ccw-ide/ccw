@@ -24,6 +24,9 @@ public class ClojureLaunchShortcut implements ILaunchShortcut {
             }
         }
 
+        if (clojureCons == null)
+        	return;
+        
         if (selection instanceof IStructuredSelection) {
             IStructuredSelection structuredSel = (IStructuredSelection) selection;
             for (Object selObj : structuredSel.toList()) {

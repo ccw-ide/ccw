@@ -175,6 +175,18 @@
             id="clojuredev.ui.edit.text.clojure.goto.previous.member">
       </command>
       <command
+            name="ActionDefinition.clojuredev.ui.edit.text.clojure.select.toplevel.s.expression.name"
+            description="ActionDefinition.clojuredev.ui.edit.text.clojure.select.toplevel.s.expression.description"
+            categoryId="org.eclipse.ui.category.navigate"
+            id="clojuredev.ui.edit.text.clojure.select.toplevel.s.expression">
+      </command>
+      <command
+            name="ActionDefinition.clojuredev.ui.edit.text.clojure.evaluate.toplevel.s.expression.name"
+            description="ActionDefinition.clojuredev.ui.edit.text.clojure.evaluate.toplevel.s.expression.description"
+            categoryId="org.eclipse.ui.category.navigate"
+            id="clojuredev.ui.edit.text.clojure.evaluate.toplevel.s.expression">
+      </command>
+      <command
             name="ActionDefinition.clojureShortcut.run.name"
             description="ActionDefinition.clojureShortcut.run.description"
             categoryId="org.eclipse.debug.ui.category.run"
@@ -193,19 +205,43 @@
             contextId="clojuredev.ui.clojureEditorScope"
             commandId="clojuredev.ui.edit.text.clojure.goto.matching.bracket"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M1+M3+P"
+            contextId="clojuredev.ui.clojureEditorScope"
+            commandId="clojuredev.ui.edit.text.clojure.goto.matching.bracket"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
 <!--            sequence="M1+M2+ARROW_UP" -->
       <key
-            sequence="M1+M2+E"
+            sequence="M1+M3+A"
+            contextId="clojuredev.ui.clojureEditorScope"
+            commandId="clojuredev.ui.edit.text.clojure.goto.previous.member"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M1+M2+A"
             contextId="clojuredev.ui.clojureEditorScope"
             commandId="clojuredev.ui.edit.text.clojure.goto.previous.member"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
 <!--            sequence="M1+M2+ARROW_DOWN" -->
       <key
-            sequence="M1+M2+A"
+            sequence="M1+M3+E"
             contextId="clojuredev.ui.clojureEditorScope"
             commandId="clojuredev.ui.edit.text.clojure.goto.next.member"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-            
+      <key
+            sequence="M1+M2+E"
+            contextId="clojuredev.ui.clojureEditorScope"
+            commandId="clojuredev.ui.edit.text.clojure.goto.next.member"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M1+M3+H"
+            contextId="clojuredev.ui.clojureEditorScope"
+            commandId="clojuredev.ui.edit.text.clojure.select.toplevel.s.expression"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M1+M3+X"
+            contextId="clojuredev.ui.clojureEditorScope"
+            commandId="clojuredev.ui.edit.text.clojure.evaluate.toplevel.s.expression"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             sequence="M2+M3+X C"
             commandId="clojuredev.debug.ui.clojureShortcut.run"

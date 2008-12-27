@@ -102,6 +102,8 @@ final class ClojureEditorMessages extends NLS {
 //	public static String ExpandSelectionMenu_label;
 	public static String GotoNextMember_label;
 	public static String GotoPreviousMember_label;
+	public static String SelectTopLevelSExpressionAction_label;
+	public static String EvaluateTopLevelSExpressionAction_label;
 	public static String GotoMatchingBracket_label;
 	public static String GotoMatchingBracket_error_invalidSelection;
 	public static String GotoMatchingBracket_error_noMatchingBracket;

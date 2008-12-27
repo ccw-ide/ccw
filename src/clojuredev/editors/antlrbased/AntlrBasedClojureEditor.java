@@ -114,6 +114,14 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.GOTO_PREVIOUS_MEMBER);
 		setAction(GotoPreviousMemberAction.ID, action);
 		
+		action = new SelectTopLevelSExpressionAction(this);
+		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.SELECT_TOP_LEVEL_S_EXPRESSION);
+		setAction(SelectTopLevelSExpressionAction.ID, action);
+
+		action = new EvaluateTopLevelSExpressionAction(this);
+		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.EVALUATE_TOP_LEVEL_S_EXPRESSION);
+		setAction(EvaluateTopLevelSExpressionAction.ID, action);
+
 		action = new ContentAssistAction(ClojureEditorMessages.getBundleForConstructedKeys(), "ContentAssistProposal.", this); 
 		String id = ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS;
 		action.setActionDefinitionId(id);
@@ -209,24 +217,50 @@ public class AntlrBasedClojureEditor extends TextEditor {
 	 * Note: the found paren must be in the correct partition (code, not string or comment)
 	 */
 	public void gotoPreviousMember() {
-		ISourceViewer sourceViewer= getSourceViewer();
-		IDocument document= sourceViewer.getDocument();
-
-		if (document == null)
+		if (!checkSelectionAndWarnUserIfProblem(ClojureEditorMessages.GotoMatchingBracket_error_invalidSelection))
 			return;
 
-		IRegion selection= getSignedSelection(sourceViewer);
+		int sourceCaretOffset= getSourceCaretOffset();
+		
+		int previousMemberOffset = getBeginningOfCurrentOrPrecedingTopLevelSExpressionFor(sourceCaretOffset);
+
+		if (previousMemberOffset >= 0) 
+			selectAndReveal(previousMemberOffset, 0);
+	}
+	
+	private boolean checkSelectionAndWarnUserIfProblem(String errorMessageIfProblem) {
+		if (getDocument() == null)
+			return false;
+		
+		IRegion selection= getSignedSelection(getSourceViewer());
 
 		int selectionLength= Math.abs(selection.getLength());
 		if (selectionLength > 0) {
-			setStatusLineErrorMessage(ClojureEditorMessages.GotoMatchingBracket_error_invalidSelection);
-			sourceViewer.getTextWidget().getDisplay().beep();
-			return;
+			setStatusLineErrorMessage(errorMessageIfProblem);
+			getSourceViewer().getTextWidget().getDisplay().beep();
+			return false;
 		}
-
-//		// #26314
-		int sourceCaretOffset= selection.getOffset() + selection.getLength();
 		
+		return true;
+	}
+	
+	private IDocument getDocument() {
+		ISourceViewer sourceViewer= getSourceViewer();
+		return sourceViewer.getDocument();
+	}
+	
+	/**
+	 * Asserts document != null.
+	 * @return
+	 */
+	private int getSourceCaretOffset() {
+		IRegion selection= getSignedSelection(getSourceViewer());
+		return selection.getOffset() + selection.getLength();
+	}
+	
+	private int getBeginningOfCurrentOrPrecedingTopLevelSExpressionFor(final int sourceCaretOffset) {
+		IDocument document= getDocument();
+
 		int currentLevel = 0;
 		int highestLevel = 0;
 		int highestLevelCaretOffset = -1;
@@ -253,12 +287,48 @@ public class AntlrBasedClojureEditor extends TextEditor {
 				nextParenOffset--;
 			}
 			
-			if (highestLevelCaretOffset < 0) 
-				return;
-			else {
-				selectAndReveal(highestLevelCaretOffset, 0);
-			}
 		} catch (BadLocationException e) {
+		}
+		return highestLevelCaretOffset;
+	}
+	
+	public void selectTopLevelSExpression() {
+		IRegion r = getTopLevelSExpression();
+		
+		if (r != null)
+			selectAndReveal(r.getOffset(), r.getLength());
+	}
+	
+	private IRegion getTopLevelSExpression() {
+		if (!checkSelectionAndWarnUserIfProblem(ClojureEditorMessages.GotoMatchingBracket_error_invalidSelection))
+			return null;
+
+		int sourceCaretOffset = getSourceCaretOffset();
+		
+		int endOffset = getEndOfCurrentOrNextTopLevelSExpressionFor(sourceCaretOffset);
+		int beginningOffset = getBeginningOfCurrentOrPrecedingTopLevelSExpressionFor(endOffset);
+
+		if (beginningOffset>=0 && endOffset>=0) {
+			// length made to not include end position but
+			// (end position - 1)
+			int length = endOffset - beginningOffset;
+			return new Region(beginningOffset, length);
+		} else {
+			return null;
+		}
+	}
+	
+	public String getCurrentOrNextTopLevelSExpression() {
+		IRegion r = getTopLevelSExpression();
+		
+		if (r != null) {
+			try {
+				return getDocument().get(r.getOffset(), r.getLength());
+			} catch (BadLocationException e) {
+				return null;
+			}
+		} else {
+			return null;
 		}
 	}
 	
@@ -266,29 +336,26 @@ public class AntlrBasedClojureEditor extends TextEditor {
 	 * Move to end of current or following defun (end-of-defun).
 	 */
 	public void gotoEndOfMember() {
+		if (!checkSelectionAndWarnUserIfProblem(ClojureEditorMessages.GotoMatchingBracket_error_invalidSelection))
+			return;
+
+		int sourceCaretOffset= getSourceCaretOffset();
+		int endOfMemberOffset = getEndOfCurrentOrNextTopLevelSExpressionFor(sourceCaretOffset);
+
+		if (endOfMemberOffset >= 0)
+			selectAndReveal(endOfMemberOffset, 0);
+	}
+	
+	private int getEndOfCurrentOrNextTopLevelSExpressionFor(int sourceCaretOffset) {
+		
 		ISourceViewer sourceViewer= getSourceViewer();
 		IDocument document= sourceViewer.getDocument();
 
-		if (document == null)
-			return;
-
-		IRegion selection= getSignedSelection(sourceViewer);
-
-		int selectionLength= Math.abs(selection.getLength());
-		if (selectionLength > 0) {
-			setStatusLineErrorMessage(ClojureEditorMessages.GotoMatchingBracket_error_invalidSelection);
-			sourceViewer.getTextWidget().getDisplay().beep();
-			return;
-		}
-
-//		// #26314
-		int sourceCaretOffset= selection.getOffset() + selection.getLength();
-		
 		int currentLevel = 0;
 		int highestLevel = 0;
 		int highestLevelCaretOffset = -1;
 		int nextParenOffset = sourceCaretOffset;
-		
+
 		try {
 			while (nextParenOffset < document.getLength()) {
 				nextParenOffset = nextCharInContentTypeMatching(nextParenOffset, 
@@ -299,7 +366,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
 					currentLevel -= 1;
 				else if (document.getChar(nextParenOffset) == ')')
 					currentLevel += 1;
-
+		
 				if (currentLevel > highestLevel) {
 					highestLevel = currentLevel;
 					highestLevelCaretOffset = nextParenOffset;
@@ -308,16 +375,12 @@ public class AntlrBasedClojureEditor extends TextEditor {
 				
 				nextParenOffset++;
 			}
-			
-			if (highestLevelCaretOffset < 0) {
-				return;
-			} else {
+			if (highestLevelCaretOffset >= 0)
 				if ((highestLevelCaretOffset + 1) < document.getLength())
 					highestLevelCaretOffset++;
-				selectAndReveal(highestLevelCaretOffset, 0);
-			}
 		} catch (BadLocationException e) {
 		}
+		return highestLevelCaretOffset; 
 	}
 
 	private int nextCharInContentTypeMatching(int currentOffset, String contentType, char[] charsToMatch, boolean searchForward) throws BadLocationException {

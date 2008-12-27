@@ -27,7 +27,6 @@ public class ClojureConsole extends IOConsole implements Runnable {
 
     static final Symbol USER = Symbol.create("user");
     static final Symbol CLOJURE = Symbol.create("clojure.core");
-
     static final Var in_ns = RT.var("clojure.core", "in-ns");
     static final Var refer = RT.var("clojure.core", "refer");
     static final Var ns = RT.var("clojure.core", "*ns*");
@@ -40,10 +39,13 @@ public class ClojureConsole extends IOConsole implements Runnable {
     static final Var star2 = RT.var("clojure.core", "*2");
     static final Var star3 = RT.var("clojure.core", "*3");
     static final Var stare = RT.var("clojure.core", "*e");
+    static final Var outVar = RT.var("clojure.core", "*out*");
 
     private PrintStream out;
     private PrintStream info;
     private PrintStream err;
+
+    IOConsoleInputStream in;
 
     private BlockingQueue queue = new LinkedBlockingQueue();
 
@@ -63,16 +65,17 @@ public class ClojureConsole extends IOConsole implements Runnable {
     }
 
     public void evalString(String string) {
-        try {
-            queue.put(string);
-        }
-        catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    	in.appendData(string);
+//        try {
+//            queue.put(string);
+//        }
+//        catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
     }
 
     public void run() {
-        final IOConsoleInputStream in = getInputStream();
+        in = getInputStream();
         IOConsoleOutputStream ioOut = newOutputStream();
         IOConsoleOutputStream ioInfo = newOutputStream();
         IOConsoleOutputStream ioErr = newOutputStream();
@@ -99,7 +102,8 @@ public class ClojureConsole extends IOConsole implements Runnable {
     				       star1, null,
     				       star2, null,
     				       star3, null,
-    				       stare, null));
+    				       stare, null,
+    				       outVar, new PrintWriter(out)));
 
     		//create and move into the user namespace
     		in_ns.invoke(USER);

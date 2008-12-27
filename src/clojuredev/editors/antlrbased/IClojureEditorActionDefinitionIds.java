@@ -51,6 +51,16 @@ public interface IClojureEditorActionDefinitionIds extends ITextEditorActionDefi
 	 */
 	public static final String GOTO_PREVIOUS_MEMBER= "clojuredev.ui.edit.text.clojure.goto.previous.member"; //$NON-NLS-1$
 	
+	/**
+	 * Action definition ID of the Clojure (or edit ?) -> select top level s expression action 
+	 */
+	public static final String SELECT_TOP_LEVEL_S_EXPRESSION = "clojuredev.ui.edit.text.clojure.select.toplevel.s.expression";
+	
+	/**
+	 * Action definition ID of the Clojure (or edit ?) -> evaluate top level s expression action 
+	 */
+	public static final String EVALUATE_TOP_LEVEL_S_EXPRESSION = "clojuredev.ui.edit.text.clojure.evaluate.toplevel.s.expression";
+	
 //	/**
 //	 * Action definition ID of the edit -> select enclosing action
 //	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.select.enclosing"</code>).
