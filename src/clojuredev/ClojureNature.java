@@ -12,7 +12,6 @@ public class ClojureNature implements IProjectNature {
 
     private IProject project;
 
-    @Override
     public void configure() throws CoreException {
         IProjectDescription desc = project.getDescription();
         ICommand[] commands = desc.getBuildSpec();
@@ -38,18 +37,15 @@ public class ClojureNature implements IProjectNature {
         }
     }
 
-    @Override
     public void deconfigure() throws CoreException {
         // TODO Auto-generated method stub
 
     }
 
-    @Override
     public IProject getProject() {
         return project;
     }
 
-    @Override
     public void setProject(IProject project) {
         this.project = project;
     }

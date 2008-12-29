@@ -24,7 +24,6 @@ public class ParseIterator implements Iterator {
                 pushbackReader.getLineNumber()));
     }
 
-    @Override
     public boolean hasNext() {
         try {
             current = LispReader.read(pushbackReader, false, EOF, false);
@@ -35,12 +34,10 @@ public class ParseIterator implements Iterator {
         }
     }
 
-    @Override
     public Object next() {
         return current;
     }
 
-    @Override
     public void remove() {
         throw new UnsupportedOperationException();
     }

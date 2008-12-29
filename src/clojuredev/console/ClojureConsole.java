@@ -116,7 +116,6 @@ public class ClojureConsole extends IOConsole implements Runnable {
 
             new Thread(new Runnable() {
 
-                @Override
                 public void run() {
                     for (;;) {
                         try {

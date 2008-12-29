@@ -68,17 +68,14 @@ abstract public class AntlrBasedTokenScanner implements ITokenScanner {
 		return new RuntimeException("Object Lifecycle error: method called at an inappropriate time");
 	}
 
-	@Override
 	public final int getTokenLength() {
 		return tokensData.get(currentTokenIndex).length;
 	}
 
-	@Override
 	public final int getTokenOffset() {
 		return tokensData.get(currentTokenIndex).offset;
 	}
 
-	@Override
 	public final IToken nextToken() {
 		int nextIndex = currentTokenIndex + 1;
 		if ( nextIndex >= tokensData.size() ) {
@@ -94,7 +91,6 @@ abstract public class AntlrBasedTokenScanner implements ITokenScanner {
 		}
 	}
 
-	@Override
 	public final void setRange(IDocument document, int offset, int length) {
 		if (!document.get().equals(text)) {
 			tokensData.clear();

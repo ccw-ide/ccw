@@ -14,7 +14,6 @@ import clojuredev.console.ClojureConsole;
 
 public class ClojureLaunchShortcut implements ILaunchShortcut {
 
-    @Override
     public void launch(ISelection selection, String mode) {
         ClojureConsole clojureCons = null;
         for (IConsole console : ConsolePlugin.getDefault().getConsoleManager()
@@ -37,7 +36,6 @@ public class ClojureLaunchShortcut implements ILaunchShortcut {
         }
     }
 
-    @Override
     public void launch(IEditorPart editor, String mode) {
         IEditorInput input = editor.getEditorInput();
         if (input instanceof FileEditorInput) {

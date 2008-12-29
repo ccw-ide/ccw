@@ -23,7 +23,6 @@ import org.eclipse.swt.widgets.Text;
  */
 public class ClojureMainTab extends AbstractJavaMainTab {
 
-    @Override
     public void createControl(Composite parent) {
         Composite comp = SWTFactory.createComposite(parent, parent.getFont(),
                 1, 1, GridData.FILL_BOTH);
@@ -39,12 +38,10 @@ public class ClojureMainTab extends AbstractJavaMainTab {
 
     }
 
-    @Override
     public String getName() {
         return "Clojure";
     }
 
-    @Override
     public void performApply(ILaunchConfigurationWorkingCopy config) {
         config.setAttribute(
                 IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, fProjText
@@ -52,7 +49,6 @@ public class ClojureMainTab extends AbstractJavaMainTab {
         mapResources(config);
     }
 
-    @Override
     public void setDefaults(ILaunchConfigurationWorkingCopy config) {
         IJavaElement javaElement = getContext();
         if (javaElement != null) {

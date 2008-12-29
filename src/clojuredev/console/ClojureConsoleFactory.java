@@ -30,7 +30,6 @@ public class ClojureConsoleFactory implements IConsoleFactory {
         });
     }
 
-    @Override
     public void openConsole() {
         if (fConsole == null) {
             fConsole = new ClojureConsole();

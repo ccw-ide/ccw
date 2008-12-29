@@ -20,7 +20,6 @@ abstract public class AntlrBasedPartitionScanner extends AntlrBasedTokenScanner 
 		super(lexer);
 	}
 	
-	@Override
 	public final void setPartialRange(IDocument document, int offset, int length, String contentType, int partitionOffset) {
 	}
 

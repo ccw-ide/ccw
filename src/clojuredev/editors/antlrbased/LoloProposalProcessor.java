@@ -45,7 +45,6 @@ public class LoloProposalProcessor implements IContentAssistProcessor {
 		
 	}
 	
-	@Override
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int offset) {
 		int wordStart = offset - 1;
 		IDocument doc = viewer.getDocument();
@@ -73,47 +72,37 @@ public class LoloProposalProcessor implements IContentAssistProcessor {
 		}
 	}
 
-	@Override
 	public IContextInformation[] computeContextInformation(ITextViewer viewer, int offset) {
 		return new IContextInformation[] {
 				new IContextInformation() {
 
-					@Override
 					public String getContextDisplayString() {
 						return "my context";
 					}
 
-					@Override
 					public Image getImage() {
 						return null;
 					}
 
-					@Override
 					public String getInformationDisplayString() {
 						return "the information for the context";
 					}}
 		};
-//		// TODO Auto-generated method stub
-//		return null;
 	}
 
-	@Override
 	public char[] getCompletionProposalAutoActivationCharacters() {
 		return new char[] { '/' };
 	}
 
-	@Override
 	public char[] getContextInformationAutoActivationCharacters() {
 		return new char[] { '.' };
 	}
 
-	@Override
 	public IContextInformationValidator getContextInformationValidator() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
 	public String getErrorMessage() {
 		// TODO Auto-generated method stub
 		return null;
