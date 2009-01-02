@@ -376,7 +376,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
 				nextParenOffset++;
 			}
 			if (highestLevelCaretOffset >= 0)
-				if ((highestLevelCaretOffset + 1) < document.getLength())
+				if ((highestLevelCaretOffset + 1) <= document.getLength())
 					highestLevelCaretOffset++;
 		} catch (BadLocationException e) {
 		}

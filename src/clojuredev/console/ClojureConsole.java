@@ -1,5 +1,6 @@
 package clojuredev.console;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
@@ -8,6 +9,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.debug.internal.core.SystemPropertyResolver;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.ui.console.IOConsole;
 import org.eclipse.ui.console.IOConsoleInputStream;
@@ -47,6 +49,11 @@ public class ClojureConsole extends IOConsole implements Runnable {
 
     IOConsoleInputStream in;
 
+    IOConsoleOutputStream ioOut;
+    IOConsoleOutputStream ioInfo;
+    IOConsoleOutputStream ioErr;
+
+    
     private BlockingQueue queue = new LinkedBlockingQueue();
 
     public ClojureConsole() {
@@ -65,20 +72,26 @@ public class ClojureConsole extends IOConsole implements Runnable {
     }
 
     public void evalString(String string) {
-    	in.appendData(string);
-//        try {
-//            queue.put(string);
-//        }
-//        catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
+    	if (in != null) {
+    		in.appendData(string);
+    		try {
+    			if (ioInfo != null) {
+    				ioInfo.write(string);
+    				String LINE_SEPARATOR = System.getProperty("line.separator"); 
+    				if (!string.endsWith(LINE_SEPARATOR)) {
+    					ioInfo.write(LINE_SEPARATOR);
+    				}
+    			}
+			} catch (IOException e) {
+			}
+    	}
     }
 
     public void run() {
         in = getInputStream();
-        IOConsoleOutputStream ioOut = newOutputStream();
-        IOConsoleOutputStream ioInfo = newOutputStream();
-        IOConsoleOutputStream ioErr = newOutputStream();
+        ioOut = newOutputStream();
+        ioInfo = newOutputStream();
+        ioErr = newOutputStream();
         in.setColor(INPUT_COLOUR);
         ioOut.setColor(OUTPUT_COLOUR);
         ioInfo.setColor(INPUT_COLOUR);
