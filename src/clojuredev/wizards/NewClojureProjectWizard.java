@@ -1,6 +1,8 @@
 package clojuredev.wizards;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.wizards.NewSourceFolderCreationWizard;
 import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
 
@@ -32,10 +34,9 @@ public class NewClojureProjectWizard extends BasicNewProjectResourceWizard {
             // ScalaCore.getJavaProject(project);
             boolean ret = ClojureCore.addJavaNature(project)
                     && ClojureCore.addClojureNature(project);
-            return ret;
+            IJavaProject javaProject = JavaCore.create(project);
+            return ret && javaProject != null;
         }
-        new NewSourceFolderCreationWizard();
-
         return false;
     }
 

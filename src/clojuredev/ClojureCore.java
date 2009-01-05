@@ -87,7 +87,7 @@ public class ClojureCore {
      *         <code>false</code> otherwise
      */
     public static boolean addClojureNature(IProject project) {
-        return addNature(project, ClojureNature.NATURE_ID);
+        return addNature(project, ClojureProjectNature.NATURE_ID);
     }
 
     /**
@@ -118,7 +118,7 @@ public class ClojureCore {
             return null;
         try {
             if (!project.exists()
-                    || !project.hasNature(ClojureNature.NATURE_ID))
+                    || !project.hasNature(ClojureProjectNature.NATURE_ID))
                 return null;
         }
         catch (CoreException e) {
@@ -153,7 +153,7 @@ public class ClojureCore {
             return p;
         try {
             if (!project.exists() || !project.isOpen()
-                    || !project.hasNature(ClojureNature.NATURE_ID))
+                    || !project.hasNature(ClojureProjectNature.NATURE_ID))
                 return null;
         }
         catch (CoreException e) {

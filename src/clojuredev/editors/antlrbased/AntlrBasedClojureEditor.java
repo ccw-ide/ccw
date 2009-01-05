@@ -54,7 +54,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
 
 	public AntlrBasedClojureEditor() {
 		setSourceViewerConfiguration(new ClojureSourceViewerConfiguration());
-		setPreferenceStore(ClojuredevPlugin.getDefault().getPreferenceStore());
+        setPreferenceStore(ClojuredevPlugin.getDefault().getPreferenceStore());
 	}
 	
 	@Override

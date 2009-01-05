@@ -25,7 +25,7 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
     @Override
     protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
             throws CoreException {
-        System.out.println("build:" + kind + " args:" + args);
+//        System.out.println("build:" + kind + " args:" + args);
         IResourceDelta delta = getDelta(getProject());
         incrementalBuild(delta, monitor);
         return null;

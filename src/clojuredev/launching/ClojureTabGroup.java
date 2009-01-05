@@ -19,10 +19,13 @@ public class ClojureTabGroup extends AbstractLaunchConfigurationTabGroup {
     public void createTabs(ILaunchConfigurationDialog dialog, String mode) {
         ILaunchConfigurationTab[] tabs = new ILaunchConfigurationTab[] {
                 // new JavaMainTab(),
-                new ClojureMainTab(), new JavaArgumentsTab(), new JavaJRETab(),
+                new ClojureMainTab(), 
+                new JavaArgumentsTab(), 
+                new JavaJRETab(),
                 new JavaClasspathTab(),
                 // new SourceLookupTab(),
-                new EnvironmentTab(), new CommonTab() };
+                new EnvironmentTab(), 
+                new CommonTab() };
         setTabs(tabs);
     }
 }

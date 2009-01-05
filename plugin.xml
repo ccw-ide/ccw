@@ -36,7 +36,7 @@
    	name="Clojure Nature" 
    	point="org.eclipse.core.resources.natures"> 
       <runtime> 
-         <run class="clojuredev.ClojureNature"/> 
+         <run class="clojuredev.ClojureProjectNature"/> 
       </runtime> 
       <builder id="clojuredev.builder"/>
       <requires-nature
@@ -55,10 +55,12 @@
    </extension> 
    <extension point="org.eclipse.debug.core.launchConfigurationTypes">
       <launchConfigurationType
-	   	   id="clojuredev.launching.clojure"
-		   name="Clojure"
-		   delegate="clojuredev.launching.ClojureLaunchConfigurationDelegate"
-		   modes= "run, debug">
+            delegate="clojuredev.launching.ClojureLaunchDelegate"
+            delegateName="Clojure Launcher"
+            id="clojuredev.launching.clojure"
+            modes="run, debug"
+            name="Clojure"
+            public="true">
          <fileExtension extension="clj" default="true"/>
       </launchConfigurationType>
    </extension>
