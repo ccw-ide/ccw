@@ -20,10 +20,10 @@ import org.eclipse.swt.graphics.Image;
 import clojuredev.lexers.ClojureLexer;
 import clojuredev.lexers.ClojureParser;
 
-public class LoloProposalProcessor implements IContentAssistProcessor {
+public class TestProposalProcessor implements IContentAssistProcessor {
 	ClojureParser parser;
 	
-	public LoloProposalProcessor() {
+	public TestProposalProcessor() {
 		this.parser = parser;
 	}
 

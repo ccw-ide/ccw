@@ -68,4 +68,16 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
                 new Status(IStatus.ERROR, PLUGIN_ID, e.getMessage(), e));
     }
 
+    public static void logWarning(String msg) {
+        plugin.getLog().log(new Status(IStatus.WARNING, PLUGIN_ID, msg));
+    }
+
+    public static void logWarning(String msg, Throwable e) {
+        plugin.getLog().log(new Status(IStatus.WARNING, PLUGIN_ID, msg, e));
+    }
+
+    public static void logWarning(Throwable e) {
+        plugin.getLog().log(
+                new Status(IStatus.WARNING, PLUGIN_ID, e.getMessage(), e));
+    }
 }

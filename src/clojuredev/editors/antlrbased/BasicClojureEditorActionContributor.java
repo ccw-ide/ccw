@@ -17,6 +17,7 @@ import java.util.ResourceBundle;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
@@ -98,15 +99,8 @@ public class BasicClojureEditorActionContributor extends BasicTextEditorActionCo
 		action= getAction(textEditor, ITextEditorActionConstants.PREVIOUS);
 		actionBars.setGlobalActionHandler(ITextEditorActionDefinitionIds.GOTO_PREVIOUS_ANNOTATION, action);
 		actionBars.setGlobalActionHandler(ITextEditorActionConstants.PREVIOUS, action);
-//		action= getAction(textEditor, IJavaEditorActionConstants.COPY_QUALIFIED_NAME);
-//		actionBars.setGlobalActionHandler(CopyQualifiedNameAction.ACTION_HANDLER_ID, action);
-//
-//		actionBars.setGlobalActionHandler(IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB, getAction(textEditor, IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB));
 	}
 
-	/*
-	 * @see IEditorActionBarContributor#dispose()
-	 */
 	public void dispose() {
 
 		for (RetargetAction a: partListeners)
@@ -115,7 +109,6 @@ public class BasicClojureEditorActionContributor extends BasicTextEditorActionCo
 		partListeners.clear();
 
 		setActiveEditor(null);
-//		fToggleBreadcrumbAction.dispose();
 		super.dispose();
 	}
 }

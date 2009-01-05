@@ -148,8 +148,8 @@
    <extension
          point="org.eclipse.ui.contexts">
       <context
-            name="context.editingClojureSource.name"
-            description="context.editingClojureSource.description"
+            name="%context.editingClojureSource.name"
+            description="%context.editingClojureSource.description"
             parentId="org.eclipse.ui.textEditorScope"
             id="clojuredev.ui.clojureEditorScope">
       </context>
@@ -159,38 +159,38 @@
          point="org.eclipse.ui.commands">
 <!-- navigate -->
       <command
-            name="ActionDefinition.gotoMatchingBracket.name"
-            description="ActionDefinition.gotoMatchingBracket.description"
+            name="%command.gotoMatchingBracket.name"
+            description="%command.gotoMatchingBracket.description"
             categoryId="org.eclipse.ui.category.navigate"
             id="clojuredev.ui.edit.text.clojure.goto.matching.bracket">
       </command>
       <command
-            name="ActionDefinition.gotoNextMember.name"
-            description="ActionDefinition.gotoNextMember.description"
+            name="%command.gotoNextMember.name"
+            description="%command.gotoNextMember.description"
             categoryId="org.eclipse.ui.category.navigate"
             id="clojuredev.ui.edit.text.clojure.goto.next.member">
       </command>
       <command
-            name="ActionDefinition.gotoPreviousMember.name"
-            description="ActionDefinition.gotoPreviousMember.description"
+            name="%command.gotoPreviousMember.name"
+            description="%command.gotoPreviousMember.description"
             categoryId="org.eclipse.ui.category.navigate"
             id="clojuredev.ui.edit.text.clojure.goto.previous.member">
       </command>
       <command
-            name="ActionDefinition.clojuredev.ui.edit.text.clojure.select.toplevel.s.expression.name"
-            description="ActionDefinition.clojuredev.ui.edit.text.clojure.select.toplevel.s.expression.description"
+            name="%command.selectToplevelSExpression.name"
+            description="%command.selectToplevelSExpression.description"
             categoryId="org.eclipse.ui.category.navigate"
             id="clojuredev.ui.edit.text.clojure.select.toplevel.s.expression">
       </command>
       <command
-            name="ActionDefinition.clojuredev.ui.edit.text.clojure.evaluate.toplevel.s.expression.name"
-            description="ActionDefinition.clojuredev.ui.edit.text.clojure.evaluate.toplevel.s.expression.description"
+            name="%command.evaluateToplevelSExpression.name"
+            description="%command.evaluateToplevelSExpression.description"
             categoryId="org.eclipse.ui.category.navigate"
             id="clojuredev.ui.edit.text.clojure.evaluate.toplevel.s.expression">
       </command>
       <command
-            name="ActionDefinition.clojureShortcut.run.name"
-            description="ActionDefinition.clojureShortcut.run.description"
+            name="%command.clojureShortcut.run.name"
+            description="%command.clojureShortcut.run.description"
             categoryId="org.eclipse.debug.ui.category.run"
             id="clojuredev.debug.ui.clojureShortcut.run">
       </command>
@@ -250,4 +250,52 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
             
 	</extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="menu:org.eclipse.ui.main.menu?after=additions">
+         <menu
+               icon="icons/clojure16x16.png"
+               id="clojuredev.topmenu"
+               label="Clojure-dev"
+               mnemonic="C"
+               tooltip="Clojure development assistance">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeEditorId">
+                  <equals
+                        value="clojuredev.antlrbasededitor">
+                  </equals>
+               </with>
+            </visibleWhen>
+            <command
+                  commandId="clojuredev.ui.edit.text.clojure.goto.matching.bracket">
+            </command>
+            <command
+                  commandId="clojuredev.ui.edit.text.clojure.select.toplevel.s.expression"
+                  style="push">
+            </command>
+         </menu>
+      </menuContribution>
+      <menuContribution
+            locationURI="clojuredev.menuContribution1">
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            adaptable="true"
+            id="clojuredev.objectContribution.clojure.nature"
+            objectClass="org.eclipse.core.resources.IContainer">
+         <action
+               class="clojuredev.actions.ToggleNatureAction"
+               enablesFor="+"
+               icon="icons/clojure16x16.png"
+               id="clojuredev.action.toggleClojureNature"
+               label="Add/Remove Clojure nature"
+               menubarPath="additions">
+         </action>
+      </objectContribution>
+   </extension>
 </plugin>

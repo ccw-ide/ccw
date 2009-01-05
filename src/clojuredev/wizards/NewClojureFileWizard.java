@@ -12,6 +12,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -69,20 +70,16 @@ public class NewClojureFileWizard extends BasicNewResourceWizard implements INew
             boolean fail = false;
             if (getSelection().size() == 1) {
                 Object sel = getSelection().getFirstElement();
-                if (sel instanceof IContainer) {
-                    dest = (IContainer)sel;
+                if (sel instanceof IPackageFragmentRoot) {
+                	dest = (IContainer) ((IPackageFragmentRoot)sel).getResource();
                 }
                 else if (sel instanceof IPackageFragment) {
                     dest = (IContainer)((IPackageFragment)sel).getResource();
                 }
-                else if (sel instanceof IProjectNature) {
-                    dest = ((IProjectNature)sel).getProject();
-                }
                 else {
-                    ClojuredevPlugin.logError("Unknown selection type: " + sel.getClass());
-                    mainPage.setErrorMessage("Cannot create top-level Clojure "
-                            + kind(true)
-                            + " without project selection.");
+                	final String JAVA_SOURCE_ERROR = "Cannot create Clojure file outside a java source folder";
+                    ClojuredevPlugin.logError("Wrong selection type: " + sel.getClass() + ". " + JAVA_SOURCE_ERROR);
+                    mainPage.setErrorMessage(JAVA_SOURCE_ERROR);
                     fail = true;
                 }
                 
