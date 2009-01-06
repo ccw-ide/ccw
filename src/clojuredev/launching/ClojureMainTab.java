@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -76,9 +77,13 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
                 if (proj == null) {
                     return;
                 }
+                IFolder src = proj.getFolder("src");
+                if (src == null) {
+                    return;
+                }
                 
                 CheckedTreeSelectionDialog dialog = new CheckedTreeSelectionDialog(parent.getShell(), new WorkbenchLabelProvider(), new BaseWorkbenchContentProvider());
-                dialog.setInput(proj);
+                dialog.setInput(src);
                 
                 if (sourceFilesViewer.getInput() != null) {
                     dialog.setInitialSelections(
@@ -154,6 +159,9 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
         super.initializeFrom(config);
         String currentProjName = fProjText.getText().trim();
         IProject proj = ResourcesPlugin.getWorkspace().getRoot().getProject(currentProjName);
+        if (proj == null) {
+            return;
+        }
         
         List<IFile> selectedFiles = new ArrayList<IFile>();
         try {
