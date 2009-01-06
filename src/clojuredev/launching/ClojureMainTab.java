@@ -115,14 +115,8 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
 
         List<IFile> sourceFilesInput = (List<IFile>)sourceFilesViewer.getInput();
         if (sourceFilesInput != null) {
-            StringBuilder args = new StringBuilder();
-            for (IFile srcFile : sourceFilesInput) {
-                if (args.length() > 0) {
-                    args.append(" ");
-                }
-                args.append(srcFile.getProjectRelativePath().toString());
-            }
-            config.setAttribute(ATTR_PROGRAM_ARGUMENTS, args.toString());
+            String args = LaunchUtils.getProgramArguments(sourceFilesInput);
+            config.setAttribute(ATTR_PROGRAM_ARGUMENTS, args);
         }
         
         mapResources(config);
@@ -144,7 +138,7 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
         
         try {
         	if (config.getAttribute(ATTR_MAIN_TYPE_NAME, (String) null) == null) {
-        		config.setAttribute(ATTR_MAIN_TYPE_NAME, "clojure.lang.Repl");
+        		config.setAttribute(ATTR_MAIN_TYPE_NAME, LaunchUtils.MAIN_CLASSNAME);
         	}
             
             config.doSave();
