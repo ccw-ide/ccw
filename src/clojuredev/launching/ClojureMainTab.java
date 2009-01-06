@@ -1,14 +1,34 @@
 package clojuredev.launching;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.internal.debug.ui.SWTFactory;
 import org.eclipse.jdt.internal.debug.ui.launcher.AbstractJavaMainTab;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
+import org.eclipse.ui.model.BaseWorkbenchContentProvider;
+import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 /**
  * Heavily adapted from JDT's java launcher tabs.
@@ -20,10 +40,8 @@ import org.eclipse.swt.widgets.Composite;
 public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchConfigurationConstants {
 
     protected boolean useREPL = true;
-//    protected Button useReplBtn;
-//    protected Button useMainBtn;
-//    protected Text entryFileText;
-//    protected Text entrySymbolText;
+
+    protected TableViewer sourceFilesViewer;
     
     public void createControl(Composite parent) {
         Composite comp = SWTFactory.createComposite(parent, parent.getFont(),
@@ -35,57 +53,73 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
         setControl(comp);
     }
 
-    private void createFileEditor(Composite parent, String string) {
-//        Composite section = SWTFactory.createComposite(parent, parent.getFont(),
-//                1, 1, GridData.FILL_BOTH);
-//        useReplBtn = new Button(section, SWT.RADIO);
-//        useReplBtn.setText("Interactive REPL");
-//        
-//        useMainBtn = new Button(section, SWT.RADIO);
-//        useMainBtn.setText("Entry Point");
-//        
-//        final Composite entryPointSection = SWTFactory.createComposite(section, section.getFont(),
-//                3, 1, GridData.FILL_BOTH);
-//        
-//        new Label(entryPointSection, SWT.NULL).setText("Entry file");
-//        entryFileText = new Text(entryPointSection, SWT.BORDER);
-//        entryFileText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-//        
-//        final Button entryFileSelect = new Button(entryPointSection, SWT.PUSH);
-//        entryFileSelect.setText("Browse...");
-//        
-//        new Label(entryPointSection, SWT.NULL).setText("Entry point symbol");
-//        entrySymbolText = new Text(entryPointSection, SWT.BORDER);
-//        entrySymbolText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-//        
-//        useReplBtn.addSelectionListener(new SelectionAdapter(){
-//
-//            @Override
-//            public void widgetSelected(SelectionEvent e) {
-//                useREPL = true;
-//                entryPointSection.setEnabled(false);
-//            }
-//            
-//        });
-//        useMainBtn.addSelectionListener(new SelectionAdapter(){
-//
-//            @Override
-//            public void widgetSelected(SelectionEvent e) {
-//                useREPL = false;
-//                entryPointSection.setEnabled(true);
-//            }
-//            
-//        });
-//        
-//        useReplBtn.setSelection(useREPL);
+    private void createFileEditor(final Composite parent, String string) {
+        Group section = SWTFactory.createGroup(parent, "Evaluate Clojure source file(s)",
+                2, 1, GridData.FILL_BOTH);
+        
+        sourceFilesViewer = new TableViewer(section);
+        sourceFilesViewer.setLabelProvider(new LabelProvider());
+        sourceFilesViewer.setContentProvider(new ArrayContentProvider());
+        sourceFilesViewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
+        
+        Composite buttonSection = SWTFactory.createComposite(section, parent.getFont(),
+                1, 1, GridData.FILL_BOTH);
+        
+        Button chooseButton = new Button(buttonSection, SWT.PUSH);
+        chooseButton.setText("Choose...");
+        chooseButton.addSelectionListener(new SelectionAdapter(){
+
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                String currentProjName = fProjText.getText().trim();
+                IProject proj = ResourcesPlugin.getWorkspace().getRoot().getProject(currentProjName);
+                if (proj == null) {
+                    return;
+                }
+                
+                CheckedTreeSelectionDialog dialog = new CheckedTreeSelectionDialog(parent.getShell(), new WorkbenchLabelProvider(), new BaseWorkbenchContentProvider());
+                dialog.setInput(proj);
+                
+                if (sourceFilesViewer.getInput() != null) {
+                    dialog.setInitialSelections(
+                            ((List)sourceFilesViewer.getInput()).toArray());
+                }
+                dialog.setTitle("Evaluate Clojure source file(s)");
+                dialog.open();
+                
+                List<IFile> selectedFiles = new ArrayList<IFile>();
+                for (Object o : dialog.getResult()) {
+                    if (o instanceof IFile) {
+                        selectedFiles.add((IFile)o);
+                    }
+                }
+                sourceFilesViewer.setInput(selectedFiles);
+                getLaunchConfigurationDialog().updateButtons();
+            }
+            
+        });
     }
 
     public String getName() {
         return "Clojure";
     }
 
+    @SuppressWarnings("unchecked")
     public void performApply(ILaunchConfigurationWorkingCopy config) {
         config.setAttribute(ATTR_PROJECT_NAME, fProjText.getText().trim());
+
+        List<IFile> sourceFilesInput = (List<IFile>)sourceFilesViewer.getInput();
+        if (sourceFilesInput != null) {
+            StringBuilder args = new StringBuilder();
+            for (IFile srcFile : sourceFilesInput) {
+                if (args.length() > 0) {
+                    args.append(" ");
+                }
+                args.append(srcFile.getProjectRelativePath().toString());
+            }
+            config.setAttribute(ATTR_PROGRAM_ARGUMENTS, args.toString());
+        }
+        
         mapResources(config);
         try {
             config.doSave();
@@ -113,7 +147,27 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
         catch (CoreException e) {
             throw new RuntimeException(e);
         }
-       
+    }
+
+    @Override
+    public void initializeFrom(ILaunchConfiguration config) {
+        super.initializeFrom(config);
+        String currentProjName = fProjText.getText().trim();
+        IProject proj = ResourcesPlugin.getWorkspace().getRoot().getProject(currentProjName);
+        
+        List<IFile> selectedFiles = new ArrayList<IFile>();
+        try {
+            for (String path : config.getAttribute(ATTR_PROGRAM_ARGUMENTS, "").split(" ")) {
+                IResource rc = proj.findMember(new Path(path));
+                if (rc instanceof IFile) {
+                    selectedFiles.add((IFile)rc);
+                }
+            }
+            sourceFilesViewer.setInput(selectedFiles);
+        }
+        catch (CoreException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
