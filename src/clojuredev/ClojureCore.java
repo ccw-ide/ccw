@@ -128,20 +128,13 @@ public class ClojureCore {
         IJavaProject p = (IJavaProject) javaProjects.get(project);
         if (p == null) {
             p = JavaCore.create(project);
-            // setScalaExclusionFilter(p);
-            String filters = p.getOption(EXCLUSION_FILTER_ID, true);
-            if (filters != null && !filters.equals("")) {
-                filters += ",";
-            }
-            filters += CLOJURE_FILE_FILTER;
-            p.setOption(EXCLUSION_FILTER_ID, filters);
             javaProjects.put(project, p);
         }
         return p;
     }
 
     /**
-     * Gets the Scala project associated to the given project
+     * Gets the Clojure project associated to the given project
      * 
      * @param project
      *            the Eclipse project

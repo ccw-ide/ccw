@@ -1,5 +1,6 @@
 package clojuredev;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import org.eclipse.core.resources.ICommand;
@@ -9,12 +10,12 @@ import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-
-import clojure.util.ClojurePlugin;
+import org.osgi.framework.Bundle;
 
 /**
  * Borrowing heavily from the old Scala Eclipse plugin.
@@ -68,14 +69,14 @@ public class ClojureProjectNature implements IProjectNature {
         IJavaProject javaProject = clojureProject
                 .getJavaProject();
         
-        if (!hasClojureLibOnClasspath(javaProject)) {
+        File clojureLib = getDefaultClojureLib();
+        if (!hasClojureLibOnClasspath(javaProject) && clojureLib!=null) {
 	        IClasspathEntry[] entriesOld = javaProject.getRawClasspath();
 	        IClasspathEntry[] entriesNew = new IClasspathEntry[entriesOld.length + 1];
 	        
 	        System.arraycopy(entriesOld, 0, entriesNew, 0, entriesOld.length);
 	
-	        entriesNew[entriesOld.length + 0] = JavaCore.newLibraryEntry(Path
-	                .fromPortableString(ClojurePlugin.getDefault().binPath()), null, null);
+	        entriesNew[entriesOld.length + 0] = JavaCore.newLibraryEntry(Path.fromOSString(clojureLib.getAbsolutePath()), null, null);
 	
 	        javaProject.setRawClasspath(entriesNew, null);
 	        javaProject.save(null, true);
@@ -86,6 +87,24 @@ public class ClojureProjectNature implements IProjectNature {
     	return javaProject.findElement(new Path("clojure/lang")) != null;
     }
 
+    private File getDefaultClojureLib() {
+        Bundle bundle = Platform.getBundle("clojure");
+        String[] locSplit = bundle.getLocation().split(":", 3);
+        File clojureBundlePath = new File(locSplit[2]);
+        File clojureLibEntry;
+        if (clojureBundlePath.getName().endsWith(".jar")) {
+        	clojureLibEntry = clojureBundlePath;
+        } else if (new File(clojureBundlePath, "bin").exists()) {
+    		clojureLibEntry = new File(clojureBundlePath, "bin");
+    	} else if (new File (clojureBundlePath, "clojure" + File.pathSeparator + "lang").exists()) {
+        		clojureLibEntry = clojureBundlePath;
+    	} else {
+        		ClojuredevPlugin.logError("Unable to find clojure lib");
+        		clojureLibEntry = null;
+    	}
+        return clojureLibEntry;
+    }
+    
     public void deconfigure() throws CoreException {
         IProjectDescription desc = getProjectDescription();
         

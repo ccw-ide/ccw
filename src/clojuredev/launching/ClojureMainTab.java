@@ -1,11 +1,6 @@
 package clojuredev.launching;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.internal.debug.ui.SWTFactory;
@@ -14,7 +9,6 @@ import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.osgi.framework.Bundle;
 
 /**
  * Heavily adapted from JDT's java launcher tabs.
@@ -105,28 +99,14 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
         IJavaElement javaElement = getContext();
         if (javaElement != null) {
             initializeJavaProject(javaElement, config);
-        }
-        else {
+        } else {
             config.setAttribute(ATTR_PROJECT_NAME, EMPTY_STRING);
         }
         
-        Bundle bundle = Platform.getBundle("clojure");
-        String[] locSplit = bundle.getLocation().split(":");
-        
         try {
-            List classpath = config.getAttribute(ATTR_CLASSPATH, new ArrayList());
-            
-            File clojurePath = new File(locSplit[2]);
-            if (clojurePath.getName().endsWith(".jar")) {
-                classpath.add(clojurePath.toString());
-            }
-            else {
-                classpath.add(new File(clojurePath, "bin").toString());
-            }
-            
-            config.setAttribute(ATTR_CLASSPATH, classpath);
-            
-            config.setAttribute(ATTR_MAIN_TYPE_NAME, "clojure.lang.Repl");
+        	if (config.getAttribute(ATTR_MAIN_TYPE_NAME, (String) null) == null) {
+        		config.setAttribute(ATTR_MAIN_TYPE_NAME, "clojure.lang.Repl");
+        	}
             
             config.doSave();
         }
