@@ -19,7 +19,7 @@ public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
             if (args.length() > 0) {
                 args.append(" ");
             }
-            args.append(srcFile.getProjectRelativePath().toString());
+            args.append("\"" + srcFile.getLocation().toString() + "\"");
         }
         return args.toString();
     }

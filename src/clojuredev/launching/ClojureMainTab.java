@@ -13,12 +13,16 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.debug.ui.SWTFactory;
 import org.eclipse.jdt.internal.debug.ui.launcher.AbstractJavaMainTab;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -30,6 +34,9 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
 import org.eclipse.ui.model.BaseWorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
+
+import clojuredev.ClojureCore;
+import clojuredev.ClojuredevPlugin;
 
 /**
  * Heavily adapted from JDT's java launcher tabs.
@@ -59,7 +66,9 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
                 2, 1, GridData.FILL_BOTH);
         
         sourceFilesViewer = new TableViewer(section);
-        sourceFilesViewer.setLabelProvider(new LabelProvider());
+        sourceFilesViewer.setLabelProvider(new DecoratingLabelProvider(
+        		new WorkbenchLabelProvider(),ClojuredevPlugin.getDefault().getWorkbench()
+        						.getDecoratorManager().getLabelDecorator()));
         sourceFilesViewer.setContentProvider(new ArrayContentProvider());
         sourceFilesViewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
         
@@ -73,17 +82,14 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
             @Override
             public void widgetSelected(SelectionEvent e) {
                 String currentProjName = fProjText.getText().trim();
-                IProject proj = ResourcesPlugin.getWorkspace().getRoot().getProject(currentProjName);
+                final IProject proj = ResourcesPlugin.getWorkspace().getRoot().getProject(currentProjName);
                 if (proj == null) {
-                    return;
-                }
-                IFolder src = proj.getFolder("src");
-                if (src == null) {
                     return;
                 }
                 
                 CheckedTreeSelectionDialog dialog = new CheckedTreeSelectionDialog(parent.getShell(), new WorkbenchLabelProvider(), new BaseWorkbenchContentProvider());
-                dialog.setInput(src);
+                dialog.setInput(proj.getWorkspace().getRoot());
+                dialog.addFilter(new ClojureElementViewerFilter(proj));
                 
                 if (sourceFilesViewer.getInput() != null) {
                     dialog.setInitialSelections(
@@ -93,10 +99,13 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
                 dialog.open();
                 
                 List<IFile> selectedFiles = new ArrayList<IFile>();
-                for (Object o : dialog.getResult()) {
-                    if (o instanceof IFile) {
-                        selectedFiles.add((IFile)o);
-                    }
+                Object[] dialogResult = dialog.getResult();
+                if (dialogResult != null) {
+	                for (Object o : dialogResult) {
+	                    if (o instanceof IFile) {
+	                        selectedFiles.add((IFile)o);
+	                    }
+	                }
                 }
                 sourceFilesViewer.setInput(selectedFiles);
                 getLaunchConfigurationDialog().updateButtons();
