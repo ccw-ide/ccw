@@ -1,6 +1,7 @@
 package clojuredev.launching;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -68,7 +69,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
                 config = createConfiguration(project, files);
             }
             if (config != null) {
-                config.launch(mode, null);
+            	config.launch(mode, null);
             }
         }
         catch (CoreException e) {
@@ -77,21 +78,19 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     }
 
     private ILaunchConfiguration findLaunchConfiguration(IProject project, IFile[] files) {
-        String replClassName = "clojure.lang.Repl";
         ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
         ILaunchConfigurationType type =
-            lm.getLaunchConfigurationType("clojuredev.launching.clojure");
+            lm.getLaunchConfigurationType(LaunchUtils.LAUNCH_ID);
         
         List candidateConfigs = Collections.EMPTY_LIST;
         
         try {
             ILaunchConfiguration[] configs = DebugPlugin.getDefault().getLaunchManager().getLaunchConfigurations(type);
             candidateConfigs = new ArrayList(configs.length);
-            for (int i = 0; i < configs.length; i++) {
-                ILaunchConfiguration config = configs[i];
-                if (config.getAttribute(ATTR_MAIN_TYPE_NAME, "").equals(replClassName)
-                    && config.getAttribute(ATTR_PROJECT_NAME, "").equals(project.getName())
-                    && config.getAttribute(ATTR_PROGRAM_ARGUMENTS, "").equals(LaunchUtils.getProgramArguments(files))) {
+            for (ILaunchConfiguration config:  configs) {
+                if (config.getAttribute(ATTR_MAIN_TYPE_NAME, "").equals(LaunchUtils.MAIN_CLASSNAME)
+                		&& config.getAttribute(ATTR_PROJECT_NAME, "").equals(project.getName())
+                		&& LaunchUtils.getFilesToLaunchList(config).equals(Arrays.asList(files))) {
                     candidateConfigs.add(config);
                 }
             }
@@ -120,15 +119,20 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
                 basename += " " + files[0].getName(); 
             }
             
-            String args = LaunchUtils.getProgramArguments(files);
-            
             ILaunchConfigurationWorkingCopy wc = type.newInstance(
                     null, DebugPlugin.getDefault().getLaunchManager().
-                        generateUniqueLaunchConfigurationNameFrom(basename)); 
-            wc.setAttribute(ATTR_PROGRAM_ARGUMENTS, args);
+                        generateUniqueLaunchConfigurationNameFrom(basename));
+            
+            LaunchUtils.setFilesToLaunchString(wc, Arrays.asList(files));
+            
+            wc.setAttribute(ATTR_PROGRAM_ARGUMENTS, "");
+            
             wc.setAttribute(ATTR_MAIN_TYPE_NAME, LaunchUtils.MAIN_CLASSNAME);
+            
             wc.setAttribute(ATTR_PROJECT_NAME, project.getName());
+            
             wc.setMappedResources(new IResource[] {project});
+            
             config = wc.doSave();
         }
         catch (CoreException ce) {
@@ -138,18 +142,24 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     }
     
     protected ILaunchConfiguration chooseConfiguration(List configList) {
-        IDebugModelPresentation labelProvider = DebugUITools.newDebugModelPresentation();
-        ElementListSelectionDialog dialog= new ElementListSelectionDialog(JDIDebugUIPlugin.getActiveWorkbenchShell(), labelProvider);
-        dialog.setElements(configList.toArray());
-        dialog.setTitle("Choose a Clojure launch configuration");  
-        dialog.setMessage(LauncherMessages.JavaLaunchShortcut_2);
-        dialog.setMultipleSelection(false);
-        int result = dialog.open();
-        labelProvider.dispose();
-        if (result == Window.OK) {
-            return (ILaunchConfiguration) dialog.getFirstResult();
-        }
-        return null;
+        IDebugModelPresentation labelProvider = null;
+    	try {
+    		labelProvider = DebugUITools.newDebugModelPresentation();
+	        ElementListSelectionDialog dialog= new ElementListSelectionDialog(JDIDebugUIPlugin.getActiveWorkbenchShell(), labelProvider);
+	        dialog.setElements(configList.toArray());
+	        dialog.setTitle("Choose a Clojure launch configuration");  
+	        dialog.setMessage(LauncherMessages.JavaLaunchShortcut_2);
+	        dialog.setMultipleSelection(false);
+	        int result = dialog.open();
+	        if (result == Window.OK) {
+	            return (ILaunchConfiguration) dialog.getFirstResult();
+	        }
+	        return null;
+    	} finally {
+    		if (labelProvider!= null) {
+    			labelProvider.dispose();
+    		}
+    	}
     }
     
 }

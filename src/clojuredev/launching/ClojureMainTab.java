@@ -4,25 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.debug.ui.SWTFactory;
 import org.eclipse.jdt.internal.debug.ui.launcher.AbstractJavaMainTab;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -35,7 +28,6 @@ import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
 import org.eclipse.ui.model.BaseWorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
-import clojuredev.ClojureCore;
 import clojuredev.ClojuredevPlugin;
 
 /**
@@ -46,7 +38,7 @@ import clojuredev.ClojuredevPlugin;
  */
 @SuppressWarnings("restriction")
 public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchConfigurationConstants {
-
+	
     protected boolean useREPL = true;
 
     protected TableViewer sourceFilesViewer;
@@ -120,13 +112,10 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
 
     @SuppressWarnings("unchecked")
     public void performApply(ILaunchConfigurationWorkingCopy config) {
+    	
         config.setAttribute(ATTR_PROJECT_NAME, fProjText.getText().trim());
 
-        List<IFile> sourceFilesInput = (List<IFile>)sourceFilesViewer.getInput();
-        if (sourceFilesInput != null) {
-            String args = LaunchUtils.getProgramArguments(sourceFilesInput);
-            config.setAttribute(ATTR_PROGRAM_ARGUMENTS, args);
-        }
+        LaunchUtils.setFilesToLaunchString(config, (List<IFile>) sourceFilesViewer.getInput());
         
         mapResources(config);
         try {
@@ -160,21 +149,15 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
     @Override
     public void initializeFrom(ILaunchConfiguration config) {
         super.initializeFrom(config);
+
         String currentProjName = fProjText.getText().trim();
         IProject proj = ResourcesPlugin.getWorkspace().getRoot().getProject(currentProjName);
         if (proj == null) {
             return;
         }
         
-        List<IFile> selectedFiles = new ArrayList<IFile>();
         try {
-            for (String path : config.getAttribute(ATTR_PROGRAM_ARGUMENTS, "").split(" ")) {
-                IResource rc = proj.findMember(new Path(path));
-                if (rc instanceof IFile) {
-                    selectedFiles.add((IFile)rc);
-                }
-            }
-            sourceFilesViewer.setInput(selectedFiles);
+            sourceFilesViewer.setInput(LaunchUtils.getFilesToLaunchList(config));
         }
         catch (CoreException e) {
             throw new RuntimeException(e);
