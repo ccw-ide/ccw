@@ -194,6 +194,11 @@
             categoryId="org.eclipse.debug.ui.category.run"
             id="clojuredev.debug.ui.clojureShortcut.run">
       </command>
+      <command
+            defaultHandler="clojuredev.TestNamespacesHandler"
+            id="clojuredev.test.namespaces"
+            name="Remote namespaces">
+      </command>
       
    </extension>
    
@@ -274,6 +279,10 @@
             </command>
             <command
                   commandId="clojuredev.ui.edit.text.clojure.select.toplevel.s.expression"
+                  style="push">
+            </command>
+            <command
+                  commandId="clojuredev.test.namespaces"
                   style="push">
             </command>
          </menu>

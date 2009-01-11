@@ -17,6 +17,8 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -24,6 +26,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
 import org.eclipse.ui.model.BaseWorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
@@ -43,6 +46,8 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
 
     protected TableViewer sourceFilesViewer;
     
+    private Text serverPort;
+    
     public void createControl(Composite parent) {
         Composite comp = SWTFactory.createComposite(parent, parent.getFont(),
                 1, 1, GridData.FILL_BOTH);
@@ -50,6 +55,8 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
         createProjectEditor(comp);
         createVerticalSpacer(comp, 1);
         createFileEditor(comp, "Clojure File");
+        createVerticalSpacer(comp, 1);
+        createReplServerControl(comp);
         setControl(comp);
     }
 
@@ -100,12 +107,26 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
 	                }
                 }
                 sourceFilesViewer.setInput(selectedFiles);
-                getLaunchConfigurationDialog().updateButtons();
+                updateLaunchConfigurationDialog();
             }
             
         });
     }
 
+    private void createReplServerControl(final Composite parent) {
+        Group section = SWTFactory.createGroup(parent, "Repl remote control settings",
+                2, 1, 0);
+        
+        SWTFactory.createLabel(section, "Remote server must listen on port: ", 1);
+        serverPort = SWTFactory.createSingleText(section, 0);
+
+        serverPort.addModifyListener( new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+		        getLaunchConfigurationDialog().updateButtons();
+			}
+		});
+    }
+    
     public String getName() {
         return "Clojure";
     }
@@ -116,6 +137,8 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
         config.setAttribute(ATTR_PROJECT_NAME, fProjText.getText().trim());
 
         LaunchUtils.setFilesToLaunchString(config, (List<IFile>) sourceFilesViewer.getInput());
+        
+        config.setAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN, Integer.valueOf(serverPort.getText()));
         
         mapResources(config);
         try {
@@ -138,6 +161,8 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
         	if (config.getAttribute(ATTR_MAIN_TYPE_NAME, (String) null) == null) {
         		config.setAttribute(ATTR_MAIN_TYPE_NAME, LaunchUtils.MAIN_CLASSNAME);
         	}
+        	
+        	config.setAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN, LaunchUtils.DEFAULT_SERVER_PORT);
             
             config.doSave();
         }
@@ -157,6 +182,7 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
         }
         
         try {
+            serverPort.setText(Integer.toString(config.getAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN, LaunchUtils.DEFAULT_SERVER_PORT)));
             sourceFilesViewer.setInput(LaunchUtils.getFilesToLaunchList(config));
         }
         catch (CoreException e) {

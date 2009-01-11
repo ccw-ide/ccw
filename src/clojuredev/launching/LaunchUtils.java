@@ -20,8 +20,12 @@ public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
     
     static public final String MAIN_CLASSNAME = "clojure.lang.Repl";
     
+    static public final int DEFAULT_SERVER_PORT = 8503;
+    
 	/** Launch attribute that will be of type String, the files will be listed separated by newlines */
     static public final String ATTR_FILES_LAUNCHED_AT_STARTUP = "CLOJUREDEV_ATTR_FILES_LAUNCHED_AT_STARTUP";
+
+	public static final String ATTR_CLOJURE_SERVER_LISTEN = "CLOJUREDEV_ATTR_CLOJURE_SERVER_LISTEN";
 
     static public String getProgramArguments(IFile[] files) {
         StringBuilder args = new StringBuilder();
