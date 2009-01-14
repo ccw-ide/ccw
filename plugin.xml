@@ -302,7 +302,7 @@
                enablesFor="+"
                icon="icons/clojure16x16.png"
                id="clojuredev.action.toggleClojureNature"
-               label="Add/Remove Clojure nature"
+               label="Enable/disable clojure language support"
                menubarPath="additions">
          </action>
       </objectContribution>
@@ -314,4 +314,32 @@
           id="clojuredev.launchConfigurationTypeImage">
     </launchConfigurationTypeImage>
 	</extension>
+ <extension
+       point="org.eclipse.ui.console.consolePageParticipants">
+    <consolePageParticipant
+          class="clojuredev.console.ConsolePageParticipant"
+          id="clojuredev.consolePageParticipant.replConsole">
+       <enablement>
+          <instanceof
+                value="org.eclipse.debug.internal.ui.views.console.ProcessConsole">
+          </instanceof>
+       </enablement>
+    </consolePageParticipant>
+ </extension>
+ <extension
+       point="org.eclipse.ui.views">
+    <view
+          category="clojuredev.category.views"
+          class="clojuredev.outline.ContentOutline"
+          icon="icons/clojure16x16.png"
+          id="clojuredev.view.namespacebrowser"
+          name="Namespace Browser"
+          restorable="false">
+    </view>
+    <category
+          id="clojuredev.category.views"
+          name="Clojuredev Views"
+          parentCategory="com.yseop.designer.views.Category">
+    </category>
+ </extension>
 </plugin>

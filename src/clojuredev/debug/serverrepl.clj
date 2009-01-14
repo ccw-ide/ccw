@@ -57,7 +57,7 @@
                   ;(binding [*out* old-out] (prn e)) 
                   (let [result (eval e)]
                     ;(println "17")
-                    (binding [*out* old-out] (prn result))
+                    ;(binding [*out* old-out] (prn result))
                     ;(println "18")
                     (prn result))
                     ;(println "19"))

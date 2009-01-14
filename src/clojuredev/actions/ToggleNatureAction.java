@@ -57,14 +57,14 @@ public class ToggleNatureAction implements IObjectActionDelegate {
 		}
 
 		private void toggleNature(IProject project) {
-			String title = "Change Clojure Nature";
+			String title = "Change Clojure language support";
 			String message;
 			try {
 				boolean added = doToggleNature(project);
-				message = "Clojure nature successfully "
+				message = "Clojure language support successfully "
 					+ (added ? "added" : "removed") + ".";
 			} catch (CoreException e) {
-				message = "Error while trying to toggle clojure nature for project "
+				message = "Error while trying to toggle clojure language support for project "
 					+ project.getName();
 				ClojuredevPlugin.logError(message, e);
 			}

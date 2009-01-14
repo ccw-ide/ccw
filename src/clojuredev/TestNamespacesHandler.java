@@ -52,7 +52,12 @@ public class TestNamespacesHandler implements IHandler {
 				Var.popThreadBindings();
 			}
 			return null;
-		} catch (Exception e) {
+		} catch (final Exception e) {
+	        PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+				public void run() {
+			        MessageDialog.openInformation(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "remote call exception!", e.getMessage());
+				}
+	        });
 			throw new ExecutionException("clojure invocation error", e);
 		}
 	}

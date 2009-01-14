@@ -28,7 +28,7 @@ public class ClojureLaunchDelegate extends
 		
 		// Add serverrepl as a file to launch to install a remote server
 		try {
-			URL serverReplBundleUrl = ClojuredevPlugin.getDefault().getBundle().getResource("clojuredev/serverrepl.clj");
+			URL serverReplBundleUrl = ClojuredevPlugin.getDefault().getBundle().getResource("clojuredev/debug/serverrepl.clj");
 			URL serverReplFileUrl = FileLocator.toFileURL(serverReplBundleUrl);
 			String serverRepl = serverReplFileUrl.getFile(); 
 			filesToLaunchArguments = '\"' + serverRepl + "\" " + filesToLaunchArguments;
@@ -46,4 +46,5 @@ public class ClojureLaunchDelegate extends
 	private boolean needsSeparator(String userArgs) {
 		return ! userArgs.contains("-- ");
 	}
+	
 }

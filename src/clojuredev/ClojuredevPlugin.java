@@ -1,9 +1,18 @@
 package clojuredev;
 
+import java.net.URL;
+
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.debug.core.model.IProcess;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+
+import clojure.lang.Compiler;
+import clojuredev.debug.ClojureClient;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -21,7 +30,7 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
      */
     public ClojuredevPlugin() {
     }
-
+    
     /*
      * (non-Javadoc)
      * 
@@ -32,8 +41,17 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
     public void start(BundleContext context) throws Exception {
         super.start(context);
         plugin = this;
+        loadPluginClojureCode();
     }
 
+    private void loadPluginClojureCode() throws Exception {
+		URL clientReplBundleUrl = ClojuredevPlugin.getDefault().getBundle().getResource("clojuredev/debug/clientrepl.clj");
+		URL clientReplFileUrl = FileLocator.toFileURL(clientReplBundleUrl);
+		String serverRepl = clientReplFileUrl.getFile(); 
+
+		Compiler.loadFile(serverRepl);
+    }
+    
     /*
      * (non-Javadoc)
      * 
@@ -80,4 +98,21 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
         plugin.getLog().log(
                 new Status(IStatus.WARNING, PLUGIN_ID, e.getMessage(), e));
     }
+
+	public static ClojureClient createClojureClientFor(IProcess process) {
+		
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+    @Override
+    protected void initializeImageRegistry(ImageRegistry reg) {
+//    	ClojuredevPluginImages.initializeImageRegistry(reg);
+    	// TODO Auto-generated method stub
+//    	super.initializeImageRegistry(reg);
+    	reg.put(NS, ImageDescriptor.createFromURL(getBundle().getEntry("/icons/jdt/package_obj.gif")));
+    	reg.put(PUBLIC_FUNCTION, ImageDescriptor.createFromURL(getBundle().getEntry("/icons/jdt/methpub_obj.gif")));
+    }
+    public static final String NS = "icon.namespace";
+    public static final String PUBLIC_FUNCTION = "icon.function.public";
 }
