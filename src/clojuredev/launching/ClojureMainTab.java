@@ -122,7 +122,7 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
 
         serverPort.addModifyListener( new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
-		        getLaunchConfigurationDialog().updateButtons();
+				updateLaunchConfigurationDialog();
 			}
 		});
     }
