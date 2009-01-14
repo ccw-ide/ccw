@@ -6,10 +6,10 @@ import java.util.Map;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
 import clojuredev.ClojuredevPlugin;
@@ -116,4 +116,19 @@ public class ClojureNSOutlinePage extends ContentOutlinePage {
                 "                              {} ns-names)]" +
                 "  ns-with-symbols)");	
 	}
+
+    public void refresh() {
+        if (Display.getCurrent() == null) {
+            Display display = PlatformUI.getWorkbench().getDisplay();
+            display.asyncExec(new Runnable() {
+                public void run() {
+                    getTreeViewer().setInput(getRemoteNsTree());
+                    getTreeViewer().refresh();
+                }
+            });
+        } else {
+            getTreeViewer().setInput(getRemoteNsTree());
+            getTreeViewer().refresh();
+        }
+    }
 }

@@ -1,12 +1,12 @@
 package clojuredev.console;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.debug.internal.ui.views.console.ProcessConsole;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsolePageParticipant;
+import org.eclipse.ui.console.IPatternMatchListener;
+import org.eclipse.ui.console.PatternMatchEvent;
+import org.eclipse.ui.console.TextConsole;
 import org.eclipse.ui.part.IPageBookViewPage;
-import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
-import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import clojuredev.ClojuredevPlugin;
 import clojuredev.debug.ClojureClient;
@@ -15,11 +15,13 @@ import clojuredev.launching.LaunchUtils;
 import clojuredev.outline.ClojureNSOutlinePage;
 
 public class ConsolePageParticipant implements IConsolePageParticipant {
-	private IContentOutlinePage contentOutlinePage;
+	private ClojureNSOutlinePage contentOutlinePage;
+	private TextConsole console;
 	private boolean associatedWithClojureVM = false;
 	private int clojureVMPort = -1;
 
 	public void activated() {
+	    contentOutlinePage.refresh();
 	}
 
 	public void deactivated() {
@@ -33,25 +35,28 @@ public class ConsolePageParticipant implements IConsolePageParticipant {
 	}
 
 	public void init(IPageBookViewPage page, IConsole console) {
-		assert ProcessConsole.class.isInstance(console);
-		ProcessConsole processConsole = (ProcessConsole) console;
+		assert org.eclipse.debug.ui.console.IConsole.class.isInstance(console);
+		assert TextConsole.class.isInstance(console);
+		
+		this.console = (TextConsole) console;
+		
+		org.eclipse.debug.ui.console.IConsole processConsole = (org.eclipse.debug.ui.console.IConsole) console;
 		try {
 			if (processConsole.getProcess().getLaunch().getLaunchConfiguration().getAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN, -1) == -1) {
 				this.associatedWithClojureVM = false;
 			} else {
 				this.associatedWithClojureVM = true;
-				clojureVMPort = Integer.valueOf(processConsole.getProcess().getLaunch().getLaunchConfiguration().getAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN, -1)); 
+				clojureVMPort = Integer.valueOf(processConsole.getProcess().getLaunch().getLaunchConfiguration().getAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN, -1));
 			}
 		} catch (CoreException e) {
 			ClojuredevPlugin.logError(e);
 			this.associatedWithClojureVM = false;
 		}
-
 	}
 
 	public Object getAdapter(Class adapter) {
 		if (associatedWithClojureVM) {
-			if (adapter == IContentOutlinePage.class) {
+			if (adapter == ClojureNSOutlinePage.class) {
 				if (contentOutlinePage == null) {
 					createContentOutlinePage();
 				}
@@ -65,6 +70,7 @@ public class ConsolePageParticipant implements IConsolePageParticipant {
 	}
 	
 	private void createContentOutlinePage() {
+	    
 		contentOutlinePage = new ClojureNSOutlinePage(new IClojureClientProvider() {
 			private final ClojureClient cc;
 			{
@@ -74,6 +80,31 @@ public class ConsolePageParticipant implements IConsolePageParticipant {
 				return cc;
 			}
 		});
-	}
+		console.addPatternMatchListener(new IPatternMatchListener() {
+            public int getCompilerFlags() {
+                return 0;
+            }
+            public String getLineQualifier() {
+                return null;
+            }
 
+            public String getPattern() {
+                return "#'[^\\s].*";
+            }
+
+            public void connect(TextConsole console) {
+                // Nothing
+            }
+
+            public void disconnect() {
+                // Nothing
+            }
+
+            public void matchFound(PatternMatchEvent event) {
+                if (contentOutlinePage != null) {
+                    contentOutlinePage.refresh();
+                }
+            }
+		});
+	}
 }

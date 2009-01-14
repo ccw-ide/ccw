@@ -194,11 +194,6 @@
             categoryId="org.eclipse.debug.ui.category.run"
             id="clojuredev.debug.ui.clojureShortcut.run">
       </command>
-      <command
-            defaultHandler="clojuredev.TestNamespacesHandler"
-            id="clojuredev.test.namespaces"
-            name="Remote namespaces">
-      </command>
       
    </extension>
    
@@ -338,8 +333,28 @@
     </view>
     <category
           id="clojuredev.category.views"
-          name="Clojuredev Views"
-          parentCategory="com.yseop.designer.views.Category">
+          name="Clojuredev Views">
     </category>
+ </extension>
+ <extension
+       point="org.eclipse.ui.perspectiveExtensions">
+    <perspectiveExtension
+          targetID="org.eclipse.jdt.ui.JavaPerspective">
+       <newWizardShortcut
+             id="clojuredev.project.new.wizard">
+       </newWizardShortcut>
+       <newWizardShortcut
+             id="clojuredev.newClojureFileWizard">
+       </newWizardShortcut>
+       <viewShortcut
+             id="clojuredev.view.namespacebrowser">
+       </viewShortcut>
+       <view
+             id="clojuredev.view.namespacebrowser"
+             minimized="false"
+             relationship="stack"
+             relative="org.eclipse.ui.views.ContentOutline">
+       </view>
+    </perspectiveExtension>
  </extension>
 </plugin>

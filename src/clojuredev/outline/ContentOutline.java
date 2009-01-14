@@ -128,9 +128,9 @@ public class ContentOutline extends PageBookView implements ISelectionProvider,
      */
     protected PageRec doCreatePage(IWorkbenchPart part) {
         // Try to get an outline page.
-        Object obj = ViewsPlugin.getAdapter(part, IContentOutlinePage.class, false);
-        if (obj instanceof IContentOutlinePage) {
-            IContentOutlinePage page = (IContentOutlinePage) obj;
+        Object obj = ViewsPlugin.getAdapter(part, ClojureNSOutlinePage.class, false);
+        if (obj instanceof ClojureNSOutlinePage) {
+            ClojureNSOutlinePage page = (ClojureNSOutlinePage) obj;
             if (page instanceof IPageBookViewPage) {
 				initPage((IPageBookViewPage) page);
 			}
