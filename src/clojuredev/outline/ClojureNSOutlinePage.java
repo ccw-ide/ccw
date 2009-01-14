@@ -3,7 +3,10 @@ package clojuredev.outline;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jface.viewers.IElementComparer;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.graphics.Image;
@@ -12,6 +15,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
+import clojure.lang.AMapEntry;
 import clojuredev.ClojuredevPlugin;
 import clojuredev.debug.IClojureClientProvider;
 
@@ -28,6 +32,33 @@ public class ClojureNSOutlinePage extends ContentOutlinePage {
 		getTreeViewer().setContentProvider(new ContentProvider());
 		getTreeViewer().setLabelProvider(new LabelProvider());
 		getTreeViewer().setSorter(new NSSorter());
+		getTreeViewer().setComparer(new IElementComparer() {
+			public boolean equals(Object a, Object b) {
+				if (a == b) {
+					return true;
+				}
+				if ( (a==null && b!=null) || (b==null && a!=null) ) {
+					return false;
+				}
+
+				if (a instanceof AMapEntry && b instanceof AMapEntry) {
+					return ((AMapEntry) a).getKey().equals(((AMapEntry) b).getKey());
+				} else {
+					return a.equals(b);
+				}
+			}
+
+			public int hashCode(Object element) {
+				if (element == null) {
+					return 0;
+				}
+				if ( element instanceof AMapEntry) {
+					return ((AMapEntry) element).getKey().hashCode();
+				} else {
+					return element.hashCode();
+				}
+			}
+		});
 
 		Object remoteTree = getRemoteNsTree();
 		getTreeViewer().setInput(remoteTree);
@@ -118,17 +149,34 @@ public class ClojureNSOutlinePage extends ContentOutlinePage {
 	}
 
     public void refresh() {
+    	if (getTreeViewer() == null) {
+    		return;
+    	}
+    	
+		Object oldInput = getTreeViewer().getInput();
+    	final Object newInput = getRemoteNsTree();
+		if (oldInput!=null && oldInput.equals(newInput)) {
+			return;
+		}
+    	
         if (Display.getCurrent() == null) {
-            Display display = PlatformUI.getWorkbench().getDisplay();
+            final Display display = PlatformUI.getWorkbench().getDisplay();
             display.asyncExec(new Runnable() {
                 public void run() {
-                    getTreeViewer().setInput(getRemoteNsTree());
-                    getTreeViewer().refresh();
+                	refreshTreeViewer(newInput);
                 }
             });
         } else {
-            getTreeViewer().setInput(getRemoteNsTree());
-            getTreeViewer().refresh();
+        	refreshTreeViewer(newInput);
         }
+    }
+    private void refreshTreeViewer(Object newInput) {
+    	ISelection sel = getTreeViewer().getSelection();
+    	TreePath[] expandedTreePaths = getTreeViewer().getExpandedTreePaths();
+
+        getTreeViewer().setInput(newInput);
+
+        getTreeViewer().setExpandedTreePaths(expandedTreePaths);
+        getTreeViewer().setSelection(sel);
     }
 }

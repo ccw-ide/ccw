@@ -21,17 +21,15 @@ public class ConsolePageParticipant implements IConsolePageParticipant {
 	private int clojureVMPort = -1;
 
 	public void activated() {
-	    contentOutlinePage.refresh();
+		if (contentOutlinePage != null) {
+			contentOutlinePage.refresh();
+		}
 	}
 
 	public void deactivated() {
 	}
 
 	public void dispose() {
-		if (contentOutlinePage != null) {
-			contentOutlinePage.dispose();
-			contentOutlinePage = null;
-		}
 	}
 
 	public void init(IPageBookViewPage page, IConsole console) {
@@ -89,7 +87,7 @@ public class ConsolePageParticipant implements IConsolePageParticipant {
             }
 
             public String getPattern() {
-                return "#'[^\\s].*";
+                return ".+\n";
             }
 
             public void connect(TextConsole console) {

@@ -15,8 +15,10 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.console.IConsoleView;
 import org.eclipse.ui.internal.views.ViewsPlugin;
 import org.eclipse.ui.internal.views.contentoutline.ContentOutlineMessages;
 import org.eclipse.ui.part.IContributedContentsView;
@@ -189,7 +191,8 @@ public class ContentOutline extends PageBookView implements ISelectionProvider,
      * We only want to track editors.
      */
     protected boolean isImportant(IWorkbenchPart part) {
-    	return true;
+    	return (part instanceof IEditorPart || part instanceof IConsoleView);
+//    	return true;
 //        //We only care about editors
 //        return (part instanceof IEditorPart);
     }
