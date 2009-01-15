@@ -27,9 +27,22 @@
         (flush))
       (read rdr))))
 
+(defn local-invoke-str [string]
+  (load-string string))
+  
 (defmacro invoke [& s-expr]
   `(invoke-fn '(do ~@s-expr)))
   
+(defmacro invoke-symbol-name [symbol-str]
+  `(invoke-fn ~(symbol symbol-str)))
+
+(defn ns-info []
+  (invoke (let [ns-names (map (comp str ns-name) (all-ns))
+        ns-with-symbols (reduce (fn [m name]
+                                  (assoc m name (apply vector (map (fn [s] (str s)) (keys (ns-interns (symbol name)))))))
+                         {} ns-names)]
+    ns-with-symbols)))
+
 
 ; list all ns : (invoke (map ns-name (all-ns)))
 ; list all symbols of a ns : (invoke (str (ns-interns 'testns)))

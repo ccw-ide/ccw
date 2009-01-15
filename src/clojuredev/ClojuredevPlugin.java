@@ -47,9 +47,9 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
     private void loadPluginClojureCode() throws Exception {
 		URL clientReplBundleUrl = ClojuredevPlugin.getDefault().getBundle().getResource("clojuredev/debug/clientrepl.clj");
 		URL clientReplFileUrl = FileLocator.toFileURL(clientReplBundleUrl);
-		String serverRepl = clientReplFileUrl.getFile(); 
+		String clientRepl = clientReplFileUrl.getFile(); 
 
-		Compiler.loadFile(serverRepl);
+		Compiler.loadFile(clientRepl);
     }
     
     /*

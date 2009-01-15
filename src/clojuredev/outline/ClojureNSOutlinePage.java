@@ -1,5 +1,6 @@
 package clojuredev.outline;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -81,7 +82,12 @@ public class ClojureNSOutlinePage extends ContentOutlinePage {
 			if (parentElement instanceof Map) {
 				return ((Map) parentElement).entrySet().toArray();
 			} else if (parentElement instanceof Map.Entry) {
-				return ((Map.Entry<String, List<String>>) parentElement).getValue().toArray();
+				Object potentialChildrenHolder = ((Map.Entry) parentElement).getValue();
+				if (Collection.class.isInstance(potentialChildrenHolder)) {
+					return ((Collection) potentialChildrenHolder).toArray();
+				} else {
+					return new Object[0];
+				}
 			} else if (parentElement instanceof String) {
 				return new Object[0];
 			} else {
@@ -97,7 +103,12 @@ public class ClojureNSOutlinePage extends ContentOutlinePage {
 			if (parentElement instanceof Map) {
 				return ! ((Map) parentElement).isEmpty();
 			} else if (parentElement instanceof Map.Entry) {
-				return ! ((Map.Entry<String, List<String>>) parentElement).getValue().isEmpty();
+				Object potentialChildrenHolder = ((Map.Entry) parentElement).getValue();
+				if (Collection.class.isInstance(potentialChildrenHolder)) {
+					return ! ((Collection) potentialChildrenHolder).isEmpty();
+				} else {
+					return false;
+				}
 			} else if (parentElement instanceof String) {
 				return false;
 			} else {
@@ -139,13 +150,9 @@ public class ClojureNSOutlinePage extends ContentOutlinePage {
 	}
 	
 	private Map<String, List<String>> getRemoteNsTree() {
-		return (Map<String, List<String>>) 
-			clojureClientProvider.getClojureClient().invoke(
-				"(let [ns-names (map (comp str ns-name) (all-ns))" +
-                "      ns-with-symbols (reduce (fn [m name]" + 
-                "                                (assoc m name (apply vector (map (fn [s] (str s)) (keys (ns-interns (symbol name)))))))" +
-                "                              {} ns-names)]" +
-                "  ns-with-symbols)");	
+		Object result = clojureClientProvider.getClojureClient().invokeLocal("(clojuredev.debug.clientrepl/ns-info)");
+		System.out.println("invokeLocal: " + result);
+		return (Map<String, List<String>>) result;
 	}
 
     public void refresh() {
