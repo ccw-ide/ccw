@@ -265,7 +265,7 @@
                <with
                      variable="activeEditorId">
                   <equals
-                        value="clojuredev.antlrbasededitor">
+                        value="clojuredev.antlrbasededitor_">
                   </equals>
                </with>
             </visibleWhen>
@@ -276,14 +276,7 @@
                   commandId="clojuredev.ui.edit.text.clojure.select.toplevel.s.expression"
                   style="push">
             </command>
-            <command
-                  commandId="clojuredev.test.namespaces"
-                  style="push">
-            </command>
          </menu>
-      </menuContribution>
-      <menuContribution
-            locationURI="clojuredev.menuContribution1">
       </menuContribution>
    </extension>
    <extension
