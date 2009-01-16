@@ -37,11 +37,11 @@
   `(invoke-fn ~(symbol symbol-str)))
 
 (defn ns-info []
-  (invoke (let [ns-names (map (comp str ns-name) (all-ns))
-        ns-with-symbols (reduce (fn [m name]
-                                  (assoc m name (apply vector (map (fn [s] (str s)) (keys (ns-interns (symbol name)))))))
-                         {} ns-names)]
-    ns-with-symbols)))
+  (invoke (ns-info)));(let [ns-names (map (comp str ns-name) (all-ns))
+                ;ns-with-symbols (reduce (fn [m name]
+                 ;                         (assoc m name (apply vector (map (fn [s] (str s)) (keys (ns-interns (symbol name)))))))
+                  ;               {} ns-names)]
+;    ns-with-symbols)))
 
 
 ; list all ns : (invoke (map ns-name (all-ns)))

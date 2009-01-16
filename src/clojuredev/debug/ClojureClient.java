@@ -25,7 +25,7 @@ public class ClojureClient {
 		starPort = RT.var("clojuredev.debug.clientrepl", "*default-repl-port*");
 	}
 
-	public Object invoke(String string) {
+	public Object invokeStr(String string) {
 		try {
 	        Var.pushThreadBindings(RT.map(starPort, port));
 	 

@@ -150,8 +150,10 @@ public class ClojureNSOutlinePage extends ContentOutlinePage {
 	}
 	
 	private Map<String, List<String>> getRemoteNsTree() {
-		Object result = clojureClientProvider.getClojureClient().invokeLocal("(clojuredev.debug.clientrepl/ns-info)");
-		System.out.println("invokeLocal: " + result);
+//		Object result = clojureClientProvider.getClojureClient().invokeLocal("(clojuredev.debug.clientrepl/ns-info)");
+		Object result = clojureClientProvider.getClojureClient().invokeStr("(clojuredev.debug.serverrepl/nss-info)");
+//		System.out.println("invokeLocal: " + result);
+		System.out.println("invokeStr: " + result);
 		return (Map<String, List<String>>) result;
 	}
 
