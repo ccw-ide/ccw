@@ -4,24 +4,37 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jface.viewers.CellLabelProvider;
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
-import clojure.lang.AMapEntry;
+import clojure.lang.Keyword;
 import clojuredev.ClojuredevPlugin;
 import clojuredev.debug.IClojureClientProvider;
 
 public class ClojureNSOutlinePage extends ContentOutlinePage {
 	private final IClojureClientProvider clojureClientProvider;
+	
+	private static final Keyword KEYWORD_NAME = Keyword.intern(null, "name");
+	private static final Keyword KEYWORD_CHILDREN = Keyword.intern(null, "children");
+	private static final Keyword KEYWORD_TYPE = Keyword.intern(null, "type");
+    private static final Keyword KEYWORD_PRIVATE = Keyword.intern(null, "private");
+    private static final Keyword KEYWORD_DOC = Keyword.intern(null, "doc");
+    private static final Keyword KEYWORD_ARGLISTS = Keyword.intern(null, "arglists");
+    
+	
 	
 	public ClojureNSOutlinePage(IClojureClientProvider clojureClientProvider) {
 		this.clojureClientProvider = clojureClientProvider;
@@ -30,8 +43,12 @@ public class ClojureNSOutlinePage extends ContentOutlinePage {
 	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
+		
+        ColumnViewerToolTipSupport.enableFor(getTreeViewer());
+        
 		getTreeViewer().setContentProvider(new ContentProvider());
 		getTreeViewer().setLabelProvider(new LabelProvider());
+		
 		getTreeViewer().setSorter(new NSSorter());
 		getTreeViewer().setComparer(new IElementComparer() {
 			public boolean equals(Object a, Object b) {
@@ -42,8 +59,9 @@ public class ClojureNSOutlinePage extends ContentOutlinePage {
 					return false;
 				}
 
-				if (a instanceof AMapEntry && b instanceof AMapEntry) {
-					return ((AMapEntry) a).getKey().equals(((AMapEntry) b).getKey());
+				if (a instanceof Map && b instanceof Map
+				        && ((Map) a).get(KEYWORD_NAME)!=null && ((Map) b).get(KEYWORD_NAME)!=null) {
+				    return ((Map) a).get(KEYWORD_NAME).equals(((Map) b).get(KEYWORD_NAME));
 				} else {
 					return a.equals(b);
 				}
@@ -53,8 +71,8 @@ public class ClojureNSOutlinePage extends ContentOutlinePage {
 				if (element == null) {
 					return 0;
 				}
-				if ( element instanceof AMapEntry) {
-					return ((AMapEntry) element).getKey().hashCode();
+				if ( element instanceof Map && ((Map) element).get(KEYWORD_NAME)!=null) {
+					return ((Map) element).get(KEYWORD_NAME).hashCode();
 				} else {
 					return element.hashCode();
 				}
@@ -62,34 +80,30 @@ public class ClojureNSOutlinePage extends ContentOutlinePage {
 		});
 
 		Object remoteTree = getRemoteNsTree();
-		getTreeViewer().setInput(remoteTree);
+//		getTreeViewer().setInput(remoteTree);
 	}
 	
 	private static class ContentProvider implements ITreeContentProvider {
-		private Map<String, List<String>> input; 
+		private Object input; 
 		public Object[] getElements(Object inputElement) {
-			return ((Map)inputElement).entrySet().toArray();
+			return getChildren(inputElement);
 		}
 
 		public void dispose() {
 		}
 
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-			this.input = (Map<String, List<String>>) newInput;
+			this.input = newInput;
 		}
 
 		public Object[] getChildren(Object parentElement) {
-			if (parentElement instanceof Map) {
-				return ((Map) parentElement).entrySet().toArray();
-			} else if (parentElement instanceof Map.Entry) {
-				Object potentialChildrenHolder = ((Map.Entry) parentElement).getValue();
-				if (Collection.class.isInstance(potentialChildrenHolder)) {
-					return ((Collection) potentialChildrenHolder).toArray();
-				} else {
-					return new Object[0];
-				}
-			} else if (parentElement instanceof String) {
-				return new Object[0];
+			if (Map.class.isInstance(parentElement)) {
+			    Collection children = (Collection) ((Map) parentElement).get(KEYWORD_CHILDREN);
+			    if (children == null) {
+			        return new Object[0];
+			    } else {
+			        return children.toArray();
+			    }
 			} else {
 				return new Object[0];
 			}
@@ -100,17 +114,8 @@ public class ClojureNSOutlinePage extends ContentOutlinePage {
 		}
 
 		public boolean hasChildren(Object parentElement) {
-			if (parentElement instanceof Map) {
-				return ! ((Map) parentElement).isEmpty();
-			} else if (parentElement instanceof Map.Entry) {
-				Object potentialChildrenHolder = ((Map.Entry) parentElement).getValue();
-				if (Collection.class.isInstance(potentialChildrenHolder)) {
-					return ! ((Collection) potentialChildrenHolder).isEmpty();
-				} else {
-					return false;
-				}
-			} else if (parentElement instanceof String) {
-				return false;
+			if (Map.class.isInstance(parentElement)) {
+			    return ((Map) parentElement).get(KEYWORD_CHILDREN) != null;
 			} else {
 				return false;
 			}
@@ -118,30 +123,73 @@ public class ClojureNSOutlinePage extends ContentOutlinePage {
 		
 	}
 	
-	private static class LabelProvider extends org.eclipse.jface.viewers.LabelProvider {
-		@Override
-		public String getText(Object element) {
-			if (element instanceof Map) {
-				return "namespaces";
-			} else if (element instanceof Map.Entry) {
-				return ((Map.Entry<String, List<String>>) element).getKey();
-			} else if (element instanceof String) {
-				return (String) element;
+	private static class LabelProvider extends CellLabelProvider {
+	    
+        public String getToolTipText(Object element) {
+            StringBuilder result = new StringBuilder();
+            
+            
+            Object maybeArglist = ((Map) element).get(KEYWORD_ARGLISTS);
+            if (maybeArglist != null) {
+                result.append("arglists: ");
+                result.append(maybeArglist);
+            }
+            
+            Object maybeDoc = ((Map) element).get(KEYWORD_DOC);
+            if (maybeDoc != null) {
+                if (result.length() > 0) {
+                    result.append("\n\n");
+                }
+                result.append(maybeDoc);
+            }
+            
+            if (result.length() != 0) {
+                return result.toString();
+            } else {
+                return "no documentation information";
+            }
+        }
+	    
+        public Point getToolTipShift(Object object) {
+            return new Point(5,15);
+        }
+
+        public int getToolTipDisplayDelayTime(Object object) {
+            return 100;
+        }
+
+        public int getToolTipTimeDisplayed(Object object) {
+            return 15000;
+        }
+        
+        public void update(ViewerCell cell) {
+            cell.setText(getText(cell.getElement()));
+            cell.setImage(getImage(cell.getElement()));
+            
+        }
+	    
+		private String getText(Object element) {
+			if (Map.class.isInstance(element)) {
+			    return (String) ((Map) element).get(KEYWORD_NAME);
 			} else {
 				return element.toString();
 			}
 		}
-		@Override
-		public Image getImage(Object element) {
-			if (element instanceof Map) {
-				return null;
-			} else if (element instanceof Map.Entry) {
-				return ClojuredevPlugin.getDefault().getImageRegistry().get(ClojuredevPlugin.NS);
-			} else if (element instanceof String) {
-				return ClojuredevPlugin.getDefault().getImageRegistry().get(ClojuredevPlugin.PUBLIC_FUNCTION);
-			} else {
-				return null;
+		
+		private Image getImage(Object element) {
+			if (Map.class.isInstance(element)) {
+			    Map node = (Map) element;
+			    if ("ns".equals(node.get(KEYWORD_TYPE))) {
+	                return ClojuredevPlugin.getDefault().getImageRegistry().get(ClojuredevPlugin.NS);
+			    } else {
+			        if ("true".equals(node.get(KEYWORD_PRIVATE))) {
+			            return ClojuredevPlugin.getDefault().getImageRegistry().get(ClojuredevPlugin.PRIVATE_FUNCTION);
+			        } else {
+                        return ClojuredevPlugin.getDefault().getImageRegistry().get(ClojuredevPlugin.PUBLIC_FUNCTION);
+			        }
+			    }
 			}
+			return null;
 		}
 	}
 	
@@ -150,10 +198,8 @@ public class ClojureNSOutlinePage extends ContentOutlinePage {
 	}
 	
 	private Map<String, List<String>> getRemoteNsTree() {
-//		Object result = clojureClientProvider.getClojureClient().invokeLocal("(clojuredev.debug.clientrepl/ns-info)");
-		Object result = clojureClientProvider.getClojureClient().invokeStr("(clojuredev.debug.serverrepl/nss-info)");
-//		System.out.println("invokeLocal: " + result);
-		System.out.println("invokeStr: " + result);
+		Object result = clojureClientProvider.getClojureClient().invokeStr("(clojuredev.debug.serverrepl/namespaces-info)");
+		System.out.println("invokeStr called");
 		return (Map<String, List<String>>) result;
 	}
 

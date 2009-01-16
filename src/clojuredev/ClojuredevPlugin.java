@@ -112,7 +112,9 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
 //    	super.initializeImageRegistry(reg);
     	reg.put(NS, ImageDescriptor.createFromURL(getBundle().getEntry("/icons/jdt/package_obj.gif")));
     	reg.put(PUBLIC_FUNCTION, ImageDescriptor.createFromURL(getBundle().getEntry("/icons/jdt/methpub_obj.gif")));
+        reg.put(PRIVATE_FUNCTION, ImageDescriptor.createFromURL(getBundle().getEntry("/icons/jdt/methpri_obj.gif")));
     }
     public static final String NS = "icon.namespace";
     public static final String PUBLIC_FUNCTION = "icon.function.public";
+    public static final String PRIVATE_FUNCTION = "icon.function.private";
 }

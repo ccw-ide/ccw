@@ -1,5 +1,7 @@
 package clojuredev.console;
 
+import java.util.regex.Pattern;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsolePageParticipant;
@@ -87,7 +89,7 @@ public class ConsolePageParticipant implements IConsolePageParticipant {
             }
 
             public String getPattern() {
-                return ".+\n";
+                return ".*\n";
             }
 
             public void connect(TextConsole console) {
