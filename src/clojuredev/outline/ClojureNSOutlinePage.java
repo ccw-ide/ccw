@@ -335,7 +335,7 @@ public class ClojureNSOutlinePage extends Page implements
 	}
 	
 	private Map<String, List<String>> getRemoteNsTree() {
-		Object result = clojureClientProvider.getClojureClient().invokeStr("(clojuredev.debug.serverrepl/namespaces-info)");
+		Object result = clojureClientProvider.getClojureClient().remoteLoadRead("(clojuredev.debug.serverrepl/namespaces-info)");
 		System.out.println("invokeStr called");
 		return (Map<String, List<String>>) result;
 	}
