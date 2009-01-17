@@ -8,6 +8,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.IConsoleView;
+import org.eclipse.ui.console.IOConsole;
 
 import clojure.lang.RT;
 import clojure.lang.Var;
@@ -67,7 +68,6 @@ public class ClojureClient {
 		}
 	}
 	
-	// TODO move this in a more central place ?
 	public static ClojureClient newClientForActiveRepl() {
         IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
         if (window != null) {
@@ -94,4 +94,33 @@ public class ClojureClient {
         }
         return null;
 	}
+	
+	public static IOConsole findActiveReplConsole() {
+        IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+        if (window != null) {
+            IWorkbenchPage page= window.getActivePage();
+            if (page != null) {
+            	for (IViewReference r: page.getViewReferences()) {
+            		IViewPart v = r.getView(false);
+            		if (IConsoleView.class.isInstance(v) && page.isPartVisible(v)) {
+            			IConsoleView cv = (IConsoleView) v;
+            			if (org.eclipse.debug.ui.console.IConsole.class.isInstance(cv.getConsole())) {
+            				org.eclipse.debug.ui.console.IConsole processConsole = (org.eclipse.debug.ui.console.IConsole) cv.getConsole();
+							try {
+								int port = Integer.valueOf(processConsole.getProcess().getLaunch().getLaunchConfiguration().getAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN, -1));
+	    						if (port != -1) {
+	    							assert IOConsole.class.isInstance(processConsole);
+	    							return (IOConsole) processConsole;
+	    						}
+							} catch (CoreException e) {
+								ClojuredevPlugin.logError("while searching active console port, unexpected error. Continue with other consoles", e);
+							}
+            			}
+            		}
+            	}
+            }
+        }
+        return null;
+	}
+
 }
