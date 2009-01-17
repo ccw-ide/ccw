@@ -3,28 +3,55 @@ package clojuredev.outline;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
+import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.jface.util.SafeRunnable;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreePath;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
+import org.eclipse.ui.part.IPageSite;
+import org.eclipse.ui.part.Page;
+import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import clojure.lang.Keyword;
 import clojuredev.ClojuredevPlugin;
 import clojuredev.debug.IClojureClientProvider;
 
-public class ClojureNSOutlinePage extends ContentOutlinePage {
+public class ClojureNSOutlinePage extends Page implements
+        IContentOutlinePage, ISelectionChangedListener {
+    private ListenerList selectionChangedListeners = new ListenerList();
+
+    private TreeViewer treeViewer;
+    
 	private final IClojureClientProvider clojureClientProvider;
 	
 	private static final Keyword KEYWORD_NAME = Keyword.intern(null, "name");
@@ -34,23 +61,115 @@ public class ClojureNSOutlinePage extends ContentOutlinePage {
     private static final Keyword KEYWORD_DOC = Keyword.intern(null, "doc");
     private static final Keyword KEYWORD_ARGLISTS = Keyword.intern(null, "arglists");
     
-	
+    private Composite control;
+	private Text filterText;
+	private String patternString = "";
+	private Pattern pattern;
+	private boolean searchInName = true;
+	private boolean searchInDoc = false;
+	private ISelection selectionBeforePatternSearchBegan;
+	private Object[] expandedElementsBeforeSearchBegan;
+
 	
 	public ClojureNSOutlinePage(IClojureClientProvider clojureClientProvider) {
 		this.clojureClientProvider = clojureClientProvider;
 	}
 	
-	@Override
-	public void createControl(Composite parent) {
-		super.createControl(parent);
+    @Override
+	public void createControl(Composite theParent) {
+		control = new Composite(theParent, SWT.NONE);
 		
-        ColumnViewerToolTipSupport.enableFor(getTreeViewer());
+		GridLayout gl = new GridLayout();
+		gl.numColumns = 4;
+		control.setLayout(gl);
+		
+		Label l = new Label(control, SWT.NONE);
+		l.setText("Find :");
+		l.setToolTipText("Enter an expression on which the browser will filter, based on name and doc string of symbols");
+		GridData gd = new GridData();
+		gd.verticalAlignment = SWT.CENTER;
+		l.setLayoutData(gd);
+		
+		filterText = new Text(control, SWT.FILL | SWT.BORDER);
+		filterText.setTextLimit(10);
+		filterText.setToolTipText("Enter here a word to search. It can be a regexp. e.g. \"-map$\" (without double quotes) for matching strings ending with -map");
+		gd = new GridData();
+		gd.horizontalAlignment = SWT.FILL;
+		gd.verticalAlignment = SWT.CENTER;
+		filterText.setLayoutData(gd);
+		filterText.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				patternString = ((Text) e.getSource()).getText();
+				if ("".equals(patternString.trim())) {
+					if (pattern != null) {
+						// user stops search, we restore the previous state of the tree
+						pattern = null;
+						treeViewer.refresh(false);
+						treeViewer.setExpandedElements(expandedElementsBeforeSearchBegan);
+						treeViewer.setSelection(selectionBeforePatternSearchBegan);
+						selectionBeforePatternSearchBegan = null;
+						expandedElementsBeforeSearchBegan = null;
+					}
+				} else {
+					pattern = Pattern.compile(patternString.trim());
+					if (selectionBeforePatternSearchBegan==null) {
+						// user triggers search, we save the current state of the tree
+						selectionBeforePatternSearchBegan = treeViewer.getSelection();
+						expandedElementsBeforeSearchBegan = treeViewer.getExpandedElements();
+					}
+					treeViewer.refresh(false);
+					treeViewer.expandAll();
+				}
+			}
+		});
+		
+		Button inName = new Button(control, SWT.CHECK);
+		gd = new GridData();
+		gd.verticalAlignment = SWT.CENTER;
+		inName.setLayoutData(gd);
+		inName.setText("in name");
+		inName.setToolTipText("Press to enable the search in the name");
+		inName.setSelection(true);
+		inName.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				searchInName = ((Button) e.getSource()).getSelection();
+				treeViewer.refresh(false);
+			}
+		});
+		
+		Button inDoc = new Button(control, SWT.CHECK);
+		gd = new GridData();
+		gd.verticalAlignment = SWT.CENTER;
+		inDoc.setLayoutData(gd);
+		inDoc.setText("in doc");
+		inDoc.setToolTipText("Press to enable the search in the documentation string");
+		inDoc.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				searchInDoc = ((Button) e.getSource()).getSelection();
+				treeViewer.refresh(false);
+			}
+		});
+		
+        treeViewer = new TreeViewer(control, SWT.MULTI | SWT.H_SCROLL
+                | SWT.V_SCROLL);
+        treeViewer.addSelectionChangedListener(this);
+		gd = new GridData();//SWT.FILL, SWT.FILL, true, true, 2, 1);
+		gd.horizontalSpan = 4;
+		gd.horizontalAlignment = SWT.FILL;
+		gd.grabExcessHorizontalSpace = true;
+		gd.verticalAlignment = SWT.FILL;
+		gd.grabExcessVerticalSpace = true;
+		treeViewer.getControl().setLayoutData(gd);
+		
+        ColumnViewerToolTipSupport.enableFor(treeViewer);
         
-		getTreeViewer().setContentProvider(new ContentProvider());
-		getTreeViewer().setLabelProvider(new LabelProvider());
+        treeViewer.setContentProvider(new ContentProvider());
+        treeViewer.setLabelProvider(new LabelProvider());
 		
-		getTreeViewer().setSorter(new NSSorter());
-		getTreeViewer().setComparer(new IElementComparer() {
+        treeViewer.setSorter(new NSSorter());
+        treeViewer.setComparer(new IElementComparer() {
 			public boolean equals(Object a, Object b) {
 				if (a == b) {
 					return true;
@@ -78,9 +197,27 @@ public class ClojureNSOutlinePage extends ContentOutlinePage {
 				}
 			}
 		});
-
-		Object remoteTree = getRemoteNsTree();
-//		getTreeViewer().setInput(remoteTree);
+        
+        treeViewer.addFilter(new ViewerFilter() {
+			@Override
+			public boolean select(Viewer viewer, Object parentElement, Object element) {
+				if (patternString==null || patternString.trim().equals("")) {
+					return true;
+				}
+				Map parent = (Map) parentElement;
+				Map elem = (Map) element;
+				if ("var".equals(elem.get(KEYWORD_TYPE))) {
+					String name = (String) elem.get(KEYWORD_NAME);
+					boolean nameMatches = searchInName && name!=null && pattern.matcher(name).find();
+					
+					String doc = (String) elem.get(KEYWORD_DOC);
+					boolean docMatches = searchInDoc && doc!=null && pattern.matcher(doc).find();
+					
+					return nameMatches || docMatches;
+				} else {
+					return true;
+				}
+			}});
 	}
 	
 	private static class ContentProvider implements ITreeContentProvider {
@@ -204,11 +341,11 @@ public class ClojureNSOutlinePage extends ContentOutlinePage {
 	}
 
     public void refresh() {
-    	if (getTreeViewer() == null) {
+    	if (treeViewer == null) {
     		return;
     	}
     	
-		Object oldInput = getTreeViewer().getInput();
+		Object oldInput = treeViewer.getInput();
     	final Object newInput = getRemoteNsTree();
 		if (oldInput!=null && oldInput.equals(newInput)) {
 			return;
@@ -225,13 +362,81 @@ public class ClojureNSOutlinePage extends ContentOutlinePage {
         	refreshTreeViewer(newInput);
         }
     }
+    
     private void refreshTreeViewer(Object newInput) {
-    	ISelection sel = getTreeViewer().getSelection();
-    	TreePath[] expandedTreePaths = getTreeViewer().getExpandedTreePaths();
+    	ISelection sel = treeViewer.getSelection();
+    	TreePath[] expandedTreePaths = treeViewer.getExpandedTreePaths();
 
-        getTreeViewer().setInput(newInput);
+    	treeViewer.setInput(newInput);
 
-        getTreeViewer().setExpandedTreePaths(expandedTreePaths);
-        getTreeViewer().setSelection(sel);
+    	treeViewer.setExpandedTreePaths(expandedTreePaths);
+    	treeViewer.setSelection(sel);
+    }
+    
+    public void addSelectionChangedListener(ISelectionChangedListener listener) {
+        selectionChangedListeners.add(listener);
+    }
+    
+    /**
+     * Fires a selection changed event.
+     *
+     * @param selection the new selection
+     */
+    protected void fireSelectionChanged(ISelection selection) {
+        // create an event
+        final SelectionChangedEvent event = new SelectionChangedEvent(this,
+                selection);
+
+        // fire the event
+        Object[] listeners = selectionChangedListeners.getListeners();
+        for (int i = 0; i < listeners.length; ++i) {
+            final ISelectionChangedListener l = (ISelectionChangedListener) listeners[i];
+            SafeRunner.run(new SafeRunnable() {
+                public void run() {
+                    l.selectionChanged(event);
+                }
+            });
+        }
+    }
+
+    public Control getControl() {
+        if (control == null) {
+			return null;
+		}
+        return control;
+    }
+
+    public ISelection getSelection() {
+        if (treeViewer == null) {
+			return StructuredSelection.EMPTY;
+		}
+        return treeViewer.getSelection();
+    }
+
+    public void init(IPageSite pageSite) {
+        super.init(pageSite);
+        pageSite.setSelectionProvider(this);
+    }
+
+    public void removeSelectionChangedListener(
+            ISelectionChangedListener listener) {
+        selectionChangedListeners.remove(listener);
+    }
+
+    public void selectionChanged(SelectionChangedEvent event) {
+        fireSelectionChanged(event.getSelection());
+    }
+
+    /**
+     * Sets focus to a part in the page.
+     */
+    public void setFocus() {
+        treeViewer.getControl().setFocus();
+    }
+
+    public void setSelection(ISelection selection) {
+        if (treeViewer != null) {
+			treeViewer.setSelection(selection);
+		}
     }
 }
