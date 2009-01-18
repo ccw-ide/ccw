@@ -5,14 +5,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.SafeRunnable;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -42,8 +52,10 @@ import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
+import util.DisplayUtil;
 import clojure.lang.Keyword;
 import clojuredev.ClojuredevPlugin;
+import clojuredev.debug.ClojureClient;
 import clojuredev.debug.IClojureClientProvider;
 
 public class ClojureNSOutlinePage extends Page implements
@@ -60,6 +72,9 @@ public class ClojureNSOutlinePage extends Page implements
     private static final Keyword KEYWORD_PRIVATE = Keyword.intern(null, "private");
     private static final Keyword KEYWORD_DOC = Keyword.intern(null, "doc");
     private static final Keyword KEYWORD_ARGLISTS = Keyword.intern(null, "arglists");
+    private static final Keyword KEYWORD_NS = Keyword.intern(null, "ns");
+    private static final Keyword KEYWORD_FILE = Keyword.intern(null, "file");
+    private static final Keyword KEYWORD_LINE = Keyword.intern(null, "line");
     
     private Composite control;
 	private Text filterText;
@@ -216,6 +231,42 @@ public class ClojureNSOutlinePage extends Page implements
 					return nameMatches || docMatches;
 				} else {
 					return true;
+				}
+			}
+		});
+        
+        treeViewer.addDoubleClickListener(new IDoubleClickListener() {
+			public void doubleClick(DoubleClickEvent event) {
+				IStructuredSelection sel = (IStructuredSelection) event.getSelection();
+				
+				if (sel.size() == 0)
+					return;
+				
+				Map node = (Map) sel.getFirstElement();
+				
+				if ("var".equals(node.get(KEYWORD_TYPE))) {
+					String ns = (String) node.get(KEYWORD_NS);
+					String file = (String) node.get(KEYWORD_FILE);
+					int line = (node.get(KEYWORD_LINE) == null)
+							? -1
+							: Integer.valueOf((String) node.get(KEYWORD_LINE));
+					
+					ns = ns.replace('.', '/');
+					try {
+						final String projectName = ((org.eclipse.debug.ui.console.IConsole) ClojureClient.findActiveReplConsole()).getProcess().getLaunch().getLaunchConfiguration().getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, (String) null);
+						DisplayUtil.syncExec(new Runnable() { 
+							public void run() { 
+								MessageDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), 
+										"source code", "project name found: " + projectName); 
+							} 
+						});
+						IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+						IJavaProject javaProject = JavaCore.create(project);
+					} catch (CoreException e) {
+						ClojuredevPlugin.logError("error while trying to obtain project's name from configuration, while trying to show source file of a symbol", e);
+					}
+
+//					JavaCore.
 				}
 			}});
 	}
