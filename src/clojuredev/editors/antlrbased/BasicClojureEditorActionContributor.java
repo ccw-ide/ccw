@@ -17,7 +17,6 @@ import java.util.ResourceBundle;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
-import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;

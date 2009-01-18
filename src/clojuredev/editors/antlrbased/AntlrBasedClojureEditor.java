@@ -122,6 +122,10 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.EVALUATE_TOP_LEVEL_S_EXPRESSION);
 		setAction(EvaluateTopLevelSExpressionAction.ID, action);
 
+		action = new EvaluateRegionAction(this);
+		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.EVALUATE_REGION);
+		setAction(EvaluateRegionAction.ID, action);
+
 		action = new ContentAssistAction(ClojureEditorMessages.getBundleForConstructedKeys(), "ContentAssistProposal.", this); 
 		String id = ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS;
 		action.setActionDefinitionId(id);
@@ -436,6 +440,25 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		return new Region(selection.x, selection.y);
 	}
 	
+	/**
+	 * Returns the unsigned current selection.
+	 * The length will always be positive.
+	 * <p>
+	 * The selection offset is model based.
+	 * </p>
+	 *
+	 * @param sourceViewer the source viewer
+	 * @return a region denoting the current unsigned selection
+	 */
+	protected IRegion getUnSignedSelection(ISourceViewer sourceViewer) {
+		StyledText text= sourceViewer.getTextWidget();
+		Point selection= text.getSelectionRange();
+
+		selection.x= widgetOffset2ModelOffset(sourceViewer, selection.x);
+
+		return new Region(selection.x, selection.y);
+	}
+	
 	/*
 	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#initializeKeyBindingScopes()
 	 */
@@ -478,5 +501,19 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		}
 		
 		return super.getAdapter(required);
+	}
+
+	public String getSelectedText() {
+		IRegion r = getUnSignedSelection(getSourceViewer());
+		
+		if (r != null) {
+			try {
+				return getDocument().get(r.getOffset(), r.getLength());
+			} catch (BadLocationException e) {
+				return null;
+			}
+		} else {
+			return null;
+		}
 	}
 }

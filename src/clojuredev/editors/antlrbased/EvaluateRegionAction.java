@@ -12,20 +12,20 @@ package clojuredev.editors.antlrbased;
 
 import org.eclipse.core.runtime.Assert;
 
-public class EvaluateTopLevelSExpressionAction extends EvaluateTextAction {
+public class EvaluateRegionAction extends EvaluateTextAction {
 
-	public final static String ID = "EvaluateTopLevelSExpressionAction"; //$NON-NLS-1$
+	public final static String ID = "EvaluateRegionAction"; //$NON-NLS-1$
 
 	private final AntlrBasedClojureEditor editor;
 
-	public EvaluateTopLevelSExpressionAction(AntlrBasedClojureEditor editor) {
-		super(ClojureEditorMessages.EvaluateTopLevelSExpressionAction_label);
+	public EvaluateRegionAction(AntlrBasedClojureEditor editor) {
+		super(ClojureEditorMessages.EvaluateRegionAction_label);
 		Assert.isNotNull(editor);
 		this.editor= editor;
 		setEnabled(true);
 	}
 
 	public void run() {
-		evaluateText(editor.getCurrentOrNextTopLevelSExpression());
+		evaluateText(editor.getSelectedText());
 	}
 }
