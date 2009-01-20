@@ -23,6 +23,8 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.ITokenScanner;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Display;
 
 import clojuredev.ClojuredevPlugin;
 import clojuredev.editors.antlrbased.TokenData;
@@ -35,6 +37,17 @@ abstract public class AntlrBasedTokenScanner implements ITokenScanner {
 	private final Map<Integer, IToken> antlrTokenTypeToJFaceToken;
 	private String text;
 	private boolean initialized = false;
+	
+	private IToken[] parenLevelTokens = new IToken[] {
+	        new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_RED))),
+            new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_BLUE))),
+            new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_CYAN))),
+            new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_GREEN))),
+            new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_BLACK))),
+            new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_DARK_MAGENTA))),
+            new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_DARK_YELLOW))),
+	};
+    private int currentParenLevel = 0;
 
 	public AntlrBasedTokenScanner(Lexer lexer) {
 		this.lexer = lexer;
@@ -84,7 +97,13 @@ abstract public class AntlrBasedTokenScanner implements ITokenScanner {
 		currentTokenIndex = nextIndex;
 		TokenData token = tokensData.get(currentTokenIndex);
 		if( token != null ){
-			return token.iToken;
+		    if (token.text.equals("(")) {
+		        return parenLevelTokens[Math.abs((currentParenLevel++)) % parenLevelTokens.length];
+		    } else if (token.text.equals(")")) {
+		        return parenLevelTokens[Math.abs((--currentParenLevel)) % parenLevelTokens.length];
+		    } else {
+		        return token.iToken;
+		    }
 		} else {
 			ClojuredevPlugin.logError("nextToken called but null token retrieved ? ! Returning UNDEFINED");
 			return org.eclipse.jface.text.rules.Token.UNDEFINED;
@@ -96,6 +115,7 @@ abstract public class AntlrBasedTokenScanner implements ITokenScanner {
 			tokensData.clear();
 			currentTokenIndex = -1;
 			text = document.get();
+			currentParenLevel = 0;
 			
 			lexer.setCharStream(new ANTLRStringStream(text));
 
