@@ -7,6 +7,7 @@
  *
  * Contributors: 
  *    Laurent PETIT - initial API and implementation
+ *    Thomas Ettinger
  *******************************************************************************/
 package clojuredev.utils.editors.antlrbased;
 
@@ -24,10 +25,14 @@ import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.ITokenScanner;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 
 import clojuredev.ClojuredevPlugin;
 import clojuredev.editors.antlrbased.TokenData;
+
+import static clojuredev.ClojuredevPlugin.getSystemColor;
+import static clojuredev.ClojuredevPlugin.getClojuredevColor;
 
 abstract public class AntlrBasedTokenScanner implements ITokenScanner {
 	private static int ANTLR_EOF = -1;
@@ -39,21 +44,22 @@ abstract public class AntlrBasedTokenScanner implements ITokenScanner {
 	private boolean initialized = false;
 	
 	private IToken[] parenLevelTokens = new IToken[] {
-            new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_RED))),
-            new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_GREEN))),
-            new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_BLUE))),
-            new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_MAGENTA))),
-            new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_GRAY))),
-
-            new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_DARK_RED))),
-            new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GREEN))),
-            new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_DARK_BLUE))),
-            new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_DARK_MAGENTA))),
-            new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY))),
-                        
-            new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_DARK_YELLOW))),
-            new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_DARK_CYAN)))
+			newParenTokenWith(getSystemColor(SWT.COLOR_RED)),
+			newParenTokenWith(getClojuredevColor(0)),
+			newParenTokenWith(getSystemColor(SWT.COLOR_GRAY)),
+			newParenTokenWith(getSystemColor(SWT.COLOR_MAGENTA)),
+			newParenTokenWith(getClojuredevColor(1)),
+			newParenTokenWith(getClojuredevColor(2)),
+			newParenTokenWith(getClojuredevColor(3)),
+			newParenTokenWith(getSystemColor(SWT.COLOR_DARK_GRAY)),
+			newParenTokenWith(getClojuredevColor(4)),
+			newParenTokenWith(getSystemColor(SWT.COLOR_DARK_BLUE)),
+			newParenTokenWith(getClojuredevColor(5)),
+			newParenTokenWith(getSystemColor(SWT.COLOR_DARK_CYAN)) 
 	};
+	private static IToken newParenTokenWith(Color color) {
+		return new org.eclipse.jface.text.rules.Token(new TextAttribute(color));
+	}
 	private IToken parenErrorToken = new org.eclipse.jface.text.rules.Token(
 			new TextAttribute(
 					Display.getDefault().getSystemColor(SWT.COLOR_WHITE),

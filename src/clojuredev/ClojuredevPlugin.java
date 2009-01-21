@@ -1,3 +1,6 @@
+/**
+ * Contributors: Thomas Ettinger
+ */
 package clojuredev;
 
 import java.net.URL;
@@ -8,6 +11,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -19,29 +24,44 @@ import clojuredev.debug.ClojureClient;
  */
 public class ClojuredevPlugin extends AbstractUIPlugin {
 
-    // The plug-in ID
+    /** The plug-in ID */
     public static final String PLUGIN_ID = "clojuredev";
 
-    // The shared instance
+    /** 
+     * @param swtKey a key from SWT.COLOR_xxx
+     * @return a system managed color (callers must not dispose 
+     *         the color themselves)
+     */
+	public static Color getSystemColor(int swtKey) { 
+		return Display.getDefault().getSystemColor(swtKey); 
+	}
+	
+	/**
+	 * @param index the index in an internal table of ClojuredevPlugin
+	 * @return the color corresponding to the index (callers must no
+	 *         dispose the color themselves)
+	 */
+	public static Color getClojuredevColor(int index) {
+		return ClojuredevPlugin.getDefault().allColors[index];
+	}
+	
+    /** The shared instance */
     private static ClojuredevPlugin plugin;
 
-    /**
-     * The constructor
-     */
+    /** "Read-only" table, do not alter */
+    public Color[] allColors;
+    
     public ClojuredevPlugin() {
     }
     
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext
-     * )
-     */
+    
     public void start(BundleContext context) throws Exception {
         super.start(context);
+        
         plugin = this;
         loadPluginClojureCode();
+        initializeParenRainbowColors();
+        
     }
 
     private void loadPluginClojureCode() throws Exception {
@@ -52,21 +72,34 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
 		Compiler.loadFile(clientRepl);
     }
     
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext
-     * )
-     */
     public void stop(BundleContext context) throws Exception {
+    	disposeParenRainbowColors();
         plugin = null;
         super.stop(context);
     }
+    
+    private void initializeParenRainbowColors() {
+        allColors = new Color[] {
+                new Color(Display.getDefault(), 0x00, 0xCC, 0x00),
+                new Color(Display.getDefault(), 0x00, 0x88, 0xAA),
+                new Color(Display.getDefault(), 0x66, 0x00, 0xAA),
+                new Color(Display.getDefault(), 0x00, 0x77, 0x00),
+                new Color(Display.getDefault(), 0x77, 0xEE, 0x00),
+                new Color(Display.getDefault(), 0xFF, 0x88, 0x00)
+            };
+    }
+    
+    private void disposeParenRainbowColors() {
+    	if (allColors != null) {
+        	for(Color c : allColors) {
+        		if (c!=null && !c.isDisposed()) {
+        			c.dispose();
+        		}
+            }
+    	}
+    }
 
     /**
-     * Returns the shared instance
-     * 
      * @return the shared instance
      */
     public static ClojuredevPlugin getDefault() {
