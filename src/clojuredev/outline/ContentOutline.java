@@ -191,7 +191,7 @@ public class ContentOutline extends PageBookView implements ISelectionProvider,
      * We only want to track editors.
      */
     protected boolean isImportant(IWorkbenchPart part) {
-    	return (part instanceof IEditorPart || part instanceof IConsoleView);
+    	return /*(part instanceof IEditorPart || */part instanceof IConsoleView/*)*/;
 //    	return true;
 //        //We only care about editors
 //        return (part instanceof IEditorPart);

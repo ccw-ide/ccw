@@ -1,4 +1,4 @@
-package util;
+package clojuredev.util;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;

@@ -39,6 +39,7 @@ import clojuredev.ClojuredevPlugin;
 import clojuredev.editors.rulesbased.ClojurePartitionScanner;
 
 public class AntlrBasedClojureEditor extends TextEditor {
+	public static final String ID = "clojuredev.antlrbasededitor";
 	/** Preference key for matching brackets */
 	//PreferenceConstants.EDITOR_MATCHING_BRACKETS;
 

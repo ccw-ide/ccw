@@ -15,10 +15,13 @@ package clojuredev.editors.antlrbased;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.internal.text.html.HTMLTextPresenter;
 import org.eclipse.jface.text.DefaultInformationControl;
+import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension3;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
@@ -58,7 +61,12 @@ public class ClojureSourceViewerConfiguration extends TextSourceViewerConfigurat
 	}
 	
 	private void addDamagerRepairerForContentType(PresentationReconciler reconciler, String contentType) {
-		DefaultDamagerRepairer dr= new DefaultDamagerRepairer(tokenScanner);
+		DefaultDamagerRepairer dr= new DefaultDamagerRepairer(tokenScanner) {
+			@Override
+			public IRegion getDamageRegion(ITypedRegion partition, DocumentEvent e, boolean documentPartitioningChanged) {
+				return partition;
+			}
+		};
 
 		reconciler.setDamager(dr, contentType);
 		reconciler.setRepairer(dr, contentType);	

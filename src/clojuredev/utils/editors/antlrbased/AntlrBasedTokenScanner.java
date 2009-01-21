@@ -39,15 +39,27 @@ abstract public class AntlrBasedTokenScanner implements ITokenScanner {
 	private boolean initialized = false;
 	
 	private IToken[] parenLevelTokens = new IToken[] {
-	        new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_RED))),
-            new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_BLUE))),
-            new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_CYAN))),
+            new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_RED))),
             new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_GREEN))),
-            new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_BLACK))),
+            new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_BLUE))),
+            new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_MAGENTA))),
+            new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_GRAY))),
+
+            new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_DARK_RED))),
+            new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GREEN))),
+            new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_DARK_BLUE))),
             new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_DARK_MAGENTA))),
+            new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY))),
+                        
             new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_DARK_YELLOW))),
+            new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_DARK_CYAN)))
 	};
-    private int currentParenLevel = 0;
+	private IToken parenErrorToken = new org.eclipse.jface.text.rules.Token(
+			new TextAttribute(
+					Display.getDefault().getSystemColor(SWT.COLOR_WHITE),
+					Display.getDefault().getSystemColor(SWT.COLOR_DARK_RED),
+					TextAttribute.UNDERLINE));
+	private int currentParenLevel = 0;
 
 	public AntlrBasedTokenScanner(Lexer lexer) {
 		this.lexer = lexer;
@@ -97,13 +109,29 @@ abstract public class AntlrBasedTokenScanner implements ITokenScanner {
 		currentTokenIndex = nextIndex;
 		TokenData token = tokensData.get(currentTokenIndex);
 		if( token != null ){
+			IToken result;
 		    if (token.text.equals("(")) {
-		        return parenLevelTokens[Math.abs((currentParenLevel++)) % parenLevelTokens.length];
+		    	if (currentParenLevel < 0) {
+//		    		result = token.iToken;
+		    		currentParenLevel = 0;
+		    	}
+//		    	} else {
+//		    		System.out.println("(, level :" + currentParenLevel + ", colorIndex :" + (currentParenLevel % parenLevelTokens.length));
+		    		result = parenLevelTokens[currentParenLevel % parenLevelTokens.length];
+//		    	}
+		    	currentParenLevel += 1;
 		    } else if (token.text.equals(")")) {
-		        return parenLevelTokens[Math.abs((--currentParenLevel)) % parenLevelTokens.length];
+		    	currentParenLevel -= 1;
+		    	if (currentParenLevel < 0) {
+		    		result = parenErrorToken;
+		    	} else {
+		    		System.out.println("), level :" + currentParenLevel + ", colorIndex :" + (currentParenLevel % parenLevelTokens.length));
+		    		result = parenLevelTokens[currentParenLevel % parenLevelTokens.length];
+		    	}
 		    } else {
-		        return token.iToken;
+		        result = token.iToken;
 		    }
+		    return result;
 		} else {
 			ClojuredevPlugin.logError("nextToken called but null token retrieved ? ! Returning UNDEFINED");
 			return org.eclipse.jface.text.rules.Token.UNDEFINED;
@@ -111,11 +139,10 @@ abstract public class AntlrBasedTokenScanner implements ITokenScanner {
 	}
 
 	public final void setRange(IDocument document, int offset, int length) {
+		System.out.println("++++++++++++++++++++++++++++++++++++++");
 		if (!document.get().equals(text)) {
 			tokensData.clear();
-			currentTokenIndex = -1;
 			text = document.get();
-			currentParenLevel = 0;
 			
 			lexer.setCharStream(new ANTLRStringStream(text));
 
@@ -131,12 +158,15 @@ abstract public class AntlrBasedTokenScanner implements ITokenScanner {
 	}
 
 	private void repositionCurrentTokenAtOffset(int offset) {
-		for( int i = tokensData.size() - 1 ; i >= 0 ; i-- ){
+		currentParenLevel = 0;
+		int size = tokensData.size();
+		for (int i = 0; i < size; i++) {
 			TokenData tokenInfo = tokensData.get(i);
-			if( tokenInfo.offset < offset ){
-				currentTokenIndex = i;
+			if (tokenInfo.offset >= offset) {
+				currentTokenIndex = i - 1;
 				break;
 			}
+			nextToken(); // called to initialize side effect on variable currentParenLevel FIXME do better ?
 		}
 	}
 

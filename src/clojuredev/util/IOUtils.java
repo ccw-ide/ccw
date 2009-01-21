@@ -1,4 +1,4 @@
-package util;
+package clojuredev.util;
 
 import java.io.Closeable;
 import java.io.IOException;

@@ -20,9 +20,9 @@ import org.eclipse.ui.console.IOConsole;
 import org.eclipse.ui.console.IOConsoleInputStream;
 import org.eclipse.ui.console.IOConsoleOutputStream;
 
-import util.DisplayUtil;
-import util.IOUtils;
 import clojuredev.debug.ClojureClient;
+import clojuredev.util.DisplayUtil;
+import clojuredev.util.IOUtils;
 
 abstract public class EvaluateTextAction extends Action {
 	

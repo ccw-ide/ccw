@@ -1,19 +1,35 @@
 package clojuredev.outline;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.URIUtil;
+import org.eclipse.core.filesystem.provider.FileStore;
+import org.eclipse.core.filesystem.provider.FileSystem;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.util.SafeRunnable;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
@@ -47,16 +63,22 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.ide.FileStoreEditorInput;
+import org.eclipse.ui.ide.IDE;
+import org.eclipse.ui.internal.ide.dialogs.IFileStoreFilter;
 import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.part.Page;
+import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
-import util.DisplayUtil;
 import clojure.lang.Keyword;
 import clojuredev.ClojuredevPlugin;
 import clojuredev.debug.ClojureClient;
 import clojuredev.debug.IClojureClientProvider;
+import clojuredev.editors.antlrbased.AntlrBasedClojureEditor;
+import clojuredev.util.DisplayUtil;
 
 public class ClojureNSOutlinePage extends Page implements
         IContentOutlinePage, ISelectionChangedListener {
@@ -244,6 +266,8 @@ public class ClojureNSOutlinePage extends Page implements
 				
 				Map node = (Map) sel.getFirstElement();
 				
+				System.out.println(node);
+				
 				if ("var".equals(node.get(KEYWORD_TYPE))) {
 					String ns = (String) node.get(KEYWORD_NS);
 					String file = (String) node.get(KEYWORD_FILE);
@@ -254,19 +278,122 @@ public class ClojureNSOutlinePage extends Page implements
 					ns = ns.replace('.', '/');
 					try {
 						final String projectName = ((org.eclipse.debug.ui.console.IConsole) ClojureClient.findActiveReplConsole()).getProcess().getLaunch().getLaunchConfiguration().getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, (String) null);
-						DisplayUtil.syncExec(new Runnable() { 
-							public void run() { 
-								MessageDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), 
-										"source code", "project name found: " + projectName); 
-							} 
-						});
+//						DisplayUtil.syncExec(new Runnable() { 
+//							public void run() { 
+//								MessageDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), 
+//										"source code", "project name found: " + projectName); 
+//							} 
+//						});
 						IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 						IJavaProject javaProject = JavaCore.create(project);
+						IClasspathEntry[] classpathEntries = javaProject.getResolvedClasspath(true);
+						for (IClasspathEntry cpe: classpathEntries) {
+							IPath maybeNsSourcePath;
+							IFile maybeNsFile ;
+							switch (cpe.getEntryKind()) {
+							case IClasspathEntry.CPE_SOURCE:
+								maybeNsSourcePath = cpe.getPath().append(ns).removeLastSegments(1).append(file);
+								System.out.println("classpath entry of kind: CPE_SOURCE");
+								System.out.println(maybeNsSourcePath); 
+								maybeNsFile = ResourcesPlugin.getWorkspace().getRoot().getFile(maybeNsSourcePath);
+								if (maybeNsFile.exists()) {
+									System.out.println("bingo!");
+									IEditorPart editor = IDE.openEditor(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(), maybeNsFile);
+									if (ITextEditor.class.isInstance(editor)) {
+										ITextEditor textEditor = (ITextEditor) editor;
+										IRegion lineRegion;
+										try {
+											lineRegion = textEditor.getDocumentProvider().getDocument(editor.getEditorInput()).getLineInformation(line - 1);
+											textEditor.selectAndReveal(lineRegion.getOffset(), lineRegion.getLength());
+										} catch (BadLocationException e) {
+											// TODO popup for a feedback to the user ?
+											ClojuredevPlugin.logError("unable to select line " + line + " in the file", e);
+										}
+									}
+									return;
+								}
+								break;
+							case IClasspathEntry.CPE_LIBRARY:
+								System.out.println("classpath entry of kind: CPE_LIBRARY");
+								System.out.println(cpe);
+								IPackageFragmentRoot[] libPackageFragmentRoots = javaProject.findPackageFragmentRoots(cpe);
+								System.out.println("all non java resources:");
+								for (IPackageFragmentRoot pfr: libPackageFragmentRoots) {
+									for (Object o: pfr.getNonJavaResources()) {
+										System.out.println(o);
+									}
+//									EFS.getStore(null).
+//									new FileStoreEditorInput()
+//									new URI(null).e
+								}
+//								IPath libSourcePath = cpe.getSourceAttachmentPath();
+//								cpe.
+//								if (libSourcePath == null) {
+//									System.out.println("oh, no sources for this lib, will try with raw bin container");
+//									libSourcePath = cpe.getPath();
+//								}
+//								maybeNsSourcePath = libSourcePath
+//										.append(ns)
+//										.removeLastSegments(1)
+//										.append(file);
+//								System.out.println(maybeNsSourcePath);
+////								if (maybeNsSourcePath.toFile().exists()) {
+////									System.out.println("bingo!");
+////									
+////								}
+//								try {
+//									
+//									URL maybeNsUrl = FileLocator.toFileURL(maybeNsSourcePath.toFile().toURL());
+//									System.out.println(maybeNsUrl);
+//									if (maybeNsUrl != null) {
+//										IEditorPart editor = IDE.openEditor(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(), maybeNsUrl.toURI(), AntlrBasedClojureEditor.ID, true);
+//										if (ITextEditor.class.isInstance(editor)) {
+//											ITextEditor textEditor = (ITextEditor) editor;
+//											IRegion lineRegion;
+//											try {
+//												lineRegion = textEditor.getDocumentProvider().getDocument(editor.getEditorInput()).getLineInformation(line - 1);
+//												textEditor.selectAndReveal(lineRegion.getOffset(), lineRegion.getLength());
+//											} catch (BadLocationException e) {
+//												// TODO popup for a feedback to the user ?
+//												ClojuredevPlugin.logError("unable to select line " + line + " in the file", e);
+//											}
+//										}
+//									}
+////								maybeNsFile = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(maybeNsSourcePath);
+//								} catch (IOException e) {
+//									ClojuredevPlugin.logError("oups", e);
+//								} catch (URISyntaxException e) {
+//									ClojuredevPlugin.logError("unable to open lib file", e);
+//								}
+//								
+////								if (maybeNsFile.exists()) {
+////									System.out.println("bingo!");
+////									IDE.openEditor(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(), maybeNsFile);
+////								}
+								break;
+							case IClasspathEntry.CPE_CONTAINER:
+								System.out.println("classpath entry of kind: CPE_CONTAINER");
+								System.out.println(cpe);
+								
+								break;
+							case IClasspathEntry.CPE_PROJECT:
+								System.out.println("classpath entry of kind: CPE_PROJECT");
+								break;
+							case IClasspathEntry.CPE_VARIABLE:
+								System.out.println("classpath entry of kind: CPE_VARIABLE");
+								break;
+							default:
+								System.out.println("unknown class entry kind ?!");
+							}
+//							if (cpe.)
+//							ResourcesPlugin.getWorkspace().getRoot().get
+//							System.out.println(cpe.getPath().append(classpathQualifiedName)); 
+////							cpe.
+						}
 					} catch (CoreException e) {
 						ClojuredevPlugin.logError("error while trying to obtain project's name from configuration, while trying to show source file of a symbol", e);
 					}
 
-//					JavaCore.
 				}
 			}});
 	}

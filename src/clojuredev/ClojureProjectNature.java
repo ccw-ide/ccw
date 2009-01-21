@@ -72,14 +72,29 @@ public class ClojureProjectNature implements IProjectNature {
                 .getJavaProject();
         
         if (!alreadyHasClojureLibOnClasspath(javaProject)) {
+        	int numOfEntriesToAdd = 0;
             File clojureLib = getDefaultClojureLib();
             if (clojureLib != null) {
+            	numOfEntriesToAdd++;
+            }
+            
+            File clojureContribLib = getDefaultClojureContribLib();
+            if (clojureContribLib != null) {
+            	numOfEntriesToAdd++;
+            }
+            
+            if (numOfEntriesToAdd > 0) {
 		        IClasspathEntry[] entriesOld = javaProject.getRawClasspath();
-		        IClasspathEntry[] entriesNew = new IClasspathEntry[entriesOld.length + 1];
+		        IClasspathEntry[] entriesNew = new IClasspathEntry[entriesOld.length + numOfEntriesToAdd];
 		        
 		        System.arraycopy(entriesOld, 0, entriesNew, 0, entriesOld.length);
 		
-		        entriesNew[entriesOld.length + 0] = JavaCore.newLibraryEntry(Path.fromOSString(clojureLib.getAbsolutePath()), null, null);
+		        if (clojureLib != null) {
+		        	entriesNew[entriesOld.length + 0] = JavaCore.newLibraryEntry(Path.fromOSString(clojureLib.getAbsolutePath()), null, null);
+		        }
+		        if (clojureContribLib != null) {
+		        	entriesNew[entriesOld.length + 1] = JavaCore.newLibraryEntry(Path.fromOSString(clojureContribLib.getAbsolutePath()), null, null);
+		        }
 		
 		        javaProject.setRawClasspath(entriesNew, null);
 		        javaProject.save(null, true);
@@ -107,6 +122,28 @@ public class ClojureProjectNature implements IProjectNature {
 	        		clojureLibEntry = null;
 	    	}
 	        return clojureLibEntry;
+    	} catch (IOException e) {
+    		ClojuredevPlugin.logError("Unable to find clojure plugin");
+    		return null;
+    	}
+    }
+    
+    private File getDefaultClojureContribLib() {
+    	try {
+	        Bundle bundle = Platform.getBundle("clojurecontrib");
+	        File clojureContribBundlePath = FileLocator.getBundleFile(bundle);
+	        File clojureContribLibEntry;
+	        if (clojureContribBundlePath.isFile()) {
+	        	clojureContribLibEntry = clojureContribBundlePath;
+	        } else if (new File(clojureContribBundlePath, "bin").exists()) {
+	    		clojureContribLibEntry = new File(clojureContribBundlePath, "bin");
+	    	} else if (new File (clojureContribBundlePath, "clojure" + File.separator + "lang").exists()) {
+	        		clojureContribLibEntry = clojureContribBundlePath;
+	    	} else {
+	        		ClojuredevPlugin.logError("Unable to find default clojurecontrib lib");
+	        		clojureContribLibEntry = null;
+	    	}
+	        return clojureContribLibEntry;
     	} catch (IOException e) {
     		ClojuredevPlugin.logError("Unable to find clojure plugin");
     		return null;
