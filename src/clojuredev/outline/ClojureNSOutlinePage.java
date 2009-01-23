@@ -273,258 +273,90 @@ public class ClojureNSOutlinePage extends Page implements
         treeViewer.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
 				IStructuredSelection sel = (IStructuredSelection) event.getSelection();
-				
 				if (sel.size() == 0)
 					return;
 				
 				Map node = (Map) sel.getFirstElement();
 				
-				System.out.println(node);
+				if (!"var".equals(node.get(KEYWORD_TYPE)))
+					return;
 				
-				if ("var".equals(node.get(KEYWORD_TYPE))) {
-					String ns = (String) node.get(KEYWORD_NS);
-					String file = (String) node.get(KEYWORD_FILE);
-					int line = (node.get(KEYWORD_LINE) == null)
-							? -1
-							: Integer.valueOf((String) node.get(KEYWORD_LINE));
-					
-					ns = ns.replace('.', '/');
-					try {
-						final String projectName = ((org.eclipse.debug.ui.console.IConsole) ClojureClient.findActiveReplConsole()).getProcess().getLaunch().getLaunchConfiguration().getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, (String) null);
-//						DisplayUtil.syncExec(new Runnable() { 
-//							public void run() { 
-//								MessageDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), 
-//										"source code", "project name found: " + projectName); 
-//							} 
-//						});
-						IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-						IJavaProject javaProject = JavaCore.create(project);
-						IClasspathEntry[] classpathEntries = javaProject.getResolvedClasspath(true);
-						for (IClasspathEntry cpe: classpathEntries) {
-							IPath maybeNsSourcePath = cpe.getPath().append(ns).removeLastSegments(1).append(file);
-							IFile maybeNsFile  = ResourcesPlugin.getWorkspace().getRoot().getFile(maybeNsSourcePath);
-							switch (cpe.getEntryKind()) {
-							case IClasspathEntry.CPE_SOURCE:
-								if (maybeNsFile.exists()) {
-									IEditorPart editor = IDE.openEditor(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(), maybeNsFile);
-									if (ITextEditor.class.isInstance(editor)) {
-										ITextEditor textEditor = (ITextEditor) editor;
-										IRegion lineRegion;
-										try {
-											lineRegion = textEditor.getDocumentProvider().getDocument(editor.getEditorInput()).getLineInformation(line - 1);
-											textEditor.selectAndReveal(lineRegion.getOffset(), lineRegion.getLength());
-										} catch (BadLocationException e) {
-											// TODO popup for a feedback to the user ?
-											ClojuredevPlugin.logError("unable to select line " + line + " in the file", e);
-										}
-									}
-									return;
-								}
-								break;
-							case IClasspathEntry.CPE_LIBRARY:
-								System.out.println("------------------------------------");
-								System.out.println("classpath entry of kind: CPE_LIBRARY");
-								System.out.println(cpe);
-								try {
-									IFileStore store = EFS.getStore(FileLocator.resolve(cpe.getPath().toFile().toURL()).toURI());
-//									System.out.println("the uri we try:" + FileLocator.resolve(cpe.getPath().);
-									System.out.println("the store: " + store);
-									IPath classPathFilePath = new Path(ns.replace('.', '/')).removeLastSegments(1).append(file);
-									System.out.println("search this file in the store:" + classPathFilePath);
-									IFileStore fs = store.getFileStore(classPathFilePath); 
-									File f = fs.toLocalFile(EFS.CACHE, null);
-									if (f!=null && f.exists()) {
-										System.out.println("BINGO !!!!!!!!!!");
-										IEditorPart editor = IDE.openEditorOnFileStore(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(), fs);
-										if (ITextEditor.class.isInstance(editor)) {
-											ITextEditor textEditor = (ITextEditor) editor;
-											IRegion lineRegion;
-											try {
-												lineRegion = textEditor.getDocumentProvider().getDocument(editor.getEditorInput()).getLineInformation(line - 1);
-												textEditor.selectAndReveal(lineRegion.getOffset(), lineRegion.getLength());
-											} catch (BadLocationException e) {
-												// TODO popup for a feedback to the user ?
-												ClojuredevPlugin.logError("unable to select line " + line + " in the file", e);
+				String searchedNS = ((String) node.get(KEYWORD_NS));
+				String searchedFileName = (String) node.get(KEYWORD_FILE);
+				int line = (node.get(KEYWORD_LINE) == null)	? -1 : Integer.valueOf((String) node.get(KEYWORD_LINE));
+				
+				try {
+					final String projectName = ((org.eclipse.debug.ui.console.IConsole) ClojureClient.findActiveReplConsole()).getProcess().getLaunch().getLaunchConfiguration().getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, (String) null);
+					IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+					IJavaProject javaProject = JavaCore.create(project);
+					IClasspathEntry[] classpathEntries = javaProject.getResolvedClasspath(true);
+					for (IClasspathEntry cpe: classpathEntries) {
+						switch (cpe.getEntryKind()) {
+						case IClasspathEntry.CPE_SOURCE:
+						case IClasspathEntry.CPE_LIBRARY:
+							IPackageFragmentRoot[] libPackageFragmentRoots = javaProject.findPackageFragmentRoots(cpe);
+							for (IPackageFragmentRoot pfr: libPackageFragmentRoots) {
+								for (IJavaElement javaElement: pfr.getChildren()) {
+									if (!javaElement.getElementName().equals(getNsPackageName(searchedNS)))
+										continue;
+									if (! (javaElement instanceof IPackageFragment))
+										continue;
+									
+									IPackageFragment packageFragment = (IPackageFragment) javaElement;
+									for (Object nonJavaResource: packageFragment.getNonJavaResources()) {
+										if (IFile.class.isInstance(nonJavaResource)) {
+											IFile nonJavaResourceFile = (IFile) nonJavaResource;
+											if (nonJavaResourceFile.getName().equals(searchedFileName)) {
+												IEditorPart editor = IDE.openEditor(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(), nonJavaResourceFile);
+												gotoEditorLine(editor, line);
+												return;
+											}
+										} else if (IJarEntryResource.class.isInstance(nonJavaResource)) {
+											IJarEntryResource jernje = (IJarEntryResource) nonJavaResource;
+											if (jernje.getName().equals(searchedFileName)) {
+												IEditorPart editor = IDE.openEditor(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(),
+														new JarEntryEditorInput(jernje), AntlrBasedClojureEditor.ID);
+												gotoEditorLine(editor, line);
+												return;
 											}
 										}
-										return;
 									}
-								} catch (Exception e) {
-									System.out.println("not yet :((((");
 								}
-								IPackageFragmentRoot[] libPackageFragmentRoots = javaProject.findPackageFragmentRoots(cpe);
-//								System.out.println("all non java resources:");
-								System.out.println("loop on fragment roots--------------");
-								for (IPackageFragmentRoot pfr: libPackageFragmentRoots) {
-									System.out.println("fragment root:" + pfr.getPath());
-									System.out.println("fragment root non java resources:");
-									if (pfr.isArchive()) {
-										for(Object o: pfr.getNonJavaResources()) {
-											IJarEntryResource jer = (IJarEntryResource) o;
-											System.out.println("child: " + jer.getName());
-										}
-									} else {
-										System.out.println("non archive fragment root");
-										for(Object o: pfr.getNonJavaResources()) {
-//											IJarEntryResource jer = (IJarEntryResource) o;
-											System.out.println("child: " + o);
-										}
-									}
-									System.out.println("fragment root java resources:");
-									System.out.println("we search for:" + ns.replace("/", "."));
-									String packageName = (ns.replace("/", ".").lastIndexOf(".") < 0)
-										? "" : ns.replace("/", ".").substring(0, ns.replace("/", ".").lastIndexOf('.'));
-									System.out.println("package searched:" + packageName);
-									for (IJavaElement je: pfr.getChildren()) {
-										System.out.println("java element:" + je.getElementName()+" "+je.getClass());
-										if (je.getElementName().equals(packageName)) {
-											System.out.println("FOUND THE PACKAGE!");
-											if (je instanceof IPackageFragment) {
-												System.out.println("it's a package fragment");
-												IPackageFragment asPF = (IPackageFragment) je;
-												for (IJavaElement pfje: asPF.getChildren()) {
-													System.out.println("  java child:" + pfje.getElementName());
-												}
-												for (Object nje: asPF.getNonJavaResources()) {
-													System.out.println("non java resource:" + nje + "class:" + nje.getClass());
-													if (IFile.class.isInstance(nje)) {
-														IFile fnje = (IFile) nje;
-														if (fnje.getName().equals(file)) {
-															System.out.println("BINGO !!!!!!!!!!");
-															IEditorPart editor = IDE.openEditor(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(), fnje);
-															if (ITextEditor.class.isInstance(editor)) {
-																ITextEditor textEditor = (ITextEditor) editor;
-																IRegion lineRegion;
-																try {
-																	lineRegion = textEditor.getDocumentProvider().getDocument(editor.getEditorInput()).getLineInformation(line - 1);
-																	textEditor.selectAndReveal(lineRegion.getOffset(), lineRegion.getLength());
-																} catch (BadLocationException e) {
-																	// TODO popup for a feedback to the user ?
-																	ClojuredevPlugin.logError("unable to select line " + line + " in the file", e);
-																}
-															}
-															return;
-
-														}
-													} else if (IJarEntryResource.class.isInstance(nje)) {
-														IJarEntryResource jernje = (IJarEntryResource) nje;
-														System.out.println("found a jar entry resource:" + jernje.getName() + "class"+jernje.getClass());
-														if (jernje.getName().equals(file)) {
-															System.out.println("BINGO !!!!!!!!!!");
-															JarEntryFile jef = (JarEntryFile) jernje;
-															if (jef.getAdapter(IFileStore.class) != null) {
-																System.out.println("bingo IFileStore!");
-															}
-															if (jef.getAdapter(IFile.class)!= null) {
-																System.out.println("bingo IFile!");
-															}
-															IEditorPart editor = IDE.openEditor(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(),
-																	new JarEntryEditorInput(jef), AntlrBasedClojureEditor.ID);
-															if (ITextEditor.class.isInstance(editor)) {
-																ITextEditor textEditor = (ITextEditor) editor;
-																IRegion lineRegion;
-																try {
-																	lineRegion = textEditor.getDocumentProvider().getDocument(editor.getEditorInput()).getLineInformation(line - 1);
-																	textEditor.selectAndReveal(lineRegion.getOffset(), lineRegion.getLength());
-																} catch (BadLocationException e) {
-																	// TODO popup for a feedback to the user ?
-																	ClojuredevPlugin.logError("unable to select line " + line + " in the file", e);
-																}
-															}
-															return;
-															
-														}
-													}
-												}
-											}
-										}
-//										je.
-									}
-//									try {
-//										System.out.println(pfr.getPath().toFile().toURL());
-//									} catch (MalformedURLException e) {
-//										e.printStackTrace();
-//									}
-//									for (Object o: pfr.getNonJavaResources()) {
-//										System.err.println("loop on non java resources---");
-//										System.out.println("class: " + o.getClass() + ":" + o);
-//									}
-//									EFS.getStore(uri)
-//									EFS.getStore(null).
-//									new FileStoreEditorInput()
-//									new URI(null).e
-								}
-//								IPath libSourcePath = cpe.getSourceAttachmentPath();
-//								cpe.
-//								if (libSourcePath == null) {
-//									System.out.println("oh, no sources for this lib, will try with raw bin container");
-//									libSourcePath = cpe.getPath();
-//								}
-//								maybeNsSourcePath = libSourcePath
-//										.append(ns)
-//										.removeLastSegments(1)
-//										.append(file);
-//								System.out.println(maybeNsSourcePath);
-////								if (maybeNsSourcePath.toFile().exists()) {
-////									System.out.println("bingo!");
-////									
-////								}
-//								try {
-//									
-//									URL maybeNsUrl = FileLocator.toFileURL(maybeNsSourcePath.toFile().toURL());
-//									System.out.println(maybeNsUrl);
-//									if (maybeNsUrl != null) {
-//										IEditorPart editor = IDE.openEditor(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(), maybeNsUrl.toURI(), AntlrBasedClojureEditor.ID, true);
-//										if (ITextEditor.class.isInstance(editor)) {
-//											ITextEditor textEditor = (ITextEditor) editor;
-//											IRegion lineRegion;
-//											try {
-//												lineRegion = textEditor.getDocumentProvider().getDocument(editor.getEditorInput()).getLineInformation(line - 1);
-//												textEditor.selectAndReveal(lineRegion.getOffset(), lineRegion.getLength());
-//											} catch (BadLocationException e) {
-//												// TODO popup for a feedback to the user ?
-//												ClojuredevPlugin.logError("unable to select line " + line + " in the file", e);
-//											}
-//										}
-//									}
-////								maybeNsFile = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(maybeNsSourcePath);
-//								} catch (IOException e) {
-//									ClojuredevPlugin.logError("oups", e);
-//								} catch (URISyntaxException e) {
-//									ClojuredevPlugin.logError("unable to open lib file", e);
-//								}
-//								
-////								if (maybeNsFile.exists()) {
-////									System.out.println("bingo!");
-////									IDE.openEditor(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(), maybeNsFile);
-////								}
-								break;
-							case IClasspathEntry.CPE_CONTAINER:
-								System.out.println("classpath entry of kind: CPE_CONTAINER");
-								System.out.println(cpe);
-								
-								break;
-							case IClasspathEntry.CPE_PROJECT:
-								System.out.println("classpath entry of kind: CPE_PROJECT");
-								break;
-							case IClasspathEntry.CPE_VARIABLE:
-								System.out.println("classpath entry of kind: CPE_VARIABLE");
-								break;
-							default:
-								System.out.println("unknown class entry kind ?!");
 							}
-//							if (cpe.)
-//							ResourcesPlugin.getWorkspace().getRoot().get
-//							System.out.println(cpe.getPath().append(classpathQualifiedName)); 
-////							cpe.
+							break;
+						case IClasspathEntry.CPE_PROJECT:
+							System.out.println("classpath entry of kind: CPE_PROJECT");
+							break;
+						default:
+							break;
 						}
-					} catch (CoreException e) {
-						ClojuredevPlugin.logError("error while trying to obtain project's name from configuration, while trying to show source file of a symbol", e);
 					}
-
+				} catch (CoreException e) {
+					ClojuredevPlugin.logError("error while trying to obtain project's name from configuration, while trying to show source file of a symbol", e);
 				}
-			}});
+
+			}
+		});
 	}
+    
+    private String getNsPackageName(String ns) {
+    	return (ns.lastIndexOf(".") < 0) ? "" : ns.substring(0, ns.lastIndexOf('.'));
+    }
+    
+	private void gotoEditorLine(IEditorPart editor, int line) {
+		if (ITextEditor.class.isInstance(editor)) {
+			ITextEditor textEditor = (ITextEditor) editor;
+			IRegion lineRegion;
+			try {
+				lineRegion = textEditor.getDocumentProvider().getDocument(editor.getEditorInput()).getLineInformation(line - 1);
+				textEditor.selectAndReveal(lineRegion.getOffset(), lineRegion.getLength());
+			} catch (BadLocationException e) {
+				// TODO popup for a feedback to the user ?
+				ClojuredevPlugin.logError("unable to select line " + line + " in the file", e);
+			}
+		}
+	}
+
 	
 	private static class ContentProvider implements ITreeContentProvider {
 		private Object input; 
