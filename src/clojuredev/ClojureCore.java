@@ -16,18 +16,35 @@ package clojuredev;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Preferences;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJarEntryResource;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.texteditor.ITextEditor;
+
+import clojuredev.debug.ClojureClient;
 
 /**
  * This class acts as a Facade for all SDT core functionality.
  * 
  */
-public class ClojureCore {
+public final class ClojureCore {
 
     /**
      * Clojure file extension
@@ -165,5 +182,107 @@ public class ClojureCore {
     public static ClojureProject[] getClojureProjects() {
         return clojureProjects.values().toArray(new ClojureProject[] {});
     }
+    
+    /*
+     *  TODO Still 1 more case to handle:
+     *  - when a LIBRARY does not have source file in its classpath, then search attached source files folder/archive 
+     */
+    public static void openInEditor(String searchedNS, String searchedFileName, int line) {
+		try {
+			String projectName = ((org.eclipse.debug.ui.console.IConsole) ClojureClient.findActiveReplConsole()).getProcess().getLaunch().getLaunchConfiguration().getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, (String) null);
+	    	openInEditor(searchedNS, searchedFileName, line, projectName, false);
+		} catch (CoreException e) {
+			ClojuredevPlugin.logError("error while trying to obtain project's name from configuration, while trying to show source file of a symbol", e);
+		}
+	}
+    
+    private static boolean openInEditor(String searchedNS, String searchedFileName, int line, String projectName, boolean onlyExportedEntries) throws PartInitException {
+			IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+			IJavaProject javaProject = JavaCore.create(project);
+			IClasspathEntry[] classpathEntries;
+			try {
+				classpathEntries = javaProject.getResolvedClasspath(true);
+			} catch (JavaModelException e) {
+				ClojuredevPlugin.logError("error getting classpathEntries of javaProject " + javaProject.getPath() 
+						+ " while trying to localize for editor opening : " 
+						+ searchedNS + " " + searchedFileName, e);
+				return false;
+			}
+			
+			for (IClasspathEntry cpe: classpathEntries) {
+				switch (cpe.getEntryKind()) {
+				case IClasspathEntry.CPE_LIBRARY:
+					if (onlyExportedEntries && !cpe.isExported())
+						continue;
+					// fall through normal case
+				case IClasspathEntry.CPE_SOURCE:
+					IPackageFragmentRoot[] libPackageFragmentRoots = javaProject.findPackageFragmentRoots(cpe);
+					for (IPackageFragmentRoot pfr: libPackageFragmentRoots) {
+						try {
+							for (IJavaElement javaElement: pfr.getChildren()) {
+								if (!javaElement.getElementName().equals(getNsPackageName(searchedNS)))
+									continue;
+								if (! (javaElement instanceof IPackageFragment))
+									continue;
+								
+								IPackageFragment packageFragment = (IPackageFragment) javaElement;
+								try {
+									for (Object nonJavaResource: packageFragment.getNonJavaResources()) {
+										String nonJavaResourceName = null;
+										if (IFile.class.isInstance(nonJavaResource)) {
+											nonJavaResourceName = ((IFile) nonJavaResource).getName();
+										} else if (IJarEntryResource.class.isInstance(nonJavaResource)) {
+											nonJavaResourceName = ((IJarEntryResource) nonJavaResource).getName();
+										}
+										if (searchedFileName.equals(nonJavaResourceName)) {
+											IEditorPart editor = EditorUtility.openInEditor(nonJavaResource);
+											gotoEditorLine(editor, line);
+											return true;
+										}
+									}
+								} catch (JavaModelException e) {
+									ClojuredevPlugin.logError("error with packageFragment " + packageFragment.getPath() 
+											+ " while trying to localize for editor opening : " 
+											+ searchedNS + " " + searchedFileName, e);
+								}
+							}
+						} catch (JavaModelException e) {
+							ClojuredevPlugin.logError("error with packageFragmentRoot " + pfr.getPath() 
+									+ " while trying to localize for editor opening : " 
+									+ searchedNS + " " + searchedFileName, e);
+						}
+					}
+					break;
+				case IClasspathEntry.CPE_PROJECT:
+					System.out.println("classpath entry of kind: CPE_PROJECT");
+					String dependentProjectName = cpe.getPath().lastSegment();
+					System.out.println("searched project:" + dependentProjectName);
+					if (openInEditor(searchedNS, searchedFileName, line, dependentProjectName, true))
+						return true;
+					break;
+				default:
+					break;
+				}
+			}
+			return false;
+	}
+    
+    public static String getNsPackageName(String ns) {
+    	return (ns.lastIndexOf(".") < 0) ? "" : ns.substring(0, ns.lastIndexOf("."));
+    }
+    
+	public static void gotoEditorLine(IEditorPart editor, int line) {
+		if (ITextEditor.class.isInstance(editor)) {
+			ITextEditor textEditor = (ITextEditor) editor;
+			IRegion lineRegion;
+			try {
+				lineRegion = textEditor.getDocumentProvider().getDocument(editor.getEditorInput()).getLineInformation(line - 1);
+				textEditor.selectAndReveal(lineRegion.getOffset(), lineRegion.getLength());
+			} catch (BadLocationException e) {
+				// TODO popup for a feedback to the user ?
+				ClojuredevPlugin.logError("unable to select line " + line + " in the file", e);
+			}
+		}
+	}
 
 }

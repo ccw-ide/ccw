@@ -1,48 +1,12 @@
 package clojuredev.outline;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.eclipse.core.filesystem.EFS;
-import org.eclipse.core.filesystem.IFileStore;
-import org.eclipse.core.filesystem.URIUtil;
-import org.eclipse.core.filesystem.provider.FileStore;
-import org.eclipse.core.filesystem.provider.FileSystem;
-import org.eclipse.core.internal.utils.FileUtil;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IStorage;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.ListenerList;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SafeRunner;
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJarEntryResource;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.internal.core.JarEntryFile;
-import org.eclipse.jdt.internal.core.PackageFragment;
-import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
-import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
-import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.util.SafeRunnable;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
@@ -76,22 +40,15 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.ide.FileStoreEditorInput;
-import org.eclipse.ui.ide.IDE;
-import org.eclipse.ui.internal.ide.dialogs.IFileStoreFilter;
 import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.part.Page;
-import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import clojure.lang.Keyword;
+import clojuredev.ClojureCore;
 import clojuredev.ClojuredevPlugin;
-import clojuredev.debug.ClojureClient;
 import clojuredev.debug.IClojureClientProvider;
-import clojuredev.editors.antlrbased.AntlrBasedClojureEditor;
-import clojuredev.util.DisplayUtil;
 
 public class ClojureNSOutlinePage extends Page implements
         IContentOutlinePage, ISelectionChangedListener {
@@ -284,92 +241,20 @@ public class ClojureNSOutlinePage extends Page implements
 				String searchedNS = ((String) node.get(KEYWORD_NS));
 				String searchedFileName = (String) node.get(KEYWORD_FILE);
 				int line = (node.get(KEYWORD_LINE) == null)	? -1 : Integer.valueOf((String) node.get(KEYWORD_LINE));
-				
-				try {
-					final String projectName = ((org.eclipse.debug.ui.console.IConsole) ClojureClient.findActiveReplConsole()).getProcess().getLaunch().getLaunchConfiguration().getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, (String) null);
-					IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-					IJavaProject javaProject = JavaCore.create(project);
-					IClasspathEntry[] classpathEntries = javaProject.getResolvedClasspath(true);
-					for (IClasspathEntry cpe: classpathEntries) {
-						switch (cpe.getEntryKind()) {
-						case IClasspathEntry.CPE_SOURCE:
-						case IClasspathEntry.CPE_LIBRARY:
-							IPackageFragmentRoot[] libPackageFragmentRoots = javaProject.findPackageFragmentRoots(cpe);
-							for (IPackageFragmentRoot pfr: libPackageFragmentRoots) {
-								for (IJavaElement javaElement: pfr.getChildren()) {
-									if (!javaElement.getElementName().equals(getNsPackageName(searchedNS)))
-										continue;
-									if (! (javaElement instanceof IPackageFragment))
-										continue;
-									
-									IPackageFragment packageFragment = (IPackageFragment) javaElement;
-									for (Object nonJavaResource: packageFragment.getNonJavaResources()) {
-										if (IFile.class.isInstance(nonJavaResource)) {
-											IFile nonJavaResourceFile = (IFile) nonJavaResource;
-											if (nonJavaResourceFile.getName().equals(searchedFileName)) {
-												IEditorPart editor = IDE.openEditor(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(), nonJavaResourceFile);
-												gotoEditorLine(editor, line);
-												return;
-											}
-										} else if (IJarEntryResource.class.isInstance(nonJavaResource)) {
-											IJarEntryResource jernje = (IJarEntryResource) nonJavaResource;
-											if (jernje.getName().equals(searchedFileName)) {
-												IEditorPart editor = IDE.openEditor(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(),
-														new JarEntryEditorInput(jernje), AntlrBasedClojureEditor.ID);
-												gotoEditorLine(editor, line);
-												return;
-											}
-										}
-									}
-								}
-							}
-							break;
-						case IClasspathEntry.CPE_PROJECT:
-							System.out.println("classpath entry of kind: CPE_PROJECT");
-							break;
-						default:
-							break;
-						}
-					}
-				} catch (CoreException e) {
-					ClojuredevPlugin.logError("error while trying to obtain project's name from configuration, while trying to show source file of a symbol", e);
-				}
-
+				System.out.println("trying to open file " + searchedNS + " " + searchedFileName + " " + line);
+				ClojureCore.openInEditor(searchedNS, searchedFileName, line);
 			}
 		});
 	}
-    
-    private String getNsPackageName(String ns) {
-    	return (ns.lastIndexOf(".") < 0) ? "" : ns.substring(0, ns.lastIndexOf('.'));
-    }
-    
-	private void gotoEditorLine(IEditorPart editor, int line) {
-		if (ITextEditor.class.isInstance(editor)) {
-			ITextEditor textEditor = (ITextEditor) editor;
-			IRegion lineRegion;
-			try {
-				lineRegion = textEditor.getDocumentProvider().getDocument(editor.getEditorInput()).getLineInformation(line - 1);
-				textEditor.selectAndReveal(lineRegion.getOffset(), lineRegion.getLength());
-			} catch (BadLocationException e) {
-				// TODO popup for a feedback to the user ?
-				ClojuredevPlugin.logError("unable to select line " + line + " in the file", e);
-			}
-		}
-	}
-
 	
 	private static class ContentProvider implements ITreeContentProvider {
-		private Object input; 
 		public Object[] getElements(Object inputElement) {
 			return getChildren(inputElement);
 		}
 
-		public void dispose() {
-		}
+		public void dispose() {	}
 
-		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-			this.input = newInput;
-		}
+		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {}
 
 		public Object[] getChildren(Object parentElement) {
 			if (Map.class.isInstance(parentElement)) {
