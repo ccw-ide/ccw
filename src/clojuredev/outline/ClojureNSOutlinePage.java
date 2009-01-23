@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.core.JarEntryFile;
 import org.eclipse.jdt.internal.core.PackageFragment;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.BadLocationException;
@@ -417,19 +418,19 @@ public class ClojureNSOutlinePage extends Page implements
 															if (jef.getAdapter(IFile.class)!= null) {
 																System.out.println("bingo IFile!");
 															}
-//															jernje.
-//															IEditorPart editor = IDE.openEditorOnFileStore(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(), (IFileStore)stnje);
-//															if (ITextEditor.class.isInstance(editor)) {
-//																ITextEditor textEditor = (ITextEditor) editor;
-//																IRegion lineRegion;
-//																try {
-//																	lineRegion = textEditor.getDocumentProvider().getDocument(editor.getEditorInput()).getLineInformation(line - 1);
-//																	textEditor.selectAndReveal(lineRegion.getOffset(), lineRegion.getLength());
-//																} catch (BadLocationException e) {
-//																	// TODO popup for a feedback to the user ?
-//																	ClojuredevPlugin.logError("unable to select line " + line + " in the file", e);
-//																}
-//															}
+															IEditorPart editor = IDE.openEditor(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(),
+																	new JarEntryEditorInput(jef), AntlrBasedClojureEditor.ID);
+															if (ITextEditor.class.isInstance(editor)) {
+																ITextEditor textEditor = (ITextEditor) editor;
+																IRegion lineRegion;
+																try {
+																	lineRegion = textEditor.getDocumentProvider().getDocument(editor.getEditorInput()).getLineInformation(line - 1);
+																	textEditor.selectAndReveal(lineRegion.getOffset(), lineRegion.getLength());
+																} catch (BadLocationException e) {
+																	// TODO popup for a feedback to the user ?
+																	ClojuredevPlugin.logError("unable to select line " + line + " in the file", e);
+																}
+															}
 															return;
 															
 														}
