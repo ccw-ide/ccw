@@ -47,13 +47,8 @@ public interface IClojureEditorActionDefinitionIds extends ITextEditorActionDefi
 	public static final String SELECT_TOP_LEVEL_S_EXPRESSION = "clojuredev.ui.edit.text.clojure.select.toplevel.s.expression";
 	
 	/**
-	 * Action definition ID of the Clojure (or edit ?) -> evaluate top level s expression action 
+	 * Action definition ID of the Clojure (or edit ?) -> evaluate top level s expression or region action 
 	 */
 	public static final String EVALUATE_TOP_LEVEL_S_EXPRESSION = "clojuredev.ui.edit.text.clojure.evaluate.toplevel.s.expression";
-	
-	/**
-	 * Action definition ID of the Clojure (or edit ?) -> evaluate region action 
-	 */
-	public static final String EVALUATE_REGION = "clojuredev.ui.edit.text.clojure.evaluate.region";
 	
 }

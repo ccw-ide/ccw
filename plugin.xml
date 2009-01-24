@@ -189,12 +189,6 @@
             id="clojuredev.ui.edit.text.clojure.evaluate.toplevel.s.expression">
       </command>
       <command
-            name="%command.evaluateRegion.name"
-            description="%command.evaluateRegion.description"
-            categoryId="org.eclipse.ui.category.navigate"
-            id="clojuredev.ui.edit.text.clojure.evaluate.region">
-      </command>
-      <command
             name="%command.clojureShortcut.run.name"
             description="%command.clojureShortcut.run.description"
             categoryId="org.eclipse.debug.ui.category.run"
@@ -249,11 +243,6 @@
             sequence="M1+M3+X"
             contextId="clojuredev.ui.clojureEditorScope"
             commandId="clojuredev.ui.edit.text.clojure.evaluate.toplevel.s.expression"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-      <key
-            sequence="M1+C M1+R"
-            contextId="clojuredev.ui.clojureEditorScope"
-            commandId="clojuredev.ui.edit.text.clojure.evaluate.region"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             sequence="M2+M3+X C"

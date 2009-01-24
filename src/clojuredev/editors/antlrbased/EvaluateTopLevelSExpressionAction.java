@@ -26,6 +26,12 @@ public class EvaluateTopLevelSExpressionAction extends EvaluateTextAction {
 	}
 
 	public void run() {
-		evaluateText(editor.getCurrentOrNextTopLevelSExpression());
+		String selectedText = editor.getSelectedText();
+		
+		if (selectedText==null || selectedText.trim().equals("")) {
+			selectedText = editor.getCurrentOrNextTopLevelSExpression();
+		}
+
+		evaluateText(selectedText);
 	}
 }
