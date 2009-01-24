@@ -21,6 +21,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJarEntryResource;
@@ -175,7 +177,7 @@ public final class ClojureCore {
     }
 
     /**
-     * Gets all the Scala projects in the workspace
+     * Gets all the Clojure projects in the workspace
      * 
      * @return an array containing all the Scala projects
      */
@@ -208,7 +210,9 @@ public final class ClojureCore {
 						+ searchedNS + " " + searchedFileName, e);
 				return false;
 			}
-			
+			IPath packageQualifiedFilePath = new Path(getNsPackageName(searchedNS).replace('.', '/') + '/' + searchedFileName);
+			System.out.println("+++++++++++++" + packageQualifiedFilePath);
+
 			for (IClasspathEntry cpe: classpathEntries) {
 				switch (cpe.getEntryKind()) {
 				case IClasspathEntry.CPE_LIBRARY:
@@ -252,6 +256,47 @@ public final class ClojureCore {
 									+ searchedNS + " " + searchedFileName, e);
 						}
 					}
+//					if (cpe.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
+//						// Last try : search in attached source folder, if any
+//						IPath sourcePath = cpe. getSourceAttachmentPath();
+//
+//						if (sourcePath == null)
+//							break;
+//						
+//						IFileStore sourcePathStore = EFS.getLocalFileSystem().fromLocalFile(sourcePath.toFile());
+//						if (sourcePathStore == null)
+//							break;
+//						System.out.println("worked : "+sourcePathStore);
+//						IFileStore maybeSearchedFileStore = sourcePathStore.getFileStore(packageQualifiedFilePath);
+//						System.out.println("packageQualifiedFilePath:"+packageQualifiedFilePath);
+//						System.out.println("maybeSearchedFileStore:"+maybeSearchedFileStore+ " exists:"+sourcePathStore.fetchInfo().exists());
+////						FileLocator.toFileURL(url)
+////						ZipEntryStorageEditorInput
+//						try {
+//							File f = maybeSearchedFileStore.toLocalFile(EFS.CACHE, null);
+//							if (f != null) {
+//								IEditorPart editor = IDE.openEditorOnFileStore(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(),
+//								maybeSearchedFileStore);
+//								gotoEditorLine(editor, line);
+//								return true;
+//							}
+//							if (maybeSearchedFileStore.fetchInfo().exists()) {
+//								System.out.println("FFFFFOOOOOUUUUUUUUUNNNNNNNNNNNNNDDDDDDDD!");
+//								IEditorPart editor = IDE.openEditorOnFileStore(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(),
+//										maybeSearchedFileStore);
+//								gotoEditorLine(editor, line);
+//								return true;
+//								
+//							} else {
+//								System.out.println("Ohhhhhhhhhhhhhhhhhhhhhhh bouhhhhhhhhhhhhhhh!");
+//								break;
+//							}
+//						} catch (CoreException e) {
+//							ClojuredevPlugin.logError("non existing file in store : " 
+//									+ searchedNS + " " + searchedFileName, e);
+//							break;
+//						}
+//					}
 					break;
 				case IClasspathEntry.CPE_PROJECT:
 					System.out.println("classpath entry of kind: CPE_PROJECT");
