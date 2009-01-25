@@ -123,6 +123,10 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.EVALUATE_TOP_LEVEL_S_EXPRESSION);
 		setAction(EvaluateTopLevelSExpressionAction.ID, action);
 
+		action = new LoadFileAction(this);
+		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.LOAD_FILE);
+		setAction(LoadFileAction.ID, action);
+
 		action = new ContentAssistAction(ClojureEditorMessages.getBundleForConstructedKeys(), "ContentAssistProposal.", this); 
 		String id = ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS;
 		action.setActionDefinitionId(id);

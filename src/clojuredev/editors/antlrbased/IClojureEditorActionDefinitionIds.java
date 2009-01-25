@@ -51,4 +51,9 @@ public interface IClojureEditorActionDefinitionIds extends ITextEditorActionDefi
 	 */
 	public static final String EVALUATE_TOP_LEVEL_S_EXPRESSION = "clojuredev.ui.edit.text.clojure.evaluate.toplevel.s.expression";
 	
+	/**
+	 * Action definition ID of the Clojure (or edit ?) -> load file action 
+	 */
+	public static final String LOAD_FILE = "clojuredev.ui.edit.text.clojure.load.file";
+	
 }

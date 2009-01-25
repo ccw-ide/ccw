@@ -189,6 +189,12 @@
             id="clojuredev.ui.edit.text.clojure.evaluate.toplevel.s.expression">
       </command>
       <command
+            name="%command.loadFile.name"
+            description="%command.loadFile.description"
+            categoryId="org.eclipse.ui.category.navigate"
+            id="clojuredev.ui.edit.text.clojure.load.file">
+      </command>
+      <command
             name="%command.clojureShortcut.run.name"
             description="%command.clojureShortcut.run.description"
             categoryId="org.eclipse.debug.ui.category.run"
@@ -243,6 +249,11 @@
             sequence="M1+M3+X"
             contextId="clojuredev.ui.clojureEditorScope"
             commandId="clojuredev.ui.edit.text.clojure.evaluate.toplevel.s.expression"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M1+M3+L"
+            contextId="clojuredev.ui.clojureEditorScope"
+            commandId="clojuredev.ui.edit.text.clojure.load.file"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             sequence="M2+M3+X C"
