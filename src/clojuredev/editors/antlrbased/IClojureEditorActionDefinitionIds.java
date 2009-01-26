@@ -56,4 +56,9 @@ public interface IClojureEditorActionDefinitionIds extends ITextEditorActionDefi
 	 */
 	public static final String LOAD_FILE = "clojuredev.ui.edit.text.clojure.load.file";
 	
+	/**
+	 * Action definition ID of the Clojure (or edit ?) -> compile lib action 
+	 */
+	public static final String COMPILE_LIB = "clojuredev.ui.edit.text.clojure.compile.lib";
+	
 }

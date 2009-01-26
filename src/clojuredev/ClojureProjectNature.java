@@ -82,19 +82,24 @@ public class ClojureProjectNature implements IProjectNature {
             if (clojureContribLib != null) {
             	numOfEntriesToAdd++;
             }
+            // TODO more to signal an error in those cases ? (and further simplify the following code)
             
             if (numOfEntriesToAdd > 0) {
 		        IClasspathEntry[] entriesOld = javaProject.getRawClasspath();
-		        IClasspathEntry[] entriesNew = new IClasspathEntry[entriesOld.length + numOfEntriesToAdd];
+		        IClasspathEntry[] entriesNew = new IClasspathEntry[entriesOld.length + 1 + numOfEntriesToAdd];
 		        
 		        System.arraycopy(entriesOld, 0, entriesNew, 0, entriesOld.length);
-		
+
+		        javaProject.getProject().getFolder("classes").create(true, true, null); // TODO if folder exists, abort
+	        	entriesNew[entriesOld.length] = JavaCore.newLibraryEntry(javaProject.getProject().getFolder("classes").getFullPath(), null, null);
+	        	
 		        if (clojureLib != null) {
-		        	entriesNew[entriesOld.length + 0] = JavaCore.newLibraryEntry(Path.fromOSString(clojureLib.getAbsolutePath()), null, null);
+		        	entriesNew[entriesOld.length + 1] = JavaCore.newLibraryEntry(Path.fromOSString(clojureLib.getAbsolutePath()), null, null);
 		        }
 		        if (clojureContribLib != null) {
-		        	entriesNew[entriesOld.length + 1] = JavaCore.newLibraryEntry(Path.fromOSString(clojureContribLib.getAbsolutePath()), null, null);
+		        	entriesNew[entriesOld.length + 2] = JavaCore.newLibraryEntry(Path.fromOSString(clojureContribLib.getAbsolutePath()), null, null);
 		        }
+		        
 		
 		        javaProject.setRawClasspath(entriesNew, null);
 		        javaProject.save(null, true);

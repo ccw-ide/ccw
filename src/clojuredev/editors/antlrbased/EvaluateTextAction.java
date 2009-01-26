@@ -15,6 +15,7 @@ import java.io.IOException;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.IOConsole;
 import org.eclipse.ui.console.IOConsoleInputStream;
@@ -59,4 +60,24 @@ abstract public class EvaluateTextAction extends Action {
 			IOUtils.safeClose(os);
 		}
 	}
+	
+	/**
+	 * Verifies if all is OK. Currently, that just means that if the file is not
+	 * saved, we ask the user for the permission to save the file and continue
+	 * @return true if it is ok to do the action, false if the action is cancelled
+	 */
+	protected boolean canProceed(IEditorPart editor, String title, String message) {
+		if (editor.isDirty()) {
+			boolean saveAndCompileLoad = MessageDialog.openConfirm(editor.getSite().getShell(), title, message);
+			if (saveAndCompileLoad) {
+				editor.getSite().getWorkbenchWindow().getActivePage().saveEditor(editor, false);
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return true;
+		}
+	}
+
 }

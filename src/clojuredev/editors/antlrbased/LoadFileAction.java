@@ -12,7 +12,6 @@ package clojuredev.editors.antlrbased;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.jface.dialogs.MessageDialog;
 
 public class LoadFileAction extends EvaluateTextAction {
 
@@ -28,19 +27,12 @@ public class LoadFileAction extends EvaluateTextAction {
 	}
 
 	public void run() {
-		if (editor.isDirty()) {
-			String title = "File Loader";
-			String message = "The editor has pending changes. Clicking OK will save the changes and load the file.";
-			boolean saveAndLoad = MessageDialog.openConfirm(editor.getSite().getShell(), title, message);
-			if (saveAndLoad) {
-				editor.getSite().getWorkbenchWindow().getActivePage().saveEditor(editor, false);
-				loadFile();
-			} else {
-				return;
-			}
-		} else {
-			loadFile();
-		}
+		String title = "File Loader";
+		String message = "The editor has pending changes. Clicking OK will save the changes and load the file.";
+		if (!canProceed(editor, title, message))
+			return;
+
+		loadFile();
 	}
 	
 	protected final void loadFile() {

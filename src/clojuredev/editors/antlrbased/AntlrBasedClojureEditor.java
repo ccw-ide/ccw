@@ -10,9 +10,13 @@
  *******************************************************************************/
 package clojuredev.editors.antlrbased;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.FindReplaceDocumentAdapter;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewerExtension5;
@@ -126,6 +130,10 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		action = new LoadFileAction(this);
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.LOAD_FILE);
 		setAction(LoadFileAction.ID, action);
+
+		action = new CompileLibAction(this);
+		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.COMPILE_LIB);
+		setAction(CompileLibAction.ID, action);
 
 		action = new ContentAssistAction(ClojureEditorMessages.getBundleForConstructedKeys(), "ContentAssistProposal.", this); 
 		String id = ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS;
@@ -249,7 +257,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		return true;
 	}
 	
-	private IDocument getDocument() {
+	protected IDocument getDocument() {
 		ISourceViewer sourceViewer= getSourceViewer();
 		return sourceViewer.getDocument();
 	}
@@ -514,6 +522,26 @@ public class AntlrBasedClojureEditor extends TextEditor {
 				return null;
 			}
 		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * @return
+	 */
+	public String getDeclaringNamespace() {
+		try {
+			String searchRegexp = "ns\\s+([^\\s\\)#\\[\\'\\{]+)";
+			IRegion nsSymbolRegion = new FindReplaceDocumentAdapter(getDocument()).find(0, searchRegexp, true, true, false, true);
+			if (nsSymbolRegion == null)
+				return null;
+			
+			String matched = getDocument().get(nsSymbolRegion.getOffset(), nsSymbolRegion.getLength());
+			Matcher matcher = Pattern.compile(searchRegexp).matcher(matched);
+			matcher.find();
+			return matcher.group(1);
+		} catch (BadLocationException e) {
+			// A bug can explain to be here, nothing else
 			return null;
 		}
 	}
