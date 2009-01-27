@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Laurent Petit   - adaptation for clojuredev
  *******************************************************************************/
 package clojuredev.outline;
 

@@ -1,6 +1,18 @@
+/*******************************************************************************
+ * Copyright (c) 2008 Casey Marshal.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors: 
+ *    Casey Marshal - initial API and implementation
+ *    Laurent PETIT - evolution and maintenance
+ *******************************************************************************/
 package clojuredev.launching;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
@@ -36,7 +48,7 @@ import clojuredev.ClojuredevPlugin;
 /**
  * Heavily adapted from JDT's java launcher tabs.
  * 
- * @author cmarshal
+ * @author cmarshal, laurent.petit
  * 
  */
 @SuppressWarnings("restriction")
@@ -48,6 +60,10 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
     
     private Text serverPort;
     
+    public String getName() {
+        return "Clojure";
+    }
+
     public void createControl(Composite parent) {
         Composite comp = SWTFactory.createComposite(parent, parent.getFont(),
                 1, 1, GridData.FILL_BOTH);
@@ -127,28 +143,6 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
 		});
     }
     
-    public String getName() {
-        return "Clojure";
-    }
-
-    @SuppressWarnings("unchecked")
-    public void performApply(ILaunchConfigurationWorkingCopy config) {
-    	
-        config.setAttribute(ATTR_PROJECT_NAME, fProjText.getText().trim());
-
-        LaunchUtils.setFilesToLaunchString(config, (List<IFile>) sourceFilesViewer.getInput());
-        
-        config.setAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN, Integer.valueOf(serverPort.getText()));
-        
-        mapResources(config);
-        try {
-            config.doSave();
-        }
-        catch (CoreException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public void setDefaults(ILaunchConfigurationWorkingCopy config) {
         IJavaElement javaElement = getContext();
         if (javaElement != null) {
@@ -183,11 +177,29 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
         
         try {
             serverPort.setText(Integer.toString(config.getAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN, LaunchUtils.DEFAULT_SERVER_PORT)));
-            sourceFilesViewer.setInput(LaunchUtils.getFilesToLaunchList(config));
+        } catch (CoreException e) {
+        	ClojuredevPlugin.logError("error while initializing serverPort", e);
+        	serverPort.setText("");
         }
-        catch (CoreException e) {
-            throw new RuntimeException(e);
+        try {    
+        	sourceFilesViewer.setInput(LaunchUtils.getFilesToLaunchList(config));
+        } catch (CoreException e) {
+        	ClojuredevPlugin.logError("error while initializing file list", e);
+        	sourceFilesViewer.setInput(Collections.emptyList());
         }
     }
+
+    @SuppressWarnings("unchecked")
+    public void performApply(ILaunchConfigurationWorkingCopy config) {
+    	
+        config.setAttribute(ATTR_PROJECT_NAME, fProjText.getText().trim());
+
+        LaunchUtils.setFilesToLaunchString(config, (List<IFile>) sourceFilesViewer.getInput());
+        
+        config.setAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN, Integer.valueOf(serverPort.getText()));
+        
+        mapResources(config);
+    }
+
 
 }

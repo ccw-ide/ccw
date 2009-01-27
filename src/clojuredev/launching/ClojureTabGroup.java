@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2009 Casey Marshall and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors: 
+ *    Casey Marshall - initial API and implementation
+ *    Laurent Petit - maintenance and evolution
+ *******************************************************************************/
 package clojuredev.launching;
 
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTabGroup;
@@ -9,6 +20,7 @@ import org.eclipse.debug.ui.ILaunchConfigurationTabGroup;
 import org.eclipse.jdt.debug.ui.launchConfigurations.JavaArgumentsTab;
 import org.eclipse.jdt.debug.ui.launchConfigurations.JavaClasspathTab;
 import org.eclipse.jdt.debug.ui.launchConfigurations.JavaJRETab;
+import org.eclipse.jdt.debug.ui.launchConfigurations.JavaMainTab;
 
 public class ClojureTabGroup extends AbstractLaunchConfigurationTabGroup {
 
@@ -18,14 +30,15 @@ public class ClojureTabGroup extends AbstractLaunchConfigurationTabGroup {
      */
     public void createTabs(ILaunchConfigurationDialog dialog, String mode) {
         ILaunchConfigurationTab[] tabs = new ILaunchConfigurationTab[] {
-                // new JavaMainTab(),
+//                 new JavaMainTab(),
                 new ClojureMainTab(), 
                 new JavaArgumentsTab(), 
                 new JavaJRETab(),
                 new JavaClasspathTab(),
                 // new SourceLookupTab(),
                 new EnvironmentTab(), 
-                new CommonTab() };
+                new CommonTab() 
+        };
         setTabs(tabs);
     }
 }
