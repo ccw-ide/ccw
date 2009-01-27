@@ -1,6 +1,5 @@
 package clojuredev.console;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsolePageParticipant;
 import org.eclipse.ui.console.IPatternMatchListener;
@@ -8,7 +7,6 @@ import org.eclipse.ui.console.PatternMatchEvent;
 import org.eclipse.ui.console.TextConsole;
 import org.eclipse.ui.part.IPageBookViewPage;
 
-import clojuredev.ClojuredevPlugin;
 import clojuredev.debug.ClojureClient;
 import clojuredev.debug.IClojureClientProvider;
 import clojuredev.launching.LaunchUtils;
@@ -39,16 +37,11 @@ public class ConsolePageParticipant implements IConsolePageParticipant {
 		this.console = (TextConsole) console;
 		
 		org.eclipse.debug.ui.console.IConsole processConsole = (org.eclipse.debug.ui.console.IConsole) console;
-		try {
-			if (processConsole.getProcess().getLaunch().getLaunchConfiguration().getAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN, -1) == -1) {
-				this.associatedWithClojureVM = false;
-			} else {
-				this.associatedWithClojureVM = true;
-				clojureVMPort = Integer.valueOf(processConsole.getProcess().getLaunch().getLaunchConfiguration().getAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN, -1));
-			}
-		} catch (CoreException e) {
-			ClojuredevPlugin.logError(e);
+		if (processConsole.getProcess().getLaunch().getAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN) == null) {
 			this.associatedWithClojureVM = false;
+		} else {
+			this.associatedWithClojureVM = true;
+			clojureVMPort = Integer.valueOf(processConsole.getProcess().getLaunch().getAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN));
 		}
 	}
 

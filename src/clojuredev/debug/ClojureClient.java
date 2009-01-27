@@ -1,6 +1,5 @@
 package clojuredev.debug;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewReference;
@@ -79,14 +78,13 @@ public class ClojureClient {
             			IConsoleView cv = (IConsoleView) v;
             			if (org.eclipse.debug.ui.console.IConsole.class.isInstance(cv.getConsole())) {
             				org.eclipse.debug.ui.console.IConsole processConsole = (org.eclipse.debug.ui.console.IConsole) cv.getConsole();
-							try {
-								int port = Integer.valueOf(processConsole.getProcess().getLaunch().getLaunchConfiguration().getAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN, -1));
-	    						if (port != -1) {
-	    							return new ClojureClient(port);
-	    						}
-							} catch (CoreException e) {
-								ClojuredevPlugin.logError("while searching active console port, unexpected error. Continue with other consoles", e);
-							}
+            				String portAttr = processConsole.getProcess().getLaunch().getAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN);
+            				if (portAttr != null) {
+    							Integer port = Integer.valueOf(portAttr);
+        						if (port != -1) {
+        							return new ClojureClient(port);
+        						}
+            				}
             			}
             		}
             	}
@@ -106,15 +104,14 @@ public class ClojureClient {
             			IConsoleView cv = (IConsoleView) v;
             			if (org.eclipse.debug.ui.console.IConsole.class.isInstance(cv.getConsole())) {
             				org.eclipse.debug.ui.console.IConsole processConsole = (org.eclipse.debug.ui.console.IConsole) cv.getConsole();
-							try {
-								int port = Integer.valueOf(processConsole.getProcess().getLaunch().getLaunchConfiguration().getAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN, -1));
+						    String portAttr = processConsole.getProcess().getLaunch().getAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN);
+						    if (portAttr != null) {
+								int port = Integer.valueOf(portAttr);
 	    						if (port != -1) {
 	    							assert IOConsole.class.isInstance(processConsole);
 	    							return (IOConsole) processConsole;
 	    						}
-							} catch (CoreException e) {
-								ClojuredevPlugin.logError("while searching active console port, unexpected error. Continue with other consoles", e);
-							}
+						    }
             			}
             		}
             	}

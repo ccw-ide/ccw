@@ -13,7 +13,7 @@
             hasPages="true"
             icon="icons/clojure16x16.png"
             id="clojuredev.project.new.wizard"
-            name="New Clojure Project"
+            name="Clojure Project"
             project="true">
       </wizard>
       <wizard
