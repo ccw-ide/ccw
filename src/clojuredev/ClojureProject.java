@@ -13,10 +13,6 @@
 // $Id: ScalaProject.java,v 1.4 2006/02/03 12:41:22 mcdirmid Exp $
 package clojuredev;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;

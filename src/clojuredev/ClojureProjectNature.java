@@ -19,6 +19,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.osgi.framework.Bundle;
 
+import clojuredev.builder.ClojureBuilder;
+
 /**
  * Borrowing heavily from the old Scala Eclipse plugin.
  * 

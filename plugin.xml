@@ -50,7 +50,7 @@
       <builder
             callOnEmptyDelta="false"
             hasNature="true"> 
-         <run class="clojuredev.ClojureBuilder"/>
+         <run class="clojuredev.builder.ClojureBuilder"/>
       </builder> 
    </extension> 
    <extension point="org.eclipse.debug.core.launchConfigurationTypes">
