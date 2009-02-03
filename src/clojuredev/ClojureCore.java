@@ -201,7 +201,11 @@ public final class ClojureCore {
      */
     public static void openInEditor(String searchedNS, String searchedFileName, int line) {
 		try {
-			String projectName = ((org.eclipse.debug.ui.console.IConsole) ClojureClient.findActiveReplConsole()).getProcess().getLaunch().getLaunchConfiguration().getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, (String) null);
+			org.eclipse.debug.ui.console.IConsole console = (org.eclipse.debug.ui.console.IConsole) ClojureClient.findActiveReplConsole();
+			if (console == null) {
+				return;
+			}
+			String projectName = console.getProcess().getLaunch().getLaunchConfiguration().getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, (String) null);
 	    	openInEditor(searchedNS, searchedFileName, line, projectName, false);
 		} catch (CoreException e) {
 			ClojuredevPlugin.logError("error while trying to obtain project's name from configuration, while trying to show source file of a symbol", e);

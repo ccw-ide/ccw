@@ -43,6 +43,8 @@ public class ClojureClient {
 	public ClojureClient(int port) {
 		this.port = port;
 	}
+	
+	public int getPort() { return port; }
 
 	public String remoteLoad(String remoteCode) {
 		return (String) invokeClojureVarWith(remoteLoad, remoteCode);

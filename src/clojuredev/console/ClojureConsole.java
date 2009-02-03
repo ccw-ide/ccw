@@ -19,7 +19,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.debug.internal.core.SystemPropertyResolver;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.ui.console.IOConsole;
 import org.eclipse.ui.console.IOConsoleInputStream;
