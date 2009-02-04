@@ -35,6 +35,8 @@ import clojure.lang.RT;
 import clojure.lang.Symbol;
 import clojure.lang.Var;
 import clojuredev.ClojuredevPlugin;
+import clojuredev.debug.ClojureClient;
+import clojuredev.editors.antlrbased.CompileLibAction;
 
 /*
  * gaetan.morice:
@@ -79,6 +81,8 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
     @Override
     protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
             throws CoreException {
+    	System.out.println("full build required!");
+//    	fullBuild(monitor);
         // Commented out to not break svn
 //        if(kind == FULL_BUILD){
 //            fullBuild(monitor);
@@ -107,16 +111,24 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
         
         IProject project = getProject();
         IJavaProject jProject = JavaCore.create(project);
+        
+        ClojureClient clojureClient = ClojuredevPlugin.getDefault().getProjectClojureClient(project);
+        if (clojureClient == null) {
+        	return;
+        }
 
         ArrayList<IFolder> srcFolders = new ArrayList<IFolder>();
-        IFolder binFolder = project.getWorkspace().getRoot().getFolder(jProject.getOutputLocation());
-        Var.pushThreadBindings(RT.map(compilePath, binFolder.getLocation().toOSString()));
-        try {
-            RT.addURL("file:"+binFolder.getLocation().toOSString()+"/");
-        } catch (Exception e2) {
-            throw new CoreException(new Status(IStatus.ERROR, ClojuredevPlugin.PLUGIN_ID, IStatus.OK, "Unable to add to ClassPath", e2));
-        }
         
+//        jProject.get
+//        
+//        IFolder binFolder = project.getWorkspace().getRoot().getFolder(jProject.getOutputLocation());
+//        Var.pushThreadBindings(RT.map(compilePath, binFolder.getLocation().toOSString()));
+//        try {
+//            RT.addURL("file:"+binFolder.getLocation().toOSString()+"/");
+//        } catch (Exception e2) {
+//            throw new CoreException(new Status(IStatus.ERROR, ClojuredevPlugin.PLUGIN_ID, IStatus.OK, "Unable to add to ClassPath", e2));
+//        }
+//        
         IClasspathEntry[] entries = jProject.getResolvedClasspath(true);
         try {
             for(IClasspathEntry entry : entries){
@@ -124,21 +136,21 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
                 case IClasspathEntry.CPE_SOURCE:
                     IFolder folder = project.getWorkspace().getRoot().getFolder(entry.getPath());
                     srcFolders.add(folder);
-                    RT.addURL("file:"+folder.getLocation().toOSString()+"/");
+//                    RT.addURL("file:"+folder.getLocation().toOSString()+"/");
                     break;
                 case IClasspathEntry.CPE_LIBRARY:
-                    String filePath = "file:"+entry.getPath().toOSString();
-                    if(!filePath.endsWith(".jar")) filePath = filePath+"/";
-                    RT.addURL("file:"+entry.getPath().toOSString());
+                	// Nothing to compile here
                     break;
                 case IClasspathEntry.CPE_PROJECT:
-                    IProject p = project.getWorkspace().getRoot().getProject(entry.getPath().toString());
-                    IJavaProject jp = JavaCore.create(project);
-                    IFolder bf = p.getWorkspace().getRoot().getFolder(jp.getOutputLocation());
-                    RT.addURL("file:"+bf.getLocation().toOSString()+"/");
+                	// TODO should compile here ?
+//                    IProject p = project.getWorkspace().getRoot().getProject(entry.getPath().toString());
+//                    IJavaProject jp = JavaCore.create(project);
+//                    IFolder bf = p.getWorkspace().getRoot().getFolder(jp.getOutputLocation());
+//                    RT.addURL("file:"+bf.getLocation().toOSString()+"/");
                     break;
                 case IClasspathEntry.CPE_CONTAINER:
                 case IClasspathEntry.CPE_VARIABLE:
+                	// Impossible cases, since entries are resolved
                 default:
                     break;
                 }
@@ -147,27 +159,39 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
             throw new CoreException(new Status(IStatus.ERROR, ClojuredevPlugin.PLUGIN_ID, IStatus.OK, "Unable to add to ClassPath", e1));
         }
         
+        // ClojureVisitor will do a lot of things:
+        // - create a list of libs
         ClojureVisitor visitor = new ClojureVisitor();
         for(IFolder srcFolder : srcFolders){
+        	visitor.setSrcFolder(srcFolder);
             srcFolder.accept(visitor);
         }
-        IFile[] srcFiles = visitor.getClojureFiles();
-        for(IFile src : srcFiles){
-            String[] segments = src.getFullPath().removeFileExtension().segments();
-            String[] elements = new String[segments.length-2];
-            System.arraycopy(segments, 2, elements, 0, elements.length);
-            String nameSpace = "";
-            for(int i=0; i<elements.length; i++){
-                if(i != elements.length-1) nameSpace += elements[i]+".";
-                else nameSpace += elements[i];
-            }
-            try {
-                compile.invoke(Symbol.intern(nameSpace));
-                binFolder.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 0));
-            } catch (Exception e) {
-                throw new CoreException(new Status(IStatus.ERROR, ClojuredevPlugin.PLUGIN_ID, IStatus.OK, "Unable to compile script : "+src.getFullPath().toOSString(), e));
-            }
+        
+        String[] clojureLibs = visitor.getClojureLibs();
+        for (String libName: clojureLibs) {
+        	System.out.println(clojureClient.remoteLoad(CompileLibAction.compileLibCommand(libName)));
         }
+        
+        IFolder classesFolder = project.getFolder("classes");
+        classesFolder.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 0));
+//        
+////        IFile[] clojureFiles = visitor.getClojureFiles();
+////        for(IFile src : clojureFiles){
+////            String[] segments = src.getFullPath().removeFileExtension().segments();
+////            String[] elements = new String[segments.length-2];
+////            System.arraycopy(segments, 2, elements, 0, elements.length);
+////            String nameSpace = "";
+////            for(int i=0; i<elements.length; i++){
+////                if(i != elements.length-1) nameSpace += elements[i]+".";
+////                else nameSpace += elements[i];
+////            }
+////            try {
+////                compile.invoke(Symbol.intern(nameSpace));
+//                binFolder.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 0));
+//            } catch (Exception e) {
+//                throw new CoreException(new Status(IStatus.ERROR, ClojuredevPlugin.PLUGIN_ID, IStatus.OK, "Unable to compile script : "+src.getFullPath().toOSString(), e));
+//            }
+//        }
         
         
     }

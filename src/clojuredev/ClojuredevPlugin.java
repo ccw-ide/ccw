@@ -12,11 +12,15 @@
 package clojuredev;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.debug.core.model.IProcess;
+import org.eclipse.debug.core.ILaunch;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Color;
@@ -26,6 +30,7 @@ import org.osgi.framework.BundleContext;
 
 import clojure.lang.Compiler;
 import clojuredev.debug.ClojureClient;
+import clojuredev.launching.LaunchUtils;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -140,12 +145,6 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
                 new Status(IStatus.WARNING, PLUGIN_ID, e.getMessage(), e));
     }
 
-	public static ClojureClient createClojureClientFor(IProcess process) {
-		
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
     @Override
     protected void initializeImageRegistry(ImageRegistry reg) {
 //    	ClojuredevPluginImages.initializeImageRegistry(reg);
@@ -158,4 +157,37 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
     public static final String NS = "icon.namespace";
     public static final String PUBLIC_FUNCTION = "icon.function.public";
     public static final String PRIVATE_FUNCTION = "icon.function.private";
+
+    private List<ILaunch> launches = new ArrayList<ILaunch>(); 
+	/**
+	 * @param launch
+	 */
+	public void addLaunch(ILaunch launch) {
+		if (!launch.isTerminated()) {
+			launches.add(launch);
+		}
+	}
+	
+	// TODO see if synchronized is mandatory ?
+	public synchronized ClojureClient getProjectClojureClient(IProject project) {
+		Iterator<ILaunch> it = launches.iterator();
+		while (it.hasNext()) {
+			ILaunch launch = it.next();
+			if (launch.isTerminated()) {
+				it.remove();
+				continue;
+			}
+			String launchProject = launch.getAttribute(LaunchUtils.ATTR_PROJECT_NAME);
+			if (launchProject != null && launchProject.equals(project.getName())) {
+				String portAttr = launch.getAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN);
+				if (portAttr != null) {
+					Integer port = Integer.valueOf(portAttr);
+					if (port != -1) {
+						return new ClojureClient(port);
+					}
+				}
+			}
+		}
+		return null;
+	}
 }

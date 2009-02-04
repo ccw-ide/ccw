@@ -52,9 +52,7 @@ public class CompileLibAction extends EvaluateTextAction {
 			return;
 		}
 		
-		String text = "(binding [*compile-path* \"classes\"] (compile '" + lib + "))";
-
-		evaluateText(text);
+		evaluateText(compileLibCommand(lib));
 		// TODO: send the compile via the server to synchronize with the compilation end before refreshing the project
 		try {
 			editorFile.getProject().getFolder("classes").refreshLocal(IFolder.DEPTH_INFINITE, null);
@@ -62,6 +60,10 @@ public class CompileLibAction extends EvaluateTextAction {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public static String compileLibCommand(String libName) {
+		return "(binding [*compile-path* \"classes\"] (compile '" + libName + "))";
 	}
 
 }

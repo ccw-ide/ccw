@@ -185,6 +185,10 @@ public final class ClojureCore {
         p = new ClojureProject(project);
         return p;
     }
+    
+    public static ClojureClient getProjectClojureClient(IProject project) {
+    	return null;
+    }
 
     /**
      * Gets all the Clojure projects in the workspace
