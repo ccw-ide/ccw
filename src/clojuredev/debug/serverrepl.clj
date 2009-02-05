@@ -40,6 +40,25 @@
 			  (recur))))
 	nil)
           
+(defn- push-answer [type answer-sexpr dos]
+	(let [answer (pr-str answer-sexpr)
+	      answer-bytes (.getBytes answer "UTF-8")]
+	  (.writeInt dos type) ; 0 = OK, -1 = KO (exception)
+	  (.writeInt dos (alength answer-bytes))
+	  (.write dos answer-bytes 0 (alength answer-bytes))
+	  (.flush dos)))
+  
+; currently just [file-name line-number message]
+(defn- serialize-exception [e]
+  (let [stack-traces (.getStackTrace e)
+        first-stack (aget stack-traces 0)
+        file-name (.getFileName first-stack)
+        line-number (.getLineNumber first-stack)
+        message (.getMessage e)]
+    { "file-name" file-name 
+      "line-number" line-number 
+      "message" message }))
+          
 (defn socket-repl 
   "starts a repl thread on the iostreams of supplied socket"
   [s]
@@ -49,11 +68,9 @@
         (let [question-bytes-length (.readInt dis)
               question-bytes (make-array Byte/TYPE question-bytes-length)]
           (.readFully dis question-bytes 0 question-bytes-length) 
-          (let [answer (pr-str (load-string (new String question-bytes "UTF-8")))
-                answer-bytes (.getBytes answer "UTF-8")]
-            (.writeInt dos (alength answer-bytes))
-            (.write dos answer-bytes 0 (alength answer-bytes))
-            (.flush dos))))))
+          (try
+            (push-answer 0 (load-string (new String question-bytes "UTF-8")) dos)
+            (catch Exception e (push-answer -1 (serialize-exception e) dos)))))))
           
 (create-server socket-repl 
               (Integer/valueOf (System/getProperty "clojure.remote.server.port" "8503")))

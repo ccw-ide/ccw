@@ -47,7 +47,7 @@ public class ClojureClient {
 	public int getPort() { return port; }
 
 	public String remoteLoad(String remoteCode) {
-		return (String) invokeClojureVarWith(remoteLoad, remoteCode);
+		return invokeClojureVarWith(remoteLoad, remoteCode).toString();
 	}
 	
 	public Object remoteLoadRead(String remoteCode) {
@@ -55,7 +55,7 @@ public class ClojureClient {
 	}
 	
 	public String localLoad(String localCode) {
-		return (String) invokeClojureVarWith(localLoad, localCode);
+		return invokeClojureVarWith(localLoad, localCode).toString();
 	}
 	
 	public Object localLoadRead(String localCode) {
@@ -67,12 +67,7 @@ public class ClojureClient {
 	        Var.pushThreadBindings(RT.map(starPort, port));
 	        return varToInvoke.invoke(code);
 		} catch (final Exception e) {
-	        PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-				public void run() {
-			        MessageDialog.openInformation(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "remote call exception!", e.getMessage());
-				}
-	        });
-		 	ClojuredevPlugin.logError("clojure invocation error", e);
+			ClojuredevPlugin.logError("clojure remote call exception", e);
 		 	return null;
 		} finally {
 			Var.popThreadBindings();

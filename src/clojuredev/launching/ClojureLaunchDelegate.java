@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
 
 import clojuredev.ClojuredevPlugin;
@@ -35,9 +34,6 @@ public class ClojureLaunchDelegate extends
                         LaunchUtils.DEFAULT_SERVER_PORT)));
         launch.setAttribute(LaunchUtils.ATTR_PROJECT_NAME, configuration.getAttribute(LaunchUtils.ATTR_PROJECT_NAME, (String) null));
         super.launch(configuration, mode, launch, monitor);
-        if (!launch.isTerminated()) {
-        	ClojuredevPlugin.getDefault().addLaunch(launch);
-        }
     }
     
 	@Override

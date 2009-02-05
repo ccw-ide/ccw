@@ -131,7 +131,7 @@ abstract public class AntlrBasedTokenScanner implements ITokenScanner {
 		    	if (currentParenLevel < 0) {
 		    		result = parenErrorToken;
 		    	} else {
-		    		System.out.println("), level :" + currentParenLevel + ", colorIndex :" + (currentParenLevel % parenLevelTokens.length));
+//		    		System.out.println("), level :" + currentParenLevel + ", colorIndex :" + (currentParenLevel % parenLevelTokens.length));
 		    		result = parenLevelTokens[currentParenLevel % parenLevelTokens.length];
 		    	}
 		    } else {
@@ -145,7 +145,7 @@ abstract public class AntlrBasedTokenScanner implements ITokenScanner {
 	}
 
 	public final void setRange(IDocument document, int offset, int length) {
-		System.out.println("++++++++++++++++++++++++++++++++++++++");
+//		System.out.println("++++++++++++++++++++++++++++++++++++++");
 		if (!document.get().equals(text)) {
 			tokensData.clear();
 			text = document.get();

@@ -28,13 +28,17 @@
           (.writeInt dos (alength s-bytes))
           (.write dos s-bytes 0 (alength s-bytes))
           (.flush dos)
-          (let [response-bytes-length (.readInt dis)
+          (let [response-type (.readInt dis) ; 0 = OK, -1 = KO (exception)
+                response-bytes-length (.readInt dis)
                 response-bytes (make-array Byte/TYPE response-bytes-length)]
             (.readFully dis response-bytes 0 response-bytes-length)
-            (new String response-bytes "UTF-8")))))))
+            { "response-type" response-type
+              "response" (new String response-bytes "UTF-8")}))))))
 
 (defn remote-load-read [s]
-  (read-string (remote-load s)))
+  (let [result (remote-load s)]
+    { "response-type" (result "response-type")
+      "response" (read-string (result "response")) }))
 
 (defn local-load-read [s]
   (load-string s))

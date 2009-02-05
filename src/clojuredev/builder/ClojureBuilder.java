@@ -15,12 +15,14 @@ package clojuredev.builder;
 import java.util.ArrayList;
 import java.util.Map;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -32,7 +34,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import clojure.lang.RT;
-import clojure.lang.Symbol;
 import clojure.lang.Var;
 import clojuredev.ClojuredevPlugin;
 import clojuredev.debug.ClojureClient;
@@ -109,7 +110,7 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
             monitor = new NullProgressMonitor();
         }
         
-        IProject project = getProject();
+        final IProject project = getProject();
         IJavaProject jProject = JavaCore.create(project);
         
         ClojureClient clojureClient = ClojuredevPlugin.getDefault().getProjectClojureClient(project);
@@ -119,16 +120,6 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
 
         ArrayList<IFolder> srcFolders = new ArrayList<IFolder>();
         
-//        jProject.get
-//        
-//        IFolder binFolder = project.getWorkspace().getRoot().getFolder(jProject.getOutputLocation());
-//        Var.pushThreadBindings(RT.map(compilePath, binFolder.getLocation().toOSString()));
-//        try {
-//            RT.addURL("file:"+binFolder.getLocation().toOSString()+"/");
-//        } catch (Exception e2) {
-//            throw new CoreException(new Status(IStatus.ERROR, ClojuredevPlugin.PLUGIN_ID, IStatus.OK, "Unable to add to ClassPath", e2));
-//        }
-//        
         IClasspathEntry[] entries = jProject.getResolvedClasspath(true);
         try {
             for(IClasspathEntry entry : entries){
@@ -136,17 +127,11 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
                 case IClasspathEntry.CPE_SOURCE:
                     IFolder folder = project.getWorkspace().getRoot().getFolder(entry.getPath());
                     srcFolders.add(folder);
-//                    RT.addURL("file:"+folder.getLocation().toOSString()+"/");
                     break;
                 case IClasspathEntry.CPE_LIBRARY:
-                	// Nothing to compile here
                     break;
                 case IClasspathEntry.CPE_PROJECT:
                 	// TODO should compile here ?
-//                    IProject p = project.getWorkspace().getRoot().getProject(entry.getPath().toString());
-//                    IJavaProject jp = JavaCore.create(project);
-//                    IFolder bf = p.getWorkspace().getRoot().getFolder(jp.getOutputLocation());
-//                    RT.addURL("file:"+bf.getLocation().toOSString()+"/");
                     break;
                 case IClasspathEntry.CPE_CONTAINER:
                 case IClasspathEntry.CPE_VARIABLE:
@@ -159,8 +144,6 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
             throw new CoreException(new Status(IStatus.ERROR, ClojuredevPlugin.PLUGIN_ID, IStatus.OK, "Unable to add to ClassPath", e1));
         }
         
-        // ClojureVisitor will do a lot of things:
-        // - create a list of libs
         ClojureVisitor visitor = new ClojureVisitor();
         for(IFolder srcFolder : srcFolders){
         	visitor.setSrcFolder(srcFolder);
@@ -172,28 +155,16 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
         	System.out.println(clojureClient.remoteLoad(CompileLibAction.compileLibCommand(libName)));
         }
         
-        IFolder classesFolder = project.getFolder("classes");
+        final IFolder classesFolder = project.getFolder("classes");
+        IResourceChangeListener listener = new ClassesFolderRefreshListener();
+        ResourcesPlugin.getWorkspace().addResourceChangeListener(listener); 
         classesFolder.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 0));
-//        
-////        IFile[] clojureFiles = visitor.getClojureFiles();
-////        for(IFile src : clojureFiles){
-////            String[] segments = src.getFullPath().removeFileExtension().segments();
-////            String[] elements = new String[segments.length-2];
-////            System.arraycopy(segments, 2, elements, 0, elements.length);
-////            String nameSpace = "";
-////            for(int i=0; i<elements.length; i++){
-////                if(i != elements.length-1) nameSpace += elements[i]+".";
-////                else nameSpace += elements[i];
-////            }
-////            try {
-////                compile.invoke(Symbol.intern(nameSpace));
-//                binFolder.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 0));
-//            } catch (Exception e) {
-//                throw new CoreException(new Status(IStatus.ERROR, ClojuredevPlugin.PLUGIN_ID, IStatus.OK, "Unable to compile script : "+src.getFullPath().toOSString(), e));
-//            }
-//        }
-        
-        
     }
-
+    private static class ClassesFolderRefreshListener implements IResourceChangeListener {
+		public void resourceChanged(IResourceChangeEvent event) {
+		}
+		public boolean isClassesFolderChange() {
+			return false;
+		}
+    }
 }

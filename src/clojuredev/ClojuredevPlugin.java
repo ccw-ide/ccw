@@ -13,14 +13,15 @@ package clojuredev;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchListener;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Color;
@@ -74,7 +75,7 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
         plugin = this;
         loadPluginClojureCode();
         initializeParenRainbowColors();
-        
+        startLaunchListener();
     }
 
     private void loadPluginClojureCode() throws Exception {
@@ -87,6 +88,7 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
     
     public void stop(BundleContext context) throws Exception {
     	disposeParenRainbowColors();
+    	stopLaunchListener();
         plugin = null;
         super.stop(context);
     }
@@ -158,34 +160,52 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
     public static final String PUBLIC_FUNCTION = "icon.function.public";
     public static final String PRIVATE_FUNCTION = "icon.function.private";
 
-    private List<ILaunch> launches = new ArrayList<ILaunch>(); 
-	/**
-	 * @param launch
-	 */
-	public void addLaunch(ILaunch launch) {
-		if (!launch.isTerminated()) {
-			launches.add(launch);
+    private List<ILaunch> launches = new ArrayList<ILaunch>();
+    private ILaunchListener launchListener = new ILaunchListener() {
+		public void launchAdded(ILaunch launch) {
+			updateLaunchList(launch);
+		}
+		public void launchChanged(ILaunch launch) {
+			updateLaunchList(launch);
+		}
+		private void updateLaunchList(ILaunch launch) {
+			if (findClojurePort(launch) != -1) {
+				launches.add(launch);
+			} else {
+				launches.remove(launch);
+			}
+		}
+		public void launchRemoved(ILaunch launch) {
+			launches.remove(launch);
+		}
+	};
+	private int findClojurePort(ILaunch launch) {
+		String portAttr = launch.getAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN);
+		if (portAttr != null) {
+			return Integer.valueOf(portAttr);
+		} else {
+			return -1;
 		}
 	}
 	
-	// TODO see if synchronized is mandatory ?
-	public synchronized ClojureClient getProjectClojureClient(IProject project) {
-		Iterator<ILaunch> it = launches.iterator();
-		while (it.hasNext()) {
-			ILaunch launch = it.next();
+    private void startLaunchListener() {
+		stopLaunchListener();
+		DebugPlugin.getDefault().getLaunchManager().addLaunchListener(launchListener);
+    }
+    
+    private void stopLaunchListener() {
+		DebugPlugin.getDefault().getLaunchManager().removeLaunchListener(launchListener);
+		launches.clear();
+    }
+    
+	public ClojureClient getProjectClojureClient(IProject project) {
+		for (ILaunch launch: launches) {
 			if (launch.isTerminated()) {
-				it.remove();
 				continue;
 			}
 			String launchProject = launch.getAttribute(LaunchUtils.ATTR_PROJECT_NAME);
 			if (launchProject != null && launchProject.equals(project.getName())) {
-				String portAttr = launch.getAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN);
-				if (portAttr != null) {
-					Integer port = Integer.valueOf(portAttr);
-					if (port != -1) {
-						return new ClojureClient(port);
-					}
-				}
+				return new ClojureClient(findClojurePort(launch));
 			}
 		}
 		return null;

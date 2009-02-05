@@ -20,7 +20,7 @@ import org.eclipse.ui.part.IPageBookViewPage;
 
 import clojuredev.debug.ClojureClient;
 import clojuredev.launching.LaunchUtils;
-import clojuredev.outline.ContentOutline;
+import clojuredev.outline.NamespaceBrowser;
 
 public class ConsolePageParticipant implements IConsolePageParticipant {
 	private TextConsole console;
@@ -43,7 +43,7 @@ public class ConsolePageParticipant implements IConsolePageParticipant {
 
 	public void activated() {
 		if (clojureClient != null) {
-			ContentOutline.setClojureClient(clojureClient);
+			NamespaceBrowser.setClojureClient(clojureClient);
 		}
 		System.out.println("activated");
 	}
@@ -84,7 +84,7 @@ public class ConsolePageParticipant implements IConsolePageParticipant {
 
             public void matchFound(PatternMatchEvent event) {
             	if (clojureClient != null) {
-            		ContentOutline.setClojureClient(clojureClient);
+            		NamespaceBrowser.setClojureClient(clojureClient);
             	}
             }
 		});

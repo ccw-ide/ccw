@@ -344,7 +344,7 @@
        point="org.eclipse.ui.views">
     <view
           category="clojuredev.category.views"
-          class="clojuredev.outline.ContentOutline"
+          class="clojuredev.outline.NamespaceBrowser"
           icon="icons/clojure16x16.png"
           id="clojuredev.view.namespacebrowser"
           name="Namespace Browser"

@@ -57,7 +57,7 @@ import clojuredev.ClojureCore;
 import clojuredev.ClojuredevPlugin;
 import clojuredev.debug.ClojureClient;
 
-public class ContentOutline extends ViewPart implements ISelectionProvider, ISelectionChangedListener {
+public class NamespaceBrowser extends ViewPart implements ISelectionProvider, ISelectionChangedListener {
 	/**
 	 * The plugin prefix.
 	 */
@@ -104,7 +104,7 @@ public class ContentOutline extends ViewPart implements ISelectionProvider, ISel
 	/**
 	 * Creates a content outline view with no content outline pages.
 	 */
-	public ContentOutline() {
+	public NamespaceBrowser() {
 		super();
 	}
 
@@ -404,9 +404,25 @@ public class ContentOutline extends ViewPart implements ISelectionProvider, ISel
 		if (clojureClient == null)
 			return Collections.emptyMap();
 		
-		Object result = clojureClient.remoteLoadRead("(clojuredev.debug.serverrepl/namespaces-info)");
-		System.out.println("invokeStr called");
-		return (Map<String, List<String>>) result;
+		Map result = (Map) clojureClient.remoteLoadRead("(clojuredev.debug.serverrepl/namespaces-info)");
+		if (result==null) {
+			System.out.println("no result, connection problem");
+			return null;
+		}
+		if (result.get("response-type").equals(0)) {
+			return (Map<String, List<String>>) result.get("response");
+		} else {
+			// error detected
+			Map error = (Map) result.get("response");
+			System.out.println("error :"
+					+ "line: " + error.get("line-number")
+					+ "file: " + error.get("file-name")
+					+ "message:" + error.get("message"));
+			return null;
+		}
+//		
+//		System.out.println("invokeStr called");
+//		return (Map<String, List<String>>) result;
 	}
 
 	public void resetInput() {
@@ -478,7 +494,6 @@ public class ContentOutline extends ViewPart implements ISelectionProvider, ISel
 	}
 
 	private void inUIResetInput(Object newInput) {
-		System.out.println("refresh start");
 		ISelection sel = treeViewer.getSelection();
 		TreePath[] expandedTreePaths = treeViewer.getExpandedTreePaths();
 
@@ -486,7 +501,6 @@ public class ContentOutline extends ViewPart implements ISelectionProvider, ISel
 
 		treeViewer.setExpandedTreePaths(expandedTreePaths);
 		treeViewer.setSelection(sel);
-		System.out.println("refresh stop");
 	}
 
 	public void addSelectionChangedListener(ISelectionChangedListener listener) {
@@ -570,10 +584,10 @@ public class ContentOutline extends ViewPart implements ISelectionProvider, ISel
 	
 	private static void inUIThreadSetClojureClient(ClojureClient clojureClient) {
 		IViewPart[] views = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getViews();			
-		ContentOutline co = null;
+		NamespaceBrowser co = null;
 		for (IViewPart v: views) {
-			if (ContentOutline.class.isInstance(v)) {
-				co = (ContentOutline) v;
+			if (NamespaceBrowser.class.isInstance(v)) {
+				co = (NamespaceBrowser) v;
 				break;
 			}
 		}
