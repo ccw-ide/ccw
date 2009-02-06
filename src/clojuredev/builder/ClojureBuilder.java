@@ -18,11 +18,8 @@ import java.util.Map;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceChangeEvent;
-import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -156,15 +153,11 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
         }
         
         final IFolder classesFolder = project.getFolder("classes");
-        IResourceChangeListener listener = new ClassesFolderRefreshListener();
-        ResourcesPlugin.getWorkspace().addResourceChangeListener(listener); 
-        classesFolder.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 0));
-    }
-    private static class ClassesFolderRefreshListener implements IResourceChangeListener {
-		public void resourceChanged(IResourceChangeEvent event) {
+        try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			ClojuredevPlugin.logError("error while waiting a while before refreshing classes folder", e);
 		}
-		public boolean isClassesFolderChange() {
-			return false;
-		}
+		classesFolder.refreshLocal(IResource.DEPTH_INFINITE, null);//new SubProgressMonitor(monitor, 0));
     }
 }
