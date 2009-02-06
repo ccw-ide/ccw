@@ -51,7 +51,10 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
     @Override
     protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
             throws CoreException {
-
+    	if (getProject()==null || getDelta(getProject()) == null) {
+    		return null;
+    	}
+    	
     	if (onlyClassesFolderRelatedDelta()) {
     		return null;
     	}
@@ -75,7 +78,9 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
     }
     
     private boolean onlyClassesFolderRelatedDelta() {
+    	
     	IPath classesFolderFullPath = getClassesFolder().getFullPath(); 
+
 		for (IResourceDelta d: getDelta(getProject()).getAffectedChildren()) {
 			if (classesFolderFullPath.isPrefixOf(d.getFullPath())) {
 				continue;
