@@ -2,7 +2,7 @@
 <feature
       id="clojuredev.feature"
       label="Clojuredev Feature"
-      version="0.0.15"
+      version="0.0.16"
       provider-name="clojure-dev team">
 
    <description url="http://code.google.com/p/clojure-dev/">
@@ -241,7 +241,7 @@ litigation.
          id="clojuredev"
          download-size="0"
          install-size="0"
-         version="0.0.15"/>
+         version="0.0.16"/>
 
    <plugin
          id="clojurecontrib"
