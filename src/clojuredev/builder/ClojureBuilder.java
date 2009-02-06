@@ -21,6 +21,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -50,8 +51,14 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
     @Override
     protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
             throws CoreException {
-    	System.out.println("full build required!");
+
+    	if (onlyClassesFolderRelatedDelta()) {
+    		return null;
+    	}
+    	
     	fullBuild(monitor);
+
+    	
         // Commented out to not break svn
 //        if(kind == FULL_BUILD){
 //            fullBuild(monitor);
@@ -67,6 +74,19 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
         return null;
     }
     
+    private boolean onlyClassesFolderRelatedDelta() {
+    	IPath classesFolderFullPath = getClassesFolder().getFullPath(); 
+		for (IResourceDelta d: getDelta(getProject()).getAffectedChildren()) {
+			if (classesFolderFullPath.isPrefixOf(d.getFullPath())) {
+				continue;
+			} else {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+
     protected void incrementalBuild(IResourceDelta delta, IProgressMonitor monitor) {
         // TODO Auto-generated method stub
         
@@ -120,9 +140,8 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
         
         String[] clojureLibs = visitor.getClojureLibs();
         for (String libName: clojureLibs) {
-        	System.out.println(clojureClient.remoteLoad(CompileLibAction.compileLibCommand(libName)));
+        	clojureClient.remoteLoad(CompileLibAction.compileLibCommand(libName));
         }
-        System.out.flush();
         
         getClassesFolder().refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 0));
     }

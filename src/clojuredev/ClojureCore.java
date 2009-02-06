@@ -31,8 +31,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJarEntryResource;
@@ -217,63 +215,64 @@ public final class ClojureCore {
 	}
     
     private static boolean openInEditor(String searchedNS, String searchedFileName, int line, String projectName, boolean onlyExportedEntries) throws PartInitException {
-			IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-			IJavaProject javaProject = JavaCore.create(project);
-			IClasspathEntry[] classpathEntries;
-			try {
-				classpathEntries = javaProject.getResolvedClasspath(true);
-			} catch (JavaModelException e) {
-				ClojuredevPlugin.logError("error getting classpathEntries of javaProject " + javaProject.getPath() 
-						+ " while trying to localize for editor opening : " 
-						+ searchedNS + " " + searchedFileName, e);
-				return false;
-			}
-			IPath packageQualifiedFilePath = new Path(getNsPackageName(searchedNS).replace('.', '/') + '/' + searchedFileName);
-			System.out.println("+++++++++++++" + packageQualifiedFilePath);
+    	if (searchedFileName==null) {
+    		return false;
+    	}
+		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+		IJavaProject javaProject = JavaCore.create(project);
+		IClasspathEntry[] classpathEntries;
+		try {
+			classpathEntries = javaProject.getResolvedClasspath(true);
+		} catch (JavaModelException e) {
+			ClojuredevPlugin.logError("error getting classpathEntries of javaProject " + javaProject.getPath() 
+					+ " while trying to localize for editor opening : " 
+					+ searchedNS + " " + searchedFileName, e);
+			return false;
+		}
 
-			for (IClasspathEntry cpe: classpathEntries) {
-				switch (cpe.getEntryKind()) {
-				case IClasspathEntry.CPE_LIBRARY:
-					if (onlyExportedEntries && !cpe.isExported())
-						continue;
-					// fall through normal case
-				case IClasspathEntry.CPE_SOURCE:
-					IPackageFragmentRoot[] libPackageFragmentRoots = javaProject.findPackageFragmentRoots(cpe);
-					for (IPackageFragmentRoot pfr: libPackageFragmentRoots) {
-						try {
-							for (IJavaElement javaElement: pfr.getChildren()) {
-								if (!javaElement.getElementName().equals(getNsPackageName(searchedNS)))
-									continue;
-								if (! (javaElement instanceof IPackageFragment))
-									continue;
-								
-								IPackageFragment packageFragment = (IPackageFragment) javaElement;
-								try {
-									for (Object nonJavaResource: packageFragment.getNonJavaResources()) {
-										String nonJavaResourceName = null;
-										if (IFile.class.isInstance(nonJavaResource)) {
-											nonJavaResourceName = ((IFile) nonJavaResource).getName();
-										} else if (IJarEntryResource.class.isInstance(nonJavaResource)) {
-											nonJavaResourceName = ((IJarEntryResource) nonJavaResource).getName();
-										}
-										if (searchedFileName.equals(nonJavaResourceName)) {
-											IEditorPart editor = EditorUtility.openInEditor(nonJavaResource);
-											gotoEditorLine(editor, line);
-											return true;
-										}
+		for (IClasspathEntry cpe: classpathEntries) {
+			switch (cpe.getEntryKind()) {
+			case IClasspathEntry.CPE_LIBRARY:
+				if (onlyExportedEntries && !cpe.isExported())
+					continue;
+				// fall through normal case
+			case IClasspathEntry.CPE_SOURCE:
+				IPackageFragmentRoot[] libPackageFragmentRoots = javaProject.findPackageFragmentRoots(cpe);
+				for (IPackageFragmentRoot pfr: libPackageFragmentRoots) {
+					try {
+						for (IJavaElement javaElement: pfr.getChildren()) {
+							if (!javaElement.getElementName().equals(getNsPackageName(searchedNS)))
+								continue;
+							if (! (javaElement instanceof IPackageFragment))
+								continue;
+							
+							IPackageFragment packageFragment = (IPackageFragment) javaElement;
+							try {
+								for (Object nonJavaResource: packageFragment.getNonJavaResources()) {
+									String nonJavaResourceName = null;
+									if (IFile.class.isInstance(nonJavaResource)) {
+										nonJavaResourceName = ((IFile) nonJavaResource).getName();
+									} else if (IJarEntryResource.class.isInstance(nonJavaResource)) {
+										nonJavaResourceName = ((IJarEntryResource) nonJavaResource).getName();
 									}
-								} catch (JavaModelException e) {
-									ClojuredevPlugin.logError("error with packageFragment " + packageFragment.getPath() 
-											+ " while trying to localize for editor opening : " 
-											+ searchedNS + " " + searchedFileName, e);
+									if (searchedFileName.equals(nonJavaResourceName)) {
+										IEditorPart editor = EditorUtility.openInEditor(nonJavaResource);
+										gotoEditorLine(editor, line);
+										return true;
+									}
 								}
+							} catch (JavaModelException e) {
+								ClojuredevPlugin.logError("error with packageFragment " + packageFragment.getPath() 
+										+ " while trying to localize for editor opening : " 
+										+ searchedNS + " " + searchedFileName, e);
 							}
-						} catch (JavaModelException e) {
-							ClojuredevPlugin.logError("error with packageFragmentRoot " + pfr.getPath() 
-									+ " while trying to localize for editor opening : " 
-									+ searchedNS + " " + searchedFileName, e);
 						}
+					} catch (JavaModelException e) {
+						ClojuredevPlugin.logError("error with packageFragmentRoot " + pfr.getPath() 
+								+ " while trying to localize for editor opening : " 
+								+ searchedNS + " " + searchedFileName, e);
 					}
+				}
 //					if (cpe.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
 //						// Last try : search in attached source folder, if any
 //						IPath sourcePath = cpe. getSourceAttachmentPath();
@@ -315,19 +314,19 @@ public final class ClojureCore {
 //							break;
 //						}
 //					}
-					break;
-				case IClasspathEntry.CPE_PROJECT:
-					System.out.println("classpath entry of kind: CPE_PROJECT");
-					String dependentProjectName = cpe.getPath().lastSegment();
-					System.out.println("searched project:" + dependentProjectName);
-					if (openInEditor(searchedNS, searchedFileName, line, dependentProjectName, true))
-						return true;
-					break;
-				default:
-					break;
-				}
+				break;
+			case IClasspathEntry.CPE_PROJECT:
+				System.out.println("classpath entry of kind: CPE_PROJECT");
+				String dependentProjectName = cpe.getPath().lastSegment();
+				System.out.println("searched project:" + dependentProjectName);
+				if (openInEditor(searchedNS, searchedFileName, line, dependentProjectName, true))
+					return true;
+				break;
+			default:
+				break;
 			}
-			return false;
+		}
+		return false;
 	}
     
     public static String getNsPackageName(String ns) {
