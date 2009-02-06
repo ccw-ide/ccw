@@ -49,15 +49,20 @@
 	  (.flush dos)))
   
 ; currently just [file-name line-number message]
-(defn- serialize-exception [e]
-  (let [stack-traces (.getStackTrace e)
-        first-stack (aget stack-traces 0)
-        file-name (.getFileName first-stack)
-        line-number (.getLineNumber first-stack)
-        message (.getMessage e)]
-    { "file-name" file-name 
-      "line-number" line-number 
-      "message" message }))
+(defn- serialize-exception 
+  ([e] (serialize-exception e []))
+  ([e v]
+    (if-not e
+      v
+		  (let [stack-traces (.getStackTrace e)
+		        first-stack (aget stack-traces 0)
+		        file-name (.getFileName first-stack)
+		        line-number (.getLineNumber first-stack)
+		        message (.getMessage e)]
+		    (recur (.getCause e)
+		           (conj v { "file-name" file-name 
+		                     "line-number" line-number 
+		                     "message" message }))))))
           
 (defn socket-repl 
   "starts a repl thread on the iostreams of supplied socket"

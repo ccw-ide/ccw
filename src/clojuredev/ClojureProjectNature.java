@@ -102,7 +102,9 @@ public class ClojureProjectNature implements IProjectNature {
 		        
 		        System.arraycopy(entriesOld, 0, entriesNew, 0, entriesOld.length);
 
-		        javaProject.getProject().getFolder("classes").create(true, true, null); // TODO if folder exists, abort
+		        if (!javaProject.getProject().getFolder("classes").exists()) {
+		        	javaProject.getProject().getFolder("classes").create(true, true, null);
+		        }
 	        	entriesNew[entriesOld.length] = JavaCore.newLibraryEntry(javaProject.getProject().getFolder("classes").getFullPath(), null, null);
 	        	
 		        if (clojureLib != null) {

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package clojuredev.debug;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbenchPage;
