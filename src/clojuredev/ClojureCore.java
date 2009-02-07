@@ -240,26 +240,29 @@ public final class ClojureCore {
 				IPackageFragmentRoot[] libPackageFragmentRoots = javaProject.findPackageFragmentRoots(cpe);
 				for (IPackageFragmentRoot pfr: libPackageFragmentRoots) {
 					try {
+						if ("".equals(getNsPackageName(searchedNS))) {
+							try {
+								if (tryNonJavaResources(pfr.getNonJavaResources(), searchedFileName, line)) {
+									return true;
+								}
+							} catch (JavaModelException e) {
+								ClojuredevPlugin.logError("error with packageFragment " + pfr.getPath() 
+										+ " while trying to localize for editor opening : " 
+										+ searchedNS + " " + searchedFileName, e);
+							}
+						}
 						for (IJavaElement javaElement: pfr.getChildren()) {
+							System.out.println("'" + javaElement.getElementName() + "' '" + getNsPackageName(searchedNS) + "' ");
 							if (!javaElement.getElementName().equals(getNsPackageName(searchedNS)))
 								continue;
+							System.out.println("ns and java element name match");
 							if (! (javaElement instanceof IPackageFragment))
 								continue;
-							
+							System.out.println("java element is a package fragment");
 							IPackageFragment packageFragment = (IPackageFragment) javaElement;
 							try {
-								for (Object nonJavaResource: packageFragment.getNonJavaResources()) {
-									String nonJavaResourceName = null;
-									if (IFile.class.isInstance(nonJavaResource)) {
-										nonJavaResourceName = ((IFile) nonJavaResource).getName();
-									} else if (IJarEntryResource.class.isInstance(nonJavaResource)) {
-										nonJavaResourceName = ((IJarEntryResource) nonJavaResource).getName();
-									}
-									if (searchedFileName.equals(nonJavaResourceName)) {
-										IEditorPart editor = EditorUtility.openInEditor(nonJavaResource);
-										gotoEditorLine(editor, line);
-										return true;
-									}
+								if (tryNonJavaResources(packageFragment.getNonJavaResources(), searchedFileName, line)) {
+									return true;
 								}
 							} catch (JavaModelException e) {
 								ClojuredevPlugin.logError("error with packageFragment " + packageFragment.getPath() 
@@ -330,9 +333,27 @@ public final class ClojureCore {
 	}
     
     public static String getNsPackageName(String ns) {
-    	return (ns.lastIndexOf(".") < 0) ? "" : ns.substring(0, ns.lastIndexOf("."));
+    	return (ns.lastIndexOf(".") < 0) ? "" : ns.substring(0, ns.lastIndexOf(".")).replace('-', '_');
     }
     
+    private static boolean tryNonJavaResources(Object[] nonJavaResources, String searchedFileName, int line) throws PartInitException {
+		for (Object nonJavaResource: nonJavaResources) {
+			String nonJavaResourceName = null;
+			if (IFile.class.isInstance(nonJavaResource)) {
+				nonJavaResourceName = ((IFile) nonJavaResource).getName();
+			} else if (IJarEntryResource.class.isInstance(nonJavaResource)) {
+				nonJavaResourceName = ((IJarEntryResource) nonJavaResource).getName();
+			}
+			System.out.println("nje'" +searchedFileName+"' '"+nonJavaResourceName+"'");
+			if (searchedFileName.equals(nonJavaResourceName)) {
+				IEditorPart editor = EditorUtility.openInEditor(nonJavaResource);
+				gotoEditorLine(editor, line);
+				return true;
+			}
+		}
+		return false;
+    }
+
 	public static void gotoEditorLine(IEditorPart editor, int line) {
 		if (ITextEditor.class.isInstance(editor)) {
 			ITextEditor textEditor = (ITextEditor) editor;
