@@ -15,6 +15,7 @@ package clojuredev.builder;
 import java.util.ArrayList;
 import java.util.Map;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -23,9 +24,7 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -33,7 +32,6 @@ import org.eclipse.jdt.core.JavaCore;
 
 import clojuredev.ClojuredevPlugin;
 import clojuredev.debug.ClojureClient;
-import clojuredev.editors.antlrbased.CompileLibAction;
 
 /*
  * gaetan.morice:
@@ -44,6 +42,7 @@ import clojuredev.editors.antlrbased.CompileLibAction;
  *  need to be launch several time to resolve all the dependencies. 
  */
 public class ClojureBuilder extends IncrementalProjectBuilder {
+	public static final String CLOJURE_COMPILER_PROBLEM_MARKER_TYPE = "clojuredev.markers.problemmarkers.compilation";
     
     static public final String BUILDER_ID = "clojuredev.builder";
     
@@ -103,50 +102,17 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
             monitor = new NullProgressMonitor();
         }
         
-        final IProject project = getProject();
-        IJavaProject jProject = JavaCore.create(project);
-        
-        ClojureClient clojureClient = ClojuredevPlugin.getDefault().getProjectClojureClient(project);
+        ClojureClient clojureClient = ClojuredevPlugin.getDefault().getProjectClojureClient(getProject());
         if (clojureClient == null) {
         	return;
         }
+        
+        deleteMarkers();
 
-        ArrayList<IFolder> srcFolders = new ArrayList<IFolder>();
+        ArrayList<IFolder> srcFolders = getSrcFolders();
         
-        IClasspathEntry[] entries = jProject.getResolvedClasspath(true);
-        try {
-            for(IClasspathEntry entry : entries){
-                switch (entry.getEntryKind()) {
-                case IClasspathEntry.CPE_SOURCE:
-                    IFolder folder = project.getWorkspace().getRoot().getFolder(entry.getPath());
-                    srcFolders.add(folder);
-                    break;
-                case IClasspathEntry.CPE_LIBRARY:
-                    break;
-                case IClasspathEntry.CPE_PROJECT:
-                	// TODO should compile here ?
-                    break;
-                case IClasspathEntry.CPE_CONTAINER:
-                case IClasspathEntry.CPE_VARIABLE:
-                	// Impossible cases, since entries are resolved
-                default:
-                    break;
-                }
-            }
-        } catch (Exception e1) {
-            throw new CoreException(new Status(IStatus.ERROR, ClojuredevPlugin.PLUGIN_ID, IStatus.OK, "Unable to add to ClassPath", e1));
-        }
-        
-        ClojureVisitor visitor = new ClojureVisitor();
-        for(IFolder srcFolder : srcFolders){
-        	visitor.setSrcFolder(srcFolder);
-            srcFolder.accept(visitor);
-        }
-        
-        String[] clojureLibs = visitor.getClojureLibs();
-        for (String libName: clojureLibs) {
-        	clojureClient.remoteLoad(CompileLibAction.compileLibCommand(libName));
-        }
+        ClojureVisitor visitor = new ClojureVisitor(clojureClient);
+        visitor.visit(srcFolders);
         
         getClassesFolder().refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 0));
     }
@@ -154,16 +120,53 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
     private IFolder getClassesFolder() {
     	return getProject().getFolder("classes");
     }
+
+    private ArrayList<IFolder> getSrcFolders() throws CoreException {
+        ArrayList<IFolder> srcFolders = new ArrayList<IFolder>();
+        
+        final IProject project = getProject();
+        IJavaProject jProject = JavaCore.create(project);
+        IClasspathEntry[] entries = jProject.getResolvedClasspath(true);
+        for(IClasspathEntry entry : entries){
+            switch (entry.getEntryKind()) {
+            case IClasspathEntry.CPE_SOURCE:
+                IFolder folder = project.getWorkspace().getRoot().getFolder(entry.getPath());
+                srcFolders.add(folder);
+                break;
+            case IClasspathEntry.CPE_LIBRARY:
+                break;
+            case IClasspathEntry.CPE_PROJECT:
+            	// TODO should compile here ?
+                break;
+            case IClasspathEntry.CPE_CONTAINER:
+            case IClasspathEntry.CPE_VARIABLE:
+            	// Impossible cases, since entries are resolved
+            default:
+                break;
+            }
+        }
+        return srcFolders;
+    }
     
     @Override
     protected void clean(IProgressMonitor monitor) throws CoreException {
     	if (monitor==null) {
     		monitor = new NullProgressMonitor();
     	}
+    	
     	getClassesFolder().delete(false, monitor);
     	if (!getClassesFolder().exists()) {
     		getClassesFolder().create(true, true, monitor);
     	}
+        getClassesFolder().refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 0));
+
+        deleteMarkers();
+    }
+    
+    private void deleteMarkers() throws CoreException {
+        for (IFolder srcFolder: getSrcFolders()) {
+        	srcFolder.deleteMarkers(CLOJURE_COMPILER_PROBLEM_MARKER_TYPE, true, IFile.DEPTH_INFINITE);
+        }
     }
     
 }

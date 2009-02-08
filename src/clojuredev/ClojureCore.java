@@ -252,13 +252,10 @@ public final class ClojureCore {
 							}
 						}
 						for (IJavaElement javaElement: pfr.getChildren()) {
-							System.out.println("'" + javaElement.getElementName() + "' '" + getNsPackageName(searchedNS) + "' ");
 							if (!javaElement.getElementName().equals(getNsPackageName(searchedNS)))
 								continue;
-							System.out.println("ns and java element name match");
 							if (! (javaElement instanceof IPackageFragment))
 								continue;
-							System.out.println("java element is a package fragment");
 							IPackageFragment packageFragment = (IPackageFragment) javaElement;
 							try {
 								if (tryNonJavaResources(packageFragment.getNonJavaResources(), searchedFileName, line)) {
@@ -319,9 +316,7 @@ public final class ClojureCore {
 //					}
 				break;
 			case IClasspathEntry.CPE_PROJECT:
-				System.out.println("classpath entry of kind: CPE_PROJECT");
 				String dependentProjectName = cpe.getPath().lastSegment();
-				System.out.println("searched project:" + dependentProjectName);
 				if (openInEditor(searchedNS, searchedFileName, line, dependentProjectName, true))
 					return true;
 				break;
@@ -344,7 +339,6 @@ public final class ClojureCore {
 			} else if (IJarEntryResource.class.isInstance(nonJavaResource)) {
 				nonJavaResourceName = ((IJarEntryResource) nonJavaResource).getName();
 			}
-			System.out.println("nje'" +searchedFileName+"' '"+nonJavaResourceName+"'");
 			if (searchedFileName.equals(nonJavaResourceName)) {
 				IEditorPart editor = EditorUtility.openInEditor(nonJavaResource);
 				gotoEditorLine(editor, line);
