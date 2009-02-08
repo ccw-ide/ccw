@@ -13,6 +13,7 @@
 package clojuredev.builder;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
@@ -50,12 +51,17 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
     @Override
     protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
             throws CoreException {
-    	if (getProject()==null || getDelta(getProject()) == null) {
+    	if (getProject()==null) {
     		return null;
     	}
     	
-    	if (onlyClassesFolderRelatedDelta()) {
-    		return null;
+    	if (kind == AUTO_BUILD || kind == INCREMENTAL_BUILD) {
+    		if (getDelta(getProject()) == null) {
+    			return null;
+    		}
+	    	if (onlyClassesFolderRelatedDelta()) {
+	    		return null;
+	    	}
     	}
     	
     	fullBuild(monitor);
@@ -81,6 +87,7 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
     	IPath classesFolderFullPath = getClassesFolder().getFullPath(); 
 
 		for (IResourceDelta d: getDelta(getProject()).getAffectedChildren()) {
+			System.out.println("affected children for build:" + d.getFullPath());
 			if (classesFolderFullPath.isPrefixOf(d.getFullPath())) {
 				continue;
 			} else {
@@ -109,10 +116,8 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
         
         deleteMarkers();
 
-        ArrayList<IFolder> srcFolders = getSrcFolders();
-        
         ClojureVisitor visitor = new ClojureVisitor(clojureClient);
-        visitor.visit(srcFolders);
+        visitor.visit(getSrcFolders());
         
         getClassesFolder().refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 0));
     }
@@ -121,17 +126,20 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
     	return getProject().getFolder("classes");
     }
 
-    private ArrayList<IFolder> getSrcFolders() throws CoreException {
-        ArrayList<IFolder> srcFolders = new ArrayList<IFolder>();
+    private Map<IFolder, IFolder> getSrcFolders() throws CoreException {
+        Map<IFolder, IFolder> srcFolders = new HashMap<IFolder, IFolder>();
         
         final IProject project = getProject();
         IJavaProject jProject = JavaCore.create(project);
         IClasspathEntry[] entries = jProject.getResolvedClasspath(true);
+        IPath defaultOutputFolder = jProject.getOutputLocation();
         for(IClasspathEntry entry : entries){
             switch (entry.getEntryKind()) {
             case IClasspathEntry.CPE_SOURCE:
                 IFolder folder = project.getWorkspace().getRoot().getFolder(entry.getPath());
-                srcFolders.add(folder);
+                IFolder outputFolder = project.getWorkspace().getRoot().getFolder(
+                		(entry.getOutputLocation()==null) ? defaultOutputFolder : entry.getOutputLocation());
+                srcFolders.put(folder, outputFolder);
                 break;
             case IClasspathEntry.CPE_LIBRARY:
                 break;
@@ -164,7 +172,7 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
     }
     
     private void deleteMarkers() throws CoreException {
-        for (IFolder srcFolder: getSrcFolders()) {
+        for (IFolder srcFolder: getSrcFolders().keySet()) {
         	srcFolder.deleteMarkers(CLOJURE_COMPILER_PROBLEM_MARKER_TYPE, true, IFile.DEPTH_INFINITE);
         }
     }

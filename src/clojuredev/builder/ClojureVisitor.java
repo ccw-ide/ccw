@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
@@ -34,7 +35,7 @@ import clojuredev.editors.antlrbased.CompileLibAction;
 
 
 public class ClojureVisitor implements IResourceVisitor {
-	private transient IFolder currentSrcFolder;
+	private transient Map.Entry<IFolder, IFolder> currentSrcFolder;
 	
 	private static final String CLOJURE_EXTENSION = "clj";
 	private final List<IFile> clojureFiles = new ArrayList<IFile>();
@@ -48,11 +49,48 @@ public class ClojureVisitor implements IResourceVisitor {
 	public ClojureVisitor(ClojureClient clojureClient) {
 		this.clojureClient = clojureClient;
 	}
-	public void visit (ArrayList<IFolder> srcFolders) throws CoreException {
-        for(IFolder srcFolder : srcFolders){
-        	setSrcFolder(srcFolder);
-            srcFolder.accept(this);
+	public void visit (Map<IFolder, IFolder> srcFolders) throws CoreException {
+        for(Map.Entry<IFolder, IFolder> srcFolderEntry : srcFolders.entrySet()){
+        	setSrcFolder(srcFolderEntry);
+            srcFolderEntry.getKey().accept(this);
         }
+		if (clojureClient!=null) {
+			for (String maybeLibName: clojureLibs) {
+				System.out.println("compiling:'" + maybeLibName + "'");
+				Map result = (Map) clojureClient.remoteLoadRead(CompileLibAction.compileLibCommand(maybeLibName));
+				System.out.println("compile result:" + result);
+				if (result != null) {
+					//response-type" -1, "response" "[{\"file-name\" \"Compiler.java\", \"line-number\" 4186, \"message\
+					if (Integer.valueOf(-1).equals(result.get("response-type"))) {
+						Collection response = (Collection) result.get("response");
+						if (response != null) {
+							Map errorMap = (Map) response.iterator().next();
+							if (errorMap != null) {
+								String message = (String) errorMap.get("message");
+								if (message != null) {
+									System.out.println("error message:" + message);
+									Matcher matcher = ERROR_MESSAGE_PATTERN.matcher(message);
+									if (matcher.matches()) {
+										System.out.println("match found for message:'" + message + "'");
+										String messageBody = matcher.group(MESSAGE_GROUP);
+										String filename = matcher.group(FILENAME_GROUP);
+										String lineStr = matcher.group(LINE_GROUP);
+										System.out.println("message:" + messageBody);
+										System.out.println("file:" + filename);
+										System.out.println("line:" + lineStr);
+										if (!NO_SOURCE_FILE.equals(filename)) {
+											createMarker(filename, Integer.parseInt(lineStr), messageBody);
+										}
+									} else {
+										System.out.println("no match found for message:'" + message + "'");
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 	
 	//"java.lang.Exception: Unable to resolve symbol: pairs in this context (sudoku_solver.clj:130)"
@@ -67,54 +105,38 @@ public class ClojureVisitor implements IResourceVisitor {
 			IFile file = (IFile) resource;
 			String extension = file.getFileExtension();
 			if(extension != null && extension.equals(CLOJURE_EXTENSION)){
-				clojureFiles.add(file);
-				file.touch(null);
-				IPath maybeLibPath = file.getFullPath().removeFirstSegments(currentSrcFolder.getFullPath().segmentCount()).removeFileExtension();
-				String maybeLibName = maybeLibPath.toString().replace('/', '.');
-				clojureLibs.add(maybeLibName);
-				
-				if (clojureClient!=null) {
-					Map result = (Map) clojureClient.remoteLoadRead(CompileLibAction.compileLibCommand(maybeLibName));
-					System.out.println("compile result:" + result);
-					if (result != null) {
-						//response-type" -1, "response" "[{\"file-name\" \"Compiler.java\", \"line-number\" 4186, \"message\
-						if (Integer.valueOf(-1).equals(result.get("response-type"))) {
-							Collection response = (Collection) result.get("response");
-							if (response != null) {
-								Map errorMap = (Map) response.iterator().next();
-								if (errorMap != null) {
-									String message = (String) errorMap.get("message");
-									if (message != null) {
-										System.out.println("error message:" + message);
-										Matcher matcher = ERROR_MESSAGE_PATTERN.matcher(message);
-										if (matcher.matches()) {
-											System.out.println("match found for message:'" + message + "'");
-											String messageBody = matcher.group(MESSAGE_GROUP);
-											String filename = matcher.group(FILENAME_GROUP);
-											String lineStr = matcher.group(LINE_GROUP);
-											System.out.println("message:" + messageBody);
-											System.out.println("file:" + filename);
-											System.out.println("line:" + lineStr);
-											if (!NO_SOURCE_FILE.equals(filename)) {
-												createMarker(filename, Integer.parseInt(lineStr), messageBody);
-											}
-										} else {
-											System.out.println("no match found for message:'" + message + "'");
-										}
-									}
-								}
-							}
-						}
-					}
+				// Find corresponding filename on classpath, update it
+				IPath classpathRelativePath = file.getFullPath().removeFirstSegments(currentSrcFolder.getKey().getFullPath().segmentCount());
+				IFile fileOnOutputPath = currentSrcFolder.getValue().getFile(classpathRelativePath);
+				clojureFiles.add(fileOnOutputPath);
+				if (!fileOnOutputPath.exists()) {
+					createParentIfNecessary(fileOnOutputPath.getParent());
+				} else {
+					fileOnOutputPath.delete(true, null);
 				}
+				file.copy(fileOnOutputPath.getFullPath(), true, null);
+				
+				// Find corresponding library name
+				IPath maybeLibPath = file.getFullPath().removeFirstSegments(currentSrcFolder.getKey().getFullPath().segmentCount()).removeFileExtension();
+				String maybeLibName = maybeLibPath.toString().replace('/', '.').replace('_', '-');
+				System.out.println("maybelibpath:'" + maybeLibName + "'");
+				clojureLibs.add(maybeLibName);
 			}
 		}
 		return true;
 	}
+	
+	private void createParentIfNecessary(IContainer folder) throws CoreException {
+		if (folder.exists() || folder.getType()==IFolder.PROJECT)
+			return;
+		createParentIfNecessary(folder.getParent());
+		((IFolder) folder).create(true, true, null);
+	}
+	
 	private void createMarker(final String filename, final int line, final String message) {
 		try {
 			System.out.println("(trying to) create a marker for " + filename);
-			currentSrcFolder.accept(new IResourceVisitor() {
+			currentSrcFolder.getKey().accept(new IResourceVisitor() {
 				public boolean visit(IResource resource) throws CoreException {
 					if (resource.getType() == IResource.FILE) {
 						System.out.println("    file found: " + resource.getName());
@@ -147,7 +169,7 @@ public class ClojureVisitor implements IResourceVisitor {
 	/**
 	 * @param srcFolder
 	 */
-	public void setSrcFolder(IFolder srcFolder) {
+	public void setSrcFolder(Map.Entry<IFolder, IFolder> srcFolder) {
 		this.currentSrcFolder = srcFolder;
 	}
 
