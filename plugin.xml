@@ -84,6 +84,9 @@
          <perspective id="org.eclipse.jdt.ui.JavaHierarchyPerspective"/>
          <perspective id="org.eclipse.jdt.ui.JavaBrowsingPerspective"/>
          <perspective id="org.eclipse.debug.ui.DebugPerspective"/>
+         <perspective
+               id="org.eclipse.pde.ui.PDEPerspective">
+         </perspective>
          <contextualLaunch>
             <enablement>
                <with
@@ -97,6 +100,9 @@
                               forcePluginActivation="true"
                               property="org.eclipse.debug.ui.matchesPattern"
                               value="*.clj">
+                        </test>
+                        <test
+                              property="hasClojureNature">
                         </test>
                      </or>
                   </iterate>
@@ -404,5 +410,15 @@
     <super
           type="org.eclipse.core.resources.problemmarker">
     </super>
+ </extension>
+ <extension
+       point="org.eclipse.core.expressions.propertyTesters">
+    <propertyTester
+          class="clojuredev.ClojureNaturePropertyTest"
+          id="clojuredev.propertyTester.clojurenature"
+          namespace="clojuredev"
+          properties="hasClojureNature"
+          type="org.eclipse.core.resources.IProject">
+    </propertyTester>
  </extension>
 </plugin>
