@@ -78,7 +78,7 @@
             class="clojuredev.launching.ClojureLaunchShortcut"
             icon="icons/clojure16x16.png"
             id="clojuredev.launching.clojureShortcut"
-            label="Clojure"
+            label="Clojure REPL"
             modes="run, debug">
          <perspective id="org.eclipse.jdt.ui.JavaPerspective"/>
          <perspective id="org.eclipse.jdt.ui.JavaHierarchyPerspective"/>
@@ -94,6 +94,22 @@
                   <count
                         value="1">
                   </count>
+                  <iterate>
+                     <or>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.eclipse.debug.ui.matchesPattern"
+                              value="*.clj">
+                        </test>
+                        <adapt
+                              type="org.eclipse.core.resources.IProject">
+                           <test
+                                 forcePluginActivation="true"
+                                 property="clojuredev.propertyTester.hasClojureNature">
+                           </test>
+                        </adapt>
+                     </or>
+                  </iterate>
                </with>
             </enablement>
          </contextualLaunch>

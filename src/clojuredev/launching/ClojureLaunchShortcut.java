@@ -18,7 +18,9 @@ import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
@@ -55,15 +57,18 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
             List<IFile> files = new ArrayList<IFile>();
             IProject proj = null;
             for (Object o : strSel.toList()) {
-                if (o instanceof IFile) {
-                    IFile f = (IFile) o;
+                IFile f = (IFile) Platform.getAdapterManager().getAdapter(o, IFile.class);
+                if (f != null) {
                     files.add(f);
                     if (proj == null) {
                         proj = f.getProject();
                     }
+                    continue;
                 }
-                else if (o instanceof IProject && strSel.size() == 1) {
-                    launchProject((IProject) o, new IFile[] {}, mode);
+                IProject p = (IProject) Platform.getAdapterManager().getAdapter(o, IProject.class);
+                if ( p != null  &&  strSel.size() == 1) {
+                    launchProject(p, new IFile[] {}, mode);
+                    return;
                 }
             }
             if (proj != null && !files.isEmpty()) {
@@ -124,9 +129,9 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
             ILaunchConfigurationType type =
                 lm.getLaunchConfigurationType(LaunchUtils.LAUNCH_ID);
             
-            String basename = project.getName();
+            String basename = project.getName() + " REPL";
             if (files.length == 1) {
-                basename += " " + files[0].getName(); 
+                basename += " [" + files[0].getName() + "]"; 
             }
             
             ILaunchConfigurationWorkingCopy wc = type.newInstance(
