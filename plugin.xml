@@ -94,18 +94,6 @@
                   <count
                         value="1">
                   </count>
-                  <iterate>
-                     <or>
-                        <test
-                              forcePluginActivation="true"
-                              property="org.eclipse.debug.ui.matchesPattern"
-                              value="*.clj">
-                        </test>
-                        <test
-                              property="hasClojureNature">
-                        </test>
-                     </or>
-                  </iterate>
                </with>
             </enablement>
          </contextualLaunch>
@@ -415,10 +403,20 @@
        point="org.eclipse.core.expressions.propertyTesters">
     <propertyTester
           class="clojuredev.ClojureNaturePropertyTest"
-          id="clojuredev.propertyTester.clojurenature"
-          namespace="clojuredev"
+          id="clojuredev.propertyTester.hasClojureNature"
+          namespace="clojuredev.propertyTester"
           properties="hasClojureNature"
           type="org.eclipse.core.resources.IProject">
     </propertyTester>
+ </extension>
+ <extension
+       point="org.eclipse.core.runtime.adapters">
+    <factory
+          adaptableType="org.eclipse.core.resources.IProject"
+          class="clojuredev.ProjectLaunchableAdapter">
+       <adapter
+             type="org.eclipse.debug.ui.actions.ILaunchable">
+       </adapter>
+    </factory>
  </extension>
 </plugin>
