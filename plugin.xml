@@ -139,7 +139,7 @@
          point="org.eclipse.ui.editors.documentProviders">
       <provider
             class="clojuredev.editors.rulesbased.ClojureDocumentProvider"
-            extensions="clj"
+            extensions=".clj"
             id="clojuredev.document.provider"
             inputTypes="org.eclipse.ui.part.FileEditorInput">
       </provider>
