@@ -40,6 +40,7 @@ import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 
 import clojuredev.ClojuredevPlugin;
+import clojuredev.editors.rulesbased.ClojureDocumentProvider;
 import clojuredev.editors.rulesbased.ClojurePartitionScanner;
 
 public class AntlrBasedClojureEditor extends TextEditor {
@@ -60,6 +61,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
 	public AntlrBasedClojureEditor() {
 		setSourceViewerConfiguration(new ClojureSourceViewerConfiguration());
         setPreferenceStore(ClojuredevPlugin.getDefault().getPreferenceStore());
+        setDocumentProvider(new ClojureDocumentProvider());
 	}
 	
 	@Override

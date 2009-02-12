@@ -116,14 +116,6 @@
       </shortcut>
    </extension>
    <extension
-         point="org.eclipse.ui.console.consoleFactories">
-      <consoleFactory
-            class="clojuredev.console.ClojureConsoleFactory"
-            icon="icons/clojure16x16.png"
-            label="Clojure REPL">
-      </consoleFactory>
-   </extension>
-   <extension
          point="org.eclipse.ui.editors">
       <editor
             class="clojuredev.editors.antlrbased.AntlrBasedClojureEditor"
@@ -134,15 +126,6 @@
             id="clojuredev.antlrbasededitor"
             name="Clojure Editor">
       </editor>
-   </extension>
-   <extension
-         point="org.eclipse.ui.editors.documentProviders">
-      <provider
-            class="clojuredev.editors.rulesbased.ClojureDocumentProvider"
-            extensions=".clj"
-            id="clojuredev.editors.document.provider"
-            inputTypes="org.eclipse.ui.part.FileEditorInput">
-      </provider>
    </extension>
    <extension
          point="org.eclipse.core.runtime.preferences">
