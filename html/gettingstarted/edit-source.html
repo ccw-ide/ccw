@@ -1,0 +1,123 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <title>Edit Clojure Source Code</title>
+    <link rel="stylesheet" href="../../../PRODUCT_PLUGIN/book.css" type="text/css"> 
+    <script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js"></script>
+</head>
+
+<body>
+<h1><a name="Edit_clojure_source_code" />Edit clojure source code</a></h1>
+<h2><a name="By_creating_a_new_clojure_file" />By creating a new clojure
+file</a></h2>
+<p>Clojure files must be located in normal java source directories. If you
+place files with the .clj extension outside of a java source directory, then
+Eclipse will not see it on the classpath of the project, and you will not be
+able to load it via the REPL, select it as an automatically loaded file in the
+launcher customization wizard ...</p>
+<ul>
+    <li>You can use File &gt; New &gt; New Clojure file to create a clojure
+    file</li>
+</ul>
+<ul>
+    <li>Inside the java source directory, follow the classical clojure
+    conventions to place your file, according to the namespace it belongs to.
+    (e.g. you want to create namespace &#x27;tests.clojure.first , then create
+    java package &quot;tests.clojure&quot;, and create clojure file first.clj in
+    it.</li>
+</ul>
+<h2><a name="By_importing_existing_code" />By importing existing code</a></h2>
+<p>Do as you would in a classic java project. Just remember to place all
+clojure files in a java source directory.</p>
+<h2><a name="What_features_does_the_editor_offer_?" />What features does
+the editor offer?</a></h2>
+<h3><a name="Syntax_higlighting" />Syntax highlighting</a></h3>
+<ul>
+    <li>Rainbow parenthesis (different colors for different nesting levels)
+    </li>
+    <li>Higlights in error closing parens that have no matching opening
+    parens</li>
+</ul>
+<ul>
+    <li>Currently still a bit &#x27;rustic&#x27;. Please be patient :-)</li>
+</ul>
+<h3><a name="Code_completion" />Code completion</a></h3>
+<p>Currently, does what is called &quot;Hippie completion&quot; by eclipse :
+code completion for all available words on all open files.</p>
+<p>Rudimentary, but still useful if you keep opened clojure.core in a second
+editor !</p>
+<p>Much much more to come ... sooner than later, we hope ! :-)</p>
+<h3><a name="Errors_reporting" />Errors reporting</a></h3>
+<ul>
+    <li>In conjunction with auto-compile functionality, compilation
+    problems are reported as problem markers : you see a summary of the problems
+    in the problems view, you see the files that have problems in the package
+    explorer, you see the problems at the correct line in the corresponding
+    editor, you can jump to the editor at the correct line by double clicking on
+    the problem in the problems view.</li>
+</ul>
+<h3><a name="Interaction_with_a_launched_REPL" />Interaction with a
+launched REPL</a></h3>
+<p>We try to follow as much as possible classical &quot;Slime&quot;
+conventions. We will also try to correctly integrate with Eclipse shortcuts
+where slime functionality is semantically equivalent to an existing Eclipse
+functionality.</p>
+
+<table>
+    <tr>
+        <td style="border: 1px solid #aaa; padding: 5px;"><strong>name</strong>
+        </td>
+        <td style="border: 1px solid #aaa; padding: 5px;"><strong>keyboard
+        shortcuts</strong></td>
+        <td style="border: 1px solid #aaa; padding: 5px;"><strong>description</strong>
+        </td>
+    </tr>
+    <tr>
+        <td style="border: 1px solid #aaa; padding: 5px;">
+        beginning-of-defn</td>
+        <td style="border: 1px solid #aaa; padding: 5px;">C-M-a <strong>or</strong>
+        C-S-A</td>
+        <td style="border: 1px solid #aaa; padding: 5px;">Move to beginning
+        of current or preceding top-level s-expression (so really not just
+        defns)</td>
+    </tr>
+    <tr>
+        <td style="border: 1px solid #aaa; padding: 5px;">end-of-defn</td>
+        <td style="border: 1px solid #aaa; padding: 5px;">C-M-e <strong>or</strong>
+        C-S-E</td>
+        <td style="border: 1px solid #aaa; padding: 5px;">Move to end of
+        current or preceding top-level s-expression (so really not just defns)</td>
+    </tr>
+    <tr>
+        <td style="border: 1px solid #aaa; padding: 5px;">mark-defn</td>
+        <td style="border: 1px solid #aaa; padding: 5px;">C-M-h</td>
+        <td style="border: 1px solid #aaa; padding: 5px;">Select current or
+        following top-level s-expression</td>
+    </tr>
+    <tr>
+        <td style="border: 1px solid #aaa; padding: 5px;">eval-defn +
+        eval-region</td>
+        <td style="border: 1px solid #aaa; padding: 5px;">C-M-x</td>
+        <td style="border: 1px solid #aaa; padding: 5px;">If a non empty
+        text is selected, evaluate it, or, if no text is selected, evaluate the
+        top-level s-expression</td>
+    </tr>
+    <tr>
+        <td style="border: 1px solid #aaa; padding: 5px;">load file</td>
+        <td style="border: 1px solid #aaa; padding: 5px;">C-M-l</td>
+        <td style="border: 1px solid #aaa; padding: 5px;">Loads the saved
+        version of the currently edited file (via load-file)</td>
+    </tr>
+</table>
+
+<p>Remarks:</p>
+<ul>
+    <li>The Windows keys combination Ctrl+Alt can also be replaced by the
+    single AltGr key)</li>
+    <li>C stands for Ctrl key, M stands for Meta key (Alt key on Windows),
+    S stands for Shift</li>
+</ul>
+
+</body>
+</html>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?NLS TYPE="org.eclipse.help.toc"?>
+
+<toc label="Getting Started" link_to="toc.xml#gettingstarted"> 
+        <topic label="Enable clojure-dev clojure&apos;s support"  href="html/gettingstarted/enable-clojure-dev.html"> 
+        </topic>
+        <topic href="html/gettingstarted/play-with-repl.html" label="Play with a REPL">
+        </topic>
+        <topic href="html/gettingstarted/edit-source.html" label="Edit Clojure Source Code">
+        </topic>
+        <topic href="html/gettingstarted/auto-build.html" label="Auto-build Feature">
+        </topic> 
+</toc>

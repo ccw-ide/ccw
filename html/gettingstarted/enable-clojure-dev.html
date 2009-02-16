@@ -1,0 +1,68 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <title>Enable clojure-dev clojure's support</title>
+    <link rel="stylesheet" href="../../../PRODUCT_PLUGIN/book.css" type="text/css"> 
+    <script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js"></script>
+</head>
+
+<body>
+<h1>Enable clojure-dev clojure's support</h1>
+<h2>On a new project</h2>
+
+<ul>
+    <li>Enable the java perspective via menu Window &gt; Open Perspective
+    &gt; Other &gt; Java</li>
+    <li>Menu File &gt;New &gt;New Clojure Project</li>
+    <li>Enter a project name</li>
+    <li>Click finish ... that's it!</li>
+</ul>
+
+<h2>On an existing java project</h2>
+
+<ul>
+    <li>Display the context menu of the java project node in the project
+    explorer</li>
+    <li>Select action "Enable/disable clojure language support"</li>
+    <li>You should have a popup feedback on the correct enabling/disabling
+    of clojure for this project</li>
+</ul>
+
+<h2>What does it do</h2>
+
+<p>A clojure project is just a java project, with an added builder for
+clojure code.</p>
+
+<p>By default, creating/enabling a clojure project will also check if you
+have clojure in your classpath, and if not, will add a dependency on clojure-dev
+plugin's own embedded clojure version.</p>
+
+<h2>What can I customize?</h2>
+
+<p>Everything you want as if you were in a classical java project. But you
+must of course always have clojure as a dependency of your project, but it can
+come in as many flavors as eclipse allows:</p>
+
+<ul>
+    <li>clojure source code directly embedded in your project (not
+    recommended)</li>
+    <li>as another project in your eclipse. You then make the clojure
+    project a dependency of you own project (recommanded if you want to keep in
+    sync)
+    <ul>
+        <li>how to?
+        <ul>
+            <li>First create a classic java project for the source code of
+            clojure. You will have to change the default java source folder: you
+            must have 2 of them, one will be src/jvm, the other will be src/clj</li>
+            <li>In a second project where you enabled clojure's support, do
+            Project &gt; Properties &gt; Java build path &gt; Projects &gt; Add
+            and add clojure's project</li>
+        </ul>
+    </ul>
+    <li>as a jarred library. use the classical java mechanism offered by
+    eclipse to add this jar to you project ( Project &gt; Properties &gt; Java
+    build path &gt; Libraries ...</li>
+</body>
+</html>

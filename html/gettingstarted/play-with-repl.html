@@ -1,0 +1,48 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <title>Play with a REPL</title>
+    <link rel="stylesheet" href="../../../PRODUCT_PLUGIN/book.css" type="text/css"> 
+        <script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js"></script>
+</head>
+<body>
+<h1><a name="Play_with_a_REPL" />Play with a REPL</h1>
+<h2><a name="Launch_the_REPL" />Launch the REPL</h2>
+<ul>
+    <li>Select your project&#x27;s node</li>
+    <li>in the contextual menu : Run as ... &gt; Run configurations &gt;
+    Clojure &gt; New (in Clojure node&#x27;s contextual menu)</li>
+    <li>Clic run</li>
+</ul>
+<p>A console should open, with clojure&#x27;s prompt waiting for you ...</p>
+<h2><a name="Use_the_namespace_browser" />Use the namespace browser</h2>
+<p>The namespace browser will show you all symbols of all namespaces of the
+REPL you have launched, and allow you to jump to the source code defining them,
+if available (double clic on the symbol).</p>
+<p>It also allows you to search the symbol you want by typing regexps in the
+&quot;Find :&quot; text zone, and choosing to do the search only on symbols
+names, or also on symbols documentation.</p>
+<p>If you let the mouse hover a node in the browser, you will have the
+documentation, if available.</p>
+<ul>
+    <li>To see the namespace browser, you must</li>
+    <ul>
+        <li>either select it via menu Window &gt; Show View &gt; Other &gt;
+        Clojuredev Views &gt; Namespace Browser</li>
+        <li>either open the java perspective. The namespace browser should
+        be located behind the outline view by default (if you are in the java
+        perspective and don&#x27;t see the namespace browser, you may reset the
+        java perspective to its default value via menu Window &gt; Reset
+        Perspective ...., or find it manually via menu Window &gt; Show View
+        &gt; Namespace Browser</li>
+    </ul>
+</ul>
+<h2><a name="How_does_it_work_?" />How does it work ?</h2>
+<p>When you have launched the REPL, clojure-dev has embedded &quot;server
+code&quot; in the launched clojure environment. This server code is contacted by
+clojure-dev to give information on the running clojure environment. The
+namespace browser uses this server to provide you with the most possible up to
+date info on the symbols.</p>
+</body>
+</html>

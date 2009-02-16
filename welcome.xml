@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<welcomePage 
+        title="Eclipse plugin supporting the Clojure languager">
+        <intro>Introduction to Clojuredev</intro>
+        
+        <!-- TODO
+        <item>Item 1</item>
+        <item>Item 2</item>
+        -->
+
+</welcomePage>
