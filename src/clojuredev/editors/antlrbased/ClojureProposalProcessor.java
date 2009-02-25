@@ -34,11 +34,18 @@ import clojuredev.lexers.ClojureParser;
 import clojuredev.outline.NamespaceBrowser;
 
 public class ClojureProposalProcessor implements IContentAssistProcessor {
+	private static final String ERROR_MESSAGE_NO_REPL_FOUND = "Impossible to connect to running REPL.";
+	private static final String ERROR_MESSAGE_INTERNAL_ERROR = "Internal clojure-dev plugin error. Please file an issue in the tracker system";
+	private static final String ERROR_MESSAGE_COMMUNICATION_ERROR = "Communication problem with the REPL. Would you consider kill it and launch a fresh one?";
+	private static final String ERROR_MESSAGE_NULL_PREFIX = "Incorrect prefix found. Probably an error with clojure-dev plugin. Please file an issue in the tracker system";
+	private static final String ERROR_MESSAGE_NO_NAMESPACE_FOUND = "clojure-dev was not available to guess the namespace this file is attached to. Please report a request for enhancement in the tracker system";
 	private final AntlrBasedClojureEditor editor;
 	
 	public ClojureProposalProcessor(AntlrBasedClojureEditor editor) {
 		this.editor = editor;
 	}
+	
+	private String errorMessage;
 
 	private List<String> parse(String text) {
 		ClojureLexer lex = new ClojureLexer(new ANTLRStringStream(text));
@@ -78,22 +85,37 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 				String s = (String) l.get(0);
 				if (s.startsWith(prefix)) {
 					String displayString = s;
-					String additionalString = "";
+					StringBuilder additionalString = new StringBuilder();
 					if (l.get(2) != null) {
 						String ns = (String) (((Map) l.get(2)).get(NamespaceBrowser.KEYWORD_NS));
 						if (ns != null && !ns.trim().equals(""))
 							displayString += " - " + ns;
 
 						String args = (String) (((Map) l.get(2)).get(NamespaceBrowser.KEYWORD_ARGLISTS));
-						if (args != null && !args.trim().equals(""))
-							additionalString += "<p><b>Arguments List(s)</b><br/>" + args.replace((CharSequence) "\n", (CharSequence) "<br/>") + "</p><br/>";
+						if (args != null && !args.trim().equals("")) {
+							additionalString.append("<p><b>Arguments List(s)</b><br/>");
+							
+							String[] argsLines = args.split("\n");
+							boolean firstLine = true;
+							for (String line: argsLines) {
+								if (line.startsWith("("))
+									line = line.substring(1);
+								if (line.endsWith(")"))
+									line = line.substring(0, line.length() - 1);
+								if (firstLine)
+									firstLine = false;
+								else
+									additionalString.append("<br/>");
+								additionalString.append(line);
+							}
+							additionalString.append("</p><br/>");
+						}
 						
 						String docString = (String) (((Map) l.get(2)).get(NamespaceBrowser.KEYWORD_DOC));
 						if (docString != null && !docString.trim().equals(""))
-							additionalString += "<p><b>Doc</b><br/>" + docString + "</p>";
+							additionalString.append("<p><b>Documentation</b><br/>").append(docString).append("</p>");
 					}
-					//replace((CharSequence) "\n", (CharSequence) "<br/>");
-					CompletionProposal cp = new CompletionProposal(s, wordStart, prefix.length(), s.length(), null, displayString, null, additionalString);
+					CompletionProposal cp = new CompletionProposal(s, wordStart, prefix.length(), s.length(), null, displayString, null, additionalString.toString());
 					
 					proposals.add(cp);
 				}
@@ -115,24 +137,37 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 		return false;
 	}
 	private List<List> dynamicComplete(String namespace, String prefix) {
-		if (namespace == null || prefix == null)
+		if (namespace == null) {
+			errorMessage = ERROR_MESSAGE_NO_NAMESPACE_FOUND;
 			return Collections.emptyList();
+		}
+		if (prefix == null) {
+			errorMessage = ERROR_MESSAGE_NULL_PREFIX;
+			return Collections.emptyList();
+		}
 		
 		ClojureClient clojureClient = editor.getCorrespondingClojureClient();
-		if (clojureClient == null)
+		if (clojureClient == null) {
+			errorMessage = ERROR_MESSAGE_NO_REPL_FOUND;
 			return Collections.emptyList();
+		}
 		
 		Map result = (Map) clojureClient.remoteLoadRead("(clojuredev.debug.serverrepl/code-complete \"" + namespace + "\" \"" + prefix + "\")");
-		if (result == null)
+		if (result == null) {
+			errorMessage = null;
 			return Collections.emptyList();
+		}
 		
 		if (result.get("response-type").equals(0)) {
 			if (result.get("response") == null) {
+				errorMessage = ERROR_MESSAGE_INTERNAL_ERROR;
 				return Collections.emptyList();
 			} else {
+				errorMessage = null;
 				return (List<List>) result.get("response");
 			}
 		} else {
+			errorMessage = ERROR_MESSAGE_COMMUNICATION_ERROR;
 			return Collections.emptyList();
 		}
 	}
@@ -169,8 +204,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 	}
 
 	public String getErrorMessage() {
-		// TODO Auto-generated method stub
-		return null;
+		return errorMessage;
 	}
 
 }

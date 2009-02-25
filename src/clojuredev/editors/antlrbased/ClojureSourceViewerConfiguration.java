@@ -30,6 +30,7 @@ import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
 import org.eclipse.jface.text.rules.ITokenScanner;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
 
@@ -94,7 +95,9 @@ public class ClojureSourceViewerConfiguration extends TextSourceViewerConfigurat
 	    assistant.setContentAssistProcessor(new ClojureProposalProcessor(editor), ClojurePartitionScanner.CLOJURE_STRING);
 
 	    assistant.enableAutoActivation(true);
-	    assistant.setEmptyMessage("No completions available.");
+	    assistant.setShowEmptyList(true);
+	    assistant.setEmptyMessage("No completions available. You may want to start a REPL for the project holding this file to activate the code completion feature.");
+
 	    assistant.enableAutoInsert(true);
 	    assistant.setAutoActivationDelay(500);
 //	    assistant.setProposalPopupOrientation(IContentAssistant.CONTEXT_INFO_BELOW);
@@ -102,10 +105,12 @@ public class ClojureSourceViewerConfiguration extends TextSourceViewerConfigurat
 //	    assistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_BELOW);
 	    assistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_ABOVE);
 	    assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
-		assistant.setContextInformationPopupBackground(sourceViewer.getTextWidget().getDisplay().getSystemColor(SWT.COLOR_WHITE));
-		assistant.setContextInformationPopupForeground(sourceViewer.getTextWidget().getDisplay().getSystemColor(SWT.COLOR_BLACK));
-		assistant.setContextSelectorBackground(sourceViewer.getTextWidget().getDisplay().getSystemColor(SWT.COLOR_WHITE));
-		assistant.setContextSelectorForeground(sourceViewer.getTextWidget().getDisplay().getSystemColor(SWT.COLOR_BLACK));
+	    
+	    Display display = sourceViewer.getTextWidget().getDisplay();
+		assistant.setContextInformationPopupBackground(display.getSystemColor(SWT.COLOR_DARK_BLUE));
+		assistant.setContextInformationPopupForeground(display.getSystemColor(SWT.COLOR_WHITE));
+		assistant.setContextSelectorBackground(display.getSystemColor(SWT.COLOR_DARK_BLUE));
+		assistant.setContextSelectorForeground(display.getSystemColor(SWT.COLOR_WHITE));
 
 	    return assistant;
 
@@ -115,8 +120,9 @@ public class ClojureSourceViewerConfiguration extends TextSourceViewerConfigurat
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
 				DefaultInformationControl ret = new DefaultInformationControl(parent, new HTMLTextPresenter());
-				ret.setBackgroundColor(parent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
-				ret.setForegroundColor(parent.getDisplay().getSystemColor(SWT.COLOR_BLACK));
+			    Display display = parent.getDisplay();
+				ret.setBackgroundColor(display.getSystemColor(SWT.COLOR_DARK_BLUE));
+				ret.setForegroundColor(display.getSystemColor(SWT.COLOR_WHITE));
 				return ret;
 			}
 		};
