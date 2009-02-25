@@ -73,10 +73,10 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 	private static final Keyword KEYWORD_NAME = Keyword.intern(null, "name");
 	private static final Keyword KEYWORD_CHILDREN = Keyword.intern(null, "children");
 	private static final Keyword KEYWORD_TYPE = Keyword.intern(null, "type");
-	private static final Keyword KEYWORD_PRIVATE = Keyword.intern(null, "private");
-	private static final Keyword KEYWORD_DOC = Keyword.intern(null, "doc");
-	private static final Keyword KEYWORD_ARGLISTS = Keyword.intern(null, "arglists");
-	private static final Keyword KEYWORD_NS = Keyword.intern(null, "ns");
+	public static final Keyword KEYWORD_PRIVATE = Keyword.intern(null, "private");
+	public static final Keyword KEYWORD_DOC = Keyword.intern(null, "doc");
+	public static final Keyword KEYWORD_ARGLISTS = Keyword.intern(null, "arglists");
+	public static final Keyword KEYWORD_NS = Keyword.intern(null, "ns");
 	private static final Keyword KEYWORD_FILE = Keyword.intern(null, "file");
 	private static final Keyword KEYWORD_LINE = Keyword.intern(null, "line");
 

@@ -32,16 +32,17 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
-import org.eclipse.ui.texteditor.HippieProposalProcessor;
 
 import clojuredev.editors.rulesbased.ClojurePartitionScanner;
 
 
 public class ClojureSourceViewerConfiguration extends TextSourceViewerConfiguration {
 	private final ITokenScanner tokenScanner;
+	private final AntlrBasedClojureEditor editor;
 
-	public ClojureSourceViewerConfiguration() {
+	public ClojureSourceViewerConfiguration(AntlrBasedClojureEditor editor) {
 		tokenScanner = new ClojureTokenScannerFactory().create(JavaUI.getColorManager());
+		this.editor = editor;
 	}
 	
 	@Override
@@ -88,9 +89,9 @@ public class ClojureSourceViewerConfiguration extends TextSourceViewerConfigurat
 	    ContentAssistant assistant = new ContentAssistant();
 
 	    assistant.setDocumentPartitioning(ClojurePartitionScanner.CLOJURE_PARTITIONING);
-	    assistant.setContentAssistProcessor(new TestProposalProcessor(), IDocument.DEFAULT_CONTENT_TYPE);
-	    assistant.setContentAssistProcessor(new HippieProposalProcessor(), ClojurePartitionScanner.CLOJURE_COMMENT);
-	    assistant.setContentAssistProcessor(new HippieProposalProcessor(), ClojurePartitionScanner.CLOJURE_STRING);
+	    assistant.setContentAssistProcessor(new ClojureProposalProcessor(editor), IDocument.DEFAULT_CONTENT_TYPE);
+	    assistant.setContentAssistProcessor(new ClojureProposalProcessor(editor), ClojurePartitionScanner.CLOJURE_COMMENT);
+	    assistant.setContentAssistProcessor(new ClojureProposalProcessor(editor), ClojurePartitionScanner.CLOJURE_STRING);
 
 	    assistant.enableAutoActivation(true);
 	    assistant.setEmptyMessage("No completions available.");

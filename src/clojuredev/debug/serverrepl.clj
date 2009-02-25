@@ -21,10 +21,13 @@
   "creates and returns a server socket on port, will pass the client
    socket to accept-socket on connection" 
   [accept-socket port]
+  (println "create-server begin")
   (on-thread 
     #(loop []
+      (println "create-server: main loop begin")
 			(let [ss (new java.net.ServerSocket port)]
 			  (loop []
+			    (println "create-server: serving loop begin")
 			    (when-not (.isClosed ss)
 			      (try 
 			        (let [s (.accept ss)]
@@ -38,22 +41,31 @@
 			      (catch Exception e (println "create-server: unexpected exception " (.getMessage e))))
 			      (recur)))
 			  (recur))))
+    (println "create-server end")
 	nil)
           
 (defn- push-answer [type answer-sexpr dos]
+  (println "push-answer: begin")
 	(let [answer (pr-str answer-sexpr)
 	      answer-bytes (.getBytes answer "UTF-8")]
+	  (println "push-answer begin: must write\"" answer "\"")
 	  (.writeInt dos type) ; 0 = OK, -1 = KO (exception)
+	  (println "push-answer: type written - " type)
 	  (.writeInt dos (alength answer-bytes))
+	  (println "push-answer: length written - " (alength answer-bytes))
 	  (.write dos answer-bytes 0 (alength answer-bytes))
-	  (.flush dos)))
+	  (println "push-answer: answer written - \" " (pr-str answer-sexpr))
+	  (.flush dos)
+	  (println "push-answer: output flushed"))
+	(println "push-answer: end"))
   
 ; currently just [file-name line-number message]
 (defn- serialize-exception 
   ([e] (serialize-exception e []))
   ([e v]
+    (println "serialize-exception: begin")
     (if-not e
-      v
+      (do (println "serialize-exception: end") v)
 		  (let [stack-traces (.getStackTrace e)
 		        first-stack (aget stack-traces 0)
 		        file-name (.getFileName first-stack)
@@ -67,15 +79,26 @@
 (defn socket-repl 
   "starts a repl thread on the iostreams of supplied socket"
   [s]
+    (println "socket-repl: begin") 
     (with-open [dis (new java.io.DataInputStream 
                          (new java.io.BufferedInputStream (.getInputStream s)))]
+      (println "socket-repl: created dis")
       (with-open [dos (new java.io.DataOutputStream (.getOutputStream s))]
-        (let [question-bytes-length (.readInt dis)
-              question-bytes (make-array Byte/TYPE question-bytes-length)]
+        (println "socket-repl: created dos")
+        (let [question-bytes-length (do (println "waiting for question length") (.readInt dis))
+              question-bytes (do (println "question length: " question-bytes-length ". waiting for question text") (make-array Byte/TYPE question-bytes-length))]
+          (println "socket-repl: question-bytes read: " question-bytes)
           (.readFully dis question-bytes 0 question-bytes-length) 
+          (println "socket-repl: question-bytes read by readFully")
           (try
+            (println "socket-repl: before push-answer - '" (new String question-bytes "UTF-8") "'")
+            (println "before load-string")
+            (load-string (new String question-bytes "UTF-8"))
+            (println "after load-string")
             (push-answer 0 (load-string (new String question-bytes "UTF-8")) dos)
-            (catch Exception e (push-answer -1 (serialize-exception e) dos)))))))
+            (println "push-answer successfully called")
+            (catch Exception e (println "exception catched in socket repl") (.printStackTrace e) (push-answer -1 (serialize-exception e) dos))))))
+    (println "socket-repl: end"))
           
 (create-server socket-repl 
               (Integer/valueOf (System/getProperty "clojure.remote.server.port" "8503")))
@@ -100,6 +123,9 @@
 (defn namespaces-info []
   { :name "namespaces" :type "namespaces"
     :children (apply vector (map ns-info (all-ns))) })
-   
+
+(defn code-complete [ns-str prefix]
+  (when-let [ns (find-ns (symbol ns-str))]
+    (into [] (map (fn [[k v]] [k (str v) (if (var? v) (var-info v) nil)]) (filter #(.startsWith (first %) prefix) (map #(vector (str (key %)) (val %)) (ns-map ns)))))))
    
 ;(remove-ns 'clojuredev.debug.serverrepl)   

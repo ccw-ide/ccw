@@ -13,6 +13,7 @@ package clojuredev.editors.antlrbased;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
@@ -27,14 +28,16 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 import org.eclipse.swt.graphics.Image;
 
+import clojuredev.debug.ClojureClient;
 import clojuredev.lexers.ClojureLexer;
 import clojuredev.lexers.ClojureParser;
+import clojuredev.outline.NamespaceBrowser;
 
-public class TestProposalProcessor implements IContentAssistProcessor {
-	ClojureParser parser;
+public class ClojureProposalProcessor implements IContentAssistProcessor {
+	private final AntlrBasedClojureEditor editor;
 	
-	public TestProposalProcessor() {
-		this.parser = parser;
+	public ClojureProposalProcessor(AntlrBasedClojureEditor editor) {
+		this.editor = editor;
 	}
 
 	private List<String> parse(String text) {
@@ -42,7 +45,7 @@ public class TestProposalProcessor implements IContentAssistProcessor {
        	CommonTokenStream tokens = new CommonTokenStream(lex);
 
        	ClojureParser parser = new ClojureParser(tokens);
-		
+
         try {
         	System.out.println("begin parse");
             parser.file();
@@ -59,26 +62,78 @@ public class TestProposalProcessor implements IContentAssistProcessor {
 		int wordStart = offset - 1;
 		IDocument doc = viewer.getDocument();
 		try {
-			
-			List<String> symbols = parse(doc.get());
-			
-			while (doc.getChar(wordStart) != ' ') {
+			while (!invalidSymbolCharacter(doc.getChar(wordStart))) {
 				wordStart--;
 				if (wordStart < 0) break;
 			}
 			wordStart++;
 			if (wordStart < 0) return null;
-			String wordPrefix = doc.get(wordStart, offset - wordStart);
-			System.out.println("found wordPrefix:'" + wordPrefix + "'");
+			String prefix = doc.get(wordStart, offset - wordStart);
+			System.out.println("found wordPrefix:'" + prefix + "'");
+			
+			List<List> dynamicSymbols = dynamicComplete(editor.getDeclaringNamespace(), prefix); //parse(doc.get());
+			
 			List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
-			for (String s: symbols) {
-				if (s.startsWith(wordPrefix))
-					proposals.add(new CompletionProposal(s, wordStart, wordPrefix.length(), wordPrefix.length()));
+			for (List l: dynamicSymbols) {
+				String s = (String) l.get(0);
+				if (s.startsWith(prefix)) {
+					String displayString = s;
+					String additionalString = "";
+					if (l.get(2) != null) {
+						String ns = (String) (((Map) l.get(2)).get(NamespaceBrowser.KEYWORD_NS));
+						if (ns != null && !ns.trim().equals(""))
+							displayString += " - " + ns;
+
+						String args = (String) (((Map) l.get(2)).get(NamespaceBrowser.KEYWORD_ARGLISTS));
+						if (args != null && !args.trim().equals(""))
+							additionalString += "<p><b>Arguments List(s)</b><br/>" + args.replace((CharSequence) "\n", (CharSequence) "<br/>") + "</p><br/>";
+						
+						String docString = (String) (((Map) l.get(2)).get(NamespaceBrowser.KEYWORD_DOC));
+						if (docString != null && !docString.trim().equals(""))
+							additionalString += "<p><b>Doc</b><br/>" + docString + "</p>";
+					}
+					//replace((CharSequence) "\n", (CharSequence) "<br/>");
+					CompletionProposal cp = new CompletionProposal(s, wordStart, prefix.length(), s.length(), null, displayString, null, additionalString);
+					
+					proposals.add(cp);
+				}
 			}
 			return proposals.toArray(new ICompletionProposal[proposals.size()]);
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 			return null;
+		}
+	}
+	private boolean invalidSymbolCharacter(char c) {
+		if (Character.isWhitespace(c))
+			return true;
+		char[] invalidChars = {'(', ')', '[', ']', '{', '}', '\'', '@', '~', '^', '`', '#', '"'};
+		for (int i = 0; i < invalidChars.length; i++) {
+			if (invalidChars[i] == c)
+				return true;
+		}
+		return false;
+	}
+	private List<List> dynamicComplete(String namespace, String prefix) {
+		if (namespace == null || prefix == null)
+			return Collections.emptyList();
+		
+		ClojureClient clojureClient = editor.getCorrespondingClojureClient();
+		if (clojureClient == null)
+			return Collections.emptyList();
+		
+		Map result = (Map) clojureClient.remoteLoadRead("(clojuredev.debug.serverrepl/code-complete \"" + namespace + "\" \"" + prefix + "\")");
+		if (result == null)
+			return Collections.emptyList();
+		
+		if (result.get("response-type").equals(0)) {
+			if (result.get("response") == null) {
+				return Collections.emptyList();
+			} else {
+				return (List<List>) result.get("response");
+			}
+		} else {
+			return Collections.emptyList();
 		}
 	}
 

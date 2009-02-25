@@ -82,6 +82,9 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
     }
     
     private boolean onlyClassesFolderRelatedDelta() {
+    	if (getDelta(getProject())==null) {
+    		return false;
+    	}
     	
     	IPath classesFolderFullPath = getClassesFolder().getFullPath(); 
 

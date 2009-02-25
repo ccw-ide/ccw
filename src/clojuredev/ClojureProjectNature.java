@@ -94,7 +94,7 @@ public class ClojureProjectNature implements IProjectNature {
             if (clojureContribLib != null) {
             	numOfEntriesToAdd++;
             }
-            // TODO more to signal an error in those cases ? (and further simplify the following code)
+            // TODO better to signal an error in those cases ? (and further simplify the following code)
             
             if (numOfEntriesToAdd > 0) {
 		        IClasspathEntry[] entriesOld = javaProject.getRawClasspath();

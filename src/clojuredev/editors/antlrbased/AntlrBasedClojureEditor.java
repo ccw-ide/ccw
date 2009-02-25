@@ -13,6 +13,7 @@ package clojuredev.editors.antlrbased;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.text.BadLocationException;
@@ -40,6 +41,7 @@ import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 
 import clojuredev.ClojuredevPlugin;
+import clojuredev.debug.ClojureClient;
 import clojuredev.editors.rulesbased.ClojureDocumentProvider;
 import clojuredev.editors.rulesbased.ClojurePartitionScanner;
 
@@ -59,7 +61,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
 	private ProjectionSupport fProjectionSupport;
 
 	public AntlrBasedClojureEditor() {
-		setSourceViewerConfiguration(new ClojureSourceViewerConfiguration());
+		setSourceViewerConfiguration(new ClojureSourceViewerConfiguration(this));
         setPreferenceStore(ClojuredevPlugin.getDefault().getPreferenceStore());
         setDocumentProvider(new ClojureDocumentProvider());
 	}
@@ -546,5 +548,13 @@ public class AntlrBasedClojureEditor extends TextEditor {
 			// A bug can explain to be here, nothing else
 			return null;
 		}
+	}
+	
+	public ClojureClient getCorrespondingClojureClient() {
+		IFile file = (IFile) getEditorInput().getAdapter(IFile.class);
+		if (file != null)
+			return ClojuredevPlugin.getDefault().getProjectClojureClient(file.getProject());
+		else 
+			return null;
 	}
 }
