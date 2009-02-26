@@ -2,6 +2,6 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Clojuredev Plugin
 Bundle-SymbolicName: clojuredev.branding; singleton:=true
-Bundle-Version: 0.0.26
+Bundle-Version: 0.0.27
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: clojure-dev team
