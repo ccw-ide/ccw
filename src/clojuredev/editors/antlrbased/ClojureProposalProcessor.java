@@ -78,12 +78,25 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 			String prefix = doc.get(wordStart, offset - wordStart);
 			System.out.println("found wordPrefix:'" + prefix + "'");
 			
-			List<List> dynamicSymbols = dynamicComplete(editor.getDeclaringNamespace(), prefix); //parse(doc.get());
+			String nsPart;
+			String symbolPrefix;
+			boolean fullyQualified = false;
+			if (prefix.indexOf('/') > 0) {
+			    String[] parts = prefix.split("/", 2);
+			    nsPart = parts[0];
+			    symbolPrefix = parts[1];
+			    fullyQualified = true;
+			} else {
+			    nsPart = editor.getDeclaringNamespace();
+			    symbolPrefix = prefix;
+			}
+			
+			List<List> dynamicSymbols = dynamicComplete(nsPart, symbolPrefix, fullyQualified); //parse(doc.get());
 			
 			List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
 			for (List l: dynamicSymbols) {
 				String s = (String) l.get(0);
-				if (s.startsWith(prefix)) {
+				if (s.startsWith(symbolPrefix)) {
 					String displayString = s;
 					StringBuilder additionalString = new StringBuilder();
 					if (l.get(2) != null) {
@@ -115,6 +128,9 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 						if (docString != null && !docString.trim().equals(""))
 							additionalString.append("<p><b>Documentation</b><br/>").append(docString).append("</p>");
 					}
+					if (fullyQualified) {
+					    s = nsPart + '/' + s;
+					}
 					CompletionProposal cp = new CompletionProposal(s, wordStart, prefix.length(), s.length(), null, displayString, null, additionalString.toString());
 					
 					proposals.add(cp);
@@ -136,7 +152,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 		}
 		return false;
 	}
-	private List<List> dynamicComplete(String namespace, String prefix) {
+	private List<List> dynamicComplete(String namespace, String prefix, boolean findOnlyPublic) {
 		if (namespace == null) {
 			errorMessage = ERROR_MESSAGE_NO_NAMESPACE_FOUND;
 			return Collections.emptyList();
@@ -152,7 +168,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 			return Collections.emptyList();
 		}
 		
-		Map result = (Map) clojureClient.remoteLoadRead("(clojuredev.debug.serverrepl/code-complete \"" + namespace + "\" \"" + prefix + "\")");
+		Map result = (Map) clojureClient.remoteLoadRead("(clojuredev.debug.serverrepl/code-complete \"" + namespace + "\" \"" + prefix + "\" " + (findOnlyPublic ? "true" : "false") + ")");
 		if (result == null) {
 			errorMessage = null;
 			return Collections.emptyList();

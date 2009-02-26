@@ -29,8 +29,6 @@ import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
 import org.eclipse.jface.text.rules.ITokenScanner;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
 
@@ -106,12 +104,6 @@ public class ClojureSourceViewerConfiguration extends TextSourceViewerConfigurat
 	    assistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_ABOVE);
 	    assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
 	    
-	    Display display = sourceViewer.getTextWidget().getDisplay();
-		assistant.setContextInformationPopupBackground(display.getSystemColor(SWT.COLOR_DARK_BLUE));
-		assistant.setContextInformationPopupForeground(display.getSystemColor(SWT.COLOR_WHITE));
-		assistant.setContextSelectorBackground(display.getSystemColor(SWT.COLOR_DARK_BLUE));
-		assistant.setContextSelectorForeground(display.getSystemColor(SWT.COLOR_WHITE));
-
 	    return assistant;
 
 	}
@@ -119,11 +111,7 @@ public class ClojureSourceViewerConfiguration extends TextSourceViewerConfigurat
 	public IInformationControlCreator getInformationControlCreator(ISourceViewer sourceViewer) {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
-				DefaultInformationControl ret = new DefaultInformationControl(parent, new HTMLTextPresenter());
-			    Display display = parent.getDisplay();
-				ret.setBackgroundColor(display.getSystemColor(SWT.COLOR_DARK_BLUE));
-				ret.setForegroundColor(display.getSystemColor(SWT.COLOR_WHITE));
-				return ret;
+				return new DefaultInformationControl(parent, new HTMLTextPresenter());
 			}
 		};
 	}

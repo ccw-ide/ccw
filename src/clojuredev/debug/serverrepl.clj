@@ -101,8 +101,9 @@
   { :name "namespaces" :type "namespaces"
     :children (apply vector (map ns-info (all-ns))) })
 
-(defn code-complete [ns-str prefix]
+(defn code-complete [ns-str prefix only-publics]
   (when-let [ns (find-ns (symbol ns-str))]
-    (into [] (map (fn [[k v]] [k (str v) (if (var? v) (var-info v) nil)]) (filter #(.startsWith (first %) prefix) (map #(vector (str (key %)) (val %)) (ns-map ns)))))))
+    (let [search-fn (if only-publics ns-publics ns-map)]
+      (into [] (map (fn [[k v]] [k (str v) (if (var? v) (var-info v) nil)]) (filter #(.startsWith (first %) prefix) (map #(vector (str (key %)) (val %)) (search-fn ns))))))))
    
 ;(remove-ns 'clojuredev.debug.serverrepl)   
