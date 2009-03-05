@@ -88,13 +88,15 @@ public class ClojureSourceViewerConfiguration extends TextSourceViewerConfigurat
 	    ContentAssistant assistant = new ContentAssistant();
 
 	    assistant.setDocumentPartitioning(ClojurePartitionScanner.CLOJURE_PARTITIONING);
-	    assistant.setContentAssistProcessor(new ClojureProposalProcessor(editor), IDocument.DEFAULT_CONTENT_TYPE);
-	    assistant.setContentAssistProcessor(new ClojureProposalProcessor(editor), ClojurePartitionScanner.CLOJURE_COMMENT);
-	    assistant.setContentAssistProcessor(new ClojureProposalProcessor(editor), ClojurePartitionScanner.CLOJURE_STRING);
+	    assistant.setContentAssistProcessor(new ClojureProposalProcessor(editor, assistant), IDocument.DEFAULT_CONTENT_TYPE);
+	    assistant.setContentAssistProcessor(new ClojureProposalProcessor(editor, assistant), ClojurePartitionScanner.CLOJURE_COMMENT);
+	    assistant.setContentAssistProcessor(new ClojureProposalProcessor(editor, assistant), ClojurePartitionScanner.CLOJURE_STRING);
 
-	    assistant.enableAutoActivation(true);
+	    assistant.enableAutoActivation(false);
 	    assistant.setShowEmptyList(true);
 	    assistant.setEmptyMessage("No completions available. You may want to start a REPL for the project holding this file to activate the code completion feature.");
+	    assistant.setStatusLineVisible(true);
+	    assistant.setStatusMessage("no current status mesage");
 
 	    assistant.enableAutoInsert(true);
 	    assistant.setAutoActivationDelay(500);
