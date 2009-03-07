@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -95,8 +96,8 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 				return null;
 			}
 			
-			String nsPart;
-			String symbolPrefix;
+			final String nsPart;
+			final String symbolPrefix;
 			boolean fullyQualified = false;
 			if (prefix.indexOf('/') > 0) {
 			    String[] parts = prefix.split("/", 2);
@@ -108,7 +109,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 			    symbolPrefix = prefix;
 			}
 			
-			List<List> dynamicSymbols = dynamicComplete(nsPart, symbolPrefix, fullyQualified); //parse(doc.get());
+			final List<List> dynamicSymbols = dynamicComplete(nsPart, symbolPrefix, fullyQualified); //parse(doc.get());
 			final List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
 			// Add dynamic completion proposals
 			for (List l: dynamicSymbols) {
@@ -159,12 +160,16 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 			if (prefix.startsWith(".")) {
 				final String methodPrefix = prefix.substring(1);
 				System.out.println("method prefix:" + methodPrefix );
+				boolean isPattern = (methodPrefix.contains("*") || methodPrefix.contains("?"));
+				boolean autoAddEndWildcard = !methodPrefix.endsWith("*");
 				SearchPattern pattern = SearchPattern.createPattern(
-						methodPrefix,
+						autoAddEndWildcard ? methodPrefix + "*" : methodPrefix,
 						IJavaSearchConstants.METHOD, // | IJavaSearchConstants.FIELD,
 //						IJavaSearchConstants.TYPE,
-						IJavaSearchConstants.DECLARATIONS, 
-						SearchPattern.R_PREFIX_MATCH);
+						IJavaSearchConstants.DECLARATIONS,
+						isPattern 
+							? SearchPattern.R_PATTERN_MATCH 
+							: SearchPattern.R_PREFIX_MATCH);
 				if (pattern != null) {
 					IJavaProject editedFileProject = JavaCore.create(((IFile) editor.getEditorInput().getAdapter(IFile.class)).getProject());
 					if (editedFileProject != null) {
@@ -187,7 +192,73 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 								proposals.add(new LazyCompletionProposal(
 										(IMethod) match.getElement(),
 										methodPrefix,
-										WORD_START + 1));
+										WORD_START + 1, null));
+							}
+							@Override
+							public void endReporting() {
+								super.endReporting();
+								System.out.println("end reporting : count=" + counter);
+							}
+							
+						};
+						SearchEngine searchEngine = new SearchEngine();
+						try {
+							searchEngine.search(
+									pattern, 
+									new SearchParticipant[] {SearchEngine.getDefaultSearchParticipant() }, 
+									scope, 
+									requestor, 
+									null /* no progress monitor */);
+							assistant.setStatusMessage(MESSAGE_JAVA_COMPLETION);
+						} catch (CoreException e) {
+							if (e.getStatus() != Status.OK_STATUS) {
+								ClojuredevPlugin.logWarning("java code proposal search error in clojure dev", e);
+							} else {
+								errorMessage = ERROR_MESSAGE_TOO_MANY_COMPLETIONS;
+								assistant.setStatusMessage(ERROR_MESSAGE_TOO_MANY_COMPLETIONS);
+							}
+						}
+					}
+				}
+			}
+			if (fullyQualified && !prefix.startsWith(".")) {
+				final String methodPrefix = prefix.substring(1);
+				System.out.println("method prefix:" + methodPrefix);
+				String patternStr = nsPart + "." + symbolPrefix;
+				System.out.println("pattern: " + patternStr);
+				boolean isPattern = (patternStr.contains("*") || patternStr.contains("?"));
+				boolean autoAddEndWildcard = !patternStr.endsWith("*");
+				SearchPattern pattern = SearchPattern.createPattern(
+						autoAddEndWildcard ? patternStr + "*" : patternStr,
+						IJavaSearchConstants.METHOD, // | IJavaSearchConstants.FIELD,
+//						IJavaSearchConstants.TYPE,
+						IJavaSearchConstants.DECLARATIONS, 
+						isPattern 
+							? SearchPattern.R_PATTERN_MATCH 
+							: SearchPattern.R_PREFIX_MATCH);
+				if (pattern != null) {
+					IJavaProject editedFileProject = JavaCore.create(((IFile) editor.getEditorInput().getAdapter(IFile.class)).getProject());
+					if (editedFileProject != null) {
+						IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { editedFileProject });
+						SearchRequestor requestor = new SearchRequestor() {
+							private int counter;
+							@Override
+							public void beginReporting() {
+								super.beginReporting();
+								System.out.println("begin reporting");
+								counter = 0;
+							}
+							@Override
+							public void acceptSearchMatch(SearchMatch match) throws CoreException {
+								counter++;
+//								if (counter >= 100) {
+//									System.out.println("too much results, throwing exception");
+//									throw new CoreException(Status.OK_STATUS);
+//								}
+								proposals.add(new LazyCompletionProposal(
+										(IMethod) match.getElement(),
+										nsPart + "/" + symbolPrefix,
+										WORD_START, editor.getDeclaringNamespace()));
 							}
 							@Override
 							public void endReporting() {
@@ -223,25 +294,68 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 		}
 	}
 	
-	private static class LazyCompletionProposal implements ICompletionProposal {
+	private class LazyCompletionProposal implements ICompletionProposal {
 		private final IMethod method;
-		private final String methodPrefix;
-		private final int methodPrefixOffset;
+		private final String prefix;
+		private final int prefixOffset;
+		private final String ns;
 		private String displayString; 
 		private CompletionProposal completionProposal;
 		
+		
 		private CompletionProposal getCompletionProposal() {
 			if (completionProposal == null) {
-				String methodName = method.getElementName();
-				String additionalString = "No javadoc found";
-				ProposalInfo info = new ProposalInfo(method);
-				String javadoc = info.getInfo(null);
+				
+				String replacementString = "";
+				int separator = prefix.indexOf('/');
+				if (separator > 0) {
+					IType methodType = method.getDeclaringType();
+					String methodTypeName = methodType.getElementName();
+					
+					String classPrefix = prefix.substring(0, separator);
+					boolean fullyQualified = classPrefix.contains((CharSequence) ".");
+					if (fullyQualified) {
+						replacementString = methodType.getFullyQualifiedName(); 
+					} else {
+						List<List> dynamicSymbols = 
+							(ns!= null) 
+								? dynamicComplete(ns, methodTypeName, false)
+								: null;
+
+						if (dynamicSymbols != null) {
+							// check that the class is indeed available unqualified from the namespace
+							// if not, place the qualification
+							boolean found = false;
+							for (List symbolData: dynamicSymbols) {
+								if (symbolData.get(0).equals(methodTypeName)) {
+									// TODO check also that it is a real class name, not a function or macro etc.
+									replacementString = methodType.getElementName();
+									found = true;
+									break;
+								}
+							}
+							// If class name not found in ns symbols, use the fully qualified name
+							if (!found) {
+								replacementString = methodType.getFullyQualifiedName();
+							}
+						} else {
+							replacementString = methodType.getElementName();
+						}
+					}
+					replacementString += "/" + method.getElementName();
+				} else {
+					replacementString = method.getElementName();
+				}
+				String additionalString;
+				String javadoc = new ProposalInfo(method).getInfo(null);
 				if (javadoc != null) {
 					additionalString = javadoc;
+				} else {
+					additionalString = "No javadoc found";
 				}
 				
 				completionProposal = new CompletionProposal(
-						methodName, methodPrefixOffset, methodPrefix.length(), methodName.length(), 
+						replacementString, prefixOffset, prefix.length(), replacementString.length(), 
 						null, 
 						getDisplayString(), 
 						null, 
@@ -249,10 +363,11 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 			}
 			return completionProposal;
 		}
-		public LazyCompletionProposal(IMethod method, String methodPrefix, int methodPrefixOffset) {
+		public LazyCompletionProposal(IMethod method, String methodPrefix, int methodPrefixOffset, String ns) {
 			this.method = method;
-			this.methodPrefix = methodPrefix;
-			this.methodPrefixOffset = methodPrefixOffset;
+			this.prefix = methodPrefix;
+			this.prefixOffset = methodPrefixOffset;
+			this.ns = ns;
 		}
 
 		public void apply(IDocument document) {
@@ -298,36 +413,36 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 	}
 	private List<List> dynamicComplete(String namespace, String prefix, boolean findOnlyPublic) {
 		if (namespace == null) {
-			errorMessage = ERROR_MESSAGE_NO_NAMESPACE_FOUND;
+//			errorMessage = ERROR_MESSAGE_NO_NAMESPACE_FOUND;
 			return Collections.emptyList();
 		}
 		if (prefix == null) {
-			errorMessage = ERROR_MESSAGE_NULL_PREFIX;
+//			errorMessage = ERROR_MESSAGE_NULL_PREFIX;
 			return Collections.emptyList();
 		}
 		
 		ClojureClient clojureClient = editor.getCorrespondingClojureClient();
 		if (clojureClient == null) {
-			errorMessage = ERROR_MESSAGE_NO_REPL_FOUND;
+//			errorMessage = ERROR_MESSAGE_NO_REPL_FOUND;
 			return Collections.emptyList();
 		}
 		
 		Map result = (Map) clojureClient.remoteLoadRead("(clojuredev.debug.serverrepl/code-complete \"" + namespace + "\" \"" + prefix + "\" " + (findOnlyPublic ? "true" : "false") + ")");
 		if (result == null) {
-			errorMessage = null;
+//			errorMessage = null;
 			return Collections.emptyList();
 		}
 		
 		if (result.get("response-type").equals(0)) {
 			if (result.get("response") == null) {
-				errorMessage = ERROR_MESSAGE_INTERNAL_ERROR;
+//				errorMessage = ERROR_MESSAGE_INTERNAL_ERROR;
 				return Collections.emptyList();
 			} else {
-				errorMessage = null;
+//				errorMessage = null;
 				return (List<List>) result.get("response");
 			}
 		} else {
-			errorMessage = ERROR_MESSAGE_COMMUNICATION_ERROR;
+//			errorMessage = ERROR_MESSAGE_COMMUNICATION_ERROR;
 			return Collections.emptyList();
 		}
 	}
