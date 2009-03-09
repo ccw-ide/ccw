@@ -10,12 +10,15 @@
  *******************************************************************************/
 package clojuredev.editors.antlrbased;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.FindReplaceDocumentAdapter;
 import org.eclipse.jface.text.IDocument;
@@ -35,10 +38,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.editors.text.TextEditor;
+import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.ContentAssistAction;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
+import org.eclipse.ui.editors.text.EditorsUI;
 
 import clojuredev.ClojuredevPlugin;
 import clojuredev.debug.ClojureClient;
@@ -61,8 +67,9 @@ public class AntlrBasedClojureEditor extends TextEditor {
 	private ProjectionSupport fProjectionSupport;
 
 	public AntlrBasedClojureEditor() {
-		setSourceViewerConfiguration(new ClojureSourceViewerConfiguration(this));
-        setPreferenceStore(ClojuredevPlugin.getDefault().getPreferenceStore());
+	    IPreferenceStore preferenceStore = createCombinedPreferenceStore();
+		setSourceViewerConfiguration(new ClojureSourceViewerConfiguration(preferenceStore, this));
+		setPreferenceStore(preferenceStore);
         setDocumentProvider(new ClojureDocumentProvider());
 	}
 	
@@ -106,7 +113,24 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		fProjectionSupport.install();
 		viewer.doOperation(ProjectionViewer.TOGGLE);
 	}
-	
+
+    /**
+     * Create a preference store combined from the Clojure, the EditorsUI and
+     * the PlatformUI preference stores to inherit all the default text editor
+     * settings from the Eclipse preferences.
+     * 
+     * @return the combined preference store.
+     */
+	private IPreferenceStore createCombinedPreferenceStore() {
+        List<IPreferenceStore> stores= new LinkedList<IPreferenceStore>();
+
+        stores.add(ClojuredevPlugin.getDefault().getPreferenceStore());
+        stores.add(EditorsUI.getPreferenceStore());
+        stores.add(PlatformUI.getPreferenceStore());
+
+        return new ChainedPreferenceStore(stores.toArray(new IPreferenceStore[stores.size()]));
+    }
+
 	@Override
 	protected void createActions() {
 		super.createActions();

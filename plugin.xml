@@ -130,7 +130,7 @@
    <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
-            class="clojuredev.PreferenceInitializer">
+            class="clojuredev.preferences.PreferenceInitializer">
       </initializer>
       <scope
             class="org.eclipse.core.runtime.preferences.DefaultScope"
@@ -417,5 +417,20 @@
              type="org.eclipse.debug.ui.actions.ILaunchable">
        </adapter>
     </factory>
+ </extension>
+ <!-- TODO: why does i18n with %preferencePage.name and %preferencePage.editor.name not work -->
+ <extension
+       point="org.eclipse.ui.preferencePages">
+    <page
+          name="Clojure"
+          class="clojuredev.preferences.EmptyPreferencePage"
+          id="clojuredev.preferences.EmptyPreferencePage">
+    </page>
+    <page
+          name="Editor"
+          category="clojuredev.preferences.EmptyPreferencePage"
+          class="clojuredev.preferences.EditorPreferencePage"
+          id="clojuredev.preferences.EditorPreferencePage">
+    </page>
  </extension>
 </plugin>

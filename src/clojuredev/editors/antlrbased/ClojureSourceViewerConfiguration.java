@@ -14,6 +14,7 @@ package clojuredev.editors.antlrbased;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.internal.text.html.HTMLTextPresenter;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
@@ -39,7 +40,8 @@ public class ClojureSourceViewerConfiguration extends TextSourceViewerConfigurat
 	private final ITokenScanner tokenScanner;
 	private final AntlrBasedClojureEditor editor;
 
-	public ClojureSourceViewerConfiguration(AntlrBasedClojureEditor editor) {
+	public ClojureSourceViewerConfiguration(IPreferenceStore preferenceStore, AntlrBasedClojureEditor editor) {
+	    super(preferenceStore);
 		tokenScanner = new ClojureTokenScannerFactory().create(JavaUI.getColorManager());
 		this.editor = editor;
 	}
@@ -70,11 +72,6 @@ public class ClojureSourceViewerConfiguration extends TextSourceViewerConfigurat
 
 		reconciler.setDamager(dr, contentType);
 		reconciler.setRepairer(dr, contentType);	
-	}
-	
-	@Override
-	public int getTabWidth(ISourceViewer sourceViewer) {
-		return 2;
 	}
 	
 	public String[] getConfiguredContentTypes(ISourceViewer sourceViewer) {
