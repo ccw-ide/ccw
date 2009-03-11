@@ -16,6 +16,6 @@ package clojuredev.preferences;
  */
 public class PreferenceConstants {
 
-/* TODO no Clojuredev-specific constants yet */
-	
+	public static final String SWITCH_TO_NS_ON_REPL_STARTUP = "clojuredev.preferences.switch_to_ns_on_repl_startup";
+
 }

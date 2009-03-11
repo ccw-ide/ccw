@@ -15,7 +15,7 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
     private static final String BUNDLE_NAME = "clojuredev.preferences.messages"; //$NON-NLS-1$
 
-    public static String ClojurePreferencePage_Description;
+	    public static String ClojurePreferencePage_Description;
 
     public static String ClojurePreferencePage_description;
 
@@ -23,6 +23,8 @@ public class Messages extends NLS {
 
     public static String ClojurePreferencePage_highlight_matching_brackets;
     
+    public static String ClojurePreferencePage_swith_to_ns_on_repl_startup;
+
     static {
         // initialize resource bundle
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);

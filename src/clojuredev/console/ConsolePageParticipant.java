@@ -10,27 +10,36 @@
  *******************************************************************************/
 package clojuredev.console;
 
+import java.util.List;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsolePageParticipant;
+import org.eclipse.ui.console.IOConsole;
 import org.eclipse.ui.console.IPatternMatchListener;
 import org.eclipse.ui.console.PatternMatchEvent;
 import org.eclipse.ui.console.TextConsole;
 import org.eclipse.ui.part.IPageBookViewPage;
 
+import clojuredev.ClojureCore;
+import clojuredev.ClojuredevPlugin;
 import clojuredev.debug.ClojureClient;
+import clojuredev.editors.antlrbased.EvaluateTextAction;
 import clojuredev.launching.LaunchUtils;
 import clojuredev.outline.NamespaceBrowser;
+import clojuredev.preferences.PreferenceConstants;
 
 public class ConsolePageParticipant implements IConsolePageParticipant {
-	private TextConsole console;
+	private IOConsole console;
 	private ClojureClient clojureClient;
 
 	public void init(IPageBookViewPage page, IConsole console) {
 		assert org.eclipse.debug.ui.console.IConsole.class.isInstance(console);
 		assert TextConsole.class.isInstance(console);
 
-		this.console = (TextConsole) console;
+		this.console = (IOConsole) console;
 		
 		org.eclipse.debug.ui.console.IConsole processConsole = (org.eclipse.debug.ui.console.IConsole) console;
 		if (processConsole.getProcess().getLaunch().getAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN) == null) {
@@ -38,6 +47,19 @@ public class ConsolePageParticipant implements IConsolePageParticipant {
 			int clojureVMPort = Integer.valueOf(processConsole.getProcess().getLaunch().getAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN));
 			clojureClient = new ClojureClient(clojureVMPort);
 			addPatternMatchListener(this.console);
+			if (ClojuredevPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.SWITCH_TO_NS_ON_REPL_STARTUP)) {
+				try {
+					List<IFile> files = LaunchUtils.getFilesToLaunchList(processConsole.getProcess().getLaunch().getLaunchConfiguration());
+					if (files.size() > 0) {
+						String namespace = ClojureCore.getDeclaredNamespace(files.get(0));
+						if (namespace != null) {
+							EvaluateTextAction.evaluateText(this.console, "(in-ns '" + namespace + ")", false); 
+						}
+					}
+				} catch (CoreException e) {
+					ClojuredevPlugin.logError("error while trying to guess the ns to which make the REPL console switch", e);
+				}
+			}
 		}
 	}
 
@@ -89,4 +111,5 @@ public class ConsolePageParticipant implements IConsolePageParticipant {
             }
 		});
 	}
+
 }

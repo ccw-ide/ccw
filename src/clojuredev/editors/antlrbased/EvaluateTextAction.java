@@ -31,21 +31,30 @@ abstract public class EvaluateTextAction extends Action {
 		super(text);
 	}
 	
-	protected final void evaluateText(final String text) {
+	public static final void evaluateText(final String text) {
+		evaluateText(ClojureClient.findActiveReplConsole(), text);
+	}
+	
+	public static final void evaluateText(IOConsole console, final String text) {
+		evaluateText(console, text, true);
+	}
+	
+	public static final void evaluateText(IOConsole console, final String text, boolean verboseMode) {
 		if (text == null)
 			return;
 
-		IOConsole console = ClojureClient.findActiveReplConsole();
 		if (console == null)
 			return;
 		
 		IOConsoleOutputStream os = null;
 		IOConsoleInputStream is = console.getInputStream();
 		try {
-			os = console.newOutputStream();
-			os.setColor(is.getColor());
-			os.setFontStyle(SWT.ITALIC);
-			os.write("\nCode sent by editor for evaluation:\n" + text + "\n");
+			if (verboseMode) {
+				os = console.newOutputStream();
+				os.setColor(is.getColor());
+				os.setFontStyle(SWT.ITALIC);
+				os.write("\nCode sent for evaluation:\n" + text + "\n");
+			}
 			is.appendData(text + "\n");
 			return;
 		} catch (IOException e) {

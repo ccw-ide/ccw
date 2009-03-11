@@ -179,7 +179,7 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
 			launches.remove(launch);
 		}
 	};
-	private int findClojurePort(ILaunch launch) {
+	public static int findClojurePort(ILaunch launch) {
 		String portAttr = launch.getAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN);
 		if (portAttr != null) {
 			return Integer.valueOf(portAttr);

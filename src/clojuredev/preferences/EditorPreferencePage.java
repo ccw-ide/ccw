@@ -53,6 +53,9 @@ public class EditorPreferencePage extends FieldEditorPreferencePage implements
             new StringFieldEditor(clojuredev.preferences.PreferenceConstants.P_STRING, Messages.ClojurePreferencePage_8, getFieldEditorParent()));*/
         addField(
                 new IntegerFieldEditor(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH, Messages.ClojurePreferencePage_displayed_tab_width, getFieldEditorParent()));
+        
+        addField(
+        		new BooleanFieldEditor(clojuredev.preferences.PreferenceConstants.SWITCH_TO_NS_ON_REPL_STARTUP, Messages.ClojurePreferencePage_swith_to_ns_on_repl_startup, getFieldEditorParent()));
     }
 
     /* (non-Javadoc)

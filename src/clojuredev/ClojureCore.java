@@ -31,6 +31,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJarEntryResource;
@@ -329,6 +330,28 @@ public final class ClojureCore {
     
     public static String getNsPackageName(String ns) {
     	return (ns.lastIndexOf(".") < 0) ? "" : ns.substring(0, ns.lastIndexOf(".")).replace('-', '_');
+    }
+    
+    // Currently based on file name convention
+    // Should be based, later, on static code analysis (and/or dynamic
+    // report of created namespace)
+    public static String getDeclaredNamespace(IFile file) {
+    	try {
+    		IJavaProject jProject = JavaCore.create(file.getProject());
+    		IPackageFragmentRoot[] froots = jProject.getAllPackageFragmentRoots();
+    		IPath path = null;
+    		for (IPackageFragmentRoot froot: froots) {
+    			if (froot.getPath().isPrefixOf(file.getFullPath())) {
+    				path = file.getFullPath().removeFirstSegments(froot.getPath().segmentCount()).removeFileExtension();
+    				break;
+    			}
+    		}
+			return (path == null) ? null : path.toString().replace('/', '.').replace('_', '-');
+			
+		} catch (JavaModelException e) {
+			ClojuredevPlugin.logError("unable to determine the fragment root of the file " + file, e);
+			return null;
+		}
     }
     
     private static boolean tryNonJavaResources(Object[] nonJavaResources, String searchedFileName, int line) throws PartInitException {

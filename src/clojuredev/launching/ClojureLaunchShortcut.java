@@ -18,7 +18,6 @@ import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
@@ -86,8 +85,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
             if (config != null) {
             	config.launch(mode, null);
             }
-        }
-        catch (CoreException e) {
+        } catch (CoreException e) {
             throw new RuntimeException(e);
         }
     }
