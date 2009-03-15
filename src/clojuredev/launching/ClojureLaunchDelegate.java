@@ -53,20 +53,12 @@ public class ClojureLaunchDelegate extends
 			URL serverReplBundleUrl = ClojuredevPlugin.getDefault().getBundle().getResource("clojuredev/debug/serverrepl.clj");
 			URL serverReplFileUrl = FileLocator.toFileURL(serverReplBundleUrl);
 			String serverRepl = serverReplFileUrl.getFile(); 
-			filesToLaunchArguments = '\"' + serverRepl + "\" " + filesToLaunchArguments;
+			filesToLaunchArguments = "-i " + '\"' + serverRepl + "\" " + filesToLaunchArguments;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		
-		if (needsSeparator(userProgramArguments)) {
-			userProgramArguments = " -- " + userProgramArguments;
-		}
-    	
-    	return filesToLaunchArguments + userProgramArguments;
-	}
-	
-	private boolean needsSeparator(String userArgs) {
-		return ! userArgs.contains("-- ");
+    	return filesToLaunchArguments + " --repl " + userProgramArguments;
 	}
 	
 }

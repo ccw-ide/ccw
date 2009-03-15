@@ -51,6 +51,13 @@ import clojuredev.ClojuredevPlugin;
  * @author cmarshal, laurent.petit
  * 
  */
+/* 
+ * TODO incoming additions: Repl settings:
+ *  * auto-attribute server port. user set server port becomes an option
+ *  * repl variants: clojure.lang.Repl , clojure.main , clojure.contrib.repl_ln
+ *  * warn-on-reflection
+ *  * (NOT DONE HERE, though): auto-completion as with the editor 
+ */
 @SuppressWarnings("restriction")
 public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchConfigurationConstants {
 	

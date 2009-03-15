@@ -28,7 +28,9 @@ public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
     
     static public final String LAUNCH_ID = "clojuredev.launching.clojure";
     
-    static public final String MAIN_CLASSNAME = "clojure.lang.Repl";
+//    static public final String MAIN_CLASSNAME = "clojure.lang.Repl";
+    static public final String MAIN_CLASSNAME = "clojure.contrib.repl_ln";
+//    static public final String MAIN_CLASSNAME = "clojure.lang.Repl";
     
     static public final int DEFAULT_SERVER_PORT = 8503;
     
@@ -43,7 +45,7 @@ public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
             if (args.length() > 0) {
                 args.append(" ");
             }
-            args.append("\"" + srcFile.getLocation().toString() + "\"");
+            args.append("-i \"" + srcFile.getLocation().toString() + "\"");
         }
         return args.toString();
     }
