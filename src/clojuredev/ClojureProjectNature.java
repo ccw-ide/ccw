@@ -15,14 +15,17 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.eclipse.core.resources.ICommand;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -78,93 +81,105 @@ public class ClojureProjectNature implements IProjectNature {
     }
     
     private void setupClojureProjectClassPath() throws CoreException {
-        ClojureProject clojureProject = ClojureCore
-                .getClojureProject(project);
-        IJavaProject javaProject = clojureProject
-                .getJavaProject();
+    	// idea: ensure that clojure and clojure-contrib are present if not
+    	// add classes if not present
+        ClojureProject clojureProject = ClojureCore.getClojureProject(project);
+        IJavaProject javaProject = clojureProject.getJavaProject();
         
         if (!alreadyHasClojureLibOnClasspath(javaProject)) {
-        	int numOfEntriesToAdd = 0;
-            File clojureLib = getDefaultClojureLib();
-            if (clojureLib != null) {
-            	numOfEntriesToAdd++;
-            }
-            
-            File clojureContribLib = getDefaultClojureContribLib();
-            if (clojureContribLib != null) {
-            	numOfEntriesToAdd++;
-            }
-            // TODO better to signal an error in those cases ? (and further simplify the following code)
-            
-            if (numOfEntriesToAdd > 0) {
-		        IClasspathEntry[] entriesOld = javaProject.getRawClasspath();
-		        IClasspathEntry[] entriesNew = new IClasspathEntry[entriesOld.length + 1 + numOfEntriesToAdd];
-		        
-		        System.arraycopy(entriesOld, 0, entriesNew, 0, entriesOld.length);
-
-		        if (!javaProject.getProject().getFolder("classes").exists()) {
-		        	javaProject.getProject().getFolder("classes").create(true, true, null);
-		        	entriesNew[entriesOld.length] = JavaCore.newLibraryEntry(javaProject.getProject().getFolder("classes").getFullPath(), null, null);
-		        }
-	        	
-		        if (clojureLib != null) {
-		        	entriesNew[entriesOld.length + 1] = JavaCore.newLibraryEntry(Path.fromOSString(clojureLib.getAbsolutePath()), null, null);
-		        }
-		        if (clojureContribLib != null) {
-		        	entriesNew[entriesOld.length + 2] = JavaCore.newLibraryEntry(Path.fromOSString(clojureContribLib.getAbsolutePath()), null, null);
-		        }
-		        
-		
-		        javaProject.setRawClasspath(entriesNew, null);
-		        javaProject.save(null, true);
-            }
+        	addClojureLibOnClasspath(javaProject);
+        }
+        if (!alreadyHasClojureContribLibOnClasspath(javaProject)) {
+        	addClojureContribLibOnClasspath(javaProject);
+        }
+        if (!alreadyHasClassesDirectory(javaProject)) {
+        	addClassesDirectory(javaProject);
         }
     }
     
-    private boolean alreadyHasClojureLibOnClasspath(IJavaProject javaProject) throws JavaModelException {
+	private void addClojureLibOnClasspath(IJavaProject javaProject) throws CoreException {
+		addLibOnClasspath(javaProject, getDefaultClojureLib());
+	}
+
+	private void addLibOnClasspath(IJavaProject javaProject, File lib) throws CoreException {
+		if (lib == null)
+			throw new CoreException(Status.CANCEL_STATUS);
+		
+		addLibOnClasspath(javaProject, Path.fromOSString(lib.getAbsolutePath()));
+	}
+	
+	private void addLibOnClasspath(IJavaProject javaProject, IPath lib) throws CoreException {
+		if (lib == null)
+			throw new CoreException(Status.CANCEL_STATUS);
+
+	    IClasspathEntry[] entriesOld = javaProject.getRawClasspath();
+	    
+	    // Verify that lib not already in the classpath
+	    for (IClasspathEntry cpe: entriesOld) {
+	    	if (cpe.getPath().equals(lib)) {
+	    		return;
+	    	}
+	    }
+	    
+	    IClasspathEntry[] entriesNew = new IClasspathEntry[entriesOld.length + 1];
+	    
+	    System.arraycopy(entriesOld, 0, entriesNew, 0, entriesOld.length);
+	
+    	entriesNew[entriesOld.length] = JavaCore.newLibraryEntry(lib, null, null);
+	    
+	    javaProject.setRawClasspath(entriesNew, null);
+	    javaProject.save(null, true);
+	}
+	
+	private void addClojureContribLibOnClasspath(IJavaProject javaProject) throws CoreException {
+		addLibOnClasspath(javaProject, getDefaultClojureContribLib());
+	}
+	
+	private void addClassesDirectory(IJavaProject javaProject) throws CoreException {
+	    IFolder classesFolder = javaProject.getProject().getFolder("classes");
+	    if (!classesFolder.exists()) {
+	    	classesFolder.create(true, true, null);
+	    }
+	    
+	    addLibOnClasspath(javaProject, classesFolder.getFullPath());
+	}
+	private boolean alreadyHasClojureLibOnClasspath(IJavaProject javaProject) throws JavaModelException {
     	return javaProject.findElement(new Path("clojure/lang")) != null;
     }
 
+	private boolean alreadyHasClojureContribLibOnClasspath(IJavaProject javaProject) throws JavaModelException {
+    	return javaProject.findElement(new Path("clojure/contrib")) != null;
+    }
+
+	private boolean alreadyHasClassesDirectory(IJavaProject javaProject) throws JavaModelException {
+		return javaProject.findPackageFragmentRoot(javaProject.getProject().getFolder("classes").getFullPath()) != null;
+    }
+
     private File getDefaultClojureLib() {
-    	try {
-	        Bundle bundle = Platform.getBundle("clojure");
-	        File clojureBundlePath = FileLocator.getBundleFile(bundle);
-	        File clojureLibEntry;
-	        if (clojureBundlePath.isFile()) {
-	        	clojureLibEntry = clojureBundlePath;
-	        } else if (new File(clojureBundlePath, "bin").exists()) {
-	    		clojureLibEntry = new File(clojureBundlePath, "bin");
-	    	} else if (new File (clojureBundlePath, "clojure" + File.separator + "lang").exists()) {
-	        		clojureLibEntry = clojureBundlePath;
-	    	} else {
-	        		ClojuredevPlugin.logError("Unable to find default clojure lib");
-	        		clojureLibEntry = null;
-	    	}
-	        return clojureLibEntry;
-    	} catch (IOException e) {
-    		ClojuredevPlugin.logError("Unable to find clojure plugin");
-    		return null;
-    	}
+    	return getJarInsidePlugin("clojure", "clojure");
     }
     
     private File getDefaultClojureContribLib() {
+    	return getJarInsidePlugin("clojurecontrib", "clojure-contrib");
+    }
+    
+    private File getJarInsidePlugin(String pluginName, String jarName) {
     	try {
-	        Bundle bundle = Platform.getBundle("clojurecontrib");
-	        File clojureContribBundlePath = FileLocator.getBundleFile(bundle);
-	        File clojureContribLibEntry;
-	        if (clojureContribBundlePath.isFile()) {
-	        	clojureContribLibEntry = clojureContribBundlePath;
-	        } else if (new File(clojureContribBundlePath, "bin").exists()) {
-	    		clojureContribLibEntry = new File(clojureContribBundlePath, "bin");
-	    	} else if (new File (clojureContribBundlePath, "clojure" + File.separator + "lang").exists()) {
-	        		clojureContribLibEntry = clojureContribBundlePath;
-	    	} else {
-	        		ClojuredevPlugin.logError("Unable to find default clojurecontrib lib");
-	        		clojureContribLibEntry = null;
+	        Bundle bundle = Platform.getBundle(pluginName);
+	        File clojureBundlePath = FileLocator.getBundleFile(bundle);
+	        if (clojureBundlePath.isFile()) {
+	        	ClojuredevPlugin.logError(pluginName + " plugin should be deployed as a directory");
+	        	return null;
+	        }
+	        
+	        File clojureLibEntry = new File(clojureBundlePath, jarName + ".jar");
+    		if (!clojureLibEntry.exists()) {
+    			ClojuredevPlugin.logError("Unable to locate " + jarName + " jar in " + pluginName + " plugin");
+    			return null;
 	    	}
-	        return clojureContribLibEntry;
+    		return clojureLibEntry;
     	} catch (IOException e) {
-    		ClojuredevPlugin.logError("Unable to find clojure plugin");
+    		ClojuredevPlugin.logError("Unable to find " + pluginName + " plugin");
     		return null;
     	}
     }
