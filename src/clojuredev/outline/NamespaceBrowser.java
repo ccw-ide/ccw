@@ -213,36 +213,6 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 		treeViewer.setContentProvider(new ContentProvider());
 		treeViewer.setLabelProvider(new LabelProvider());
 
-		treeViewer.setSorter(new NSSorter());
-		treeViewer.setComparer(new IElementComparer() {
-			public boolean equals(Object a, Object b) {
-				if (a == b) {
-					return true;
-				}
-				if ((a == null && b != null) || (b == null && a != null)) {
-					return false;
-				}
-
-				if (a instanceof Map && b instanceof Map && ((Map) a).get(KEYWORD_NAME) != null
-						&& ((Map) b).get(KEYWORD_NAME) != null) {
-					return ((Map) a).get(KEYWORD_NAME).equals(((Map) b).get(KEYWORD_NAME));
-				} else {
-					return a.equals(b);
-				}
-			}
-
-			public int hashCode(Object element) {
-				if (element == null) {
-					return 0;
-				}
-				if (element instanceof Map && ((Map) element).get(KEYWORD_NAME) != null) {
-					return ((Map) element).get(KEYWORD_NAME).hashCode();
-				} else {
-					return element.hashCode();
-				}
-			}
-		});
-
 		treeViewer.addFilter(new ViewerFilter() {
 			@Override
 			public boolean select(Viewer viewer, Object parentElement, Object element) {

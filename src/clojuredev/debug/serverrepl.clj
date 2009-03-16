@@ -95,11 +95,11 @@
 (defn- ns-info [n]
   { :name ((comp str ns-name) n)
     :type "ns"
-    :children (apply vector (map #(var-info (second %)) (ns-interns n))) })
+    :children (apply vector (sort-by :name (map #(var-info (second %)) (ns-interns n)))) })
 
 (defn namespaces-info []
   { :name "namespaces" :type "namespaces"
-    :children (apply vector (map ns-info (all-ns))) })
+    :children (apply vector (sort-by :name (map ns-info (all-ns)))) })
 
 (defn code-complete [ns-str prefix only-publics]
   (when-let [ns (find-ns (symbol ns-str))]
