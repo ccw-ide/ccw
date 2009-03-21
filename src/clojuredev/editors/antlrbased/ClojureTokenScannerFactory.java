@@ -11,47 +11,58 @@
 package clojuredev.editors.antlrbased;
 
 
-import org.eclipse.jdt.ui.text.IColorManager;
-import org.eclipse.jdt.ui.text.IJavaColorConstants;
-
+import org.eclipse.jface.resource.ColorRegistry;
 
 import clojuredev.lexers.ClojureLexer;
 import clojuredev.utils.editors.antlrbased.AntlrBasedTokenScanner;
+import clojuredev.utils.editors.antlrbased.IScanContext;
 import clojuredev.utils.editors.antlrbased.TokenScannerUtils;
 
 
 public final class ClojureTokenScannerFactory {
 
-	public AntlrBasedTokenScanner create(final IColorManager colorProvider) {
-		return new AntlrBasedTokenScanner(new ClojureLexer()) {
+	public AntlrBasedTokenScanner create(final ColorRegistry colorProvider, IScanContext scanContext) {
+		return new AntlrBasedTokenScanner(new ClojureLexer(), scanContext) {
 			@Override
 			protected void initAntlrTokenTypeToJFaceTokenMap() {
 				TokenScannerUtils u = new TokenScannerUtils(this, colorProvider);
-				u.addTokenType(ClojureLexer.STRING, IJavaColorConstants.JAVA_STRING); 
-				u.addTokenType(ClojureLexer.NUMBER, IJavaColorConstants.JAVA_STRING);
-				u.addTokenType(ClojureLexer.CHARACTER, IJavaColorConstants.JAVA_STRING);
-				u.addTokenType(ClojureLexer.NIL, IJavaColorConstants.JAVA_DEFAULT);
-				u.addTokenType(ClojureLexer.BOOLEAN, IJavaColorConstants.JAVA_STRING);
-				u.addTokenType(ClojureLexer.SYMBOL, IJavaColorConstants.JAVA_DEFAULT);
-				u.addBoldToken(ClojureLexer.SPECIAL_FORM, IJavaColorConstants.JAVA_KEYWORD);
-				u.addTokenType(ClojureLexer.T23, IJavaColorConstants.JAVA_DEFAULT);//'&'=20
-				u.addTokenType(ClojureLexer.OPEN_PAREN, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT);//'('=21
-				u.addTokenType(ClojureLexer.CLOSE_PAREN, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT);//')'=22
-				u.addTokenType(ClojureLexer.T24, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT);//'['=23
-				u.addTokenType(ClojureLexer.T25, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT);//']'=24
-				u.addTokenType(ClojureLexer.T26, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT);//'{'=25
-				u.addTokenType(ClojureLexer.T27, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT);//'}'=26
-				u.addTokenType(ClojureLexer.T28, IJavaColorConstants.JAVA_KEYWORD);//'\''=27
-				u.addTokenType(ClojureLexer.T29, IJavaColorConstants.JAVA_DEFAULT);//'^'=28
-				u.addTokenType(ClojureLexer.T30, IJavaColorConstants.JAVA_DEFAULT);//'@'=29
-				u.addTokenType(ClojureLexer.T31, IJavaColorConstants.JAVA_DEFAULT);//'#'=30
-				u.addTokenType(ClojureLexer.KEYWORD, IJavaColorConstants.JAVA_STRING);
-				u.addTokenType(ClojureLexer.SYNTAX_QUOTE, IJavaColorConstants.JAVA_DEFAULT);
-				u.addTokenType(ClojureLexer.UNQUOTE_SPLICING, IJavaColorConstants.JAVA_DEFAULT);
-				u.addTokenType(ClojureLexer.UNQUOTE, IJavaColorConstants.JAVA_DEFAULT);
-				u.addItalicToken(ClojureLexer.COMMENT, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT);
-				u.addTokenType(ClojureLexer.SPACE, IJavaColorConstants.JAVA_DEFAULT);
-				u.addTokenType(ClojureLexer.LAMBDA_ARG, IJavaColorConstants.JAVA_STRING);			
+				
+				u.addTokenType(ClojureLexer.STRING); 
+				u.addTokenType(ClojureLexer.NUMBER);
+				u.addTokenType(ClojureLexer.CHARACTER);
+				u.addTokenType(ClojureLexer.NIL);
+				u.addTokenType(ClojureLexer.BOOLEAN);
+				u.addTokenType(ClojureLexer.SYMBOL);
+				u.addTokenType(IScanContext.SymbolType.FUNCTION);
+				u.addTokenType(IScanContext.SymbolType.GLOBAL_VAR);
+				u.addTokenType(IScanContext.SymbolType.MACRO);
+				u.addTokenType(IScanContext.SymbolType.SPECIAL_FORM);
+				u.addTokenType(ClojureLexer.SPECIAL_FORM);
+				u.addTokenType(ClojureLexer.METADATA_TYPEHINT);
+//				u.addBoldToken(IScanContext.SymbolType.FUNCTION);
+//				u.addBoldToken(IScanContext.SymbolType.GLOBAL_VAR);
+//				u.addBoldToken(IScanContext.SymbolType.MACRO);
+//				u.addBoldToken(IScanContext.SymbolType.SPECIAL_FORM);
+//				u.addBoldToken(ClojureLexer.SPECIAL_FORM);
+				u.addTokenType(ClojureLexer.T24);//'&'=20
+				u.addTokenType(ClojureLexer.OPEN_PAREN);//'('=21
+				u.addTokenType(ClojureLexer.CLOSE_PAREN);//')'=22
+				u.addTokenType(ClojureLexer.T25);//'['=23
+				u.addTokenType(ClojureLexer.T26);//']'=24
+				u.addTokenType(ClojureLexer.T27);//'{'=25
+				u.addTokenType(ClojureLexer.T28);//'}'=26
+				u.addTokenType(ClojureLexer.T29);//'\''=27
+				u.addTokenType(ClojureLexer.T30);//'^'=28
+				u.addTokenType(ClojureLexer.T31);//'@'=29
+				u.addTokenType(ClojureLexer.T32);//'#'=30
+				u.addTokenType(ClojureLexer.KEYWORD);
+				u.addTokenType(ClojureLexer.SYNTAX_QUOTE);
+				u.addTokenType(ClojureLexer.UNQUOTE_SPLICING);
+				u.addTokenType(ClojureLexer.UNQUOTE);
+				u.addTokenType(ClojureLexer.COMMENT);
+//				u.addItalicToken(ClojureLexer.COMMENT);
+				u.addTokenType(ClojureLexer.SPACE);
+				u.addTokenType(ClojureLexer.LAMBDA_ARG);			
 			}
 		};
 	}

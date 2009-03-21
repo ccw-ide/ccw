@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Display;
 
 import clojuredev.ClojuredevPlugin;
 import clojuredev.editors.antlrbased.TokenData;
+import clojuredev.lexers.ClojureLexer;
 
 import static clojuredev.ClojuredevPlugin.getSystemColor;
 import static clojuredev.ClojuredevPlugin.getClojuredevColor;
@@ -39,9 +40,10 @@ abstract public class AntlrBasedTokenScanner implements ITokenScanner {
 	private Lexer lexer;
 	private final List<TokenData> tokensData;
 	private int currentTokenIndex;
-	private final Map<Integer, IToken> antlrTokenTypeToJFaceToken;
+	private final Map<Object, IToken> antlrTokenTypeToJFaceToken;
 	private String text;
 	private boolean initialized = false;
+	private final IScanContext context;
 	
 	private IToken[] parenLevelTokens = new IToken[] {
 			newParenTokenWith(getSystemColor(SWT.COLOR_RED)),
@@ -67,12 +69,13 @@ abstract public class AntlrBasedTokenScanner implements ITokenScanner {
 					TextAttribute.UNDERLINE));
 	private int currentParenLevel = 0;
 
-	public AntlrBasedTokenScanner(Lexer lexer) {
+	public AntlrBasedTokenScanner(Lexer lexer, IScanContext context) {
 		this.lexer = lexer;
+		this.context = context;
 		
 		tokensData = new ArrayList<TokenData>();
 		
-		antlrTokenTypeToJFaceToken = new HashMap<Integer, IToken>();
+		antlrTokenTypeToJFaceToken = new HashMap<Object, IToken>();
 		initAntlrTokenTypeToJFaceTokenMap();
 		antlrTokenTypeToJFaceToken.put(ANTLR_EOF, org.eclipse.jface.text.rules.Token.EOF);
 		initialized = true;
@@ -80,12 +83,12 @@ abstract public class AntlrBasedTokenScanner implements ITokenScanner {
 	
 	abstract protected void initAntlrTokenTypeToJFaceTokenMap();
 	
-	public final void addTokenType(int tokenIndex, org.eclipse.jface.text.rules.Token token) {
+	public final void addTokenType(Object tokenIndex, org.eclipse.jface.text.rules.Token token) {
 		if (initialized) throw lifeCycleError();
 		antlrTokenTypeToJFaceToken.put(tokenIndex, token);
 	}
 	
-	public final void addTokenType(int tokenIndex, TextAttribute textAttribute) {
+	public final void addTokenType(Object tokenIndex, TextAttribute textAttribute) {
 		if (initialized) throw lifeCycleError();
 		addTokenType(tokenIndex, new org.eclipse.jface.text.rules.Token(textAttribute));
 	}
@@ -178,10 +181,24 @@ abstract public class AntlrBasedTokenScanner implements ITokenScanner {
 
 	private void addTokenInfo(CommonToken token){
 		assert token != null;
-		IToken retToken = antlrTokenTypeToJFaceToken.get(token.getType());
+		IToken retToken;
+		if (token.getType() != ClojureLexer.SYMBOL) {
+			retToken = antlrTokenTypeToJFaceToken.get(token.getType());
+		} else {
+			retToken = guessEclipseTokenForSymbol(token);
+		}
 		if( retToken == null ) {
 			retToken = org.eclipse.jface.text.rules.Token.UNDEFINED; 
 		}
 		tokensData.add(new TokenData(token, retToken));
+	}
+	private IToken guessEclipseTokenForSymbol(CommonToken symbolToken) {
+		String symbol = symbolToken.getText();
+		IScanContext.SymbolType symbolType = context.getSymbolType(symbol);
+		if (symbolType == null) {
+			return null;
+		} else {
+			return antlrTokenTypeToJFaceToken.get(symbolType);
+		}
 	}
 }

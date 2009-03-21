@@ -12,7 +12,6 @@
  *******************************************************************************/
 package clojuredev.editors.antlrbased;
 
-import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.internal.text.html.HTMLTextPresenter;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.DefaultInformationControl;
@@ -33,6 +32,7 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
 
+import clojuredev.ClojuredevPlugin;
 import clojuredev.editors.rulesbased.ClojurePartitionScanner;
 
 
@@ -42,7 +42,7 @@ public class ClojureSourceViewerConfiguration extends TextSourceViewerConfigurat
 
 	public ClojureSourceViewerConfiguration(IPreferenceStore preferenceStore, AntlrBasedClojureEditor editor) {
 	    super(preferenceStore);
-		tokenScanner = new ClojureTokenScannerFactory().create(JavaUI.getColorManager());
+		tokenScanner = new ClojureTokenScannerFactory().create(ClojuredevPlugin.getDefault().getColorRegistry(), ClojuredevPlugin.getDefault().getDefaultScanContext());
 		this.editor = editor;
 	}
 	

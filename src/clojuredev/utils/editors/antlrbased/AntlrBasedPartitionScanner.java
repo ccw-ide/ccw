@@ -16,8 +16,8 @@ import org.eclipse.jface.text.rules.IPartitionTokenScanner;
 
 abstract public class AntlrBasedPartitionScanner extends AntlrBasedTokenScanner implements IPartitionTokenScanner {
 
-	public AntlrBasedPartitionScanner(Lexer lexer) {
-		super(lexer);
+	public AntlrBasedPartitionScanner(Lexer lexer, IScanContext scanContext) {
+		super(lexer, scanContext);
 	}
 	
 	public final void setPartialRange(IDocument document, int offset, int length, String contentType, int partitionOffset) {

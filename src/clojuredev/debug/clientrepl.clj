@@ -54,11 +54,42 @@
 (defn local-load-read [s]
   (load-string s))
   
-(defn local-load [s]
-  (str (local-load-read s)))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; support code  
 
 (defn ns-info []
   (remote-load "(ns-info)"))
+
+(defn ns-sym [s]
+  "returns a vector with the namespace in first position and the symbol in second position.
+   if there is no namespace, first position will contain \"\"."
+  (let [[s n] (-> s (.split "/") reverse)] [(or n "") s]))
+
+(defn qualify-sym [ns s]
+  "returns a symbol with ns as a namespace if s does not yet have a namespace.
+  ns and s are strings"
+  (let [n-s (ns-sym s)]
+    (if (= "" (first n-s)) (str ns "/" s) s)))
+    
+(defn symbol-type [ns-name s-name]
+	(try 
+	  (let [s             (symbol (qualify-sym ns-name s-name))
+	        macro?        #((meta (find-var %)) :macro)]
+		  (cond 
+		    (special-symbol? (symbol s-name)) "SPECIAL_FORM"
+		    (nil? (find-var s)) nil
+		    (macro? s)        "MACRO"
+		    :else             "FUNCTION"))
+    (catch IllegalArgumentException e nil)))
+
+(def clojure-core-namespaces 
+	'("clojure.core" "clojure.main" "clojure.set" "clojure.xml" "clojure.zip"
+	  "clojure.inspector" "clojure.parallel"))
+
+(defn core-symbol-type [s-name]
+  (first (filter identity (map #(symbol-type % s-name) clojure-core-namespaces))))
+  
+; FUNCTION, MACRO, SPECIAL_FORM, GLOBAL_VAR
+(defn clojure-symbol-types [] 
+	(let [namespaces (map find-ns clojure-core-namespaces)]
+	  (mapcat (fn [sym] [(str sym) (symbol-type sym)]) namespaces)))  ; TODO implement this method!

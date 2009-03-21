@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchListener;
+import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Color;
@@ -31,7 +32,9 @@ import org.osgi.framework.BundleContext;
 
 import clojure.lang.Compiler;
 import clojuredev.debug.ClojureClient;
+import clojuredev.editors.antlrbased.AntlrBasedClojureEditor;
 import clojuredev.launching.LaunchUtils;
+import clojuredev.utils.editors.antlrbased.IScanContext;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -65,9 +68,10 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
     /** "Read-only" table, do not alter */
     public Color[] allColors;
     
+    private ColorRegistry colorRegistry;
+    
     public ClojuredevPlugin() {
     }
-    
     
     public void start(BundleContext context) throws Exception {
         super.start(context);
@@ -75,7 +79,19 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
         plugin = this;
         loadPluginClojureCode();
         initializeParenRainbowColors();
+        createColorRegistry();
         startLaunchListener();
+    }
+    
+    private void createColorRegistry() {
+    	if (colorRegistry == null) {
+    		colorRegistry = new ColorRegistry(getWorkbench().getDisplay());
+    		AntlrBasedClojureEditor.registerEditorColors(colorRegistry);
+    	}
+    }
+    
+    public ColorRegistry getColorRegistry() {
+    	return colorRegistry;
     }
 
     private void loadPluginClojureCode() throws Exception {
@@ -89,6 +105,8 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
     public void stop(BundleContext context) throws Exception {
     	disposeParenRainbowColors();
     	stopLaunchListener();
+    	// We don't remove colors when deregistered, because, well, we don't have a
+    	// corresponding method on the ColorRegistry instance!
         plugin = null;
         super.stop(context);
     }
@@ -209,5 +227,15 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
 			}
 		}
 		return null;
+	}
+
+	
+	private IScanContext scanContext;
+
+	public synchronized IScanContext getDefaultScanContext() {
+		if (scanContext == null) {
+			scanContext = new StaticScanContext();
+		}
+		return scanContext;
 	}
 }

@@ -26,16 +26,16 @@ import clojuredev.launching.LaunchUtils;
 public class ClojureClient {
 	private static final Var remoteLoad;
 	private static final Var remoteLoadRead;
-	private static final Var localLoad;
-	private static final Var localLoadRead;
+	private static final Var loadString;
+//	private static final Var localLoadRead;
 	private static final Var starPort;
 	private final int port;
 	
 	static {
 		remoteLoad = RT.var("clojuredev.debug.clientrepl", "remote-load");
 		remoteLoadRead = RT.var("clojuredev.debug.clientrepl", "remote-load-read");
-		localLoad = RT.var("clojure.core", "local-load");
-		localLoadRead = RT.var("clojure.core", "local-load-read");
+		loadString = RT.var("clojure.core", "load-string");
+//		localLoadRead = RT.var("clojure.core", "local-load-read");
 		starPort = RT.var("clojuredev.debug.clientrepl", "*default-repl-port*");
 	}
 	
@@ -54,13 +54,13 @@ public class ClojureClient {
 		return invokeClojureVarWith(remoteLoadRead, remoteCode);
 	}
 	
-	public String localLoad(String localCode) {
-		return invokeClojureVarWith(localLoad, localCode).toString();
+	public static Object loadString(String localCode) {
+		return invokeLocalClojureVarWith(loadString, localCode);
 	}
 	
-	public Object localLoadRead(String localCode) {
-		return invokeClojureVarWith(localLoadRead, localCode);
-	}
+//	public Object localLoadRead(String localCode) {
+//		return invokeClojureVarWith(localLoadRead, localCode);
+//	}
 	
 	private Object invokeClojureVarWith(Var varToInvoke, String code) {
 		try {
@@ -71,6 +71,16 @@ public class ClojureClient {
 		 	return null;
 		} finally {
 			Var.popThreadBindings();
+		}
+	}
+	
+	
+	private static Object invokeLocalClojureVarWith(Var varToInvoke, String code) {
+		try {
+	        return varToInvoke.invoke(code);
+		} catch (final Exception e) {
+			ClojuredevPlugin.logError("following clojure code thrown an exception:'" + code + "'", e);
+		 	return null;
 		}
 	}
 	

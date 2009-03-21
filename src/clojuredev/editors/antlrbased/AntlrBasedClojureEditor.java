@@ -19,6 +19,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.FindReplaceDocumentAdapter;
 import org.eclipse.jface.text.IDocument;
@@ -34,22 +35,25 @@ import org.eclipse.jface.text.source.projection.ProjectionSupport;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.ContentAssistAction;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
-import org.eclipse.ui.editors.text.EditorsUI;
 
 import clojuredev.ClojuredevPlugin;
 import clojuredev.debug.ClojureClient;
 import clojuredev.editors.rulesbased.ClojureDocumentProvider;
 import clojuredev.editors.rulesbased.ClojurePartitionScanner;
+import clojuredev.lexers.ClojureLexer;
+import clojuredev.utils.editors.antlrbased.IScanContext;
 
 public class AntlrBasedClojureEditor extends TextEditor {
 	public static final String ID = "clojuredev.antlrbasededitor";
@@ -580,5 +584,46 @@ public class AntlrBasedClojureEditor extends TextEditor {
 			return ClojuredevPlugin.getDefault().getProjectClojureClient(file.getProject());
 		else 
 			return null;
+	}
+
+	/**
+	 * @param colorRegistry
+	 */
+	public static void registerEditorColors(ColorRegistry colorRegistry) {
+		RGB literal = new RGB(188,143,143);
+		RGB black = new RGB(0,0,0);
+		RGB gray = new RGB(128,128,128);
+		RGB greeen = new RGB(34,139,34);
+		
+		colorRegistry.put(ID + "_" + ClojureLexer.STRING, literal);
+		colorRegistry.put(ID + "_" + ClojureLexer.NUMBER, literal);
+		colorRegistry.put(ID + "_" + ClojureLexer.CHARACTER, literal);
+		colorRegistry.put(ID + "_" + ClojureLexer.NIL, literal);
+		colorRegistry.put(ID + "_" + ClojureLexer.BOOLEAN, literal);
+		colorRegistry.put(ID + "_" + ClojureLexer.OPEN_PAREN, black);
+		colorRegistry.put(ID + "_" + ClojureLexer.CLOSE_PAREN, black);
+		colorRegistry.put(ID + "_" + ClojureLexer.SPECIAL_FORM, new RGB(160,32,240));
+		colorRegistry.put(ID + "_" + ClojureLexer.SYMBOL, black);
+		colorRegistry.put(ID + "_" + IScanContext.SymbolType.FUNCTION, new RGB(218,112,214));
+		colorRegistry.put(ID + "_" + IScanContext.SymbolType.GLOBAL_VAR, black);
+		colorRegistry.put(ID + "_" + IScanContext.SymbolType.MACRO, new RGB(160,32,240));
+		colorRegistry.put(ID + "_" + IScanContext.SymbolType.SPECIAL_FORM, new RGB(160,32,240));
+		colorRegistry.put(ID + "_" + ClojureLexer.KEYWORD, new RGB(218,112,214));
+		colorRegistry.put(ID + "_" + ClojureLexer.SYNTAX_QUOTE, black);
+		colorRegistry.put(ID + "_" + ClojureLexer.UNQUOTE_SPLICING, black);
+		colorRegistry.put(ID + "_" + ClojureLexer.UNQUOTE, black);
+		colorRegistry.put(ID + "_" + ClojureLexer.COMMENT, new RGB(178,34,34));
+		colorRegistry.put(ID + "_" + ClojureLexer.SPACE, black);
+		colorRegistry.put(ID + "_" + ClojureLexer.LAMBDA_ARG, black);
+		colorRegistry.put(ID + "_" + ClojureLexer.METADATA_TYPEHINT, greeen);
+		colorRegistry.put(ID + "_" + ClojureLexer.T24, black);//'&'=20
+		colorRegistry.put(ID + "_" + ClojureLexer.T25, gray);//'['=23
+		colorRegistry.put(ID + "_" + ClojureLexer.T26, gray);//']'=24
+		colorRegistry.put(ID + "_" + ClojureLexer.T27, gray);//'{'=25
+		colorRegistry.put(ID + "_" + ClojureLexer.T28, gray);//'}'=26
+		colorRegistry.put(ID + "_" + ClojureLexer.T29, black);//'\''=27
+		colorRegistry.put(ID + "_" + ClojureLexer.T30, black);//'^'=28
+		colorRegistry.put(ID + "_" + ClojureLexer.T31, black);//'@'=29
+		colorRegistry.put(ID + "_" + ClojureLexer.T32, black);//'#'=30
 	}
 }
