@@ -41,7 +41,7 @@ public class LoadFileAction extends EvaluateTextAction {
 			return;
 		
 		String absoluteFilePath = editorFile.getLocation().toOSString();
-		String text = "(load-file \"" + absoluteFilePath.replaceAll("\\\\","\\\\\\\\").replaceAll("\"", "\\\\\"") + "\")";
+		String text = "(clojure.core/load-file \"" + absoluteFilePath.replaceAll("\\\\","\\\\\\\\").replaceAll("\"", "\\\\\"") + "\")";
 
 		evaluateText(text);
 	}
