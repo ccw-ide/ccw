@@ -36,8 +36,16 @@ public final class ClojureTokenScannerFactory {
 				u.addTokenType(IScanContext.SymbolType.FUNCTION);
 				u.addTokenType(IScanContext.SymbolType.GLOBAL_VAR);
 				u.addTokenType(IScanContext.SymbolType.MACRO);
+//				u.addBoldToken(IScanContext.SymbolType.MACRO);
 				u.addTokenType(IScanContext.SymbolType.SPECIAL_FORM);
+				
+				u.addItalicToken(IScanContext.SymbolType.JAVA_CLASS);
+				u.addItalicToken(IScanContext.SymbolType.JAVA_INSTANCE_METHOD);
+				u.addItalicToken(IScanContext.SymbolType.JAVA_STATIC_METHOD);
+
 				u.addTokenType(ClojureLexer.SPECIAL_FORM);
+//				u.addBoldToken(IScanContext.SymbolType.SPECIAL_FORM);
+//				u.addBoldToken(ClojureLexer.SPECIAL_FORM);
 				u.addTokenType(ClojureLexer.METADATA_TYPEHINT);
 //				u.addBoldToken(IScanContext.SymbolType.FUNCTION);
 //				u.addBoldToken(IScanContext.SymbolType.GLOBAL_VAR);

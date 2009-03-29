@@ -19,7 +19,7 @@ package clojuredev.utils.editors.antlrbased;
 public interface IScanContext {
 
 	enum SymbolType {
-		FUNCTION, MACRO, SPECIAL_FORM, GLOBAL_VAR
+		FUNCTION, MACRO, SPECIAL_FORM, GLOBAL_VAR, JAVA_CLASS, JAVA_INSTANCE_METHOD, JAVA_STATIC_METHOD
 	};
 	
 	/**

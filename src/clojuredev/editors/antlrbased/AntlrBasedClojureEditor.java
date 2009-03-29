@@ -593,7 +593,9 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		RGB literal = new RGB(188,143,143);
 		RGB black = new RGB(0,0,0);
 		RGB gray = new RGB(128,128,128);
-		RGB greeen = new RGB(34,139,34);
+		RGB green = new RGB(34,139,34);
+		RGB specialForm = new RGB(160,32,240);
+		RGB function = new RGB(218,112,214);
 		
 		colorRegistry.put(ID + "_" + ClojureLexer.STRING, literal);
 		colorRegistry.put(ID + "_" + ClojureLexer.NUMBER, literal);
@@ -602,12 +604,17 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		colorRegistry.put(ID + "_" + ClojureLexer.BOOLEAN, literal);
 		colorRegistry.put(ID + "_" + ClojureLexer.OPEN_PAREN, black);
 		colorRegistry.put(ID + "_" + ClojureLexer.CLOSE_PAREN, black);
-		colorRegistry.put(ID + "_" + ClojureLexer.SPECIAL_FORM, new RGB(160,32,240));
+		colorRegistry.put(ID + "_" + ClojureLexer.SPECIAL_FORM, specialForm);
 		colorRegistry.put(ID + "_" + ClojureLexer.SYMBOL, black);
-		colorRegistry.put(ID + "_" + IScanContext.SymbolType.FUNCTION, new RGB(218,112,214));
-		colorRegistry.put(ID + "_" + IScanContext.SymbolType.GLOBAL_VAR, black);
-		colorRegistry.put(ID + "_" + IScanContext.SymbolType.MACRO, new RGB(160,32,240));
-		colorRegistry.put(ID + "_" + IScanContext.SymbolType.SPECIAL_FORM, new RGB(160,32,240));
+		colorRegistry.put(ID + "_" + IScanContext.SymbolType.FUNCTION, function);
+		colorRegistry.put(ID + "_" + IScanContext.SymbolType.GLOBAL_VAR, green);
+		colorRegistry.put(ID + "_" + IScanContext.SymbolType.MACRO, specialForm);
+		colorRegistry.put(ID + "_" + IScanContext.SymbolType.SPECIAL_FORM, specialForm);
+		
+		colorRegistry.put(ID + "_" + IScanContext.SymbolType.JAVA_CLASS, black);
+		colorRegistry.put(ID + "_" + IScanContext.SymbolType.JAVA_STATIC_METHOD, black);
+		colorRegistry.put(ID + "_" + IScanContext.SymbolType.JAVA_INSTANCE_METHOD, black);
+		
 		colorRegistry.put(ID + "_" + ClojureLexer.KEYWORD, new RGB(218,112,214));
 		colorRegistry.put(ID + "_" + ClojureLexer.SYNTAX_QUOTE, black);
 		colorRegistry.put(ID + "_" + ClojureLexer.UNQUOTE_SPLICING, black);
@@ -615,7 +622,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		colorRegistry.put(ID + "_" + ClojureLexer.COMMENT, new RGB(178,34,34));
 		colorRegistry.put(ID + "_" + ClojureLexer.SPACE, black);
 		colorRegistry.put(ID + "_" + ClojureLexer.LAMBDA_ARG, black);
-		colorRegistry.put(ID + "_" + ClojureLexer.METADATA_TYPEHINT, greeen);
+		colorRegistry.put(ID + "_" + ClojureLexer.METADATA_TYPEHINT, green);
 		colorRegistry.put(ID + "_" + ClojureLexer.T24, black);//'&'=20
 		colorRegistry.put(ID + "_" + ClojureLexer.T25, gray);//'['=23
 		colorRegistry.put(ID + "_" + ClojureLexer.T26, gray);//']'=24
