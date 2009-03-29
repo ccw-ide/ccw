@@ -12,8 +12,6 @@ package clojuredev.editors.antlrbased;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -21,7 +19,6 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.FindReplaceDocumentAdapter;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewerExtension5;
@@ -48,6 +45,7 @@ import org.eclipse.ui.texteditor.ContentAssistAction;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 
+import clojuredev.ClojureCore;
 import clojuredev.ClojuredevPlugin;
 import clojuredev.debug.ClojureClient;
 import clojuredev.editors.rulesbased.ClojureDocumentProvider;
@@ -558,24 +556,8 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		}
 	}
 
-	/**
-	 * @return
-	 */
 	public String getDeclaringNamespace() {
-		try {
-			String searchRegexp = "ns\\s+([^\\s\\)#\\[\\'\\{]+)";
-			IRegion nsSymbolRegion = new FindReplaceDocumentAdapter(getDocument()).find(0, searchRegexp, true, true, false, true);
-			if (nsSymbolRegion == null)
-				return null;
-			
-			String matched = getDocument().get(nsSymbolRegion.getOffset(), nsSymbolRegion.getLength());
-			Matcher matcher = Pattern.compile(searchRegexp).matcher(matched);
-			matcher.find();
-			return matcher.group(1);
-		} catch (BadLocationException e) {
-			// A bug can explain to be here, nothing else
-			return null;
-		}
+		return ClojureCore.getDeclaringNamespace(getDocument().get());
 	}
 	
 	public ClojureClient getCorrespondingClojureClient() {

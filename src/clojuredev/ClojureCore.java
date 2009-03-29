@@ -25,6 +25,8 @@ package clojuredev;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -49,6 +51,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.ITextEditor;
 
+import clojure.lang.RT;
 import clojuredev.debug.ClojureClient;
 
 /**
@@ -198,6 +201,22 @@ public final class ClojureCore {
         return clojureProjects.values().toArray(new ClojureProject[] {});
     }
     
+	/**
+	 * Currently very basic: uses a regexp
+	 * @return
+	 */
+	public static String getDeclaringNamespace(String sourceText) {
+			String searchRegexp = "\\(\\s*ns\\s+([^\\s\\)#\\[\\'\\{]+)";
+			Matcher matcher = Pattern.compile(searchRegexp).matcher(sourceText);
+			
+			String result = null;
+			while (matcher.find()) {
+				result = matcher.group(1);
+			}
+			
+			return result;
+	}
+	
     /*
      *  TODO Still 1 more case to handle:
      *  - when a LIBRARY does not have source file in its classpath, then search attached source files folder/archive 
@@ -346,10 +365,26 @@ public final class ClojureCore {
     				break;
     			}
     		}
-			return (path == null) ? null : path.toString().replace('/', '.').replace('_', '-');
+    		if (path == null) {
+    			// file is not on the classpath
+    			return null;
+    		} else {
+//    			return path.toString().replace('/', '.').replace('_', '-');
+    			String ns = getDeclaringNamespace(getFileText(file));
+				return ns;
+    		}
 			
 		} catch (JavaModelException e) {
 			ClojuredevPlugin.logError("unable to determine the fragment root of the file " + file, e);
+			return null;
+		}
+    }
+    
+    private static String getFileText(IFile file) {
+    	try {
+			return (String) RT.var("clojure.core", "slurp").invoke(file.getLocation().toOSString());
+		} catch (Exception e) {
+			ClojuredevPlugin.logError("error while getting text from file " + file, e);
 			return null;
 		}
     }
