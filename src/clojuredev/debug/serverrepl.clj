@@ -101,9 +101,30 @@
   { :name "namespaces" :type "namespaces"
     :children (apply vector (sort-by :name (map ns-info (all-ns)))) })
 
+; The following function (splitted-match) taken from vimClojure with the permission of the author.
+; Please look for vimClojure license for more detail
+(defn splitted-match
+  "Splits pattern and candidate at the given delimiters and matches
+  the parts of the pattern with the parts of the candidate. Match
+  means „startsWith“ here."
+  [pattern candidate delimiters]
+  (if-let [delimiters (seq delimiters)]
+    (let [delim           (first delimiters)
+          pattern-split   (.split pattern delim)
+          candidate-split (.split candidate delim)]
+      (and (<= (count pattern-split) (count candidate-split))
+           (reduce #(and %1 %2) (map #(splitted-match %1 %2 (rest delimiters))
+                                     pattern-split
+                                     candidate-split))))
+    (.startsWith candidate pattern)))
+
+
 (defn code-complete [ns-str prefix only-publics]
-  (when-let [ns (find-ns (symbol ns-str))]
+  (when-let [ns (find-ns (symbol ns-str))] ; TODO here allow ns to also be written as c.c for e.g. clojure.core, so multiple namespaces could be searched
     (let [search-fn (if only-publics ns-publics ns-map)]
-      (into [] (map (fn [[k v]] [k (str v) (if (var? v) (var-info v) nil)]) (filter #(.startsWith (first %) prefix) (map #(vector (str (key %)) (val %)) (search-fn ns))))))))
+      (into [] (map (fn [[k v]] [k (str v) (if (var? v) (var-info v) nil)])
+                    (filter #(or (.startsWith (first %) prefix) (splitted-match prefix (first %) ["-"]))
+                            (map #(vector (str (key %)) (val %)) 
+                                 (search-fn ns))))))))
    
 ;(remove-ns 'clojuredev.debug.serverrepl)   

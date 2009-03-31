@@ -49,12 +49,15 @@ import clojuredev.debug.ClojureClient;
 import clojuredev.outline.NamespaceBrowser;
 
 public class ClojureProposalProcessor implements IContentAssistProcessor {
+	private static final int MAX_JAVA_SEARCH_RESULT_NUMBER = 200;
+	
+
 	private static final String ERROR_MESSAGE_NO_REPL_FOUND = "Impossible to connect to running REPL.";
 	private static final String ERROR_MESSAGE_INTERNAL_ERROR = "Internal clojure-dev plugin error. Please file an issue in the tracker system";
 	private static final String ERROR_MESSAGE_COMMUNICATION_ERROR = "Communication problem with the REPL. Would you consider kill it and launch a fresh one?";
 	private static final String ERROR_MESSAGE_NULL_PREFIX = "Incorrect prefix found. Probably an error with clojure-dev plugin. Please file an issue in the tracker system";
 	private static final String ERROR_MESSAGE_NO_NAMESPACE_FOUND = "clojure-dev was not available to guess the namespace this file is attached to. Please report a request for enhancement in the tracker system";
-	private static final String ERROR_MESSAGE_TOO_MANY_COMPLETIONS = "Too many proposals found. Only first 100 found are shown";
+	private static final String ERROR_MESSAGE_TOO_MANY_COMPLETIONS = "Too many proposals found. Only first " + MAX_JAVA_SEARCH_RESULT_NUMBER + " found are shown";
 	private static final String MESSAGE_JAVA_COMPLETION = "Completion for all available java methods";
 	private static final String MESSAGE_CLOJURE_COMPLETION = "Completion for symbols visible from current namespace";
 	
@@ -96,6 +99,13 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 				return null;
 			}
 			
+			final int PREFIX_MIN_LENGTH = 3;
+			if (prefix.length() < PREFIX_MIN_LENGTH) {
+				ClojuredevPlugin.logWarning("completion proposal asked for a prefix whose length "
+						+ "is less than the authorized one (" + PREFIX_MIN_LENGTH + "):'" + prefix + "'");
+				return null;
+			}
+			
 			final String nsPart;
 			final String symbolPrefix;
 			boolean fullyQualified = false;
@@ -114,7 +124,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 			// Add dynamic completion proposals
 			for (List l: dynamicSymbols) {
 				String s = (String) l.get(0);
-				if (s.startsWith(symbolPrefix)) {
+//				if (s.startsWith(symbolPrefix)) {
 					String displayString = s;
 					StringBuilder additionalString = new StringBuilder();
 					if (l.get(2) != null) {
@@ -152,8 +162,9 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 					CompletionProposal cp = new CompletionProposal(s, wordStart, prefix.length(), s.length(), null, displayString, null, additionalString.toString());
 					
 					proposals.add(cp);
-				}
+//				}
 			}
+			
 			assistant.setStatusMessage(MESSAGE_CLOJURE_COMPLETION);
 			final int WORD_START = wordStart;
 			// Compute and add java completion proposal
@@ -161,7 +172,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 				final String methodPrefix = prefix.substring(1);
 				System.out.println("method prefix:" + methodPrefix );
 				boolean isPattern = (methodPrefix.contains("*") || methodPrefix.contains("?"));
-				boolean autoAddEndWildcard = !methodPrefix.endsWith("*");
+				boolean autoAddEndWildcard = isPattern && !methodPrefix.endsWith("*");
 				SearchPattern pattern = SearchPattern.createPattern(
 						autoAddEndWildcard ? methodPrefix + "*" : methodPrefix,
 						IJavaSearchConstants.METHOD, // | IJavaSearchConstants.FIELD,
@@ -185,10 +196,10 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 							@Override
 							public void acceptSearchMatch(SearchMatch match) throws CoreException {
 								counter++;
-//								if (counter >= 100) {
-//									System.out.println("too much results, throwing exception");
-//									throw new CoreException(Status.OK_STATUS);
-//								}
+								if (counter >= MAX_JAVA_SEARCH_RESULT_NUMBER) {
+									System.out.println("too much results (>" + MAX_JAVA_SEARCH_RESULT_NUMBER + "), throwing exception");
+									throw new CoreException(Status.OK_STATUS);
+								}
 								proposals.add(new LazyCompletionProposal(
 										(IMethod) match.getElement(),
 										methodPrefix,
@@ -227,7 +238,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 				String patternStr = nsPart + "." + symbolPrefix;
 				System.out.println("pattern: " + patternStr);
 				boolean isPattern = (patternStr.contains("*") || patternStr.contains("?"));
-				boolean autoAddEndWildcard = !patternStr.endsWith("*");
+				boolean autoAddEndWildcard = isPattern && !patternStr.endsWith("*");
 				SearchPattern pattern = SearchPattern.createPattern(
 						autoAddEndWildcard ? patternStr + "*" : patternStr,
 						IJavaSearchConstants.METHOD, // | IJavaSearchConstants.FIELD,
@@ -251,10 +262,10 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 							@Override
 							public void acceptSearchMatch(SearchMatch match) throws CoreException {
 								counter++;
-//								if (counter >= 100) {
-//									System.out.println("too much results, throwing exception");
-//									throw new CoreException(Status.OK_STATUS);
-//								}
+								if (counter >= MAX_JAVA_SEARCH_RESULT_NUMBER) {
+									System.out.println("too much results (>" + MAX_JAVA_SEARCH_RESULT_NUMBER + "), throwing exception");
+									throw new CoreException(Status.OK_STATUS);
+								}
 								proposals.add(new LazyCompletionProposal(
 										(IMethod) match.getElement(),
 										nsPart + "/" + symbolPrefix,
