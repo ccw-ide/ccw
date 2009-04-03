@@ -2,7 +2,7 @@
 <feature
       id="clojuredev.feature"
       label="%featureName"
-      version="0.0.29"
+      version="0.0.30"
       provider-name="%providerName"
       plugin="clojuredev.branding">
 
@@ -23,6 +23,7 @@
    </url>
 
    <requires>
+      <import plugin="org.eclipse.core.runtime" version="3.4.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.ui.ide"/>
       <import plugin="org.eclipse.jdt.launching"/>
@@ -37,32 +38,30 @@
       <import plugin="org.eclipse.ui.views" match="greaterOrEqual"/>
       <import plugin="org.eclipse.core.filesystem"/>
       <import plugin="org.eclipse.core.expressions"/>
-      <import plugin="org.eclipse.core.runtime" version="3.4.0" match="greaterOrEqual"/>
    </requires>
 
    <plugin
          id="clojure"
          download-size="0"
          install-size="0"
-         version="0.0.0.20090120_r1217_compile_patch"/>
+         version="0.0.0.20090404_r1338"/>
 
    <plugin
          id="clojuredev"
          download-size="0"
          install-size="0"
-         version="0.0.29"/>
+         version="0.0.30"/>
 
    <plugin
          id="clojurecontrib"
          download-size="0"
          install-size="0"
-         version="0.0.0.20090120_r394"
-         unpack="false"/>
+         version="0.0.0.20090404_r633"/>
 
    <plugin
          id="clojuredev.branding"
          download-size="0"
          install-size="0"
-         version="0.0.29"/>
+         version="0.0.30"/>
 
 </feature>
