@@ -203,6 +203,7 @@ public final class ClojureCore {
     
 	/**
 	 * Currently very basic: uses a regexp
+	 * TODO: should also work with in-ns calls ?
 	 * @return
 	 */
 	public static String getDeclaringNamespace(String sourceText) {
