@@ -39,7 +39,7 @@ public class ClojureLaunchDelegate extends
 	@Override
 	public String getVMArguments(ILaunchConfiguration configuration) throws CoreException {
 		return " -D" + "clojure.remote.server.port" + "=" + Integer.toString(configuration.getAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN, LaunchUtils.DEFAULT_SERVER_PORT))
-			+ super.getVMArguments(configuration);
+			+ " " + super.getVMArguments(configuration);
 	}
 	
 	@Override
