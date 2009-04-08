@@ -254,6 +254,21 @@
             commandId="clojuredev.ui.edit.text.clojure.evaluate.toplevel.s.expression"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
+            sequence="M1+M2+X"
+            contextId="clojuredev.ui.clojureEditorScope"
+            commandId="clojuredev.ui.edit.text.clojure.evaluate.toplevel.s.expression"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            platform="carbon"/>
+      <key
+            sequence="M2+M3+X C"
+            commandId="clojuredev.debug.ui.clojureShortcut.run"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M1+M3+X C"
+            commandId="clojuredev.debug.ui.clojureShortcut.run"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            platform="carbon"/>
+      <key
             sequence="M1+M3+L"
             contextId="clojuredev.ui.clojureEditorScope"
             commandId="clojuredev.ui.edit.text.clojure.load.file"
@@ -262,10 +277,6 @@
             sequence="M1+M3+K"
             contextId="clojuredev.ui.clojureEditorScope"
             commandId="clojuredev.ui.edit.text.clojure.compile.lib"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-      <key
-            sequence="M2+M3+X C"
-            commandId="clojuredev.debug.ui.clojureShortcut.run"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
             
 	</extension>
