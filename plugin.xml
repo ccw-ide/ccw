@@ -154,24 +154,24 @@
 
    <extension
          point="org.eclipse.ui.commands">
+      <command
+            categoryId="org.eclipse.ui.category.navigate"
+            description="%command.gotoMatchingBracket.description"
+            id="clojuredev.ui.edit.text.clojure.goto.matching.bracket"
+            name="%command.gotoMatchingBracket.name">
+      </command>
 <!-- navigate -->
       <command
-            name="%command.gotoMatchingBracket.name"
-            description="%command.gotoMatchingBracket.description"
             categoryId="org.eclipse.ui.category.navigate"
-            id="clojuredev.ui.edit.text.clojure.goto.matching.bracket">
+            description="%command.gotoPreviousMember.description"
+            id="clojuredev.ui.edit.text.clojure.goto.previous.member"
+            name="%command.gotoPreviousMember.name">
       </command>
       <command
-            name="%command.gotoNextMember.name"
+            name="Go to matching bracket"
             description="%command.gotoNextMember.description"
             categoryId="org.eclipse.ui.category.navigate"
             id="clojuredev.ui.edit.text.clojure.goto.next.member">
-      </command>
-      <command
-            name="%command.gotoPreviousMember.name"
-            description="%command.gotoPreviousMember.description"
-            categoryId="org.eclipse.ui.category.navigate"
-            id="clojuredev.ui.edit.text.clojure.goto.previous.member">
       </command>
       <command
             name="%command.selectToplevelSExpression.name"
@@ -285,27 +285,124 @@
       <menuContribution
             locationURI="menu:org.eclipse.ui.main.menu?after=additions">
          <menu
-               icon="icons/clojure16x16.png"
-               id="clojuredev.topmenu"
-               label="Clojure-dev"
+               id="clojuredev.menus.clojure"
+               label="Clojure"
                mnemonic="C"
-               tooltip="Clojure development assistance">
-            <visibleWhen
-                  checkEnabled="false">
-               <with
-                     variable="activeEditorId">
-                  <equals
-                        value="clojuredev.antlrbasededitor_">
-                  </equals>
-               </with>
-            </visibleWhen>
+               tooltip="Menu for Clojure related commands">
             <command
-                  commandId="clojuredev.ui.edit.text.clojure.goto.matching.bracket">
+                  commandId="clojuredev.ui.edit.text.clojure.goto.matching.bracket"
+                  label="Go to matching bracket"
+                  style="push">
+            </command>
+            <separator
+                  name="clojuredev.menus.separator1"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="clojuredev.ui.edit.text.clojure.goto.previous.member"
+                  label="Go to the previous top level s-expression"
+                  style="push">
+            </command>
+            <command
+                  commandId="clojuredev.ui.edit.text.clojure.goto.next.member"
+                  label="Go to the next top level s-expression"
+                  style="push">
             </command>
             <command
                   commandId="clojuredev.ui.edit.text.clojure.select.toplevel.s.expression"
+                  label="Select top level s-expression"
                   style="push">
             </command>
+            <command
+                  commandId="clojuredev.ui.edit.text.clojure.evaluate.toplevel.s.expression"
+                  label="Evaluate Top Level s-expression"
+                  style="push">
+            </command>
+            <separator
+                  name="clojuredev.menus.separator2"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="clojuredev.ui.edit.text.clojure.load.file"
+                  label="Load clojure file in REPL"
+                  style="push">
+            </command>
+            <command
+                  commandId="clojuredev.ui.edit.text.clojure.compile.lib"
+                  label="Compile clojure file in REPL"
+                  style="push">
+            </command>
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activePartId">
+                  <equals
+                        value="clojuredev.antlrbasededitor">
+                  </equals>
+               </with>
+            </visibleWhen>
+         </menu>
+      </menuContribution>
+      <menuContribution
+            locationURI="popup:org.eclipse.ui.popup.any?after=additions">
+         <menu
+               icon="icons/clojure16x16.png"
+               id="clojuredev.menus.clojure"
+               label="Clojure"
+               mnemonic="C"
+               tooltip="Menu for Clojure related commands">
+            <command
+                  commandId="clojuredev.ui.edit.text.clojure.goto.matching.bracket"
+                  label="Go to matching bracket"
+                  style="push">
+            </command>
+            <separator
+                  name="clojuredev.menus.separator1"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="clojuredev.ui.edit.text.clojure.goto.previous.member"
+                  label="Go to previous top level s-expression"
+                  style="push">
+            </command>
+            <command
+                  commandId="clojuredev.ui.edit.text.clojure.goto.next.member"
+                  label="Go to next top level s-expression"
+                  style="push">
+            </command>
+            <command
+                  commandId="clojuredev.ui.edit.text.clojure.select.toplevel.s.expression"
+                  label="Select top level s-expression"
+                  style="push">
+            </command>
+            <separator
+                  name="clojuredev.menus.separator2"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="clojuredev.ui.edit.text.clojure.evaluate.toplevel.s.expression"
+                  label="Evaluate Top Level s-expression"
+                  style="push">
+            </command>
+            <command
+                  commandId="clojuredev.ui.edit.text.clojure.load.file"
+                  label="Load clojure file in REPL"
+                  style="push">
+            </command>
+            <command
+                  commandId="clojuredev.ui.edit.text.clojure.compile.lib"
+                  label="Compile clojure file in REPL"
+                  style="push">
+            </command>
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activePartId">
+                  <equals
+                        value="clojuredev.antlrbasededitor">
+                  </equals>
+               </with>
+            </visibleWhen>
          </menu>
       </menuContribution>
    </extension>
