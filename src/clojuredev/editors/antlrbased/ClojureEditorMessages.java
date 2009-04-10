@@ -17,9 +17,9 @@ import org.eclipse.osgi.util.NLS;
  * Helper class to get NLSed messages.
  */
 final class ClojureEditorMessages extends NLS {
+	private static final String BUNDLE_NAME= "clojuredev.editors.antlrbased.ClojureEditorMessages";
 
-	private static final String BUNDLE_FOR_CONSTRUCTED_KEYS= ClojureEditorMessages.class.getCanonicalName();
-	private static ResourceBundle bundleForConstructedKeys= ResourceBundle.getBundle(BUNDLE_FOR_CONSTRUCTED_KEYS);
+	private static ResourceBundle bundleForConstructedKeys= ResourceBundle.getBundle(BUNDLE_NAME);
 
 	/**
 	 * Returns the message bundle which contains constructed keys.
@@ -28,9 +28,6 @@ final class ClojureEditorMessages extends NLS {
 	public static ResourceBundle getBundleForConstructedKeys() {
 		return bundleForConstructedKeys;
 	}
-
-	private static final String BUNDLE_NAME= ClojureEditorMessages.class.getName();
-
 
 	private ClojureEditorMessages() {
 		// Not intended to be instanciated

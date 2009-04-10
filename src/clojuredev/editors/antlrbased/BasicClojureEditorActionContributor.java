@@ -44,13 +44,13 @@ public class BasicClojureEditorActionContributor extends BasicTextEditorActionCo
 
 		ResourceBundle b= ClojureEditorMessages.getBundleForConstructedKeys();
 
-		gotoMatchingBracket= new RetargetTextEditorAction( b, "GotoMatchingBracket."); //$NON-NLS-1$
+		gotoMatchingBracket= new RetargetTextEditorAction( b, "GotoMatchingBracket_"); //$NON-NLS-1$
 		gotoMatchingBracket.setActionDefinitionId(IClojureEditorActionDefinitionIds.GOTO_MATCHING_BRACKET);
 		
-		gotoNextMember= new RetargetTextEditorAction( b, "GotoNextMember."); //$NON-NLS-1$
+		gotoNextMember= new RetargetTextEditorAction( b, "GotoNextMember_"); //$NON-NLS-1$
 		gotoNextMember.setActionDefinitionId(IClojureEditorActionDefinitionIds.GOTO_NEXT_MEMBER);
 
-		gotoPreviousMember= new RetargetTextEditorAction( b, "GotoPreviousMember."); //$NON-NLS-1$
+		gotoPreviousMember= new RetargetTextEditorAction( b, "GotoPreviousMember_"); //$NON-NLS-1$
 		gotoPreviousMember.setActionDefinitionId(IClojureEditorActionDefinitionIds.GOTO_PREVIOUS_MEMBER);
 	}
 
