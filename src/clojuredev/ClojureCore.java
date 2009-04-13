@@ -239,6 +239,16 @@ public final class ClojureCore {
     	if (searchedFileName==null) {
     		return false;
     	}
+    	// TODO at some point in time, remove the second behaviour
+    	// (when I estimate everybody is using the newer clojure version
+    	if (searchedFileName.contains("/")) {
+    		// new clojure version with namespace in searchedFileName
+    		searchedNS = searchedFileName.substring(0, searchedFileName.lastIndexOf('.')).replace('/', '.');
+    		searchedFileName = searchedFileName.substring(1 + searchedFileName.lastIndexOf('/'));
+    	} else {
+    		// old clojure version without namespace in searchedFileName
+    		// let it be
+    	}
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 		IJavaProject javaProject = JavaCore.create(project);
 		IClasspathEntry[] classpathEntries;
