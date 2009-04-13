@@ -2,7 +2,7 @@
 <feature
       id="clojuredev.feature"
       label="%featureName"
-      version="0.0.31"
+      version="0.0.32"
       provider-name="%providerName"
       plugin="clojuredev.branding">
 
@@ -50,7 +50,7 @@
          id="clojuredev"
          download-size="0"
          install-size="0"
-         version="0.0.31"/>
+         version="0.0.32"/>
 
    <plugin
          id="clojurecontrib"
@@ -62,6 +62,6 @@
          id="clojuredev.branding"
          download-size="0"
          install-size="0"
-         version="0.0.31"/>
+         version="0.0.32"/>
 
 </feature>
