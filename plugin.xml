@@ -540,5 +540,11 @@
           class="clojuredev.preferences.EditorPreferencePage"
           id="clojuredev.preferences.EditorPreferencePage">
     </page>
+    <page
+          name="Syntax Coloring"
+          category="clojuredev.preferences.EmptyPreferencePage"
+          class="clojuredev.preferences.SyntaxColoringPreferencePage"
+          id="clojuredev.preferences.SyntaxColoringPreferencePage">
+    </page>
  </extension>
 </plugin>

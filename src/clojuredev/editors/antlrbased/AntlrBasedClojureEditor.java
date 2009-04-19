@@ -17,6 +17,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -572,12 +573,14 @@ public class AntlrBasedClojureEditor extends TextEditor {
 	 * @param colorRegistry
 	 */
 	public static void registerEditorColors(ColorRegistry colorRegistry) {
+	    IPreferenceStore store = ClojuredevPlugin.getDefault().getPreferenceStore();
+	    
 		RGB literal = new RGB(188,143,143);
 		RGB black = new RGB(0,0,0);
 		RGB gray = new RGB(128,128,128);
 		RGB green = new RGB(34,139,34);
 		RGB specialForm = new RGB(160,32,240);
-		RGB function = new RGB(218,112,214);
+		RGB function = PreferenceConverter.getColor(store, clojuredev.preferences.PreferenceConstants.EDITOR_FUNCTION_COLOR);
 		
 		colorRegistry.put(ID + "_" + ClojureLexer.STRING, literal);
 		colorRegistry.put(ID + "_" + ClojureLexer.NUMBER, literal);

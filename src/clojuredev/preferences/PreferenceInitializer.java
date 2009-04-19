@@ -30,5 +30,8 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
                 StringConverter.asString(new RGB(150, 150, 150)));
 	    store.setDefault(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH, 2);
 	    store.setDefault(clojuredev.preferences.PreferenceConstants.SWITCH_TO_NS_ON_REPL_STARTUP, true);
+	    
+	    store.setDefault(clojuredev.preferences.PreferenceConstants.EDITOR_FUNCTION_COLOR, 
+                StringConverter.asString(new RGB(218,112,214)));
 	}
 }

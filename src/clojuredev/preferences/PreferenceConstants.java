@@ -16,6 +16,7 @@ package clojuredev.preferences;
  */
 public class PreferenceConstants {
 
-	public static final String SWITCH_TO_NS_ON_REPL_STARTUP = "clojuredev.preferences.switch_to_ns_on_repl_startup";
+	public static final String SWITCH_TO_NS_ON_REPL_STARTUP = "clojuredev.preferences.switch_to_ns_on_repl_startup"; //$NON-NLS-1$
 
+	public static final String EDITOR_FUNCTION_COLOR = "clojuredev.preferences.editor_function_color"; //$NON-NLS-1$
 }
