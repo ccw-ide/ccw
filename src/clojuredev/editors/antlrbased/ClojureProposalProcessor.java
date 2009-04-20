@@ -42,11 +42,11 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.Display;
 
 import clojuredev.ClojuredevPlugin;
 import clojuredev.debug.ClojureClient;
 import clojuredev.outline.NamespaceBrowser;
+import clojuredev.util.ClojureDocUtils;
 
 public class ClojureProposalProcessor implements IContentAssistProcessor {
 	private static final int MAX_JAVA_SEARCH_RESULT_NUMBER = 200;
@@ -126,35 +126,13 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 				String s = (String) l.get(0);
 //				if (s.startsWith(symbolPrefix)) {
 					String displayString = s;
-					StringBuilder additionalString = new StringBuilder();
+					String additionalString = "";
 					if (l.get(2) != null) {
 						String ns = (String) (((Map) l.get(2)).get(NamespaceBrowser.KEYWORD_NS));
 						if (ns != null && !ns.trim().equals(""))
 							displayString += " - " + ns;
 
-						String args = (String) (((Map) l.get(2)).get(NamespaceBrowser.KEYWORD_ARGLISTS));
-						if (args != null && !args.trim().equals("")) {
-							additionalString.append("<p><b>Arguments List(s)</b><br/>");
-							
-							String[] argsLines = args.split("\n");
-							boolean firstLine = true;
-							for (String line: argsLines) {
-								if (line.startsWith("("))
-									line = line.substring(1);
-								if (line.endsWith(")"))
-									line = line.substring(0, line.length() - 1);
-								if (firstLine)
-									firstLine = false;
-								else
-									additionalString.append("<br/>");
-								additionalString.append(line);
-							}
-							additionalString.append("</p><br/>");
-						}
-						
-						String docString = (String) (((Map) l.get(2)).get(NamespaceBrowser.KEYWORD_DOC));
-						if (docString != null && !docString.trim().equals(""))
-							additionalString.append("<p><b>Documentation</b><br/>").append(docString).append("</p>");
+						additionalString = ClojureDocUtils.getHtmlVarDocInfo(l.get(2));
 					}
 					if (fullyQualified) {
 					    s = nsPart + '/' + s;

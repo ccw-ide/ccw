@@ -56,6 +56,7 @@ import clojure.lang.Keyword;
 import clojuredev.ClojureCore;
 import clojuredev.ClojuredevPlugin;
 import clojuredev.debug.ClojureClient;
+import clojuredev.util.ClojureDocUtils;
 
 public class NamespaceBrowser extends ViewPart implements ISelectionProvider, ISelectionChangedListener {
 	/**
@@ -74,8 +75,6 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 	private static final Keyword KEYWORD_CHILDREN = Keyword.intern(null, "children");
 	private static final Keyword KEYWORD_TYPE = Keyword.intern(null, "type");
 	public static final Keyword KEYWORD_PRIVATE = Keyword.intern(null, "private");
-	public static final Keyword KEYWORD_DOC = Keyword.intern(null, "doc");
-	public static final Keyword KEYWORD_ARGLISTS = Keyword.intern(null, "arglists");
 	public static final Keyword KEYWORD_NS = Keyword.intern(null, "ns");
 	private static final Keyword KEYWORD_FILE = Keyword.intern(null, "file");
 	private static final Keyword KEYWORD_LINE = Keyword.intern(null, "line");
@@ -225,7 +224,7 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 					String name = (String) elem.get(KEYWORD_NAME);
 					boolean nameMatches = searchInName && name != null && pattern.matcher(name).find();
 
-					String doc = (String) elem.get(KEYWORD_DOC);
+					String doc = (String) elem.get(ClojureDocUtils.KEYWORD_DOC);
 					boolean docMatches = searchInDoc && doc != null && pattern.matcher(doc).find();
 
 					return nameMatches || docMatches;
@@ -300,27 +299,7 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 	private static class LabelProvider extends CellLabelProvider {
 
 		public String getToolTipText(Object element) {
-			StringBuilder result = new StringBuilder();
-
-			Object maybeArglist = ((Map) element).get(KEYWORD_ARGLISTS);
-			if (maybeArglist != null) {
-				result.append("arglists: ");
-				result.append(maybeArglist);
-			}
-
-			Object maybeDoc = ((Map) element).get(KEYWORD_DOC);
-			if (maybeDoc != null) {
-				if (result.length() > 0) {
-					result.append("\n\n");
-				}
-				result.append(maybeDoc);
-			}
-
-			if (result.length() != 0) {
-				return result.toString();
-			} else {
-				return "no documentation information";
-			}
+			return ClojureDocUtils.getVarDocInfo(element);
 		}
 
 		public Point getToolTipShift(Object object) {
