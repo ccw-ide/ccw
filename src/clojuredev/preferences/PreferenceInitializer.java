@@ -32,6 +32,18 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	    store.setDefault(clojuredev.preferences.PreferenceConstants.SWITCH_TO_NS_ON_REPL_STARTUP, true);
 	    
 	    store.setDefault(clojuredev.preferences.PreferenceConstants.EDITOR_FUNCTION_COLOR, 
-                StringConverter.asString(new RGB(218,112,214)));
+                StringConverter.asString(new RGB(218, 112, 214)));
+        store.setDefault(clojuredev.preferences.PreferenceConstants.EDITOR_LITERAL_COLOR, 
+                StringConverter.asString(new RGB(188, 143, 143)));
+        store.setDefault(clojuredev.preferences.PreferenceConstants.EDITOR_SPECIAL_FORM_COLOR, 
+                StringConverter.asString(new RGB(160, 32, 240)));
+        store.setDefault(clojuredev.preferences.PreferenceConstants.EDITOR_COMMENT_COLOR, 
+                StringConverter.asString(new RGB(178, 34, 34)));
+        store.setDefault(clojuredev.preferences.PreferenceConstants.EDITOR_GLOBAL_VAR_COLOR, 
+                StringConverter.asString(new RGB(34, 139, 34)));
+        store.setDefault(clojuredev.preferences.PreferenceConstants.EDITOR_KEYWORD_COLOR, 
+                StringConverter.asString(new RGB(218, 112, 214)));
+        store.setDefault(clojuredev.preferences.PreferenceConstants.EDITOR_METADATA_TYPEHINT_COLOR, 
+                StringConverter.asString(new RGB(34, 139, 34)));
 	}
 }

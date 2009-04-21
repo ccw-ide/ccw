@@ -25,7 +25,7 @@ public class Messages extends NLS {
     
     public static String ClojurePreferencePage_switch_to_ns_on_repl_startup;
 
-    public static String SyntaxColoringPreferencePage_function_color;
+    public static String SyntaxColoringPreferencePage_function;
 
     // TODO new messages in properties
     public static String SyntaxColoringPreferencePage_link;
@@ -43,6 +43,20 @@ public class Messages extends NLS {
     public static String SyntaxColoringPreferencePage_strikethrough;
 
     public static String SyntaxColoringPreferencePage_underline;
+
+    public static String SyntaxColoringPreferencePage_literal;
+
+    public static String SyntaxColoringPreferencePage_specialForm;
+
+    public static String SyntaxColoringPreferencePage_comment;
+
+    public static String SyntaxColoringPreferencePage_globalVar;
+
+    public static String SyntaxColoringPreferencePage_keyword;
+
+    public static String SyntaxColoringPreferencePage_metadataTypehint;
+
+    public static String SyntaxColoringPreferencePage_preview;
 
     static {
         // initialize resource bundle

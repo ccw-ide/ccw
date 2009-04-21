@@ -34,28 +34,17 @@ public class EditorPreferencePage extends FieldEditorPreferencePage implements
      * restore itself.
      */
     public void createFieldEditors() {
-        /*addField(new DirectoryFieldEditor(clojuredev.preferences.PreferenceConstants.P_PATH, 
-                Messages.ClojurePreferencePage_4, getFieldEditorParent()));*/
         addField(
             new BooleanFieldEditor(
                 PreferenceConstants.EDITOR_MATCHING_BRACKETS,
                 Messages.ClojurePreferencePage_highlight_matching_brackets,
                 getFieldEditorParent()));
 
-/*      addField(new RadioGroupFieldEditor(
-                clojuredev.preferences.PreferenceConstants.P_CHOICE,
-            Messages.ClojurePreferencePage_2,
-            1,
-            new String[][] { { Messages.ClojurePreferencePage_1, Messages.ClojurePreferencePage_5 }, {
-                Messages.ClojurePreferencePage_6, Messages.ClojurePreferencePage_7 }
-        }, getFieldEditorParent()));*/
-/*      addField(
-            new StringFieldEditor(clojuredev.preferences.PreferenceConstants.P_STRING, Messages.ClojurePreferencePage_8, getFieldEditorParent()));*/
         addField(
-                new IntegerFieldEditor(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH, Messages.ClojurePreferencePage_displayed_tab_width, getFieldEditorParent()));
+            new IntegerFieldEditor(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH, Messages.ClojurePreferencePage_displayed_tab_width, getFieldEditorParent()));
         
         addField(
-        		new BooleanFieldEditor(clojuredev.preferences.PreferenceConstants.SWITCH_TO_NS_ON_REPL_STARTUP, Messages.ClojurePreferencePage_switch_to_ns_on_repl_startup, getFieldEditorParent()));
+    		new BooleanFieldEditor(clojuredev.preferences.PreferenceConstants.SWITCH_TO_NS_ON_REPL_STARTUP, Messages.ClojurePreferencePage_switch_to_ns_on_repl_startup, getFieldEditorParent()));
     }
 
     /* (non-Javadoc)

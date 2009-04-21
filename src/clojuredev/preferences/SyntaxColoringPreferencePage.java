@@ -16,7 +16,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.Preferences;
 
@@ -63,6 +66,10 @@ import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentPartitioner;
+import org.eclipse.jface.text.TextUtilities;
+import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.projection.ProjectionViewer;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -74,7 +81,11 @@ import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.jdt.core.JavaCore;
 
 import clojuredev.ClojuredevPlugin;
+import clojuredev.editors.antlrbased.ClojureSourceViewer;
+import clojuredev.editors.antlrbased.ClojureSourceViewerConfiguration;
 import clojuredev.editors.rulesbased.ClojureColorManager;
+import clojuredev.editors.rulesbased.ClojurePartitionScanner;
+import clojuredev.editors.rulesbased.ClojurePartitioner;
 import clojuredev.preferences.PreferenceConstants;
 
 import org.eclipse.jdt.ui.text.IColorManager;
@@ -237,8 +248,11 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
     
          /* @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
          */
+        @SuppressWarnings("unchecked")
         public Object[] getElements(Object inputElement) {
-            return fListModel.toArray();
+            return inputElement instanceof List
+                ? ((List) inputElement).toArray()
+                : null;
         }
 
         /* @see org.eclipse.jface.viewers.IContentProvider#dispose() */
@@ -272,20 +286,14 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
      * The keys of the overlay store.
      */
     private final String[][] fSyntaxColorListModel= new String[][] {
-            { Messages.SyntaxColoringPreferencePage_function_color, PreferenceConstants.EDITOR_FUNCTION_COLOR },
-/*            { Messages.SyntaxColoringPreferencePage_javaDocHtmlTags, PreferenceConstants.EDITOR_JAVADOC_TAG_COLOR },
-            { Messages.SyntaxColoringPreferencePage_javaDocLinks, PreferenceConstants.EDITOR_JAVADOC_LINKS_COLOR },
-            { Messages.SyntaxColoringPreferencePage_javaDocOthers, PreferenceConstants.EDITOR_JAVADOC_DEFAULT_COLOR },
-            { Messages.SyntaxColoringPreferencePage_multiLineComment, PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_COLOR },
-            { Messages.SyntaxColoringPreferencePage_singleLineComment, PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_COLOR },
-            { Messages.SyntaxColoringPreferencePage_javaCommentTaskTags, PreferenceConstants.EDITOR_TASK_TAG_COLOR },
-            { Messages.SyntaxColoringPreferencePage_keywords, PreferenceConstants.EDITOR_JAVA_KEYWORD_COLOR },
-            { Messages.SyntaxColoringPreferencePage_returnKeyword, PreferenceConstants.EDITOR_JAVA_KEYWORD_RETURN_COLOR },
-            { Messages.SyntaxColoringPreferencePage_operators, PreferenceConstants.EDITOR_JAVA_OPERATOR_COLOR },
-            { Messages.SyntaxColoringPreferencePage_brackets, PreferenceConstants.EDITOR_JAVA_BRACKET_COLOR },
-            { Messages.SyntaxColoringPreferencePage_strings, PreferenceConstants.EDITOR_STRING_COLOR },
-            { Messages.SyntaxColoringPreferencePage_others, PreferenceConstants.EDITOR_JAVA_DEFAULT_COLOR },
-*/    };
+        { Messages.SyntaxColoringPreferencePage_function, PreferenceConstants.EDITOR_FUNCTION_COLOR },
+        { Messages.SyntaxColoringPreferencePage_literal, PreferenceConstants.EDITOR_LITERAL_COLOR },
+        { Messages.SyntaxColoringPreferencePage_specialForm, PreferenceConstants.EDITOR_SPECIAL_FORM_COLOR },
+        { Messages.SyntaxColoringPreferencePage_comment, PreferenceConstants.EDITOR_COMMENT_COLOR },
+        { Messages.SyntaxColoringPreferencePage_globalVar, PreferenceConstants.EDITOR_GLOBAL_VAR_COLOR },
+        { Messages.SyntaxColoringPreferencePage_keyword, PreferenceConstants.EDITOR_KEYWORD_COLOR },
+        { Messages.SyntaxColoringPreferencePage_metadataTypehint, PreferenceConstants.EDITOR_METADATA_TYPEHINT_COLOR },
+    };
     
 /*    private final String fJavaCategory= Messages.SyntaxColoringPreferencePage_coloring_category_java;
     private final String fJavadocCategory= Messages.SyntaxColoringPreferencePage_coloring_category_javadoc;
@@ -314,15 +322,10 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
      * Highlighting color list
      * @since  3.0
      */
-    private final java.util.List fListModel= new ArrayList();
-    /**
-     * Highlighting color tree viewer
-     * @since  3.0
-     */
-    /*private TreeViewer fTreeViewer;*/
+    private final List<HighlightingColorListItem> fListModel= new ArrayList<HighlightingColorListItem>();
+    
     /**
      * Highlighting color list viewer
-     * @since  3.0
      */
     private ListViewer fListViewer;
     /**
@@ -334,7 +337,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
      * The previewer.
      * @since 3.0
      */
-    /*private JavaSourceViewer fPreviewViewer;*/
+    private ClojureSourceViewer fPreviewViewer;
     /**
      * The color manager.
      * @since 3.1
@@ -354,7 +357,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         fColorManager= new ClojureColorManager(false);
         
         for (int i= 0, n= fSyntaxColorListModel.length; i < n; i++)
-            fListModel.add(new HighlightingColorListItem (
+            fListModel.add(new HighlightingColorListItem(
                     fSyntaxColorListModel[i][0],
                     fSyntaxColorListModel[i][1] /*,
                     fSyntaxColorListModel[i][1] + BOLD,
@@ -478,9 +481,9 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         handleSyntaxColorListSelection();
 
 /*        uninstallSemanticHighlighting();
-        installSemanticHighlighting();
+        installSemanticHighlighting();*/
 
-        fPreviewViewer.invalidateTextPresentation();*/
+        fPreviewViewer.invalidateTextPresentation();
     }
 
     /*
@@ -573,7 +576,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         GridData gd= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
         editorComposite.setLayoutData(gd);
     
-        fListViewer= new ListViewer(editorComposite, SWT.SINGLE | SWT.BORDER);
+        fListViewer= new ListViewer(editorComposite, SWT.SINGLE | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
         fListViewer.setLabelProvider(new ColorListLabelProvider());
         fListViewer.setContentProvider(new ColorListContentProvider());
         fListViewer.setInput(fListModel);
@@ -605,7 +608,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         gd.widthHint= maxWidth;
         
         fListViewer.getControl().setLayoutData(gd);
-        installDoubleClickListener();
+        /* installDoubleClickListener(); */
                         
         Composite stylesComposite= new Composite(editorComposite, SWT.NONE);
         layout= new GridLayout();
@@ -661,7 +664,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         gd.horizontalSpan= 2;
         fUnderlineCheckBox.setLayoutData(gd);
         
-        /*        label= new Label(colorComposite, SWT.LEFT);
+        label= new Label(colorComposite, SWT.LEFT);
         label.setText(Messages.SyntaxColoringPreferencePage_preview);
         label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         
@@ -669,7 +672,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         gd= new GridData(GridData.FILL_BOTH);
         gd.widthHint= convertWidthInCharsToPixels(20);
         gd.heightHint= convertHeightInCharsToPixels(5);
-        previewer.setLayoutData(gd);*/
+        previewer.setLayoutData(gd);
         
         fListViewer.addSelectionChangedListener(new ISelectionChangedListener() {
             public void selectionChanged(SelectionChangedEvent event) {
@@ -759,8 +762,8 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
      * 
      * @since 3.4
      */
-    private void installDoubleClickListener() {
-/*        fTreeViewer.addDoubleClickListener(new IDoubleClickListener() {
+    /*  private void installDoubleClickListener() {
+       fTreeViewer.addDoubleClickListener(new IDoubleClickListener() {
             
              * @see org.eclipse.jface.viewers.IDoubleClickListener#doubleClick(org.eclipse.jface.viewers.DoubleClickEvent)
              
@@ -770,8 +773,8 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
                 if (fTreeViewer.isExpandable(element))
                     fTreeViewer.setExpandedState(element, !fTreeViewer.getExpandedState(element));
             }
-        });*/
-    }
+        });
+    }*/
 
     private void addFiller(Composite composite, int horizontalSpan) {
         PixelConverter pixelConverter= new PixelConverter(composite);
@@ -782,38 +785,59 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         filler.setLayoutData(gd);
     }
 
-/*    private Control createPreviewer(Composite parent) {
+    private static final String PREVIEW_SOURCE =
+        "; this is a comment\n" //$NON-NLS-1$
+        + "(defmacro and\n" //$NON-NLS-1$
+        + "  \"Evaluates exprs one at a time, from left to right. If a form\n" //$NON-NLS-1$
+        + "  returns logical false (nil or false), and returns that value and\n" //$NON-NLS-1$
+        + "  doesn't evaluate any of the other expressions, otherwise it returns\n" //$NON-NLS-1$
+        + "  the value of the last expr. (and) returns true.\"\n" //$NON-NLS-1$
+        + "  ([] true)\n" //$NON-NLS-1$
+        + "  ([x] x)\n" //$NON-NLS-1$
+        + "  ([x & next]\n" //$NON-NLS-1$
+        + "  `(let [and# ~x]\n" //$NON-NLS-1$
+        + "     (if and# (and ~@next) and#))))\n"; //$NON-NLS-1$
+    
+    private Control createPreviewer(Composite parent) {
         
         IPreferenceStore generalTextStore= EditorsUI.getPreferenceStore();
+        /* TODO: what is the PreferencesAdapter good for
         IPreferenceStore store= new ChainedPreferenceStore(new IPreferenceStore[] { getPreferenceStore(), new PreferencesAdapter(createTemporaryCorePreferenceStore()), generalTextStore });
-        fPreviewViewer= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER, store);
-        SimpleJavaSourceViewerConfiguration configuration= new SimpleJavaSourceViewerConfiguration(fColorManager, store, null, IJavaPartitions.JAVA_PARTITIONING, false);
+        */
+        IPreferenceStore store= new ChainedPreferenceStore(new IPreferenceStore[] { getPreferenceStore(), generalTextStore });
+
+        fPreviewViewer= new ClojureSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER, store);
+        ClojureSourceViewerConfiguration configuration= new ClojureSourceViewerConfiguration(store, null);
         fPreviewViewer.configure(configuration);
-        // fake 1.5 source to get 1.5 features right.
-        configuration.handlePropertyChangeEvent(new PropertyChangeEvent(this, JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_4, JavaCore.VERSION_1_5));
-        Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
+        Font font= JFaceResources.getFont(org.eclipse.jdt.ui.PreferenceConstants.EDITOR_TEXT_FONT);
         fPreviewViewer.getTextWidget().setFont(font);
-        new JavaSourcePreviewerUpdater(fPreviewViewer, configuration, store);
+        new ClojureSourcePreviewerUpdater(fPreviewViewer, configuration, store);
         fPreviewViewer.setEditable(false);
         
-        String content= loadPreviewContentFromFile("ColorSettingPreviewCode.txt"); //$NON-NLS-1$
-        IDocument document= new Document(content);
-        JavaPlugin.getDefault().getJavaTextTools().setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
+        IDocument document= new Document(PREVIEW_SOURCE);
+        IDocumentPartitioner partitioner = new ClojurePartitioner(new ClojurePartitionScanner(), 
+                ClojurePartitionScanner.CLOJURE_CONTENT_TYPES);
+
+        Map<String, IDocumentPartitioner> m = new HashMap<String, IDocumentPartitioner>();
+        m.put(ClojurePartitionScanner.CLOJURE_PARTITIONING, partitioner);
+        
+        TextUtilities.addDocumentPartitioners(document, m);
         fPreviewViewer.setDocument(document);
     
-        installSemanticHighlighting();
+        // installSemanticHighlighting();
         
         return fPreviewViewer.getControl();
-    }*/
+    }
 
 
-    private Preferences createTemporaryCorePreferenceStore() {
+/* TODO what is this needed for?
+ *     private Preferences createTemporaryCorePreferenceStore() {
         Preferences result= new Preferences();
         
         result.setValue(COMPILER_TASK_TAGS, "TASK,TODO"); //$NON-NLS-1$
         
         return result;
-    }
+    }*/
 
 
     private String loadPreviewContentFromFile(String filename) {

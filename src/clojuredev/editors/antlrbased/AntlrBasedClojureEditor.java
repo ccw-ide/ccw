@@ -30,7 +30,6 @@ import org.eclipse.jface.text.source.ICharacterPairMatcher;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.projection.ProjectionSupport;
-import org.eclipse.jface.text.source.projection.ProjectionViewer;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
@@ -55,7 +54,9 @@ import clojuredev.lexers.ClojureLexer;
 import clojuredev.utils.editors.antlrbased.IScanContext;
 
 public class AntlrBasedClojureEditor extends TextEditor {
-	public static final String ID = "clojuredev.antlrbasededitor";
+	private static final String CONTENT_ASSIST_PROPOSAL = "ContentAssistProposal"; //$NON-NLS-1$
+
+    public static final String ID = "clojuredev.antlrbasededitor"; //$NON-NLS-1$
 	/** Preference key for matching brackets */
 	//PreferenceConstants.EDITOR_MATCHING_BRACKETS;
 
@@ -94,7 +95,8 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		fAnnotationAccess= createAnnotationAccess();
 		fOverviewRuler= createOverviewRuler(getSharedColors());
 		
-		ISourceViewer viewer= new ProjectionViewer(parent, ruler, getOverviewRuler(), isOverviewRulerVisible(), styles);
+		// ISourceViewer viewer= new ProjectionViewer(parent, ruler, getOverviewRuler(), isOverviewRulerVisible(), styles);
+        ISourceViewer viewer= new ClojureSourceViewer(parent, ruler, getOverviewRuler(), isOverviewRulerVisible(), styles, getPreferenceStore());
 		// ensure decoration support has been created and configured.
 		getSourceViewerDecorationSupport(viewer);
 		
@@ -106,7 +108,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
 	 */
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
-		ProjectionViewer viewer= (ProjectionViewer) getSourceViewer();
+		ClojureSourceViewer viewer= (ClojureSourceViewer) getSourceViewer();
 		fProjectionSupport= new ProjectionSupport(viewer, getAnnotationAccess(), getSharedColors());
 		
 		// TODO remove the 2 following lines ?
@@ -114,7 +116,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.warning"); //$NON-NLS-1$
 		
 		fProjectionSupport.install();
-		viewer.doOperation(ProjectionViewer.TOGGLE);
+		viewer.doOperation(ClojureSourceViewer.TOGGLE);
 	}
 
     /**
@@ -166,11 +168,11 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.COMPILE_LIB);
 		setAction(CompileLibAction.ID, action);
 
-		action = new ContentAssistAction(ClojureEditorMessages.getBundleForConstructedKeys(), "ContentAssistProposal.", this); 
+		action = new ContentAssistAction(ClojureEditorMessages.getBundleForConstructedKeys(), CONTENT_ASSIST_PROPOSAL + ".", this);  //$NON-NLS-1$
 		String id = ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS;
 		action.setActionDefinitionId(id);
-		setAction("ContentAssistProposal", action); 
-		markAsStateDependentAction("ContentAssistProposal", true);
+		setAction(CONTENT_ASSIST_PROPOSAL, action); 
+		markAsStateDependentAction(CONTENT_ASSIST_PROPOSAL, true);
 	}
 	
 	/**
@@ -574,48 +576,53 @@ public class AntlrBasedClojureEditor extends TextEditor {
 	 */
 	public static void registerEditorColors(ColorRegistry colorRegistry) {
 	    IPreferenceStore store = ClojuredevPlugin.getDefault().getPreferenceStore();
-	    
-		RGB literal = new RGB(188,143,143);
-		RGB black = new RGB(0,0,0);
-		RGB gray = new RGB(128,128,128);
-		RGB green = new RGB(34,139,34);
-		RGB specialForm = new RGB(160,32,240);
+
+	    // TODO: define separate preferences for the tokens that use black and gray?
+	    RGB black = new RGB(0,0,0);
+	    RGB gray = new RGB(128,128,128);
+	        
+		RGB literal = PreferenceConverter.getColor(store, clojuredev.preferences.PreferenceConstants.EDITOR_LITERAL_COLOR);
+		RGB specialForm = PreferenceConverter.getColor(store, clojuredev.preferences.PreferenceConstants.EDITOR_SPECIAL_FORM_COLOR);
 		RGB function = PreferenceConverter.getColor(store, clojuredev.preferences.PreferenceConstants.EDITOR_FUNCTION_COLOR);
+		RGB comment = PreferenceConverter.getColor(store, clojuredev.preferences.PreferenceConstants.EDITOR_COMMENT_COLOR);
+		RGB globalVar = PreferenceConverter.getColor(store, clojuredev.preferences.PreferenceConstants.EDITOR_GLOBAL_VAR_COLOR);
+		RGB keyword = PreferenceConverter.getColor(store, clojuredev.preferences.PreferenceConstants.EDITOR_KEYWORD_COLOR);
+		RGB metadataTypehint = PreferenceConverter.getColor(store, clojuredev.preferences.PreferenceConstants.EDITOR_METADATA_TYPEHINT_COLOR);
 		
-		colorRegistry.put(ID + "_" + ClojureLexer.STRING, literal);
-		colorRegistry.put(ID + "_" + ClojureLexer.NUMBER, literal);
-		colorRegistry.put(ID + "_" + ClojureLexer.CHARACTER, literal);
-		colorRegistry.put(ID + "_" + ClojureLexer.NIL, literal);
-		colorRegistry.put(ID + "_" + ClojureLexer.BOOLEAN, literal);
-		colorRegistry.put(ID + "_" + ClojureLexer.OPEN_PAREN, black);
-		colorRegistry.put(ID + "_" + ClojureLexer.CLOSE_PAREN, black);
-		colorRegistry.put(ID + "_" + ClojureLexer.SPECIAL_FORM, specialForm);
-		colorRegistry.put(ID + "_" + ClojureLexer.SYMBOL, black);
-		colorRegistry.put(ID + "_" + IScanContext.SymbolType.FUNCTION, function);
-		colorRegistry.put(ID + "_" + IScanContext.SymbolType.GLOBAL_VAR, green);
-		colorRegistry.put(ID + "_" + IScanContext.SymbolType.MACRO, specialForm);
-		colorRegistry.put(ID + "_" + IScanContext.SymbolType.SPECIAL_FORM, specialForm);
+		colorRegistry.put(ID + "_" + ClojureLexer.STRING, literal); //$NON-NLS-1$
+		colorRegistry.put(ID + "_" + ClojureLexer.NUMBER, literal); //$NON-NLS-1$
+		colorRegistry.put(ID + "_" + ClojureLexer.CHARACTER, literal); //$NON-NLS-1$
+		colorRegistry.put(ID + "_" + ClojureLexer.NIL, literal); //$NON-NLS-1$
+		colorRegistry.put(ID + "_" + ClojureLexer.BOOLEAN, literal); //$NON-NLS-1$
+		colorRegistry.put(ID + "_" + ClojureLexer.OPEN_PAREN, black); //$NON-NLS-1$
+		colorRegistry.put(ID + "_" + ClojureLexer.CLOSE_PAREN, black); //$NON-NLS-1$
+		colorRegistry.put(ID + "_" + ClojureLexer.SPECIAL_FORM, specialForm); //$NON-NLS-1$
+		colorRegistry.put(ID + "_" + ClojureLexer.SYMBOL, black); //$NON-NLS-1$
+		colorRegistry.put(ID + "_" + IScanContext.SymbolType.FUNCTION, function); //$NON-NLS-1$
+		colorRegistry.put(ID + "_" + IScanContext.SymbolType.GLOBAL_VAR, globalVar); //$NON-NLS-1$
+		colorRegistry.put(ID + "_" + IScanContext.SymbolType.MACRO, specialForm); //$NON-NLS-1$
+		colorRegistry.put(ID + "_" + IScanContext.SymbolType.SPECIAL_FORM, specialForm); //$NON-NLS-1$
 		
-		colorRegistry.put(ID + "_" + IScanContext.SymbolType.JAVA_CLASS, black);
-		colorRegistry.put(ID + "_" + IScanContext.SymbolType.JAVA_STATIC_METHOD, black);
-		colorRegistry.put(ID + "_" + IScanContext.SymbolType.JAVA_INSTANCE_METHOD, black);
+		colorRegistry.put(ID + "_" + IScanContext.SymbolType.JAVA_CLASS, black); //$NON-NLS-1$
+		colorRegistry.put(ID + "_" + IScanContext.SymbolType.JAVA_STATIC_METHOD, black); //$NON-NLS-1$
+		colorRegistry.put(ID + "_" + IScanContext.SymbolType.JAVA_INSTANCE_METHOD, black); //$NON-NLS-1$
 		
-		colorRegistry.put(ID + "_" + ClojureLexer.KEYWORD, new RGB(218,112,214));
-		colorRegistry.put(ID + "_" + ClojureLexer.SYNTAX_QUOTE, black);
-		colorRegistry.put(ID + "_" + ClojureLexer.UNQUOTE_SPLICING, black);
-		colorRegistry.put(ID + "_" + ClojureLexer.UNQUOTE, black);
-		colorRegistry.put(ID + "_" + ClojureLexer.COMMENT, new RGB(178,34,34));
-		colorRegistry.put(ID + "_" + ClojureLexer.SPACE, black);
-		colorRegistry.put(ID + "_" + ClojureLexer.LAMBDA_ARG, black);
-		colorRegistry.put(ID + "_" + ClojureLexer.METADATA_TYPEHINT, green);
-		colorRegistry.put(ID + "_" + ClojureLexer.T24, black);//'&'=20
-		colorRegistry.put(ID + "_" + ClojureLexer.T25, gray);//'['=23
-		colorRegistry.put(ID + "_" + ClojureLexer.T26, gray);//']'=24
-		colorRegistry.put(ID + "_" + ClojureLexer.T27, gray);//'{'=25
-		colorRegistry.put(ID + "_" + ClojureLexer.T28, gray);//'}'=26
-		colorRegistry.put(ID + "_" + ClojureLexer.T29, black);//'\''=27
-		colorRegistry.put(ID + "_" + ClojureLexer.T30, black);//'^'=28
-		colorRegistry.put(ID + "_" + ClojureLexer.T31, black);//'@'=29
-		colorRegistry.put(ID + "_" + ClojureLexer.T32, black);//'#'=30
+		colorRegistry.put(ID + "_" + ClojureLexer.KEYWORD, keyword); //$NON-NLS-1$
+		colorRegistry.put(ID + "_" + ClojureLexer.SYNTAX_QUOTE, black); //$NON-NLS-1$
+		colorRegistry.put(ID + "_" + ClojureLexer.UNQUOTE_SPLICING, black); //$NON-NLS-1$
+		colorRegistry.put(ID + "_" + ClojureLexer.UNQUOTE, black); //$NON-NLS-1$
+		colorRegistry.put(ID + "_" + ClojureLexer.COMMENT, comment); //$NON-NLS-1$
+		colorRegistry.put(ID + "_" + ClojureLexer.SPACE, black); //$NON-NLS-1$
+		colorRegistry.put(ID + "_" + ClojureLexer.LAMBDA_ARG, black); //$NON-NLS-1$
+		colorRegistry.put(ID + "_" + ClojureLexer.METADATA_TYPEHINT, metadataTypehint); //$NON-NLS-1$
+		colorRegistry.put(ID + "_" + ClojureLexer.T24, black);//'&'=20 //$NON-NLS-1$
+		colorRegistry.put(ID + "_" + ClojureLexer.T25, gray);//'['=23 //$NON-NLS-1$
+		colorRegistry.put(ID + "_" + ClojureLexer.T26, gray);//']'=24 //$NON-NLS-1$
+		colorRegistry.put(ID + "_" + ClojureLexer.T27, gray);//'{'=25 //$NON-NLS-1$
+		colorRegistry.put(ID + "_" + ClojureLexer.T28, gray);//'}'=26 //$NON-NLS-1$
+		colorRegistry.put(ID + "_" + ClojureLexer.T29, black);//'\''=27 //$NON-NLS-1$
+		colorRegistry.put(ID + "_" + ClojureLexer.T30, black);//'^'=28 //$NON-NLS-1$
+		colorRegistry.put(ID + "_" + ClojureLexer.T31, black);//'@'=29 //$NON-NLS-1$
+		colorRegistry.put(ID + "_" + ClojureLexer.T32, black);//'#'=30 //$NON-NLS-1$
 	}
 }
