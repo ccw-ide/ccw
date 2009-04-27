@@ -42,9 +42,8 @@ public class ConsolePageParticipant implements IConsolePageParticipant {
 		this.console = (IOConsole) console;
 		
 		org.eclipse.debug.ui.console.IConsole processConsole = (org.eclipse.debug.ui.console.IConsole) console;
-		if (processConsole.getProcess().getLaunch().getAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN) == null) {
-		} else {
-			int clojureVMPort = Integer.valueOf(processConsole.getProcess().getLaunch().getAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN));
+		int clojureVMPort = LaunchUtils.getLaunchServerReplPort(processConsole.getProcess().getLaunch());
+		if (clojureVMPort != -1) {
 			clojureClient = new ClojureClient(clojureVMPort);
 			addPatternMatchListener(this.console);
 			if (ClojuredevPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.SWITCH_TO_NS_ON_REPL_STARTUP)) {

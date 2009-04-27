@@ -197,7 +197,7 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
 			updateLaunchList(launch);
 		}
 		private void updateLaunchList(ILaunch launch) {
-			if (findClojurePort(launch) != -1) {
+			if (LaunchUtils.getLaunchServerReplPort(launch) != -1) {
 				launches.add(launch);
 			} else {
 				launches.remove(launch);
@@ -207,14 +207,6 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
 			launches.remove(launch);
 		}
 	};
-	public static int findClojurePort(ILaunch launch) {
-		String portAttr = launch.getAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN);
-		if (portAttr != null) {
-			return Integer.valueOf(portAttr);
-		} else {
-			return -1;
-		}
-	}
 	
     private void startLaunchListener() {
 		stopLaunchListener();
@@ -233,7 +225,7 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
 			}
 			String launchProject = launch.getAttribute(LaunchUtils.ATTR_PROJECT_NAME);
 			if (launchProject != null && launchProject.equals(project.getName())) {
-				return new ClojureClient(findClojurePort(launch));
+				return new ClojureClient(LaunchUtils.getLaunchServerReplPort(launch));
 			}
 		}
 		return null;
