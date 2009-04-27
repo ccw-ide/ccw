@@ -34,6 +34,7 @@ import clojure.lang.Compiler;
 import clojuredev.debug.ClojureClient;
 import clojuredev.editors.antlrbased.AntlrBasedClojureEditor;
 import clojuredev.launching.LaunchUtils;
+import clojuredev.util.DisplayUtil;
 import clojuredev.utils.editors.antlrbased.IScanContext;
 
 /**
@@ -85,8 +86,11 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
     
     private void createColorRegistry() {
     	if (colorRegistry == null) {
-    		colorRegistry = new ColorRegistry(getWorkbench().getDisplay());
-    		AntlrBasedClojureEditor.registerEditorColors(colorRegistry);
+    		DisplayUtil.syncExec(new Runnable() {
+				public void run() {
+		    		colorRegistry = new ColorRegistry(getWorkbench().getDisplay());
+		    		AntlrBasedClojureEditor.registerEditorColors(colorRegistry);
+				}});
     	}
     }
     
@@ -112,23 +116,29 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
     }
     
     private void initializeParenRainbowColors() {
-        allColors = new Color[] {
-                new Color(Display.getDefault(), 0x00, 0xCC, 0x00),
-                new Color(Display.getDefault(), 0x00, 0x88, 0xAA),
-                new Color(Display.getDefault(), 0x66, 0x00, 0xAA),
-                new Color(Display.getDefault(), 0x00, 0x77, 0x00),
-                new Color(Display.getDefault(), 0x77, 0xEE, 0x00),
-                new Color(Display.getDefault(), 0xFF, 0x88, 0x00)
-            };
+    	DisplayUtil.syncExec(new Runnable() {
+			public void run() {
+		        allColors = new Color[] {
+		                new Color(Display.getDefault(), 0x00, 0xCC, 0x00),
+		                new Color(Display.getDefault(), 0x00, 0x88, 0xAA),
+		                new Color(Display.getDefault(), 0x66, 0x00, 0xAA),
+		                new Color(Display.getDefault(), 0x00, 0x77, 0x00),
+		                new Color(Display.getDefault(), 0x77, 0xEE, 0x00),
+		                new Color(Display.getDefault(), 0xFF, 0x88, 0x00)
+		            };
+			}});
     }
     
     private void disposeParenRainbowColors() {
     	if (allColors != null) {
-        	for(Color c : allColors) {
-        		if (c!=null && !c.isDisposed()) {
-        			c.dispose();
-        		}
-            }
+    		DisplayUtil.syncExec(new Runnable() {
+				public void run() {
+		        	for(Color c : allColors) {
+		        		if (c!=null && !c.isDisposed()) {
+		        			c.dispose();
+		        		}
+		            }
+				}});
     	}
     }
 
