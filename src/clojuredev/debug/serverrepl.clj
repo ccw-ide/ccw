@@ -20,10 +20,13 @@
 (defn create-server 
   "creates and returns a server socket on port, will pass the client
    socket to accept-socket on connection" 
-  [accept-socket port]
+  [accept-socket port file-name]
   (on-thread 
     #(loop []
-			(let [ss (new java.net.ServerSocket port)]
+			(let [ss (java.net.ServerSocket. (if (= port -1) 0 port))]
+			  (when (= port -1)
+			    (with-open [f (java.io.FileWriter. file-name)]
+			      (.write f (.getLocalPort ss))))
 			  (loop []
 			    (when-not (.isClosed ss)
 			      (try 
@@ -78,7 +81,8 @@
             (catch Exception e (push-answer -1 (serialize-exception e) dos)))))))
           
 (create-server socket-repl 
-              (Integer/valueOf (System/getProperty "clojure.remote.server.port" "8503")))
+              (Integer/valueOf (System/getProperty "clojure.remote.server.port" "-1"))
+              (System/getProperty "clojuredev.debug.serverrepl.file.port"))
    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; support code  
