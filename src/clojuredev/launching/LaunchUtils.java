@@ -102,7 +102,9 @@ public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
 		int port;
 		if (portAttr == null || (port = Integer.valueOf(portAttr)) == -1) {
 			port = tryFindPort(launch);
-			launch.setAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN, Integer.toString(port));
+			if (port != -1) {
+				launch.setAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN, Integer.toString(port));
+			}
 		}
 		return port;
     }

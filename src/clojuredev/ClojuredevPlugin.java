@@ -197,11 +197,7 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
 			updateLaunchList(launch);
 		}
 		private void updateLaunchList(ILaunch launch) {
-			if (LaunchUtils.getLaunchServerReplPort(launch) != -1) {
-				launches.add(launch);
-			} else {
-				launches.remove(launch);
-			}
+			launches.add(launch);
 		}
 		public void launchRemoved(ILaunch launch) {
 			launches.remove(launch);
