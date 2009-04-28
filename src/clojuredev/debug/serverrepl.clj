@@ -23,10 +23,11 @@
   [accept-socket port file-name]
   (on-thread 
     #(loop []
+            (println "port=" port "\nfile-name=" file-name)
 			(let [ss (java.net.ServerSocket. (if (= port -1) 0 port))]
 			  (when (= port -1)
-			    (with-open [f (java.io.FileWriter. file-name)]
-			      (.write f (.getLocalPort ss))))
+			    (with-open [fw (java.io.FileWriter. file-name)]
+			      (.write fw (str (.getLocalPort ss)))))
 			  (loop []
 			    (when-not (.isClosed ss)
 			      (try 

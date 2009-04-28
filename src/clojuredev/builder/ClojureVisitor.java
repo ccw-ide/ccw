@@ -109,12 +109,12 @@ public class ClojureVisitor implements IResourceVisitor {
 				IPath classpathRelativePath = file.getFullPath().removeFirstSegments(currentSrcFolder.getKey().getFullPath().segmentCount());
 				IFile fileOnOutputPath = currentSrcFolder.getValue().getFile(classpathRelativePath);
 				clojureFiles.add(fileOnOutputPath);
-				if (!fileOnOutputPath.exists()) {
-					createParentIfNecessary(fileOnOutputPath.getParent());
-				} else {
-					fileOnOutputPath.delete(true, null);
-				}
-				file.copy(fileOnOutputPath.getFullPath(), true, null);
+//				if (!fileOnOutputPath.exists()) {
+//					createParentIfNecessary(fileOnOutputPath.getParent());
+//				} else {
+//					fileOnOutputPath.delete(true, null);
+//				}
+//				file.copy(fileOnOutputPath.getFullPath(), true, null);
 				
 				// Find corresponding library name
 				IPath maybeLibPath = file.getFullPath().removeFirstSegments(currentSrcFolder.getKey().getFullPath().segmentCount()).removeFileExtension();

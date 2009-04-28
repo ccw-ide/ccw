@@ -164,7 +164,7 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
     		monitor = new NullProgressMonitor();
     	}
     	
-    	getClassesFolder().delete(false, monitor);
+    	getClassesFolder().delete(true, monitor);
     	if (!getClassesFolder().exists()) {
     		getClassesFolder().create(true, true, monitor);
     	}
