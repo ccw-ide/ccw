@@ -55,9 +55,6 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
     	}
     	
     	if (kind == AUTO_BUILD || kind == INCREMENTAL_BUILD) {
-    		if (getDelta(getProject()) == null) {
-    			return null;
-    		}
 	    	if (onlyClassesFolderRelatedDelta()) {
 	    		return null;
 	    	}
