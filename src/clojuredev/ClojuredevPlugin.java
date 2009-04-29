@@ -86,7 +86,7 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
     
     private void createColorRegistry() {
     	if (colorRegistry == null) {
-    		DisplayUtil.syncExec(new Runnable() {
+    		DisplayUtil.asyncExec(new Runnable() {
 				public void run() {
 		    		colorRegistry = new ColorRegistry(getWorkbench().getDisplay());
 		    		AntlrBasedClojureEditor.registerEditorColors(colorRegistry);
@@ -116,7 +116,7 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
     }
     
     private void initializeParenRainbowColors() {
-    	DisplayUtil.syncExec(new Runnable() {
+    	DisplayUtil.asyncExec(new Runnable() {
 			public void run() {
 		        allColors = new Color[] {
 		                new Color(Display.getDefault(), 0x00, 0xCC, 0x00),
@@ -131,7 +131,7 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
     
     private void disposeParenRainbowColors() {
     	if (allColors != null) {
-    		DisplayUtil.syncExec(new Runnable() {
+    		DisplayUtil.asyncExec(new Runnable() {
 				public void run() {
 		        	for(Color c : allColors) {
 		        		if (c!=null && !c.isDisposed()) {
