@@ -164,7 +164,11 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
     		monitor = new NullProgressMonitor();
     	}
     	
-    	getClassesFolder().delete(true, monitor);
+    	try {
+    		getClassesFolder().delete(true, monitor);
+    	} catch (CoreException e) {
+    		ClojuredevPlugin.logError("Unable to clean classes folder", e);
+    	}
     	if (!getClassesFolder().exists()) {
     		getClassesFolder().create(true, true, monitor);
     	}
