@@ -41,37 +41,46 @@ public class ConsolePageParticipant implements IConsolePageParticipant {
 
 		this.console = (IOConsole) console;
 		
-		org.eclipse.debug.ui.console.IConsole processConsole = (org.eclipse.debug.ui.console.IConsole) console;
-		int clojureVMPort = LaunchUtils.getLaunchServerReplPort(processConsole.getProcess().getLaunch());
-		if (clojureVMPort != -1) {
-			clojureClient = new ClojureClient(clojureVMPort);
-			addPatternMatchListener(this.console);
-			if (ClojuredevPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.SWITCH_TO_NS_ON_REPL_STARTUP)) {
-				try {
-					List<IFile> files = LaunchUtils.getFilesToLaunchList(processConsole.getProcess().getLaunch().getLaunchConfiguration());
-					if (files.size() > 0) {
-						String namespace = ClojureCore.getDeclaredNamespace(files.get(0));
-						if (namespace != null) {
-							EvaluateTextAction.evaluateText(this.console, "(in-ns '" + namespace + ")", false); 
+	}
+
+	public void activated() {
+		if (clojureClient == null) {
+			bindConsoleToClojureEnvironment();
+			if (clojureClient != null) {
+				System.out.println("activated");
+			}
+		}
+		if (clojureClient != null) {
+			NamespaceBrowser.setClojureClient(clojureClient);
+		}
+	}
+	
+	private synchronized void bindConsoleToClojureEnvironment() {
+		if (clojureClient == null) {
+			org.eclipse.debug.ui.console.IConsole processConsole = (org.eclipse.debug.ui.console.IConsole) console;
+			int clojureVMPort = LaunchUtils.getLaunchServerReplPort(processConsole.getProcess().getLaunch());
+			if (clojureVMPort != -1) {
+				clojureClient = new ClojureClient(clojureVMPort);
+				addPatternMatchListener(this.console);
+				if (ClojuredevPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.SWITCH_TO_NS_ON_REPL_STARTUP)) {
+					try {
+						List<IFile> files = LaunchUtils.getFilesToLaunchList(processConsole.getProcess().getLaunch().getLaunchConfiguration());
+						if (files.size() > 0) {
+							String namespace = ClojureCore.getDeclaredNamespace(files.get(0));
+							if (namespace != null) {
+								EvaluateTextAction.evaluateText(this.console, "(in-ns '" + namespace + ")", false); 
+							}
 						}
+					} catch (CoreException e) {
+						ClojuredevPlugin.logError("error while trying to guess the ns to which make the REPL console switch", e);
 					}
-				} catch (CoreException e) {
-					ClojuredevPlugin.logError("error while trying to guess the ns to which make the REPL console switch", e);
 				}
 			}
 		}
 	}
-
-	public void activated() {
-		if (clojureClient != null) {
-			NamespaceBrowser.setClojureClient(clojureClient);
-		}
-		System.out.println("activated");
-	}
 	
 	public void deactivated() {
-//		ContentOutline.setClojureClient(null);
-//		System.out.println("deactivated");
+		// Nothing
 	}
 
 	public void dispose() {

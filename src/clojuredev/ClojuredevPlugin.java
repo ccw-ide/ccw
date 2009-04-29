@@ -59,15 +59,28 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
 	 * @return the color corresponding to the index (callers must no
 	 *         dispose the color themselves)
 	 */
-	public static Color getClojuredevColor(int index) {
-		return ClojuredevPlugin.getDefault().allColors[index];
+	public static Color getClojuredevColor(final int index) {
+		final Color[] result = new Color[1];
+		DisplayUtil.syncExec(new Runnable() {
+			public void run() {
+				result[0] = ClojuredevPlugin.getDefault().getAllColors()[index];
+			}
+		});
+		return result[0];
 	}
 	
     /** The shared instance */
     private static ClojuredevPlugin plugin;
 
     /** "Read-only" table, do not alter */
-    public Color[] allColors;
+    private Color[] allColors;
+    
+    public Color[] getAllColors() {
+    	if (allColors == null) {
+            initializeParenRainbowColors();
+    	}
+    	return allColors;
+    }
     
     private ColorRegistry colorRegistry;
     
@@ -79,14 +92,12 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
         
         plugin = this;
         loadPluginClojureCode();
-        initializeParenRainbowColors();
-        createColorRegistry();
         startLaunchListener();
     }
     
-    private void createColorRegistry() {
+    private synchronized void createColorRegistry() {
     	if (colorRegistry == null) {
-    		DisplayUtil.asyncExec(new Runnable() {
+    		DisplayUtil.syncExec(new Runnable() {
 				public void run() {
 		    		colorRegistry = new ColorRegistry(getWorkbench().getDisplay());
 		    		AntlrBasedClojureEditor.registerEditorColors(colorRegistry);
@@ -95,6 +106,9 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
     }
     
     public ColorRegistry getColorRegistry() {
+    	if (colorRegistry == null) {
+    		createColorRegistry();
+    	}
     	return colorRegistry;
     }
 
@@ -116,7 +130,7 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
     }
     
     private void initializeParenRainbowColors() {
-    	DisplayUtil.asyncExec(new Runnable() {
+    	DisplayUtil.syncExec(new Runnable() {
 			public void run() {
 		        allColors = new Color[] {
 		                new Color(Display.getDefault(), 0x00, 0xCC, 0x00),

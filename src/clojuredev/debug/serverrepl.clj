@@ -23,7 +23,7 @@
   [accept-socket port file-name]
   (on-thread 
     #(loop []
-            (println "port=" port "\nfile-name=" file-name)
+            ;(println "port=" port " ; file-name=" file-name)
 			(let [ss (java.net.ServerSocket. (if (= port -1) 0 port))]
 			  (when (= port -1)
 			    (with-open [fw (java.io.FileWriter. file-name)]
