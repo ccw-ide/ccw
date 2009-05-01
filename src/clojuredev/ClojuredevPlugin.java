@@ -86,7 +86,6 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
     private void createColorRegistry() {
     	if (colorRegistry == null) {
     		colorRegistry = new ColorRegistry(getWorkbench().getDisplay());
-    		AntlrBasedClojureEditor.registerEditorColors(colorRegistry);
     	}
     }
     

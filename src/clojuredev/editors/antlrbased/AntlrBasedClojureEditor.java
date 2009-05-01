@@ -571,58 +571,13 @@ public class AntlrBasedClojureEditor extends TextEditor {
 			return null;
 	}
 
-	/**
-	 * @param colorRegistry
-	 */
-	public static void registerEditorColors(ColorRegistry colorRegistry) {
-	    IPreferenceStore store = ClojuredevPlugin.getDefault().getPreferenceStore();
-
-	    // TODO: define separate preferences for the tokens that use black and gray?
-	    RGB black = new RGB(0,0,0);
-	    RGB gray = new RGB(128,128,128);
-	        
-		RGB literal = PreferenceConverter.getColor(store, clojuredev.preferences.PreferenceConstants.EDITOR_LITERAL_COLOR);
-		RGB specialForm = PreferenceConverter.getColor(store, clojuredev.preferences.PreferenceConstants.EDITOR_SPECIAL_FORM_COLOR);
-		RGB function = PreferenceConverter.getColor(store, clojuredev.preferences.PreferenceConstants.EDITOR_FUNCTION_COLOR);
-		RGB comment = PreferenceConverter.getColor(store, clojuredev.preferences.PreferenceConstants.EDITOR_COMMENT_COLOR);
-		RGB globalVar = PreferenceConverter.getColor(store, clojuredev.preferences.PreferenceConstants.EDITOR_GLOBAL_VAR_COLOR);
-		RGB keyword = PreferenceConverter.getColor(store, clojuredev.preferences.PreferenceConstants.EDITOR_KEYWORD_COLOR);
-		RGB metadataTypehint = PreferenceConverter.getColor(store, clojuredev.preferences.PreferenceConstants.EDITOR_METADATA_TYPEHINT_COLOR);
-		
-		colorRegistry.put(ID + "_" + ClojureLexer.STRING, literal); //$NON-NLS-1$
-		colorRegistry.put(ID + "_" + ClojureLexer.NUMBER, literal); //$NON-NLS-1$
-		colorRegistry.put(ID + "_" + ClojureLexer.CHARACTER, literal); //$NON-NLS-1$
-		colorRegistry.put(ID + "_" + ClojureLexer.NIL, literal); //$NON-NLS-1$
-		colorRegistry.put(ID + "_" + ClojureLexer.BOOLEAN, literal); //$NON-NLS-1$
-		colorRegistry.put(ID + "_" + ClojureLexer.OPEN_PAREN, black); //$NON-NLS-1$
-		colorRegistry.put(ID + "_" + ClojureLexer.CLOSE_PAREN, black); //$NON-NLS-1$
-		colorRegistry.put(ID + "_" + ClojureLexer.SPECIAL_FORM, specialForm); //$NON-NLS-1$
-		colorRegistry.put(ID + "_" + ClojureLexer.SYMBOL, black); //$NON-NLS-1$
-		colorRegistry.put(ID + "_" + IScanContext.SymbolType.FUNCTION, function); //$NON-NLS-1$
-		colorRegistry.put(ID + "_" + IScanContext.SymbolType.GLOBAL_VAR, globalVar); //$NON-NLS-1$
-		colorRegistry.put(ID + "_" + IScanContext.SymbolType.MACRO, specialForm); //$NON-NLS-1$
-		colorRegistry.put(ID + "_" + IScanContext.SymbolType.SPECIAL_FORM, specialForm); //$NON-NLS-1$
-		
-		colorRegistry.put(ID + "_" + IScanContext.SymbolType.JAVA_CLASS, black); //$NON-NLS-1$
-		colorRegistry.put(ID + "_" + IScanContext.SymbolType.JAVA_STATIC_METHOD, black); //$NON-NLS-1$
-		colorRegistry.put(ID + "_" + IScanContext.SymbolType.JAVA_INSTANCE_METHOD, black); //$NON-NLS-1$
-		
-		colorRegistry.put(ID + "_" + ClojureLexer.KEYWORD, keyword); //$NON-NLS-1$
-		colorRegistry.put(ID + "_" + ClojureLexer.SYNTAX_QUOTE, black); //$NON-NLS-1$
-		colorRegistry.put(ID + "_" + ClojureLexer.UNQUOTE_SPLICING, black); //$NON-NLS-1$
-		colorRegistry.put(ID + "_" + ClojureLexer.UNQUOTE, black); //$NON-NLS-1$
-		colorRegistry.put(ID + "_" + ClojureLexer.COMMENT, comment); //$NON-NLS-1$
-		colorRegistry.put(ID + "_" + ClojureLexer.SPACE, black); //$NON-NLS-1$
-		colorRegistry.put(ID + "_" + ClojureLexer.LAMBDA_ARG, black); //$NON-NLS-1$
-		colorRegistry.put(ID + "_" + ClojureLexer.METADATA_TYPEHINT, metadataTypehint); //$NON-NLS-1$
-		colorRegistry.put(ID + "_" + ClojureLexer.T24, black);//'&'=20 //$NON-NLS-1$
-		colorRegistry.put(ID + "_" + ClojureLexer.T25, gray);//'['=23 //$NON-NLS-1$
-		colorRegistry.put(ID + "_" + ClojureLexer.T26, gray);//']'=24 //$NON-NLS-1$
-		colorRegistry.put(ID + "_" + ClojureLexer.T27, gray);//'{'=25 //$NON-NLS-1$
-		colorRegistry.put(ID + "_" + ClojureLexer.T28, gray);//'}'=26 //$NON-NLS-1$
-		colorRegistry.put(ID + "_" + ClojureLexer.T29, black);//'\''=27 //$NON-NLS-1$
-		colorRegistry.put(ID + "_" + ClojureLexer.T30, black);//'^'=28 //$NON-NLS-1$
-		colorRegistry.put(ID + "_" + ClojureLexer.T31, black);//'@'=29 //$NON-NLS-1$
-		colorRegistry.put(ID + "_" + ClojureLexer.T32, black);//'#'=30 //$NON-NLS-1$
-	}
+	/*
+     * @see org.eclipse.ui.texteditor.AbstractTextEditor#setPreferenceStore(org.eclipse.jface.preference.IPreferenceStore)
+     * @since 3.0
+     */
+    protected void setPreferenceStore(IPreferenceStore store) {
+        super.setPreferenceStore(store);
+        if (getSourceViewer() instanceof ClojureSourceViewer)
+            ((ClojureSourceViewer)getSourceViewer()).setPreferenceStore(store);
+    }
 }

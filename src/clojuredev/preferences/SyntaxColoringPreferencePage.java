@@ -1,16 +1,16 @@
-package clojuredev.preferences;
-
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2009 Stephan Muehlstrasser.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *     IBM Corporation - initial API and implementation
- *     Andre Soereng <andreis@fast.no> - [syntax highlighting] highlight numbers - https://bugs.eclipse.org/bugs/show_bug.cgi?id=63573
+ * Contributors: 
+ *    Stephan Muehlstrasser - initial implementation, derived from
+ * org.eclipse.jdt.internal.ui.preferences.JavaEditorColoringConfigurationBlock
  *******************************************************************************/
+
+package clojuredev.preferences;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,8 +21,28 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.runtime.Preferences;
-
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.OverlayPreferenceStore;
+import org.eclipse.jdt.internal.ui.util.PixelConverter;
+import org.eclipse.jdt.ui.text.IColorManager;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.preference.ColorSelector;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.preference.PreferencePage;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentPartitioner;
+import org.eclipse.jface.text.TextUtilities;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.ListViewer;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -41,44 +61,11 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Scrollable;
-
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.preference.ColorSelector;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferenceConverter;
-import org.eclipse.jface.preference.PreferencePage;
-import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.ListViewer;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerComparator;
-
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentPartitioner;
-import org.eclipse.jface.text.TextUtilities;
-import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.jface.text.source.projection.ProjectionViewer;
-
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.dialogs.PreferencesUtil;
-import org.eclipse.ui.texteditor.ChainedPreferenceStore;
-
 import org.eclipse.ui.editors.text.EditorsUI;
-
-import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 
 import clojuredev.ClojuredevPlugin;
 import clojuredev.editors.antlrbased.ClojureSourceViewer;
@@ -86,21 +73,6 @@ import clojuredev.editors.antlrbased.ClojureSourceViewerConfiguration;
 import clojuredev.editors.rulesbased.ClojureColorManager;
 import clojuredev.editors.rulesbased.ClojurePartitionScanner;
 import clojuredev.editors.rulesbased.ClojurePartitioner;
-import clojuredev.preferences.PreferenceConstants;
-
-import org.eclipse.jdt.ui.text.IColorManager;
-import org.eclipse.jdt.ui.text.IJavaPartitions;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
-import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting;
-import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager;
-import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
-import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager.HighlightedRange;
-import org.eclipse.jdt.internal.ui.text.JavaColorManager;
-import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
-import org.eclipse.jdt.internal.ui.text.SimpleJavaSourceViewerConfiguration;
-import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 /**
  * Configures Clojure Editor syntax coloring preferences.
@@ -120,18 +92,20 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         private String fColorKey;
         /** Bold preference key *//*
         private String fBoldKey;
-        *//** Italic preference key *//*
+        */
+        /** Italic preference key *//*
         private String fItalicKey;
-        *//**
+        */
+        /**
          * Strikethrough preference key.
          * @since 3.1
          *//*
         private String fStrikethroughKey;
-        *//** Underline preference key.
+        */
+        /** Underline preference key.
          * @since 3.1
          *//*
         private String fUnderlineKey;*/
-        
         /**
          * Initialize the item with the given values.
          * @param displayName the display name
@@ -194,34 +168,6 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
             return fDisplayName;
         }
     }
-    
-    /*private static class SemanticHighlightingColorListItem extends HighlightingColorListItem {
-    
-        *//** Enablement preference key *//*
-        private final String fEnableKey;
-        
-        *//**
-         * Initialize the item with the given values.
-         * @param displayName the display name
-         * @param colorKey the color preference key
-         * @param boldKey the bold preference key
-         * @param italicKey the italic preference key
-         * @param strikethroughKey the strikethroughKey preference key
-         * @param underlineKey the underlineKey preference key
-         * @param enableKey the enable preference key
-         *//*
-        public SemanticHighlightingColorListItem(String displayName, String colorKey, String boldKey, String italicKey, String strikethroughKey, String underlineKey, String enableKey) {
-            super(displayName, colorKey, boldKey, italicKey, strikethroughKey, underlineKey);
-            fEnableKey= enableKey;
-        }
-    
-        *//**
-         * @return the enablement preference key
-         *//*
-        public String getEnableKey() {
-            return fEnableKey;
-        }
-    }*/
 
     /**
      * Color list label provider.
@@ -295,10 +241,8 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         { Messages.SyntaxColoringPreferencePage_metadataTypehint, PreferenceConstants.EDITOR_METADATA_TYPEHINT_COLOR },
     };
     
-/*    private final String fJavaCategory= Messages.SyntaxColoringPreferencePage_coloring_category_java;
-    private final String fJavadocCategory= Messages.SyntaxColoringPreferencePage_coloring_category_javadoc;
-    private final String fCommentsCategory= Messages.SyntaxColoringPreferencePage_coloring_category_comments;
-*/    
+    OverlayPreferenceStore fOverlayStore;
+    
     private ColorSelector fSyntaxForegroundColorEditor;
     private Label fColorEditorLabel;
     private Button fBoldCheckBox;
@@ -329,11 +273,6 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
      */
     private ListViewer fListViewer;
     /**
-     * Semantic highlighting manager
-     * @since  3.0
-     */
-    // private SemanticHighlightingManager fSemanticHighlightingManager;
-    /**
      * The previewer.
      * @since 3.0
      */
@@ -349,11 +288,11 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
      */
     private FontMetrics fFontMetrics;
 
-    public SyntaxColoringPreferencePage(/*OverlayPreferenceStore store*/) {
-        /*super(store);*/
-        
+    public SyntaxColoringPreferencePage() {
         setPreferenceStore(ClojuredevPlugin.getDefault().getPreferenceStore());
         
+        fOverlayStore = new OverlayPreferenceStore(getPreferenceStore(), createOverlayStoreKeys());
+
         fColorManager= new ClojureColorManager(false);
         
         for (int i= 0, n= fSyntaxColorListModel.length; i < n; i++)
@@ -480,10 +419,18 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         
         handleSyntaxColorListSelection();
 
-/*        uninstallSemanticHighlighting();
-        installSemanticHighlighting();*/
-
+        fOverlayStore.loadDefaults();
+        
         fPreviewViewer.invalidateTextPresentation();
+    }
+
+    public boolean performOk() {
+        
+        fOverlayStore.propagate();
+        
+        ClojuredevPlugin.getDefault().savePluginPreferences();
+        
+        return true;
     }
 
     /*
@@ -492,6 +439,11 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
     public void dispose() {
         /*uninstallSemanticHighlighting();*/
         fColorManager.dispose();
+        
+        if (fOverlayStore != null) {
+            fOverlayStore.stop();
+            fOverlayStore= null;
+        }
         
         super.dispose();
     }
@@ -508,35 +460,27 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
             fUnderlineCheckBox.setEnabled(false);
             return;
         }
-        RGB rgb= PreferenceConverter.getColor(getPreferenceStore(), item.getColorKey());
+        // TODO: RGB rgb= PreferenceConverter.getColor(getPreferenceStore(), item.getColorKey());
+        RGB rgb= PreferenceConverter.getColor(fOverlayStore, item.getColorKey());
         fSyntaxForegroundColorEditor.setColorValue(rgb);
 /*        fBoldCheckBox.setSelection(getPreferenceStore().getBoolean(item.getBoldKey()));
         fItalicCheckBox.setSelection(getPreferenceStore().getBoolean(item.getItalicKey()));
         fStrikethroughCheckBox.setSelection(getPreferenceStore().getBoolean(item.getStrikethroughKey()));
         fUnderlineCheckBox.setSelection(getPreferenceStore().getBoolean(item.getUnderlineKey()));
-        if (item instanceof SemanticHighlightingColorListItem) {
-            fEnableCheckbox.setEnabled(true);
-            boolean enable= getPreferenceStore().getBoolean(((SemanticHighlightingColorListItem) item).getEnableKey());
-            fEnableCheckbox.setSelection(enable);
-            fSyntaxForegroundColorEditor.getButton().setEnabled(enable);
-            fColorEditorLabel.setEnabled(enable);
-            fBoldCheckBox.setEnabled(enable);
-            fItalicCheckBox.setEnabled(enable);
-            fStrikethroughCheckBox.setEnabled(enable);
-            fUnderlineCheckBox.setEnabled(enable);
-        } else {*/
-            fSyntaxForegroundColorEditor.getButton().setEnabled(true);
-            fColorEditorLabel.setEnabled(true);
-            fBoldCheckBox.setEnabled(true);
-            fItalicCheckBox.setEnabled(true);
-            fStrikethroughCheckBox.setEnabled(true);
-            fUnderlineCheckBox.setEnabled(true);
-            fEnableCheckbox.setEnabled(false);
-            fEnableCheckbox.setSelection(true);
-       /* }*/
+        */
+        fSyntaxForegroundColorEditor.getButton().setEnabled(true);
+        fColorEditorLabel.setEnabled(true);
+        fBoldCheckBox.setEnabled(true);
+        fItalicCheckBox.setEnabled(true);
+        fStrikethroughCheckBox.setEnabled(true);
+        fUnderlineCheckBox.setEnabled(true);
+        fEnableCheckbox.setEnabled(false);
+        fEnableCheckbox.setSelection(true);
     }
     
     private Control createSyntaxPage(final Composite parent) {
+        fOverlayStore.load();
+        fOverlayStore.start();
         
         Composite colorComposite= new Composite(parent, SWT.NONE);
         GridLayout layout= new GridLayout();
@@ -580,26 +524,12 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         fListViewer.setLabelProvider(new ColorListLabelProvider());
         fListViewer.setContentProvider(new ColorListContentProvider());
         fListViewer.setInput(fListModel);
-        /* fListViewer.setComparator(new ViewerComparator() {
-            public int category(Object element) {
-                // don't sort the top level categories
-                if (fJavaCategory.equals(element))
-                    return 0;
-                if (fJavadocCategory.equals(element))
-                    return 1;
-                if (fCommentsCategory.equals(element))
-                    return 2;
-                // to sort semantic settings after partition based ones:
-//              if (element instanceof SemanticHighlightingColorListItem)
-//                  return 1;
-                return 0;
-            }
-        });*/
+
         gd= new GridData(SWT.BEGINNING, SWT.BEGINNING, false, true);
         gd.heightHint= convertHeightInCharsToPixels(9);
         int maxWidth= 0;
-        for (Iterator it= fListModel.iterator(); it.hasNext();) {
-            HighlightingColorListItem item= (HighlightingColorListItem) it.next();
+        for (Iterator<HighlightingColorListItem> it= fListModel.iterator(); it.hasNext();) {
+            HighlightingColorListItem item=  it.next();
             maxWidth= Math.max(maxWidth, convertWidthInCharsToPixels(item.getDisplayName().length()));
         }
         ScrollBar vBar= ((Scrollable) fListViewer.getControl()).getVerticalBar();
@@ -608,7 +538,6 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         gd.widthHint= maxWidth;
         
         fListViewer.getControl().setLayoutData(gd);
-        /* installDoubleClickListener(); */
                         
         Composite stylesComposite= new Composite(editorComposite, SWT.NONE);
         layout= new GridLayout();
@@ -686,7 +615,8 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
             }
             public void widgetSelected(SelectionEvent e) {
                 HighlightingColorListItem item= getHighlightingColorListItem();
-                PreferenceConverter.setValue(getPreferenceStore(), item.getColorKey(), fSyntaxForegroundColorEditor.getColorValue());
+                // TODO: remove this ? PreferenceConverter.setValue(getPreferenceStore(), item.getColorKey(), fSyntaxForegroundColorEditor.getColorValue());
+                PreferenceConverter.setValue(fOverlayStore, item.getColorKey(), fSyntaxForegroundColorEditor.getColorValue());
             }
         });
     
@@ -755,26 +685,6 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
                 
         return colorComposite;
     }
-    
-    /**
-     * Installs a double-click listener which allows
-     * to expand and collapse tree items.
-     * 
-     * @since 3.4
-     */
-    /*  private void installDoubleClickListener() {
-       fTreeViewer.addDoubleClickListener(new IDoubleClickListener() {
-            
-             * @see org.eclipse.jface.viewers.IDoubleClickListener#doubleClick(org.eclipse.jface.viewers.DoubleClickEvent)
-             
-            public void doubleClick(DoubleClickEvent event) {
-                IStructuredSelection s= (IStructuredSelection) event.getSelection();
-                Object element= s.getFirstElement();
-                if (fTreeViewer.isExpandable(element))
-                    fTreeViewer.setExpandedState(element, !fTreeViewer.getExpandedState(element));
-            }
-        });
-    }*/
 
     private void addFiller(Composite composite, int horizontalSpan) {
         PixelConverter pixelConverter= new PixelConverter(composite);
@@ -785,6 +695,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         filler.setLayoutData(gd);
     }
 
+    /* TODO complete example with all syntax features */
     private static final String PREVIEW_SOURCE =
         "; this is a comment\n" //$NON-NLS-1$
         + "(defmacro and\n" //$NON-NLS-1$
@@ -804,8 +715,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         /* TODO: what is the PreferencesAdapter good for
         IPreferenceStore store= new ChainedPreferenceStore(new IPreferenceStore[] { getPreferenceStore(), new PreferencesAdapter(createTemporaryCorePreferenceStore()), generalTextStore });
         */
-        IPreferenceStore store= new ChainedPreferenceStore(new IPreferenceStore[] { getPreferenceStore(), generalTextStore });
-
+        IPreferenceStore store= new ChainedPreferenceStore(new IPreferenceStore[] { fOverlayStore, generalTextStore });
         fPreviewViewer= new ClojureSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER, store);
         ClojureSourceViewerConfiguration configuration= new ClojureSourceViewerConfiguration(store, null);
         fPreviewViewer.configure(configuration);
@@ -823,22 +733,19 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         
         TextUtilities.addDocumentPartitioners(document, m);
         fPreviewViewer.setDocument(document);
-    
-        // installSemanticHighlighting();
         
         return fPreviewViewer.getControl();
     }
 
-
-/* TODO what is this needed for?
- *     private Preferences createTemporaryCorePreferenceStore() {
+/* TODO TASK and TODO not needed currently?
+    private Preferences createTemporaryCorePreferenceStore() {
         Preferences result= new Preferences();
         
         result.setValue(COMPILER_TASK_TAGS, "TASK,TODO"); //$NON-NLS-1$
         
         return result;
-    }*/
-
+    }
+*/
 
     private String loadPreviewContentFromFile(String filename) {
         String line;
@@ -860,91 +767,6 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         }
         return buffer.toString();
     }
-
-
-/*    *//**
-     * Install Semantic Highlighting on the previewer
-     * 
-     * @since 3.0
-     *//*
-    private void installSemanticHighlighting() {
-        if (fSemanticHighlightingManager == null) {
-            fSemanticHighlightingManager= new SemanticHighlightingManager();
-            fSemanticHighlightingManager.install(fPreviewViewer, fColorManager, getPreferenceStore(), createPreviewerRanges());
-        }
-    }
-
-
-    *//**
-     * Uninstall Semantic Highlighting from the previewer
-     * 
-     * @since 3.0
-     *//*
-    private void uninstallSemanticHighlighting() {
-        if (fSemanticHighlightingManager != null) {
-            fSemanticHighlightingManager.uninstall();
-            fSemanticHighlightingManager= null;
-        }
-    }
-*/
-
-    /**
-     * Create the hard coded previewer ranges
-     * 
-     * @return the hard coded previewer ranges
-     * @since 3.0
-     */
-/*    private SemanticHighlightingManager.HighlightedRange[][] createPreviewerRanges() {
-        return new SemanticHighlightingManager.HighlightedRange[][] {
-            { createHighlightedRange( 6, 13,  9, SemanticHighlightings.DEPRECATED_MEMBER), createHighlightedRange( 6, 13,  9, SemanticHighlightings.CLASS),  },
-            { createHighlightedRange( 6, 23,  1, SemanticHighlightings.TYPE_VARIABLE), createHighlightedRange( 6, 23,  1, SemanticHighlightings.TYPE_ARGUMENT), },
-            { createHighlightedRange( 6, 37,  9, SemanticHighlightings.INTERFACE) },
-            { createHighlightedRange( 6, 47,  6, SemanticHighlightings.TYPE_ARGUMENT), createHighlightedRange( 6, 47,  6, SemanticHighlightings.CLASS) },
-            { createHighlightedRange( 7,  6,  5, SemanticHighlightings.ENUM), },
-            { createHighlightedRange( 7, 14, 3, SemanticHighlightings.STATIC_FINAL_FIELD), createHighlightedRange(7, 14, 3, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(7, 14, 3, SemanticHighlightings.FIELD) },
-            { createHighlightedRange( 7, 19, 5, SemanticHighlightings.STATIC_FINAL_FIELD), createHighlightedRange(7, 19, 5, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(7, 19, 5, SemanticHighlightings.FIELD) },
-            { createHighlightedRange( 7, 26, 4, SemanticHighlightings.STATIC_FINAL_FIELD), createHighlightedRange(7, 26, 4, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(7, 26, 4, SemanticHighlightings.FIELD) },
-            { createHighlightedRange( 9, 8, 6, SemanticHighlightings.CLASS), },
-            { createHighlightedRange( 9, 15, 11, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(9, 15, 11, SemanticHighlightings.FIELD) },
-            { createHighlightedRange(11,  9,  1, SemanticHighlightings.TYPE_VARIABLE) },
-            { createHighlightedRange(11, 11,  5, SemanticHighlightings.FIELD) },
-            { createHighlightedRange(13, 2,  16, SemanticHighlightings.ANNOTATION) },
-            { createHighlightedRange(13, 19,  5, SemanticHighlightings.ANNOTATION_ELEMENT_REFERENCE) },
-            { createHighlightedRange(14, 12,  3, SemanticHighlightings.METHOD_DECLARATION), createHighlightedRange(14, 12,  3, SemanticHighlightings.METHOD) },
-            { createHighlightedRange(14, 24,  9, SemanticHighlightings.PARAMETER_VARIABLE) },
-            { createHighlightedRange(15,  2, 14, SemanticHighlightings.ABSTRACT_METHOD_INVOCATION), createHighlightedRange(15,  2, 14, SemanticHighlightings.METHOD) },
-            { createHighlightedRange(16,  6,  5, SemanticHighlightings.LOCAL_VARIABLE_DECLARATION) },
-            { createHighlightedRange(16, 13, 2, SemanticHighlightings.NUMBER) },
-            { createHighlightedRange(16, 16,  8, SemanticHighlightings.INHERITED_METHOD_INVOCATION), createHighlightedRange(16, 16,  8, SemanticHighlightings.METHOD) },
-            { createHighlightedRange(17,  2, 12, SemanticHighlightings.STATIC_METHOD_INVOCATION), createHighlightedRange(17,  2, 12, SemanticHighlightings.METHOD) },
-            { createHighlightedRange(18, 9,  3, SemanticHighlightings.METHOD) },
-            { createHighlightedRange(18, 13,  5, SemanticHighlightings.LOCAL_VARIABLE) },
-            { createHighlightedRange(18, 22,  9, SemanticHighlightings.AUTOBOXING) },
-        };
-    }
-*/
-
-    /**
-     * Create a highlighted range on the previewers document with the given line, column, length and key.
-     * 
-     * @param line the line
-     * @param column the column
-     * @param length the length
-     * @param key the key
-     * @return the highlighted range
-     * @since 3.0
-     */
-/*    private HighlightedRange createHighlightedRange(int line, int column, int length, String key) {
-        try {
-            IDocument document= fPreviewViewer.getDocument();
-            int offset= document.getLineOffset(line) + column;
-            return new HighlightedRange(offset, length, key);
-        } catch (BadLocationException x) {
-            JavaPlugin.log(x);
-        }
-        return null;
-    }*/
-
 
     /**
      * Returns the current highlighting color list item.
@@ -979,10 +801,23 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         gc.dispose();
     }
 
-
-
     public void init(IWorkbench workbench) {
         // TODO Auto-generated method stub
         
+    }
+    
+    private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {  
+        ArrayList<OverlayPreferenceStore.OverlayKey> overlayKeys= new ArrayList<OverlayPreferenceStore.OverlayKey>();
+
+        overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_FUNCTION_COLOR));
+        overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_LITERAL_COLOR));
+        overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_SPECIAL_FORM_COLOR));
+        overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_COMMENT_COLOR));
+        overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_GLOBAL_VAR_COLOR));
+        overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_KEYWORD_COLOR));
+        overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_METADATA_TYPEHINT_COLOR));
+
+        OverlayPreferenceStore.OverlayKey[] keys= new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];
+        return overlayKeys.toArray(keys);
     }
 }
