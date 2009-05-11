@@ -37,5 +37,4 @@ public class ScrolledPageContent extends SharedScrolledComposite {
     public Composite getBody() {
         return (Composite) getContent();
     }
-
 }
