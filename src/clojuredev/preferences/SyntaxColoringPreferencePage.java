@@ -821,3 +821,4 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         return overlayKeys.toArray(keys);
     }
 }
+
