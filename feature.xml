@@ -2,7 +2,7 @@
 <feature
       id="clojuredev.feature"
       label="%featureName"
-      version="0.0.34"
+      version="0.0.35"
       provider-name="%providerName"
       plugin="clojuredev.branding">
 
@@ -63,5 +63,12 @@
          download-size="0"
          install-size="0"
          version="0.0.33"/>
+
+   <plugin
+         id="org.antlr.runtime"
+         download-size="0"
+         install-size="0"
+         version="3.0.0.v200803061811"
+         unpack="false"/>
 
 </feature>
