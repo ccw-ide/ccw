@@ -717,11 +717,11 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         */
         IPreferenceStore store= new ChainedPreferenceStore(new IPreferenceStore[] { fOverlayStore, generalTextStore });
         fPreviewViewer= new ClojureSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER, store);
+        ClojuredevPlugin.registerEditorColors(store);
         ClojureSourceViewerConfiguration configuration= new ClojureSourceViewerConfiguration(store, null);
         fPreviewViewer.configure(configuration);
         Font font= JFaceResources.getFont(org.eclipse.jdt.ui.PreferenceConstants.EDITOR_TEXT_FONT);
         fPreviewViewer.getTextWidget().setFont(font);
-        new ClojureSourcePreviewerUpdater(fPreviewViewer, configuration, store);
         fPreviewViewer.setEditable(false);
         
         IDocument document= new Document(PREVIEW_SOURCE);

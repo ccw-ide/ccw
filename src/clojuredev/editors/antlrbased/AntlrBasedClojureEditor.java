@@ -17,8 +17,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferenceConverter;
-import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -32,7 +30,6 @@ import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.projection.ProjectionSupport;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
@@ -50,8 +47,6 @@ import clojuredev.ClojuredevPlugin;
 import clojuredev.debug.ClojureClient;
 import clojuredev.editors.rulesbased.ClojureDocumentProvider;
 import clojuredev.editors.rulesbased.ClojurePartitionScanner;
-import clojuredev.lexers.ClojureLexer;
-import clojuredev.utils.editors.antlrbased.IScanContext;
 
 public class AntlrBasedClojureEditor extends TextEditor {
 	private static final String CONTENT_ASSIST_PROPOSAL = "ContentAssistProposal"; //$NON-NLS-1$
@@ -72,6 +67,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
 
 	public AntlrBasedClojureEditor() {
 	    IPreferenceStore preferenceStore = createCombinedPreferenceStore();
+	    ClojuredevPlugin.registerEditorColors(preferenceStore);
 		setSourceViewerConfiguration(new ClojureSourceViewerConfiguration(preferenceStore, this));
 		setPreferenceStore(preferenceStore);
         setDocumentProvider(new ClojureDocumentProvider());
@@ -96,10 +92,10 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		fOverviewRuler= createOverviewRuler(getSharedColors());
 		
 		// ISourceViewer viewer= new ProjectionViewer(parent, ruler, getOverviewRuler(), isOverviewRulerVisible(), styles);
-        ISourceViewer viewer= new ClojureSourceViewer(parent, ruler, getOverviewRuler(), isOverviewRulerVisible(), styles, getPreferenceStore());
+		ISourceViewer viewer= new ClojureSourceViewer(parent, ruler, getOverviewRuler(), isOverviewRulerVisible(), styles, getPreferenceStore());
 		// ensure decoration support has been created and configured.
 		getSourceViewerDecorationSupport(viewer);
-		
+
 		return viewer;
 	}
 	
