@@ -26,6 +26,7 @@ import org.eclipse.jface.text.source.SourceViewer;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import clojuredev.editors.antlrbased.ClojureSourceViewer;
 import clojuredev.editors.antlrbased.ClojureSourceViewerConfiguration;
 
 /**
@@ -42,7 +43,7 @@ public class ClojureSourcePreviewerUpdater {
      * @param configuration the configuration
      * @param preferenceStore the preference store
      */
-    public ClojureSourcePreviewerUpdater(final SourceViewer viewer, final ClojureSourceViewerConfiguration configuration, final IPreferenceStore preferenceStore) {
+    public ClojureSourcePreviewerUpdater(final ClojureSourceViewer viewer, final ClojureSourceViewerConfiguration configuration, final IPreferenceStore preferenceStore) {
         Assert.isNotNull(viewer);
         Assert.isNotNull(configuration);
         Assert.isNotNull(preferenceStore);
@@ -66,6 +67,10 @@ public class ClojureSourcePreviewerUpdater {
                     configuration.handlePropertyChangeEvent(event);
                     viewer.invalidateTextPresentation();
                 }*/
+                viewer.unconfigure();
+                viewer.registerEditorColors();
+                configuration.initTokenScanner();
+                viewer.configure(configuration);
                 viewer.invalidateTextPresentation();
             }
         };

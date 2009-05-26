@@ -37,13 +37,13 @@ import clojuredev.editors.rulesbased.ClojurePartitionScanner;
 
 
 public class ClojureSourceViewerConfiguration extends TextSourceViewerConfiguration {
-	private final ITokenScanner tokenScanner;
+	private ITokenScanner tokenScanner;
 	private final AntlrBasedClojureEditor editor;
 
 	public ClojureSourceViewerConfiguration(IPreferenceStore preferenceStore, AntlrBasedClojureEditor editor) {
 	    super(preferenceStore);
-		tokenScanner = new ClojureTokenScannerFactory().create(ClojuredevPlugin.getDefault().getColorRegistry(), ClojuredevPlugin.getDefault().getDefaultScanContext());
-		this.editor = editor;
+	    initTokenScanner();
+	    this.editor = editor;
 	}
 	
 	@Override
@@ -115,4 +115,7 @@ public class ClojureSourceViewerConfiguration extends TextSourceViewerConfigurat
 		};
 	}
 	
+	public void initTokenScanner() {
+       tokenScanner = new ClojureTokenScannerFactory().create(ClojuredevPlugin.getDefault().getColorRegistry(), ClojuredevPlugin.getDefault().getDefaultScanContext());
+	}
 }

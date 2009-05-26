@@ -97,7 +97,7 @@ public class ClojureSourceViewer extends ProjectionViewer implements
         fIsConfigured= false;
     }
     
-    private void registerEditorColors() {
+    public void registerEditorColors() {
         ColorRegistry colorRegistry = ClojuredevPlugin.getDefault().getColorRegistry();
         
         // TODO: define separate preferences for the tokens that use black and gray?
