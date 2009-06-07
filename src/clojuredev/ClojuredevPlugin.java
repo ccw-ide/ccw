@@ -38,6 +38,7 @@ import clojuredev.debug.ClojureClient;
 import clojuredev.editors.antlrbased.AntlrBasedClojureEditor;
 import clojuredev.launching.LaunchUtils;
 import clojuredev.lexers.ClojureLexer;
+import clojuredev.util.DisplayUtil;
 import clojuredev.utils.editors.antlrbased.IScanContext;
 
 /**
@@ -89,7 +90,10 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
     
     private void createColorRegistry() {
     	if (colorRegistry == null) {
-    		colorRegistry = new ColorRegistry(getWorkbench().getDisplay());
+    		DisplayUtil.syncExec(new Runnable() {
+				public void run() {
+		    		colorRegistry = new ColorRegistry(getWorkbench().getDisplay());
+				}});
     	}
     }
     

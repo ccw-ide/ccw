@@ -55,9 +55,6 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
     	}
     	
     	if (kind == AUTO_BUILD || kind == INCREMENTAL_BUILD) {
-    		if (getDelta(getProject()) == null) {
-    			return null;
-    		}
 	    	if (onlyClassesFolderRelatedDelta()) {
 	    		return null;
 	    	}
@@ -164,7 +161,11 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
     		monitor = new NullProgressMonitor();
     	}
     	
-    	getClassesFolder().delete(false, monitor);
+    	try {
+    		getClassesFolder().delete(true, monitor);
+    	} catch (CoreException e) {
+    		ClojuredevPlugin.logError("Unable to clean classes folder", e);
+    	}
     	if (!getClassesFolder().exists()) {
     		getClassesFolder().create(true, true, monitor);
     	}

@@ -17,7 +17,6 @@ import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -30,7 +29,6 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerFilter;
-import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -56,6 +54,8 @@ import clojure.lang.Keyword;
 import clojuredev.ClojureCore;
 import clojuredev.ClojuredevPlugin;
 import clojuredev.debug.ClojureClient;
+import clojuredev.util.ClojureDocUtils;
+import clojuredev.util.DisplayUtil;
 
 public class NamespaceBrowser extends ViewPart implements ISelectionProvider, ISelectionChangedListener {
 	/**
@@ -74,8 +74,6 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 	private static final Keyword KEYWORD_CHILDREN = Keyword.intern(null, "children");
 	private static final Keyword KEYWORD_TYPE = Keyword.intern(null, "type");
 	public static final Keyword KEYWORD_PRIVATE = Keyword.intern(null, "private");
-	public static final Keyword KEYWORD_DOC = Keyword.intern(null, "doc");
-	public static final Keyword KEYWORD_ARGLISTS = Keyword.intern(null, "arglists");
 	public static final Keyword KEYWORD_NS = Keyword.intern(null, "ns");
 	private static final Keyword KEYWORD_FILE = Keyword.intern(null, "file");
 	private static final Keyword KEYWORD_LINE = Keyword.intern(null, "line");
@@ -127,16 +125,14 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 
 		Label l = new Label(control, SWT.NONE);
 		l.setText("Find :");
-		l
-				.setToolTipText("Enter an expression on which the browser will filter, based on name and doc string of symbols");
+		l.setToolTipText("Enter an expression on which the browser will filter, based on name and doc string of symbols");
 		GridData gd = new GridData();
 		gd.verticalAlignment = SWT.CENTER;
 		l.setLayoutData(gd);
 
 		filterText = new Text(control, SWT.FILL | SWT.BORDER);
 		filterText.setTextLimit(10);
-		filterText
-				.setToolTipText("Enter here a word to search. It can be a regexp. e.g. \"-map$\" (without double quotes) for matching strings ending with -map");
+		filterText.setToolTipText("Enter here a word to search. It can be a regexp. e.g. \"-map$\" (without double quotes) for matching strings ending with -map");
 		gd = new GridData();
 		gd.horizontalAlignment = SWT.FILL;
 		gd.verticalAlignment = SWT.CENTER;
@@ -225,7 +221,7 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 					String name = (String) elem.get(KEYWORD_NAME);
 					boolean nameMatches = searchInName && name != null && pattern.matcher(name).find();
 
-					String doc = (String) elem.get(KEYWORD_DOC);
+					String doc = (String) elem.get(ClojureDocUtils.KEYWORD_DOC);
 					boolean docMatches = searchInDoc && doc != null && pattern.matcher(doc).find();
 
 					return nameMatches || docMatches;
@@ -300,27 +296,7 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 	private static class LabelProvider extends CellLabelProvider {
 
 		public String getToolTipText(Object element) {
-			StringBuilder result = new StringBuilder();
-
-			Object maybeArglist = ((Map) element).get(KEYWORD_ARGLISTS);
-			if (maybeArglist != null) {
-				result.append("arglists: ");
-				result.append(maybeArglist);
-			}
-
-			Object maybeDoc = ((Map) element).get(KEYWORD_DOC);
-			if (maybeDoc != null) {
-				if (result.length() > 0) {
-					result.append("\n\n");
-				}
-				result.append(maybeDoc);
-			}
-
-			if (result.length() != 0) {
-				return result.toString();
-			} else {
-				return "no documentation information";
-			}
+			return ClojureDocUtils.getVarDocInfo(element);
 		}
 
 		public Point getToolTipShift(Object object) {
@@ -364,10 +340,6 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 			}
 			return null;
 		}
-	}
-
-	private static class NSSorter extends ViewerSorter {
-
 	}
 
 	private Map<String, List<String>> getRemoteNsTree() {
@@ -540,16 +512,10 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 	 * @param clojureClient
 	 */
 	public static void setClojureClient(final ClojureClient clojureClient) {
-		Display display = Display.getCurrent();
-		if (display==null) {
-			PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
-				public void run() {
-					inUIThreadSetClojureClient(clojureClient);
-				}
-			});
-		} else {
-			inUIThreadSetClojureClient(clojureClient);
-		}
+		DisplayUtil.asyncExec(new Runnable() {
+			public void run() {
+				inUIThreadSetClojureClient(clojureClient);
+			}});
 	}
 	
 	private static void inUIThreadSetClojureClient(ClojureClient clojureClient) {
@@ -565,19 +531,7 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 			return;
 		}
 
-		if (clojureClient == null) {
-			co.clojureClient = null;
-			co.resetInput();
-			return;
-		}
-		
-		if (co.clojureClient!=null 
-				&& co.clojureClient.getPort()==clojureClient.getPort()) {
-			co.resetInput();
-			return;
-		}
 		co.clojureClient = clojureClient;
-		
 		co.resetInput();
 	}
 	

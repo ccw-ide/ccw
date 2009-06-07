@@ -95,13 +95,10 @@ public class ClojureClient {
             			IConsoleView cv = (IConsoleView) v;
             			if (org.eclipse.debug.ui.console.IConsole.class.isInstance(cv.getConsole())) {
             				org.eclipse.debug.ui.console.IConsole processConsole = (org.eclipse.debug.ui.console.IConsole) cv.getConsole();
-            				String portAttr = processConsole.getProcess().getLaunch().getAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN);
-            				if (portAttr != null) {
-    							Integer port = Integer.valueOf(portAttr);
-        						if (port != -1) {
-        							return new ClojureClient(port);
-        						}
-            				}
+            				int port = LaunchUtils.getLaunchServerReplPort(processConsole.getProcess().getLaunch());
+    						if (port != -1) {
+    							return new ClojureClient(port);
+    						}
             			}
             		}
             	}
@@ -121,14 +118,11 @@ public class ClojureClient {
             			IConsoleView cv = (IConsoleView) v;
             			if (org.eclipse.debug.ui.console.IConsole.class.isInstance(cv.getConsole())) {
             				org.eclipse.debug.ui.console.IConsole processConsole = (org.eclipse.debug.ui.console.IConsole) cv.getConsole();
-						    String portAttr = processConsole.getProcess().getLaunch().getAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN);
-						    if (portAttr != null) {
-								int port = Integer.valueOf(portAttr);
-	    						if (port != -1) {
-	    							assert IOConsole.class.isInstance(processConsole);
-	    							return (IOConsole) processConsole;
-	    						}
-						    }
+            				int port = LaunchUtils.getLaunchServerReplPort(processConsole.getProcess().getLaunch());
+    						if (port != -1) {
+    							assert IOConsole.class.isInstance(processConsole);
+    							return (IOConsole) processConsole;
+    						}
             			}
             		}
             	}

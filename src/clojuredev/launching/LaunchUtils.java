@@ -10,6 +10,10 @@
  *******************************************************************************/
 package clojuredev.launching;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,9 +22,12 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
+
+import clojuredev.util.IOUtils;
 
 public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
 
@@ -32,12 +39,18 @@ public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
     static public final String MAIN_CLASSNAME = "clojure.contrib.repl_ln";
 //    static public final String MAIN_CLASSNAME = "clojure.lang.Repl";
     
-    static public final int DEFAULT_SERVER_PORT = 8503;
+    static public final int DEFAULT_SERVER_PORT = -1;
     
 	/** Launch attribute that will be of type String, the files will be listed separated by newlines */
     static public final String ATTR_FILES_LAUNCHED_AT_STARTUP = "CLOJUREDEV_ATTR_FILES_LAUNCHED_AT_STARTUP";
 
 	public static final String ATTR_CLOJURE_SERVER_LISTEN = "CLOJUREDEV_ATTR_CLOJURE_SERVER_LISTEN";
+
+	public static final String ATTR_CLOJURE_SERVER_FILE_PORT = "clojuredev.debug.serverrepl.file.port";
+
+	public static final String SERVER_FILE_PORT_PREFIX = "clojuredev.debug.serverrepl.port-";
+
+	public static final String SERVER_FILE_PORT_SUFFFIX = ".port";
 
     static public String getProgramArguments(IFile[] files) {
         StringBuilder args = new StringBuilder();
@@ -84,4 +97,36 @@ public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
         config.setAttribute(LaunchUtils.ATTR_FILES_LAUNCHED_AT_STARTUP, filesAsString.toString());
     }
 
+    static public int getLaunchServerReplPort(ILaunch launch) {
+		String portAttr = launch.getAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN);
+		int port;
+		if (portAttr == null || (port = Integer.valueOf(portAttr)) == -1) {
+			port = tryFindPort(launch);
+			if (port != -1) {
+				launch.setAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN, Integer.toString(port));
+			}
+		}
+		return port;
+    }
+    static private int tryFindPort(ILaunch launch) {
+    	FileReader fr = null;
+    	BufferedReader br = null;
+    	try {
+    		String filename = launch.getAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_FILE_PORT);
+    		if (filename != null) {
+		    	File f = new File(filename);
+		    	fr = new FileReader(f);
+		    	br = new BufferedReader(fr);
+		    	return Integer.valueOf(br.readLine());
+    		}
+    	} catch (IOException e) {
+    		// maybe do not catch exception to not pollute log with false positives?
+    	} catch (NumberFormatException e) {
+    		// maybe do not catch exception to not pollute log with false positives?
+    	} finally {
+    		IOUtils.safeClose(br);
+    		IOUtils.safeClose(fr);
+    	}
+		return -1;
+    }
 }
