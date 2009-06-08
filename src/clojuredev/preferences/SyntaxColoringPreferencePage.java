@@ -8,6 +8,8 @@
  * Contributors: 
  *    Stephan Muehlstrasser - initial implementation, derived from
  * org.eclipse.jdt.internal.ui.preferences.JavaEditorColoringConfigurationBlock
+ *    Stephan Muehlstrasser - support for enabling/disabling syntax coloring on
+ * per-element basis
  *******************************************************************************/
 
 package clojuredev.preferences;
@@ -21,7 +23,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.OverlayPreferenceStore;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
@@ -42,6 +43,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -76,16 +78,16 @@ import clojuredev.editors.rulesbased.ClojurePartitioner;
 
 /**
  * Configures Clojure Editor syntax coloring preferences.
- * from org.eclipse.jdt.internal.ui.preferences.JavaEditorColoringConfigurationBlock
+ * Adapted from org.eclipse.jdt.internal.ui.preferences.JavaEditorColoringConfigurationBlock
  */
 public class SyntaxColoringPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
     /**
      * Item in the highlighting color list.
-     * 
-     * @since 3.0
      */
     private static class HighlightingColorListItem {
+        /** Enablement preference key */
+        private final String fEnableKey;
         /** Display name */
         private String fDisplayName;
         /** Color preference key */
@@ -98,12 +100,10 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         */
         /**
          * Strikethrough preference key.
-         * @since 3.1
          *//*
         private String fStrikethroughKey;
         */
         /** Underline preference key.
-         * @since 3.1
          *//*
         private String fUnderlineKey;*/
         /**
@@ -115,13 +115,15 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
          * @param strikethroughKey the strikethrough preference key
          * @param underlineKey the underline preference key
          */
-        public HighlightingColorListItem(String displayName, String colorKey/*, String boldKey, String italicKey, String strikethroughKey, String underlineKey*/) {
+        public HighlightingColorListItem(String displayName, String colorKey, /*String boldKey, String italicKey, String strikethroughKey, String underlineKey*/
+                String enableKey) {
             fDisplayName= displayName;
             fColorKey= colorKey;
             /*fBoldKey= boldKey;
             fItalicKey= italicKey;
             fStrikethroughKey= strikethroughKey;
             fUnderlineKey= underlineKey;*/
+            fEnableKey = enableKey;
         }
         
 /*        *//**
@@ -140,7 +142,6 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         
         *//**
          * @return the strikethrough preference key
-         * @since 3.1
          *//*
         public String getStrikethroughKey() {
             return fStrikethroughKey;
@@ -148,7 +149,6 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         
         *//**
          * @return the underline preference key
-         * @since 3.1
          *//*
         public String getUnderlineKey() {
             return fUnderlineKey;
@@ -167,12 +167,17 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         public String getDisplayName() {
             return fDisplayName;
         }
+        
+        /**
+         * @return the enablement preference key
+         */
+        public String getEnableKey() {
+            return fEnableKey;
+        }
     }
 
     /**
      * Color list label provider.
-     * 
-     * @since 3.0
      */
     private class ColorListLabelProvider extends LabelProvider {
         /*
@@ -187,8 +192,6 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
 
     /**
      * Color list content provider.
-     * 
-     * @since 3.0
      */
     private class ColorListContentProvider implements IStructuredContentProvider {
     
@@ -209,25 +212,24 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
         }
     }
-
 /*    private static final String BOLD= PreferenceConstants.EDITOR_BOLD_SUFFIX;
     *//**
      * Preference key suffix for italic preferences.
-     * @since  3.0
      *//*
     private static final String ITALIC= PreferenceConstants.EDITOR_ITALIC_SUFFIX;
     *//**
      * Preference key suffix for strikethrough preferences.
-     * @since  3.1
      *//*
     private static final String STRIKETHROUGH= PreferenceConstants.EDITOR_STRIKETHROUGH_SUFFIX;
     *//**
      * Preference key suffix for underline preferences.
-     * @since  3.1
      *//*
     private static final String UNDERLINE= PreferenceConstants.EDITOR_UNDERLINE_SUFFIX;
 */    
-    private static final String COMPILER_TASK_TAGS= JavaCore.COMPILER_TASK_TAGS;
+    private static final String ENABLED = PreferenceConstants.EDITOR_COLORING_ENABLED_SUFFIX;
+    
+    /* private static final String COMPILER_TASK_TAGS= JavaCore.COMPILER_TASK_TAGS; */
+    
     /**
      * The keys of the overlay store.
      */
@@ -245,26 +247,28 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
     
     private ColorSelector fSyntaxForegroundColorEditor;
     private Label fColorEditorLabel;
-    private Button fBoldCheckBox;
+    
     private Button fEnableCheckbox;
+    
+    /* TODO enable bold, italic, strikethrough, underline elements once
+     * text attributes are used
+     */
+    // private Button fBoldCheckBox;
+    
     /**
      * Check box for italic preference.
-     * @since  3.0
      */
-    private Button fItalicCheckBox;
+    // private Button fItalicCheckBox;
     /**
      * Check box for strikethrough preference.
-     * @since  3.1
      */
-    private Button fStrikethroughCheckBox;
+    // private Button fStrikethroughCheckBox;
     /**
      * Check box for underline preference.
-     * @since  3.1
      */
-    private Button fUnderlineCheckBox;
+    // private Button fUnderlineCheckBox;
     /**
      * Highlighting color list
-     * @since  3.0
      */
     private final List<HighlightingColorListItem> fListModel= new ArrayList<HighlightingColorListItem>();
     
@@ -274,17 +278,14 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
     private ListViewer fListViewer;
     /**
      * The previewer.
-     * @since 3.0
      */
     private ClojureSourceViewer fPreviewViewer;
     /**
      * The color manager.
-     * @since 3.1
      */
     private IColorManager fColorManager;
     /**
      * The font metrics.
-     * @since 3.1
      */
     private FontMetrics fFontMetrics;
 
@@ -295,29 +296,15 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
 
         fColorManager= new ClojureColorManager(false);
         
-        for (int i= 0, n= fSyntaxColorListModel.length; i < n; i++)
+        for (String[] modelItem: fSyntaxColorListModel)
             fListModel.add(new HighlightingColorListItem(
-                    fSyntaxColorListModel[i][0],
-                    fSyntaxColorListModel[i][1] /*,
-                    fSyntaxColorListModel[i][1] + BOLD,
-                    fSyntaxColorListModel[i][1] + ITALIC,
-                    fSyntaxColorListModel[i][1] + STRIKETHROUGH,
-                    fSyntaxColorListModel[i][1] + UNDERLINE*/));
-        
-        /* SemanticHighlighting[] semanticHighlightings= SemanticHighlightings.getSemanticHighlightings();
-        for (int i= 0, n= semanticHighlightings.length; i < n; i++)
-            fListModel.add(
-                    new SemanticHighlightingColorListItem(
-                            semanticHighlightings[i].getDisplayName(),
-                            SemanticHighlightings.getColorPreferenceKey(semanticHighlightings[i]),
-                            SemanticHighlightings.getBoldPreferenceKey(semanticHighlightings[i]),
-                            SemanticHighlightings.getItalicPreferenceKey(semanticHighlightings[i]),
-                            SemanticHighlightings.getStrikethroughPreferenceKey(semanticHighlightings[i]),
-                            SemanticHighlightings.getUnderlinePreferenceKey(semanticHighlightings[i]),
-                            SemanticHighlightings.getEnabledPreferenceKey(semanticHighlightings[i])
-                    ));
-        
-        store.addKeys(createOverlayStoreKeys());*/
+                    modelItem[0],
+                    modelItem[1], /*
+                    getBoldPreferenceKey(model[1]),
+                    getItalicPreferenceKey(model[1]),
+                    getStrikethroughPreferenceKey(model[1]),
+                    getUnderlinePreferenceKey(model[1]),*/
+                    getEnabledPreferenceKey(modelItem[1])));
     }
 
 /*    private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
@@ -425,7 +412,6 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
     }
 
     public boolean performOk() {
-        
         fOverlayStore.propagate();
         
         ClojuredevPlugin.getDefault().savePluginPreferences();
@@ -437,7 +423,6 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
      * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#dispose()
      */
     public void dispose() {
-        /*uninstallSemanticHighlighting();*/
         fColorManager.dispose();
         
         if (fOverlayStore != null) {
@@ -454,28 +439,33 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
             fEnableCheckbox.setEnabled(false);
             fSyntaxForegroundColorEditor.getButton().setEnabled(false);
             fColorEditorLabel.setEnabled(false);
+            /* TODO uncomment this once text attributes are used
             fBoldCheckBox.setEnabled(false);
             fItalicCheckBox.setEnabled(false);
             fStrikethroughCheckBox.setEnabled(false);
             fUnderlineCheckBox.setEnabled(false);
+            */
             return;
         }
-        // TODO: RGB rgb= PreferenceConverter.getColor(getPreferenceStore(), item.getColorKey());
         RGB rgb= PreferenceConverter.getColor(fOverlayStore, item.getColorKey());
         fSyntaxForegroundColorEditor.setColorValue(rgb);
-/*        fBoldCheckBox.setSelection(getPreferenceStore().getBoolean(item.getBoldKey()));
-        fItalicCheckBox.setSelection(getPreferenceStore().getBoolean(item.getItalicKey()));
-        fStrikethroughCheckBox.setSelection(getPreferenceStore().getBoolean(item.getStrikethroughKey()));
-        fUnderlineCheckBox.setSelection(getPreferenceStore().getBoolean(item.getUnderlineKey()));
+/*        fBoldCheckBox.setSelection(fOverlayStore.getBoolean(item.getBoldKey()));
+        fItalicCheckBox.setSelection(fOverlayStore.getBoolean(item.getItalicKey()));
+        fStrikethroughCheckBox.setSelection(fOverlayStore.getBoolean(item.getStrikethroughKey()));
+        fUnderlineCheckBox.setSelection(fOverlayStore.getBoolean(item.getUnderlineKey()));
         */
-        fSyntaxForegroundColorEditor.getButton().setEnabled(true);
-        fColorEditorLabel.setEnabled(true);
-        fBoldCheckBox.setEnabled(true);
-        fItalicCheckBox.setEnabled(true);
-        fStrikethroughCheckBox.setEnabled(true);
-        fUnderlineCheckBox.setEnabled(true);
-        fEnableCheckbox.setEnabled(false);
-        fEnableCheckbox.setSelection(true);
+        
+        fEnableCheckbox.setEnabled(true);
+        boolean enable= fOverlayStore.getBoolean(item.getEnableKey());
+        fEnableCheckbox.setSelection(enable);
+        fSyntaxForegroundColorEditor.getButton().setEnabled(enable);
+        fColorEditorLabel.setEnabled(enable);
+        /* TODO depend on enable if text attributes are actually used
+        fBoldCheckBox.setEnabled(enable);
+        fItalicCheckBox.setEnabled(enable);
+        fStrikethroughCheckBox.setEnabled(enable);
+        fUnderlineCheckBox.setEnabled(enable);
+        */
     }
     
     private Control createSyntaxPage(final Composite parent) {
@@ -565,6 +555,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
         foregroundColorButton.setLayoutData(gd);
         
+        /* TODO enable once text attributes are used
         fBoldCheckBox= new Button(stylesComposite, SWT.CHECK);
         fBoldCheckBox.setText(Messages.SyntaxColoringPreferencePage_bold);
         gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
@@ -592,6 +583,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         gd.horizontalIndent= 20;
         gd.horizontalSpan= 2;
         fUnderlineCheckBox.setLayoutData(gd);
+        */
         
         label= new Label(colorComposite, SWT.LEFT);
         label.setText(Messages.SyntaxColoringPreferencePage_preview);
@@ -626,7 +618,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
             }
             public void widgetSelected(SelectionEvent e) {
                 HighlightingColorListItem item= getHighlightingColorListItem();
-                getPreferenceStore().setValue(item.getBoldKey(), fBoldCheckBox.getSelection());
+                fOverlayStore.setValue(item.getBoldKey(), fBoldCheckBox.getSelection());
             }
         });
                 
@@ -636,7 +628,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
             }
             public void widgetSelected(SelectionEvent e) {
                 HighlightingColorListItem item= getHighlightingColorListItem();
-                getPreferenceStore().setValue(item.getItalicKey(), fItalicCheckBox.getSelection());
+                fOverlayStore.setValue(item.getItalicKey(), fItalicCheckBox.getSelection());
             }
         });
         fStrikethroughCheckBox.addSelectionListener(new SelectionListener() {
@@ -645,7 +637,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
             }
             public void widgetSelected(SelectionEvent e) {
                 HighlightingColorListItem item= getHighlightingColorListItem();
-                getPreferenceStore().setValue(item.getStrikethroughKey(), fStrikethroughCheckBox.getSelection());
+                fOverlayStore.setValue(item.getStrikethroughKey(), fStrikethroughCheckBox.getSelection());
             }
         });
         
@@ -655,9 +647,10 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
             }
             public void widgetSelected(SelectionEvent e) {
                 HighlightingColorListItem item= getHighlightingColorListItem();
-                getPreferenceStore().setValue(item.getUnderlineKey(), fUnderlineCheckBox.getSelection());
+                fOverlayStore.setValue(item.getUnderlineKey(), fUnderlineCheckBox.getSelection());
             }
         });
+        */
                 
         fEnableCheckbox.addSelectionListener(new SelectionListener() {
             public void widgetDefaultSelected(SelectionEvent e) {
@@ -665,24 +658,24 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
             }
             public void widgetSelected(SelectionEvent e) {
                 HighlightingColorListItem item= getHighlightingColorListItem();
-                if (item instanceof SemanticHighlightingColorListItem) {
-                    boolean enable= fEnableCheckbox.getSelection();
-                    getPreferenceStore().setValue(((SemanticHighlightingColorListItem) item).getEnableKey(), enable);
-                    fEnableCheckbox.setSelection(enable);
-                    fSyntaxForegroundColorEditor.getButton().setEnabled(enable);
-                    fColorEditorLabel.setEnabled(enable);
-                    fBoldCheckBox.setEnabled(enable);
-                    fItalicCheckBox.setEnabled(enable);
-                    fStrikethroughCheckBox.setEnabled(enable);
-                    fUnderlineCheckBox.setEnabled(enable);
-                    uninstallSemanticHighlighting();
-                    installSemanticHighlighting();
-                }
+                boolean enable= fEnableCheckbox.getSelection();
+                fOverlayStore.setValue(item.getEnableKey(), enable);
+                fEnableCheckbox.setSelection(enable);
+                fSyntaxForegroundColorEditor.getButton().setEnabled(enable);
+                fColorEditorLabel.setEnabled(enable);
+                /* TODO re-enable once text attributes are used
+                fBoldCheckBox.setEnabled(enable);
+                fItalicCheckBox.setEnabled(enable);
+                fStrikethroughCheckBox.setEnabled(enable);
+                fUnderlineCheckBox.setEnabled(enable);
+                */
             }
         });
-*/        
+        
         colorComposite.layout(false);
                 
+        fListViewer.setSelection(new StructuredSelection(fListModel.get(0)));
+
         return colorComposite;
     }
 
@@ -712,7 +705,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
     private Control createPreviewer(Composite parent) {
         
         IPreferenceStore generalTextStore= EditorsUI.getPreferenceStore();
-        /* TODO: what is the PreferencesAdapter good for
+        /* TODO: what is the PreferencesAdapter good for?
         IPreferenceStore store= new ChainedPreferenceStore(new IPreferenceStore[] { getPreferenceStore(), new PreferencesAdapter(createTemporaryCorePreferenceStore()), generalTextStore });
         */
         IPreferenceStore store= new ChainedPreferenceStore(new IPreferenceStore[] { fOverlayStore, generalTextStore });
@@ -759,6 +752,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
                 buffer.append(separator);
             }
         } catch (IOException io) {
+            /* TODO Clojuredev logging here */
             JavaPlugin.log(io);
         } finally {
             if (reader != null) {
@@ -809,16 +803,66 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
     private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {  
         ArrayList<OverlayPreferenceStore.OverlayKey> overlayKeys= new ArrayList<OverlayPreferenceStore.OverlayKey>();
 
-        overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_FUNCTION_COLOR));
-        overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_LITERAL_COLOR));
-        overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_SPECIAL_FORM_COLOR));
-        overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_COMMENT_COLOR));
-        overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_GLOBAL_VAR_COLOR));
-        overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_KEYWORD_COLOR));
-        overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_METADATA_TYPEHINT_COLOR));
-
+        for (String[] s: fSyntaxColorListModel) {
+            overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, s[1]));
+            overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, getEnabledPreferenceKey(s[1])));
+        }
+        
         OverlayPreferenceStore.OverlayKey[] keys= new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];
         return overlayKeys.toArray(keys);
+    }
+    
+/* TODO adapt these once text attributes are used   */
+    /**
+     * A named preference that controls if the given semantic highlighting has the text attribute bold.
+     *
+     * @param semanticHighlighting the semantic highlighting
+     * @return the bold preference key
+     *//*
+    public static String getBoldPreferenceKey(SemanticHighlighting semanticHighlighting) {
+        return PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + semanticHighlighting.getPreferenceKey() + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_BOLD_SUFFIX;
+    }
+
+    *//**
+     * A named preference that controls if the given semantic highlighting has the text attribute italic.
+     *
+     * @param semanticHighlighting the semantic highlighting
+     * @return the italic preference key
+     *//*
+    public static String getItalicPreferenceKey(SemanticHighlighting semanticHighlighting) {
+        return PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + semanticHighlighting.getPreferenceKey() + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ITALIC_SUFFIX;
+    }
+
+    *//**
+     * A named preference that controls if the given semantic highlighting has the text attribute strikethrough.
+     *
+     * @param semanticHighlighting the semantic highlighting
+     * @return the strikethrough preference key
+     * @since 3.1
+     *//*
+    public static String getStrikethroughPreferenceKey(SemanticHighlighting semanticHighlighting) {
+        return PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + semanticHighlighting.getPreferenceKey() + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_STRIKETHROUGH_SUFFIX;
+    }
+
+    *//**
+     * A named preference that controls if the given semantic highlighting has the text attribute underline.
+     *
+     * @param semanticHighlighting the semantic highlighting
+     * @return the underline preference key
+     * @since 3.1
+     *//*
+    public static String getUnderlinePreferenceKey(SemanticHighlighting semanticHighlighting) {
+        return PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + semanticHighlighting.getPreferenceKey() + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_UNDERLINE_SUFFIX;
+    }
+*/
+    /**
+     * A named preference that controls if the given Clojure syntax highlighting is enabled.
+     *
+     * @param the preference key
+     * @return the enabled preference key
+     */
+    public static String getEnabledPreferenceKey(String preferenceKey) {
+        return PreferenceConstants.CLOJUREDEV_PREFERENCE_PREFIX + preferenceKey + PreferenceConstants.EDITOR_COLORING_ENABLED_SUFFIX;
     }
 }
 
