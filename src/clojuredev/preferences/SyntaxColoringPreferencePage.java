@@ -14,16 +14,12 @@
 
 package clojuredev.preferences;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.OverlayPreferenceStore;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.ui.text.IColorManager;
@@ -212,22 +208,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
         }
     }
-/*    private static final String BOLD= PreferenceConstants.EDITOR_BOLD_SUFFIX;
-    *//**
-     * Preference key suffix for italic preferences.
-     *//*
-    private static final String ITALIC= PreferenceConstants.EDITOR_ITALIC_SUFFIX;
-    *//**
-     * Preference key suffix for strikethrough preferences.
-     *//*
-    private static final String STRIKETHROUGH= PreferenceConstants.EDITOR_STRIKETHROUGH_SUFFIX;
-    *//**
-     * Preference key suffix for underline preferences.
-     *//*
-    private static final String UNDERLINE= PreferenceConstants.EDITOR_UNDERLINE_SUFFIX;
-*/    
-    private static final String ENABLED = PreferenceConstants.EDITOR_COLORING_ENABLED_SUFFIX;
-    
+
     /* private static final String COMPILER_TASK_TAGS= JavaCore.COMPILER_TASK_TAGS; */
     
     /**
@@ -739,28 +720,6 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         return result;
     }
 */
-
-    private String loadPreviewContentFromFile(String filename) {
-        String line;
-        String separator= System.getProperty("line.separator"); //$NON-NLS-1$
-        StringBuffer buffer= new StringBuffer(512);
-        BufferedReader reader= null;
-        try {
-            reader= new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(filename)));
-            while ((line= reader.readLine()) != null) {
-                buffer.append(line);
-                buffer.append(separator);
-            }
-        } catch (IOException io) {
-            /* TODO Clojuredev logging here */
-            JavaPlugin.log(io);
-        } finally {
-            if (reader != null) {
-                try { reader.close(); } catch (IOException e) {}
-            }
-        }
-        return buffer.toString();
-    }
 
     /**
      * Returns the current highlighting color list item.
