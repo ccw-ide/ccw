@@ -475,8 +475,6 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         gridData.horizontalSpan= 2;
         link.setLayoutData(gridData);
 
-        addFiller(colorComposite, 1);
-        
         Label label;
         label= new Label(colorComposite, SWT.LEFT);
         label.setText(Messages.SyntaxColoringPreferencePage_coloring_element);
@@ -660,40 +658,33 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         return colorComposite;
     }
 
-    private void addFiller(Composite composite, int horizontalSpan) {
-        PixelConverter pixelConverter= new PixelConverter(composite);
-        Label filler= new Label(composite, SWT.LEFT );
-        GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-        gd.horizontalSpan= horizontalSpan;
-        gd.heightHint= pixelConverter.convertHeightInCharsToPixels(1) / 2;
-        filler.setLayoutData(gd);
-    }
-
-    /* TODO complete example with all syntax features */
+    /**
+     * The source code to display inside the syntax coloring preference dialog.
+     */
     private static final String PREVIEW_SOURCE =
-        "; this is a comment\n" //$NON-NLS-1$
-        + "(defmacro and\n" //$NON-NLS-1$
-        + "  \"Evaluates exprs one at a time, from left to right. If a form\n" //$NON-NLS-1$
-        + "  returns logical false (nil or false), and returns that value and\n" //$NON-NLS-1$
-        + "  doesn't evaluate any of the other expressions, otherwise it returns\n" //$NON-NLS-1$
-        + "  the value of the last expr. (and) returns true.\"\n" //$NON-NLS-1$
-        + "  ([] true)\n" //$NON-NLS-1$
-        + "  ([x] x)\n" //$NON-NLS-1$
-        + "  ([x & next]\n" //$NON-NLS-1$
-        + "  `(let [and# ~x]\n" //$NON-NLS-1$
-        + "     (if and# (and ~@next) and#))))\n"; //$NON-NLS-1$
-    
+        "(ns clojuredev.syntaxcoloring)\n" //$NON-NLS-1$
+        + "\n" //$NON-NLS-1$
+        + "; this is a comment\n" //$NON-NLS-1$
+        + "\n" //$NON-NLS-1$
+        + "(def *global-var* \"the answer is\")\n" //$NON-NLS-1$
+        + "\n" //$NON-NLS-1$
+        + "(defn function\n" //$NON-NLS-1$
+        + "  \"demonstrate Clojuredev syntax coloring\"\n" //$NON-NLS-1$
+        + "  [#^java.lang.String string]\n" //$NON-NLS-1$
+        + "  (let [m {:keyword (String/valueOf 42)}]\n" //$NON-NLS-1$
+        + "    (str string \" \" (get m :keyword))))\n";  //$NON-NLS-1$
+
     private Control createPreviewer(Composite parent) {
-        
         IPreferenceStore generalTextStore= EditorsUI.getPreferenceStore();
-        /* TODO: what is the PreferencesAdapter good for?
-        IPreferenceStore store= new ChainedPreferenceStore(new IPreferenceStore[] { getPreferenceStore(), new PreferencesAdapter(createTemporaryCorePreferenceStore()), generalTextStore });
-        */
         IPreferenceStore store= new ChainedPreferenceStore(new IPreferenceStore[] { fOverlayStore, generalTextStore });
+        
         fPreviewViewer= new ClojureSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER, store);
+        
         ClojuredevPlugin.registerEditorColors(store);
+        
         ClojureSourceViewerConfiguration configuration= new ClojureSourceViewerConfiguration(store, null);
         fPreviewViewer.configure(configuration);
+        
         Font font= JFaceResources.getFont(org.eclipse.jdt.ui.PreferenceConstants.EDITOR_TEXT_FONT);
         fPreviewViewer.getTextWidget().setFont(font);
         fPreviewViewer.setEditable(false);
@@ -711,21 +702,10 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         return fPreviewViewer.getControl();
     }
 
-/* TODO TASK and TODO not needed currently?
-    private Preferences createTemporaryCorePreferenceStore() {
-        Preferences result= new Preferences();
-        
-        result.setValue(COMPILER_TASK_TAGS, "TASK,TODO"); //$NON-NLS-1$
-        
-        return result;
-    }
-*/
-
     /**
      * Returns the current highlighting color list item.
      * 
      * @return the current highlighting color list item
-     * @since 3.0
      */
     private HighlightingColorListItem getHighlightingColorListItem() {
         IStructuredSelection selection= (IStructuredSelection) fListViewer.getSelection();
@@ -755,8 +735,6 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
     }
 
     public void init(IWorkbench workbench) {
-        // TODO Auto-generated method stub
-        
     }
     
     private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {  
@@ -797,7 +775,6 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
      *
      * @param semanticHighlighting the semantic highlighting
      * @return the strikethrough preference key
-     * @since 3.1
      *//*
     public static String getStrikethroughPreferenceKey(SemanticHighlighting semanticHighlighting) {
         return PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + semanticHighlighting.getPreferenceKey() + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_STRIKETHROUGH_SUFFIX;
@@ -808,7 +785,6 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
      *
      * @param semanticHighlighting the semantic highlighting
      * @return the underline preference key
-     * @since 3.1
      *//*
     public static String getUnderlinePreferenceKey(SemanticHighlighting semanticHighlighting) {
         return PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + semanticHighlighting.getPreferenceKey() + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_UNDERLINE_SUFFIX;
