@@ -15,7 +15,7 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
     private static final String BUNDLE_NAME = "clojuredev.preferences.messages"; //$NON-NLS-1$
 
-	    public static String ClojurePreferencePage_Description;
+    public static String ClojurePreferencePage_Description;
 
     public static String ClojurePreferencePage_description;
 
@@ -23,7 +23,40 @@ public class Messages extends NLS {
 
     public static String ClojurePreferencePage_highlight_matching_brackets;
     
-    public static String ClojurePreferencePage_swith_to_ns_on_repl_startup;
+    public static String ClojurePreferencePage_switch_to_ns_on_repl_startup;
+
+    public static String SyntaxColoringPreferencePage_function;
+
+    // TODO new messages in properties
+    public static String SyntaxColoringPreferencePage_link;
+
+    public static String SyntaxColoringPreferencePage_coloring_element;
+
+    public static String SyntaxColoringPreferencePage_enable;
+
+    public static String SyntaxColoringPreferencePage_color;
+
+    public static String SyntaxColoringPreferencePage_bold;
+
+    public static String SyntaxColoringPreferencePage_italic;
+
+    public static String SyntaxColoringPreferencePage_strikethrough;
+
+    public static String SyntaxColoringPreferencePage_underline;
+
+    public static String SyntaxColoringPreferencePage_literal;
+
+    public static String SyntaxColoringPreferencePage_specialForm;
+
+    public static String SyntaxColoringPreferencePage_comment;
+
+    public static String SyntaxColoringPreferencePage_globalVar;
+
+    public static String SyntaxColoringPreferencePage_keyword;
+
+    public static String SyntaxColoringPreferencePage_metadataTypehint;
+
+    public static String SyntaxColoringPreferencePage_preview;
 
     static {
         // initialize resource bundle
