@@ -93,12 +93,6 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 	private ISelection selectionBeforePatternSearchBegan;
 	private Object[] expandedElementsBeforeSearchBegan;
 
-	// /**
-	// * Message to show on the default page.
-	// */
-	// private String defaultText =
-	// ContentOutlineMessages.ContentOutline_noOutline;
-
 	/**
 	 * Creates a content outline view with no content outline pages.
 	 */
@@ -362,9 +356,6 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 					+ "message:" + error.get("message"));
 			return null;
 		}
-//		
-//		System.out.println("invokeStr called");
-//		return (Map<String, List<String>>) result;
 	}
 
 	public void resetInput() {
