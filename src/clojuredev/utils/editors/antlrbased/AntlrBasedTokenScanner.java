@@ -121,20 +121,15 @@ abstract public class AntlrBasedTokenScanner implements ITokenScanner {
 			IToken result;
 		    if (token.text.equals("(")) {
 		    	if (currentParenLevel < 0) {
-//		    		result = token.iToken;
 		    		currentParenLevel = 0;
 		    	}
-//		    	} else {
-//		    		System.out.println("(, level :" + currentParenLevel + ", colorIndex :" + (currentParenLevel % parenLevelTokens.length));
 		    		result = parenLevelTokens[currentParenLevel % parenLevelTokens.length];
-//		    	}
 		    	currentParenLevel += 1;
 		    } else if (token.text.equals(")")) {
 		    	currentParenLevel -= 1;
 		    	if (currentParenLevel < 0) {
 		    		result = parenErrorToken;
 		    	} else {
-//		    		System.out.println("), level :" + currentParenLevel + ", colorIndex :" + (currentParenLevel % parenLevelTokens.length));
 		    		result = parenLevelTokens[currentParenLevel % parenLevelTokens.length];
 		    	}
 		    } else {
