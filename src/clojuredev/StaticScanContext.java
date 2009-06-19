@@ -44,18 +44,29 @@ public class StaticScanContext implements IScanContext {
 			return SymbolType.GLOBAL_VAR;
 		}
 		
-		if (Character.isUpperCase(symbol.charAt(0))) {
-			if (symbol.substring(1).contains("/")) {
-				return SymbolType.JAVA_STATIC_METHOD;
-			} else {
-				return SymbolType.JAVA_CLASS;
-			}
-		}
 		if (symbol.startsWith(".")  &&  symbol.length() > 1) {
 			if (isJavaIdentifier(symbol.substring(1))) {
 				return SymbolType.JAVA_INSTANCE_METHOD;
 			}
 		}
+		
+		// This code must appear after the test for JAVA_INSTANCE_METHOD, or a bug in it would mask
+		// any attempt to guess a java instance method
+		int from;
+		int foundIndex = -1;
+		int letterAfterPointIndex = 0;
+		do {
+			letterAfterPointIndex = foundIndex + 1;
+			if ( (letterAfterPointIndex < symbol.length()) && Character.isUpperCase(symbol.charAt(letterAfterPointIndex)) ) {
+				if (symbol.substring(letterAfterPointIndex + 1).contains("/")) {
+					return SymbolType.JAVA_STATIC_METHOD;
+				} else {
+					return SymbolType.JAVA_CLASS;
+				}
+			} else {
+				from = letterAfterPointIndex;
+			}
+		} while ((from < symbol.length()) && (foundIndex = symbol.indexOf('.', from)) > 0);
 		
 		if (clojureSymbolTypesCache.containsKey(symbol)) {
 			return clojureSymbolTypesCache.get(symbol);
