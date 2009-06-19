@@ -16,12 +16,18 @@ import org.eclipse.ui.PlatformUI;
 public class DisplayUtil {
 	
 	public static void asyncExec(Runnable r) {
-		PlatformUI.getWorkbench().getDisplay().asyncExec(r);
+		Display display = PlatformUI.getWorkbench().getDisplay();
+		if (!display.isDisposed()) {
+			display.asyncExec(r);
+		}
 	}
 
 	public static void syncExec(Runnable r) {
 		if (Display.getCurrent() == null) {
-			PlatformUI.getWorkbench().getDisplay().syncExec(r);
+			Display display = PlatformUI.getWorkbench().getDisplay();
+			if (!display.isDisposed()) {
+				display.asyncExec(r);
+			}
 		} else {
 			r.run();
 		}
