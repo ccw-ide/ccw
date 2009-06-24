@@ -55,6 +55,8 @@ public class Messages extends NLS {
     public static String SyntaxColoringPreferencePage_keyword;
 
     public static String SyntaxColoringPreferencePage_metadataTypehint;
+    
+    public static String SyntaxColoringPreferencePage_macro;
 
     public static String SyntaxColoringPreferencePage_preview;
 

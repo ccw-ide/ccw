@@ -270,6 +270,7 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
         final RGB globalVarColor = getElementColor(store, PreferenceConstants.EDITOR_GLOBAL_VAR_COLOR, black);
         final RGB keywordColor = getElementColor(store, PreferenceConstants.EDITOR_KEYWORD_COLOR, black);
         final RGB metadataTypehintColor = getElementColor(store, PreferenceConstants.EDITOR_METADATA_TYPEHINT_COLOR, black);
+        final RGB macroColor = getElementColor(store, PreferenceConstants.EDITOR_MACRO_COLOR, black);
         
         colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.STRING, literalColor); //$NON-NLS-1$
         colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.NUMBER, literalColor); //$NON-NLS-1$
@@ -283,7 +284,7 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
         colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.SYMBOL, black); //$NON-NLS-1$
         colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + IScanContext.SymbolType.FUNCTION, functionColor); //$NON-NLS-1$
         colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + IScanContext.SymbolType.GLOBAL_VAR, globalVarColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + IScanContext.SymbolType.MACRO, specialFormColor); //$NON-NLS-1$
+        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + IScanContext.SymbolType.MACRO, macroColor); //$NON-NLS-1$
         colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + IScanContext.SymbolType.SPECIAL_FORM, specialFormColor); //$NON-NLS-1$
         
         colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + IScanContext.SymbolType.JAVA_CLASS, black); //$NON-NLS-1$

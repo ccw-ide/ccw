@@ -54,6 +54,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
         new SyntaxColoringDefault(PreferenceConstants.EDITOR_GLOBAL_VAR_COLOR, new RGB(34, 139, 34), true),
         new SyntaxColoringDefault(PreferenceConstants.EDITOR_KEYWORD_COLOR, new RGB(218, 112, 214), true),
         new SyntaxColoringDefault(PreferenceConstants.EDITOR_METADATA_TYPEHINT_COLOR, new RGB(34, 139, 34), true),
+        new SyntaxColoringDefault(PreferenceConstants.EDITOR_MACRO_COLOR, new RGB(9, 107, 243), true),
     };
     
 	@Override

@@ -222,6 +222,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         { Messages.SyntaxColoringPreferencePage_globalVar, PreferenceConstants.EDITOR_GLOBAL_VAR_COLOR },
         { Messages.SyntaxColoringPreferencePage_keyword, PreferenceConstants.EDITOR_KEYWORD_COLOR },
         { Messages.SyntaxColoringPreferencePage_metadataTypehint, PreferenceConstants.EDITOR_METADATA_TYPEHINT_COLOR },
+        { Messages.SyntaxColoringPreferencePage_macro, PreferenceConstants.EDITOR_MACRO_COLOR },
     };
     
     OverlayPreferenceStore fOverlayStore;
@@ -495,7 +496,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         fListViewer.setInput(fListModel);
 
         gd= new GridData(SWT.BEGINNING, SWT.BEGINNING, false, true);
-        gd.heightHint= convertHeightInCharsToPixels(9);
+        gd.heightHint= convertHeightInCharsToPixels(12);
         int maxWidth= 0;
         for (Iterator<HighlightingColorListItem> it= fListModel.iterator(); it.hasNext();) {
             HighlightingColorListItem item=  it.next();

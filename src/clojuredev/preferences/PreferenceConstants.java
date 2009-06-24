@@ -30,6 +30,7 @@ public class PreferenceConstants {
     public static final String EDITOR_GLOBAL_VAR_COLOR = CLOJUREDEV_PREFERENCE_PREFIX + "." + EDITOR_COLORING_PREFIX + ".global_var"; //$NON-NLS-1$ //$NON-NLS-2$
     public static final String EDITOR_KEYWORD_COLOR = CLOJUREDEV_PREFERENCE_PREFIX + "." + EDITOR_COLORING_PREFIX + ".keyword"; //$NON-NLS-1$ //$NON-NLS-2$
     public static final String EDITOR_METADATA_TYPEHINT_COLOR = CLOJUREDEV_PREFERENCE_PREFIX + "." + EDITOR_COLORING_PREFIX + ".metadata_typehint"; //$NON-NLS-1$ //$NON-NLS-2$
+    public static final String EDITOR_MACRO_COLOR = CLOJUREDEV_PREFERENCE_PREFIX + "." + EDITOR_COLORING_PREFIX + ".macro"; //$NON-NLS-1$ //$NON-NLS-2$
 
     /* TODO enable these once text attributes are used in the editor
     public static final String EDITOR_BOLD_SUFFIX = ".bold"; //$NON-NLS-1$
