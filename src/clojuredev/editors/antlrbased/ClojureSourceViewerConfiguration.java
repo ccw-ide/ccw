@@ -35,7 +35,6 @@ import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
 import clojuredev.ClojuredevPlugin;
 import clojuredev.editors.rulesbased.ClojurePartitionScanner;
 
-
 public class ClojureSourceViewerConfiguration extends TextSourceViewerConfiguration {
 	private final ITokenScanner tokenScanner;
 	private final AntlrBasedClojureEditor editor;
@@ -102,6 +101,7 @@ public class ClojureSourceViewerConfiguration extends TextSourceViewerConfigurat
 //	    assistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_BELOW);
 	    assistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_ABOVE);
 	    assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
+	    assistant.enableColoredLabels(true);
 	    
 	    return assistant;
 

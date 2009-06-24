@@ -23,9 +23,11 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchListener;
 import org.eclipse.jface.resource.ColorRegistry;
+import org.eclipse.jface.resource.FontRegistry;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -84,6 +86,8 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
     
     private ColorRegistry colorRegistry;
     
+    private FontRegistry fontRegistry;
+    
     public ClojuredevPlugin() {
     }
     
@@ -111,6 +115,31 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
     	}
     	return colorRegistry;
     }
+    
+    private synchronized void createFontRegistry() {
+    	if (fontRegistry == null) {
+    		DisplayUtil.syncExec(new Runnable() {
+    			public void run() {
+    				fontRegistry = new FontRegistry(getWorkbench().getDisplay());
+    				
+                    // Forces initializations
+                    fontRegistry.getItalic(""); // readOnlyFont
+                    fontRegistry.getBold("");   // abstractFont
+    			}
+    		});
+    	}
+    }
+
+    private FontRegistry getFontRegistry() {
+    	if (fontRegistry == null) {
+    		createFontRegistry();
+    	}
+    	return fontRegistry;
+    }
+
+    public final Font getJavaSymbolFont() {
+        return getFontRegistry().getItalic("");
+    }
 
     private void loadPluginClojureCode() throws Exception {
 		URL clientReplBundleUrl = ClojuredevPlugin.getDefault().getBundle().getResource("clojuredev/debug/clientrepl.clj");
@@ -125,6 +154,7 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
     	stopLaunchListener();
     	// We don't remove colors when deregistered, because, well, we don't have a
     	// corresponding method on the ColorRegistry instance!
+    	// We also don't remove fonts when deregistered
         plugin = null;
         super.stop(context);
     }
@@ -191,16 +221,16 @@ public class ClojuredevPlugin extends AbstractUIPlugin {
 
     @Override
     protected void initializeImageRegistry(ImageRegistry reg) {
-//    	ClojuredevPluginImages.initializeImageRegistry(reg);
-    	// TODO Auto-generated method stub
-//    	super.initializeImageRegistry(reg);
     	reg.put(NS, ImageDescriptor.createFromURL(getBundle().getEntry("/icons/jdt/package_obj.gif")));
     	reg.put(PUBLIC_FUNCTION, ImageDescriptor.createFromURL(getBundle().getEntry("/icons/jdt/methpub_obj.gif")));
         reg.put(PRIVATE_FUNCTION, ImageDescriptor.createFromURL(getBundle().getEntry("/icons/jdt/methpri_obj.gif")));
+        reg.put(CLASS, ImageDescriptor.createFromURL(getBundle().getEntry("/icons/jdt/class_obj.gif")));
     }
     public static final String NS = "icon.namespace";
     public static final String PUBLIC_FUNCTION = "icon.function.public";
     public static final String PRIVATE_FUNCTION = "icon.function.private";
+	public static final String CLASS = "class_obj.gif";
+
 
     private List<ILaunch> launches = new ArrayList<ILaunch>();
     private ILaunchListener launchListener = new ILaunchListener() {

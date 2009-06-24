@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -37,11 +38,14 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.CompletionProposal;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
+import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.TextStyle;
 
 import clojuredev.ClojuredevPlugin;
 import clojuredev.debug.ClojureClient;
@@ -58,7 +62,9 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 	private final ContentAssistant assistant;
 	
 	private String errorMessage;
-	
+
+	final int JAVA_PREFIX_MIN_LENGTH = 3;
+
 	public static class PrefixInfo {
 		public final String prefix;
 		public final int prefixOffset;
@@ -108,31 +114,66 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int offset) {
 		errorMessage = "";
 		assistant.setStatusMessage("");
+
 		final PrefixInfo prefixInfo;
 		try {
 			prefixInfo = computePrefix(viewer, offset);
 			if (prefixInfo == null) {
 				return null;
 			}
-			
-			final int PREFIX_MIN_LENGTH = 3;
-			if (prefixInfo.prefix.length() < PREFIX_MIN_LENGTH) {
-				ClojuredevPlugin.logWarning("completion proposal asked for a prefix whose length "
-						+ "is less than the authorized one (" + PREFIX_MIN_LENGTH + "):'" + prefixInfo + "'");
-				return null;
-			}
-			
+	
 			final List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
 			
-			proposals.addAll(computeClojureProposals(prefixInfo));
+			if (prefixInfo.prefix.startsWith(".")) {
+				//    chercher completion parmi les methodes d'instances des classes declarees dans le namespace courant
+			    //      (possibilite d'ecriture du nom de la methode en camelCase)
+				// virer l'utilisation de la recherche totale et aller chercher les methodes directement
+				// sur le type
+				proposals.addAll(computeAndAddJavaInstanceMethodCompletionProposal(prefixInfo));
+			} else {
+				if (prefixInfo.fullyQualified) {
+					proposals.addAll(computeClojureFullyQualifiedSymbolsProposals(prefixInfo));
+					//	        chercher completion parmi les methodes statiques (de classes) de classes dont le nom de classe matche ce qui est avant le /, et le nom de méthode ce qui est apres le /
+			        //	          (possibilite d'ecriture du nom de la classe et/ou de la méthode en camelCase)
+					// virer l'utilisation de la recherche totale et aller chercher les methodes directement
+					// sur le type
+					proposals.addAll(computeAndAddJavaStaticMethodCompletionProposal(prefixInfo, JavaSearchType.STATIC_METHOD));
+				} else {
+					proposals.addAll(computeAndAddJavaStaticMethodCompletionProposal(prefixInfo, JavaSearchType.PACKAGE));
+					/*
+				        chercher completion parmi les noms de classes du classpath
+				            si des points
+				                parmi les noms de classes en considerant que c'est totalement qualifie
+				                  (possibilite d'ecriture en camel case)
+				            sinon
+				                parmi les noms de classes en cherchant dans n'importe quel package
+				                  (possibilite d'ecriture en camel case)
+				            fin si
+					 */
+					proposals.addAll(computeAndAddJavaStaticMethodCompletionProposal(prefixInfo, JavaSearchType.CLASS));
+					 /*
+				        si contient au moins un point
+				            considerer que ce qui est avant le dernier point doit matcher une classe
+				            considerer que ce qui est apres le dernier point doit matcher une méthode d'instance
+				            chercher completion parmi les noms de classes du classpath avec la methode
+				                si des points
+				                    parmi les noms de classes en considerant que c'est totalement qualifie
+				                      (possibilite d'ecriture en camel case)
+				                sinon
+				                    parmi les noms de classes en cherchant dans n'importe quel package
+				                      (possibilite d'ecriture en camel case)
+				                fin si
+				        fin si
+					 */
+					
+					proposals.addAll(computeClojureNamespacesProposals(prefixInfo));
+
+					proposals.addAll(computeClojureSymbolsProposals(prefixInfo));
+				}
+			}
+			
 			assistant.setStatusMessage(MESSAGE_CLOJURE_COMPLETION);
 			
-			if (prefixInfo.prefix.startsWith(".")) {
-				proposals.addAll(computeAndAddJavaInstanceMethodCompletionProposal(prefixInfo));
-			}
-			if (prefixInfo.fullyQualified && !prefixInfo.prefix.startsWith(".")) {
-				proposals.addAll(computeAndAddJavaStaticMethodCompletionProposal(prefixInfo));
-			}
 			return proposals.toArray(new ICompletionProposal[proposals.size()]);
 		} catch (BadLocationException e) {
 			e.printStackTrace();
@@ -140,43 +181,91 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 		}
 	}
 	
-	private List<ICompletionProposal> computeClojureProposals(PrefixInfo prefixInfo) {
+	private List<ICompletionProposal> computeClojureFullyQualifiedSymbolsProposals(PrefixInfo prefixInfo) {
 		final List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
 
-		final String nsPart;
-		final String symbolPrefix;
-		boolean fullyQualified = false;
-		if (prefixInfo.prefix.indexOf('/') > 0) {
-		    String[] parts = prefixInfo.prefix.split("/", 2);
-		    nsPart = parts[0];
-		    symbolPrefix = parts[1];
-		    fullyQualified = true;
-		} else {
-		    nsPart = editor.getDeclaringNamespace();
-		    symbolPrefix = prefixInfo.prefix;
-		}
-		
-		final List<List> dynamicSymbols = dynamicComplete(nsPart, symbolPrefix, fullyQualified); //parse(doc.get());
+		final List<List> dynamicSymbols = dynamicComplete(prefixInfo.nsPart, 
+				prefixInfo.symbolPrefix, editor, prefixInfo.fullyQualified); //parse(doc.get());
 		// Add dynamic completion proposals
 		for (List l: dynamicSymbols) {
 			String s = (String) l.get(0);
-	//		if (s.startsWith(symbolPrefix)) {
-				String displayString = s;
-				String additionalString = "";
-				if (l.get(2) != null) {
-					String ns = (String) (((Map) l.get(2)).get(NamespaceBrowser.KEYWORD_NS));
-					if (ns != null && !ns.trim().equals(""))
-						displayString += " - " + ns;
+			String displayString = s;
+			String additionalString = "";
+			if (l.get(2) != null) {
+				String ns = (String) (((Map) l.get(2)).get(NamespaceBrowser.KEYWORD_NS));
+				if (ns != null && !ns.trim().equals(""))
+					displayString += " - " + ns;
+
+				additionalString = ClojureDocUtils.getHtmlVarDocInfo(l.get(2));
+			}
+			if (prefixInfo.fullyQualified) {
+			    s = prefixInfo.nsPart + '/' + s;
+			}
+			String replacement = ((String) l.get(1)).substring(2);
+			CompletionProposal cp = new CompletionProposal(replacement, prefixInfo.prefixOffset, 
+					prefixInfo.prefix.length(), replacement.length(), null, displayString, null, 
+					additionalString.toString());
+			
+			proposals.add(cp);
+		}
+		
+		return proposals;
+	}
 	
-					additionalString = ClojureDocUtils.getHtmlVarDocInfo(l.get(2));
-				}
-				if (fullyQualified) {
-				    s = nsPart + '/' + s;
-				}
-				CompletionProposal cp = new CompletionProposal(s, prefixInfo.prefixOffset, prefixInfo.prefix.length(), s.length(), null, displayString, null, additionalString.toString());
-				
-				proposals.add(cp);
-	//		}
+	private List<ICompletionProposal> computeClojureSymbolsProposals(PrefixInfo prefixInfo) {
+		final List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
+
+		final List<List> dynamicSymbols = dynamicComplete(prefixInfo.nsPart, 
+				prefixInfo.symbolPrefix, editor, prefixInfo.fullyQualified); //parse(doc.get());
+		// Add dynamic completion proposals
+		for (List l: dynamicSymbols) {
+			String s = (String) l.get(0);
+			String displayString = s;
+			String additionalString = "";
+			if (l.get(2) != null) {
+				String ns = (String) (((Map) l.get(2)).get(NamespaceBrowser.KEYWORD_NS));
+				if (ns != null && !ns.trim().equals(""))
+					displayString += " - " + ns;
+
+				additionalString = ClojureDocUtils.getHtmlVarDocInfo(l.get(2));
+			}
+			if (prefixInfo.fullyQualified) {
+			    s = prefixInfo.nsPart + '/' + s;
+			}
+			CompletionProposal cp = new CompletionProposal(s, prefixInfo.prefixOffset, 
+					prefixInfo.prefix.length(), s.length(), null, displayString, null, 
+					additionalString.toString());
+			
+			proposals.add(cp);
+		}
+		
+		return proposals;
+	}
+	
+	private List<ICompletionProposal> computeClojureNamespacesProposals(PrefixInfo prefixInfo) {
+		final List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
+
+		final List<List> dynamicSymbols = dynamicNamespaceComplete(prefixInfo.prefix);
+		// Add dynamic completion proposals
+		for (List l: dynamicSymbols) {
+			String s = (String) l.get(0);
+			String displayString = s + " (namespace)";
+			String additionalString = "";
+			if (l.get(2) != null) {
+				String ns = (String) (((Map) l.get(2)).get(NamespaceBrowser.KEYWORD_NS));
+				if (ns != null && !ns.trim().equals(""))
+					displayString += " - " + ns;
+
+				additionalString = ClojureDocUtils.getHtmlVarDocInfo(l.get(2));
+			}
+			if (prefixInfo.fullyQualified) {
+			    s = prefixInfo.nsPart + '/' + s;
+			}
+			CompletionProposal cp = new CompletionProposal(s, prefixInfo.prefixOffset, 
+					prefixInfo.prefix.length(), s.length(), null, displayString, null, 
+					additionalString);
+			
+			proposals.add(cp);
 		}
 		
 		return proposals;
@@ -186,6 +275,12 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 			final PrefixInfo prefixInfo) {
 		final List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
 		
+		if (prefixInfo.prefix.length() < JAVA_PREFIX_MIN_LENGTH) {
+			ClojuredevPlugin.logWarning("completion proposal asked for a prefix whose length "
+					+ "is less than the authorized one (" + JAVA_PREFIX_MIN_LENGTH + "):'" + prefixInfo + "' for java completions");
+			return Collections.emptyList();
+		}
+
 		final String methodPrefix = prefixInfo.prefix.substring(1);
 		System.out.println("method prefix:" + methodPrefix );
 		boolean isPattern = (methodPrefix.contains("*") || methodPrefix.contains("?"));
@@ -217,10 +312,11 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 							System.out.println("too much results (>" + MAX_JAVA_SEARCH_RESULT_NUMBER + "), throwing exception");
 							throw new CoreException(Status.OK_STATUS);
 						}
-						proposals.add(new LazyCompletionProposal(
+						proposals.add(new MethodLazyCompletionProposal(
 								(IMethod) match.getElement(),
 								methodPrefix,
-								prefixInfo.prefixOffset + 1, null));
+								prefixInfo.prefixOffset + 1, null,
+								editor));
 					}
 					@Override
 					public void endReporting() {
@@ -251,87 +347,134 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 		return proposals;
 	}
 	
+	static enum JavaSearchType {
+		STATIC_METHOD { 
+			public int[] searchFor() { return new int[] { IJavaSearchConstants.METHOD }; }
+			public int[] matchRule() { return new int[] { SearchPattern.R_CAMELCASE_MATCH /* | SearchPattern.R_CASE_SENSITIVE */}; }
+			public String[] patternStr(PrefixInfo prefixInfo) {
+				return new String[] { prefixInfo.nsPart + "." + prefixInfo.symbolPrefix };
+			}
+			public AbstractLazyCompletionProposal lazyCompletionProposal(PrefixInfo prefixInfo, AntlrBasedClojureEditor editor, SearchMatch match) {
+				return new MethodLazyCompletionProposal(
+						(IMethod) match.getElement(),
+						prefixInfo.nsPart + "/" + prefixInfo.symbolPrefix,
+						prefixInfo.prefixOffset, editor.getDeclaringNamespace(),
+						editor);
+			}
+			public int[] prefixMinLength() { return new int[] { 2 }; }
+		},
+		CLASS {
+			public int[] searchFor() { return new int[] { IJavaSearchConstants.TYPE, IJavaSearchConstants.TYPE }; }
+			public int[] matchRule() { return new int[] { SearchPattern.R_CAMELCASE_MATCH /* | SearchPattern.R_CASE_SENSITIVE */, SearchPattern.R_PATTERN_MATCH /* | SearchPattern.R_CASE_SENSITIVE */ }; }
+			public String[] patternStr(PrefixInfo prefixInfo) {
+				return new String[] { prefixInfo.prefix, prefixInfo.prefix + "*" };
+			}
+			public AbstractLazyCompletionProposal lazyCompletionProposal(PrefixInfo prefixInfo, AntlrBasedClojureEditor editor, SearchMatch match) {
+				return new ClassLazyCompletionProposal(
+						(IType) match.getElement(),
+						prefixInfo.prefix,
+						prefixInfo.prefixOffset, editor.getDeclaringNamespace(),
+						editor);
+			}
+			public int[] prefixMinLength() { return new int[] { 1, 3 }; }
+		},
+		PACKAGE {
+			public int[] searchFor() { return new int[] { IJavaSearchConstants.PACKAGE }; }
+			public int[] matchRule() { return new int[] { SearchPattern.R_PATTERN_MATCH /* | SearchPattern.R_CASE_SENSITIVE */ }; }
+			public String[] patternStr(PrefixInfo prefixInfo) {
+				return new String[] { prefixInfo.prefix + "*" };
+			}
+			public AbstractLazyCompletionProposal lazyCompletionProposal(PrefixInfo prefixInfo, AntlrBasedClojureEditor editor, SearchMatch match) {
+				return new PackageLazyCompletionProposal(
+						(IPackageFragment) match.getElement(),
+						prefixInfo.prefix,
+						prefixInfo.prefixOffset, editor.getDeclaringNamespace(),
+						editor);
+			}
+			public int[] prefixMinLength() { return new int[] { 1 }; }
+		};
+		
+		public abstract int[] searchFor();
+		public abstract String[] patternStr(PrefixInfo prefixInfo);
+		public abstract AbstractLazyCompletionProposal lazyCompletionProposal(PrefixInfo prefixInfo, AntlrBasedClojureEditor editor, SearchMatch match);
+		public abstract int[] matchRule();
+		/** try to match only if the size of the prefix is equal or greater than this. */
+		public abstract int[] prefixMinLength();
+	}
 	private List<ICompletionProposal> computeAndAddJavaStaticMethodCompletionProposal(
-			final PrefixInfo prefixInfo) {
+			final PrefixInfo prefixInfo, final JavaSearchType searchType) {
 		final List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
 	
-		final String methodPrefix = prefixInfo.prefix.substring(1);
-		System.out.println("method prefix:" + methodPrefix);
-		String patternStr = prefixInfo.nsPart + "." + prefixInfo.symbolPrefix;
-		System.out.println("pattern: " + patternStr);
-		boolean isPattern = (patternStr.contains("*") || patternStr.contains("?"));
-		boolean autoAddEndWildcard = isPattern && !patternStr.endsWith("*");
-		SearchPattern pattern = SearchPattern.createPattern(
-				autoAddEndWildcard ? patternStr + "*" : patternStr,
-				IJavaSearchConstants.METHOD, // | IJavaSearchConstants.FIELD,
-	//			IJavaSearchConstants.TYPE,
-				IJavaSearchConstants.DECLARATIONS, 
-				isPattern 
-					? SearchPattern.R_PATTERN_MATCH 
-					: SearchPattern.R_PREFIX_MATCH);
-		if (pattern != null) {
-			IJavaProject editedFileProject = JavaCore.create(((IFile) editor.getEditorInput().getAdapter(IFile.class)).getProject());
-			if (editedFileProject != null) {
-				IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { editedFileProject });
-				SearchRequestor requestor = new SearchRequestor() {
-					private int counter;
-					@Override
-					public void beginReporting() {
-						super.beginReporting();
-						System.out.println("begin reporting");
-						counter = 0;
+		int nbPatterns = searchType.matchRule().length;
+		List<SearchPattern> combinedPattern = new ArrayList<SearchPattern>();
+		
+		for (int i = 0; i < nbPatterns; i++) {
+			if (prefixInfo.prefix.length() < searchType.prefixMinLength()[i]) {
+				continue;
+			}
+			SearchPattern pattern = SearchPattern.createPattern(
+					searchType.patternStr(prefixInfo)[i],
+					searchType.searchFor()[i],
+					IJavaSearchConstants.DECLARATIONS, 
+					searchType.matchRule()[i]
+					);
+			combinedPattern.add(pattern);
+		}
+		
+		IJavaProject editedFileProject = JavaCore.create(((IFile) editor.getEditorInput().getAdapter(IFile.class)).getProject());
+		if (editedFileProject != null) {
+			IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { editedFileProject });
+			SearchRequestor requestor = new SearchRequestor() {
+				@Override
+				public void acceptSearchMatch(SearchMatch match) throws CoreException {
+					proposals.add(searchType.lazyCompletionProposal(prefixInfo, editor, match));
+				}
+			};
+			SearchEngine searchEngine = new SearchEngine();
+			try {
+				for (SearchPattern pattern: combinedPattern) {
+					if (pattern != null) {
+						searchEngine.search(
+								pattern, 
+								new SearchParticipant[] {SearchEngine.getDefaultSearchParticipant() }, 
+								scope, 
+								requestor, 
+								null /* no progress monitor */);
+						assistant.setStatusMessage(MESSAGE_JAVA_COMPLETION);
 					}
-					@Override
-					public void acceptSearchMatch(SearchMatch match) throws CoreException {
-						counter++;
-						if (counter >= MAX_JAVA_SEARCH_RESULT_NUMBER) {
-							System.out.println("too much results (>" + MAX_JAVA_SEARCH_RESULT_NUMBER + "), throwing exception");
-							throw new CoreException(Status.OK_STATUS);
-						}
-						proposals.add(new LazyCompletionProposal(
-								(IMethod) match.getElement(),
-								prefixInfo.nsPart + "/" + prefixInfo.symbolPrefix,
-								prefixInfo.prefixOffset, editor.getDeclaringNamespace()));
-					}
-					@Override
-					public void endReporting() {
-						super.endReporting();
-						System.out.println("end reporting : count=" + counter);
-					}
-					
-				};
-				SearchEngine searchEngine = new SearchEngine();
-				try {
-					searchEngine.search(
-							pattern, 
-							new SearchParticipant[] {SearchEngine.getDefaultSearchParticipant() }, 
-							scope, 
-							requestor, 
-							null /* no progress monitor */);
-					assistant.setStatusMessage(MESSAGE_JAVA_COMPLETION);
-				} catch (CoreException e) {
-					if (e.getStatus() != Status.OK_STATUS) {
-						ClojuredevPlugin.logWarning("java code proposal search error in clojure dev", e);
-					} else {
-						errorMessage = ERROR_MESSAGE_TOO_MANY_COMPLETIONS;
-						assistant.setStatusMessage(ERROR_MESSAGE_TOO_MANY_COMPLETIONS);
-					}
+				}
+			} catch (CoreException e) {
+				if (e.getStatus() != Status.OK_STATUS) {
+					ClojuredevPlugin.logWarning("java code proposal search error in clojure dev", e);
+				} else {
+					errorMessage = ERROR_MESSAGE_TOO_MANY_COMPLETIONS;
+					assistant.setStatusMessage(ERROR_MESSAGE_TOO_MANY_COMPLETIONS);
 				}
 			}
 		}
 		return proposals;
 	}
-
-	private class LazyCompletionProposal implements ICompletionProposal {
+	
+	private static abstract class AbstractLazyCompletionProposal implements ICompletionProposal, ICompletionProposalExtension6 {
 		private final IMethod method;
 		private final String prefix;
 		private final int prefixOffset;
 		private final String ns;
+		private final AntlrBasedClojureEditor editor;
 		private String displayString; 
 		private CompletionProposal completionProposal;
+
+		protected static StyledString.Styler javaStyler = new StyledString.Styler() {
+			public void applyStyles(TextStyle textStyle) {
+				textStyle.font = ClojuredevPlugin.getDefault().getJavaSymbolFont();
+			}
+		};
 		
+		public StyledString getStyledDisplayString() {
+			return new StyledString(getDisplayString(), javaStyler);
+		}
 		
-		private CompletionProposal getCompletionProposal() {
+		protected CompletionProposal getCompletionProposal() {
 			if (completionProposal == null) {
 				
 				String replacementString = "";
@@ -347,7 +490,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 					} else {
 						List<List> dynamicSymbols = 
 							(ns!= null) 
-								? dynamicComplete(ns, methodTypeName, false)
+								? dynamicComplete(ns, methodTypeName, editor, false)
 								: null;
 
 						if (dynamicSymbols != null) {
@@ -391,11 +534,13 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 			}
 			return completionProposal;
 		}
-		public LazyCompletionProposal(IMethod method, String methodPrefix, int methodPrefixOffset, String ns) {
+		
+		public AbstractLazyCompletionProposal(IMethod method, String methodPrefix, int methodPrefixOffset, String ns, AntlrBasedClojureEditor editor) {
 			this.method = method;
 			this.prefix = methodPrefix;
 			this.prefixOffset = methodPrefixOffset;
 			this.ns = ns;
+			this.editor = editor;
 		}
 
 		public void apply(IDocument document) {
@@ -429,6 +574,128 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 		}
 	}
 	
+	private static class MethodLazyCompletionProposal extends AbstractLazyCompletionProposal {
+		public MethodLazyCompletionProposal(IMethod method, String methodPrefix, int methodPrefixOffset, String ns, AntlrBasedClojureEditor editor) {
+			super(method, methodPrefix, methodPrefixOffset, ns, editor);
+		}
+		public Image getImage() {
+			return ClojuredevPlugin.getDefault().getImageRegistry().get(ClojuredevPlugin.PUBLIC_FUNCTION);
+		}
+	}
+	
+	private static class ClassLazyCompletionProposal extends AbstractLazyCompletionProposal {
+		private final IType method;
+		private final String prefix;
+		private final int prefixOffset;
+		private final String ns;
+		private final AntlrBasedClojureEditor editor;
+		private String displayString; 
+		private CompletionProposal completionProposal;
+		
+		public Image getImage() {
+			return ClojuredevPlugin.getDefault().getImageRegistry().get(ClojuredevPlugin.CLASS);
+		}
+		
+		protected CompletionProposal getCompletionProposal() {
+			if (completionProposal == null) {
+				
+				String replacementString = null;
+				ClojureClient client = editor.getCorrespondingClojureClient();
+				if (client != null) {
+					Map result = (Map) client
+						.remoteLoadRead("(clojuredev.debug.serverrepl/imported-class \"" + ns + "\" \"" + method.getElementName() + "\")");
+					if (result != null && result.get("response-type").equals(0) && result.get("response") != null) {
+						replacementString = (String) result.get("response");
+					}
+				}
+				if (replacementString == null) {
+					replacementString = method.getFullyQualifiedName();
+				}
+
+				String additionalString;
+				String javadoc = new ProposalInfo(method).getInfo(null);
+				if (javadoc != null) {
+					additionalString = javadoc;
+				} else {
+					additionalString = "No javadoc found";
+				}
+				
+				completionProposal = new CompletionProposal(
+						replacementString, prefixOffset, prefix.length(), replacementString.length(), 
+						null, 
+						getDisplayString(), 
+						null, 
+						additionalString);
+			}
+			return completionProposal;
+		}
+		
+		public ClassLazyCompletionProposal(IType method, String methodPrefix, int methodPrefixOffset, String ns, AntlrBasedClojureEditor editor) {
+			super(null, methodPrefix, methodPrefixOffset, ns, editor); // TODO vraiment nulle comme technique !
+			this.method = method;
+			this.prefix = methodPrefix;
+			this.prefixOffset = methodPrefixOffset;
+			this.ns = ns;
+			this.editor = editor;
+		}
+		
+		public String getDisplayString() {
+			if (displayString == null) {
+				displayString = method.getElementName() 
+					+ " (" + method.getPackageFragment().getElementName() + ")";
+
+			}
+			return displayString;
+		}
+	}
+	
+	private static class PackageLazyCompletionProposal extends AbstractLazyCompletionProposal {
+		private final IPackageFragment method;
+		private final String prefix;
+		private final int prefixOffset;
+		private final String ns;
+		private final AntlrBasedClojureEditor editor;
+		private String displayString; 
+		private CompletionProposal completionProposal;
+		
+		public Image getImage() {
+			return ClojuredevPlugin.getDefault().getImageRegistry().get(ClojuredevPlugin.NS);
+		}
+
+		protected CompletionProposal getCompletionProposal() {
+			if (completionProposal == null) {
+				
+				String replacementString = method.getElementName();
+
+				String additionalString = "";
+				
+				completionProposal = new CompletionProposal(
+						replacementString, prefixOffset, prefix.length(), replacementString.length(), 
+						null, 
+						getDisplayString(), 
+						null, 
+						additionalString);
+			}
+			return completionProposal;
+		}
+		
+		public PackageLazyCompletionProposal(IPackageFragment method, String methodPrefix, int methodPrefixOffset, String ns, AntlrBasedClojureEditor editor) {
+			super(null, methodPrefix, methodPrefixOffset, ns, editor); // TODO vraiment nulle comme technique !
+			this.method = method;
+			this.prefix = methodPrefix;
+			this.prefixOffset = methodPrefixOffset;
+			this.ns = ns;
+			this.editor = editor;
+		}
+		
+		public String getDisplayString() {
+			if (displayString == null) {
+				displayString = method.getElementName() + " ( package )";
+			}
+			return displayString;
+		}
+	}
+	
 	private boolean invalidSymbolCharacter(char c) {
 		if (Character.isWhitespace(c))
 			return true;
@@ -439,7 +706,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 		}
 		return false;
 	}
-	private List<List> dynamicComplete(String namespace, String prefix, boolean findOnlyPublic) {
+	private static List<List> dynamicComplete(String namespace, String prefix, AntlrBasedClojureEditor editor, boolean findOnlyPublic) {
 		if (namespace == null) {
 			return Collections.emptyList();
 		}
@@ -467,42 +734,32 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 			return Collections.emptyList();
 		}
 	}
-//	private List<String> getMappedJavaClasses(String namespace, String prefix, boolean findOnlyPublic) {
-//		if (namespace == null) {
-//			errorMessage = ERROR_MESSAGE_NO_NAMESPACE_FOUND;
-//			return Collections.emptyList();
-//		}
-//		if (prefix == null) {
-//			errorMessage = ERROR_MESSAGE_NULL_PREFIX;
-//			return Collections.emptyList();
-//		}
-//		
-//		ClojureClient clojureClient = editor.getCorrespondingClojureClient();
-//		if (clojureClient == null) {
-//			errorMessage = ERROR_MESSAGE_NO_REPL_FOUND;
-//			return Collections.emptyList();
-//		}
-//		
-//		Map result = (Map) clojureClient.remoteLoadRead("(clojuredev.debug.serverrepl/code-complete \"" + namespace + "\" \"" + prefix + "\" " + (findOnlyPublic ? "true" : "false") + ")");
-//		if (result == null) {
-//			errorMessage = null;
-//			return Collections.emptyList();
-//		}
-//		
-//		if (result.get("response-type").equals(0)) {
-//			if (result.get("response") == null) {
-//				errorMessage = ERROR_MESSAGE_INTERNAL_ERROR;
-//				return Collections.emptyList();
-//			} else {
-//				errorMessage = null;
-//				return (List<List>) result.get("response");
-//			}
-//		} else {
-//			errorMessage = ERROR_MESSAGE_COMMUNICATION_ERROR;
-//			return Collections.emptyList();
-//		}
-//	}
-//
+	private List<List> dynamicNamespaceComplete(String prefix) {
+		if (prefix == null) {
+			return Collections.emptyList();
+		}
+		
+		ClojureClient clojureClient = editor.getCorrespondingClojureClient();
+		if (clojureClient == null) {
+			return Collections.emptyList();
+		}
+		
+		Map result = (Map) clojureClient.remoteLoadRead("(clojuredev.debug.serverrepl/code-complete-ns \"" + prefix + "\")");
+		if (result == null) {
+			return Collections.emptyList();
+		}
+		
+		if (result.get("response-type").equals(0)) {
+			if (result.get("response") == null) {
+				return Collections.emptyList();
+			} else {
+				return (List<List>) result.get("response");
+			}
+		} else {
+			return Collections.emptyList();
+		}
+	}
+
 	public IContextInformation[] computeContextInformation(ITextViewer viewer, int offset) {
 		return new IContextInformation[] {
 				new IContextInformation() {

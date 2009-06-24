@@ -97,10 +97,16 @@
 (defn- var-info [v]
   (merge { :type "var" :name (str v) } (meta-info v)))
 
-(defn- ns-info [n]
-  { :name ((comp str ns-name) n)
-    :type "ns"
-    :children (apply vector (sort-by :name (map #(var-info (second %)) (ns-interns n)))) })
+(defn- ns-info 
+  ([n] (ns-info n true))
+  ([n insert-symbols?]
+    (conj
+      { :name ((comp str ns-name) n)
+        :type "ns"
+        :doc (:doc (meta n)) }
+      (when insert-symbols?
+        [:children 
+         (apply vector (sort-by :name (map #(var-info (second %)) (ns-interns n))))]))))
 
 (defn namespaces-info []
   { :name "namespaces" :type "namespaces"
@@ -118,18 +124,39 @@
           pattern-split   (.split pattern delim)
           candidate-split (.split candidate delim)]
       (and (<= (count pattern-split) (count candidate-split))
-           (reduce #(and %1 %2) (map #(splitted-match %1 %2 (rest delimiters))
+           (reduce (fn [a b] (and a b)) (map (fn [a b] (splitted-match a b (rest delimiters)))
                                      pattern-split
                                      candidate-split))))
     (.startsWith candidate pattern)))
 
+(defn- matching-ns 
+  "seq of namespaces which match the prefix
+  clojure.co matches clojure.core, ...
+  c.c also matches clojure.core, ..."
+  [prefix]
+  (filter #(splitted-match prefix (str %) ["\\."]) (all-ns)))
 
 (defn code-complete [ns-str prefix only-publics]
-  (when-let [ns (find-ns (symbol ns-str))] ; TODO here allow ns to also be written as c.c for e.g. clojure.core, so multiple namespaces could be searched
-    (let [search-fn (if only-publics ns-publics ns-map)]
+  (when-let [nss (matching-ns ns-str)]
+    (let [search-fn (if only-publics ns-publics ns-map)
+          ns-symbols (fn [ns] (search-fn ns))
+          symbols (mapcat ns-symbols nss)]
       (into [] (map (fn [[k v]] [k (str v) (if (var? v) (var-info v) nil)])
-                    (filter #(or (.startsWith (first %) prefix) (splitted-match prefix (first %) ["-"]))
-                            (map #(vector (str (key %)) (val %)) 
-                                 (search-fn ns))))))))
-   
+                    (filter #(or (.startsWith (first %) prefix) 
+                                 (splitted-match prefix (first %) ["-"]))
+                            (map (fn [n] [(str (key n)) (val n)]) 
+                                 symbols)))))))
+
+(defn code-complete-ns [prefix]
+  (let [result-ns (matching-ns prefix)]
+    (into [] (map (fn [ns] [(str ns) (str ns) (ns-info ns)]) result-ns))))
+
+(defn imported-class 
+  "returns the symbol name corresponding to the java type name
+  passed as a parameter if it is imported in the namespace,
+  or nil if no corresponding class imported"
+  [ns-name type-name]
+  (when-let [found-type (ffirst (filter #(= type-name (str (first %))) 
+                                (ns-imports (find-ns (symbol ns-name)))))]
+    (str found-type)))   
 ;(remove-ns 'clojuredev.debug.serverrepl)   
