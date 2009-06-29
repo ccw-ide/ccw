@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.internal.ui.preferences.OverlayPreferenceStore;
-import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.ColorSelector;
