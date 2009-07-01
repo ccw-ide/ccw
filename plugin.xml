@@ -526,22 +526,21 @@
        </adapter>
     </factory>
  </extension>
- <!-- TODO: why does i18n with %preferencePage.name and %preferencePage.editor.name not work -->
  <extension
        point="org.eclipse.ui.preferencePages">
     <page
-          name="Clojure"
+          name="%preferencePage.clojure.name"
           class="clojuredev.preferences.EmptyPreferencePage"
           id="clojuredev.preferences.EmptyPreferencePage">
     </page>
     <page
-          name="Editor"
+          name="%preferencePage.editor.name"
           category="clojuredev.preferences.EmptyPreferencePage"
           class="clojuredev.preferences.EditorPreferencePage"
           id="clojuredev.preferences.EditorPreferencePage">
     </page>
     <page
-          name="Syntax Coloring"
+          name="%preferencePage.syntaxColoring.name"
           category="clojuredev.preferences.EmptyPreferencePage"
           class="clojuredev.preferences.SyntaxColoringPreferencePage"
           id="clojuredev.preferences.SyntaxColoringPreferencePage">
