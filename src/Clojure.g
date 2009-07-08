@@ -38,13 +38,13 @@ public void clearParensMatching() { parensMatching.clear(); }
  
  OPEN_PAREN: '('
  	;
- CLOSE_PAREN: ')' { }
+ CLOSE_PAREN: ')'
 	;
 	
 // TODO complete this list
 SPECIAL_FORM: 'def' | 'if' | 'do' | 'let' | 'quote' | 'var' | 'fn' | 'loop' |
             'recur' | 'throw' | 'try' | 'monitor-enter' | 'monitor-exit' |
-            'new' | 'set!'
+            'new' | 'set!' | '.'
     ;
 
 
@@ -73,11 +73,14 @@ BOOLEAN:
     ;
 
 SYMBOL:
-	'.'
-    |   '/' // The division function FIXME is it necessary to hardcode this ?
+        '/' // The division function FIXME is it necessary to hardcode this ?
     |   NAME ('/' NAME)?
     ;
 
+METADATA_TYPEHINT:
+		'#' '^' NAME
+	;
+	
 fragment
 NAME:   SYMBOL_HEAD SYMBOL_REST* (':' SYMBOL_REST+)*
     ;
@@ -87,7 +90,7 @@ SYMBOL_HEAD:
         'a'..'z' | 'A'..'Z' | '*' | '+' | '!' | '-' | '_' | '?' | '>' | '<' | '=' | '$'
         // other characters will be allowed eventually, but not all macro characters have been determined
     ;
-    
+
 fragment
 SYMBOL_REST:
         SYMBOL_HEAD
