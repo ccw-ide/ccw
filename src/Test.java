@@ -21,18 +21,18 @@ public class Test {
 //        	System.out.println("line [" + t.getLine() + "], col [" 
 //        			+ t.getCharPositionInLine() + "], type [" + t.getType() + "] :'" + t.getText() + "'");
 //        }
-		ClojureLexer lex = new ClojureLexer(new ANTLRStringStream(text));
-       	CommonTokenStream tokens = new CommonTokenStream(lex);
-
-       	ClojureParser parser = new ClojureParser(tokens);
-		
-        try {
-        	System.out.println("begin parse");
-            parser.file();
-        	System.out.println("end parse");
-        } catch (RecognitionException e)  {
-            e.printStackTrace();
-        }
+//		ClojureLexer lex = new ClojureLexer(new ANTLRStringStream(text));
+//       	CommonTokenStream tokens = new CommonTokenStream(lex);
+//
+//       	ClojureParser parser = new ClojureParser(tokens);
+//		
+//        try {
+//        	System.out.println("begin parse");
+//            parser.file();
+//        	System.out.println("end parse");
+//        } catch (RecognitionException e)  {
+//            e.printStackTrace();
+//        }
 		
     
     }
