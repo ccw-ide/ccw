@@ -130,6 +130,7 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 		gd = new GridData();
 		gd.horizontalAlignment = SWT.FILL;
 		gd.verticalAlignment = SWT.CENTER;
+		gd.grabExcessHorizontalSpace = true;
 		filterText.setLayoutData(gd);
 		filterText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
