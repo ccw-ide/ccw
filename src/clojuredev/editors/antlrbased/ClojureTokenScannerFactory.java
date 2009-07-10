@@ -52,17 +52,17 @@ public final class ClojureTokenScannerFactory {
 //				u.addBoldToken(IScanContext.SymbolType.MACRO);
 //				u.addBoldToken(IScanContext.SymbolType.SPECIAL_FORM);
 //				u.addBoldToken(ClojureLexer.SPECIAL_FORM);
-				u.addTokenType(ClojureLexer.T24);//'&'=20
-				u.addTokenType(ClojureLexer.OPEN_PAREN);//'('=21
-				u.addTokenType(ClojureLexer.CLOSE_PAREN);//')'=22
-				u.addTokenType(ClojureLexer.T25);//'['=23
-				u.addTokenType(ClojureLexer.T26);//']'=24
-				u.addTokenType(ClojureLexer.T27);//'{'=25
-				u.addTokenType(ClojureLexer.T28);//'}'=26
-				u.addTokenType(ClojureLexer.T29);//'\''=27
-				u.addTokenType(ClojureLexer.T30);//'^'=28
-				u.addTokenType(ClojureLexer.T31);//'@'=29
-				u.addTokenType(ClojureLexer.T32);//'#'=30
+				u.addTokenType(ClojureLexer.AMPERSAND);
+				u.addTokenType(ClojureLexer.OPEN_PAREN);
+				u.addTokenType(ClojureLexer.CLOSE_PAREN);
+				u.addTokenType(ClojureLexer.LEFT_SQUARE_BRACKET);
+				u.addTokenType(ClojureLexer.RIGHT_SQUARE_BRACKET);
+				u.addTokenType(ClojureLexer.LEFT_CURLY_BRACKET);
+				u.addTokenType(ClojureLexer.RIGHT_CURLY_BRACKET);
+				u.addTokenType(ClojureLexer.BACKSLASH);
+				u.addTokenType(ClojureLexer.CIRCUMFLEX);
+				u.addTokenType(ClojureLexer.COMMERCIAL_AT);
+				u.addTokenType(ClojureLexer.NUMBER_SIGN);
 				u.addTokenType(ClojureLexer.KEYWORD);
 				u.addTokenType(ClojureLexer.SYNTAX_QUOTE);
 				u.addTokenType(ClojureLexer.UNQUOTE_SPLICING);
