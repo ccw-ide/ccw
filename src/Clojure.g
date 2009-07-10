@@ -36,20 +36,39 @@ public void clearParensMatching() { parensMatching.clear(); }
  * Lexer part
  */
  
- OPEN_PAREN: '('
+OPEN_PAREN: '('
  	;
- CLOSE_PAREN: ')'
+CLOSE_PAREN: ')'
 	;
-	
+AMPERSAND: '&'
+        ;
+LEFT_SQUARE_BRACKET: '['
+        ;
+RIGHT_SQUARE_BRACKET: ']'
+        ;
+LEFT_CURLY_BRACKET: '{'
+        ; 
+RIGHT_CURLY_BRACKET: '}'
+        ;
+BACKSLASH: '\\'
+        ;
+CIRCUMFLEX: '^'
+        ;
+COMMERCIAL_AT: '@'
+        ;
+NUMBER_SIGN: '#'
+        ;
+APOSTROPHE: '\''
+        ;
+        
 // TODO complete this list
 SPECIAL_FORM: 'def' | 'if' | 'do' | 'let' | 'quote' | 'var' | 'fn' | 'loop' |
             'recur' | 'throw' | 'try' | 'monitor-enter' | 'monitor-exit' |
             'new' | 'set!' | '.'
     ;
 
-
 // TODO is this sufficient ?
-STRING: '"' ( ~'"' | ('\\' '"') )* '"'
+STRING: '"' ( ~'"' | (BACKSLASH '"') )* '"'
     ;
 
 // TODO get the real definition from a java grammar.
@@ -61,9 +80,13 @@ CHARACTER:
         '\\newline'
     |   '\\space'
     |   '\\tab'
-    |   '\\' .   // TODO : is it correct to allow anything ?
+    |   '\\u' HEXDIGIT HEXDIGIT HEXDIGIT HEXDIGIT
+    |   BACKSLASH .   // TODO : is it correct to allow anything ?
     ;
 
+HEXDIGIT:
+        '0'..'9' | 'a'..'f' | 'A'..'F';
+        
 NIL:    'nil'
     ;
     
@@ -78,7 +101,7 @@ SYMBOL:
     ;
 
 METADATA_TYPEHINT:
-		'#' '^' NAME
+		NUMBER_SIGN CIRCUMFLEX NAME
 	;
 	
 fragment
@@ -96,7 +119,7 @@ SYMBOL_REST:
         SYMBOL_HEAD
     |   '0'..'9' // Done this because a strange cannot find matchRange symbol occured when compiling the parser
     |   '.' // multiple successive points is allowed by the reader (but will break at evaluation)
-    |   '#' // FIXME normally # is allowed only in syntax quote forms, in last position
+    |   NUMBER_SIGN // FIXME normally # is allowed only in syntax quote forms, in last position
     ;
 
 literal:
@@ -152,7 +175,7 @@ form	:
     |    literal // Place literal first to make nil and booleans take precedence over symbol (impossible to 
                 // name a symbol nil, true or false)
     |	COMMENT
-    |   '&'
+    |   AMPERSAND
     |   metadataForm? ( SPECIAL_FORM | s=SYMBOL { symbols.add(s.getText()); } | list | vector | map )
     |   macroForm
     |   dispatchMacroForm
@@ -177,22 +200,22 @@ dispatchMacroForm:
 list:   o=OPEN_PAREN form * c=CLOSE_PAREN { parensMatching.put(Integer.valueOf(o.getTokenIndex()), Integer.valueOf(c.getTokenIndex())); parensMatching.put(Integer.valueOf(c.getTokenIndex()), Integer.valueOf(o.getTokenIndex())); }
     ;
     
-vector: '[' form* ']'
+vector:  LEFT_SQUARE_BRACKET form* RIGHT_SQUARE_BRACKET
     ;
     
-map:    '{' (form form)* '}'
+map:    LEFT_CURLY_BRACKET (form form)* RIGHT_CURLY_BRACKET
     ;
     
 quoteForm
 @init  { this.syntaxQuoteDepth++; }
 @after { this.syntaxQuoteDepth--; }
-    :  '\'' form
+    :  APOSTROPHE form
     ;
 
-metaForm:   '^' form
+metaForm:   CIRCUMFLEX form
     ;
     
-derefForm:  '@' form
+derefForm:  COMMERCIAL_AT form
     ;
     
 syntaxQuoteForm
@@ -216,18 +239,18 @@ unquoteSplicingForm
         UNQUOTE_SPLICING form
     ;
     
-set:    '#' '{' form* '}'
+set:    NUMBER_SIGN LEFT_CURLY_BRACKET form* RIGHT_CURLY_BRACKET
     ;
 
-regexForm:  '#' STRING
+regexForm:  NUMBER_SIGN STRING
     ;
     
 metadataForm:
-        '#' '^' (map | SYMBOL|KEYWORD|STRING)
+        NUMBER_SIGN CIRCUMFLEX (map | SYMBOL|KEYWORD|STRING)
     ;
 
 varQuoteForm:
-        '#' '\'' form
+        NUMBER_SIGN APOSTROPHE form
     ;
 
 lambdaForm
@@ -237,5 +260,5 @@ this.inLambda = true;
 @after {
 this.inLambda = false;
 }
-    : '#' list
+    : NUMBER_SIGN list
     ;
