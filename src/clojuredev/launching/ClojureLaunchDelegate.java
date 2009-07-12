@@ -64,19 +64,25 @@ public class ClojureLaunchDelegate extends
 	public String getProgramArguments(ILaunchConfiguration configuration) throws CoreException {
 		String userProgramArguments = super.getProgramArguments(configuration);
 
-		String filesToLaunchArguments = LaunchUtils.getFilesToLaunchAsCommandLineList(configuration);
-		
-		// Add serverrepl as a file to launch to install a remote server
-		try {
-			URL serverReplBundleUrl = ClojuredevPlugin.getDefault().getBundle().getResource("clojuredev/debug/serverrepl.clj");
-			URL serverReplFileUrl = FileLocator.toFileURL(serverReplBundleUrl);
-			String serverRepl = serverReplFileUrl.getFile(); 
-			filesToLaunchArguments = "-i " + '\"' + serverRepl + "\" " + filesToLaunchArguments;
-		} catch (IOException e) {
-			e.printStackTrace();
+		if (configuration.getAttribute(LaunchUtils.ATTR_CLOJURE_INSTALL_REPL, true)) {
+			String filesToLaunchArguments = LaunchUtils.getFilesToLaunchAsCommandLineList(configuration, false);
+			
+			// Add serverrepl as a file to launch to install a remote server
+			try {
+				URL serverReplBundleUrl = ClojuredevPlugin.getDefault().getBundle().getResource("clojuredev/debug/serverrepl.clj");
+				URL serverReplFileUrl = FileLocator.toFileURL(serverReplBundleUrl);
+				String serverRepl = serverReplFileUrl.getFile(); 
+				filesToLaunchArguments = "-i " + '\"' + serverRepl + "\" " + filesToLaunchArguments;
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+	    	return filesToLaunchArguments + " --repl " + userProgramArguments;
+		} else {
+			String filesToLaunchArguments = LaunchUtils.getFilesToLaunchAsCommandLineList(configuration, true);
+			
+	    	return filesToLaunchArguments + userProgramArguments;
 		}
-		
-    	return filesToLaunchArguments + " --repl " + userProgramArguments;
 	}
 	
 }

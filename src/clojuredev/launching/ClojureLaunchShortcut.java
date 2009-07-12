@@ -101,7 +101,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
             ILaunchConfiguration[] configs = DebugPlugin.getDefault().getLaunchManager().getLaunchConfigurations(type);
             candidateConfigs = new ArrayList(configs.length);
             for (ILaunchConfiguration config:  configs) {
-                if (config.getAttribute(ATTR_MAIN_TYPE_NAME, "").equals(LaunchUtils.MAIN_CLASSNAME)
+                if (config.getAttribute(ATTR_MAIN_TYPE_NAME, "").startsWith("clojure.")
                 		&& config.getAttribute(ATTR_PROJECT_NAME, "").equals(project.getName())
                 		&& LaunchUtils.getFilesToLaunchList(config).equals(Arrays.asList(files))) {
                     candidateConfigs.add(config);
@@ -140,7 +140,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
             
             wc.setAttribute(ATTR_PROGRAM_ARGUMENTS, "");
             
-            wc.setAttribute(ATTR_MAIN_TYPE_NAME, LaunchUtils.MAIN_CLASSNAME);
+            wc.setAttribute(ATTR_MAIN_TYPE_NAME, LaunchUtils.MAIN_CLASSNAME_FOR_REPL);
             
             wc.setAttribute(ATTR_PROJECT_NAME, project.getName());
             

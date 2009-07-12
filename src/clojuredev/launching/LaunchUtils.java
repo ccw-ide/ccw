@@ -35,9 +35,8 @@ public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
     
     static public final String LAUNCH_ID = "clojuredev.launching.clojure";
     
-//    static public final String MAIN_CLASSNAME = "clojure.lang.Repl";
-    static public final String MAIN_CLASSNAME = "clojure.contrib.repl_ln";
-//    static public final String MAIN_CLASSNAME = "clojure.lang.Repl";
+    static public final String MAIN_CLASSNAME = "clojure.main";
+    static public final String MAIN_CLASSNAME_FOR_REPL = "clojure.contrib.repl_ln";
     
     static public final int DEFAULT_SERVER_PORT = -1;
     
@@ -52,19 +51,34 @@ public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
 
 	public static final String SERVER_FILE_PORT_SUFFFIX = ".port";
 
-    static public String getProgramArguments(IFile[] files) {
+	public static final String ATTR_CLOJURE_INSTALL_REPL = "CLOJUREDEV_ATTR_CLOJURE_INSTALL_REPL";
+
+	/**
+	 * @param files
+	 * @param lastFileAsScript if true, does not install the last arg as a resource to load, but as
+	 *        a script to launch
+	 * @return
+	 */
+    static public String getProgramArguments(IFile[] files, boolean lastFileAsScript) {
         StringBuilder args = new StringBuilder();
-        for (IFile srcFile : files) {
-            if (args.length() > 0) {
-                args.append(" ");
-            }
-            args.append("-i \"" + srcFile.getLocation().toString() + "\"");
+        
+        int lastIndex = lastFileAsScript ? files.length - 1 : files.length;
+        
+        for (int i = 0; i < lastIndex; i++) {
+            args.append(" -i" + fileArg(files[i]));
+        }
+        if (lastFileAsScript) {
+        	args.append(fileArg(files[lastIndex]));
         }
         return args.toString();
     }
     
-    static public String getProgramArguments(List<IFile> files) {
-        return getProgramArguments(files.toArray(new IFile[]{}));
+    private static String fileArg(IFile file) {
+    	return " \"" + file.getLocation().toString() + "\"";
+    }
+    
+    static public String getProgramArguments(List<IFile> files, boolean lastFileAsScript) {
+        return getProgramArguments(files.toArray(new IFile[]{}), lastFileAsScript);
     }
     
     static public List<IFile> getFilesToLaunchList(ILaunchConfiguration config) throws CoreException {
@@ -78,9 +92,9 @@ public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
         return selectedFiles;
     }
     
-    static public String getFilesToLaunchAsCommandLineList(ILaunchConfiguration config) throws CoreException {
+    static public String getFilesToLaunchAsCommandLineList(ILaunchConfiguration config, boolean lastFileAsScript) throws CoreException {
     	List<IFile> filesToLaunch = LaunchUtils.getFilesToLaunchList(config);
-    	return LaunchUtils.getProgramArguments(filesToLaunch);
+    	return LaunchUtils.getProgramArguments(filesToLaunch, lastFileAsScript);
 
     }
     

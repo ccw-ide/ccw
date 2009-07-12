@@ -33,6 +33,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -65,6 +66,7 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
 
     protected TableViewer sourceFilesViewer;
     
+    private Button installREPLChoice; 
     private Text serverPort;
     
     public String getName() {
@@ -137,12 +139,27 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
     }
 
     private void createReplServerControl(final Composite parent) {
-        Group section = SWTFactory.createGroup(parent, "Repl remote control settings",
+        Group section = SWTFactory.createGroup(parent, "Repl settings",
                 2, 1, 0);
+        
+        installREPLChoice = SWTFactory.createCheckButton(
+        		section, "Install a REPL (see tooltip for detail)", null, true, 2);
+        installREPLChoice.setToolTipText("If checked, the main class will be clojure.contrib.repl_ln, all files listed will be loaded"
+        		+ " with the -i option.\n If unchecked, the main class will be clojure.main, all files listed but the last will be loaded"
+        		+ " with the -i option, and the last file will be loaded as a script.");
         
         SWTFactory.createLabel(section, "Remote server must listen on port: ", 1);
         serverPort = SWTFactory.createSingleText(section, 0);
 
+        installREPLChoice.addSelectionListener( new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {}
+
+			public void widgetSelected(SelectionEvent e) {
+				serverPort.setEnabled(installREPLChoice.getSelection());
+				updateLaunchConfigurationDialog();
+			}
+		});
+        
         serverPort.addModifyListener( new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				updateLaunchConfigurationDialog();
@@ -160,9 +177,9 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
         
         try {
         	if (config.getAttribute(ATTR_MAIN_TYPE_NAME, (String) null) == null) {
-        		config.setAttribute(ATTR_MAIN_TYPE_NAME, LaunchUtils.MAIN_CLASSNAME);
+        		config.setAttribute(ATTR_MAIN_TYPE_NAME, LaunchUtils.MAIN_CLASSNAME_FOR_REPL);
         	}
-        	
+        	config.setAttribute(LaunchUtils.ATTR_CLOJURE_INSTALL_REPL, true);
         	config.setAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN, LaunchUtils.DEFAULT_SERVER_PORT);
             
             config.doSave();
@@ -183,9 +200,14 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
         }
         
         try {
+        	installREPLChoice.setSelection(config.getAttribute(
+        			LaunchUtils.ATTR_CLOJURE_INSTALL_REPL, true));
             serverPort.setText(Integer.toString(config.getAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN, LaunchUtils.DEFAULT_SERVER_PORT)));
+            serverPort.setEnabled(installREPLChoice.getSelection());
         } catch (CoreException e) {
         	ClojuredevPlugin.logError("error while initializing serverPort", e);
+        	installREPLChoice.setSelection(true);
+        	serverPort.setEnabled(true);
         	serverPort.setText("");
         }
         try {    
@@ -202,11 +224,15 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
         config.setAttribute(ATTR_PROJECT_NAME, fProjText.getText().trim());
 
         LaunchUtils.setFilesToLaunchString(config, (List<IFile>) sourceFilesViewer.getInput());
-        
+
+    	config.setAttribute(ATTR_MAIN_TYPE_NAME, 
+    			installREPLChoice.getSelection() 
+    				? LaunchUtils.MAIN_CLASSNAME_FOR_REPL
+    				: LaunchUtils.MAIN_CLASSNAME);
+
+        config.setAttribute(LaunchUtils.ATTR_CLOJURE_INSTALL_REPL, installREPLChoice.getSelection());
         config.setAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN, Integer.valueOf(serverPort.getText()));
         
         mapResources(config);
     }
-
-
 }
