@@ -449,7 +449,7 @@
           icon="icons/clojure16x16.png"
           id="clojuredev.view.namespacebrowser"
           name="Namespace Browser"
-          restorable="false">
+          restorable="true">
     </view>
     <category
           id="clojuredev.category.views"
