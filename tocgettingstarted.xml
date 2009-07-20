@@ -2,7 +2,7 @@
 <?NLS TYPE="org.eclipse.help.toc"?>
 
 <toc label="Getting Started" link_to="toc.xml#gettingstarted"> 
-        <topic label="Enable clojure-dev clojure&apos;s support"  href="html/gettingstarted/enable-clojure-dev.html"> 
+        <topic label="Enable Clojure Support for a Project"  href="html/gettingstarted/enable-clojure-dev.html"> 
         </topic>
         <topic href="html/gettingstarted/play-with-repl.html" label="Play with a REPL">
         </topic>

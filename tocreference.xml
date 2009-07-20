@@ -1,6 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?NLS TYPE="org.eclipse.help.toc"?>
 
-<toc label="Reference" link_to="toc.xml#reference"> 
+<toc label="Reference" link_to="toc.xml#reference">
+   <topic label="Wizards and Dialogs">
+      <topic label="Create New Elements">
+         <topic label="New Clojure Project Wizard">
+         </topic>
+         <topic label="New Clojure File Wizards">
+         </topic>
+      </topic>
+   </topic>
+   <topic label="Preferences">
+      <topic label="Clojure">
+         <topic label="Editor">
+         </topic>
+         <topic label="REPL">
+         </topic>
+      </topic>
+   </topic>
+   <topic label="Views">
+      <topic label="Namespace Browser">
+      </topic>
+      <topic label="REPL Console">
+      </topic>
+   </topic>
+   <topic label="Clojure Editor">
+   </topic>
+   <topic href="html/reference/reference-glossary.html" label="Glossary">
+   </topic> 
 
 </toc>

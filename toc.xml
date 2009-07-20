@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?NLS TYPE="org.eclipse.help.toc"?>
 
-<toc label="Clojuredev Plugin" topic="html/toc.html">
+<toc label="Clojuredev Plugin">
    <topic label="Getting Started">
       <anchor id="gettingstarted"/>
    </topic>
@@ -11,10 +11,9 @@
    <topic label="Tasks">
       <anchor id="tasks"/>
    </topic>
-   <topic label="Reference">
+   <topic href="html/toc.html" label="Reference">
       <anchor id="reference"/>
    </topic>
-   <topic label="Samples">
-      <anchor id="samples"/>
+   <topic href="epl-v10.html" label="License">
    </topic>
 </toc>

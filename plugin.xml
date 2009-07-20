@@ -18,9 +18,6 @@
             file="tocreference.xml">
       </toc>
       <toc
-            file="tocsamples.xml">
-      </toc>
-      <toc
             file="toctasks.xml">
       </toc>
    </extension>

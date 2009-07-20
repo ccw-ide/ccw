@@ -8,69 +8,61 @@
 </head>
 
 <body>
-<h1><a name="Edit_clojure_source_code" />Edit clojure source code</a></h1>
-<h2><a name="By_creating_a_new_clojure_file" />By creating a new clojure
-file</a></h2>
-<p>Clojure files must be located in normal java source directories. If you
-place files with the .clj extension outside of a java source directory, then
-Eclipse will not see it on the classpath of the project, and you will not be
-able to load it via the REPL, select it as an automatically loaded file in the
-launcher customization wizard ...</p>
+<h1>Edit Clojure source code</h1>
+<h2>By Creating a New Clojure File</h2>
+<p>Clojure files must be located in normal Java source directories. If you
+place files with the .clj extension outside of a Java source directory,
+Eclipse will not see it on the classpath of the project, and it will not be
+possible to load it via the REPL or to select it as an automatically loaded file in the
+launcher customization wizard.</p>
 <ul>
-    <li>You can use File &gt; New &gt; New Clojure file to create a clojure
+    <li>You can use <strong>File &gt; New &gt; Clojure File</strong> to create a Clojure
     file</li>
 </ul>
 <ul>
-    <li>Inside the java source directory, follow the classical clojure
+    <li>Inside the Java source directory, follow the classical Clojure
     conventions to place your file, according to the namespace it belongs to.
-    (e.g. you want to create namespace &#x27;tests.clojure.first , then create
-    java package &quot;tests.clojure&quot;, and create clojure file first.clj in
+    (e.g. you want to create namespace &#x27;tests.clojure.first, then create
+    Java package &quot;tests.clojure&quot;, and create Clojure file first.clj in
     it.</li>
 </ul>
-<h2><a name="By_importing_existing_code" />By importing existing code</a></h2>
-<p>Do as you would in a classic java project. Just remember to place all
-clojure files in a java source directory.</p>
-<h2><a name="What_features_does_the_editor_offer_?" />What features does
-the editor offer?</a></h2>
-<h3><a name="Syntax_higlighting" />Syntax highlighting</a></h3>
+<h2>By Importing Existing Code</h2>
+<p>Do as you would in a classic Java project. Just remember to place all
+Clojure files in a Java source directory.</p>
+<h2>What Features Does The Editor Offer?</h2>
+<h3>Syntax Highlighting</h3>
 <ul>
-    <li>Rainbow parenthesis (different colors for different nesting levels)
-    </li>
-    <li>Higlights in error closing parens that have no matching opening
+    <li>Rainbow parenthesis (different colors for different nesting levels)</li>
+    <li>Highlights in error closing parens that have no matching opening
     parens</li>
 </ul>
-<ul>
-    <li>Currently still a bit &#x27;rustic&#x27;. Please be patient :-)</li>
-</ul>
-<h3><a name="Code_completion" />Code completion</a></h3>
-<p>Currently, does what is called &quot;Hippie completion&quot; by eclipse :
+<h3>Code completion</h3>
+<p>Currently, does what is called &quot;Hippie completion&quot; by Eclipse:
 code completion for all available words on all open files.</p>
-<p>Rudimentary, but still useful if you keep opened clojure.core in a second
-editor !</p>
-<p>Much much more to come ... sooner than later, we hope ! :-)</p>
-<h3><a name="Errors_reporting" />Errors reporting</a></h3>
+<h3>Errors reporting</h3>
+<p>In conjunction with auto-compile functionality, compilation
+    problems are reported as problem markers:</p>
 <ul>
-    <li>In conjunction with auto-compile functionality, compilation
-    problems are reported as problem markers : you see a summary of the problems
-    in the problems view, you see the files that have problems in the package
-    explorer, you see the problems at the correct line in the corresponding
-    editor, you can jump to the editor at the correct line by double clicking on
-    the problem in the problems view.</li>
+<li>A summary of the problems is displayed in the <strong>Problems</strong> view</li>
+<li>Files that have problems are marked in the <strong>Package Explorer</strong></li>
+<li>Problems are marked at the correct line in the Clojure editor</li>
+<li>A double-click on a problem in the <strong>Problems</strong> view jumps to
+the correct line in the Clojure editor</li>
 </ul>
-<h3><a name="Interaction_with_a_launched_REPL" />Interaction with a
-launched REPL</a></h3>
-<p>We try to follow as much as possible classical &quot;Slime&quot;
-conventions. We will also try to correctly integrate with Eclipse shortcuts
-where slime functionality is semantically equivalent to an existing Eclipse
+
+<h3>Interaction with a launched REPL</h3>
+<p>The Clojure Plugin tries to follow as much as possible classical &quot;Slime&quot;
+conventions. It also tries to correctly integrate with Eclipse shortcuts
+where Slime functionality is semantically equivalent to an existing Eclipse
 functionality.</p>
 
 <table>
     <tr>
-        <td style="border: 1px solid #aaa; padding: 5px;"><strong>name</strong>
+        <td style="border: 1px solid #aaa; padding: 5px;"><strong>Name</strong>
         </td>
-        <td style="border: 1px solid #aaa; padding: 5px;"><strong>keyboard
-        shortcuts</strong></td>
-        <td style="border: 1px solid #aaa; padding: 5px;"><strong>description</strong>
+        <td style="border: 1px solid #aaa; padding: 5px;"><strong>Keyboard
+        Shortcuts</strong></td>
+        <td style="border: 1px solid #aaa; padding: 5px;"><strong>Description</strong>
         </td>
     </tr>
     <tr>
@@ -79,15 +71,13 @@ functionality.</p>
         <td style="border: 1px solid #aaa; padding: 5px;">C-M-a <strong>or</strong>
         C-S-A</td>
         <td style="border: 1px solid #aaa; padding: 5px;">Move to beginning
-        of current or preceding top-level s-expression (so really not just
-        defns)</td>
+        of current or preceding top-level s-expression (not just defns)</td>
     </tr>
     <tr>
         <td style="border: 1px solid #aaa; padding: 5px;">end-of-defn</td>
-        <td style="border: 1px solid #aaa; padding: 5px;">C-M-e <strong>or</strong>
-        C-S-E</td>
+        <td style="border: 1px solid #aaa; padding: 5px;">C-M-e or C-S-E</td>
         <td style="border: 1px solid #aaa; padding: 5px;">Move to end of
-        current or preceding top-level s-expression (so really not just defns)</td>
+        current or preceding top-level s-expression (not just defns)</td>
     </tr>
     <tr>
         <td style="border: 1px solid #aaa; padding: 5px;">mark-defn</td>
@@ -99,7 +89,7 @@ functionality.</p>
         <td style="border: 1px solid #aaa; padding: 5px;">eval-defn +
         eval-region</td>
         <td style="border: 1px solid #aaa; padding: 5px;">C-M-x</td>
-        <td style="border: 1px solid #aaa; padding: 5px;">If a non empty
+        <td style="border: 1px solid #aaa; padding: 5px;">If a non-empty
         text is selected, evaluate it, or, if no text is selected, evaluate the
         top-level s-expression</td>
     </tr>
@@ -107,14 +97,15 @@ functionality.</p>
         <td style="border: 1px solid #aaa; padding: 5px;">load file</td>
         <td style="border: 1px solid #aaa; padding: 5px;">C-M-l</td>
         <td style="border: 1px solid #aaa; padding: 5px;">Loads the saved
-        version of the currently edited file (via load-file)</td>
+        version of the currently edited file into the REPL
+        (via Clojure&quot;s &quot;load-file&quot; function)</td>
     </tr>
 </table>
 
 <p>Remarks:</p>
 <ul>
     <li>The Windows keys combination Ctrl+Alt can also be replaced by the
-    single AltGr key)</li>
+    single AltGr key</li>
     <li>C stands for Ctrl key, M stands for Meta key (Alt key on Windows),
     S stands for Shift</li>
 </ul>
