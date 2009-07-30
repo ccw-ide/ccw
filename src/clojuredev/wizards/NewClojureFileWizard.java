@@ -17,7 +17,6 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -40,6 +39,7 @@ import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 
 import clojuredev.ClojuredevPlugin;
+import clojuredev.util.StringUtils;
 
 public class NewClojureFileWizard extends BasicNewResourceWizard implements INewWizard {
 
@@ -63,6 +63,7 @@ public class NewClojureFileWizard extends BasicNewResourceWizard implements INew
 
         IContainer dest = null;
         Text text;
+        String packageName = "";
 
         public void createControl(Composite parent) {
             Composite topLevel = new Composite(parent, SWT.NONE);
@@ -85,6 +86,7 @@ public class NewClojureFileWizard extends BasicNewResourceWizard implements INew
                 }
                 else if (sel instanceof IPackageFragment) {
                     dest = (IContainer)((IPackageFragment)sel).getResource();
+                    packageName = ((IPackageFragment)sel).getElementName();
                 }
                 else {
                 	final String JAVA_SOURCE_ERROR = "Cannot create Clojure file outside a java source folder";
@@ -247,8 +249,9 @@ public class NewClojureFileWizard extends BasicNewResourceWizard implements INew
         }
 
         try {
-            String contents = ";; " + name;
-            contents += "\n\n";
+        	String namespace = ((StringUtils.isEmpty(mainPage.packageName) ? "" 
+        			: mainPage.packageName + ".") + name).replaceAll("_", "-");
+        	String contents = "(ns " + namespace + ")\n\n";
             file.create(new StringBufferInputStream(contents), true, null);
             IWorkbenchWindow dw = getWorkbench().getActiveWorkbenchWindow();
             if (dw != null) {
