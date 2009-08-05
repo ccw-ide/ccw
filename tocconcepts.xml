@@ -2,6 +2,6 @@
 <?NLS TYPE="org.eclipse.help.toc"?>
 
 <toc label="Concepts" link_to="toc.xml#concepts"> 
- <topic href="html/concepts/concept-clojure-project.html" label="Clojure Projects">
+ <topic href="html/concepts/clojure-project.html" label="Clojure Projects">
  </topic> 
 </toc>

@@ -2,55 +2,34 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-    <title>Edit Clojure Source Code</title>
+    <title>Clojure Editor Features</title>
     <link rel="stylesheet" href="../../../PRODUCT_PLUGIN/book.css" type="text/css"> 
     <script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js"></script>
 </head>
 
 <body>
-<h1>Edit Clojure source code</h1>
-<h2>By Creating a New Clojure File</h2>
-<p>Clojure files must be located in normal Java source directories. If you
-place files with the .clj extension outside of a Java source directory,
-Eclipse will not see it on the classpath of the project, and it will not be
-possible to load it via the REPL or to select it as an automatically loaded file in the
-launcher customization wizard.</p>
-<ul>
-    <li>You can use <strong>File &gt; New &gt; Clojure File</strong> to create a Clojure
-    file</li>
-</ul>
-<ul>
-    <li>Inside the Java source directory, follow the classical Clojure
-    conventions to place your file, according to the namespace it belongs to.
-    (e.g. you want to create namespace &#x27;tests.clojure.first, then create
-    Java package &quot;tests.clojure&quot;, and create Clojure file first.clj in
-    it.</li>
-</ul>
-<h2>By Importing Existing Code</h2>
-<p>Do as you would in a classic Java project. Just remember to place all
-Clojure files in a Java source directory.</p>
-<h2>What Features Does The Editor Offer?</h2>
-<h3>Syntax Highlighting</h3>
+<h1>Clojure Editor Features</h1>
+<h2>Syntax Highlighting</h3>
 <ul>
     <li>Rainbow parenthesis (different colors for different nesting levels)</li>
     <li>Highlights in error closing parens that have no matching opening
     parens</li>
 </ul>
-<h3>Code completion</h3>
+<h3>Code Completion</h3>
 <p>Currently, does what is called &quot;Hippie completion&quot; by Eclipse:
-code completion for all available words on all open files.</p>
-<h3>Errors reporting</h3>
+Code completion for all available words on all open files.</p>
+<h2>Error Reporting</h3>
 <p>In conjunction with auto-compile functionality, compilation
     problems are reported as problem markers:</p>
 <ul>
-<li>A summary of the problems is displayed in the <strong>Problems</strong> view</li>
+<li>A summary of the problems is displayed in the <strong>Problems View</strong></li>
 <li>Files that have problems are marked in the <strong>Package Explorer</strong></li>
 <li>Problems are marked at the correct line in the Clojure editor</li>
-<li>A double-click on a problem in the <strong>Problems</strong> view jumps to
+<li>A double-click on a problem in the <strong>Problems  View</strong> jumps to
 the correct line in the Clojure editor</li>
 </ul>
 
-<h3>Interaction with a launched REPL</h3>
+<h2>Interaction With a Launched REPL</h3>
 <p>The Clojure Plugin tries to follow as much as possible classical &quot;Slime&quot;
 conventions. It also tries to correctly integrate with Eclipse shortcuts
 where Slime functionality is semantically equivalent to an existing Eclipse

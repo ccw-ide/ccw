@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?NLS TYPE="org.eclipse.help.toc"?>
 
-<toc label="Tasks" link_to="toc.xml#tasks"> 
- <topic href="html/tasks/tasks-creating-jar-files.html" label="Creating JAR Files">
+<toc label="Tasks" link_to="toc.xml#tasks">
+ <topic href="html/tasks/create-clojure-file.html" label="Creating Clojure Files">
+ </topic> 
+ <topic href="html/tasks/creating-jar-files.html" label="Creating JAR Files">
  </topic>
- <topic href="html/tasks/tasks-clojure-dependencies.html" label="Adding Dependencies to Clojure">
+ <topic href="html/tasks/clojure-dependencies.html" label="Setting Up Dependencies to Clojure">
  </topic> 
 </toc>

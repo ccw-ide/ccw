@@ -6,16 +6,12 @@
       <topic label="Create New Elements">
          <topic label="New Clojure Project Wizard">
          </topic>
-         <topic label="New Clojure File Wizards">
+         <topic label="New Clojure File Wizard">
          </topic>
       </topic>
    </topic>
    <topic label="Preferences">
       <topic label="Clojure">
-         <topic label="Editor">
-         </topic>
-         <topic label="REPL">
-         </topic>
       </topic>
    </topic>
    <topic label="Views">
@@ -24,9 +20,11 @@
       <topic label="REPL Console">
       </topic>
    </topic>
-   <topic label="Clojure Editor">
+   <topic href="html/reference/editor.html" label="Clojure Editor">
    </topic>
-   <topic href="html/reference/reference-glossary.html" label="Glossary">
+   <topic href="html/reference/auto-build.html" label="Auto Build">
+   </topic>
+   <topic href="html/reference/glossary.html" label="Glossary">
    </topic> 
 
 </toc>

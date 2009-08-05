@@ -2,49 +2,46 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-    <title>Play with a REPL</title>
+    <title>Play With a REPL</title>
     <link rel="stylesheet" href="../../../PRODUCT_PLUGIN/book.css" type="text/css"> 
     <script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js"></script>
 </head>
 <body>
-<h1>Play with a REPL</h1>
+<h1>Play With a REPL</h1>
 <h2>Launch the REPL</h2>
 <ul>
     <li>Select your project&#x27;s node</li>
-    <li>In the context menu: <strong>Run as ... &gt; Run configurations &gt;
+    <li>In the context menu: <strong>Run as ... &gt; Run Configurations &gt;
     Clojure &gt; New</strong> (in Clojure node&#x27;s contextual menu)</li>
-    <li>Click run</li>
+    <li>Click <strong>Run</strong></li>
 </ul>
-<p>A console should open, with Clojure&#x27;s prompt waiting for you ...</p>
+<p>A console will open, with Clojure&#x27;s prompt waiting for you ...</p>
 <h2>Use the Namespace Browser</h2>
-<p>The namespace browser will show you all symbols of all namespaces of the
+<p>The <strong>Namespace Browser</strong> will show you all symbols of all namespaces of the
 REPL you have launched, and allow you to jump to the source code defining them,
 if available (double-click on the symbol).</p>
 <p>It also allows you to search the symbol you want by typing regular expressions in the
-<strong>Find</strong> text field, and choosing to do the search only on symbols
-names, or also on symbols documentation.</p>
+<strong>Find</strong> text field, and choosing to do the search only on symbol
+names, or also on symbol documentation.</p>
 <p>If you let the mouse hover over a node in the browser, you will have the
 documentation, if available.</p>
+<p>To open the <strong>Namespace Browser</strong>:</p>
 <ul>
-    <li>To see the namespace browser, you must</li>
-    <li>
-        <ul>
-            <li>either select it via menu <strong>Window &gt; Show View &gt; Other &gt;
-            Clojuredev Views &gt; Namespace Browser</strong></li>
-            <li>either open the java perspective. The namespace browser should
-            be located behind the outline view by default (if you are in the java
-            perspective and don&#x27;t see the namespace browser, you may reset the
-            java perspective to its default value via menu <strong>Window &gt; Reset
-            Perspective</strong>, or find it manually via menu <strong>Window &gt; Show View
-            &gt; Namespace Browser</strong></li>
-        </ul>
-    </li>
+    <li>Select it via menu <strong>Window &gt; Show View &gt; Other &gt;
+    Clojuredev Views &gt; Namespace Browser</strong></li>
+    <li>Open the <strong>Java Perspective</strong>. The <strong>Namespace Browser</strong> is
+    located behind the outline view by default (if you are in the <strong>Java
+    Perspective</strong> and don&#x27;t see the <strong>Namespace Browser</strong>, you may reset the
+    <strong>Java Perspective</strong> to its default value via menu <strong>Window &gt; Reset
+    Perspective</strong>, or find it manually via menu <strong>Window &gt; Show View
+    &gt; Namespace Browser</strong></li>
 </ul>
-<h2>How does it work?</h2>
+
+<h2>How Does it Work?</h2>
 <p>When you have launched the REPL, the Clojure Eclipse plugin has embedded &quot;server
 code&quot; in the launched Clojure environment. This server code is contacted by
 the Clojure Eclipse plugin to give information on the running Clojure environment. The
-namespace browser uses this server to provide you with the most possible up to
+<strong>Namespace Browser</strong> uses this server to provide you with the most possible up to
 date info on the symbols.</p>
 </body>
 </html>

@@ -4,10 +4,6 @@
 <toc label="Getting Started" link_to="toc.xml#gettingstarted"> 
         <topic label="Enable Clojure Support for a Project"  href="html/gettingstarted/enable-clojure-dev.html"> 
         </topic>
-        <topic href="html/gettingstarted/play-with-repl.html" label="Play with a REPL">
+        <topic href="html/gettingstarted/play-with-repl.html" label="Play With a REPL">
         </topic>
-        <topic href="html/gettingstarted/edit-source.html" label="Edit Clojure Source Code">
-        </topic>
-        <topic href="html/gettingstarted/auto-build.html" label="Auto-build Feature">
-        </topic> 
 </toc>
