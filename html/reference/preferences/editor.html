@@ -1,0 +1,92 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!--
+Copyright (c) 2009 Stephan Muehlstrasser and others
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Eclipse Public License v1.0
+which accompanies this distribution, and is available at
+http://www.eclipse.org/legal/epl-v10.html
+
+Contributors: 
+    Stephan Muehlstrasser - initial documentation of preferences
+-->
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <title>Editor Preferences</title>
+    <link rel="stylesheet" href="../../../../PRODUCT_PLUGIN/book.css" type="text/css">
+    <script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js"></script>
+</head>
+<body>
+<h1>Editor Preferences</h1>
+    <p>
+      The following Clojuredev preferences can be set on the
+      <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=clojuredev.preferences.EditorPreferencePage)")'>
+      <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens the Clojuredev editor preference page">
+      <b>Clojuredev &gt; Editor</b></a> preference page and its sub-pages.
+    </p>
+    <table border="1" cellspacing="0" cellpadding="5" width="100%" summary="General editor settings">
+      <thead>
+        <tr>
+          <th>Option</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td valign="top">
+          Highlight matching brackets
+          </td>
+
+          <td valign="top">
+            <p>
+              If enabled, whenever the cursor is next to a parenthesis, bracket or curly braces, its opening or closing counter part is highlighted.
+            </p>
+          </td>
+          <td valign="top">
+            <p>
+              On
+            </p>
+
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">
+          Displayed tab width
+          </td>
+          <td valign="top">
+            <p>
+              This option allows you to set the displayed tab width for text editors.
+            </p>
+
+          </td>
+          <td valign="top">
+            <p>
+              2
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">
+          On file launch, switch the REPL to the file namespace (calling &apos;in-ns)
+          </td>
+          <td valign="top">
+            <p>
+            When a Clojure file is loaded into the REPL, this option will automatically
+            call the <strong>in-ns</strong> function to allow direct calling of functions
+            from the file just loaded, without the need to prefix the functions with the
+            namespace prefix.
+            </p>
+          </td>
+          <td valign="top">
+            <p>
+              On
+            </p>
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+
+</body>
+</html>

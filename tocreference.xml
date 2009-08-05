@@ -20,8 +20,10 @@ Contributors:
          </topic>
       </topic>
    </topic>
-   <topic label="Preferences">
-      <topic label="Clojure">
+   <topic href="html/reference/preferences/preferences.html" label="Preferences">
+      <topic href="html/reference/preferences/editor.html" label="Editor Preferences">
+      </topic>
+      <topic href="html/reference/preferences/syntax-coloring.html" label="Syntax Coloring">
       </topic>
    </topic>
    <topic label="Views">
