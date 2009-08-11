@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Clojuredev Plugin
-Bundle-SymbolicName: clojuredev.branding; singleton:=true
+Bundle-Name: Counterclockwise Plugin
+Bundle-SymbolicName: ccw.branding;singleton:=true
 Bundle-Version: 0.0.33
 Bundle-ActivationPolicy: lazy
-Bundle-Vendor: clojure-dev team
+Bundle-Vendor: Counterclockwise team

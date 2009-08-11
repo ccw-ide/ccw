@@ -8,11 +8,11 @@ which accompanies this distribution, and is available at
 http://www.eclipse.org/legal/epl-v10.html
 
 Contributors: 
-    Laurent Petit - initial documentation in Clojuredev Wiki
+    Laurent Petit - initial documentation in Counterclockwise Wiki
     Stephan Muehlstrasser - transformed Wiki pages into Eclipse help pages
 -->
 <toc label="Getting Started" link_to="toc.xml#gettingstarted"> 
-        <topic label="Enable Clojure Support for a Project"  href="html/gettingstarted/enable-clojure-dev.html"> 
+        <topic label="Enable Clojure Support for a Project"  href="html/gettingstarted/enable-ccw.html"> 
         </topic>
         <topic href="html/gettingstarted/play-with-repl.html" label="Play With a REPL">
         </topic>

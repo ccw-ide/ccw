@@ -8,10 +8,10 @@ which accompanies this distribution, and is available at
 http://www.eclipse.org/legal/epl-v10.html
 
 Contributors: 
-    Laurent Petit - initial documentation in Clojuredev Wiki
+    Laurent Petit - initial documentation in Counterclockwise Wiki
     Stephan Muehlstrasser - transformed Wiki pages into Eclipse help pages
 -->
-<toc label="Clojuredev Plugin">
+<toc label="Counterclockwise Plugin">
    <topic label="Getting Started">
       <anchor id="gettingstarted"/>
    </topic>

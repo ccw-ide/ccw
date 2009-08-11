@@ -7,12 +7,12 @@ which accompanies this distribution, and is available at
 http://www.eclipse.org/legal/epl-v10.html
 
 Contributors: 
-    Laurent Petit - initial documentation in Clojuredev Wiki
+    Laurent Petit - initial documentation in Counterclockwise Wiki
     Stephan Muehlstrasser - transformed Wiki pages into Eclipse help pages
 -->
 <welcomePage 
         title="Eclipse Plugin Supporting the Clojure Language">
-        <intro>Introduction to Clojuredev</intro>
+        <intro>Introduction to Counterclockwise</intro>
         
         <!-- TODO
         <item>Item 1</item>
