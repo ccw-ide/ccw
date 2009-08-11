@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>clojuredev</name>
+	<name>ccw</name>
 	<comment></comment>
 	<projects>
 	</projects>
 	<buildSpec>
 		<buildCommand>
-			<name>clojuredev.builder</name>
+			<name>ccw.builder</name>
 			<arguments>
 			</arguments>
 		</buildCommand>
@@ -29,6 +29,6 @@
 	<natures>
 		<nature>org.eclipse.pde.PluginNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
-		<nature>clojuredev.nature</nature>
+		<nature>ccw.nature</nature>
 	</natures>
 </projectDescription>

@@ -1,10 +1,10 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Clojuredev Plug-in
-Bundle-SymbolicName: clojuredev;singleton:=true
+Bundle-Name: Counterclockwise Clojure Plug-in
+Bundle-SymbolicName: ccw;singleton:=true
 Bundle-Version: 0.0.37
 Bundle-Localization: plugin
-Bundle-Activator: clojuredev.ClojuredevPlugin
+Bundle-Activator: ccw.CCWPlugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.ui.ide,
@@ -19,15 +19,15 @@ Require-Bundle: org.eclipse.ui,
  org.antlr.runtime;bundle-version="3.0.0",
  org.eclipse.ui.views,
  org.eclipse.core.filesystem,
- clojurecontrib;bundle-version="0.0.0",
  org.eclipse.core.expressions,
  org.eclipse.ui.forms,
- clojure;bundle-version="0.0.0"
-Export-Package: clojuredev,
- clojuredev.launching
+ ccw.clojure;bundle-version="1.0.0",
+ ccw.clojurecontrib;bundle-version="0.0.0"
+Export-Package: ccw,
+ ccw.launching
 Bundle-ClassPath: .,
  classes/
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Bundle-Vendor: clojure-dev team
+Bundle-Vendor: Counterclockwise team
 Bundle-ActivationPolicy: lazy
 Eclipse-RegisterBuddy: clojure

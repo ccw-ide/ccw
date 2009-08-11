@@ -4,23 +4,23 @@
    <extension
          point="org.eclipse.ui.newWizards">
       <category
-            id="clojuredev.category.new"
+            id="ccw.category.new"
             name="Clojure">
       </category>
       <wizard
-            category="clojuredev.category.new"
-            class="clojuredev.wizards.NewClojureProjectWizard"
+            category="ccw.category.new"
+            class="ccw.wizards.NewClojureProjectWizard"
             hasPages="true"
             icon="icons/clojure16x16.png"
-            id="clojuredev.project.new.wizard"
+            id="ccw.project.new.wizard"
             name="Clojure Project"
             project="true">
       </wizard>
       <wizard
-            category="clojuredev.category.new"
-            class="clojuredev.wizards.NewClojureFileWizard"
+            category="ccw.category.new"
+            class="ccw.wizards.NewClojureFileWizard"
             icon="icons/clojure16x16.png"
-            id="clojuredev.newClojureFileWizard"
+            id="ccw.newClojureFileWizard"
             name="Clojure File"
             project="false">
          <description>
@@ -32,32 +32,32 @@
       </wizard>
    </extension>
    <extension 
-   	id="clojuredev.nature" 
+   	id="ccw.nature" 
    	name="Clojure Nature" 
    	point="org.eclipse.core.resources.natures"> 
       <runtime> 
-         <run class="clojuredev.ClojureProjectNature"/> 
+         <run class="ccw.ClojureProjectNature"/> 
       </runtime> 
-      <builder id="clojuredev.builder"/>
+      <builder id="ccw.builder"/>
       <requires-nature
             id="org.eclipse.jdt.core.javanature">
       </requires-nature> 
    </extension> 
    <extension 
-   	id="clojuredev.builder" 
+   	id="ccw.builder" 
    	name="Clojure Builder" 
    	point="org.eclipse.core.resources.builders"> 
       <builder
             callOnEmptyDelta="false"
             hasNature="true"> 
-         <run class="clojuredev.builder.ClojureBuilder"/>
+         <run class="ccw.builder.ClojureBuilder"/>
       </builder> 
    </extension> 
    <extension point="org.eclipse.debug.core.launchConfigurationTypes">
       <launchConfigurationType
-            delegate="clojuredev.launching.ClojureLaunchDelegate"
+            delegate="ccw.launching.ClojureLaunchDelegate"
             delegateName="Clojure Launcher"
-            id="clojuredev.launching.clojure"
+            id="ccw.launching.clojure"
             modes="run, debug"
             name="Clojure"
             public="true">
@@ -67,17 +67,17 @@
 
    <extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
       <launchConfigurationTabGroup
-        type="clojuredev.launching.clojure"
-        class="clojuredev.launching.ClojureTabGroup"
-        id="clojuredev.launching.clojure.launchConfigurationTabGroup">
+        type="ccw.launching.clojure"
+        class="ccw.launching.ClojureTabGroup"
+        id="ccw.launching.clojure.launchConfigurationTabGroup">
       </launchConfigurationTabGroup>
    </extension>
    <extension
          point="org.eclipse.debug.ui.launchShortcuts">
       <shortcut
-            class="clojuredev.launching.ClojureLaunchShortcut"
+            class="ccw.launching.ClojureLaunchShortcut"
             icon="icons/clojure16x16.png"
-            id="clojuredev.launching.clojureShortcut"
+            id="ccw.launching.clojureShortcut"
             label="Clojure REPL"
             modes="run, debug">
          <perspective id="org.eclipse.jdt.ui.JavaPerspective"/>
@@ -105,7 +105,7 @@
                               type="org.eclipse.core.resources.IProject">
                            <test
                                  forcePluginActivation="true"
-                                 property="clojuredev.propertyTester.hasClojureNature">
+                                 property="ccw.propertyTester.hasClojureNature">
                            </test>
                         </adapt>
                      </or>
@@ -118,19 +118,19 @@
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            class="clojuredev.editors.antlrbased.AntlrBasedClojureEditor"
+            class="ccw.editors.antlrbased.AntlrBasedClojureEditor"
             default="true"
             extensions="clj"
-            contributorClass="clojuredev.editors.antlrbased.BasicClojureEditorActionContributor"
+            contributorClass="ccw.editors.antlrbased.BasicClojureEditorActionContributor"
             icon="icons/clojure16x16.png"
-            id="clojuredev.antlrbasededitor"
+            id="ccw.antlrbasededitor"
             name="Clojure Editor">
       </editor>
    </extension>
    <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
-            class="clojuredev.preferences.PreferenceInitializer">
+            class="ccw.preferences.PreferenceInitializer">
       </initializer>
       <scope
             class="org.eclipse.core.runtime.preferences.DefaultScope"
@@ -139,7 +139,7 @@
    </extension>
    
 <!-- =========================================================================== -->
-<!-- CLOJUREDEV command definitions                                              -->
+<!-- CCW command definitions                                              -->
 <!-- =========================================================================== -->
 
    <extension
@@ -148,7 +148,7 @@
             name="%context.editingClojureSource.name"
             description="%context.editingClojureSource.description"
             parentId="org.eclipse.ui.textEditorScope"
-            id="clojuredev.ui.clojureEditorScope">
+            id="ccw.ui.clojureEditorScope">
       </context>
    </extension>
 
@@ -157,51 +157,51 @@
       <command
             categoryId="org.eclipse.ui.category.navigate"
             description="%command.gotoMatchingBracket.description"
-            id="clojuredev.ui.edit.text.clojure.goto.matching.bracket"
+            id="ccw.ui.edit.text.clojure.goto.matching.bracket"
             name="%command.gotoMatchingBracket.name">
       </command>
 <!-- navigate -->
       <command
             categoryId="org.eclipse.ui.category.navigate"
             description="%command.gotoPreviousMember.description"
-            id="clojuredev.ui.edit.text.clojure.goto.previous.member"
+            id="ccw.ui.edit.text.clojure.goto.previous.member"
             name="%command.gotoPreviousMember.name">
       </command>
       <command
             name="Go to matching bracket"
             description="%command.gotoNextMember.description"
             categoryId="org.eclipse.ui.category.navigate"
-            id="clojuredev.ui.edit.text.clojure.goto.next.member">
+            id="ccw.ui.edit.text.clojure.goto.next.member">
       </command>
       <command
             name="%command.selectToplevelSExpression.name"
             description="%command.selectToplevelSExpression.description"
             categoryId="org.eclipse.ui.category.navigate"
-            id="clojuredev.ui.edit.text.clojure.select.toplevel.s.expression">
+            id="ccw.ui.edit.text.clojure.select.toplevel.s.expression">
       </command>
       <command
             name="%command.evaluateToplevelSExpression.name"
             description="%command.evaluateToplevelSExpression.description"
             categoryId="org.eclipse.ui.category.navigate"
-            id="clojuredev.ui.edit.text.clojure.evaluate.toplevel.s.expression">
+            id="ccw.ui.edit.text.clojure.evaluate.toplevel.s.expression">
       </command>
       <command
             name="%command.loadFile.name"
             description="%command.loadFile.description"
             categoryId="org.eclipse.ui.category.navigate"
-            id="clojuredev.ui.edit.text.clojure.load.file">
+            id="ccw.ui.edit.text.clojure.load.file">
       </command>
       <command
             name="%command.compileLib.name"
             description="%command.compileLib.description"
             categoryId="org.eclipse.ui.category.navigate"
-            id="clojuredev.ui.edit.text.clojure.compile.lib">
+            id="ccw.ui.edit.text.clojure.compile.lib">
       </command>
       <command
             name="%command.clojureShortcut.run.name"
             description="%command.clojureShortcut.run.description"
             categoryId="org.eclipse.debug.ui.category.run"
-            id="clojuredev.debug.ui.clojureShortcut.run">
+            id="ccw.debug.ui.clojureShortcut.run">
       </command>
       
    </extension>
@@ -213,70 +213,70 @@
 <!-- navigate -->  
       <key
             sequence="M1+M2+P"
-            contextId="clojuredev.ui.clojureEditorScope"
-            commandId="clojuredev.ui.edit.text.clojure.goto.matching.bracket"
+            contextId="ccw.ui.clojureEditorScope"
+            commandId="ccw.ui.edit.text.clojure.goto.matching.bracket"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             sequence="M1+M3+P"
-            contextId="clojuredev.ui.clojureEditorScope"
-            commandId="clojuredev.ui.edit.text.clojure.goto.matching.bracket"
+            contextId="ccw.ui.clojureEditorScope"
+            commandId="ccw.ui.edit.text.clojure.goto.matching.bracket"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
 <!--            sequence="M1+M2+ARROW_UP" -->
       <key
             sequence="M1+M3+A"
-            contextId="clojuredev.ui.clojureEditorScope"
-            commandId="clojuredev.ui.edit.text.clojure.goto.previous.member"
+            contextId="ccw.ui.clojureEditorScope"
+            commandId="ccw.ui.edit.text.clojure.goto.previous.member"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             sequence="M1+M2+A"
-            contextId="clojuredev.ui.clojureEditorScope"
-            commandId="clojuredev.ui.edit.text.clojure.goto.previous.member"
+            contextId="ccw.ui.clojureEditorScope"
+            commandId="ccw.ui.edit.text.clojure.goto.previous.member"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
 <!--            sequence="M1+M2+ARROW_DOWN" -->
       <key
             sequence="M1+M3+E"
-            contextId="clojuredev.ui.clojureEditorScope"
-            commandId="clojuredev.ui.edit.text.clojure.goto.next.member"
+            contextId="ccw.ui.clojureEditorScope"
+            commandId="ccw.ui.edit.text.clojure.goto.next.member"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             sequence="M1+M2+E"
-            contextId="clojuredev.ui.clojureEditorScope"
-            commandId="clojuredev.ui.edit.text.clojure.goto.next.member"
+            contextId="ccw.ui.clojureEditorScope"
+            commandId="ccw.ui.edit.text.clojure.goto.next.member"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             sequence="M1+M3+H"
-            contextId="clojuredev.ui.clojureEditorScope"
-            commandId="clojuredev.ui.edit.text.clojure.select.toplevel.s.expression"
+            contextId="ccw.ui.clojureEditorScope"
+            commandId="ccw.ui.edit.text.clojure.select.toplevel.s.expression"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             sequence="M1+M3+X"
-            contextId="clojuredev.ui.clojureEditorScope"
-            commandId="clojuredev.ui.edit.text.clojure.evaluate.toplevel.s.expression"
+            contextId="ccw.ui.clojureEditorScope"
+            commandId="ccw.ui.edit.text.clojure.evaluate.toplevel.s.expression"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             sequence="M1+M2+X"
-            contextId="clojuredev.ui.clojureEditorScope"
-            commandId="clojuredev.ui.edit.text.clojure.evaluate.toplevel.s.expression"
+            contextId="ccw.ui.clojureEditorScope"
+            commandId="ccw.ui.edit.text.clojure.evaluate.toplevel.s.expression"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             platform="carbon"/>
       <key
             sequence="M2+M3+X C"
-            commandId="clojuredev.debug.ui.clojureShortcut.run"
+            commandId="ccw.debug.ui.clojureShortcut.run"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             sequence="M1+M3+X C"
-            commandId="clojuredev.debug.ui.clojureShortcut.run"
+            commandId="ccw.debug.ui.clojureShortcut.run"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             platform="carbon"/>
       <key
             sequence="M1+M3+L"
-            contextId="clojuredev.ui.clojureEditorScope"
-            commandId="clojuredev.ui.edit.text.clojure.load.file"
+            contextId="ccw.ui.clojureEditorScope"
+            commandId="ccw.ui.edit.text.clojure.load.file"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             sequence="M1+M3+K"
-            contextId="clojuredev.ui.clojureEditorScope"
-            commandId="clojuredev.ui.edit.text.clojure.compile.lib"
+            contextId="ccw.ui.clojureEditorScope"
+            commandId="ccw.ui.edit.text.clojure.compile.lib"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
             
 	</extension>
@@ -285,50 +285,50 @@
       <menuContribution
             locationURI="menu:org.eclipse.ui.main.menu?after=additions">
          <menu
-               id="clojuredev.menus.clojure"
+               id="ccw.menus.clojure"
                label="Clojure"
                mnemonic="C"
                tooltip="Menu for Clojure related commands">
             <command
-                  commandId="clojuredev.ui.edit.text.clojure.goto.matching.bracket"
+                  commandId="ccw.ui.edit.text.clojure.goto.matching.bracket"
                   label="Go to matching bracket"
                   style="push">
             </command>
             <separator
-                  name="clojuredev.menus.separator1"
+                  name="ccw.menus.separator1"
                   visible="true">
             </separator>
             <command
-                  commandId="clojuredev.ui.edit.text.clojure.goto.previous.member"
+                  commandId="ccw.ui.edit.text.clojure.goto.previous.member"
                   label="Go to the previous top level s-expression"
                   style="push">
             </command>
             <command
-                  commandId="clojuredev.ui.edit.text.clojure.goto.next.member"
+                  commandId="ccw.ui.edit.text.clojure.goto.next.member"
                   label="Go to the next top level s-expression"
                   style="push">
             </command>
             <command
-                  commandId="clojuredev.ui.edit.text.clojure.select.toplevel.s.expression"
+                  commandId="ccw.ui.edit.text.clojure.select.toplevel.s.expression"
                   label="Select top level s-expression"
                   style="push">
             </command>
             <command
-                  commandId="clojuredev.ui.edit.text.clojure.evaluate.toplevel.s.expression"
+                  commandId="ccw.ui.edit.text.clojure.evaluate.toplevel.s.expression"
                   label="Evaluate Top Level s-expression"
                   style="push">
             </command>
             <separator
-                  name="clojuredev.menus.separator2"
+                  name="ccw.menus.separator2"
                   visible="true">
             </separator>
             <command
-                  commandId="clojuredev.ui.edit.text.clojure.load.file"
+                  commandId="ccw.ui.edit.text.clojure.load.file"
                   label="Load clojure file in REPL"
                   style="push">
             </command>
             <command
-                  commandId="clojuredev.ui.edit.text.clojure.compile.lib"
+                  commandId="ccw.ui.edit.text.clojure.compile.lib"
                   label="Compile clojure file in REPL"
                   style="push">
             </command>
@@ -337,7 +337,7 @@
                <with
                      variable="activePartId">
                   <equals
-                        value="clojuredev.antlrbasededitor">
+                        value="ccw.antlrbasededitor">
                   </equals>
                </with>
             </visibleWhen>
@@ -347,50 +347,50 @@
             locationURI="popup:org.eclipse.ui.popup.any?after=additions">
          <menu
                icon="icons/clojure16x16.png"
-               id="clojuredev.menus.clojure"
+               id="ccw.menus.clojure"
                label="Clojure"
                mnemonic="C"
                tooltip="Menu for Clojure related commands">
             <command
-                  commandId="clojuredev.ui.edit.text.clojure.goto.matching.bracket"
+                  commandId="ccw.ui.edit.text.clojure.goto.matching.bracket"
                   label="Go to matching bracket"
                   style="push">
             </command>
             <separator
-                  name="clojuredev.menus.separator1"
+                  name="ccw.menus.separator1"
                   visible="true">
             </separator>
             <command
-                  commandId="clojuredev.ui.edit.text.clojure.goto.previous.member"
+                  commandId="ccw.ui.edit.text.clojure.goto.previous.member"
                   label="Go to previous top level s-expression"
                   style="push">
             </command>
             <command
-                  commandId="clojuredev.ui.edit.text.clojure.goto.next.member"
+                  commandId="ccw.ui.edit.text.clojure.goto.next.member"
                   label="Go to next top level s-expression"
                   style="push">
             </command>
             <command
-                  commandId="clojuredev.ui.edit.text.clojure.select.toplevel.s.expression"
+                  commandId="ccw.ui.edit.text.clojure.select.toplevel.s.expression"
                   label="Select top level s-expression"
                   style="push">
             </command>
             <separator
-                  name="clojuredev.menus.separator2"
+                  name="ccw.menus.separator2"
                   visible="true">
             </separator>
             <command
-                  commandId="clojuredev.ui.edit.text.clojure.evaluate.toplevel.s.expression"
+                  commandId="ccw.ui.edit.text.clojure.evaluate.toplevel.s.expression"
                   label="Evaluate Top Level s-expression"
                   style="push">
             </command>
             <command
-                  commandId="clojuredev.ui.edit.text.clojure.load.file"
+                  commandId="ccw.ui.edit.text.clojure.load.file"
                   label="Load clojure file in REPL"
                   style="push">
             </command>
             <command
-                  commandId="clojuredev.ui.edit.text.clojure.compile.lib"
+                  commandId="ccw.ui.edit.text.clojure.compile.lib"
                   label="Compile clojure file in REPL"
                   style="push">
             </command>
@@ -399,7 +399,7 @@
                <with
                      variable="activePartId">
                   <equals
-                        value="clojuredev.antlrbasededitor">
+                        value="ccw.antlrbasededitor">
                   </equals>
                </with>
             </visibleWhen>
@@ -410,13 +410,13 @@
          point="org.eclipse.ui.popupMenus">
       <objectContribution
             adaptable="true"
-            id="clojuredev.objectContribution.clojure.nature"
+            id="ccw.objectContribution.clojure.nature"
             objectClass="org.eclipse.core.resources.IContainer">
          <action
-               class="clojuredev.actions.ToggleNatureAction"
+               class="ccw.actions.ToggleNatureAction"
                enablesFor="+"
                icon="icons/clojure16x16.png"
-               id="clojuredev.action.toggleClojureNature"
+               id="ccw.action.toggleClojureNature"
                label="Enable/disable clojure language support"
                menubarPath="additions">
          </action>
@@ -424,16 +424,16 @@
    </extension>
 	<extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">
     <launchConfigurationTypeImage
-          configTypeID="clojuredev.launching.clojure"
+          configTypeID="ccw.launching.clojure"
           icon="icons/clojure16x16.png"
-          id="clojuredev.launchConfigurationTypeImage">
+          id="ccw.launchConfigurationTypeImage">
     </launchConfigurationTypeImage>
 	</extension>
  <extension
        point="org.eclipse.ui.console.consolePageParticipants">
     <consolePageParticipant
-          class="clojuredev.console.ConsolePageParticipant"
-          id="clojuredev.consolePageParticipant.replConsole">
+          class="ccw.console.ConsolePageParticipant"
+          id="ccw.consolePageParticipant.replConsole">
        <enablement>
           <instanceof
                 value="org.eclipse.debug.internal.ui.views.console.ProcessConsole">
@@ -444,16 +444,16 @@
  <extension
        point="org.eclipse.ui.views">
     <view
-          category="clojuredev.category.views"
-          class="clojuredev.outline.NamespaceBrowser"
+          category="ccw.category.views"
+          class="ccw.outline.NamespaceBrowser"
           icon="icons/clojure16x16.png"
-          id="clojuredev.view.namespacebrowser"
+          id="ccw.view.namespacebrowser"
           name="Namespace Browser"
           restorable="true">
     </view>
     <category
-          id="clojuredev.category.views"
-          name="Clojuredev Views">
+          id="ccw.category.views"
+          name="Counterclockwise Views">
     </category>
  </extension>
  <extension
@@ -461,16 +461,16 @@
     <perspectiveExtension
           targetID="org.eclipse.jdt.ui.JavaPerspective">
        <newWizardShortcut
-             id="clojuredev.project.new.wizard">
+             id="ccw.project.new.wizard">
        </newWizardShortcut>
        <newWizardShortcut
-             id="clojuredev.newClojureFileWizard">
+             id="ccw.newClojureFileWizard">
        </newWizardShortcut>
        <viewShortcut
-             id="clojuredev.view.namespacebrowser">
+             id="ccw.view.namespacebrowser">
        </viewShortcut>
        <view
-             id="clojuredev.view.namespacebrowser"
+             id="ccw.view.namespacebrowser"
              minimized="false"
              relationship="stack"
              relative="org.eclipse.ui.views.ContentOutline">
@@ -479,16 +479,16 @@
     <perspectiveExtension
           targetID="org.eclipse.pde.ui.PDEPerspective">
        <newWizardShortcut
-             id="clojuredev.project.new.wizard">
+             id="ccw.project.new.wizard">
        </newWizardShortcut>
        <newWizardShortcut
-             id="clojuredev.newClojureFileWizard">
+             id="ccw.newClojureFileWizard">
        </newWizardShortcut>
        <viewShortcut
-             id="clojuredev.view.namespacebrowser">
+             id="ccw.view.namespacebrowser">
        </viewShortcut>
        <view
-             id="clojuredev.view.namespacebrowser"
+             id="ccw.view.namespacebrowser"
              minimized="false"
              relationship="stack"
              relative="org.eclipse.ui.views.ContentOutline">
@@ -496,7 +496,7 @@
     </perspectiveExtension>
  </extension>
  <extension
-       id="clojuredev.markers.problemmarkers.compilation"
+       id="ccw.markers.problemmarkers.compilation"
        name="Clojure Compilation Problem"
        point="org.eclipse.core.resources.markers">
     <persistent
@@ -509,9 +509,9 @@
  <extension
        point="org.eclipse.core.expressions.propertyTesters">
     <propertyTester
-          class="clojuredev.ClojureNaturePropertyTest"
-          id="clojuredev.propertyTester.hasClojureNature"
-          namespace="clojuredev.propertyTester"
+          class="ccw.ClojureNaturePropertyTest"
+          id="ccw.propertyTester.hasClojureNature"
+          namespace="ccw.propertyTester"
           properties="hasClojureNature"
           type="org.eclipse.core.resources.IProject">
     </propertyTester>
@@ -520,7 +520,7 @@
        point="org.eclipse.core.runtime.adapters">
     <factory
           adaptableType="org.eclipse.core.resources.IProject"
-          class="clojuredev.ProjectLaunchableAdapter">
+          class="ccw.ProjectLaunchableAdapter">
        <adapter
              type="org.eclipse.debug.ui.actions.ILaunchable">
        </adapter>
@@ -530,20 +530,20 @@
        point="org.eclipse.ui.preferencePages">
     <page
           name="%preferencePage.clojure.name"
-          class="clojuredev.preferences.EmptyPreferencePage"
-          id="clojuredev.preferences.EmptyPreferencePage">
+          class="ccw.preferences.EmptyPreferencePage"
+          id="ccw.preferences.EmptyPreferencePage">
     </page>
     <page
           name="%preferencePage.editor.name"
-          category="clojuredev.preferences.EmptyPreferencePage"
-          class="clojuredev.preferences.EditorPreferencePage"
-          id="clojuredev.preferences.EditorPreferencePage">
+          category="ccw.preferences.EmptyPreferencePage"
+          class="ccw.preferences.EditorPreferencePage"
+          id="ccw.preferences.EditorPreferencePage">
     </page>
     <page
           name="%preferencePage.syntaxColoring.name"
-          category="clojuredev.preferences.EmptyPreferencePage"
-          class="clojuredev.preferences.SyntaxColoringPreferencePage"
-          id="clojuredev.preferences.SyntaxColoringPreferencePage">
+          category="ccw.preferences.EmptyPreferencePage"
+          class="ccw.preferences.SyntaxColoringPreferencePage"
+          id="ccw.preferences.SyntaxColoringPreferencePage">
     </page>
  </extension>
 </plugin>
