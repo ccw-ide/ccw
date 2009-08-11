@@ -30,4 +30,4 @@ Bundle-ClassPath: .,
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-Vendor: Counterclockwise team
 Bundle-ActivationPolicy: lazy
-Eclipse-RegisterBuddy: clojure
+Eclipse-RegisterBuddy: ccw.clojure
