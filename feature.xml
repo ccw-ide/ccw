@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="clojuredev.feature"
+      id="ccw.feature"
       label="%featureName"
       version="0.0.37"
       provider-name="%providerName"
-      plugin="clojuredev.branding">
+      plugin="ccw.branding">
 
    <description url="http://code.google.com/p/clojure-dev/">
       %description
@@ -19,7 +19,7 @@
    </license>
 
    <url>
-      <update label="Clojuredev" url="http://clojure-dev.googlecode.com/svn/updatesite/"/>
+      <update label="Counterclockwise Update Site" url="http://clojure-dev.googlecode.com/svn/updatesite/"/>
    </url>
 
    <requires>
@@ -41,34 +41,35 @@
    </requires>
 
    <plugin
-         id="clojure"
-         download-size="0"
-         install-size="0"
-         version="1.0.0"/>
-
-   <plugin
-         id="clojuredev"
-         download-size="0"
-         install-size="0"
-         version="0.0.37"/>
-
-   <plugin
-         id="clojurecontrib"
-         download-size="0"
-         install-size="0"
-         version="0.0.0.20090504_r756"/>
-
-   <plugin
-         id="clojuredev.branding"
-         download-size="0"
-         install-size="0"
-         version="0.0.33"/>
-
-   <plugin
          id="org.antlr.runtime"
          download-size="0"
          install-size="0"
          version="3.0.0.v200803061811"
          unpack="false"/>
+
+   <plugin
+         id="ccw.clojure"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="ccw.clojurecontrib"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="ccw"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="ccw.branding"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
 
 </feature>
