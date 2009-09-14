@@ -21,7 +21,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.filesystem,
  org.eclipse.core.expressions,
  org.eclipse.ui.forms,
- ccw.clojure;bundle-version="1.0.0",
+ ccw.clojure;bundle-version="1.1.0",
  ccw.clojurecontrib;bundle-version="0.0.0"
 Export-Package: ccw,
  ccw.launching
