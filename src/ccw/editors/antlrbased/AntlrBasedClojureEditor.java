@@ -41,10 +41,12 @@ import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.ContentAssistAction;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
+import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import ccw.ClojureCore;
 import ccw.CCWPlugin;
 import ccw.debug.ClojureClient;
+import ccw.editors.outline.ClojureOutlinePage;
 import ccw.editors.rulesbased.ClojureDocumentProvider;
 import ccw.editors.rulesbased.ClojurePartitionScanner;
 
@@ -64,6 +66,8 @@ public class AntlrBasedClojureEditor extends TextEditor {
 
 	/** The projection support */
 	private ProjectionSupport fProjectionSupport;
+
+	private ClojureOutlinePage outlinePage;
 
 	public AntlrBasedClojureEditor() {
 	    IPreferenceStore preferenceStore = createCombinedPreferenceStore();
@@ -523,14 +527,14 @@ public class AntlrBasedClojureEditor extends TextEditor {
 	 */ 
 	@Override
 	public Object getAdapter(Class required) {
-//		if (IContentOutlinePage.class.equals(required)) {
-//			if (fOutlinePage == null) {
-//				fOutlinePage= new JavaContentOutlinePage(getDocumentProvider(), this);
-//				if (getEditorInput() != null)
-//					fOutlinePage.setInput(getEditorInput());
-//			}
-//			return fOutlinePage;
-//		}
+		if (IContentOutlinePage.class.equals(required)) {
+			if (outlinePage == null) {
+				outlinePage= new ClojureOutlinePage(getDocumentProvider(), this);
+				if (getEditorInput() != null)
+					outlinePage.setInput(getEditorInput());
+			}
+			return outlinePage;
+		}
 		
 		if (fProjectionSupport != null) {
 			Object adapter= fProjectionSupport.getAdapter(getSourceViewer(), required);
