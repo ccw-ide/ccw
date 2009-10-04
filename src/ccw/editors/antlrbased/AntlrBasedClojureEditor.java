@@ -28,6 +28,7 @@ import org.eclipse.jface.text.source.ICharacterPairMatcher;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.projection.ProjectionSupport;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
@@ -74,7 +75,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
 	    CCWPlugin.registerEditorColors(preferenceStore);
 		setSourceViewerConfiguration(new ClojureSourceViewerConfiguration(preferenceStore, this));
 		setPreferenceStore(preferenceStore);
-        setDocumentProvider(new ClojureDocumentProvider());
+        setDocumentProvider(new ClojureDocumentProvider());        
 	}
 	
 	@Override
@@ -118,8 +119,14 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		fProjectionSupport.install();
 		viewer.doOperation(ClojureSourceViewer.TOGGLE);
 	}
+	
 
-    /**
+    @Override
+	public ISelectionProvider getSelectionProvider() {
+		return getSourceViewer().getSelectionProvider();
+	}
+
+	/**
      * Create a preference store combined from the Clojure, the EditorsUI and
      * the PlatformUI preference stores to inherit all the default text editor
      * settings from the Eclipse preferences.
@@ -580,4 +587,6 @@ public class AntlrBasedClojureEditor extends TextEditor {
         if (getSourceViewer() instanceof ClojureSourceViewer)
             ((ClojureSourceViewer)getSourceViewer()).setPreferenceStore(store);
     }
+    
+    
 }

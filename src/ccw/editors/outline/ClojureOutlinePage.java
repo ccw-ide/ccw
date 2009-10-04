@@ -11,17 +11,23 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
+import org.eclipse.jface.text.TextSelection;
+import org.eclipse.jface.viewers.IPostSelectionProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.part.PageSite;
 import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.eclipse.ui.views.contentoutline.ContentOutline;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
 import ccw.ClojureCore;
@@ -34,6 +40,45 @@ import clojure.lang.Obj;
 import clojure.lang.LispReader.ReaderException;
 
 public class ClojureOutlinePage extends ContentOutlinePage {
+	private final class DocumentChangedListener implements IDocumentListener {
+		public void documentChanged(DocumentEvent event) {
+			refreshInput();
+		}
+
+		public void documentAboutToBeChanged(DocumentEvent event) {
+		}
+	}
+	private final class EditorSelectionChangedListener implements
+			ISelectionChangedListener {
+		private final TreeViewer viewer;
+
+		private EditorSelectionChangedListener(TreeViewer viewer) {
+			this.viewer = viewer;
+		}
+
+		public void selectionChanged(SelectionChangedEvent event) {
+			ISelection selection = event.getSelection();
+			if (selection instanceof TextSelection) {
+				TextSelection textSelection = (TextSelection) selection;
+				int line = textSelection.getStartLine();
+				StructuredSelection newSelection = findClosest(line+1);
+				ISelection oldSelection = viewer.getSelection();
+				if(!newSelection.equals(oldSelection)) {
+					viewer.setSelection(newSelection);
+				}
+			}
+
+		}
+	}
+	private final class TreeSelectionChangedListener implements
+			ISelectionChangedListener {
+		public void selectionChanged(SelectionChangedEvent event) {
+			ISelection selection = event.getSelection();
+			if(isActivePart()) {
+				selectInEditor(selection);
+			}
+		}
+	}
 	private static final Keyword KEYWORD_LINE = Keyword.intern(null, "line");
 	private final Object REFRESH_OUTLINE_JOB_FAMILY = new Object();
 	private final IDocumentProvider documentProvider;
@@ -41,6 +86,9 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 	private List<Object> input = new ArrayList<Object>(0);
 
 	private IDocument document;
+	private TreeSelectionChangedListener treeSelectionChangedListener;
+	private EditorSelectionChangedListener editorSelectionChangedListener;
+	private DocumentChangedListener documentChangedListener;
 
 	public ClojureOutlinePage(IDocumentProvider documentProvider,
 			AntlrBasedClojureEditor editor) {
@@ -52,7 +100,7 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
-		TreeViewer viewer = getTreeViewer();
+		final TreeViewer viewer = getTreeViewer();
 		viewer.setContentProvider(new ITreeContentProvider() {
 
 			public void inputChanged(Viewer viewer, Object oldInput,
@@ -89,7 +137,7 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 					if (list.size() > 1) {
 						String kind = safeToString(list.get(0));
 						String symbol = safeToString(list.get(1));
-						return symbol + " : "+kind;
+						return symbol + " : " + kind;
 					}
 
 				}
@@ -99,27 +147,39 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 		});
 		viewer.addSelectionChangedListener(this);
 		viewer.setInput(new ArrayList<Object>(input));
-		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
+		treeSelectionChangedListener = new TreeSelectionChangedListener();
+		viewer.addSelectionChangedListener(treeSelectionChangedListener);
 
-			public void selectionChanged(SelectionChangedEvent event) {
-				ISelection selection = event.getSelection();
-				selectInEditor(selection);
+		IPostSelectionProvider selectionProvider = (IPostSelectionProvider) editor
+				.getSelectionProvider();
+		editorSelectionChangedListener = new EditorSelectionChangedListener(viewer);
+		selectionProvider
+				.addPostSelectionChangedListener(editorSelectionChangedListener);
+
+	}
+
+	protected StructuredSelection findClosest(int toFind) {
+		Object selected = null;
+		for (Object o : input) {
+			if (o instanceof Obj) {
+				Obj obj = (Obj) o;
+				int lineNr = getLineNr(obj);
+				if (lineNr >= 0 && lineNr <= toFind) {
+					selected = obj;
+				}
+					
 			}
-		});
-
+		}
+		if (selected != null) {
+			return new StructuredSelection(selected);
+		}
+		return StructuredSelection.EMPTY;
 	}
 
 	public void setInput(IEditorInput editorInput) {
 		document = documentProvider.getDocument(editorInput);
-		document.addDocumentListener(new IDocumentListener() {
-
-			public void documentChanged(DocumentEvent event) {
-				refreshInput();
-			}
-
-			public void documentAboutToBeChanged(DocumentEvent event) {
-			}
-		});
+		documentChangedListener = new DocumentChangedListener();
+		document.addDocumentListener(documentChangedListener);
 		refreshInput();
 	}
 
@@ -135,10 +195,11 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 				Object result = null;
 				while (true) {
 					try {
-						result = LispReader.read(pushbackReader, false, EOF, false);
-						if(result == EOF) {
+						result = LispReader.read(pushbackReader, false, EOF,
+								false);
+						if (result == EOF) {
 							break;
-						}				
+						}
 						input.add(result);
 					} catch (ReaderException e) {
 						// ignore, probably a syntax error
@@ -150,6 +211,7 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 				setInputInUiThread();
 				return Status.OK_STATUS;
 			}
+
 			@Override
 			public boolean belongsTo(Object family) {
 				return REFRESH_OUTLINE_JOB_FAMILY.equals(family);
@@ -157,12 +219,12 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 		};
 		job.setSystem(true);
 		Job.getJobManager().cancel(REFRESH_OUTLINE_JOB_FAMILY);
-		job.schedule(500);		
+		job.schedule(500);
 	}
 
 	protected void setInputInUiThread() {
 		getControl().getDisplay().asyncExec(new Runnable() {
-			
+
 			public void run() {
 				TreeViewer treeViewer = getTreeViewer();
 				if (treeViewer != null) {
@@ -171,7 +233,7 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 					treeViewer.getTree().setRedraw(true);
 				}
 			}
-		});		
+		});
 	}
 
 	private void selectInEditor(ISelection selection) {
@@ -180,14 +242,49 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 			return;
 
 		Obj obj = (Obj) sel.getFirstElement();
-		IMapEntry line = obj.meta().entryAt(KEYWORD_LINE);
-		if (line != null && line.val() instanceof Number) {
-			ClojureCore
-					.gotoEditorLine(editor, ((Number) line.val()).intValue());
+		int lineNr = getLineNr(obj);
+		if (lineNr >= 0) {
+			ClojureCore.gotoEditorLine(editor, lineNr);
 		}
 	}
+
+	private int getLineNr(Obj obj) {
+		int lineNr = -1;
+		if(obj.meta() == null) {
+			return lineNr;
+		}
+		IMapEntry line = obj.meta().entryAt(KEYWORD_LINE);
+		if (line != null && line.val() instanceof Number) {
+			lineNr = ((Number) line.val()).intValue();
+		}
+		return lineNr;
+	}
+
 	private static String safeToString(Object value) {
 		return value == null ? "N/A" : value.toString();
 	}
+	protected boolean isActivePart() {
+		IWorkbenchPart part= getSite().getPage().getActivePart();
+		return part != null && "org.eclipse.ui.views.ContentOutline".equals(part.getSite().getId());
+	}
 
+	@Override
+	public void dispose() {
+		try {
+			if(document != null) document.removeDocumentListener(documentChangedListener);
+		} catch(Throwable t) {}
+		try {
+			final TreeViewer viewer = getTreeViewer();
+			if(viewer != null) viewer.removeSelectionChangedListener(this);
+			if(viewer != null) viewer.removeSelectionChangedListener(treeSelectionChangedListener);
+		} catch(Throwable t) {}
+		try {
+			IPostSelectionProvider selectionProvider = (IPostSelectionProvider) editor
+			.getSelectionProvider();
+			if(selectionProvider != null) selectionProvider.removePostSelectionChangedListener(editorSelectionChangedListener);
+		} catch(Throwable t) {}
+		super.dispose();
+	}
+	
+	
 }
