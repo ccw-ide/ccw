@@ -56,7 +56,7 @@ public class NewClojureProjectWizard extends BasicNewProjectResourceWizard {
 	            		return ClojureCore.addClojureNature(project);
 					} catch (CoreException e) {
 						CCWPlugin.logError(
-								"Error while creating new clojure project", e);
+								"Error(s) while creating new clojure project " + project.getName(), e);
 						return false;
 					}
             	}

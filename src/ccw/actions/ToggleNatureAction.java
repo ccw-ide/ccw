@@ -25,8 +25,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 
-import ccw.ClojureProjectNature;
 import ccw.CCWPlugin;
+import ccw.ClojureCore;
 
 /**
  * Inspired from cusp
@@ -75,7 +75,10 @@ public class ToggleNatureAction implements IObjectActionDelegate {
 					+ (added ? "added" : "removed") + ".";
 			} catch (CoreException e) {
 				message = "Error while trying to toggle clojure language support for project "
-					+ project.getName();
+					+ project.getName() + ":";
+				if (e.getMessage() != null) {
+					message += "\n\n" + e.getMessage();
+				}
 				CCWPlugin.logError(message, e);
 			}
 			MessageDialog.openInformation(targetPart.getSite().getShell(), title, message);
@@ -92,7 +95,7 @@ public class ToggleNatureAction implements IObjectActionDelegate {
 			
 			boolean natureFound = false;
 			for (String nature: natures) {
-				if (nature.equals(ClojureProjectNature.NATURE_ID)) {
+				if (nature.equals(ClojureCore.NATURE_ID)) {
 					// remove it, that is do not add it to newNatures
 					natureFound = true;
 				} else {
@@ -102,7 +105,7 @@ public class ToggleNatureAction implements IObjectActionDelegate {
 			
 			if (!natureFound) {
 				// Nature not found, so add it
-				newNatures.add(ClojureProjectNature.NATURE_ID);
+				newNatures.add(ClojureCore.NATURE_ID);
 			}
 
 			description.setNatureIds(newNatures.toArray(new String[0]));

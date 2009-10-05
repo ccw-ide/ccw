@@ -13,7 +13,7 @@ public class ClojureNaturePropertyTest extends PropertyTester {
         IProject project = (IProject) receiver;
         
         try {
-            return project.hasNature(ClojureProjectNature.NATURE_ID);
+            return project.hasNature(ClojureCore.NATURE_ID);
         } catch (CoreException e) {
             CCWPlugin.logError("error while evaluating if project " + project +
                     " has nature " + expectedValue, e);

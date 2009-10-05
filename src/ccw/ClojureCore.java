@@ -59,7 +59,7 @@ import clojure.lang.RT;
  * 
  */
 public final class ClojureCore {
-
+	static public final String NATURE_ID = "ccw.nature";
     /**
      * Clojure file extension
      */
@@ -118,7 +118,7 @@ public final class ClojureCore {
      *         <code>false</code> otherwise
      */
     public static boolean addClojureNature(IProject project) {
-        return addNature(project, ClojureProjectNature.NATURE_ID);
+        return addNature(project, NATURE_ID);
     }
 
     /**
@@ -149,7 +149,7 @@ public final class ClojureCore {
             return null;
         try {
             if (!project.exists()
-                    || !project.hasNature(ClojureProjectNature.NATURE_ID))
+                    || !project.hasNature(NATURE_ID))
                 return null;
         }
         catch (CoreException e) {
@@ -177,7 +177,7 @@ public final class ClojureCore {
             return p;
         try {
             if (!project.exists() || !project.isOpen()
-                    || !project.hasNature(ClojureProjectNature.NATURE_ID))
+                    || !project.hasNature(NATURE_ID))
                 return null;
         }
         catch (CoreException e) {
