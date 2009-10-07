@@ -669,7 +669,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         + "(def *global-var* \"the answer is\")\n" //$NON-NLS-1$
         + "\n" //$NON-NLS-1$
         + "(defn function\n" //$NON-NLS-1$
-        + "  \"demonstrate Counterclockwise syntax coloring\"\n" //$NON-NLS-1$
+        + "  \"demonstrate Counterclockwise Clojure syntax coloring\"\n" //$NON-NLS-1$
         + "  [#^java.lang.String string]\n" //$NON-NLS-1$
         + "  (let [m {:keyword (String/valueOf 42)}]\n" //$NON-NLS-1$
         + "    (str string \" \" (get m :keyword))))\n";  //$NON-NLS-1$

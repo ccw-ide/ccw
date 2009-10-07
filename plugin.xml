@@ -453,7 +453,7 @@
     </view>
     <category
           id="ccw.category.views"
-          name="Counterclockwise Views">
+          name="Clojure Views">
     </category>
  </extension>
  <extension
