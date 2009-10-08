@@ -28,6 +28,7 @@ import org.eclipse.jface.text.source.ICharacterPairMatcher;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.projection.ProjectionSupport;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
@@ -41,10 +42,12 @@ import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.ContentAssistAction;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
+import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import ccw.ClojureCore;
 import ccw.CCWPlugin;
 import ccw.debug.ClojureClient;
+import ccw.editors.outline.ClojureOutlinePage;
 import ccw.editors.rulesbased.ClojureDocumentProvider;
 import ccw.editors.rulesbased.ClojurePartitionScanner;
 
@@ -65,12 +68,14 @@ public class AntlrBasedClojureEditor extends TextEditor {
 	/** The projection support */
 	private ProjectionSupport fProjectionSupport;
 
+	private ClojureOutlinePage outlinePage;
+
 	public AntlrBasedClojureEditor() {
 	    IPreferenceStore preferenceStore = createCombinedPreferenceStore();
 	    CCWPlugin.registerEditorColors(preferenceStore);
 		setSourceViewerConfiguration(new ClojureSourceViewerConfiguration(preferenceStore, this));
 		setPreferenceStore(preferenceStore);
-        setDocumentProvider(new ClojureDocumentProvider());
+        setDocumentProvider(new ClojureDocumentProvider());        
 	}
 	
 	@Override
@@ -114,8 +119,14 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		fProjectionSupport.install();
 		viewer.doOperation(ClojureSourceViewer.TOGGLE);
 	}
+	
 
-    /**
+    @Override
+	public ISelectionProvider getSelectionProvider() {
+		return getSourceViewer().getSelectionProvider();
+	}
+
+	/**
      * Create a preference store combined from the Clojure, the EditorsUI and
      * the PlatformUI preference stores to inherit all the default text editor
      * settings from the Eclipse preferences.
@@ -523,14 +534,14 @@ public class AntlrBasedClojureEditor extends TextEditor {
 	 */ 
 	@Override
 	public Object getAdapter(Class required) {
-//		if (IContentOutlinePage.class.equals(required)) {
-//			if (fOutlinePage == null) {
-//				fOutlinePage= new JavaContentOutlinePage(getDocumentProvider(), this);
-//				if (getEditorInput() != null)
-//					fOutlinePage.setInput(getEditorInput());
-//			}
-//			return fOutlinePage;
-//		}
+		if (IContentOutlinePage.class.equals(required)) {
+			if (outlinePage == null) {
+				outlinePage= new ClojureOutlinePage(getDocumentProvider(), this);
+				if (getEditorInput() != null)
+					outlinePage.setInput(getEditorInput());
+			}
+			return outlinePage;
+		}
 		
 		if (fProjectionSupport != null) {
 			Object adapter= fProjectionSupport.getAdapter(getSourceViewer(), required);
@@ -576,4 +587,6 @@ public class AntlrBasedClojureEditor extends TextEditor {
         if (getSourceViewer() instanceof ClojureSourceViewer)
             ((ClojureSourceViewer)getSourceViewer()).setPreferenceStore(store);
     }
+    
+    
 }
