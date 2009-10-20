@@ -60,7 +60,9 @@
             id="ccw.launching.clojure"
             modes="run, debug"
             name="Clojure"
-            public="true">
+            public="true"
+            sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
+            sourcePathComputerId="ccw.sourcePathComputer">
          <fileExtension extension="clj" default="true"/>
       </launchConfigurationType>
    </extension>
@@ -545,5 +547,12 @@
           class="ccw.preferences.SyntaxColoringPreferencePage"
           id="ccw.preferences.SyntaxColoringPreferencePage">
     </page>
+ </extension>
+ <extension
+       point="org.eclipse.debug.core.sourcePathComputers">
+    <sourcePathComputer
+          class="ccw.launching.SourcePathComputerDelegate"
+          id="ccw.sourcePathComputer">
+    </sourcePathComputer>
  </extension>
 </plugin>

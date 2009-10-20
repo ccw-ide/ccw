@@ -129,24 +129,19 @@
       	(when-not (has-classpath-entry? java-project lib-path)
       	  (let [make-dest-path    #(-> java-project .getProject .getLocation (.append (.lastSegment %)))
       	        in-project-lib    (make-dest-path lib-path)
-      	        in-project-libSrc (make-dest-path libSrc-path)]
-      	        ;copy-lib-job      (make-workspace-job (str "adding clojure libraries to project " (project-name java-project))
-      	        ;                    (fn [_] (cc.stream/copy lib-path in-project-lib)))
-      	        ;copy-libSrc-job   (make-workspace-job (str "adding clojure-contrib libraries to project " (project-name java-project))
-      	        ;                    (fn [_] (cc.stream/copy libSrc-path in-project-libSrc)))
-      	        ;jobs              [copy-lib-job copy-libSrc-job]]
-      	    ;(doseq [job jobs]
-      	    ;  (println "scheduling job" job)
-      	    ;  (.schedule job)
-      	    ;  (try
-      	    ;    ;(println "joining job" job)
-      	    ;    ;(.join job)
-      	    ;    ;(println "job" job )
-      	    ;    (catch InterruptedException e
-      	    ;      (throw-error "Error while trying to copy clojure.jar and/or clojure-contrib.jar in the project."))))
+      	        in-project-libSrc (when libSrc-path
+      	        										(if copy?
+		      	        									(-> in-project-lib 
+		      	        										(.removeLastSegments 1) 
+		      	        										(.append (-> in-project-lib 
+		      	        																.removeFileExtension 
+		      	        																.lastSegment
+		      	        																(str "-src")))
+		      	        										(.addFileExtension (.getFileExtension libSrc-path)))
+		      	        									(make-dest-path libSrc-path)))]
       	    (when copy?
       	    	(cc.stream/copy lib-path in-project-lib)
-      	    	(cc.stream/copy libSrc-path in-project-libSrc)
+      	    	(when in-project-libSrc (cc.stream/copy libSrc-path in-project-libSrc))
       	    	(-> java-project .getProject (.refreshLocal (IResource/DEPTH_ZERO) nil)))
       	    (let [entries-new (into-array (conj entries-old (JavaCore/newLibraryEntry in-project-lib in-project-libSrc nil)))]
       	      (doto java-project
@@ -184,7 +179,7 @@
 	    (add-lib-on-classpath!
 	      java-project
 	      (.getFullPath classes-folder)
-	      (-> java-project .getPath (.append "src"))
+	      nil ; (-> java-project .getPath (.append "src"))
 	      false))))
 
 (defn- setup-clojure-project-classpath!

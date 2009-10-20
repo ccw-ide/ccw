@@ -72,7 +72,10 @@ public class ClojureLaunchDelegate extends
 				URL serverReplBundleUrl = CCWPlugin.getDefault().getBundle().getResource("ccw/debug/serverrepl.clj");
 				URL serverReplFileUrl = FileLocator.toFileURL(serverReplBundleUrl);
 				String serverRepl = serverReplFileUrl.getFile(); 
-				filesToLaunchArguments = "-i " + '\"' + serverRepl + "\" " + filesToLaunchArguments;
+				filesToLaunchArguments = 
+					"-i " + '\"' + serverRepl + "\" " 
+					+ "-e \"(doseq [[v b] {(var *print-length*) 10000, (var *print-level*) 100}] (var-set v b))\" "
+					+ filesToLaunchArguments;
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
