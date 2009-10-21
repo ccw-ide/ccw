@@ -26,6 +26,7 @@ import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
+import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
 import org.eclipse.jface.text.rules.ITokenScanner;
 import org.eclipse.jface.text.source.ISourceViewer;
@@ -118,4 +119,13 @@ public class ClojureSourceViewerConfiguration extends TextSourceViewerConfigurat
 	public void initTokenScanner() {
        tokenScanner = new ClojureTokenScannerFactory().create(CCWPlugin.getDefault().getColorRegistry(), CCWPlugin.getDefault().getDefaultScanContext());
 	}
+
+	@Override
+	public IReconciler getReconciler(ISourceViewer sourceViewer) {
+		// cf. http://code.google.com/p/counterclockwise/issues/detail?id=5
+		// Completely disable spellchecking until we can distinguish comments and code, and spell check based on these partitions
+		return null;
+	}
+	
+	
 }
