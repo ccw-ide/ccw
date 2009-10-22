@@ -61,7 +61,7 @@
             modes="run, debug"
             name="Clojure"
             public="true"
-            sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
+            sourceLocatorId="ccw.sourceLocator"
             sourcePathComputerId="ccw.sourcePathComputer">
          <fileExtension extension="clj" default="true"/>
       </launchConfigurationType>
@@ -554,5 +554,13 @@
           class="ccw.launching.SourcePathComputerDelegate"
           id="ccw.sourcePathComputer">
     </sourcePathComputer>
+ </extension>
+ <extension
+       point="org.eclipse.debug.core.sourceLocators">
+    <sourceLocator
+          class="ccw.launching.ClojureSourceLookupDirector"
+          id="ccw.sourceLocator"
+          name="Clojure code source lookup director">
+    </sourceLocator>
  </extension>
 </plugin>

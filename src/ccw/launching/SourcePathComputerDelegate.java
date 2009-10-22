@@ -1,14 +1,23 @@
 package ccw.launching;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.sourcelookup.ISourceContainer;
+import org.eclipse.debug.core.sourcelookup.containers.DirectorySourceContainer;
+import org.eclipse.debug.core.sourcelookup.containers.ExternalArchiveSourceContainer;
 import org.eclipse.debug.core.sourcelookup.containers.FolderSourceContainer;
+import org.eclipse.jdt.launching.sourcelookup.containers.JavaProjectSourceContainer;
 import org.eclipse.jdt.launching.sourcelookup.containers.JavaSourcePathComputer;
+import org.eclipse.jdt.launching.sourcelookup.containers.PackageFragmentRootSourceContainer;
 
 import ccw.clojure.util.ClojurePlugin;
 
@@ -19,14 +28,55 @@ public class SourcePathComputerDelegate extends JavaSourcePathComputer {
 			ILaunchConfiguration configuration, IProgressMonitor monitor)
 			throws CoreException {
 
+		
 		ISourceContainer[] superResult = super.computeSourceContainers(configuration, monitor);
-		ISourceContainer[] result = new ISourceContainer[superResult.length + 1];
-		System.arraycopy(superResult, 0, result, 1, superResult.length);
-		result[0] = getSrcFolderAsISourceContainer(configuration);
-		return result;
+		
+		List<ISourceContainer> result = new ArrayList<ISourceContainer>(superResult.length * 2);
+		result.addAll(getSrcFoldersAsISourceContainers(configuration));
+		
+		for (ISourceContainer sourceContainer: superResult) {
+			if (sourceContainer instanceof PackageFragmentRootSourceContainer) {
+				PackageFragmentRootSourceContainer sc = (PackageFragmentRootSourceContainer) sourceContainer;
+				// soit attacher la source, soit le path, en tant que simple external folder ou archive, 
+				// en plus
+				IPath maybeSourcePath =	sc.getPackageFragmentRoot().getSourceAttachmentPath();
+				if (maybeSourcePath != null) {
+					if (maybeSourcePath.toFile().isFile()) {
+						result.add(new ExternalArchiveSourceContainer(maybeSourcePath.toOSString(), false));
+					} else {
+						result.add(new DirectorySourceContainer(maybeSourcePath, false));
+					}
+				}
+			} else if (sourceContainer instanceof ExternalArchiveSourceContainer) {
+				// TODO
+				ExternalArchiveSourceContainer sc = (ExternalArchiveSourceContainer) sourceContainer;
+			} else if (sourceContainer instanceof JavaProjectSourceContainer) {
+				// TODO
+				JavaProjectSourceContainer sc = (JavaProjectSourceContainer) sourceContainer;
+				sc.getJavaProject();
+			} else {
+				/*		TODO manager other kinds ?
+						DirectorySourceContainer
+
+						ISourceContainer
+							ArchiveSourceContainer
+							ClassPathContainerSourceContainer
+							ClassPathVariableSourceContainer
+							FolderSourceContainer
+							ProjectSourceContainer
+							WorkingSetSourceContainer
+							WorkspaceSourceContainer				 
+				 */
+			}
+			result.add(sourceContainer);
+		}
+		return result.toArray(new ISourceContainer[result.size()]);
 	}
 
-	private ISourceContainer getSrcFolderAsISourceContainer(ILaunchConfiguration configuration) throws CoreException {
+	/*
+	 * TODO : remove the hard coded src/ folder and really returns all java source folders instead
+	 */
+	private List<ISourceContainer> getSrcFoldersAsISourceContainers(ILaunchConfiguration configuration) throws CoreException {
 		String projectName = configuration.getAttribute(LaunchUtils.ATTR_PROJECT_NAME, (String) null);
 		
 		if (projectName == null) {
@@ -34,10 +84,11 @@ public class SourcePathComputerDelegate extends JavaSourcePathComputer {
 		} else {
 			// TODO be smarter here : currently only works if src/ is the name of the dir :(
 			//                        and only if one source directory is defined in the project :(
-			return new FolderSourceContainer(
-					ResourcesPlugin.getWorkspace().getRoot().getProject(projectName).getFolder("src")
-					, true);
-			
+			return Arrays.asList(new ISourceContainer[] {
+					new FolderSourceContainer(			
+							ResourcesPlugin.getWorkspace().getRoot().getProject(projectName).getFolder("src")
+							, true)
+			});
 		}
 	}
 	
