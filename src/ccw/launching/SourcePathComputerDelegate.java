@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -12,6 +14,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.sourcelookup.ISourceContainer;
+import org.eclipse.debug.core.sourcelookup.containers.ArchiveSourceContainer;
 import org.eclipse.debug.core.sourcelookup.containers.DirectorySourceContainer;
 import org.eclipse.debug.core.sourcelookup.containers.ExternalArchiveSourceContainer;
 import org.eclipse.debug.core.sourcelookup.containers.FolderSourceContainer;
@@ -37,14 +40,28 @@ public class SourcePathComputerDelegate extends JavaSourcePathComputer {
 		for (ISourceContainer sourceContainer: superResult) {
 			if (sourceContainer instanceof PackageFragmentRootSourceContainer) {
 				PackageFragmentRootSourceContainer sc = (PackageFragmentRootSourceContainer) sourceContainer;
-				// soit attacher la source, soit le path, en tant que simple external folder ou archive, 
-				// en plus
+
 				IPath maybeSourcePath =	sc.getPackageFragmentRoot().getSourceAttachmentPath();
 				if (maybeSourcePath != null) {
 					if (maybeSourcePath.toFile().isFile()) {
 						result.add(new ExternalArchiveSourceContainer(maybeSourcePath.toOSString(), false));
 					} else {
 						result.add(new DirectorySourceContainer(maybeSourcePath, false));
+					}
+				}
+				// unconditionnally add the path of the archive, *after* the sourcePath, so that cljs in sourcePath
+				// take precedence over cljs in "bin" path
+				if (sc.getPackageFragmentRoot().isExternal()) {
+					if (sc.getPackageFragmentRoot().isArchive()) {
+						result.add(new ExternalArchiveSourceContainer(sc.getPackageFragmentRoot().getPath().toOSString(), false));
+					} else {
+						result.add(new DirectorySourceContainer(sc.getPackageFragmentRoot().getPath(), false));
+					}
+				} else {
+					if (sc.getPackageFragmentRoot().isArchive()) {
+						result.add(new ArchiveSourceContainer((IFile) sc.getPackageFragmentRoot().getCorrespondingResource(), false));
+					} else {
+						result.add(new FolderSourceContainer((IContainer) sc.getPackageFragmentRoot().getCorrespondingResource(), false));
 					}
 				}
 			} else if (sourceContainer instanceof ExternalArchiveSourceContainer) {
@@ -67,6 +84,7 @@ public class SourcePathComputerDelegate extends JavaSourcePathComputer {
 							WorkingSetSourceContainer
 							WorkspaceSourceContainer				 
 				 */
+				// nothing intelligent to do yet :)
 			}
 			result.add(sourceContainer);
 		}
