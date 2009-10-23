@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.core.runtime.adapters">
+      <factory
+            adaptableType="org.eclipse.ui.texteditor.ITextEditor"
+            class="ccw.debug.BreakpointAdapterFactory">
+         <adapter
+               type="org.eclipse.debug.ui.actions.IToggleBreakpointsTarget">
+         </adapter>
+      </factory>
+   </extension>
+   <extension point="org.eclipse.ui.popupMenus">
+	   <viewerContribution
+	     targetID="org.eclipse.ui.DefaultTextEditor.RulerContext"
+	     id="ccw.editors.DefaultTextEditor.RulerPopupActions">
+	       <action
+	         label="Enable Breakpoint"
+	         class="org.eclipse.debug.ui.actions.RulerEnableDisableBreakpointActionDelegate"
+	         menubarPath="additions"
+	         id="ccw.editors.DefaultTextEditor.RulerContext.enableBreakpointAction">
+	       </action>
+	       <action
+	         label="Toggle Breakpoint"
+	         class="org.eclipse.debug.ui.actions.RulerToggleBreakpointActionDelegate"
+	         menubarPath="additions"
+	         id="ccw.editors.DefaultTextEditor.RulerContext.toggleBreakpointAction">
+	       </action>
+	   </viewerContribution>
+    <viewerContribution
+          id="ccw.editors.ClojureEditor.RulerPopupActions"
+          targetID="ccw.antlrbasededitor.RulerContext">
+       <action
+             class="org.eclipse.debug.ui.actions.RulerEnableDisableBreakpointActionDelegate"
+             id="ccw.editors.ClojureEditor.RulerContext.enableBreakpointAction"
+             label="Enable Breakpoint"
+             menubarPath="additions">
+       </action>
+       <action
+             class="org.eclipse.debug.ui.actions.RulerToggleBreakpointActionDelegate"
+             id="ccw.editors.ClojureEditor.RulerContext.toggleBreakpointAction"
+             label="Toggle Breakpoint"
+             menubarPath="additions">
+       </action>
+    </viewerContribution>
+   </extension>
+   <extension
+	      point="org.eclipse.ui.editorActions">
+	   <editorContribution
+	         id="ccw.editors.DefaultTextEditor.RulerActions"
+	         targetID="org.eclipse.ui.DefaultTextEditor">
+	      <action
+	            actionID="RulerDoubleClick"
+	            class="org.eclipse.debug.ui.actions.RulerToggleBreakpointActionDelegate"
+	            id="ccw.editors.DefaultTextEditor.RulerContext.doubleClickBreakpointAction"
+	            label="Not Used"
+	            style="push">
+	      </action>
+	   </editorContribution>
+    <editorContribution
+          id="ccw.editors.ClojureEditor.RulerActions"
+          targetID="ccw.antlrbasededitor">
+       <action
+             actionID="RulerDoubleClick"
+             class="org.eclipse.debug.ui.actions.RulerToggleBreakpointActionDelegate"
+             id="ccw.editors.ClojureEditor.RulerContext.doubleClickBreakpointAction"
+             label="Not Used"
+             style="push">
+       </action>
+    </editorContribution>
+   </extension>
+
+</plugin>
