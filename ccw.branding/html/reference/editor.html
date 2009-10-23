@@ -1,0 +1,104 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!--
+Copyright (c) 2009 Laurent Petit and others
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Eclipse Public License v1.0
+which accompanies this distribution, and is available at
+http://www.eclipse.org/legal/epl-v10.html
+
+Contributors: 
+    Laurent Petit - initial documentation in Counterclockwise Wiki
+    Stephan Muehlstrasser - transformed Wiki pages into Eclipse help pages
+-->
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <title>Clojure Editor Features</title>
+    <link rel="stylesheet" href="../../../PRODUCT_PLUGIN/book.css" type="text/css"> 
+    <script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js"></script>
+</head>
+
+<body>
+<h1>Clojure Editor Features</h1>
+<h2>Syntax Highlighting</h3>
+<ul>
+    <li>Rainbow parenthesis (different colors for different nesting levels)</li>
+    <li>Highlights in error closing parens that have no matching opening
+    parens</li>
+</ul>
+<h3>Code Completion</h3>
+<p>Currently, does what is called &quot;Hippie completion&quot; by Eclipse:
+Code completion for all available words on all open files.</p>
+<h2>Error Reporting</h3>
+<p>In conjunction with auto-compile functionality, compilation
+    problems are reported as problem markers:</p>
+<ul>
+<li>A summary of the problems is displayed in the <strong>Problems View</strong></li>
+<li>Files that have problems are marked in the <strong>Package Explorer</strong></li>
+<li>Problems are marked at the correct line in the Clojure editor</li>
+<li>A double-click on a problem in the <strong>Problems  View</strong> jumps to
+the correct line in the Clojure editor</li>
+</ul>
+
+<h2>Interaction With a Launched REPL</h3>
+<p>The Clojure Plugin tries to follow as much as possible classical &quot;Slime&quot;
+conventions. It also tries to correctly integrate with Eclipse shortcuts
+where Slime functionality is semantically equivalent to an existing Eclipse
+functionality.</p>
+
+<table>
+    <tr>
+        <td style="border: 1px solid #aaa; padding: 5px;"><strong>Name</strong>
+        </td>
+        <td style="border: 1px solid #aaa; padding: 5px;"><strong>Keyboard
+        Shortcuts</strong></td>
+        <td style="border: 1px solid #aaa; padding: 5px;"><strong>Description</strong>
+        </td>
+    </tr>
+    <tr>
+        <td style="border: 1px solid #aaa; padding: 5px;">
+        beginning-of-defn</td>
+        <td style="border: 1px solid #aaa; padding: 5px;">C-M-a <strong>or</strong>
+        C-S-A</td>
+        <td style="border: 1px solid #aaa; padding: 5px;">Move to beginning
+        of current or preceding top-level s-expression (not just defns)</td>
+    </tr>
+    <tr>
+        <td style="border: 1px solid #aaa; padding: 5px;">end-of-defn</td>
+        <td style="border: 1px solid #aaa; padding: 5px;">C-M-e or C-S-E</td>
+        <td style="border: 1px solid #aaa; padding: 5px;">Move to end of
+        current or preceding top-level s-expression (not just defns)</td>
+    </tr>
+    <tr>
+        <td style="border: 1px solid #aaa; padding: 5px;">mark-defn</td>
+        <td style="border: 1px solid #aaa; padding: 5px;">C-M-h</td>
+        <td style="border: 1px solid #aaa; padding: 5px;">Select current or
+        following top-level s-expression</td>
+    </tr>
+    <tr>
+        <td style="border: 1px solid #aaa; padding: 5px;">eval-defn +
+        eval-region</td>
+        <td style="border: 1px solid #aaa; padding: 5px;">C-M-x</td>
+        <td style="border: 1px solid #aaa; padding: 5px;">If a non-empty
+        text is selected, evaluate it, or, if no text is selected, evaluate the
+        top-level s-expression</td>
+    </tr>
+    <tr>
+        <td style="border: 1px solid #aaa; padding: 5px;">load file</td>
+        <td style="border: 1px solid #aaa; padding: 5px;">C-M-l</td>
+        <td style="border: 1px solid #aaa; padding: 5px;">Loads the saved
+        version of the currently edited file into the REPL
+        (via Clojure&quot;s &quot;load-file&quot; function)</td>
+    </tr>
+</table>
+
+<p>Remarks:</p>
+<ul>
+    <li>The Windows keys combination Ctrl+Alt can also be replaced by the
+    single AltGr key</li>
+    <li>C stands for Ctrl key, M stands for Meta key (Alt key on Windows),
+    S stands for Shift</li>
+</ul>
+
+</body>
+</html>
