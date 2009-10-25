@@ -10,13 +10,6 @@
   (:gen-class
    :implements [org.eclipse.core.resources.IProjectNature]
    :init init
-   #_:constructors #_{[java.io.Writer Integer] [], 
-                  [java.io.Writer] []}
-   #_:methods #_[[configure [] Void]
-             [deconfigure [] Integer]
-             [getMaxColumn [] Integer]
-             [setMaxColumn [Integer] Void]
-             [getWriter [] java.io.Writer]]
    :state state))
 
 ;; adding a definition to clojure.contrib.duck-streams
@@ -75,7 +68,7 @@
           
 (defn- has-classes-folder?
   [java-project]
-  (not (nil? (.findPackageFragmentRoot java-project (-> java-project .getProject (.getFolder "classes") .getFullPath)))))     
+  (not (nil? (.findPackageFragmentRoot java-project (-> java-project .getProject (.getFolder "classes") .getLocation)))))     
 
 (defn- has-path-on-classpath? 
   [java-project searched-path]
@@ -104,20 +97,11 @@
     (runInWorkspace [monitor]
       (runInWorkspace-fn monitor))))
 
-#_(defn- add-error!
-  [instance mess]
-  (io!
-    (when (not (nil? mess))
-      (dosync (alter (.state instance)
-                update-in [:errors] conj mess)))))
-    
 (defn- throw-error
-  [#_instance mess]
-  #_(add-error! instance mess)
+  [mess]
   (throw (CoreException.
            (Status. (Status/ERROR)
                     (CCWPlugin/PLUGIN_ID)
-                    #_(apply str (interpose "\n" (:errors @(.state instance))))
                     mess))))
     
 (defn- add-lib-on-classpath!
@@ -150,7 +134,6 @@
 
 (defn- file-to-path
   [file] (Path/fromOSString (.getAbsolutePath file)))
-
 
 (defn- add-clojure-lib-on-classpath!
   [java-project]
