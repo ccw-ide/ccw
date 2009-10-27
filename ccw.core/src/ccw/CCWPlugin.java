@@ -33,6 +33,8 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -343,4 +345,17 @@ public class CCWPlugin extends AbstractUIPlugin {
         colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.COMMERCIAL_AT, black); //$NON-NLS-1$
         colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.NUMBER_SIGN, black); //$NON-NLS-1$
     }
+    
+    
+	public static IWorkbenchPage getActivePage() {
+		return getDefault().internalGetActivePage();
+	}
+
+    // copied from JavaPlugin
+	private IWorkbenchPage internalGetActivePage() {
+		IWorkbenchWindow window= getWorkbench().getActiveWorkbenchWindow();
+		if (window == null)
+			return null;
+		return window.getActivePage();
+	}
 }
