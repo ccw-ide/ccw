@@ -5,9 +5,17 @@ Bundle-SymbolicName: ccw.debug;singleton:=true
 Bundle-Version: 1.0.0
 Bundle-ClassPath: .
 Bundle-Activator: ccw.debug.Activator
-Require-Bundle: org.eclipse.ui,org.eclipse.core.runtime,org.eclipse.jface.text,org.eclipse.ui.editors,org.eclipse.debug.core,org.eclipse.debug.ui,org.eclipse.jdt.debug,org.eclipse.jdt.debug.ui,
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.jface.text,
+ org.eclipse.ui.editors,
+ org.eclipse.debug.core,
+ org.eclipse.debug.ui,
+ org.eclipse.jdt.debug,
+ org.eclipse.jdt.debug.ui,
  org.eclipse.ui,
- org.eclipse.core.runtime
+ org.eclipse.core.runtime,
+ org.eclipse.ui.ide;bundle-version="3.4.2"
 Eclipse-LazyStart: true
 Created-By: 1.6.0_03-b05 (Sun Microsystems Inc.)
 Ant-Version: Apache Ant 1.7.0

@@ -11,19 +11,16 @@
 package ccw.debug;
 
 
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.debug.ui.actions.IToggleBreakpointsTarget;
-import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.IEditorPart;
 
 public class BreakpointAdapterFactory implements IAdapterFactory {
 
 	public Object getAdapter(Object adaptableObject, Class adapterType) {
-		if (adaptableObject instanceof ITextEditor) {
-			ITextEditor editorPart = (ITextEditor) adaptableObject;
-			IResource resource = (IResource) editorPart.getEditorInput()
-					.getAdapter(IResource.class);
-			if (resource != null && resource.getFileExtension().equals("clj")) {
+		if (adaptableObject instanceof IEditorPart) {
+			IEditorPart editorPart = (IEditorPart) adaptableObject;
+			if (ClojureLineBreakpointAdapter.isCljFile(editorPart)) {
 				return new ClojureLineBreakpointAdapter();
 			}
 		}
