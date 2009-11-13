@@ -15,7 +15,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jdt.debug.ui,
  org.eclipse.ui,
  org.eclipse.core.runtime,
- org.eclipse.ui.ide;bundle-version="3.4.2"
+ org.eclipse.ui.ide;bundle-version="3.4.2",
+ ccw;bundle-version="0.0.38"
 Eclipse-LazyStart: true
 Created-By: 1.6.0_03-b05 (Sun Microsystems Inc.)
 Ant-Version: Apache Ant 1.7.0

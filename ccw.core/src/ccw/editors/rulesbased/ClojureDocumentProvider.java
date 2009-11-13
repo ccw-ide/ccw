@@ -17,7 +17,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.TextUtilities;
+import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.editors.text.FileDocumentProvider;
+
+import ccw.StorageMarkerAnnotationModel;
 
 public class ClojureDocumentProvider extends FileDocumentProvider {
 
@@ -39,4 +43,19 @@ public class ClojureDocumentProvider extends FileDocumentProvider {
         return document;
     }
 
+    @Override
+    public IAnnotationModel getAnnotationModel(Object element) {
+    	IAnnotationModel annotationModel = super.getAnnotationModel(element);
+    	if (annotationModel != null) 
+    		return annotationModel;
+    	if (element instanceof IStorageEditorInput) {
+			IStorageEditorInput input = (IStorageEditorInput) element;
+			try {
+				return new StorageMarkerAnnotationModel(input.getStorage());
+			} catch (CoreException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		return null;
+    }
 }

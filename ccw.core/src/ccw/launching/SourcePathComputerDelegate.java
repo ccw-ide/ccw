@@ -32,6 +32,7 @@ import org.eclipse.jdt.launching.sourcelookup.containers.JavaProjectSourceContai
 import org.eclipse.jdt.launching.sourcelookup.containers.JavaSourcePathComputer;
 import org.eclipse.jdt.launching.sourcelookup.containers.PackageFragmentRootSourceContainer;
 
+import ccw.CCWPlugin;
 import ccw.clojure.util.ClojurePlugin;
 
 public class SourcePathComputerDelegate extends JavaSourcePathComputer {
@@ -108,7 +109,7 @@ public class SourcePathComputerDelegate extends JavaSourcePathComputer {
 		String projectName = configuration.getAttribute(LaunchUtils.ATTR_PROJECT_NAME, (String) null);
 		
 		if (projectName == null) {
-			throw new CoreException(new Status(IStatus.ERROR, ClojurePlugin.ID, "Clojure SourcePathComputerDelegate unable to correctly set the clojure sources in the class because the considered launch configuration does not have an associated project"));
+			throw new CoreException(new Status(IStatus.ERROR, CCWPlugin.PLUGIN_ID, "Clojure SourcePathComputerDelegate unable to correctly set the clojure sources in the class because the considered launch configuration does not have an associated project"));
 		} else {
 			// TODO be smarter here : currently only works if src/ is the name of the dir :(
 			//                        and only if one source directory is defined in the project :(

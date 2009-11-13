@@ -10,6 +10,9 @@
  *******************************************************************************/
 package ccw.debug;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -22,9 +25,12 @@ import org.eclipse.jdt.debug.core.IJavaStratumLineBreakpoint;
 import org.eclipse.jdt.debug.core.JDIDebugModel;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.osgi.storagemanager.StorageManager;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.IWorkbenchPart;
+
+import ccw.StorageMarkerAnnotationModel;
 
 public class ClojureLineBreakpointAdapter implements IToggleBreakpointsTarget {
 
@@ -80,7 +86,7 @@ public class ClojureLineBreakpointAdapter implements IToggleBreakpointsTarget {
 					IBreakpoint breakpoint = breakpoints[i];
 					if (breakpoint instanceof IJavaStratumLineBreakpoint) {
 						IJavaStratumLineBreakpoint stratumBreakpoint = (IJavaStratumLineBreakpoint) breakpoint;
-						if (storage.getFullPath().equals(stratumBreakpoint.getSourcePath())) {
+						if (storage.getFullPath().toPortableString().equals(stratumBreakpoint.getSourcePath())) {
 							if (((ILineBreakpoint) breakpoint).getLineNumber() == (lineNumber + 1)) {
 								breakpoint.delete();
 								return;
@@ -88,9 +94,11 @@ public class ClojureLineBreakpointAdapter implements IToggleBreakpointsTarget {
 						}
 					}
 				}
+				Map attributes = new HashMap();
+				StorageMarkerAnnotationModel.addAttribute(attributes, storage);
 				JDIDebugModel.createStratumBreakpoint(ResourcesPlugin.getWorkspace().getRoot(), 
 						"Clojure", storage.getName(), storage.getFullPath().toPortableString(), 
-						null, lineNumber + 1, -1, -1, 0, true, null);
+						null, lineNumber + 1, -1, -1, 0, true, attributes);
 			}
 		}
 	}
