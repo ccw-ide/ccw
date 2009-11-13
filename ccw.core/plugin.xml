@@ -249,7 +249,7 @@
             commandId="ccw.ui.edit.text.clojure.select.toplevel.s.expression"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
-            sequence="M1+M2+H"
+            sequence="M1+M3+T"
             contextId="ccw.ui.clojureEditorScope"
             commandId="ccw.ui.edit.text.clojure.select.toplevel.s.expression"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
