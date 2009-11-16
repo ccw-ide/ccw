@@ -6,11 +6,11 @@
       provider-name="%providerName"
       plugin="ccw.branding">
 
-   <description url="http://code.google.com/p/clojure-dev/">
+   <description url="http://code.google.com/p/counterclockwise/">
       %description
    </description>
 
-   <copyright url="http://code.google.com/p/clojure-dev/">
+   <copyright url="http://code.google.com/p/counterclockwise/">
       %copyright
    </copyright>
 
@@ -19,7 +19,7 @@
    </license>
 
    <url>
-      <update label="Counterclockwise Update Site" url="http://clojure-dev.googlecode.com/svn/updatesite/"/>
+      <update label="Counterclockwise Update Site" url="http://updatesite.counterclockwise.googlecode.com/hg"/>
    </url>
 
    <requires>
