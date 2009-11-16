@@ -103,7 +103,7 @@ public class StorageMarkerAnnotationModel extends AbstractMarkerAnnotationModel 
 	@Override
 	protected boolean isAcceptable(IMarker marker) {
 		try {
-			return marker.getAttribute(STORAGE_ID).equals(storageId(fStorage));
+			return storageId(fStorage).equals(marker.getAttribute(STORAGE_ID));
 		} catch (CoreException e) {
 			throw new RuntimeException(e);
 		}
