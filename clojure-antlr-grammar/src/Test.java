@@ -1,10 +1,3 @@
-import java.io.InputStream;
-import java.util.List;
-
-import org.antlr.runtime.*;
-
-import clojuredev.lexers.ClojureLexer;
-import clojuredev.lexers.ClojureParser;
 
 public class Test {
     public static void main(String[] args) throws Exception {
