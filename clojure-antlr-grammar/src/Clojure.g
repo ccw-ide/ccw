@@ -67,8 +67,31 @@ SPECIAL_FORM: 'def' | 'if' | 'do' | 'let' | 'quote' | 'var' | 'fn' | 'loop' |
             'new' | 'set!' | '.'
     ;
 
-// TODO is this sufficient ?
-STRING: '"' ( ~'"' | (BACKSLASH '"') )* '"'
+// taken from the java grammar example of Terrence Parr
+STRING
+    :  '"' ( EscapeSequence | ~('\\'|'"') )* '"'
+    ;
+
+// taken from the java grammar example of Terrence Parr
+fragment
+EscapeSequence
+    :   '\\' ('b'|'t'|'n'|'f'|'r'|'\"'|'\''|'\\')
+    |   UnicodeEscape
+    |   OctalEscape
+    ;
+
+// taken from the java grammar example of Terrence Parr
+fragment
+UnicodeEscape
+    :   '\\' 'u' HEXDIGIT HEXDIGIT HEXDIGIT HEXDIGIT
+    ;
+
+// taken from the java grammar example of Terrence Parr
+fragment
+OctalEscape
+    :   '\\' ('0'..'3') ('0'..'7') ('0'..'7')
+    |   '\\' ('0'..'7') ('0'..'7')
+    |   '\\' ('0'..'7')
     ;
 
 // TODO get the real definition from a java grammar.
