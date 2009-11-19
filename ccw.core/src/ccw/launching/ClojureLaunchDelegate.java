@@ -74,8 +74,9 @@ public class ClojureLaunchDelegate extends
 				String serverRepl = serverReplFileUrl.getFile(); 
 				filesToLaunchArguments = 
 					"-i " + '\"' + serverRepl + "\" " 
-					+ "-e \"(doseq [[v b] {(var *print-length*) 10000, (var *print-level*) 100}] (var-set v b))\" "
-					+ filesToLaunchArguments;
+					+ filesToLaunchArguments
+				    // doesn't work + "-e \"(doseq [[v b] {(var *print-length*) 10000, (var *print-level*) 100}] (var-set v b))\" ";
+					;
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
