@@ -27,7 +27,8 @@ public final class ClojureTokenScannerFactory {
 			protected void initAntlrTokenTypeToJFaceTokenMap() {
 				TokenScannerUtils u = new TokenScannerUtils(this, colorProvider);
 				
-				u.addTokenType(ClojureLexer.STRING); 
+				u.addTokenType(ClojureLexer.STRING);
+				u.addTokenType(ClojureLexer.REGEX_LITERAL);
 				u.addTokenType(ClojureLexer.NUMBER);
 				u.addTokenType(ClojureLexer.CHARACTER);
 				u.addTokenType(ClojureLexer.NIL);

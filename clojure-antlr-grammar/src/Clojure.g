@@ -72,6 +72,10 @@ STRING
     :  '"' ( EscapeSequence | ~('\\'|'"') )* '"'
     ;
 
+REGEX_LITERAL
+    : NUMBER_SIGN '"' ( ~('\\' | '"') | '\\' . )* '"'
+    ;
+
 // taken from the java grammar example of Terrence Parr
 fragment
 EscapeSequence
@@ -124,7 +128,7 @@ SYMBOL:
     ;
 
 METADATA_TYPEHINT:
-		NUMBER_SIGN CIRCUMFLEX NAME
+		NUMBER_SIGN CIRCUMFLEX ( 'ints' | 'floats' | 'longs' | 'doubles' | 'objects' )*
 	;
 	
 fragment
@@ -215,7 +219,7 @@ macroForm:
     ;
     
 dispatchMacroForm:   
-        regexForm
+        REGEX_LITERAL
     |   varQuoteForm
     |   {!this.inLambda}? lambdaForm // contraction for anonymousFunction
     ;
@@ -265,9 +269,6 @@ unquoteSplicingForm
 set:    NUMBER_SIGN LEFT_CURLY_BRACKET form* RIGHT_CURLY_BRACKET
     ;
 
-regexForm:  NUMBER_SIGN STRING
-    ;
-    
 metadataForm:
         NUMBER_SIGN CIRCUMFLEX (map | SYMBOL|KEYWORD|STRING)
     ;

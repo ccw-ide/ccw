@@ -309,6 +309,7 @@ public class CCWPlugin extends AbstractUIPlugin {
         final RGB macroColor = getElementColor(store, PreferenceConstants.EDITOR_MACRO_COLOR, black);
         
         colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.STRING, literalColor); //$NON-NLS-1$
+        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.REGEX_LITERAL, literalColor); //$NON-NLS-1$
         colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.NUMBER, literalColor); //$NON-NLS-1$
         colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.CHARACTER, literalColor); //$NON-NLS-1$
         colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.NIL, literalColor); //$NON-NLS-1$
