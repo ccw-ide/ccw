@@ -114,7 +114,7 @@ public class ClojureLineBreakpointAdapter implements IToggleBreakpointsTarget {
 	public static boolean isCljFile(IEditorPart editorPart) {
 		IResource resource = (IResource) editorPart.getEditorInput()
 				.getAdapter(IResource.class);
-		if (resource != null && resource.getFileExtension().equals("clj")) {
+		if (resource != null && "clj".equals(resource.getFileExtension())) {
 			return true;
 		}
 		
