@@ -55,7 +55,7 @@ public class ClojureElementViewerFilter extends ViewerFilter {
 				return true;
 			} else if (contains(froot.getResource(), resource)) {
 				if (resource.getType() == IResource.FILE) {
-					return ((IFile) resource).getFileExtension().equals("clj");
+					return "clj".equals(((IFile) resource).getFileExtension());
 				} else {
 					return true;
 				}
