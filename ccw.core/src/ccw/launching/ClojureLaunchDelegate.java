@@ -85,7 +85,7 @@ public class ClojureLaunchDelegate extends
 		} else {
 			String filesToLaunchArguments = LaunchUtils.getFilesToLaunchAsCommandLineList(configuration, true);
 			
-	    	return filesToLaunchArguments + userProgramArguments;
+	    	return filesToLaunchArguments + " " + userProgramArguments;
 		}
 	}
 	

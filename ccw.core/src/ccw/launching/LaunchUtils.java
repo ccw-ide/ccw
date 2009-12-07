@@ -18,16 +18,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
+import ccw.CCWPlugin;
+import ccw.ClojureCore;
 import ccw.util.IOUtils;
+import ccw.util.StringUtils;
 
 public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
 
@@ -59,26 +68,79 @@ public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
 	 *        a script to launch
 	 * @return
 	 */
-    static public String getProgramArguments(IFile[] files, boolean lastFileAsScript) {
+    static public String getProgramArguments(IProject project, IFile[] files, boolean lastFileAsScript) {
         StringBuilder args = new StringBuilder();
         
         int lastIndex = lastFileAsScript ? files.length - 1 : files.length;
         
         for (int i = 0; i < lastIndex; i++) {
-            args.append(" -i" + fileArg(files[i]));
+        	String fileArg = fileArg(project, files[i]);
+        	if (!StringUtils.isEmpty(fileArg)) {
+        		args.append(" -i" + fileArg);
+        	}
         }
         if (lastFileAsScript) {
-        	args.append(fileArg(files[lastIndex]));
+        	args.append(fileArg(project, files[lastIndex]));
         }
         return args.toString();
     }
     
-    private static String fileArg(IFile file) {
-    	return " \"" + file.getLocation().toString() + "\"";
+    public static IProject getProject(ILaunchConfiguration configuration) throws CoreException {
+    	String projectName = configuration.getAttribute(LaunchUtils.ATTR_PROJECT_NAME, (String) null);
+    	if (projectName == null) {
+    		return null;
+    	} else {
+    		return ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+    	}
     }
     
-    static public String getProgramArguments(List<IFile> files, boolean lastFileAsScript) {
-        return getProgramArguments(files.toArray(new IFile[]{}), lastFileAsScript);
+    private static String fileArg(IProject project, IFile file) {
+    	String FILE_ARG_ERROR_PREFIX = 	"When trying to create clojure.main "
+    			+ "file arg to launch, was " + "unable to "; 
+		    	
+    	IPath filePath = file.getLocation();
+    	
+    	IJavaProject javaProject = ClojureCore.getJavaProject(project);
+    	try {
+    		IPackageFragmentRoot filePFR = findPackageFragmentRoot(javaProject, filePath);
+	    	if (filePFR != null) {
+	    		IPath pfrPath = filePFR.getResource().getLocation();// getResource();
+    			String classpathRelativeArg = filePath.makeRelativeTo(pfrPath).toString();
+            	return " \"@/" + classpathRelativeArg + "\"";
+	    	} else {
+	    		CCWPlugin.logError(FILE_ARG_ERROR_PREFIX + 
+	    				" find package fragment root for file " 
+	    				+ file + " in project " + project);
+	    		return "";
+	    	}
+    	} catch (JavaModelException jme) {
+    		CCWPlugin.logError(FILE_ARG_ERROR_PREFIX + 
+    				" complete due to a JavaModelException finding package fragment root for file " 
+    				+ file + " in project " + project, jme);
+    		return "";
+    	}
+    }
+    
+    private static IPackageFragmentRoot findPackageFragmentRoot(IJavaProject javaProject, IPath filePath) throws JavaModelException {
+    	if (filePath.isEmpty()) {
+    		return null;
+    	} else {
+    		IResource possibleFragmentResource = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(filePath);
+    		if (possibleFragmentResource != null) {
+    			filePath = possibleFragmentResource.getFullPath();
+    		}
+        	IPackageFragmentRoot fragment = javaProject.findPackageFragmentRoot(filePath);
+        	if (fragment != null) {
+        		return fragment;
+        	} else {
+        		return findPackageFragmentRoot(javaProject, filePath.removeLastSegments(1));
+        	}
+    	}
+    }
+    
+    
+    static public String getProgramArguments(IProject project, List<IFile> files, boolean lastFileAsScript) {
+        return getProgramArguments(project, files.toArray(new IFile[]{}), lastFileAsScript);
     }
     
     static public List<IFile> getFilesToLaunchList(ILaunchConfiguration config) throws CoreException {
@@ -94,7 +156,7 @@ public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
     
     static public String getFilesToLaunchAsCommandLineList(ILaunchConfiguration config, boolean lastFileAsScript) throws CoreException {
     	List<IFile> filesToLaunch = LaunchUtils.getFilesToLaunchList(config);
-    	return LaunchUtils.getProgramArguments(filesToLaunch, lastFileAsScript);
+    	return LaunchUtils.getProgramArguments(getProject(config), filesToLaunch, lastFileAsScript);
 
     }
     
