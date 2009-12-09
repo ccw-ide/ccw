@@ -7,6 +7,7 @@
  *
  * Contributors: 
  *    Laurent PETIT - initial API and implementation
+ *    Gorsal - patch for correcting namespace browser initialisation issue
  *******************************************************************************/
 package ccw.console;
 
@@ -35,44 +36,68 @@ public class ConsolePageParticipant implements IConsolePageParticipant {
 	private IOConsole console;
 	private ClojureClient clojureClient;
 
+	private Thread initializationThread;
 	public void init(IPageBookViewPage page, IConsole console) {
 		assert org.eclipse.debug.ui.console.IConsole.class.isInstance(console);
 		assert TextConsole.class.isInstance(console);
 
 		this.console = (IOConsole) console;
-		
+		this.initializationThread = new Thread(new Runnable () {
+			public void run() {
+				initNamespaceBrowser();
+			}
+		});
+		initializationThread.start();
 	}
 
 	public void activated() {
+		// Nothing to do
+	}
+	
+	private synchronized void initNamespaceBrowser() {
 		if (clojureClient == null) {
 			bindConsoleToClojureEnvironment();
-			if (clojureClient != null) {
-				System.out.println("activated");
-			}
 		}
 		if (clojureClient != null) {
+			System.out.println("activated");
+			addPatternMatchListener(this.console);
+			if (CCWPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.SWITCH_TO_NS_ON_REPL_STARTUP)) {
+				try {
+					org.eclipse.debug.ui.console.IConsole processConsole = (org.eclipse.debug.ui.console.IConsole) console;
+					List<IFile> files = LaunchUtils.getFilesToLaunchList(processConsole.getProcess().getLaunch().getLaunchConfiguration());
+					if (files.size() > 0) {
+						String namespace = ClojureCore.getDeclaredNamespace(files.get(0));
+						if (namespace != null) {
+							EvaluateTextAction.evaluateText(this.console, "(in-ns '" + namespace + ")", false); 
+						}
+					}
+				} catch (CoreException e) {
+					CCWPlugin.logError("error while trying to guess the ns to which make the REPL console switch", e);
+				}
+			}
 			NamespaceBrowser.setClojureClient(clojureClient);
 		}
 	}
 	
-	private synchronized void bindConsoleToClojureEnvironment() {
-		if (clojureClient == null) {
-			org.eclipse.debug.ui.console.IConsole processConsole = (org.eclipse.debug.ui.console.IConsole) console;
-			int clojureVMPort = LaunchUtils.getLaunchServerReplPort(processConsole.getProcess().getLaunch());
-			if (clojureVMPort != -1) {
-				clojureClient = new ClojureClient(clojureVMPort);
-				addPatternMatchListener(this.console);
-				if (CCWPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.SWITCH_TO_NS_ON_REPL_STARTUP)) {
+	private void bindConsoleToClojureEnvironment() {
+		org.eclipse.debug.ui.console.IConsole processConsole = (org.eclipse.debug.ui.console.IConsole) console;
+		boolean stop = false;
+		int selfTimeout = 60000; // 60 seconds
+		while (!stop && selfTimeout > 0) {
+			if (Thread.interrupted()) {
+				stop = true;
+			} else {
+				int clojureVMPort = LaunchUtils.getLaunchServerReplPort(processConsole.getProcess().getLaunch());
+				if (clojureVMPort != -1) {
+					clojureClient = new ClojureClient(clojureVMPort);
+					stop = true;
+				} else {
 					try {
-						List<IFile> files = LaunchUtils.getFilesToLaunchList(processConsole.getProcess().getLaunch().getLaunchConfiguration());
-						if (files.size() > 0) {
-							String namespace = ClojureCore.getDeclaredNamespace(files.get(0));
-							if (namespace != null) {
-								EvaluateTextAction.evaluateText(this.console, "(in-ns '" + namespace + ")", false); 
-							}
-						}
-					} catch (CoreException e) {
-						CCWPlugin.logError("error while trying to guess the ns to which make the REPL console switch", e);
+						Thread.sleep(100);
+						selfTimeout -= 100;
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+						stop = true;
 					}
 				}
 			}
@@ -84,7 +109,9 @@ public class ConsolePageParticipant implements IConsolePageParticipant {
 	}
 
 	public void dispose() {
-		// Nothing
+		if (initializationThread.isAlive()) {
+			initializationThread.interrupt();
+		}
 	}
 
 	public Object getAdapter(Class adapter) {
