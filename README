@@ -1,0 +1,19 @@
+The following work is released under the EPL.
+
+It is an attempt to rewrite paredit in clojure.
+
+The development will follow these steps:
+
+ * basic port of paredit.el to paredit/core.clj
+ * write of a comprehensive unit tests suite
+ * rewrite of paredit/core.clj to be idiomatic clojure code
+ 
+Differences from paredit:
+ * this library will concentrate on the core functionality of paredit, not the UI handling part.
+ * so I intend the basic interface to be along those lines:
+   a central function (or multifunction) whose signature will be
+   ([paredit-command [initial-text cursor-offset selection-length]])
+   and which will return either (not sure yet): [modified-text new-cursor-offset new-selection-length]
+   either [text-alteration* new-cursor-offset new-selection-offset] (with text-alteration being a vector of {:offset offset :length length :text text}) 
+   
+But let's code and see what the future will be :-)   
