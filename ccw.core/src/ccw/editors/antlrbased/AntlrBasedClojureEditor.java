@@ -63,7 +63,18 @@ public class AntlrBasedClojureEditor extends TextEditor {
 
 	protected final static char[] PAIRS= { '{', '}', '(', ')', '[', ']' };
 	
-	private DefaultCharacterPairMatcher pairsMatcher = new DefaultCharacterPairMatcher(PAIRS, ClojurePartitionScanner.CLOJURE_PARTITIONING);
+	private DefaultCharacterPairMatcher pairsMatcher = new DefaultCharacterPairMatcher(PAIRS, ClojurePartitionScanner.CLOJURE_PARTITIONING) {
+		/* tries to match a pair be the cursor after or before a pair start/end element */
+		@Override
+		public IRegion match(IDocument doc, int offset) {
+			IRegion region = super.match(doc, offset);
+			if (region == null && offset < (doc.getLength()-1)) {
+				return super.match(doc, offset + 1);
+			} else {
+				return region;
+			}
+		}
+	};
 
 	/** The projection support */
 	private ProjectionSupport fProjectionSupport;
