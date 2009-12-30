@@ -14,14 +14,18 @@ package ccw.editors.antlrbased;
 
 import org.eclipse.jface.internal.text.html.HTMLTextPresenter;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultInformationControl;
+import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.DocumentEvent;
+import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension3;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITypedRegion;
+import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
@@ -36,96 +40,178 @@ import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
 import ccw.CCWPlugin;
 import ccw.editors.rulesbased.ClojurePartitionScanner;
 
-public class ClojureSourceViewerConfiguration extends TextSourceViewerConfiguration {
+public class ClojureSourceViewerConfiguration extends
+		TextSourceViewerConfiguration {
 	private ITokenScanner tokenScanner;
 	private final AntlrBasedClojureEditor editor;
 
-	public ClojureSourceViewerConfiguration(IPreferenceStore preferenceStore, AntlrBasedClojureEditor editor) {
-	    super(preferenceStore);
-	    initTokenScanner();
-	    this.editor = editor;
+	public ClojureSourceViewerConfiguration(IPreferenceStore preferenceStore,
+			AntlrBasedClojureEditor editor) {
+		super(preferenceStore);
+		initTokenScanner();
+		this.editor = editor;
 	}
-	
+
 	@Override
-	public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer) {
-		PresentationReconciler reconciler= new PresentationReconciler();
+	public IPresentationReconciler getPresentationReconciler(
+			ISourceViewer sourceViewer) {
+		PresentationReconciler reconciler = new PresentationReconciler();
 
-		reconciler.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
+		reconciler
+				.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
 
-		addDamagerRepairerForContentType(reconciler, IDocument.DEFAULT_CONTENT_TYPE);
+		addDamagerRepairerForContentType(reconciler,
+				IDocument.DEFAULT_CONTENT_TYPE);
 
 		return reconciler;
 	}
-	
+
 	@Override
 	public String getConfiguredDocumentPartitioning(ISourceViewer sourceViewer) {
 		return IDocumentExtension3.DEFAULT_PARTITIONING;
 	}
-	
-	private void addDamagerRepairerForContentType(PresentationReconciler reconciler, String contentType) {
-		DefaultDamagerRepairer dr= new DefaultDamagerRepairer(tokenScanner) {
+
+	private void addDamagerRepairerForContentType(
+			PresentationReconciler reconciler, String contentType) {
+		DefaultDamagerRepairer dr = new DefaultDamagerRepairer(tokenScanner) {
 			@Override
-			public IRegion getDamageRegion(ITypedRegion partition, DocumentEvent e, boolean documentPartitioningChanged) {
+			public IRegion getDamageRegion(ITypedRegion partition,
+					DocumentEvent e, boolean documentPartitioningChanged) {
 				return partition;
 			}
 		};
 
 		reconciler.setDamager(dr, contentType);
-		reconciler.setRepairer(dr, contentType);	
+		reconciler.setRepairer(dr, contentType);
 	}
-	
+
 	public String[] getConfiguredContentTypes(ISourceViewer sourceViewer) {
-		return new String[] { 
-				IDocument.DEFAULT_CONTENT_TYPE
-		};
+		return new String[] { IDocument.DEFAULT_CONTENT_TYPE };
 	}
 
 	@Override
 	public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
-	    ContentAssistant assistant = new ContentAssistant();
+		ContentAssistant assistant = new ContentAssistant();
 
-	    assistant.setDocumentPartitioning(ClojurePartitionScanner.CLOJURE_PARTITIONING);
-	    assistant.setContentAssistProcessor(new ClojureProposalProcessor(editor, assistant), IDocument.DEFAULT_CONTENT_TYPE);
-	    assistant.setContentAssistProcessor(new ClojureProposalProcessor(editor, assistant), ClojurePartitionScanner.CLOJURE_COMMENT);
-	    assistant.setContentAssistProcessor(new ClojureProposalProcessor(editor, assistant), ClojurePartitionScanner.CLOJURE_STRING);
+		assistant
+				.setDocumentPartitioning(ClojurePartitionScanner.CLOJURE_PARTITIONING);
+		assistant.setContentAssistProcessor(new ClojureProposalProcessor(
+				editor, assistant), IDocument.DEFAULT_CONTENT_TYPE);
+		assistant.setContentAssistProcessor(new ClojureProposalProcessor(
+				editor, assistant), ClojurePartitionScanner.CLOJURE_COMMENT);
+		assistant.setContentAssistProcessor(new ClojureProposalProcessor(
+				editor, assistant), ClojurePartitionScanner.CLOJURE_STRING);
 
-	    assistant.enableAutoActivation(false);
-	    assistant.setShowEmptyList(true);
-	    assistant.setEmptyMessage("No completions available. You may want to start a REPL for the project holding this file to activate the code completion feature.");
-	    assistant.setStatusLineVisible(true);
-	    assistant.setStatusMessage("no current status mesage");
+		assistant.enableAutoActivation(false);
+		assistant.setShowEmptyList(true);
+		assistant
+				.setEmptyMessage("No completions available. You may want to start a REPL for the project holding this file to activate the code completion feature.");
+		assistant.setStatusLineVisible(true);
+		assistant.setStatusMessage("no current status mesage");
 
-	    assistant.enableAutoInsert(true);
-	    assistant.setAutoActivationDelay(500);
-//	    assistant.setProposalPopupOrientation(IContentAssistant.CONTEXT_INFO_BELOW);
-	    assistant.setProposalPopupOrientation(IContentAssistant.PROPOSAL_OVERLAY);
-//	    assistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_BELOW);
-	    assistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_ABOVE);
-	    assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
-	    assistant.enableColoredLabels(true);
-	    
-	    return assistant;
+		assistant.enableAutoInsert(true);
+		assistant.setAutoActivationDelay(500);
+		// assistant.setProposalPopupOrientation(IContentAssistant.CONTEXT_INFO_BELOW);
+		assistant
+				.setProposalPopupOrientation(IContentAssistant.PROPOSAL_OVERLAY);
+		// assistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_BELOW);
+		assistant
+				.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_ABOVE);
+		assistant
+				.setInformationControlCreator(getInformationControlCreator(sourceViewer));
+		assistant.enableColoredLabels(true);
+
+		return assistant;
 
 	}
-	
-	public IInformationControlCreator getInformationControlCreator(ISourceViewer sourceViewer) {
+
+	public IInformationControlCreator getInformationControlCreator(
+			ISourceViewer sourceViewer) {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
-				return new DefaultInformationControl(parent, new HTMLTextPresenter());
+				return new DefaultInformationControl(parent,
+						new HTMLTextPresenter());
 			}
 		};
 	}
-	
+
 	public void initTokenScanner() {
-       tokenScanner = new ClojureTokenScannerFactory().create(CCWPlugin.getDefault().getColorRegistry(), CCWPlugin.getDefault().getDefaultScanContext());
+		tokenScanner = new ClojureTokenScannerFactory().create(CCWPlugin
+				.getDefault().getColorRegistry(), CCWPlugin.getDefault()
+				.getDefaultScanContext());
 	}
 
 	@Override
 	public IReconciler getReconciler(ISourceViewer sourceViewer) {
 		// cf. http://code.google.com/p/counterclockwise/issues/detail?id=5
-		// Completely disable spellchecking until we can distinguish comments and code, and spell check based on these partitions
+		// Completely disable spellchecking until we can distinguish comments
+		// and code, and spell check based on these partitions
 		return null;
 	}
-	
-	
+
+	@Override
+	public IAutoEditStrategy[] getAutoEditStrategies(
+			ISourceViewer sourceViewer, final String contentType) {
+		return new IAutoEditStrategy[] { new IAutoEditStrategy() {
+
+			public void customizeDocumentCommand(IDocument document,
+					DocumentCommand command) {
+				if (command.doit) {
+					if (command.length == 0) {
+						for (int i = 0; i < editor.PAIRS.length; i += 2) {
+							if (command.text.equals("" + editor.PAIRS[i])) {
+								command.text += editor.PAIRS[i + 1];
+								command.shiftsCaret = false;
+								command.caretOffset = command.offset + 1;
+								return;
+							}
+						}
+						for (int i = 1; i < editor.PAIRS.length; i += 2) {
+							try {
+								if (command.text.equals("" + editor.PAIRS[i])) {
+									int blanksBeforeClosing = 0;
+									int newOffset = -1;
+									boolean foundCorrespondingClosing = false;
+									int offset = command.offset;
+									while (offset < document.getLength()) {
+										if (document.getContentType(offset).equals(contentType)) {
+											char c = document.getChar(offset);
+											if (c == editor.PAIRS[i]) {
+												foundCorrespondingClosing = true;
+												break;
+											} else if (c == ' ' || c == '\t'
+													|| c == '\n' || c == '\r') {
+												blanksBeforeClosing++;
+												if (newOffset == -1) {
+													newOffset = offset;
+												}
+											} else {
+												blanksBeforeClosing = 0;
+												newOffset = -1;
+											}
+										}
+										offset++;
+									}
+									command.length = blanksBeforeClosing;
+									if (newOffset != -1) {
+										command.offset = newOffset;
+									}
+									if (foundCorrespondingClosing) {
+										command.text = "";
+									}
+									command.shiftsCaret = false;
+									command.caretOffset = offset + 1; 
+									return;
+								}
+							} catch (BadLocationException e) {
+								e.printStackTrace();
+							}
+						}
+					}
+				}
+			}
+
+		}, new org.eclipse.jface.text.DefaultIndentLineAutoEditStrategy() };
+	}
+
 }

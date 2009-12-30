@@ -61,7 +61,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
 	/** Preference key for matching brackets color */
 	//PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR;
 
-	protected final static char[] PAIRS= { '{', '}', '(', ')', '[', ']' };
+	public final static char[] PAIRS= { '{', '}', '(', ')', '[', ']' };
 	
 	private DefaultCharacterPairMatcher pairsMatcher = new DefaultCharacterPairMatcher(PAIRS, ClojurePartitionScanner.CLOJURE_PARTITIONING) {
 		/* tries to match a pair be the cursor after or before a pair start/end element */
