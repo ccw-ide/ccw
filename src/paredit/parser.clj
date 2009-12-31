@@ -15,84 +15,80 @@
 	 TODO: make the parser restartable at a given offset given a state ...
 	 TODO: make the parser fully incremental (via chunks of any possible size ...)"	
 	[text stop-offset]
-  (let [r (StringBuilder.) ; result string builder
-        append-spaces (fn [n-spaces] (dotimes [_ n-spaces] (.append r " ")))
-       ] 
-    (loop [
-           s (seq text) ; current string, stream of chars
-           { :keys [parents offset line col] :as state} { :parents [{:type nil :offset 0 :line 0 :col 0}] :offset 0 :line 0 :col 0}]
-        (if (or (not s) (>= offset stop-offset))
-          state
-          (let [c (first s)] ; c: current char
-            (cond
-              (*opening-brackets* c)
-                (cond 
-                  (= \" (-> parents pop :type))
-                    (recur (next s) (assoc state :offset (inc offset) :col (inc col)))
-                  (= \; (-> parents pop :type))
-                    (recur (next s) (assoc state :offset (inc offset) :col (inc col)))
-                  :else
-		                (recur 
-		                  (next s) 
-		                  (assoc state 
-		                    :parents (conj parents {:type c :line line :col col :offset offset})
-		                    :offset (inc offset)
-		                    :col (inc col))))
-              (*closing-brackets* c)
-                (cond 
-                  (= \" (-> parents pop :type))
-                    (recur (next s) (assoc state :offset (inc offset) :col (inc col)))
-                  (= \; (-> parents pop :type))
-                    (recur (next s) (assoc state :offset (inc offset) :col (inc col)))
-                  :else
-		                (recur 
-		                  (next s)
-		                  (assoc state 
-		                    :parents (pop parents)
-		                    :offset (inc offset)
-		                    :col (inc col))))
-              (= (first "\r") c)
-                (recur (next s) (assoc state :offset (inc offset))) ; we do not increment the column    
-              (= \newline c)
-                (cond 
-                  (= \" (-> parents pop :type))
-		                (recur (next s) (assoc state :offset (inc offset) :line (inc line) :col 0))
-                  (= \; (-> parents pop :type))
-                    ; we take care of going out of comments, if we are in comments !
-		                (recur (next s) (assoc state :parents (if (= \; (-> parents pop :type)) (pop parents) parents) :offset (inc offset) :line (inc line) :col 0))
-                  :else
-		                (recur (next s) (assoc state :offset (inc offset) :line (inc line) :col 0)))
-              #_(#{\space \tab \,} c)
-                #_(cond 
-                  (= \" (-> parents pop :type))
-                  (= \; (-> parents pop :type))
-                  :else
-                )
-              (= \" c)
-                (cond 
-                  (= \" (-> parents pop :type))
-                    (if (= offset 0)
-                      (recur (next s) (assoc state :offset (inc offset) :col (inc col) :parents (conj {:type c :line line :col col :offset offset})))
-                      (if (= \\ (.charAt text (dec offset)))
-                        (recur (next s) (assoc state :offset (inc offset) :col (inc col)))
-                        (recur (next s) (assoc state :parents (pop parents) :offset (inc offset) :col (inc col)))))
-                  (= \; (-> parents pop :type))
-                    (recur (next s) (assoc state :offset (inc offset) :col (inc col)))
-                  :else
-                    (recur (next s) (assoc state :offset (inc offset) :col (inc col) :parents (conj parents {:type c :line line :col col :offset offset}))))
-              (= \; c)
-                (cond 
-                  (= \" (-> parents pop :type))
-                    (recur (next s) (assoc state :offset (inc offset) :col (inc col)))
-                  (= \; (-> parents pop :type))
-                    (recur (next s) (assoc state :offset (inc offset) :col (inc col)))
-                  :else
-                    (recur (next s) (assoc state :parents (conj parents {:type c :offset offset :col col :line line}) state :offset (inc offset) :col (inc col))))
-              :else
-                (recur (next s) (assoc state :offset (inc offset) :col (inc col)))))))))    
+  (loop [{ :keys [parents offset line col] :as state} { :parents [{:type nil :offset 0 :line 0 :col 0}] :offset 0 :line 0 :col 0}]
+      (if (>= offset stop-offset)
+        state
+        (let [c (.charAt text offset)] ; c: current char
+          (cond
+            (*opening-brackets* c)
+              (cond 
+                (= \" (-> parents pop :type))
+                  (recur (assoc state :offset (inc offset) :col (inc col)))
+                (= \; (-> parents pop :type))
+                  (recur (assoc state :offset (inc offset) :col (inc col)))
+                :else
+	                (recur 
+	                  (assoc state 
+	                    :parents (conj parents {:type c :line line :col col :offset offset})
+	                    :offset (inc offset)
+	                    :col (inc col))))
+            (*closing-brackets* c)
+              (cond 
+                (= \" (-> parents pop :type))
+                  (recur (assoc state :offset (inc offset) :col (inc col)))
+                (= \; (-> parents pop :type))
+                  (recur (assoc state :offset (inc offset) :col (inc col)))
+                :else
+	                (recur 
+	                  (assoc state 
+	                    :parents (pop parents)
+	                    :offset (inc offset)
+	                    :col (inc col))))
+            (= (first "\r") c)
+              (recur (assoc state :offset (inc offset))) ; we do not increment the column    
+            (= \newline c)
+              (cond 
+                (= \" (-> parents pop :type))
+	                (recur (assoc state :offset (inc offset) :line (inc line) :col 0))
+                (= \; (-> parents pop :type))
+                  ; we take care of going out of comments, if we are in comments !
+	                (recur (assoc state :parents (pop parents) :offset (inc offset) :line (inc line) :col 0))
+                :else
+	                (recur (assoc state :offset (inc offset) :line (inc line) :col 0)))
+            #_(#{\space \tab \,} c)
+              #_(cond 
+                (= \" (-> parents pop :type))
+                (= \; (-> parents pop :type))
+                :else
+              )
+            (= \" c)
+              (cond 
+                (= \" (-> parents pop :type))
+                  (if (= offset 0)
+                    (recur (assoc state :offset (inc offset) :col (inc col) :parents (conj {:type c :line line :col col :offset offset})))
+                    (if (= \\ (.charAt text (dec offset)))
+                      (recur (assoc state :offset (inc offset) :col (inc col)))
+                      (recur (assoc state :parents (pop parents) :offset (inc offset) :col (inc col)))))
+                (= \; (-> parents pop :type))
+                  (recur (assoc state :offset (inc offset) :col (inc col)))
+                :else
+                  (recur (assoc state :offset (inc offset) :col (inc col) :parents (conj parents {:type c :line line :col col :offset offset}))))
+            (= \; c)
+              (cond 
+                (= \" (-> parents pop :type))
+                  (recur (assoc state :offset (inc offset) :col (inc col)))
+                (= \; (-> parents pop :type))
+                  (recur (assoc state :offset (inc offset) :col (inc col)))
+                :else
+                  (recur (assoc state :parents (conj parents {:type c :offset offset :col col :line line}) :offset (inc offset) :col (inc col))))
+            :else
+              (recur (assoc state :offset (inc offset) :col (inc col))))))))    
 
 (defn parse-core []
-  (time (let [s (slurp "/home/lpetit/projects/clojure/src/clj/clojure/core.clj")] (parse s (.length s)) (.length s))))
+  (time 
+    (let [s (slurp "/home/lpetit/projects/clojure/src/clj/clojure/core.clj")] 
+      (parse s (.length s)) 
+      (.length s))))
 
 #_(deftest test-format-code
   (testing "parens combinatorics"
