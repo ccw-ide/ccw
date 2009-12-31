@@ -1,4 +1,6 @@
-(ns paredit.core)
+(ns paredit.core
+  (:use clojure.contrib.def)
+  (:require clojure.contrib.pprint))
 
 ;;; -*- Mode: Emacs-Lisp; outline-regexp: "\n;;;;+" -*-
 
@@ -176,30 +178,53 @@
 
 ;;; This assumes Unix-style LF line endings.
 
+;; Translation of a maximum of the initial paredit code via macros!
+(defmacro defconst [& body] `(clojure.contrib.def/defvar ~@body))
+(defmacro defun [name args & body]
+  `(defn ~name [~@args] ~@body))
+(defmacro progn [& body] `(do ~@body))
+(defmacro setq [& body] `(set! ~@body))
+(defmacro stringp [& body] `(string? ~@body))
+(defmacro car [& body] `(first ~@body))
+(defmacro cadr [& body] `(fnext ~@body))
+(defmacro cddr [& body] `(nnext ~@body))
+
+;; Here begins the paredit code, hopefully just a little bit of it
+;; will be modified, and lots of it will be translated via macros
+
 (defconst paredit-version 21)
 (defconst paredit-beta-p nil)
 
-(eval-and-compile
-
+(comment
   (defun paredit-xemacs-p ()
     ;; No idea where I got this definition from.  Edward O'Connor
     ;; (hober in #emacs) suggested the current definition.
     ;;   (and (boundp 'running-xemacs)
     ;;        running-xemacs)
     (featurep 'xemacs))
-
+)
+(comment
   (defun paredit-gnu-emacs-p ()
     ;++ This could probably be improved.
     (not (paredit-xemacs-p)))
+)
 
-  (defmacro xcond (&rest clauses)
+  (defmacro xcond 
     "Exhaustive COND.
-Signal an error if no clause matches."
-    `(cond ,@clauses
-           (t (error "XCOND lost."))))
+     Signal an error if no clause matches."
+    [& clauses]
+    `(cond ~@(mapcat identity clauses)
+           :else (throw (Exception. "XCOND lost."))))
 
+(comment
   (defalias 'paredit-warn (if (fboundp 'warn) 'warn 'message))
-
+)
+(defn
+  paredit-warn
+  "??? adapted from defalias 'paredit-warn"
+  [format-string & args]
+  (printf (apply clojure.contrib.pprint/cl-format nil format-string args)))
+(comment "TODO LAP: reactiver ou virer plus tard"
   (defvar paredit-sexp-error-type
     (with-temp-buffer
       (insert "(")
@@ -213,7 +238,6 @@ Signal an error if no clause matches."
                                  " This may cause obscure problems. "
                                  " Please upgrade Emacs."))
                (car condition)))))
-
   (defmacro paredit-handle-sexp-errors (body &rest handler)
     `(condition-case ()
          ,body
@@ -226,14 +250,16 @@ Signal an error if no clause matches."
        nil))
 
   (put 'paredit-ignore-sexp-errors 'lisp-indent-function 0)
+)
 
-  nil)
 
 ;;;; Minor Mode Definition
 
-(defvar paredit-mode-map (make-sparse-keymap)
-  "Keymap for the paredit minor mode.")
 
+(defvar paredit-mode-map {}
+  "Keymap for the paredit minor mode.")
+(comment
+"LAP: this is UI code, replacing it with a global usage predicate indicating whether paredit can be enabled"
 (define-minor-mode paredit-mode
   "Minor mode for pseudo-structurally editing Lisp code.
 \\<paredit-mode-map>"
@@ -253,30 +279,13 @@ Signal an error if no clause matches."
               (check-parens)
             (error (setq paredit-mode nil)
                    (signal (car condition) (cdr condition)))))))
+)
+(defn check-parens "TODO LAP: implement it !" [text] true)
+(defn can-enable-paredit? [text] (check-parens text))
 
-;;; Old functions from when there was a different mode for emacs -nw.
-
-(defun enable-paredit-mode ()
-  "Turn on pseudo-structural editing of Lisp code.
-
-Deprecated: use `paredit-mode' instead."
-  (interactive)
-  (paredit-mode +1))
-
-(defun disable-paredit-mode ()
-  "Turn off pseudo-structural editing of Lisp code.
-
-Deprecated: use `paredit-mode' instead."
-  (interactive)
-  (paredit-mode -1))
-
-(defvar paredit-backward-delete-key
-  (xcond ((paredit-xemacs-p)    "BS")
-         ((paredit-gnu-emacs-p) "DEL")))
-
-(defvar paredit-forward-delete-keys
-  (xcond ((paredit-xemacs-p)    '("DEL"))
-         ((paredit-gnu-emacs-p) '("<delete>" "<deletechar>"))))
+"FIXME LAP: disabled, this is UI stuff"
+(defvar paredit-backward-delete-key (list "BS"))
+(defvar paredit-forward-delete-keys (list "DEL"))
 
 ;;;; Paredit Keys
 
@@ -293,7 +302,7 @@ Deprecated: use `paredit-mode' instead."
 ;;; or a list of such strings.  Entries in this list may also just be
 ;;; strings, in which case they are headings for the next entries.
 
-(progn (setq paredit-commands
+(setq paredit-commands
  `(
    "Basic Insertion Commands"
    ("("         paredit-open-round
@@ -329,7 +338,7 @@ Deprecated: use `paredit-mode' instead."
                 ("(foo \"bar |baz\" quux)"
                  "(foo \"bar baz\"\n     |quux)")
                 ("(foo |(bar #\\x \"baz \\\\ quux\") zot)"
-                 ,(concat "(foo \"|(bar #\\\\x \\\"baz \\\\"
+                 ~(str "(foo \"|(bar #\\\\x \\\"baz \\\\"
                           "\\\\ quux\\\")\" zot)")))
    ("\\"        paredit-backslash
                 ("(string #|)\n  ; Escaping character... (x)"
@@ -350,12 +359,12 @@ Deprecated: use `paredit-mode' instead."
 
    ("C-j"       paredit-newline
                 ("(let ((n (frobbotz))) |(display (+ n 1)\nport))"
-                 ,(concat "(let ((n (frobbotz)))"
+                 ~(concat "(let ((n (frobbotz)))"
                           "\n  |(display (+ n 1)"
                           "\n            port))")))
 
    "Deleting & Killing"
-   (("C-d" ,@paredit-forward-delete-keys)
+   (("C-d" ~@paredit-forward-delete-keys)
                 paredit-forward-delete
                 ("(quu|x \"zot\")" "(quu| \"zot\")")
                 ("(quux |\"zot\")"
@@ -363,7 +372,7 @@ Deprecated: use `paredit-mode' instead."
                  "(quux \"|ot\")")
                 ("(foo (|) bar)" "(foo | bar)")
                 ("|(foo bar)" "(|foo bar)"))
-   (,paredit-backward-delete-key
+   (~paredit-backward-delete-key
                 paredit-backward-delete
                 ("(\"zot\" q|uux)" "(\"zot\" |uux)")
                 ("(\"zot\"| quux)"
@@ -388,7 +397,7 @@ Deprecated: use `paredit-mode' instead."
                 (";;;| Frobnicate\n(defun frobnicate ...)"
                  ";;;|\n(defun frobnicate ...)"
                  ";;;\n(| frobnicate ...)"))
-   (,(concat "M-" paredit-backward-delete-key)
+   (~(str "M-" paredit-backward-delete-key)
                 paredit-backward-kill-word
                 ("(foo bar)    ; baz\n(quux)|"
                  "(foo bar)    ; baz\n(|)"
@@ -471,34 +480,33 @@ Deprecated: use `paredit-mode' instead."
    ("C-c C-M-l" paredit-recentre-on-sexp)
    ("M-q"       paredit-reindent-defun)
    ))
-       nil)                             ; end of PROGN
 
 ;;;;; Command Examples
-
-(eval-and-compile
-  (defmacro paredit-do-commands (vars string-case &rest body)
-    (let ((spec     (nth 0 vars))
-          (keys     (nth 1 vars))
-          (fn       (nth 2 vars))
-          (examples (nth 3 vars)))
-      `(dolist (,spec paredit-commands)
-         (if (stringp ,spec)
-             ,string-case
-           (let ((,keys (let ((k (car ,spec)))
-                          (cond ((stringp k) (list k))
-                                ((listp k) k)
-                                (t (error "Invalid paredit command %s."
-                                          ,spec)))))
-                 (,fn (cadr ,spec))
-                 (,examples (cddr ,spec)))
-             ,@body)))))
-
-  (put 'paredit-do-commands 'lisp-indent-function 2))
+(
+"TODO LAP: all this is really interesting keyboard shortcut initialization stuff.
+Let's focus on the core parts right now, and not place this in core (it will be very dependent
+upon each IDE framework, btw"
+"FIXME LAP: replace vars with a vector ?"
+  (defmacro paredit-do-commands 
+    #^{:lisp-indent-function 2} ; FIXME LAP: lisp-indent-function is certainly used by emacs itself ...
+    [vars string-case & body]
+    (let [[spec keys fn examples] vars]
+      `(dolist [~spec paredit-commands]
+         (if (stringp ~spec)
+             ~string-case
+	           (let [~keys (let [k (car ~spec)]
+	                          (cond (stringp k) (list k)
+	                                (listp k) k
+	                                :else (throw (Exception. "Invalid paredit command %s."
+	                                          ~spec))))
+	                 ~fn (cadr ~spec)
+	                 ~examples (cddr ~spec)]
+	             ~@body)))))
 
 (defun paredit-define-keys ()
   (paredit-do-commands (spec keys fn examples)
       nil       ; string case
-    (dolist (key keys)
+    (dolist [key keys]
       (define-key paredit-mode-map (read-kbd-macro key) fn))))
 
 (defun paredit-function-documentation (fn)
@@ -512,14 +520,14 @@ Deprecated: use `paredit-mode' instead."
   (let ((contents
          (list (paredit-function-documentation 'paredit-mode))))
     (paredit-do-commands (spec keys fn examples)
-        (push (concat "\n\n" spec "\n")
+        (push (str "\n\n" spec "\n")
               contents)
       (let ((name (symbol-name fn)))
         (if (string-match (symbol-name 'paredit-) name)
-            (push (concat "\n\n\\[" name "]\t" name
+            (push (str "\n\n\\[" name "]\t" name
                           (if examples
                               (mapconcat (lambda (example)
-                                           (concat
+                                           (str
                                             "\n"
                                             (mapconcat 'identity
                                                        example
@@ -530,7 +538,7 @@ Deprecated: use `paredit-mode' instead."
                               "\n  (no examples)\n"))
                   contents))))
     (put 'paredit-mode 'function-documentation
-         (apply 'concat (reverse contents))))
+         (apply str (reverse contents))))
   ;; PUT returns the huge string we just constructed, which we don't
   ;; want it to return.
   nil)
@@ -539,10 +547,10 @@ Deprecated: use `paredit-mode' instead."
   (paredit-do-commands (spec keys fn examples)
       nil       ; string case
     (put fn 'function-documentation
-         (concat (paredit-function-documentation fn)
+         (str (paredit-function-documentation fn)
                  "\n\n\\<paredit-mode-map>\\[" (symbol-name fn) "]\n"
                  (mapconcat (lambda (example)
-                              (concat "\n"
+                              (str "\n"
                                       (mapconcat 'identity
                                                  example
                                                  "\n  ->\n")
@@ -564,10 +572,10 @@ Deprecated: use `paredit-mode' instead."
            (mapconcat 'paredit-html-quote keys ", ")))
         (html-example
          (lambda (example)
-           (concat "<table><tr><td><pre>"
+           (str "<table><tr><td><pre>"
                    (mapconcat 'paredit-html-quote
                               example
-                              (concat "</pre></td></tr><tr><td>"
+                              (str "</pre></td></tr><tr><td>"
                                       "&nbsp;&nbsp;&nbsp;&nbsp;---&gt;"
                                       "</td></tr><tr><td><pre>"))
                    "</pre></td></tr></table>")))
@@ -577,7 +585,7 @@ Deprecated: use `paredit-mode' instead."
                    (insert "</table>\n")
                    (setq firstp nil))
                (funcall insert-lines
-                        (concat "<h3>" spec "</h3>")
+                        (str "<h3>" spec "</h3>")
                         "<table border=\"1\" cellpadding=\"1\">"
                         "  <tr>"
                         "    <th>Command</th>"
@@ -588,11 +596,11 @@ Deprecated: use `paredit-mode' instead."
         (if (string-match (symbol-name 'paredit-) name)
             (funcall insert-lines
                      "  <tr>"
-                     (concat "    <td><tt>" name "</tt></td>")
-                     (concat "    <td align=\"center\">"
+                     (str "    <td><tt>" name "</tt></td>")
+                     (str "    <td align=\"center\">"
                              (funcall html-keys keys)
                              "</td>")
-                     (concat "    <td>"
+                     (str "    <td>"
                              (if examples
                                  (mapconcat html-example examples
                                             "<hr>")
@@ -600,7 +608,6 @@ Deprecated: use `paredit-mode' instead."
                              "</td>")
                      "  </tr>")))))
   (insert "</table>\n"))
-
 (defun paredit-html-quote (string)
   (with-temp-buffer
     (dotimes (i (length string))
@@ -612,17 +619,40 @@ Deprecated: use `paredit-mode' instead."
                       ((eq c ?\") "&quot;")
                       (t c)))))
     (buffer-string)))
+)
 
 ;;;; Delimiter Insertion
 
-(eval-and-compile
-  (defun paredit-conc-name (&rest strings)
-    (intern (apply 'concat strings)))
+(declare paredit-in-string-p paredit-in-comment-p paredit-in-char-p paredit-insert-pair 
+         paredit-move-past-close paredit-move-past-close-and-newline paredit-wrap-sexp)
 
-  (defmacro define-paredit-pair (open close name)
+(defvar *text* (atom {:text "" :offset 0 :length 0})
+  "defines a text, with :offset being the cursor position,
+   and :length being a possible selection (may be negative)")
+
+(defn insert [s]
+  (let [{text :text offset :offset length :length} @*text*]
+    (reset! *text* (update-in @*text* [:text] #(str (.substring % 0 offset) s (.substring % offset)))))) 
+
+(defn goto-char 
+  "(frome emac) Set point to position, a number or marker.
+Beginning of buffer is position (point-min), end is (point-max).
+
+The return value is position." ;; LAP fixme: currently I reset the length of the selection, is it ok ?
+  [position]
+  (reset! *text* (assoc @*text* :offset position :length 0)))
+  
+(defvar paredit-wrap-commands (atom [paredit-wrap-sexp])
+  "List of paredit commands that wrap S-expressions.
+Used by `paredit-yank-pop'; for internal paredit use only.")
+
+  (defun paredit-conc-name (& strings)
+    (symbol (apply str strings)))
+
+  (defmacro define-paredit-pair [open close name]
     `(progn
-       (defun ,(paredit-conc-name "paredit-open-" name) (&optional n)
-         ,(concat "Insert a balanced " name " pair.
+       (defn ~(paredit-conc-name "paredit-open-" name) 
+         ~(str "Insert a balanced " name " pair.
 With a prefix argument N, put the closing " name " after N
   S-expressions forward.
 If the region is active, `transient-mark-mode' is enabled, and the
@@ -631,39 +661,42 @@ If the region is active, `transient-mark-mode' is enabled, and the
 If in a string or a comment, insert a single " name ".
 If in a character literal, do nothing.  This prevents changing what was
   in the character literal to a meaningful delimiter unintentionally.")
-         (interactive "P")
-         (cond ((or (paredit-in-string-p)
-                    (paredit-in-comment-p))
-                (insert ,open))
-               ((not (paredit-in-char-p))
-                (paredit-insert-pair n ,open ,close 'goto-char))))
-       (defun ,(paredit-conc-name "paredit-close-" name) ()
-         ,(concat "Move past one closing delimiter and reindent.
-\(Agnostic to the specific closing delimiter.)
+  			([] (~(paredit-conc-name "paredit-open-" name) false))
+  			([n]
+         #_(interactive "P")
+         (cond (or (paredit-in-string-p)
+                    (paredit-in-comment-p)
+                 (insert ~open)
+               (not (paredit-in-char-p))
+                (paredit-insert-pair n ~open ~close goto-char)))))
+       (defn ~(paredit-conc-name "paredit-close-" name) 
+         ~(str "Move past one closing delimiter and reindent.
+\\(Agnostic to the specific closing delimiter.)
 If in a string or comment, insert a single closing " name ".
 If in a character literal, do nothing.  This prevents changing what was
   in the character literal to a meaningful delimiter unintentionally.")
-         (interactive)
-         (paredit-move-past-close ,close))
-       (defun ,(paredit-conc-name "paredit-close-" name "-and-newline") ()
-         ,(concat "Move past one closing delimiter, add a newline,"
+  			 []
+         #_(interactive)
+         (paredit-move-past-close ~close))
+       (defn ~(paredit-conc-name "paredit-close-" name "-and-newline") 
+         ~(str "Move past one closing delimiter, add a newline,"
                   " and reindent.
 If there was a margin comment after the closing delimiter, preserve it
   on the same line.")
-         (interactive)
-         (paredit-move-past-close-and-newline ,close))
-       (defun ,(paredit-conc-name "paredit-wrap-" name)
-           (&optional argument)
-         ,(concat "Wrap the following S-expression.
+          []
+         #_(interactive)
+         (paredit-move-past-close-and-newline ~close))
+       (defn ~(paredit-conc-name "paredit-wrap-" name)
+         ~(str "Wrap the following S-expression.
 See `paredit-wrap-sexp' for more details.")
+         ([] (~(paredit-conc-name "paredit-wrap-" name) nil))
+         ([argument]
          (interactive "P")
-         (paredit-wrap-sexp argument ,open ,close))
-       (add-to-list 'paredit-wrap-commands
-                    ',(paredit-conc-name "paredit-wrap-" name)))))
+         (paredit-wrap-sexp argument ,open ,close)))
+       (swap! paredit-wrap-commands conj
+                    '~(paredit-conc-name "paredit-wrap-" name)))) 
 
-(defvar paredit-wrap-commands '(paredit-wrap-sexp)
-  "List of paredit commands that wrap S-expressions.
-Used by `paredit-yank-pop'; for internal paredit use only.")
+;;;;; *********** LAP *************
 
 (define-paredit-pair ?\( ?\) "round")
 (define-paredit-pair ?\[ ?\] "square")
