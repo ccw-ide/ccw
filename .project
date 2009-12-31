@@ -17,7 +17,7 @@
 		</buildCommand>
 	</buildSpec>
 	<natures>
-		<nature>ccw.nature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
+		<nature>ccw.nature</nature>
 	</natures>
 </projectDescription>
