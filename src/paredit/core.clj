@@ -5,6 +5,8 @@
   (:require clojure.contrib.pprint)
   (:require [clojure.contrib.str-utils2 :as str2]))
 
+(set! *warn-on-reflection* true)
+
 ;;; -*- Mode: Emacs-Lisp; outline-regexp: "\n;;;;+" -*-
 
 ;;;;;; Paredit: Parenthesis-Editing Minor Mode
@@ -215,8 +217,8 @@
   [
     ["Basic Insertion Commands"
 	    ["("         :paredit-open-round
-	                {#_"(a b |c d)"
-	                 #_"(a b (|) c d)"
+	                {"(a b |c d)"
+	                 "(a b (|) c d)"
 	                 "(foo \"bar |baz\" quux)"
 	                 "(foo \"bar (|baz\" quux)"}]
 	    #_[")"         :paredit-close-round
@@ -252,7 +254,7 @@
   "true if character at offset offset is in a code
    position, that is not in a string, regexp or comment"
   [s offset]
-  false) ; TODO
+  (not (#{\" \;} (-> (parse s offset) :parents peek :type))))
 
 (defn insert
   "insert what at offset. offset shifted by what's length, selection length unchanged"
@@ -270,10 +272,10 @@
 "(a b |c d)"
 
 (defmethod paredit :paredit-open-round
-  [cmd {:keys [s offset length] :as text}]
-  (if (in-code? s offset)
-    (-> text (insert "() ") (shift-offset -2))
-    (-> text (insert "("))))
+  [cmd {:keys [text offset length] :as t}]
+  (if (in-code? text offset)
+    (-> t (insert "() ") (shift-offset -2))
+    (-> t (insert "("))))
     
 
 (deftest paredit-tests
