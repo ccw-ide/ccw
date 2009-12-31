@@ -1,6 +1,8 @@
 (ns paredit.parser
 	(:use clojure.test))
 
+(set! *warn-on-reflection* true)
+
 (def *brackets* {\( \) \{ \} \[ \]})
 (def *opening-brackets* (set (keys *brackets*)))
 (def *closing-brackets* (set (vals *brackets*)))
@@ -14,7 +16,7 @@
 	"TODO: currently the parser assumes a well formed document ...
 	 TODO: make the parser restartable at a given offset given a state ...
 	 TODO: make the parser fully incremental (via chunks of any possible size ...)"	
-	[text stop-offset]
+	[#^String text stop-offset]
   (loop [{ :keys [parents offset line col] :as state} { :parents [{:type nil :offset 0 :line 0 :col 0}] :offset 0 :line 0 :col 0}]
       (if (>= offset stop-offset)
         state
@@ -85,10 +87,9 @@
               (recur (assoc state :offset (inc offset) :col (inc col))))))))    
 
 (defn parse-core []
-  (time 
-    (let [s (slurp "/home/lpetit/projects/clojure/src/clj/clojure/core.clj")] 
-      (parse s (.length s)) 
-      (.length s))))
+    (let [#^String s (slurp "/home/lpetit/projects/clojure/src/clj/clojure/core.clj")] 
+      (time (parse s (.length s))) 
+      (.length s)))
 
 #_(deftest test-format-code
   (testing "parens combinatorics"
