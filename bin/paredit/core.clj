@@ -194,9 +194,6 @@
 (defn check-parens "TODO LAP: implement it !" [text] true)
 (defn can-enable-paredit? [text] (check-parens text))
 
-(defvar paredit-commands nil
-  "List of paredit commands with their keys and examples.")
-
 (def 
   #^{ :doc "
     The format for documenting the commands is simple, and a slight varation of
@@ -213,14 +210,15 @@
     text-spec := a string, with the caret position indicated by a pipe character |, 
                  and if there is a selected portion of the text, the end of the text
                  selection is marked with another pipe character |"}
-  paredit-commands
+  *paredit-commands*
   [
     ["Basic Insertion Commands"
 	    ["("         :paredit-open-round
 	                {"(a b |c d)"
 	                 "(a b (|) c d)"
 	                 "(foo \"bar |baz\" quux)"
-	                 "(foo \"bar (|baz\" quux)"}]
+	                 "(foo \"bar (|baz\" quux)"}
+	                {"(a b|c d)" "(a b (|) c d)"}]
 	    #_[")"         :paredit-close-round
 	                {"(a b |c   )" "(a b c)|"
 	                "; Hello,| world!"
@@ -233,9 +231,11 @@
     ]
   ])
 
+(def *spaces* #{\newline \tab \space \,})
+
 (defn text-spec-to-text 
   "Converts a text spec to text map" 
-  [text-spec]
+  [#^String text-spec]
   (let [offset (.indexOf text-spec "|")
         second-pipe (dec (.indexOf text-spec "|" (inc offset)))]  
   {:text (str2/replace text-spec "|" "")
@@ -245,20 +245,20 @@
 (defn text-to-text-spec
   "Converts a text map to text spec"
   [text]
-  (let [insert (fn [s i c] (str (.substring s 0 i) c (.substring s i)))
+  (let [insert (fn [#^String s i c] (str (.substring s 0 i) c (.substring s i)))
         spec (insert (:text text) (:offset text) "|")
         spec (if (zero? (:length text)) spec (insert spec (+ 1 (:offset text) (:length text)) "|"))]
     spec))
 
 (defn in-code? 
   "true if character at offset offset is in a code
-   position, that is not in a string, regexp or comment"
+   position, e.g. not in a string, regexp or comment"
   [s offset]
   (not (#{\" \;} (-> (parse s offset) :parents peek :type))))
 
 (defn insert
   "insert what at offset. offset shifted by what's length, selection length unchanged"
-  [{:keys [text offset length] :as where} what]
+  [{:keys [#^String text offset length] :as where} #^String what]
   (assoc where 
     :text (str (.substring text 0 offset) what (.substring text offset))
     :offset (+ offset (.length what)))) 
@@ -269,22 +269,31 @@
   (assoc where :offset (+ offset shift))) 
 
 (defmulti paredit (fn [k & args] k))
-"(a b |c d)"
 
+(defn previous-char [{:keys [#^String text offset length] :as t}]
+  (when (> offset 0)
+    (.charAt text (dec offset))))
+  
+; TODO strip spaces before and after so that we just have one whitespace
 (defmethod paredit :paredit-open-round
   [cmd {:keys [text offset length] :as t}]
   (if (in-code? text offset)
-    (-> t (insert "() ") (shift-offset -2))
+    (let [ins-str (if (*spaces* (previous-char t)) "() " " () ")]
+      (-> t (insert ins-str) (shift-offset -2)))
     (-> t (insert "("))))
     
+(defn test-command [title-prefix command]
+  (testing (str title-prefix " " (second command) " (\"" (first command) "\")")
+    (doseq [[input expected] (get command 2)]
+      (is (= expected (text-to-text-spec (paredit (second command) (text-spec-to-text input))))))))
 
 (deftest paredit-tests
-  (doseq [commands-group paredit-commands]
-		(testing (first commands-group)
-		  (doseq [command (rest commands-group)]
-			  (testing (str (second command) " (\"" (first command) "\")")
-			    (doseq [[input expected] (get command 2)]
-			      (is (= expected (text-to-text-spec (paredit (second command) (text-spec-to-text input)))))))))))
+  (doseq [group *paredit-commands*]
+		(testing (str (first group) ":")
+		  (doseq [command (rest group)]
+		    (test-command "public documentation of paredit command" command)
+		    (test-command "additional non regression tests of paredit command " (assoc command 2 (get command 3)))))))
+
 (def pts paredit-tests)
 
 (defvar *text* (atom {:text "" :offset 0 :length 0})
