@@ -2,8 +2,6 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="/home/lpetit/projects/paredit.clj/clojure.jar" sourcepath="/home/lpetit/projects/paredit.clj/clojure-src.jar"/>
-	<classpathentry kind="lib" path="/home/lpetit/projects/paredit.clj/clojure-contrib.jar" sourcepath="/home/lpetit/projects/paredit.clj/clojure-contrib-src.jar"/>
 	<classpathentry kind="lib" path="/home/lpetit/projects/paredit.clj/classes"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="output" path="bin"/>
