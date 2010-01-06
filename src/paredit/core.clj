@@ -219,7 +219,9 @@
 	                 "(foo \"bar |baz\" quux)"
 	                 "(foo \"bar (|baz\" quux)"}
 	                {"(a b|c d)" "(a b (|) c d)"
-	                 "(|)" "((|))"}]
+	                 "(|)" "((|))"
+	                 "|" "(|)"
+	                 "a|" "a (|)"}]
 	    #_[")"         :paredit-close-round
 	                {"(a b |c   )" "(a b c)|"
 	                "; Hello,| world!"
@@ -233,8 +235,8 @@
   ])
 
 (def *spaces* #{\newline \tab \space \,})
-(def *open-brackets* (set "([{"))
-(def *close-brackets* (set ")]}"))
+(def *open-brackets* (conj (set "([{") nil)) ; we add nil to the list to also match beginning of text 
+(def *close-brackets* (conj (set ")]}") nil)) ; we add nil to the list to also match end of text
 
 (defn text-spec-to-text 
   "Converts a text spec to text map" 
@@ -271,8 +273,6 @@
   [{:keys [text offset length] :as where} shift]
   (assoc where :offset (+ offset shift))) 
 
-(defmulti paredit (fn [k & args] k))
-
 ; TODO faire comme next-char sur l'utilisation de length
 ; !! attention pas de gestion de length negative
 (defn previous-char [{:keys [#^String text offset length] :as t}]
@@ -285,16 +285,20 @@
   (when (< (+ offset length) (.length text))
     (.charAt text (+ offset length))))
   
+(defmulti paredit (fn [k & args] k))
+
 (defmethod paredit 
   :paredit-open-round
   [cmd {:keys [text offset length] :as t}]
+  (println "t:" t)
   (if (in-code? text offset)
-    (let [pre-space? (not ((into *spaces* *open-brackets*) (previous-char t)))
-          post-space? (not ((into *spaces* *close-brackets*) (next-char t)))
-          ins-str (str (if pre-space? " " "")
+    (let [add-pre-space? (not (contains? (into *spaces* *open-brackets*) (previous-char t)))
+          add-post-space? (not (contains? (into *spaces* *close-brackets*) (next-char t)))
+          ins-str (str (if add-pre-space? " " "")
                        "()"
-                       (if post-space? " " ""))
-          offset-shift (if post-space? -2 -1)]
+                       (if add-post-space? " " ""))
+          offset-shift (if add-post-space? -2 -1)]
+      (prn "ins-str:" ins-str)
       (-> t (insert ins-str) (shift-offset offset-shift)))
     (-> t (insert "("))))
     
