@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Paredit.clj
+Bundle-SymbolicName: paredit.clj;singleton:=true
+Bundle-Version: 0.1.0
+Bundle-ClassPath: clj.jar,
+ lpetit/projects/paredit.clj/clojure.jar,
+ lpetit/projects/paredit.clj/clojure-contrib.jar,
+ lpetit/projects/paredit.clj/classes
+Export-Package: paredit
+Bundle-ActivationPolicy: lazy
+Bundle-Vendor: Laurent Petit
+Require-Bundle: ccw.clojure;bundle-version="1.1.0",
+ ccw.clojurecontrib;bundle-version="0.0.0"
