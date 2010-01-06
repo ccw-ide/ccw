@@ -218,7 +218,8 @@
 	                 "(a b (|) c d)"
 	                 "(foo \"bar |baz\" quux)"
 	                 "(foo \"bar (|baz\" quux)"}
-	                {"(a b|c d)" "(a b (|) c d)"}]
+	                {"(a b|c d)" "(a b (|) c d)"
+	                 "(|)" "((|))"}]
 	    #_[")"         :paredit-close-round
 	                {"(a b |c   )" "(a b c)|"
 	                "; Hello,| world!"
@@ -232,6 +233,8 @@
   ])
 
 (def *spaces* #{\newline \tab \space \,})
+(def *open-brackets* (set "([{"))
+(def *close-brackets* (set ")]}"))
 
 (defn text-spec-to-text 
   "Converts a text spec to text map" 
@@ -270,16 +273,29 @@
 
 (defmulti paredit (fn [k & args] k))
 
+; TODO faire comme next-char sur l'utilisation de length
+; !! attention pas de gestion de length negative
 (defn previous-char [{:keys [#^String text offset length] :as t}]
+  (assert (>= length 0))
   (when (> offset 0)
     (.charAt text (dec offset))))
   
-; TODO strip spaces before and after so that we just have one whitespace
-(defmethod paredit :paredit-open-round
+(defn next-char [{:keys [#^String text offset length] :as t}]
+  (assert (>= length 0))
+  (when (< (+ offset length) (.length text))
+    (.charAt text (+ offset length))))
+  
+(defmethod paredit 
+  :paredit-open-round
   [cmd {:keys [text offset length] :as t}]
   (if (in-code? text offset)
-    (let [ins-str (if (*spaces* (previous-char t)) "() " " () ")]
-      (-> t (insert ins-str) (shift-offset -2)))
+    (let [pre-space? (not ((into *spaces* *open-brackets*) (previous-char t)))
+          post-space? (not ((into *spaces* *close-brackets*) (next-char t)))
+          ins-str (str (if pre-space? " " "")
+                       "()"
+                       (if post-space? " " ""))
+          offset-shift (if post-space? -2 -1)]
+      (-> t (insert ins-str) (shift-offset offset-shift)))
     (-> t (insert "("))))
     
 (defn test-command [title-prefix command]
