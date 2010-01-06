@@ -152,66 +152,69 @@ public class ClojureSourceViewerConfiguration extends
 	@Override
 	public IAutoEditStrategy[] getAutoEditStrategies(
 			ISourceViewer sourceViewer, final String contentType) {
-		return new IAutoEditStrategy[] { new IAutoEditStrategy() {
-
-			public void customizeDocumentCommand(IDocument document,
-					DocumentCommand command) {
-				if (command.doit) {
-					if (command.length == 0) {
-						for (int i = 0; i < editor.PAIRS.length; i += 2) {
-							if (command.text.equals("" + editor.PAIRS[i])) {
-								command.text += editor.PAIRS[i + 1];
-								command.shiftsCaret = false;
-								command.caretOffset = command.offset + 1;
-								return;
-							}
-						}
-						for (int i = 1; i < editor.PAIRS.length; i += 2) {
-							try {
-								if (command.text.equals("" + editor.PAIRS[i])) {
-									int blanksBeforeClosing = 0;
-									int newOffset = -1;
-									boolean foundCorrespondingClosing = false;
-									int offset = command.offset;
-									while (offset < document.getLength()) {
-										if (document.getContentType(offset).equals(contentType)) {
-											char c = document.getChar(offset);
-											if (c == editor.PAIRS[i]) {
-												foundCorrespondingClosing = true;
-												break;
-											} else if (c == ' ' || c == '\t'
-													|| c == '\n' || c == '\r') {
-												blanksBeforeClosing++;
-												if (newOffset == -1) {
-													newOffset = offset;
-												}
-											} else {
-												blanksBeforeClosing = 0;
-												newOffset = -1;
-											}
-										}
-										offset++;
-									}
-									command.length = blanksBeforeClosing;
-									if (newOffset != -1) {
-										command.offset = newOffset;
-									}
-									if (foundCorrespondingClosing) {
-										command.text = "";
-									}
-									command.shiftsCaret = false;
-									command.caretOffset = offset + 1; 
-									return;
-								}
-							} catch (BadLocationException e) {
-								e.printStackTrace();
-							}
-						}
-					}
-				}
-			}
-
-		}, new org.eclipse.jface.text.DefaultIndentLineAutoEditStrategy() };
+		return new IAutoEditStrategy[] { 
+				new PareditAutoEditStrategy()
+//		new IAutoEditStrategy() {
+//
+//			public void customizeDocumentCommand(IDocument document,
+//					DocumentCommand command) {
+//				if (command.doit) {
+//					if (command.length == 0) {
+//						for (int i = 0; i < editor.PAIRS.length; i += 2) {
+//							if (command.text.equals("" + editor.PAIRS[i])) {
+//								command.text += editor.PAIRS[i + 1];
+//								command.shiftsCaret = false;
+//								command.caretOffset = command.offset + 1;
+//								return;
+//							}
+//						}
+//						for (int i = 1; i < editor.PAIRS.length; i += 2) {
+//							try {
+//								if (command.text.equals("" + editor.PAIRS[i])) {
+//									int blanksBeforeClosing = 0;
+//									int newOffset = -1;
+//									boolean foundCorrespondingClosing = false;
+//									int offset = command.offset;
+//									while (offset < document.getLength()) {
+//										if (document.getContentType(offset).equals(contentType)) {
+//											char c = document.getChar(offset);
+//											if (c == editor.PAIRS[i]) {
+//												foundCorrespondingClosing = true;
+//												break;
+//											} else if (c == ' ' || c == '\t'
+//													|| c == '\n' || c == '\r') {
+//												blanksBeforeClosing++;
+//												if (newOffset == -1) {
+//													newOffset = offset;
+//												}
+//											} else {
+//												blanksBeforeClosing = 0;
+//												newOffset = -1;
+//											}
+//										}
+//										offset++;
+//									}
+//									command.length = blanksBeforeClosing;
+//									if (newOffset != -1) {
+//										command.offset = newOffset;
+//									}
+//									if (foundCorrespondingClosing) {
+//										command.text = "";
+//									}
+//									command.shiftsCaret = false;
+//									command.caretOffset = offset + 1; 
+//									return;
+//								}
+//							} catch (BadLocationException e) {
+//								e.printStackTrace();
+//							}
+//						}
+//					}
+//				}
+//			}
+//
+//		}
+		, new org.eclipse.jface.text.DefaultIndentLineAutoEditStrategy() };
 	}
 
 }
