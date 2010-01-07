@@ -235,6 +235,17 @@
 	                 "(defun f (x)\n  |)"
 	                "; (Foo.|"
 	                 "; (Foo.)|"}]
+	    ["["         :paredit-open-square
+                 {"(a b |c d)"  "(a b [|] c d)"
+                  "(foo \"bar |baz\" quux)" "(foo \"bar [|baz\" quux)"}
+                  {"(a b|c d)" "(a b [|] c d)"
+                   "(|)" "([|])"
+                   "|" "[|]"
+                   "a|" "a [|]"
+                   "(a |,b)" "(a [|],b)"
+                   "(a,| b)" "(a, [|] b)"
+                   "(a,|b)" "(a, [|] b)"
+                   "(a,|)" "(a, [|])"}]
     ]
   ])
 
@@ -292,20 +303,32 @@
   
 (defmulti paredit (fn [k & args] k))
 
-(defmethod paredit 
-  :paredit-open-round
-  [cmd {:keys [text offset length] :as t}]
+(defn open-balanced
+  [[o c] {:keys [text offset length] :as t}]
   #_(prn "t:" t)
   (if (in-code? text offset)
     (let [add-pre-space? (not (contains? (into *real-spaces* *open-brackets*) (previous-char t)))
           add-post-space? (not (contains? (into *extended-spaces* *close-brackets*) (next-char t)))
           ins-str (str (if add-pre-space? " " "")
-                       "()"
+                       (str o c)
                        (if add-post-space? " " ""))
           offset-shift (if add-post-space? -2 -1)]
       #_(prn "ins-str:" ins-str)
       (-> t (insert ins-str) (shift-offset offset-shift)))
-    (-> t (insert "("))))
+    (-> t (insert (str o)))))
+  
+
+(defmethod paredit 
+  :paredit-open-round
+  [cmd {:keys [text offset length] :as t}]
+  #_(prn "t:" t)
+  (open-balanced [\( \)] t))
+    
+(defmethod paredit 
+  :paredit-open-square
+  [cmd {:keys [text offset length] :as t}]
+  #_(prn "t:" t)
+  (open-balanced [\[ \]] t))
     
 (defn test-command [title-prefix command]
   (testing (str title-prefix " " (second command) " (\"" (first command) "\")")
