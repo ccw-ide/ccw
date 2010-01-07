@@ -12,12 +12,15 @@
 (defn- -init
   [] [[] (ref {})])   
 
+; TODO move this into paredit itself ...
+(def *one-char-command* {"(" :paredit-open-round "[" :paredit-open-square })
+
 (defn -customizeDocumentCommand 
   [#^IAutoEditStrategy this, #^IDocument document, #^DocumentCommand command]
   (when (.doit command)
     (if (and (= 0 (.length command))
-             (= "(" (.text command)))
-      (let [result (paredit :paredit-open-round {:text (.get document) :offset (.offset command) :length 0})]
+             (contains? *one-char-command* (.text command)))
+      (let [result (paredit (get *one-char-command* (.text command)) {:text (.get document) :offset (.offset command) :length 0})]
         #_(println "result:" result)
         (set! (.offset command) 0)
         (set! (.length command) (.length (.get document)))
