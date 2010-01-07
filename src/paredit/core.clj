@@ -235,7 +235,7 @@
 	                 "(defun f (x)\n  |)"
 	                "; (Foo.|"
 	                 "; (Foo.)|"}]
-	    ["["         :paredit-open-square
+      ["["         :paredit-open-square
                  {"(a b |c d)"  "(a b [|] c d)"
                   "(foo \"bar |baz\" quux)" "(foo \"bar [|baz\" quux)"}
                   {"(a b|c d)" "(a b [|] c d)"
@@ -246,6 +246,19 @@
                    "(a,| b)" "(a, [|] b)"
                    "(a,|b)" "(a, [|] b)"
                    "(a,|)" "(a, [|])"}]
+      ["{"         :paredit-open-curly ; this command does not exist in paredit AFAIK
+                 {"(a b |c d)"  "(a b {|} c d)"
+                  "(foo \"bar |baz\" quux)" "(foo \"bar {|baz\" quux)"}
+                  {"(a b|c d)" "(a b {|} c d)"
+                   "(|)" "({|})"
+                   "|" "{|}"
+                   "a|" "a {|}"
+                   "#|" "#{|}" ; specific to clojure sets
+                   "(a |,b)" "(a {|},b)"
+                   "(a,| b)" "(a, {|} b)"
+                   "(a,|b)" "(a, {|} b)"
+                   "(a,|)" "(a, {|})"
+                   }]
     ]
   ])
 
@@ -304,11 +317,14 @@
 (defmulti paredit (fn [k & args] k))
 
 (defn open-balanced
-  [[o c] {:keys [text offset length] :as t}]
+  [[o c] {:keys [text offset length] :as t} 
+   chars-with-no-space-before chars-with-no-space-after]
   #_(prn "t:" t)
   (if (in-code? text offset)
-    (let [add-pre-space? (not (contains? (into *real-spaces* *open-brackets*) (previous-char t)))
-          add-post-space? (not (contains? (into *extended-spaces* *close-brackets*) (next-char t)))
+    (let [add-pre-space? (not (contains? chars-with-no-space-before 
+                                         (previous-char t)))
+          add-post-space? (not (contains? chars-with-no-space-after 
+                                          (next-char t)))
           ins-str (str (if add-pre-space? " " "")
                        (str o c)
                        (if add-post-space? " " ""))
@@ -322,13 +338,25 @@
   :paredit-open-round
   [cmd {:keys [text offset length] :as t}]
   #_(prn "t:" t)
-  (open-balanced [\( \)] t))
+  (open-balanced [\( \)] t 
+    (into *real-spaces* *open-brackets*)
+    (into *extended-spaces* *close-brackets*)))
     
 (defmethod paredit 
   :paredit-open-square
   [cmd {:keys [text offset length] :as t}]
   #_(prn "t:" t)
-  (open-balanced [\[ \]] t))
+  (open-balanced [\[ \]] t
+    (into *real-spaces* *open-brackets*)
+    (into *extended-spaces* *close-brackets*)))
+    
+(defmethod paredit 
+  :paredit-open-curly
+  [cmd {:keys [text offset length] :as t}]
+  #_(prn "t:" t)
+  (open-balanced [\{ \}] t
+    (conj (into *real-spaces* *open-brackets*) \#) ; add # for not inserting space before a set
+    (into *extended-spaces* *close-brackets*)))
     
 (defn test-command [title-prefix command]
   (testing (str title-prefix " " (second command) " (\"" (first command) "\")")
