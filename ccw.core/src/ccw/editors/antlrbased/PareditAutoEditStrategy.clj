@@ -13,7 +13,10 @@
   [] [[] (ref {})])   
 
 ; TODO move this into paredit itself ...
-(def *one-char-command* {"(" :paredit-open-round "[" :paredit-open-square })
+(def *one-char-command* 
+  {"(" :paredit-open-round 
+   "[" :paredit-open-square
+   "{" :paredit-open-curly })
 
 (defn -customizeDocumentCommand 
   [#^IAutoEditStrategy this, #^IDocument document, #^DocumentCommand command]
