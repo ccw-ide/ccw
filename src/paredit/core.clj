@@ -221,7 +221,10 @@
 	                {"(a b|c d)" "(a b (|) c d)"
 	                 "(|)" "((|))"
 	                 "|" "(|)"
-	                 "a|" "a (|)"}]
+	                 "a|" "a (|)"
+	                 "(a |,b)" "(a (|),b)"
+	                 "(a,| b)" "(a, (|) b)"
+	                 "(a,|b)" "(a, (|) b)"}]
 	    #_[")"         :paredit-close-round
 	                {"(a b |c   )" "(a b c)|"
 	                "; Hello,| world!"
@@ -234,7 +237,8 @@
     ]
   ])
 
-(def *spaces* #{\newline \tab \space \,})
+(def *real-spaces* #{\newline \tab \space})
+(def *extended-spaces* (conj *real-spaces* \,))
 (def *open-brackets* (conj (set "([{") nil)) ; we add nil to the list to also match beginning of text 
 (def *close-brackets* (conj (set ")]}") nil)) ; we add nil to the list to also match end of text
 
@@ -290,15 +294,15 @@
 (defmethod paredit 
   :paredit-open-round
   [cmd {:keys [text offset length] :as t}]
-  (println "t:" t)
+  #_(prn "t:" t)
   (if (in-code? text offset)
-    (let [add-pre-space? (not (contains? (into *spaces* *open-brackets*) (previous-char t)))
-          add-post-space? (not (contains? (into *spaces* *close-brackets*) (next-char t)))
+    (let [add-pre-space? (not (contains? (into *real-spaces* *open-brackets*) (previous-char t)))
+          add-post-space? (not (contains? (into *extended-spaces* *close-brackets*) (next-char t)))
           ins-str (str (if add-pre-space? " " "")
                        "()"
                        (if add-post-space? " " ""))
           offset-shift (if add-post-space? -2 -1)]
-      (prn "ins-str:" ins-str)
+      #_(prn "ins-str:" ins-str)
       (-> t (insert ins-str) (shift-offset offset-shift)))
     (-> t (insert "("))))
     
