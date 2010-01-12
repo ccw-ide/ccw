@@ -93,7 +93,7 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 				result.append(kindString);
 			} else {
 				// TODO: handle non-lists...
-				result = new StyledString(element.toString());
+				result = new StyledString(safeToString(element));
 			}
 			return result;
 		}
@@ -321,7 +321,11 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 	}
 
 	private String safeToString(Object value) {
-		return value == null ? NOT_AVAILABLE : value.toString();
+		try {
+			return value == null ? NOT_AVAILABLE : value.toString();
+		} catch (Exception e) {
+			return NOT_AVAILABLE;
+		}
 	}
 
 	protected boolean isActivePart() {
