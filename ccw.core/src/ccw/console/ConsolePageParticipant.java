@@ -16,12 +16,15 @@ import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsolePageParticipant;
 import org.eclipse.ui.console.IOConsole;
 import org.eclipse.ui.console.IPatternMatchListener;
 import org.eclipse.ui.console.PatternMatchEvent;
 import org.eclipse.ui.console.TextConsole;
+import org.eclipse.ui.contexts.IContextActivation;
+import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.part.IPageBookViewPage;
 
 import ccw.ClojureCore;
@@ -35,14 +38,16 @@ import ccw.preferences.PreferenceConstants;
 public class ConsolePageParticipant implements IConsolePageParticipant {
 	private IOConsole console;
 	private ClojureClient clojureClient;
+	private IContextActivation contextActivation;
 
 	private Thread initializationThread;
+
 	public void init(IPageBookViewPage page, IConsole console) {
 		assert org.eclipse.debug.ui.console.IConsole.class.isInstance(console);
 		assert TextConsole.class.isInstance(console);
 
 		this.console = (IOConsole) console;
-		this.initializationThread = new Thread(new Runnable () {
+		this.initializationThread = new Thread(new Runnable() {
 			public void run() {
 				initNamespaceBrowser();
 			}
@@ -51,9 +56,30 @@ public class ConsolePageParticipant implements IConsolePageParticipant {
 	}
 
 	public void activated() {
-		// Nothing to do
+		activateContext("ccw.ui.clojureEditorScope"); //$NON-NLS-1$
 	}
 	
+	public void deactivated() {
+		deactivateContext();
+	}
+
+	private static IContextService contextService() {
+		return (IContextService) PlatformUI.getWorkbench().getAdapter(
+				IContextService.class);
+	}
+	private void activateContext(String contextId) {
+		contextActivation = contextService().activateContext(contextId);
+	}
+
+	private void deactivateContext() {
+		if (contextActivation != null) {
+			contextService().deactivateContext(contextActivation);
+			contextActivation = null;
+		}
+	}
+
+
+
 	private synchronized void initNamespaceBrowser() {
 		if (clojureClient == null) {
 			bindConsoleToClojureEnvironment();
@@ -61,24 +87,32 @@ public class ConsolePageParticipant implements IConsolePageParticipant {
 		if (clojureClient != null) {
 			System.out.println("activated");
 			addPatternMatchListener(this.console);
-			if (CCWPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.SWITCH_TO_NS_ON_REPL_STARTUP)) {
+			if (CCWPlugin.getDefault().getPreferenceStore().getBoolean(
+					PreferenceConstants.SWITCH_TO_NS_ON_REPL_STARTUP)) {
 				try {
 					org.eclipse.debug.ui.console.IConsole processConsole = (org.eclipse.debug.ui.console.IConsole) console;
-					List<IFile> files = LaunchUtils.getFilesToLaunchList(processConsole.getProcess().getLaunch().getLaunchConfiguration());
+					List<IFile> files = LaunchUtils
+							.getFilesToLaunchList(processConsole.getProcess()
+									.getLaunch().getLaunchConfiguration());
 					if (files.size() > 0) {
-						String namespace = ClojureCore.getDeclaredNamespace(files.get(0));
+						String namespace = ClojureCore
+								.getDeclaredNamespace(files.get(0));
 						if (namespace != null) {
-							EvaluateTextAction.evaluateText(this.console, "(in-ns '" + namespace + ")", false); 
+							EvaluateTextAction.evaluateText(this.console,
+									"(in-ns '" + namespace + ")", false);
 						}
 					}
 				} catch (CoreException e) {
-					CCWPlugin.logError("error while trying to guess the ns to which make the REPL console switch", e);
+					CCWPlugin
+							.logError(
+									"error while trying to guess the ns to which make the REPL console switch",
+									e);
 				}
 			}
 			NamespaceBrowser.setClojureClient(clojureClient);
 		}
 	}
-	
+
 	private void bindConsoleToClojureEnvironment() {
 		org.eclipse.debug.ui.console.IConsole processConsole = (org.eclipse.debug.ui.console.IConsole) console;
 		boolean stop = false;
@@ -87,7 +121,9 @@ public class ConsolePageParticipant implements IConsolePageParticipant {
 			if (Thread.interrupted()) {
 				stop = true;
 			} else {
-				int clojureVMPort = LaunchUtils.getLaunchServerReplPort(processConsole.getProcess().getLaunch());
+				int clojureVMPort = LaunchUtils
+						.getLaunchServerReplPort(processConsole.getProcess()
+								.getLaunch());
 				if (clojureVMPort != -1) {
 					clojureClient = new ClojureClient(clojureVMPort);
 					stop = true;
@@ -103,10 +139,6 @@ public class ConsolePageParticipant implements IConsolePageParticipant {
 			}
 		}
 	}
-	
-	public void deactivated() {
-		// Nothing
-	}
 
 	public void dispose() {
 		if (initializationThread.isAlive()) {
@@ -117,33 +149,34 @@ public class ConsolePageParticipant implements IConsolePageParticipant {
 	public Object getAdapter(Class adapter) {
 		return Platform.getAdapterManager().getAdapter(this, adapter);
 	}
-	
+
 	private void addPatternMatchListener(TextConsole console) {
 		console.addPatternMatchListener(new IPatternMatchListener() {
-            public int getCompilerFlags() {
-                return 0;
-            }
-            public String getLineQualifier() {
-                return null;
-            }
+			public int getCompilerFlags() {
+				return 0;
+			}
 
-            public String getPattern() {
-                return ".*\n";
-            }
+			public String getLineQualifier() {
+				return null;
+			}
 
-            public void connect(TextConsole console) {
-                // Nothing
-            }
+			public String getPattern() {
+				return ".*\n";
+			}
 
-            public void disconnect() {
-                // Nothing
-            }
+			public void connect(TextConsole console) {
+				// Nothing
+			}
 
-            public void matchFound(PatternMatchEvent event) {
-            	if (clojureClient != null) {
-            		NamespaceBrowser.setClojureClient(clojureClient);
-            	}
-            }
+			public void disconnect() {
+				// Nothing
+			}
+
+			public void matchFound(PatternMatchEvent event) {
+				if (clojureClient != null) {
+					NamespaceBrowser.setClojureClient(clojureClient);
+				}
+			}
 		});
 	}
 
