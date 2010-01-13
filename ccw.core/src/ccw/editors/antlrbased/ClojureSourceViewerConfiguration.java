@@ -87,6 +87,7 @@ public class ClojureSourceViewerConfiguration extends TextSourceViewerConfigurat
 	    assistant.setDocumentPartitioning(ClojurePartitionScanner.CLOJURE_PARTITIONING);
 	    assistant.setContentAssistProcessor(new ClojureProposalProcessor(editor, assistant), IDocument.DEFAULT_CONTENT_TYPE);
 	    assistant.setContentAssistProcessor(new ClojureProposalProcessor(editor, assistant), ClojurePartitionScanner.CLOJURE_COMMENT);
+	    assistant.setContentAssistProcessor(new ClojureProposalProcessor(editor, assistant), ClojurePartitionScanner.CLOJURE_CHAR);
 	    assistant.setContentAssistProcessor(new ClojureProposalProcessor(editor, assistant), ClojurePartitionScanner.CLOJURE_STRING);
 
 	    assistant.enableAutoActivation(false);
