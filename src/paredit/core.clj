@@ -225,7 +225,9 @@
 	                 "(a |,b)" "(a (|),b)"
 	                 "(a,| b)" "(a, (|) b)"
 	                 "(a,|b)" "(a, (|) b)"
-	                 "(a,|)" "(a, (|))"}]
+	                 "(a,|)" "(a, (|))"
+	                 "\\| " "\\(| "
+	                 "\\\\| " "\\\\ (|) "}]
 	    #_[")"         :paredit-close-round
 	                {"(a b |c   )" "(a b c)|"
 	                "; Hello,| world!"
@@ -245,7 +247,9 @@
                    "(a |,b)" "(a [|],b)"
                    "(a,| b)" "(a, [|] b)"
                    "(a,|b)" "(a, [|] b)"
-                   "(a,|)" "(a, [|])"}]
+                   "(a,|)" "(a, [|])"
+                   "\\| " "\\[| "
+                   "\\\\| " "\\\\ [|] "}]
       ["{"         :paredit-open-curly ; this command does not exist in paredit AFAIK
                  {"(a b |c d)"  "(a b {|} c d)"
                   "(foo \"bar |baz\" quux)" "(foo \"bar {|baz\" quux)"}
@@ -258,6 +262,8 @@
                    "(a,| b)" "(a, {|} b)"
                    "(a,|b)" "(a, {|} b)"
                    "(a,|)" "(a, {|})"
+                   "\\| " "\\{| "
+                   "\\\\| " "\\\\ {|} "
                    }]
     ]
   ])
@@ -286,9 +292,9 @@
 
 (defn in-code? 
   "true if character at offset offset is in a code
-   position, e.g. not in a string, regexp or comment"
+   position, e.g. not in a string, regexp, literal char or comment"
   [s offset]
-  (not (#{\" \;} (-> (parse s offset) :parents peek :type))))
+  (not (#{\" \; \\} (-> (parse s offset) :parents peek :type))))
 
 (defn insert
   "insert what at offset. offset shifted by what's length, selection length unchanged"
