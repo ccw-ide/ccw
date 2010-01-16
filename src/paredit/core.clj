@@ -228,14 +228,16 @@
 	                 "(a,|)" "(a, (|))"
 	                 "\\| " "\\(| "
 	                 "\\\\| " "\\\\ (|) "}]
-	    #_[")"         :paredit-close-round
-	                {"(a b |c   )" "(a b c)|"
-	                "; Hello,| world!"
-	                 "; Hello,)| world!"}]
+	    [")"         :paredit-close-round
+	                {#_"(a b |c   )" #_"(a b c)|"
+	                 "; Hello,| world!"  "; Hello,)| world!"
+	                 "  \"Hello,| world!\" foo" "  \"Hello,)| world!\" foo"
+	                 "  \"Hello,| world!" "  \"Hello,)| world!"
+	                 "foo \\|" "foo \\)|"}]
 	    #_["M-)"       :paredit-close-round-and-newline
 	                {"(defun f (x|  ))"
 	                 "(defun f (x)\n  |)"
-	                "; (Foo.|"
+	                 "; (Foo.|"
 	                 "; (Foo.)|"}]
       ["["         :paredit-open-square
                  {"(a b |c d)"  "(a b [|] c d)"
@@ -250,6 +252,13 @@
                    "(a,|)" "(a, [|])"
                    "\\| " "\\[| "
                    "\\\\| " "\\\\ [|] "}]
+      ["]"         :paredit-close-square
+                  {#_"(define-key keymap [frob|  ] 'frobnicate)"
+                   #_"(define-key keymap [frob]| 'frobnicate)"
+                   "; [Bar.|" "; [Bar.]|"
+                   "  \"Hello,| world!\" foo" "  \"Hello,]| world!\" foo"
+                   "  \"Hello,| world!" "  \"Hello,]| world!"
+                   "foo \\|" "foo \\]|"}]
       ["{"         :paredit-open-curly ; this command does not exist in paredit AFAIK
                  {"(a b |c d)"  "(a b {|} c d)"
                   "(foo \"bar |baz\" quux)" "(foo \"bar {|baz\" quux)"}
@@ -265,6 +274,13 @@
                    "\\| " "\\{| "
                    "\\\\| " "\\\\ {|} "
                    }]
+      ["}"         :paredit-close-curly
+                  {#_"{a b |c   }" #_"{a b c}|"
+                   "; Hello,| world!"
+                   "; Hello,}| world!"
+                   "  \"Hello,| world!\" foo" "  \"Hello,}| world!\" foo"
+                   "  \"Hello,| world!" "  \"Hello,}| world!"
+                   "foo \\|" "foo \\}|"}]
     ]
   ])
 
@@ -339,6 +355,23 @@
       (-> t (insert ins-str) (shift-offset offset-shift)))
     (-> t (insert (str o)))))
   
+(defn close-balanced
+  [[o c] {:keys [text offset length] :as t} 
+   chars-with-no-space-before chars-with-no-space-after]
+  #_(prn "t:" t)
+  (-> t (insert (str c)))
+  #_(if (in-code? text offset)
+    (let [add-pre-space? (not (contains? chars-with-no-space-before 
+                                         (previous-char t)))
+          add-post-space? (not (contains? chars-with-no-space-after 
+                                          (next-char t)))
+          ins-str (str (if add-pre-space? " " "")
+                       (str o c)
+                       (if add-post-space? " " ""))
+          offset-shift (if add-post-space? -2 -1)]
+      #_(prn "ins-str:" ins-str)
+      (-> t (insert ins-str) (shift-offset offset-shift)))
+    (-> t (insert (str o)))))
 
 (defmethod paredit 
   :paredit-open-round
@@ -364,6 +397,24 @@
     (conj (into *real-spaces* *open-brackets*) \#) ; add # for not inserting space before a set
     (into *extended-spaces* *close-brackets*)))
     
+(defmethod paredit 
+  :paredit-close-round
+  [cmd {:keys [text offset length] :as t}]
+  (close-balanced [\( \)] t
+    nil nil))
+
+(defmethod paredit 
+  :paredit-close-square
+  [cmd {:keys [text offset length] :as t}] t
+  (close-balanced [\[ \]] t
+    nil nil))
+
+(defmethod paredit 
+  :paredit-close-curly
+  [cmd {:keys [text offset length] :as t}] t
+  (close-balanced [\{ \}] t
+    nil nil))
+
 (defn test-command [title-prefix command]
   (testing (str title-prefix " " (second command) " (\"" (first command) "\")")
     (doseq [[input expected] (get command 2)]
