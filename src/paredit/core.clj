@@ -229,7 +229,13 @@
 	                 "\\| " "\\(| "
 	                 "\\\\| " "\\\\ (|) "}]
 	    [")"         :paredit-close-round
-	                {#_"(a b |c   )" #_"(a b c)|"
+	                {"(a b |c [])" "(a b c [])|"
+	                 #_"(a b |c   )" #_"(a b c)|"
+                   #_"( a,  b |[a b ]   )" #_"( a,  b [a b ])|"
+                   #_"( a,  b [|a b ]   )" #_"( a,  b [a b ])|"
+                   #_"[ a,  b (|a b )   ]" #_"[ a,  b (a b)|   ]"
+	                 #_"(a b |c ,  )" #_"(a b c)|"
+	                 #_"(a b | [d e]" #_"(a b)| [d e]"
 	                 "; Hello,| world!"  "; Hello,)| world!"
 	                 "  \"Hello,| world!\" foo" "  \"Hello,)| world!\" foo"
 	                 "  \"Hello,| world!" "  \"Hello,)| world!"
