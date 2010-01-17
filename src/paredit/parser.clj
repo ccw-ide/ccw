@@ -63,25 +63,29 @@
   [stop-offset]
   (fn stop-offset-based-parser-hook
   ; todo : later on, move offset+line+col+parents inside a proper deftyped type
-    [#^String text offset line col parents hook-state]
-    [(< offset stop-offset)
-    { :parents parents :offset offset :line line :col col }]))
+    [#^String text offset line col parents parser-state hook-state]
+    [(< offset stop-offset) nil]))
+
+(defn default-parser-result-maker
+  [#^String text offset line col parents parser-state hook-state]
+  { :parents parents :offset offset :line line :col col })
    
 (defn parse 
 	"TODO: currently the parser assumes a well formed document ... Define a policy if the parser encounters and invalid text
 	 TODO: make the parser restartable at a given offset given a state ...
 	 TODO: make the parser fully incremental (via chunks of any possible size ...)"	
-  ([#^String text] (parse text (make-stop-offset-based-parser-hook (.length text)) nil))
-  ([#^String text stop-offset] (parse text (make-stop-offset-based-parser-hook stop-offset) nil))
-	([#^String text parser-hook hook-state]
+  ([#^String text] (parse text (.length text)))
+  ([#^String text stop-offset] (parse text nil (make-stop-offset-based-parser-hook stop-offset) default-parser-result-maker))
+	([#^String text initial-hook-state parser-hook parser-result-maker]
 	  (loop [offset  (int 0)
 	         line    (int 0)
 	         col     (int 0)
 	         parents [{:type nil :offset 0 :line 0 :col 0}]
-	         hook-state hook-state]
-	      (let [[continue? hook-state] (parser-hook text offset line col parents hook-state)] 
-  	      (if (or (not continue?) (>= offset (.length text)))
-  	        hook-state
+	         hook-state initial-hook-state]
+	      (let [parser-state (if (>= offset (.length text)) :eof :ok) ; TODO soon an additional :parser-error state !
+	            [continue? hook-state] (parser-hook text offset line col parents parser-state hook-state)] 
+  	      (if (or (not continue?) (= :eof parser-state))
+  	        (parser-result-maker text offset line col parents parser-state hook-state)
   	        (let [c (.charAt text offset)] ; c: current char
   	          (condp = (-> parents peek :type)
   	            \" 
