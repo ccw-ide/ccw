@@ -7,6 +7,7 @@
 (def *brackets* {\( \) \{ \} \[ \]})
 (def *opening-brackets* (set (keys *brackets*)))
 (def *closing-brackets* (set (vals *brackets*)))
+(def *spaces* #{\space \tab \newline \return})
 
 (defn 
   start-like
@@ -106,14 +107,18 @@
                       (recur (inc offset) (inc line) (int 0) (pop parents) accumulated-state)
                     :else
                       (recur (inc offset) line (inc col) parents accumulated-state))
+                \space
+                  (cond 
+                    (= \newline c)
+                      (recur (inc offset) (inc line) (int 0) parents accumulated-state)
+                    (= \return c)
+                      (recur (inc offset) line col parents accumulated-state)
+                    (*spaces* c) ; we know it's not a space related to line jump
+                      (recur (inc offset) line (inc col) parents accumulated-state)
+                    :else ; we know we're going out of spaces
+                      (recur offset line col (pop parents) accumulated-state))
                 \\
                   (cond   ; leaved as a template if new cases have to be handled
-                    #_(*opening-brackets* c)
-                    #_(*closing-brackets* c)
-                    #_(= (first "\r") c)
-                    #_(= \newline c)
-                    #_(= \" c)
-                    #_(= \; c)
                     ; TODO refactor the following stuff. or keep for performance ? (bleh)
                     (start-like (.substring text (-> parents peek :offset)) "\\newline")
                       (if (< (inc (- offset (-> parents peek :offset))) (.length "\\newline"))
@@ -147,7 +152,7 @@
                       (recur (inc offset) (inc line) (int 0) parents accumulated-state)
                     :else
                       (recur (inc offset) line (inc col) (pop parents) accumulated-state))
-                ; last falling case: we are in plain code, neither in a string, regexp or a comment
+                ; last falling case: we are in plain code, neither in a string, regexp or a comment or a space
                 (cond
                   (*opening-brackets* c)
                     (recur 
@@ -159,7 +164,7 @@
                       (inc offset) line (inc col)
                       (pop parents)
                        accumulated-state)
-                  (= (first "\r") c)
+                  (= \return c)
                     (recur (inc offset) line col parents accumulated-state) ; we do not increment the column    
                   (= \newline c)
                     (recur (inc offset) (inc line) (int 0) parents accumulated-state)
@@ -169,6 +174,8 @@
                     (recur (inc offset) line (inc col) (conj parents {:type c :offset offset :line line :col col}) accumulated-state)
                   (= \\ c)
                     (recur (inc offset) line (inc col) (conj parents {:type c :offset offset :line line :col col}) accumulated-state)
+                  (*spaces* c)
+                    (recur offset line col (conj parents {:type c :offset offset :line line :col col}) accumulated-state)
                   :else
                     (recur (inc offset) line (inc col) parents accumulated-state))
                   
@@ -181,7 +188,8 @@
                     (= \; c)
                     (= \\ c)
                     :else
-                      (recur (inc offset) line (inc col) parents accumulated-state)))))))))
+                      (recur (inc offset) line (inc col) parents accumulated-state))
+                      )))))))
 	          
 (comment
 (defn parse-lib 
