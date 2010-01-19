@@ -87,8 +87,9 @@
 	            continue? (continue?-fn text offset line col parents parser-state accumulated-state)] 
   	      (if (or (not continue?) (= :eof parser-state))
   	        (make-result-fn text offset line col parents parser-state accumulated-state)
-  	        (let [c (.charAt text offset)] ; c: current char
-  	          (condp = (-> parents peek :type)
+  	        (let [c (.charAt text offset)
+  	              parent-type (-> parents peek :type)] ; c: current char
+  	          (condp = parent-type
   	            \" 
                   (cond
                     (= \newline c)
@@ -157,27 +158,29 @@
                   (*opening-brackets* c)
                     (recur 
                       (inc offset) line (inc col)
-                      (conj parents {:type c :offset offset :line line :col col})
+                      (conj (if (= \a parent-type) (pop parents) parents) {:type c :offset offset :line line :col col})
                        accumulated-state)
                   (*closing-brackets* c)
                     (recur 
                       (inc offset) line (inc col)
-                      (pop parents)
+                      (pop (if (= \a parent-type) (pop parents) parents))
                        accumulated-state)
-                  (= \return c)
-                    (recur (inc offset) line col parents accumulated-state) ; we do not increment the column    
-                  (= \newline c)
-                    (recur (inc offset) (inc line) (int 0) parents accumulated-state)
+                  #_(= \return c)
+                    #_(recur (inc offset) line col parents accumulated-state) ; we do not increment the column    
+                  #_(= \newline c)
+                    #_(recur (inc offset) (inc line) (int 0) parents accumulated-state)
                   (= \" c)
-                    (recur (inc offset) line (inc col) (conj parents {:type c :offset offset :line line :col col }) accumulated-state)
+                    (recur (inc offset) line (inc col) (conj (if (= \a parent-type) (pop parents) parents) {:type c :offset offset :line line :col col }) accumulated-state)
                   (= \; c)
-                    (recur (inc offset) line (inc col) (conj parents {:type c :offset offset :line line :col col}) accumulated-state)
+                    (recur (inc offset) line (inc col) (conj (if (= \a parent-type) (pop parents) parents) {:type c :offset offset :line line :col col}) accumulated-state)
                   (= \\ c)
-                    (recur (inc offset) line (inc col) (conj parents {:type c :offset offset :line line :col col}) accumulated-state)
+                    (recur (inc offset) line (inc col) (conj (if (= \a parent-type) (pop parents) parents) {:type c :offset offset :line line :col col}) accumulated-state)
                   (*spaces* c)
-                    (recur offset line col (conj parents {:type c :offset offset :line line :col col}) accumulated-state)
+                    (recur offset line col (conj (if (= \a parent-type) (pop parents) parents) {:type \space :offset offset :line line :col col}) accumulated-state)
                   :else
-                    (recur (inc offset) line (inc col) parents accumulated-state))
+                    (recur (inc offset) line (inc col) 
+                      (if (= \a parent-type) parents (conj parents {:type \a :offset offset :line line :col col}))
+                      accumulated-state)) ; \a comme atom
                   
                   #_(cond   ; leaved as a template if new cases have to be handled
                     (*opening-brackets* c)
@@ -187,6 +190,8 @@
                     (= \" c)
                     (= \; c)
                     (= \\ c)
+                    (= \space c)
+                    (= \c c)
                     :else
                       (recur (inc offset) line (inc col) parents accumulated-state))
                       )))))))
