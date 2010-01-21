@@ -75,13 +75,6 @@
 (defn default-accumulator
   [#^String text offset line col parents parser-state accumulated-state]
     [#^String text offset line col parents parser-state accumulated-state]
-    (println "offset:" offset ", parser-state:" parser-state ", current:")
-    (pr (-> accumulated-state peek :tag))
-    (println "will go into :eof section:" (or
-        (< (count parents) (count accumulated-state))
-        (and (= :eof parser-state) (= \a (-> accumulated-state peek :tag)))))
-    (println "accumulated-state:" accumulated-state)
-    (println "")
     (cond
       (> (count parents) (count accumulated-state))
         ; enter a sublevel
