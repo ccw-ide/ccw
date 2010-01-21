@@ -1,6 +1,7 @@
 ; note : hiredman's reader http://github.com/hiredman/clojure/blob/readerII/src/clj/clojure/reader.clj#L516
 ; still TODO :
-; 1. make parser and function behaviour similar for terminals atom and spaces (and move the special handling of zipping terminals up on :eof from default-handler to default-maker ?)
+; 1. done - make parser and function behaviour similar for terminals atom and spaces 
+; 1.a  (and move the special handling of zipping terminals up on :eof from default-handler to default-maker ?)
 ; 2. correctly handle clojure specificities : #{} #^ #"" ' ` @ #^ ^ #' #_ #() ~ ~@ foo#
 ; 3. correctly handle the premature :eof on non closed structures (a cause of error)
 ; 4. correctly handle parsetree errors (wrong closing of bracket, ... TODO finish the exhaustive list)
@@ -62,7 +63,7 @@
 (def *opening-brackets* (set (keys *brackets*)))
 (def *closing-brackets* (set (vals *brackets*)))
 (def *spaces* #{\space \tab \newline \return})
-
+(def *atoms* #{ \a \space})
       
 (defn zip-one [#^String text offset line col parents parser-state accumulated-state]
   (let [level (-> accumulated-state peek (assoc :end-offset offset))
@@ -78,14 +79,14 @@
     (cond
       (> (count parents) (count accumulated-state))
         ; enter a sublevel
-        (if (and (= :eof parser-state) (= \a (-> parents peek :tag))) ; todo move in default-make-result ?
+        (if (and (= :eof parser-state) (*atoms* (-> parents peek :tag))) ; todo move in default-make-result ?
           (zip-one 
             text offset line col parents parser-state 
             (-> accumulated-state (conj (peek parents))))
           (-> accumulated-state (conj (peek parents)))) 
       (or
         (< (count parents) (count accumulated-state))
-        (and (= :eof parser-state) (= \a (-> accumulated-state peek :tag))))
+        (and (= :eof parser-state) (*atoms* (-> accumulated-state peek :tag))))
         ; exit a sublevel
           ; on stocke l'offset de fin du niveau, on l'enregistre en tant
           ; que fils du parent, on depope le niveau
