@@ -1,3 +1,11 @@
+; todo 
+; 1. emit text deltas, not plain text replacement (or IDEs will not like it)
+; 2. write with clojure.zip functions the close-* stuff
+; 3. write the string related stuff
+; ... ?
+; 4. add support for more clojure-related source code ( #{}, #""... )
+; ... and all the other paredit stuff ...
+
 (ns paredit.core
   (:use clojure.contrib.def)
   (:use clojure.test)
@@ -229,7 +237,7 @@
 	                 "\\| " "\\(| "
 	                 "\\\\| " "\\\\ (|) "}]
 	    [")"         :paredit-close-round
-	                {#_"(a b |c [])" #_"(a b c [])|"
+	                {"(a b |c [])" "(a b c [])|"
 	                 #_"(a b |c   )" #_"(a b c)|"
                    #_"( a,  b |[a b ]   )" #_"( a,  b [a b ])|"
                    #_"( a,  b [|a b ]   )" #_"( a,  b [a b ])|"
@@ -316,7 +324,7 @@
   "true if character at offset offset is in a code
    position, e.g. not in a string, regexp, literal char or comment"
   [s offset]
-  (not (#{\" \; \\} (-> (parse s offset) :parents peek :type))))
+  (not (#{\" \; \\} (-> (parse s offset) :parents peek :tag))))
 
 (defn insert
   "insert what at offset. offset shifted by what's length, selection length unchanged"
@@ -438,4 +446,3 @@
 (defvar *text* (atom {:text "" :offset 0 :length 0})
   "defines a text, with :offset being the cursor position,
    and :length being a possible selection (may be negative)")
-
