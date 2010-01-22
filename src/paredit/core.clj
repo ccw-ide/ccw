@@ -1,9 +1,13 @@
 ; todo 
 ; 1. emit text deltas, not plain text replacement (or IDEs will not like it)
-; 2. write with clojure.zip functions the close-* stuff
-; 3. write the string related stuff
+; 2. have a story for invalid parsetrees : just do nothing ?
+; 3. use restartable version of the parser
+; 4. make paredit optional in ccw
+; 5. prepare a new release of ccw
+; 6. write with clojure.zip functions the close-* stuff
+; 7. write the string related stuff
 ; ... ?
-; 4. add support for more clojure-related source code ( #{}, #""... )
+; . add support for more clojure-related source code ( #{}, #""... )
 ; ... and all the other paredit stuff ...
 
 (ns paredit.core
