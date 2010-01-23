@@ -235,7 +235,6 @@
                         parents 
                         (conj parents {:tag \a :offset offset :line line :col col}))
                           accumulated-state)))))))))
-	          
 (defn parse-lib 
   ([lib] (parse-lib lib false))
   ([lib show?]
