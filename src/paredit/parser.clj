@@ -2,7 +2,7 @@
 ; still TODO :
 ; 1. done - make parser and function behaviour similar for terminals atom and spaces 
 ; 1.a  (and move the special handling of zipping terminals up on :eof from default-handler to default-maker ?)
-; 2. correctly handle clojure specificities : #{} #^ #"" ' ` @ #^ ^ #' #_ #() ~ ~@ foo#
+; 2. correctly handle clojure specificities : #{} #^ #"" ' ` @ #^ ^ #' #_ #() ~ ~@ foo# #!
 ; 3. correctly handle the premature :eof on non closed structures (a cause of error)
 ; 4. correctly handle parsetree errors (wrong closing of bracket, ... TODO finish the exhaustive list)
 ; 5. make the parser restartable
