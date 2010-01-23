@@ -332,10 +332,12 @@
 
 (defn insert
   "insert what at offset. offset shifted by what's length, selection length unchanged"
-  [{:keys [#^String text offset length] :as where} #^String what]
-  (assoc where 
-    :text (str (.substring text 0 offset) what (.substring text offset))
-    :offset (+ offset (.length what)))) 
+  [{:keys [#^String text offset length modifs] :as where :or {:modifs []}} #^String what]
+  (let [new-offset (+ offset (.length what))]
+    (assoc where 
+      :text (str (.substring text 0 offset) what (.substring text offset))
+      :offset new-offset
+      :modifs (conj modifs {:text what, :offset offset, :length 0})))) 
 
 (defn shift-offset     
   "shift offset, the selection is also shifted"
