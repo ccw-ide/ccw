@@ -27,9 +27,9 @@
                           {:text (.get document) 
                            :offset (.offset command) 
                            :length 0})]
-      (println "result:" result)
-      (set! (.offset command) 0)
-      (set! (.length command) (.length (.get document)))
-      (set! (.text command) (:text result))
+      #_(println "result:" result)
+      (set! (.offset command) (-> result :modifs first :offset))
+      (set! (.length command) (-> result :modifs first :length))
+      (set! (.text command) (-> result :modifs first :text))
       (set! (.shiftsCaret command) false)
       (set! (.caretOffset command) (:offset result)))))
