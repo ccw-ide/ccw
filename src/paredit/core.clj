@@ -1,5 +1,5 @@
 ; todo 
-; 1. emit text deltas, not plain text replacement (or IDEs will not like it)
+; done 1. emit text deltas, not plain text replacement (or IDEs will not like it)
 ; 2. have a story for invalid parsetrees : just do nothing ?
 ; 3. use restartable version of the parser
 ; 4. make paredit optional in ccw
