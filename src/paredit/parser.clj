@@ -4,7 +4,7 @@
 ; 1.a  (and move the special handling of zipping terminals up on :eof from default-handler to default-maker ?)
 ; 2. correctly handle clojure specificities : #{} #^ #"" ' ` @ #^ ^ #' #_ #() ~ ~@ foo# #!
 ; 3. correctly handle the premature :eof on non closed structures (a cause of error)
-; 4. correctly handle parsetree errors (wrong closing of bracket, ... TODO finish the exhaustive list)
+; 4. correctly handle parsetree errors (wrong closing of bracket (this one done), ... TODO finish the exhaustive list)
 ; 5. make the parser restartable
 ; 6. make the parser incremental 
 ; 7. refactor the code so that the handling of advancing offset, line, column ... is mutualized (be aware of not introducing regressions in the handling of atoms and spaces terminals)
@@ -13,6 +13,9 @@
 
 ; bugs:
 ; \newlinb should be an error, not \n + symbol ewlinb
+
+; miscellaneous TODO
+; * add an explicit error message to :parser-state :ko (unbalanced parens)
 
 (ns paredit.parser
 	(:use clojure.test))
@@ -67,9 +70,14 @@
 (def *closing-brackets* (set (vals *brackets*)))
 (def *spaces* #{\space \tab \newline \return})
 (def *atoms* #{ \a \space})
-      
+
 (defn zip-one [#^String text offset line col parents parser-state accumulated-state]
-  (let [level (-> accumulated-state peek (assoc :end-offset offset))
+  (let [level (-> accumulated-state peek)
+        level-content (get level :content [])
+        level-content (if-let [closing-delimiter (-> level :tag *brackets*)]
+                        (conj level-content (str closing-delimiter))
+                        (conj level-content (.substring text (get level :offset 0) offset)))
+        level (-> accumulated-state peek (assoc :end-offset offset :content level-content))
         parent-level (-> accumulated-state pop peek)
         brothers (get parent-level :content [])
         parent-level (assoc parent-level :content (conj brothers level))]
@@ -86,7 +94,11 @@
           (zip-one 
             text offset line col parents parser-state 
             (-> accumulated-state (conj (peek parents))))
-          (-> accumulated-state (conj (peek parents)))) 
+          (let [new-node (peek parents)
+                new-node (assoc new-node :content (if-let [opening-delimiter (*opening-brackets* (:tag new-node))]
+                                           [(str opening-delimiter)]
+                                           []))]
+            (-> accumulated-state (conj new-node)))) 
       (or
         (< (count parents) (count accumulated-state))
         (and (= :eof parser-state) (*atoms* (-> accumulated-state peek :tag))))
