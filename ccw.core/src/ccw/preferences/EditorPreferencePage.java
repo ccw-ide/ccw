@@ -45,7 +45,10 @@ public class EditorPreferencePage extends FieldEditorPreferencePage implements
         
         addField(
     		new BooleanFieldEditor(ccw.preferences.PreferenceConstants.SWITCH_TO_NS_ON_REPL_STARTUP, Messages.ClojurePreferencePage_switch_to_ns_on_repl_startup, getFieldEditorParent()));
-    }
+
+        addField(
+        	new BooleanFieldEditor(ccw.preferences.PreferenceConstants.ACTIVATE_PAREDIT, Messages.ClojurePreferencePage_activate_paredit, getFieldEditorParent()));
+}
 
     /* (non-Javadoc)
      * @see org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)

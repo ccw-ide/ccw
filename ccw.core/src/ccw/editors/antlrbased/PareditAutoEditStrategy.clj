@@ -7,11 +7,12 @@
                             DocumentCommand])
   (:gen-class
    :implements [org.eclipse.jface.text.IAutoEditStrategy]
+   :constructors {[org.eclipse.jface.preference.IPreferenceStore] []}
    :init init
    :state state))
    
 (defn- -init
-  [] [[] (ref {})])   
+  [preference-store] [[] (ref {:prefs-store preference-store})])   
 
 ; TODO move this into paredit itself ...
 (def *one-char-command* 
@@ -23,9 +24,14 @@
    "}" :paredit-close-curly
    "\"" :paredit-doublequote})
 
+(defn paredit-enabled?
+  [#^org.eclipse.jface.preference.IPreferenceStore prefs-store]
+  (.getBoolean prefs-store ccw.preferences.PreferenceConstants/ACTIVATE_PAREDIT))
+
 (defn -customizeDocumentCommand 
   [#^IAutoEditStrategy this, #^IDocument document, #^DocumentCommand command]
-  (when (and (.doit command)
+  (when (paredit-enabled? (-> this .state deref :prefs-store))
+        (and (.doit command)
              (= 0 (.length command))
              (contains? *one-char-command* (.text command)))
     (let [result (paredit (get *one-char-command* (.text command))

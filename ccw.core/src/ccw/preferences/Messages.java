@@ -25,6 +25,8 @@ public class Messages extends NLS {
     
     public static String ClojurePreferencePage_switch_to_ns_on_repl_startup;
 
+    public static String ClojurePreferencePage_activate_paredit;
+
     public static String SyntaxColoringPreferencePage_function;
 
     // TODO new messages in properties

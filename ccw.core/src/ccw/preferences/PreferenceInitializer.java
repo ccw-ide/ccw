@@ -65,6 +65,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
                 StringConverter.asString(new RGB(150, 150, 150)));
 	    store.setDefault(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH, 2);
 	    store.setDefault(ccw.preferences.PreferenceConstants.SWITCH_TO_NS_ON_REPL_STARTUP, true);
+	    store.setDefault(ccw.preferences.PreferenceConstants.ACTIVATE_PAREDIT, true);
 	    
 	    for (SyntaxColoringDefault d: coloringDefaults) {
 	        store.setDefault(d.getPreferenceConstant(),
