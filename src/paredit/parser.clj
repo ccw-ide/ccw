@@ -18,7 +18,8 @@
 ; * add an explicit error message to :parser-state :ko (unbalanced parens)
 
 (ns paredit.parser
-	(:use clojure.test))
+	(:use [clojure.test])
+	(:require [clojure.zip :as zip]))
 
 (set! *warn-on-reflection* true)
 
@@ -68,7 +69,7 @@
 (def *brackets* {\( \) \{ \} \[ \]})
 (def *opening-brackets* (set (keys *brackets*)))
 (def *closing-brackets* (set (vals *brackets*)))
-(def *spaces* #{\space \tab \newline \return})
+(def *spaces* #{\space \tab \newline \return \,})
 (def *atoms* #{ \a \space})
 
 (defn zip-one [#^String text offset line col parents parser-state accumulated-state]
@@ -121,8 +122,13 @@
     :offset offset 
     :line line 
     :col col 
-    :accumulated-state accumulated-state
-    :parser-state parser-state})
+    :accumulated-state (assoc-in accumulated-state [0 :end-offset] offset)
+    :parser-state parser-state })
+
+(defn empty-node? [node]
+  (or 
+    (= \space (:tag node))
+    (every? #(and (not (string? %)) (= \space (:tag %))) (:content node))))
    
 (defn parse 
 	"TODO: currently the parser assumes a well formed document ... Define a policy if the parser encounters and invalid text
@@ -134,7 +140,7 @@
 	  (loop [offset  (int 0)
 	         line    (int 0)
 	         col     (int 0)
-	         parents [{:tag nil :offset 0 :line 0 :col 0}]
+	         parents [{:tag :root :offset 0 :line 0 :col 0}]
 	         accumulated-state initial-accumulated-state
 	         parser-state :ok]
       (if (= :ko parser-state)
@@ -268,6 +274,44 @@
                         (conj parents {:tag \a :offset offset :line line :col col}))
                       accumulated-state
                       :ok))))))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; utility libraries for manipulating the parse-tree
+
+(defn parsed-root-loc [parsed]
+  ; TODO handle the case where the parse is invalid
+  (-> parsed :accumulated-state first zip/xml-zip))
+
+(defn contains-offset?
+  "returns the loc itself if it contains the offset, else nil"
+  [loc offset]
+  (let [n (zip/node loc)]
+    (and 
+      (not (string? n))
+      (cond
+        (= :root (:tag n))
+          (<= (:offset n) offset (:end-offset n))
+        :else
+          (and (<= (:offset n) offset) 
+               (< offset (:end-offset n))))
+      loc)))
+
+(defn loc-for-offset 
+  "returns a zipper location or nil if does not contain the offset"
+  ([loc offset] (loc-for-offset loc offset nil))
+  ([loc offset last-match]
+    (if (or (nil? loc) (not (contains-offset? loc offset)) (not (zip/branch? loc)))
+      last-match
+      (recur 
+        (some  
+          #(contains-offset? % offset) 
+          (take-while identity (iterate zip/right (zip/down loc)))) 
+        offset
+        loc))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; test functions
 
 (defn parse-lib 
   ([lib] (parse-lib lib false))

@@ -1,6 +1,6 @@
 ; todo 
 ; done 1. emit text deltas, not plain text replacement (or IDEs will not like it)
-; 2. have a story for invalid parsetrees : just do nothing ?
+; done 2. have a story for invalid parsetrees : just do nothing : currently = paredit deactivated if error from start-of-file to area of paredit's work
 ; 3. use restartable version of the parser
 ; 4. make paredit optional in ccw
 ; 5. prepare a new release of ccw
@@ -15,7 +15,8 @@
   (:use clojure.test)
   (:use paredit.parser)
   (:require clojure.contrib.pprint)
-  (:require [clojure.contrib.str-utils2 :as str2]))
+  (:require [clojure.contrib.str-utils2 :as str2])
+  (:require [clojure.zip :as zip]))
 
 (set! *warn-on-reflection* true)
 
@@ -241,13 +242,17 @@
 	                 "\\| " "\\(| "
 	                 "\\\\| " "\\\\ (|) "}]
 	    [")"         :paredit-close-round
-	                {"(a b |c [])" "(a b c [])|"
-	                 #_"(a b |c   )" #_"(a b c)|"
-                   #_"( a,  b |[a b ]   )" #_"( a,  b [a b ])|"
-                   #_"( a,  b [|a b ]   )" #_"( a,  b [a b ])|"
-                   #_"[ a,  b (|a b )   ]" #_"[ a,  b (a b)|   ]"
-	                 #_"(a b |c ,  )" #_"(a b c)|"
-	                 #_"(a b | [d e]" #_"(a b)| [d e]"
+	                {"(a |b)" "(a b)|"
+	                 "(a |b) cd" "(a b)| cd"
+	                 "(a |b ) cd" "(a b)| cd"
+	                 "(a b |c [])" "(a b c [])|"
+                   "(a b c [|] )" "(a b c [])|"
+	                 "(a b |c   )" "(a b c)|"
+                   "( a,  b |[a b ]   )" "( a,  b [a b ])|"
+                   "( a,  b [|a b ]   )" "( a,  b [a b ])|"
+                   "[ a,  b (|a b )   ]" "[ a,  b (a b)|   ]"
+	                 "(a b |c ,  )" "(a b c)|"
+	                 "(a b| [d e]" "(a b)| [d e]"
 	                 "; Hello,| world!"  "; Hello,)| world!"
 	                 "  \"Hello,| world!\" foo" "  \"Hello,)| world!\" foo"
 	                 "  \"Hello,| world!" "  \"Hello,)| world!"
@@ -271,8 +276,8 @@
                    "\\| " "\\[| "
                    "\\\\| " "\\\\ [|] "}]
       ["]"         :paredit-close-square
-                  {#_"(define-key keymap [frob|  ] 'frobnicate)"
-                   #_"(define-key keymap [frob]| 'frobnicate)"
+                  {"(define-key keymap [frob|  ] 'frobnicate)"
+                   "(define-key keymap [frob]| 'frobnicate)"
                    "; [Bar.|" "; [Bar.]|"
                    "  \"Hello,| world!\" foo" "  \"Hello,]| world!\" foo"
                    "  \"Hello,| world!" "  \"Hello,]| world!"
@@ -293,12 +298,25 @@
                    "\\\\| " "\\\\ {|} "
                    }]
       ["}"         :paredit-close-curly
-                  {#_"{a b |c   }" #_"{a b c}|"
+                  {"{a b |c   }" "{a b c}|"
                    "; Hello,| world!"
                    "; Hello,}| world!"
                    "  \"Hello,| world!\" foo" "  \"Hello,}| world!\" foo"
                    "  \"Hello,| world!" "  \"Hello,}| world!"
                    "foo \\|" "foo \\}|"}]
+      ["\""        :paredit-doublequote
+                  {"(frob grovel |full lexical)"
+                   "(frob grovel \"|\" full lexical)",
+                   "(frob grovel \"|\" full lexical)"
+                   "(frob grovel \"\"| full lexical)",
+                   "(foo \"bar |baz\" quux)"
+                   "(foo \"bar \\\"|baz\" quux)",
+                   ";|ab" ";\"|ab",
+                   "(frob grovel \"foo \\|bar\" full lexical)",
+                   "(frob grovel \"foo \\\"|bar\" full lexical)"
+                   "(frob grovel \"foo \\\\|bar\" full lexical)",
+                   "(frob grovel \"foo \\\\\\\"|bar\" full lexical)",
+                   }]
     ]
   ])
 
@@ -324,11 +342,19 @@
         spec (if (zero? (:length text)) spec (insert spec (+ 1 (:offset text) (:length text)) "|"))]
     spec))
 
-(defn in-code? 
+(def *not-in-code* #{\" \; \\})
+
+(defn parsed-in-tags?
+  [parsed tags-set]
+  (tags-set (-> parsed :parents peek :tag)))
+
+(defn in-code?
+  ; TODO the current function is not general enough, it just works for the offset
+  ; the parse stopped at  
   "true if character at offset offset is in a code
    position, e.g. not in a string, regexp, literal char or comment"
-  [s offset]
-  (not (#{\" \; \\} (-> (parse s offset) :parents peek :tag))))
+  [parsed]
+  (not (parsed-in-tags? parsed *not-in-code*)))
 
 (defn insert
   "insert what at offset. offset shifted by what's length, selection length unchanged"
@@ -339,17 +365,33 @@
       :offset new-offset
       :modifs (conj modifs {:text what, :offset offset, :length 0})))) 
 
+(defn delete
+  "removes n chars at offset off. offset not shifted, selection length unchanged"
+  ; TODO FIXME : decrease length if now that things are removed, length would make the selection overflow the text
+  [{:keys [#^String text offset length modifs] :as where :or {:modifs []}} off n]
+  (assoc where 
+    :text (str (.substring text 0 off) (.substring text (+ off n)))
+    :offset offset
+    :modifs (conj modifs {:text "", :offset off, :length n}))) 
+
 (defn shift-offset     
   "shift offset, the selection is also shifted"
   [{:keys [text offset length] :as where} shift]
   (assoc where :offset (+ offset shift))) 
 
+(defn set-offset     
+  "sets offset, the selection is also shifted"
+  [{:keys [text offset length] :as where} new-offset]
+  (assoc where :offset new-offset)) 
+
 ; TODO faire comme next-char sur l'utilisation de length
 ; !! attention pas de gestion de length negative
-(defn previous-char [{:keys [#^String text offset length] :as t}]
-  (assert (>= length 0))
-  (when (> offset 0)
-    (.charAt text (dec offset))))
+(defn previous-char 
+  ([{:keys [#^String text offset length] :as t}] (previous-char t 1))
+  ([{:keys [#^String text offset length] :as t} n]
+    (assert (>= length 0))
+    (when (>= (- offset n) 0)
+      (.charAt text (- offset n)))))
   
 (defn next-char [{:keys [#^String text offset length] :as t}]
   (assert (>= length 0))
@@ -358,45 +400,50 @@
   
 (defmulti paredit (fn [k & args] k))
 
+(defn insert-balanced
+  [[o c] t chars-with-no-space-before chars-with-no-space-after]
+  (let [add-pre-space? (not (contains? chars-with-no-space-before 
+                                       (previous-char t)))
+        add-post-space? (not (contains? chars-with-no-space-after 
+                                        (next-char t)))
+        ins-str (str (if add-pre-space? " " "")
+                     (str o c)
+                     (if add-post-space? " " ""))
+        offset-shift (if add-post-space? -2 -1)]
+    (-> t (insert ins-str) (shift-offset offset-shift))))
+
 (defn open-balanced
-  [[o c] {:keys [text offset length] :as t} 
+  [[o c] {:keys [#^String text offset length] :as t} 
    chars-with-no-space-before chars-with-no-space-after]
-  #_(prn "t:" t)
-  (if (in-code? text offset)
-    (let [add-pre-space? (not (contains? chars-with-no-space-before 
-                                         (previous-char t)))
-          add-post-space? (not (contains? chars-with-no-space-after 
-                                          (next-char t)))
-          ins-str (str (if add-pre-space? " " "")
-                       (str o c)
-                       (if add-post-space? " " ""))
-          offset-shift (if add-post-space? -2 -1)]
-      #_(prn "ins-str:" ins-str)
-      (-> t (insert ins-str) (shift-offset offset-shift)))
-    (-> t (insert (str o)))))
+  (let [parsed (parse text offset)]
+    (if (in-code? parsed)
+      (insert-balanced [o c] t chars-with-no-space-before chars-with-no-space-after)
+      (-> t (insert (str o))))))
   
 (defn close-balanced
-  [[o c] {:keys [text offset length] :as t} 
+  [[o c] {:keys [#^String text offset length] :as t} 
    chars-with-no-space-before chars-with-no-space-after]
-  #_(prn "t:" t)
-  (-> t (insert (str c)))
-  #_(if (in-code? text offset)
-    (let [add-pre-space? (not (contains? chars-with-no-space-before 
-                                         (previous-char t)))
-          add-post-space? (not (contains? chars-with-no-space-after 
-                                          (next-char t)))
-          ins-str (str (if add-pre-space? " " "")
-                       (str o c)
-                       (if add-post-space? " " ""))
-          offset-shift (if add-post-space? -2 -1)]
-      #_(prn "ins-str:" ins-str)
-      (-> t (insert ins-str) (shift-offset offset-shift)))
-    (-> t (insert (str o)))))
+    (let [parsed (parse text (.length text))] ; changed offset to (.length text)
+      (if-let [offset-loc (and 
+                            (in-code? parsed)
+                            (-> parsed parsed-root-loc (loc-for-offset offset)))]
+        (let [up-locs (take-while identity (iterate zip/up offset-loc))
+              match (some #(when (= o (-> % zip/node :tag)) %) up-locs)]
+          (if match
+            (let [last-node (-> match zip/down zip/rightmost zip/left zip/node)
+                  nb-delete (if (= \space (:tag last-node)) 
+                              (- (:end-offset last-node) (:offset last-node))
+                              0)
+                  t (if (> nb-delete 0) 
+                      (delete t (:offset last-node) nb-delete)
+                      t)] ; zip/left because there is the closing node
+              (-> t (set-offset (- (-> match zip/node (:end-offset)) nb-delete))))
+            (-> t (insert (str c)))))
+        (-> t (insert (str c))))))
 
 (defmethod paredit 
   :paredit-open-round
   [cmd {:keys [text offset length] :as t}]
-  #_(prn "t:" t)
   (open-balanced [\( \)] t 
     (into *real-spaces* *open-brackets*)
     (into *extended-spaces* *close-brackets*)))
@@ -404,7 +451,6 @@
 (defmethod paredit 
   :paredit-open-square
   [cmd {:keys [text offset length] :as t}]
-  #_(prn "t:" t)
   (open-balanced [\[ \]] t
     (into *real-spaces* *open-brackets*)
     (into *extended-spaces* *close-brackets*)))
@@ -412,9 +458,8 @@
 (defmethod paredit 
   :paredit-open-curly
   [cmd {:keys [text offset length] :as t}]
-  #_(prn "t:" t)
   (open-balanced [\{ \}] t
-    (conj (into *real-spaces* *open-brackets*) \#) ; add # for not inserting space before a set
+    (conj (into *real-spaces* *open-brackets*) \#) ; add # for not inserting space before a set FIXME
     (into *extended-spaces* *close-brackets*)))
     
 (defmethod paredit 
@@ -434,6 +479,25 @@
   [cmd {:keys [text offset length] :as t}] t
   (close-balanced [\{ \}] t
     nil nil))
+
+(defmethod paredit
+  :paredit-doublequote
+  [cmd {:keys [text offset length] :as t}]
+  (let [parsed (parse text offset)]
+    (cond
+      (in-code? parsed)
+        (insert-balanced [\" \"] t
+          (into *real-spaces* *open-brackets*)
+          (into *extended-spaces* *close-brackets*))
+      (not (parsed-in-tags? parsed #{\"}))
+        (-> t (insert (str \")))
+      (and (= \\ (previous-char t)) (not= \\ (previous-char t 2)))
+        (-> t (insert (str \")))
+      (= \" (next-char t))
+        (shift-offset t 1)
+        #_(close-balanced [\" \"] t nil nil)
+      :else
+        (-> t (insert (str \\ \"))))))
 
 (defn test-command [title-prefix command]
   (testing (str title-prefix " " (second command) " (\"" (first command) "\")")
