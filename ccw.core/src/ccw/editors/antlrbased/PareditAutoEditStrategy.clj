@@ -1,5 +1,6 @@
 (ns ccw.editors.antlrbased.PareditAutoEditStrategy
-  (:use [paredit [core :only [paredit]]])  
+  (:use [paredit [core :only [paredit]]])
+  (:use [clojure.contrib.core :only [-?>]])  
   (:import
     [org.eclipse.jface.text IAutoEditStrategy
                             IDocument
@@ -16,7 +17,11 @@
 (def *one-char-command* 
   {"(" :paredit-open-round 
    "[" :paredit-open-square
-   "{" :paredit-open-curly })
+   "{" :paredit-open-curly
+   ")" :paredit-close-round
+   "]" :paredit-close-square
+   "}" :paredit-close-curly
+   "\"" :paredit-doublequote})
 
 (defn -customizeDocumentCommand 
   [#^IAutoEditStrategy this, #^IDocument document, #^DocumentCommand command]
@@ -28,8 +33,15 @@
                            :offset (.offset command) 
                            :length 0})]
       (when (not= :ko (-> result :parser-state))
-        (set! (.offset command) (-> result :modifs first :offset))
-        (set! (.length command) (-> result :modifs first :length))
-        (set! (.text command) (-> result :modifs first :text))
+        (if-let [modif (-?> result :modifs first)]
+          (do
+            (set! (.offset command) (-> result :modifs first :offset))
+            (set! (.length command) (-> result :modifs first :length))
+            (set! (.text command) (-> result :modifs first :text)))
+          (do
+            (set! (.offset command) (:offset result))
+            (set! (.length command) 0)
+            (set! (.text command) "")
+            (set! (.doit command) false)))
         (set! (.shiftsCaret command) false)
         (set! (.caretOffset command) (:offset result))))))
