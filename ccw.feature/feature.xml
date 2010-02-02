@@ -2,7 +2,7 @@
 <feature
       id="ccw.feature"
       label="%featureName"
-      version="0.0.45"
+      version="0.0.48"
       provider-name="%providerName"
       plugin="ccw.branding">
 
@@ -24,20 +24,25 @@
 
    <requires>
       <import plugin="org.eclipse.core.runtime" version="3.4.0" match="greaterOrEqual"/>
+      <import plugin="ccw.clojure" version="1.1.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.ui"/>
-      <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="org.eclipse.jface.text"/>
+      <import plugin="org.eclipse.ui.editors"/>
+      <import plugin="org.eclipse.debug.core"/>
+      <import plugin="org.eclipse.debug.ui"/>
+      <import plugin="org.eclipse.jdt.debug"/>
+      <import plugin="org.eclipse.jdt.debug.ui"/>
+      <import plugin="org.eclipse.ui.ide" version="3.4.2" match="greaterOrEqual"/>
       <import plugin="org.eclipse.jdt.launching"/>
       <import plugin="org.eclipse.jdt.core"/>
-      <import plugin="org.eclipse.jdt.debug.ui"/>
-      <import plugin="org.eclipse.debug.ui"/>
       <import plugin="org.eclipse.jdt.ui"/>
       <import plugin="org.eclipse.ui.console"/>
-      <import plugin="org.eclipse.ui.editors"/>
-      <import plugin="org.eclipse.jface.text"/>
       <import plugin="org.eclipse.ui.views" match="greaterOrEqual"/>
       <import plugin="org.eclipse.core.filesystem"/>
       <import plugin="org.eclipse.core.expressions"/>
       <import plugin="org.eclipse.ui.forms"/>
+      <import plugin="paredit.clj" version="0.1.0" match="greaterOrEqual"/>
+      <import plugin="ccw.clojurecontrib" version="1.1.0" match="greaterOrEqual"/>
    </requires>
 
    <plugin
