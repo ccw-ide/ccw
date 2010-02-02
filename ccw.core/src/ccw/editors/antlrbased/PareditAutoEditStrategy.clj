@@ -30,8 +30,8 @@
 
 (defn -customizeDocumentCommand 
   [#^IAutoEditStrategy this, #^IDocument document, #^DocumentCommand command]
-  (when (paredit-enabled? (-> this .state deref :prefs-store))
-        (and (.doit command)
+  (when (and (paredit-enabled? (-> this .state deref :prefs-store))
+             (.doit command)
              (= 0 (.length command))
              (contains? *one-char-command* (.text command)))
     (let [result (paredit (get *one-char-command* (.text command))
