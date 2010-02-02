@@ -21,7 +21,7 @@
 	(:use [clojure.test])
 	(:require [clojure.zip :as zip]))
 
-(set! *warn-on-reflection* true)
+#_(set! *warn-on-reflection* true)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; utility code
