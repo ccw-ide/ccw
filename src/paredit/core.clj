@@ -14,6 +14,7 @@
   (:use clojure.contrib.def)
   (:use clojure.test)
   (:use paredit.parser)
+  (:use clojure.set)
   (:require clojure.contrib.pprint)
   (:require [clojure.contrib.str-utils2 :as str2])
   (:require [clojure.zip :as zip]))
@@ -240,6 +241,8 @@
 	                 "(a,|b)" "(a, (|) b)"
 	                 "(a,|)" "(a, (|))"
 	                 "\\| " "\\(| "
+	                 "~|" "~(|)"
+	                 "~@|" "~@(|)"
 	                 "\\\\| " "\\\\ (|) "}]
 	    [")"         :paredit-close-round
 	                {"(a |b)" "(a b)|"
@@ -254,7 +257,7 @@
 	                 "(a b |c ,  )" "(a b c)|"
 	                 "(a b| [d e]" "(a b)| [d e]"
 	                 "; Hello,| world!"  "; Hello,)| world!"
-	                 "  \"Hello,| world!\" foo" "  \"Hello,)| world!\" foo"
+	                 "(  \"Hello,| world!\" foo )" "(  \"Hello,)| world!\" foo )"
 	                 "  \"Hello,| world!" "  \"Hello,)| world!"
 	                 "foo \\|" "foo \\)|"}]
 	    #_["M-)"       :paredit-close-round-and-newline
@@ -325,6 +328,8 @@
 (def *open-brackets* (conj (set "([{") nil)) ; we add nil to the list to also match beginning of text 
 (def *close-brackets* (conj (set ")]}") nil)) ; we add nil to the list to also match end of text
 
+(def *form-macro-chars* #{\# \~ "~@" \' \` \@ "#^" "#'" "#_"})
+
 (defn text-spec-to-text 
   "Converts a text spec to text map" 
   [#^String text-spec]
@@ -390,12 +395,12 @@
   ([{:keys [#^String text offset length] :as t}] (previous-char t 1))
   ([{:keys [#^String text offset length] :as t} n]
     (assert (>= length 0))
-    (when (>= (- offset n) 0)
+    (when (< -1 (- offset n) (.length text))
       (.charAt text (- offset n)))))
   
 (defn next-char [{:keys [#^String text offset length] :as t}]
   (assert (>= length 0))
-  (when (< (+ offset length) (.length text))
+  (when (< -1 (+ offset length) (.length text))
     (.charAt text (+ offset length))))
   
 (defmulti paredit (fn [k & args] k))
@@ -423,10 +428,9 @@
 (defn close-balanced
   [[o c] {:keys [#^String text offset length] :as t} 
    chars-with-no-space-before chars-with-no-space-after]
-    (let [parsed (parse text (.length text))] ; changed offset to (.length text)
-      (if-let [offset-loc (and 
-                            (in-code? parsed)
-                            (-> parsed parsed-root-loc (loc-for-offset offset)))]
+    (let [parsed (parse text (.length text))
+          offset-loc (-> parsed parsed-root-loc (loc-for-offset offset))]       
+      (if (and offset-loc (not (*not-in-code* (-> offset-loc zip/node :tag))))
         (let [up-locs (take-while identity (iterate zip/up offset-loc))
               match (some #(when (= o (-> % zip/node :tag)) %) up-locs)]
           (if match
@@ -445,21 +449,21 @@
   :paredit-open-round
   [cmd {:keys [text offset length] :as t}]
   (open-balanced [\( \)] t 
-    (into *real-spaces* *open-brackets*)
+    (union (conj (into *real-spaces* *open-brackets*) \#) *form-macro-chars*)
     (into *extended-spaces* *close-brackets*)))
     
 (defmethod paredit 
   :paredit-open-square
   [cmd {:keys [text offset length] :as t}]
   (open-balanced [\[ \]] t
-    (into *real-spaces* *open-brackets*)
+    (union (into *real-spaces* *open-brackets*) *form-macro-chars*)
     (into *extended-spaces* *close-brackets*)))
     
 (defmethod paredit 
   :paredit-open-curly
   [cmd {:keys [text offset length] :as t}]
   (open-balanced [\{ \}] t
-    (conj (into *real-spaces* *open-brackets*) \#) ; add # for not inserting space before a set FIXME
+    (union (conj (into *real-spaces* *open-brackets*) \#) *form-macro-chars*)
     (into *extended-spaces* *close-brackets*)))
     
 (defmethod paredit 
