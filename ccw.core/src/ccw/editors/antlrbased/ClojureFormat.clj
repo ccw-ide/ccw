@@ -111,6 +111,6 @@
                     cmindent))))
       (apply str out))))
 
-
 (deftest code-formatting
-  (is (= "#\"something\"" (format-code "#\"something\""))))
+  (is (= "#\"something\"" (format-code "#\"something\"")))
+  (is (= "(resourcefully/put url {\"Content-Type\" \"multipart/form-data\" \"Encoding\" \"UTF-8\"} request)))" (format-code "(resourcefully/put url {\"Content-Type\" \"multipart/form-data\" \"Encoding\" \"UTF-8\"} request)))"))))
