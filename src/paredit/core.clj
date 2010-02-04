@@ -321,6 +321,23 @@
                    "(frob grovel \"foo \\\\\\\"|bar\" full lexical)",
                    }]
     ]
+    ["Deleting & Killing"
+      ["Del"     :paredit-forward-delete
+                {"(quu|x \"zot\")" "(quu| \"zot\")",
+                 #_"(quux |\"zot\")" #_"(quux \"|zot\")",
+                 "(quux \"|zot\")" "(quux \"|ot\")",
+                 #_"(foo (|) bar)" #_"(foo | bar)",
+                 #_"(foo |() bar)" #_"(foo | bar)",
+                 #_"(foo (| , ) bar)" #_"(foo | bar)",
+                 #_"|(foo bar)" #_"(|foo bar)"}]
+      #_["BackDel" :paredit-backward-delete
+                {"(\"zot\" q|uux)" "(\"zot\" |uux)",
+                "(\"zot\"| quux)" "(\"zot|\" quux)",
+                 "(\"zot|\" quux)" "(\"zo|\" quux)",
+                 "(foo (|) bar)" "(foo | bar)",
+                 "(foo (, | ) bar)" "(foo | bar)",
+                 "(foo bar)|" "(foo bar|)"}]
+    ]
   ])
 
 (def *real-spaces* #{\newline \tab \space})
@@ -502,6 +519,12 @@
         #_(close-balanced [\" \"] t nil nil)
       :else
         (-> t (insert (str \\ \"))))))
+
+(defmethod paredit 
+  :paredit-forward-delete
+  [cmd {:keys [text offset length] :as t}] t
+  (delete t offset 1))
+
 
 (defn test-command [title-prefix command]
   (testing (str title-prefix " " (second command) " (\"" (first command) "\")")
