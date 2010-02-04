@@ -14,9 +14,7 @@ package ccw.editors.antlrbased;
 
 import org.eclipse.jface.internal.text.html.HTMLTextPresenter;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultInformationControl;
-import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
@@ -25,7 +23,6 @@ import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITypedRegion;
-import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;

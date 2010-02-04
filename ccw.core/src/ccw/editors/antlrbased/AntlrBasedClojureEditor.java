@@ -44,8 +44,8 @@ import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
-import ccw.ClojureCore;
 import ccw.CCWPlugin;
+import ccw.ClojureCore;
 import ccw.debug.ClojureClient;
 import ccw.editors.outline.ClojureOutlinePage;
 import ccw.editors.rulesbased.ClojureDocumentProvider;
@@ -185,6 +185,11 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		action = new CompileLibAction(this);
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.COMPILE_LIB);
 		setAction(CompileLibAction.ID, action);
+		
+		action = new FormatAction(this);
+		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.FORMAT_CODE);
+		setAction(CompileLibAction.ID, action);
+
 
 		action = new ContentAssistAction(ClojureEditorMessages.getBundleForConstructedKeys(), CONTENT_ASSIST_PROPOSAL + ".", this);  //$NON-NLS-1$
 		String id = ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS;

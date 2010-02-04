@@ -7,6 +7,6 @@
 <listEntry value="4"/>
 </listAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.antlr.Tool"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="o:/clojure/basic-clojure-grammar/src/ClojurePartition.g"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="${project_loc}/src/ClojurePartition.g"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="clojure-grammar"/>
 </launchConfiguration>

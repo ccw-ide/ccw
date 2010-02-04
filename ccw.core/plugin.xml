@@ -199,6 +199,15 @@
             categoryId="org.eclipse.ui.category.navigate"
             id="ccw.ui.edit.text.clojure.compile.lib">
       </command>
+
+      <command
+            name="%command.formatCode.name"
+            description="%command.formatCode.description"
+            categoryId="org.eclipse.ui.category.navigate"
+            id="ccw.ui.edit.text.clojure.format.code">
+      </command>
+
+	  
       <command
             name="%command.clojureShortcut.run.name"
             description="%command.clojureShortcut.run.description"
@@ -286,6 +295,13 @@
             contextId="ccw.ui.clojureEditorScope"
             commandId="ccw.ui.edit.text.clojure.compile.lib"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M1+M2+F"
+            contextId="ccw.ui.clojureEditorScope"
+            commandId="ccw.ui.edit.text.clojure.format.code"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+			
+			
             
 	</extension>
    <extension
@@ -340,6 +356,12 @@
                   label="Compile clojure file in REPL"
                   style="push">
             </command>
+            <command
+                  commandId="ccw.ui.edit.text.clojure.format.code"
+                  label="Format clojure code"
+                  style="push">
+            </command>
+			
             <visibleWhen
                   checkEnabled="false">
                <with
@@ -402,6 +424,12 @@
                   label="Compile clojure file in REPL"
                   style="push">
             </command>
+            <command
+                  commandId="ccw.ui.edit.text.clojure.format.code"
+                  label="Format clojure code"
+                  style="push">
+            </command>
+
             <visibleWhen
                   checkEnabled="false">
                <with

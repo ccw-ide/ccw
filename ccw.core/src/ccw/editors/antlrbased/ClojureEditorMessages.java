@@ -39,6 +39,7 @@ final class ClojureEditorMessages extends NLS {
 	public static String EvaluateTopLevelSExpressionAction_label;
 	public static String LoadFileAction_label;
 	public static String CompileLibAction_label;
+	public static String FormatAction_label;
 	public static String GotoMatchingBracket_label;
 	public static String GotoMatchingBracket_error_invalidSelection;
 	public static String GotoMatchingBracket_error_noMatchingBracket;

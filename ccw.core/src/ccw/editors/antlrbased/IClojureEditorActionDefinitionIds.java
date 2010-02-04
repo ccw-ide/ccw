@@ -61,4 +61,10 @@ public interface IClojureEditorActionDefinitionIds extends ITextEditorActionDefi
 	 */
 	public static final String COMPILE_LIB = "ccw.ui.edit.text.clojure.compile.lib";
 	
+	/**
+	 * Action definition ID of the Clojure (or edit ?) -> format action 
+	 */
+	public static final String FORMAT_CODE = "ccw.ui.edit.text.clojure.format.code";
+
+	
 }

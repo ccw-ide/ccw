@@ -65,5 +65,4 @@ public class CompileLibAction extends EvaluateTextAction {
 	public static String compileLibCommand(String libName) {
 		return "(clojure.core/binding [clojure.core/*compile-path* \"classes\"] (clojure.core/compile '" + libName + "))";
 	}
-
 }
