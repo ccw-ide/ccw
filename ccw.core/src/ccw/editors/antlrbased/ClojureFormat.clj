@@ -1,9 +1,5 @@
 (ns ccw.editors.antlrbased.ClojureFormat
-  (:use [clojure.contrib.pprint])
-  (:import
-    [org.eclipse.jface.text IAutoEditStrategy
-     IDocument
-     DocumentCommand])
+  (:use [clojure.test])
   (:gen-class
     :init init
     :state state
@@ -11,7 +7,11 @@
 
 (defn -init [])
 
+(declare format-code)
 (defn -formatCode [this string]
+  (format-code string))
+
+(defn format-code [string]
   (loop [s string col 0 dstack [] out [] space nil incl false
          insl false incm false lwcr false sups true cmindent nil]
     (if-let [c (first s)] ; test comment 1 { ; )
@@ -52,7 +52,7 @@
                    r (if nl (dec (count cc)) (+ col (count cc)))
                    dstack (into out cc) nil false false
                    (if-not nl incm) (= c \return) nl cmindent))
-          (= c \") (let [cc (if (or incl insl) [c] [\space c])]
+          (= c \") (let [cc (if (or incl insl sups) [c] [\space c])]
                      (recur
                        r (+ col (count cc)) dstack (into out cc)
                        (if (and insl (not incl)) [\space]) false
@@ -110,3 +110,7 @@
                     false false false false (sups-char? c)
                     cmindent))))
       (apply str out))))
+
+
+(deftest code-formatting
+  (is (= "#\"something\"" (format-code "#\"something\""))))
