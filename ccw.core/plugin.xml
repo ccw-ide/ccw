@@ -162,6 +162,12 @@
             id="ccw.ui.edit.text.clojure.goto.matching.bracket"
             name="%command.gotoMatchingBracket.name">
       </command>
+      <command
+            categoryId="org.eclipse.ui.category.navigate"
+            description="%command.selectToMatchingBracket.description"
+            id="ccw.ui.edit.text.clojure.select.to.matching.bracket"
+            name="%command.selectToMatchingBracket.name">
+      </command>	  
 <!-- navigate -->
       <command
             categoryId="org.eclipse.ui.category.navigate"
@@ -230,7 +236,7 @@
       <key
             sequence="M1+M3+P"
             contextId="ccw.ui.clojureEditorScope"
-            commandId="ccw.ui.edit.text.clojure.goto.matching.bracket"
+            commandId="ccw.ui.edit.text.clojure.select.to.matching.bracket"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
 <!--            sequence="M1+M2+ARROW_UP" -->
       <key
@@ -318,6 +324,11 @@
                   label="Go to matching bracket"
                   style="push">
             </command>
+			<command
+                  commandId="ccw.ui.edit.text.clojure.select.to.matching.bracket"
+                  label="Select to matching bracket"
+                  style="push">
+            </command>
             <separator
                   name="ccw.menus.separator1"
                   visible="true">
@@ -386,6 +397,11 @@
                   label="Go to matching bracket"
                   style="push">
             </command>
+            <command
+                  commandId="ccw.ui.edit.text.clojure.select.to.matching.bracket"
+                  label="Select to matching bracket"
+                  style="push">
+            </command>			
             <separator
                   name="ccw.menus.separator1"
                   visible="true">

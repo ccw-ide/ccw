@@ -1,4 +1,4 @@
-(ns ccw.editors.antlrbased.ClojureFormat
+(ns ccw.editors.antlrbased.formatting.ClojureFormat
   (:use [clojure.test])
   (:gen-class
     :init init
@@ -10,6 +10,7 @@
 (declare format-code)
 (defn -formatCode [this string]
   (format-code string))
+
 
 (defn format-code [string]
   (loop [s string col 0 dstack [] out [] space nil incl false

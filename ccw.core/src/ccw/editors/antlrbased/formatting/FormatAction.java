@@ -1,4 +1,4 @@
-package ccw.editors.antlrbased;
+package ccw.editors.antlrbased.formatting;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.action.Action;
@@ -9,8 +9,11 @@ import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
 
+import ccw.editors.antlrbased.AntlrBasedClojureEditor;
+import ccw.editors.antlrbased.ClojureEditorMessages;
+
 public class FormatAction extends Action {
-    private AntlrBasedClojureEditor editor;
+    private final AntlrBasedClojureEditor editor;
 
     public FormatAction(AntlrBasedClojureEditor editor) {
         super(ClojureEditorMessages.FormatAction_label);
