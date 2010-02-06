@@ -463,7 +463,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
      * @return a region denoting the current signed selection, for a resulting
      *         RtoL selections length is < 0
      */
-    protected IRegion getSignedSelection(ISourceViewer sourceViewer) {
+    public IRegion getSignedSelection(ISourceViewer sourceViewer) {
         StyledText text = sourceViewer.getTextWidget();
         Point selection = text.getSelectionRange();
         if (text.getCaretOffset() == selection.x) {
