@@ -343,13 +343,14 @@
                  "(|{foo bar})" "({|foo bar})"
                  #_"(|#{foo bar})" #_"(#{|foo bar})"
                  }]
-      #_["BackDel" :paredit-backward-delete
+      ["BackDel" :paredit-backward-delete
                 {"(\"zot\" q|uux)" "(\"zot\" |uux)",
                 "(\"zot\"| quux)" "(\"zot|\" quux)",
                  "(\"zot|\" quux)" "(\"zo|\" quux)",
                  "(foo (|) bar)" "(foo | bar)",
-                 "(foo (, | ) bar)" "(foo | bar)",
-                 "(foo bar)|" "(foo bar|)"}]
+                 "(foo bar)|" "(foo bar|)",
+                 "(foo bar|)" "(foo ba|)"
+                 }]
     ]
   ])
 
@@ -555,6 +556,31 @@
           :else
             (delete t offset 1)))
       (delete t offset 1))))
+
+
+(defmethod paredit 
+  :paredit-backward-delete
+  [cmd {:keys [text offset length] :as t}]
+  (let [offset (dec offset)
+        parsed (parse text (.length text))
+        parse-ok (not= :ko (:parser-state parsed))]
+    (if parse-ok
+      (let [offset-loc (-> parsed parsed-root-loc (loc-for-offset offset))
+            offset-node (-> offset-loc zip/node)
+            handled-forms (conj *open-brackets* \")
+            in-handled-form (handled-forms (:tag offset-node))]
+        (cond 
+          (and in-handled-form (= offset (:offset offset-node)))
+            (if (> (-> offset-node :content count) 2)
+              t     ; don't move
+              (-> t ; delete the form 
+                (delete (:offset offset-node) (- (:end-offset offset-node) (:offset offset-node)))
+                (shift-offset -1)))
+          (and in-handled-form (= offset (dec (:end-offset offset-node))))
+            (shift-offset t -1)
+          :else
+            (-> t (delete offset 1) (shift-offset -1))))
+      (-> t (delete offset 1) (shift-offset -1)))))
 
 (defn test-command [title-prefix command]
   (testing (str title-prefix " " (second command) " (\"" (first command) "\")")
