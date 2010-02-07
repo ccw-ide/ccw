@@ -44,8 +44,8 @@ import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
-import ccw.ClojureCore;
 import ccw.CCWPlugin;
+import ccw.ClojureCore;
 import ccw.debug.ClojureClient;
 import ccw.editors.outline.ClojureOutlinePage;
 import ccw.editors.rulesbased.ClojureDocumentProvider;
@@ -86,7 +86,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
 	    CCWPlugin.registerEditorColors(preferenceStore);
 		setSourceViewerConfiguration(new ClojureSourceViewerConfiguration(preferenceStore, this));
 		setPreferenceStore(preferenceStore);
-        setDocumentProvider(new ClojureDocumentProvider());        
+        setDocumentProvider(new ClojureDocumentProvider()); 
 	}
 	
 	@Override
@@ -317,7 +317,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
 	 * Asserts document != null.
 	 * @return
 	 */
-	private int getSourceCaretOffset() {
+	public int getSourceCaretOffset() {
 		IRegion selection= getSignedSelection(getSourceViewer());
 		return selection.getOffset() + selection.getLength();
 	}
@@ -486,7 +486,10 @@ public class AntlrBasedClojureEditor extends TextEditor {
 	 * @param sourceViewer the source viewer
 	 * @return a region denoting the current signed selection, for a resulting RtoL selections length is < 0
 	 */
-	protected IRegion getSignedSelection(ISourceViewer sourceViewer) {
+	public IRegion getSignedSelection(ISourceViewer sourceViewer) {
+		if (sourceViewer == null) {
+			sourceViewer = getSourceViewer();
+		}
 		StyledText text= sourceViewer.getTextWidget();
 		Point selection= text.getSelectionRange();
 
@@ -494,6 +497,44 @@ public class AntlrBasedClojureEditor extends TextEditor {
 			selection.x= selection.x + selection.y;
 			selection.y= -selection.y;
 		}
+
+		selection.x= widgetOffset2ModelOffset(sourceViewer, selection.x);
+
+		return new Region(selection.x, selection.y);
+	}
+	
+	/**
+	 * Returns the signed current selection.
+	 * The length will be negative if the resulting selection
+	 * is right-to-left (RtoL).
+	 * <p>
+	 * The selection offset is model based.
+	 * </p>
+	 *
+	 * @param sourceViewer the source viewer
+	 * @return a region denoting the current signed selection, for a resulting RtoL selections length is < 0
+	 */
+	public IRegion getSignedSelection() {
+		return getSignedSelection(null);
+	}
+	
+	
+	/**
+	 * Returns the unsigned current selection.
+	 * The length will always be positive.
+	 * <p>
+	 * The selection offset is model based.
+	 * </p>
+	 *
+	 * @param sourceViewer the source viewer
+	 * @return a region denoting the current unsigned selection
+	 */
+	public IRegion getUnSignedSelection(ISourceViewer sourceViewer) {
+		if (sourceViewer == null) {
+			sourceViewer = getSourceViewer();
+		}
+		StyledText text= sourceViewer.getTextWidget();
+		Point selection= text.getSelectionRange();
 
 		selection.x= widgetOffset2ModelOffset(sourceViewer, selection.x);
 
@@ -510,13 +551,8 @@ public class AntlrBasedClojureEditor extends TextEditor {
 	 * @param sourceViewer the source viewer
 	 * @return a region denoting the current unsigned selection
 	 */
-	protected IRegion getUnSignedSelection(ISourceViewer sourceViewer) {
-		StyledText text= sourceViewer.getTextWidget();
-		Point selection= text.getSelectionRange();
-
-		selection.x= widgetOffset2ModelOffset(sourceViewer, selection.x);
-
-		return new Region(selection.x, selection.y);
+	public IRegion getUnSignedSelection() {
+		return getUnSignedSelection(null);
 	}
 	
 	/*

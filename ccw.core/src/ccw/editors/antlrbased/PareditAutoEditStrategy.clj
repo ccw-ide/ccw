@@ -4,15 +4,16 @@
   (:import
     [org.eclipse.jface.text IAutoEditStrategy
                             IDocument
-                            DocumentCommand])
+                            DocumentCommand]
+    [ccw.editors.antlrbased AntlrBasedClojureEditor])
   (:gen-class
    :implements [org.eclipse.jface.text.IAutoEditStrategy]
-   :constructors {[org.eclipse.jface.preference.IPreferenceStore] []}
+   :constructors {[ccw.editors.antlrbased.AntlrBasedClojureEditor org.eclipse.jface.preference.IPreferenceStore] []}
    :init init
    :state state))
    
 (defn- -init
-  [preference-store] [[] (ref {:prefs-store preference-store})])   
+  [editor preference-store] [[] (ref {:editor editor :prefs-store preference-store})])   
 
 ; TODO move this into paredit itself ...
 (def *one-char-command* 
@@ -26,18 +27,20 @@
 
 (defn- call-paredit [command document-text]
   (cond
-    (and (zero? (:length command))
+    (and (zero? (:length command)) ; TODO enhance to also handle the replace of a bunch of text
          (contains? *one-char-command* (:text command)))
       (paredit (get *one-char-command* (:text command))
-               {:text document-text 
+               {:text (:text document-text) 
                 :offset (:offset command) 
                 :length 0})
     (and (zero? (-> command :text .length))
          (= 1 (:length command)))
-      (paredit :paredit-forward-delete ; TODO how to distinguish from forward delete and backward delete ?
-               {:text document-text
-                :offset (:offset command)
-                :length 1})))
+      (let [paredit-command (if (= (:offset command) (:caret-offset document-text)) 
+                              :paredit-forward-delete :paredit-backward-delete)]
+        (paredit paredit-command
+                 {:text (:text document-text)
+                  :offset (if (= paredit-command :paredit-backward-delete) (inc (:offset command)) (:offset command))
+                  :length 1}))))
 
 
 (defn paredit-enabled?
@@ -48,7 +51,9 @@
   [#^IAutoEditStrategy this, #^IDocument document, #^DocumentCommand command]
   (when (and (paredit-enabled? (-> this .state deref :prefs-store))
              (.doit command))
-    (let [document-text (.get document)
+    
+    (let [signed-selection (bean (-> this .state deref :editor .getSignedSelection))
+          document-text {:text (.get document) :caret-offset (+ (:offset signed-selection) (:length signed-selection)) :selection-length (:length signed-selection)}
           par-command {:text (.text command) :offset (.offset command) :length (.length command)}
           result (call-paredit par-command document-text)]
       (when (and result (not= :ko (-> result :parser-state)))
