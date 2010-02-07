@@ -324,12 +324,25 @@
     ["Deleting & Killing"
       ["Del"     :paredit-forward-delete
                 {"(quu|x \"zot\")" "(quu| \"zot\")",
-                 #_"(quux |\"zot\")" #_"(quux \"|zot\")",
+                 "(quux |\"zot\")" "(quux \"|zot\")",
                  "(quux \"|zot\")" "(quux \"|ot\")",
-                 #_"(foo (|) bar)" #_"(foo | bar)",
-                 #_"(foo |() bar)" #_"(foo | bar)",
-                 #_"(foo (| , ) bar)" #_"(foo | bar)",
-                 #_"|(foo bar)" #_"(|foo bar)"}]
+                 "(foo |(a) bar)" "(foo (|a) bar)"
+                 "(foo (|a) bar)" "(foo (|) bar)" 
+                 "(foo (|) bar)" "(foo | bar)"
+                 "(foo [|] bar)" "(foo | bar)"
+                 "(foo {|} bar)" "(foo | bar)"
+                 #_"(foo #{|} bar)" #_"(foo | bar)"
+                 "(foo \"|\" bar)" "(foo | bar)"
+                 "(foo (a|) bar)" "(foo (a|) bar)"
+                 "(foo [a|] bar)" "(foo [a|] bar)"
+                 "(foo {a|} bar)" "(foo {a|} bar)"
+                 #_"(foo #{a|} bar)" #_"(foo #{a|} bar)"
+                 "(foo \"a|\" bar)" "(foo \"a|\" bar)"
+                 "(|(foo bar))" "((|foo bar))"
+                 "(|[foo bar])" "([|foo bar])"
+                 "(|{foo bar})" "({|foo bar})"
+                 #_"(|#{foo bar})" #_"(#{|foo bar})"
+                 }]
       #_["BackDel" :paredit-backward-delete
                 {"(\"zot\" q|uux)" "(\"zot\" |uux)",
                 "(\"zot\"| quux)" "(\"zot|\" quux)",
@@ -491,13 +504,13 @@
 
 (defmethod paredit 
   :paredit-close-square
-  [cmd {:keys [text offset length] :as t}] t
+  [cmd {:keys [text offset length] :as t}]
   (close-balanced [\[ \]] t
     nil nil))
 
 (defmethod paredit 
   :paredit-close-curly
-  [cmd {:keys [text offset length] :as t}] t
+  [cmd {:keys [text offset length] :as t}]
   (close-balanced [\{ \}] t
     nil nil))
 
@@ -522,9 +535,26 @@
 
 (defmethod paredit 
   :paredit-forward-delete
-  [cmd {:keys [text offset length] :as t}] t
-  (delete t offset 1))
-
+  [cmd {:keys [text offset length] :as t}]
+  (let [parsed (parse text (.length text))
+        parse-ok (not= :ko (:parser-state parsed))]
+    (if parse-ok
+      (let [offset-loc (-> parsed parsed-root-loc (loc-for-offset offset))
+            offset-node (-> offset-loc zip/node)
+            handled-forms (conj *open-brackets* \")
+            in-handled-form (handled-forms (:tag offset-node))]
+        (cond 
+          (and in-handled-form (= offset (:offset offset-node)))
+            (shift-offset t 1)
+          (and in-handled-form (= offset (dec (:end-offset offset-node))))
+            (if (> (-> offset-node :content count) 2)
+              t     ; don't move
+              (-> t ; delete the form 
+                (delete (:offset offset-node) (- (:end-offset offset-node) (:offset offset-node)))
+                (shift-offset -1)))
+          :else
+            (delete t offset 1)))
+      (delete t offset 1))))
 
 (defn test-command [title-prefix command]
   (testing (str title-prefix " " (second command) " (\"" (first command) "\")")

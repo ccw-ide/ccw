@@ -65,8 +65,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; the parser code
-
-(def *brackets* {\( \) \{ \} \[ \]})
+(def *brackets* {\( \), \{ \}, \[ \], \" \"})
 (def *opening-brackets* (set (keys *brackets*)))
 (def *closing-brackets* (set (vals *brackets*)))
 (def *spaces* #{\space \tab \newline \return \,})
@@ -76,7 +75,9 @@
   (let [level (-> accumulated-state peek)
         level-content (get level :content [])
         level-content (if-let [closing-delimiter (-> level :tag *brackets*)]
-                        (conj level-content (str closing-delimiter))
+                        (if (and (= \" closing-delimiter) (> (- offset (get level :offset 0)) 2))
+                          [ "\"" (.substring text (inc (get level :offset 0)) (dec offset)) "\""]
+                          (conj level-content (str closing-delimiter)))
                         (conj level-content (.substring text (get level :offset 0) offset)))
         level (-> accumulated-state peek (assoc :end-offset offset :content level-content))
         parent-level (-> accumulated-state pop peek)
