@@ -70,4 +70,6 @@ public interface IClojureEditorActionDefinitionIds extends ITextEditorActionDefi
      */
     public static final String FORMAT_CODE = "ccw.ui.edit.text.clojure.format.code";
 
+    public static final String HIGHLIGHT_SAME_WORD = "ccw.ui.edit.text.clojure.highlight.same.word";
+
 }

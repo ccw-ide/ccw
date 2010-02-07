@@ -46,6 +46,7 @@ public class ClojureSourceViewer extends ProjectionViewer implements
     }
 
     public void propertyChange(PropertyChangeEvent event) {
+        System.out.println("propertt change");
         if (fConfiguration != null) {
             ClojureSourceViewerConfiguration tmp = fConfiguration;
             unconfigure();

@@ -39,7 +39,7 @@ import ccw.editors.rulesbased.ClojurePartitionScanner;
 
 public class ClojureSourceViewerConfiguration extends
 		TextSourceViewerConfiguration {
-	private ITokenScanner tokenScanner;
+	protected ITokenScanner tokenScanner;
 	private final AntlrBasedClojureEditor editor;
 
 	public ClojureSourceViewerConfiguration(IPreferenceStore preferenceStore,

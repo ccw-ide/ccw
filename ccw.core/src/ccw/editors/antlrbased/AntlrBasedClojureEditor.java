@@ -23,6 +23,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewerExtension5;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
+import org.eclipse.jface.text.rules.ITokenScanner;
 import org.eclipse.jface.text.source.DefaultCharacterPairMatcher;
 import org.eclipse.jface.text.source.ICharacterPairMatcher;
 import org.eclipse.jface.text.source.ISourceViewer;
@@ -83,11 +84,18 @@ public class AntlrBasedClojureEditor extends TextEditor {
     /** The projection support */
     private ProjectionSupport fProjectionSupport;
     private ClojureOutlinePage outlinePage;
+    private ITokenScanner tokenScanner;
+
+    public ITokenScanner getTokenScanner() {
+        return tokenScanner;
+    }
 
     public AntlrBasedClojureEditor() {
         IPreferenceStore preferenceStore = createCombinedPreferenceStore();
         CCWPlugin.registerEditorColors(preferenceStore);
-        setSourceViewerConfiguration(new ClojureSourceViewerConfiguration(preferenceStore, this));
+        ClojureSourceViewerConfiguration configuration = new ClojureSourceViewerConfiguration(preferenceStore, this);
+        tokenScanner = configuration.tokenScanner;
+        setSourceViewerConfiguration(configuration);
         setPreferenceStore(preferenceStore);
         setDocumentProvider(new ClojureDocumentProvider());
     }
@@ -95,6 +103,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
     @Override
     public void init(IEditorSite site, IEditorInput input) throws PartInitException {
         super.init(site, input);
+        
     }
 
     @Override
@@ -113,6 +122,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
         ISourceViewer viewer = new ClojureSourceViewer(parent, ruler, getOverviewRuler(), isOverviewRulerVisible(), styles, getPreferenceStore());
         // ensure decoration support has been created and configured.
         getSourceViewerDecorationSupport(viewer);
+        viewer.getTextWidget().addCaretListener(new SameWordHighlightingCaretListener(this));
         return viewer;
     }
 
@@ -183,6 +193,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
         action = new FormatAction(this);
         action.setActionDefinitionId(IClojureEditorActionDefinitionIds.FORMAT_CODE);
         setAction(CompileLibAction.ID, action);
+        
         action = new ContentAssistAction(ClojureEditorMessages.getBundleForConstructedKeys(), CONTENT_ASSIST_PROPOSAL + ".", this); //$NON-NLS-1$
         String id = ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS;
         action.setActionDefinitionId(id);
