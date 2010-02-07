@@ -8,10 +8,10 @@ import org.eclipse.swt.custom.CaretEvent;
 import org.eclipse.swt.custom.CaretListener;
 import org.eclipse.swt.custom.StyleRange;
 
-final class SameWordHighlightingCaretListener implements CaretListener {
+public class SameWordHighlightingCaretListener implements CaretListener {
     private final AntlrBasedClojureEditor editor;
 
-    SameWordHighlightingCaretListener(AntlrBasedClojureEditor editor) {
+    public SameWordHighlightingCaretListener(AntlrBasedClojureEditor editor) {
         this.editor = editor;
     }
 

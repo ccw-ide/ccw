@@ -47,6 +47,10 @@ public final class ClojureEditorMessages extends NLS {
     public static String GotoMatchingBracket_error_noMatchingBracket;
     public static String GotoMatchingBracket_error_bracketOutsideSelectedElement;
     public static String SelectToMatchingBracket_label;
+    
+    public static String Compilation_failed;
+    public static String Tests_failed;
+    public static String Tests_passed;
 
     static {
         NLS.initializeMessages(BUNDLE_NAME, ClojureEditorMessages.class);

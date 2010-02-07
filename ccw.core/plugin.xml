@@ -205,6 +205,14 @@
             categoryId="org.eclipse.ui.category.navigate"
             id="ccw.ui.edit.text.clojure.compile.lib">
       </command>
+      
+      <command
+            name="%command.runTests.name"
+            description="%command.runTests.description"
+            categoryId="org.eclipse.ui.category.navigate"
+            id="ccw.ui.edit.text.clojure.run.tests">
+      </command>
+      
 
       <command
             name="%command.formatCode.name"
@@ -302,6 +310,11 @@
             commandId="ccw.ui.edit.text.clojure.compile.lib"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
+            sequence="M1+T"
+            contextId="ccw.ui.clojureEditorScope"
+            commandId="ccw.ui.edit.text.clojure.run.tests"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
             sequence="M1+M2+F"
             contextId="ccw.ui.clojureEditorScope"
             commandId="ccw.ui.edit.text.clojure.format.code"
@@ -365,6 +378,11 @@
             <command
                   commandId="ccw.ui.edit.text.clojure.compile.lib"
                   label="Compile clojure file in REPL"
+                  style="push">
+            </command>
+            <command
+                  commandId="ccw.ui.edit.text.clojure.run.tests"
+                  label="Run tests in REPL"
                   style="push">
             </command>
             <command
@@ -438,6 +456,11 @@
             <command
                   commandId="ccw.ui.edit.text.clojure.compile.lib"
                   label="Compile clojure file in REPL"
+                  style="push">
+            </command>
+            <command
+                  commandId="ccw.ui.edit.text.clojure.run.tests"
+                  label="Run tests in REPL"
                   style="push">
             </command>
             <command

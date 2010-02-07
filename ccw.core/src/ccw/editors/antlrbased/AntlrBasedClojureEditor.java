@@ -187,12 +187,16 @@ public class AntlrBasedClojureEditor extends TextEditor {
         action = new LoadFileAction(this);
         action.setActionDefinitionId(IClojureEditorActionDefinitionIds.LOAD_FILE);
         setAction(LoadFileAction.ID, action);
+        action = new RunTestsAction(this);
+        action.setActionDefinitionId(IClojureEditorActionDefinitionIds.RUN_TESTS);
+        setAction(RunTestsAction.RUN_TESTS_ID, action);
         action = new CompileLibAction(this);
         action.setActionDefinitionId(IClojureEditorActionDefinitionIds.COMPILE_LIB);
         setAction(CompileLibAction.ID, action);
+
         action = new FormatAction(this);
         action.setActionDefinitionId(IClojureEditorActionDefinitionIds.FORMAT_CODE);
-        setAction(CompileLibAction.ID, action);
+        setAction(FormatAction.ID, action);
         
         action = new ContentAssistAction(ClojureEditorMessages.getBundleForConstructedKeys(), CONTENT_ASSIST_PROPOSAL + ".", this); //$NON-NLS-1$
         String id = ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS;

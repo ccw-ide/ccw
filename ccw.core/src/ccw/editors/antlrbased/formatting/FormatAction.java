@@ -5,11 +5,11 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.source.ISourceViewer;
-
 import ccw.editors.antlrbased.AntlrBasedClojureEditor;
 import ccw.editors.antlrbased.ClojureEditorMessages;
 
 public class FormatAction extends Action {
+    public final static String ID = "FormatAction"; //$NON-NLS-1$
     private final AntlrBasedClojureEditor editor;
 
     public FormatAction(AntlrBasedClojureEditor editor) {
