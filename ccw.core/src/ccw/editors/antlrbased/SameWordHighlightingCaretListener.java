@@ -7,6 +7,7 @@ import org.eclipse.jface.text.rules.ITokenScanner;
 import org.eclipse.swt.custom.CaretEvent;
 import org.eclipse.swt.custom.CaretListener;
 import org.eclipse.swt.custom.StyleRange;
+import org.eclipse.swt.graphics.Color;
 
 public class SameWordHighlightingCaretListener implements CaretListener {
     private final AntlrBasedClojureEditor editor;
@@ -36,7 +37,7 @@ public class SameWordHighlightingCaretListener implements CaretListener {
 
     private StyleRange createRange(ITokenScanner tokenScanner) {
         StyleRange range = new StyleRange();
-        range.background = editor.sourceViewer().getTextWidget().getDisplay().getSystemColor(15);
+        range.background = new Color(editor.sourceViewer().getTextWidget().getDisplay(), 225,225,225);
         range.start = tokenScanner.getTokenOffset();
         range.length = tokenScanner.getTokenLength();
         return range;
@@ -52,7 +53,7 @@ public class SameWordHighlightingCaretListener implements CaretListener {
                     StyleRange range = new StyleRange();
                     range.start = tokenScanner.getTokenOffset();
                     range.length = tokenScanner.getTokenLength();
-                    range.background = editor.sourceViewer().getTextWidget().getDisplay().getSystemColor(5);
+                    range.background = new Color(editor.sourceViewer().getTextWidget().getDisplay(), 255,255,180);
                     editor.sourceViewer().getTextWidget().setStyleRange(range);
                 }
             }
