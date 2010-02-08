@@ -25,14 +25,20 @@ public class SelectToMatchingBracketAction extends Action {
 
     private void selectToMatchingBracket() {
         ISourceViewer sourceViewer = editor.sourceViewer();
-        IRegion selection = editor.getSignedSelection(sourceViewer);
+        IRegion selection = editor.getUnSignedSelection(sourceViewer);
         boolean previousSelectionExists = Math.abs(selection.getLength()) > 1;
-        if (previousSelectionExists) {
-            String error = ClojureEditorMessages.GotoMatchingBracket_error_invalidSelection;
-            showError(sourceViewer, error);
-        } else {
-            int sourceCaretOffset = selection.getOffset() + selection.getLength();
-            IRegion region = editor.getPairsMatcher().match(editor.getDocument(), sourceCaretOffset);
+        {
+            int sourceCaretOffset = selection.getOffset();
+            if (previousSelectionExists) {
+                sourceCaretOffset = selection.getOffset() - 1;
+            }
+            IRegion region = null;
+            while (region == null && sourceCaretOffset >= 0) {
+                region = editor.getPairsMatcher().match(editor.getDocument(), sourceCaretOffset);
+                if (region == null) {
+                    sourceCaretOffset--;
+                }
+            }
             if (region == null) {
                 String error = ClojureEditorMessages.GotoMatchingBracket_error_noMatchingBracket;
                 showError(sourceViewer, error);
@@ -58,9 +64,6 @@ public class SelectToMatchingBracketAction extends Action {
     }
 
     public void actualSelection(ISourceViewer sourceViewer, IRegion selection, int sourceCaretOffset, int offset, int length, int anchor, int targetOffset) {
-        if (selection.getLength() < 0) {
-            targetOffset -= selection.getLength();
-        }
         int distanceBetweenBrackets = sourceCaretOffset - targetOffset + offsetAdjustment(sourceCaretOffset, offset, length, anchor);
         sourceViewer.setSelectedRange(targetOffset + targetOffsetAdjustment(anchor), distanceBetweenBrackets);
         sourceViewer.revealRange(targetOffset + targetOffsetAdjustment(anchor), distanceBetweenBrackets);
