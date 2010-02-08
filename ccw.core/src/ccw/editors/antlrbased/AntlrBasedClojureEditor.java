@@ -12,8 +12,8 @@ package ccw.editors.antlrbased;
 
 import java.util.LinkedList;
 import java.util.List;
-
 import org.eclipse.core.resources.IFile;
+import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -44,7 +44,6 @@ import org.eclipse.ui.texteditor.ContentAssistAction;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
-
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.debug.ClojureClient;
@@ -52,6 +51,7 @@ import ccw.editors.antlrbased.formatting.FormatAction;
 import ccw.editors.outline.ClojureOutlinePage;
 import ccw.editors.rulesbased.ClojureDocumentProvider;
 import ccw.editors.rulesbased.ClojurePartitionScanner;
+import ccw.launching.ClojureLaunchShortcut;
 
 public class AntlrBasedClojureEditor extends TextEditor {
     private static final String CONTENT_ASSIST_PROPOSAL = "ContentAssistProposal"; //$NON-NLS-1$
@@ -103,7 +103,6 @@ public class AntlrBasedClojureEditor extends TextEditor {
     @Override
     public void init(IEditorSite site, IEditorInput input) throws PartInitException {
         super.init(site, input);
-        
     }
 
     @Override
@@ -193,11 +192,16 @@ public class AntlrBasedClojureEditor extends TextEditor {
         action = new CompileLibAction(this);
         action.setActionDefinitionId(IClojureEditorActionDefinitionIds.COMPILE_LIB);
         setAction(CompileLibAction.ID, action);
-
         action = new FormatAction(this);
         action.setActionDefinitionId(IClojureEditorActionDefinitionIds.FORMAT_CODE);
         setAction(FormatAction.ID, action);
-        
+        action = new Action() {
+            public void run() {
+                new ClojureLaunchShortcut().launch(AntlrBasedClojureEditor.this, ILaunchManager.RUN_MODE);
+            };
+        };
+        action.setActionDefinitionId(IClojureEditorActionDefinitionIds.LAUNCH_REPL);
+        setAction("ClojureLaunchAction", action);
         action = new ContentAssistAction(ClojureEditorMessages.getBundleForConstructedKeys(), CONTENT_ASSIST_PROPOSAL + ".", this); //$NON-NLS-1$
         String id = ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS;
         action.setActionDefinitionId(id);

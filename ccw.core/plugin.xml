@@ -205,6 +205,13 @@
             categoryId="org.eclipse.ui.category.navigate"
             id="ccw.ui.edit.text.clojure.compile.lib">
       </command>
+
+      <command
+            name="%command.launchRepl.name"
+            description="%command.launchRepl.description"
+            categoryId="org.eclipse.ui.category.navigate"
+            id="ccw.ui.edit.text.clojure.launch.repl">
+      </command>
       
       <command
             name="%command.runTests.name"
@@ -292,11 +299,13 @@
             platform="carbon"/>
       <key
             sequence="M2+M3+X C"
-            commandId="ccw.debug.ui.clojureShortcut.run"
+            contextId="ccw.ui.clojureEditorScope"
+            commandId="ccw.ui.edit.text.clojure.launch.repl"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             sequence="M1+M3+X C"
-            commandId="ccw.debug.ui.clojureShortcut.run"
+            contextId="ccw.ui.clojureEditorScope"
+            commandId="ccw.ui.edit.text.clojure.launch.repl"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             platform="carbon"/>
       <key
