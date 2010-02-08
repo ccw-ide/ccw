@@ -29,7 +29,7 @@ public class RunTestsAction extends Action {
             runTests(lib, clojure);
         } else {
             editor.setStatusLineErrorMessage(ClojureEditorMessages.Compilation_failed);
-            setReplBackgroundColor(new Color(Display.getDefault(), 0xff, 0xff, 0x7f));
+            setReplBackgroundColor(new Color(Display.getDefault(), 0xff, 0xff, 0xcf));
         }
     }
 
@@ -37,10 +37,10 @@ public class RunTestsAction extends Action {
         String results = clojure.remoteLoad(runTestsCommand(lib));
         if (results.contains(":fail 0, :error 0")) {
             editor.setStatusLineErrorMessage(ClojureEditorMessages.Tests_passed);
-            setReplBackgroundColor(new Color(Display.getDefault(), 0x7f, 0xff, 0x7f));
+            setReplBackgroundColor(new Color(Display.getDefault(), 0xcf, 0xff, 0xcf));
         } else {
             editor.setStatusLineErrorMessage(ClojureEditorMessages.Tests_failed);
-            setReplBackgroundColor(new Color(Display.getDefault(), 0xff, 0x7f, 0x7f));
+            setReplBackgroundColor(new Color(Display.getDefault(), 0xff, 0xcf, 0xcf));
         }
     }
 
