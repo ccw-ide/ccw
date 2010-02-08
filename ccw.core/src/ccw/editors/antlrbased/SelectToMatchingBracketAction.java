@@ -28,15 +28,22 @@ public class SelectToMatchingBracketAction extends Action {
         IRegion selection = editor.getUnSignedSelection(sourceViewer);
         boolean previousSelectionExists = Math.abs(selection.getLength()) > 1;
         {
-            int sourceCaretOffset = selection.getOffset();
+            int caretOffset = selection.getOffset();
             if (previousSelectionExists) {
-                sourceCaretOffset = selection.getOffset() - 1;
+                caretOffset = selection.getOffset() - 1;
             }
+            int originalSelectionEnd = selection.getOffset() + selection.getLength();
             IRegion region = null;
-            while (region == null && sourceCaretOffset >= 0) {
-                region = editor.getPairsMatcher().match(editor.getDocument(), sourceCaretOffset);
+            while (region == null && caretOffset >= 0) {
+                region = editor.getPairsMatcher().match(editor.getDocument(), caretOffset);
+                if (region != null) {
+                    int newSelectionEnd = region.getOffset() + region.getLength();
+                    if (newSelectionEnd < originalSelectionEnd) {
+                        region = null;
+                    }
+                }
                 if (region == null) {
-                    sourceCaretOffset--;
+                    caretOffset--;
                 }
             }
             if (region == null) {
@@ -49,7 +56,7 @@ public class SelectToMatchingBracketAction extends Action {
                     int anchor = editor.getPairsMatcher().getAnchor();
                     int targetOffset = ICharacterPairMatcher.RIGHT == anchor ? offset + 1 : offset + length;
                     if (visible(sourceViewer, targetOffset)) {
-                        actualSelection(sourceViewer, selection, sourceCaretOffset, offset, length, anchor, targetOffset);
+                        actualSelection(sourceViewer, selection, caretOffset, offset, length, anchor, targetOffset);
                     } else {
                         showError(sourceViewer, ClojureEditorMessages.GotoMatchingBracket_error_bracketOutsideSelectedElement);
                     }
