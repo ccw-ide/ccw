@@ -2,16 +2,18 @@ package ccw.editors.antlrbased;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewerExtension5;
 import org.eclipse.jface.text.source.ICharacterPairMatcher;
 import org.eclipse.jface.text.source.ISourceViewer;
 
-public class SelectToMatchingBracketAction extends Action {
+public class OutwardExpandingSelectAction extends Action {
     public final static String ID = "ClojureSelectToMatchingBracket"; //$NON-NLS-1$
     private final AntlrBasedClojureEditor editor;
 
-    public SelectToMatchingBracketAction(AntlrBasedClojureEditor editor) {
+    public OutwardExpandingSelectAction(AntlrBasedClojureEditor editor) {
         super(ClojureEditorMessages.SelectToMatchingBracket_label);
         Assert.isNotNull(editor);
         this.editor = editor;
@@ -56,7 +58,7 @@ public class SelectToMatchingBracketAction extends Action {
                     int anchor = editor.getPairsMatcher().getAnchor();
                     int targetOffset = ICharacterPairMatcher.RIGHT == anchor ? offset + 1 : offset + length;
                     if (visible(sourceViewer, targetOffset)) {
-                        actualSelection(sourceViewer, selection, caretOffset, offset, length, anchor, targetOffset);
+                        actualSelection(editor.getDocument(), sourceViewer, caretOffset, offset, length, anchor, targetOffset);
                     } else {
                         showError(sourceViewer, ClojureEditorMessages.GotoMatchingBracket_error_bracketOutsideSelectedElement);
                     }
@@ -70,10 +72,28 @@ public class SelectToMatchingBracketAction extends Action {
         sourceViewer.getTextWidget().getDisplay().beep();
     }
 
-    public void actualSelection(ISourceViewer sourceViewer, IRegion selection, int sourceCaretOffset, int offset, int length, int anchor, int targetOffset) {
+    public void actualSelection(IDocument document, ISourceViewer sourceViewer, int sourceCaretOffset, int offset, int length, int anchor, int targetOffset) {
         int distanceBetweenBrackets = sourceCaretOffset - targetOffset + offsetAdjustment(sourceCaretOffset, offset, length, anchor);
-        sourceViewer.setSelectedRange(targetOffset + targetOffsetAdjustment(anchor), distanceBetweenBrackets);
-        sourceViewer.revealRange(targetOffset + targetOffsetAdjustment(anchor), distanceBetweenBrackets);
+        int adjustedTargetOffset = targetOffset + targetOffsetAdjustment(anchor);
+        if (distanceBetweenBrackets < 0) {
+            adjustedTargetOffset = adjustedTargetOffset + distanceBetweenBrackets;
+            distanceBetweenBrackets = Math.abs(distanceBetweenBrackets);
+        }
+        if (previousCharacterIsPound(document, adjustedTargetOffset)) {
+            adjustedTargetOffset--;
+            distanceBetweenBrackets++;
+        }
+        sourceViewer.setSelectedRange(adjustedTargetOffset, distanceBetweenBrackets);
+        sourceViewer.revealRange(adjustedTargetOffset, distanceBetweenBrackets);
+    }
+
+    public boolean previousCharacterIsPound(IDocument document, int adjustedTargetOffset) {
+        try {
+            String previousCharacter = document.get(adjustedTargetOffset - 1, 1);
+            return "#".equals(previousCharacter);
+        } catch (BadLocationException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public int targetOffsetAdjustment(int anchor) {

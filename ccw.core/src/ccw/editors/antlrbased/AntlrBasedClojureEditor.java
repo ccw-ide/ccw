@@ -168,9 +168,9 @@ public class AntlrBasedClojureEditor extends TextEditor {
         Action action = new GotoMatchingBracketAction(this);
         action.setActionDefinitionId(IClojureEditorActionDefinitionIds.GOTO_MATCHING_BRACKET);
         setAction(GotoMatchingBracketAction.ID, action);
-        action = new SelectToMatchingBracketAction(this);
+        action = new OutwardExpandingSelectAction(this);
         action.setActionDefinitionId(IClojureEditorActionDefinitionIds.SELECT_TO_MATCHING_BRACKET);
-        setAction(SelectToMatchingBracketAction.ID, action);
+        setAction(OutwardExpandingSelectAction.ID, action);
         action = new GotoNextMemberAction(this);
         action.setActionDefinitionId(IClojureEditorActionDefinitionIds.GOTO_NEXT_MEMBER);
         setAction(GotoNextMemberAction.ID, action);
