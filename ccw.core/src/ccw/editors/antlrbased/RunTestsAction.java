@@ -59,6 +59,13 @@ public class RunTestsAction extends Action {
     }
 
     public static String runTestsCommand(String libName) {
-        return "(clojure.test/run-tests'" + libName + ")";
+        return "(clojure.test/run-tests'" + testLibName(libName) + ")";
+    }
+
+    public static String testLibName(String libName) {
+        if (libName.endsWith("-test")) {
+            return libName;
+        }
+        return libName + "-test";
     }
 }
