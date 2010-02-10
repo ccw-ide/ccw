@@ -12,6 +12,7 @@ package ccw.editors.antlrbased;
 
 import java.util.LinkedList;
 import java.util.List;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -23,7 +24,6 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewerExtension5;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
-import org.eclipse.jface.text.rules.ITokenScanner;
 import org.eclipse.jface.text.source.DefaultCharacterPairMatcher;
 import org.eclipse.jface.text.source.ICharacterPairMatcher;
 import org.eclipse.jface.text.source.ISourceViewer;
@@ -44,6 +44,7 @@ import org.eclipse.ui.texteditor.ContentAssistAction;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
+
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.debug.ClojureClient;
@@ -84,17 +85,11 @@ public class AntlrBasedClojureEditor extends TextEditor {
     /** The projection support */
     private ProjectionSupport fProjectionSupport;
     private ClojureOutlinePage outlinePage;
-    private ITokenScanner tokenScanner;
-
-    public ITokenScanner getTokenScanner() {
-        return tokenScanner;
-    }
 
     public AntlrBasedClojureEditor() {
         IPreferenceStore preferenceStore = createCombinedPreferenceStore();
         CCWPlugin.registerEditorColors(preferenceStore);
         ClojureSourceViewerConfiguration configuration = new ClojureSourceViewerConfiguration(preferenceStore, this);
-        tokenScanner = configuration.tokenScanner;
         setSourceViewerConfiguration(configuration);
         setPreferenceStore(preferenceStore);
         setDocumentProvider(new ClojureDocumentProvider());
@@ -196,6 +191,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
         action.setActionDefinitionId(IClojureEditorActionDefinitionIds.FORMAT_CODE);
         setAction(FormatAction.ID, action);
         action = new Action() {
+            @Override
             public void run() {
                 new ClojureLaunchShortcut().launch(AntlrBasedClojureEditor.this, ILaunchManager.RUN_MODE);
             };
