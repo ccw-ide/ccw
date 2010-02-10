@@ -1,6 +1,5 @@
 package ccw.editors.antlrbased;
 
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.ITokenScanner;
@@ -17,64 +16,37 @@ public class SameWordHighlightingCaretListener implements CaretListener {
     }
 
     public void caretMoved(CaretEvent event) {
-        try {
-            IDocument document = editor.getDocument();
-            ITokenScanner tokenScanner = editor.getTokenScanner();
-            startTokenScannerAtTheBeginningOfCurrentLine(event, document, tokenScanner);
-            IToken tokenAtCaret = tokenAtCaret(tokenScanner, event.caretOffset);
-            boolean wordIsNotFormatted = tokenAtCaret.getData() == null;
-            if (wordIsNotFormatted) {
-                StyleRange range = createRange(tokenScanner);
-                String wordAtCaret = document.get(range.start, range.length);
-                editor.sourceViewer().invalidateTextPresentation();
-                colorOtherMatches(document, tokenScanner, wordAtCaret);
-                editor.sourceViewer().getTextWidget().setStyleRange(range);
-            }
-        } catch (BadLocationException e) {
-            throw new RuntimeException(e);
+        IDocument document = editor.getDocument();
+        Tokens tokens = new Tokens(document, event.caretOffset);
+        tokens.putTokenScannerRangeOnCurrentLine();
+        IToken tokenAtCaret = tokens.tokenAtCaret();
+        boolean wordIsNotFormatted = tokenAtCaret.getData() == null;
+        if (wordIsNotFormatted) {
+            StyleRange range = createRange(tokens);
+            String wordAtCaret = tokens.tokenContents();
+            editor.sourceViewer().invalidateTextPresentation();
+            colorOtherMatches(document, tokens, wordAtCaret);
+            editor.sourceViewer().getTextWidget().setStyleRange(range);
         }
     }
 
-    private StyleRange createRange(ITokenScanner tokenScanner) {
-        StyleRange range = new StyleRange();
-        range.background = new Color(editor.sourceViewer().getTextWidget().getDisplay(), 225, 225, 225);
-        range.start = tokenScanner.getTokenOffset();
-        range.length = tokenScanner.getTokenLength();
-        return range;
+    private StyleRange createRange(Tokens tokens) {
+        return tokens.styleRange(new Color(editor.sourceViewer().getTextWidget().getDisplay(), 225, 225, 225));
     }
 
-    private void colorOtherMatches(IDocument document, ITokenScanner tokenScanner, String original) throws BadLocationException {
+    private void colorOtherMatches(IDocument document, Tokens tokens, String original) {
+        ITokenScanner tokenScanner = tokens.getTokenScanner();
         tokenScanner.setRange(document, 0, document.getLength());
         IToken token = tokenScanner.nextToken();
         while (!token.isEOF()) {
             if (token.getData() == null) {
-                String tokenContents = document.get(tokenScanner.getTokenOffset(), tokenScanner.getTokenLength());
+                String tokenContents = tokens.tokenContents();
                 if (tokenContents.equals(original)) {
-                    StyleRange range = new StyleRange();
-                    range.start = tokenScanner.getTokenOffset();
-                    range.length = tokenScanner.getTokenLength();
-                    range.background = new Color(editor.sourceViewer().getTextWidget().getDisplay(), 255, 255, 180);
+                    StyleRange range = tokens.styleRange(new Color(editor.sourceViewer().getTextWidget().getDisplay(), 255, 255, 180));
                     editor.sourceViewer().getTextWidget().setStyleRange(range);
                 }
             }
             token = tokenScanner.nextToken();
         }
-    }
-
-    private IToken tokenAtCaret(ITokenScanner tokenScanner, int caretOffset) {
-        IToken token = tokenScanner.nextToken();
-        while (!token.isEOF()) {
-            if (tokenScanner.getTokenOffset() + tokenScanner.getTokenLength() > caretOffset)
-                return token;
-            token = tokenScanner.nextToken();
-        }
-        return token;
-    }
-
-    private void startTokenScannerAtTheBeginningOfCurrentLine(CaretEvent event, IDocument document, ITokenScanner tokenScanner) throws BadLocationException {
-        int lineOfOffset = document.getLineOfOffset(event.caretOffset);
-        int lineOffset = document.getLineOffset(lineOfOffset);
-        int lineLength = document.getLineLength(lineOfOffset);
-        tokenScanner.setRange(document, lineOffset, lineLength);
     }
 }
