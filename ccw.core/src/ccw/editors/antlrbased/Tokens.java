@@ -23,6 +23,7 @@ public class Tokens {
 
     public Tokens(IDocument document) {
         this.tokenScanner = tokenScanner();
+        tokenScanner.setRange(document, 0, document.getLength());
         this.document = document;
     }
 
