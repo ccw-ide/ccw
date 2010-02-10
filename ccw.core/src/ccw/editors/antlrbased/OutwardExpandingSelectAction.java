@@ -22,46 +22,49 @@ public class OutwardExpandingSelectAction extends Action {
 
     @Override
     public void run() {
-        selectToMatchingBracket();
+        select();
     }
 
-    private void selectToMatchingBracket() {
+    private void select() {
         ISourceViewer sourceViewer = editor.sourceViewer();
         IRegion selection = editor.getUnSignedSelection(sourceViewer);
         boolean previousSelectionExists = Math.abs(selection.getLength()) > 1;
-        {
-            int caretOffset = selection.getOffset();
-            if (previousSelectionExists) {
-                caretOffset = selection.getOffset() - 1;
-            }
-            int originalSelectionEnd = selection.getOffset() + selection.getLength();
-            IRegion region = null;
-            while (region == null && caretOffset >= 0) {
-                region = editor.getPairsMatcher().match(editor.getDocument(), caretOffset);
-                if (region != null) {
-                    int newSelectionEnd = region.getOffset() + region.getLength();
-                    if (newSelectionEnd < originalSelectionEnd) {
-                        region = null;
-                    }
-                }
-                if (region == null) {
-                    caretOffset--;
+        int caretOffset = selection.getOffset();
+        if (previousSelectionExists) {
+            caretOffset = selection.getOffset() - 1;
+        }
+        Tokens tokens = new Tokens(editor.getDocument(), caretOffset);
+        if (tokens.tokenAtCaret().getData() == null) {
+            showSelection(sourceViewer, tokens.getTokenOffset(), tokens.getTokenLength());
+            return;
+        }
+        int originalSelectionEnd = selection.getOffset() + selection.getLength();
+        IRegion region = null;
+        while (region == null && caretOffset >= 0) {
+            region = editor.getPairsMatcher().match(editor.getDocument(), caretOffset);
+            if (region != null) {
+                int newSelectionEnd = region.getOffset() + region.getLength();
+                if (newSelectionEnd < originalSelectionEnd) {
+                    region = null;
                 }
             }
             if (region == null) {
-                String error = ClojureEditorMessages.GotoMatchingBracket_error_noMatchingBracket;
-                showError(sourceViewer, error);
-            } else {
-                int offset = region.getOffset();
-                int length = region.getLength();
-                if (length >= 1) {
-                    int anchor = editor.getPairsMatcher().getAnchor();
-                    int targetOffset = ICharacterPairMatcher.RIGHT == anchor ? offset + 1 : offset + length;
-                    if (visible(sourceViewer, targetOffset)) {
-                        actualSelection(editor.getDocument(), sourceViewer, caretOffset, offset, length, anchor, targetOffset);
-                    } else {
-                        showError(sourceViewer, ClojureEditorMessages.GotoMatchingBracket_error_bracketOutsideSelectedElement);
-                    }
+                caretOffset--;
+            }
+        }
+        if (region == null) {
+            String error = ClojureEditorMessages.GotoMatchingBracket_error_noMatchingBracket;
+            showError(sourceViewer, error);
+        } else {
+            int offset = region.getOffset();
+            int length = region.getLength();
+            if (length >= 1) {
+                int anchor = editor.getPairsMatcher().getAnchor();
+                int targetOffset = ICharacterPairMatcher.RIGHT == anchor ? offset + 1 : offset + length;
+                if (visible(sourceViewer, targetOffset)) {
+                    actualSelection(editor.getDocument(), sourceViewer, caretOffset, offset, length, anchor, targetOffset);
+                } else {
+                    showError(sourceViewer, ClojureEditorMessages.GotoMatchingBracket_error_bracketOutsideSelectedElement);
                 }
             }
         }
@@ -83,8 +86,12 @@ public class OutwardExpandingSelectAction extends Action {
             adjustedTargetOffset--;
             distanceBetweenBrackets++;
         }
-        sourceViewer.setSelectedRange(adjustedTargetOffset, distanceBetweenBrackets);
-        sourceViewer.revealRange(adjustedTargetOffset, distanceBetweenBrackets);
+        showSelection(sourceViewer, adjustedTargetOffset, distanceBetweenBrackets);
+    }
+
+    public void showSelection(ISourceViewer sourceViewer, int offset, int length) {
+        sourceViewer.setSelectedRange(offset, length);
+        sourceViewer.revealRange(offset, length);
     }
 
     public boolean previousCharacterIsPound(IDocument document, int adjustedTargetOffset) {
