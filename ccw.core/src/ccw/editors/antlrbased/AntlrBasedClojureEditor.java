@@ -190,6 +190,9 @@ public class AntlrBasedClojureEditor extends TextEditor {
         action = new FormatAction(this);
         action.setActionDefinitionId(IClojureEditorActionDefinitionIds.FORMAT_CODE);
         setAction(FormatAction.ID, action);
+        action = new NavigationToDefinitionAction(this);
+        action.setActionDefinitionId(IClojureEditorActionDefinitionIds.NAVIGATE_TO_DEFINITION);
+        setAction(NavigationToDefinitionAction.ID, action);
         action = new Action() {
             @Override
             public void run() {
