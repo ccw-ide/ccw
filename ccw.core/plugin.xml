@@ -219,7 +219,6 @@
             categoryId="org.eclipse.ui.category.navigate"
             id="ccw.ui.edit.text.clojure.run.tests">
       </command>
-      
 
       <command
             name="%command.formatCode.name"
@@ -227,7 +226,13 @@
             categoryId="org.eclipse.ui.category.navigate"
             id="ccw.ui.edit.text.clojure.format.code">
       </command>
-
+	  
+	        <command
+            name="%command.navigateToDefition.name"
+            description="%command.navigateToDefition.description"
+            categoryId="org.eclipse.ui.category.navigate"
+            id="ccw.ui.edit.text.clojure.navigate.to.definition">
+      </command>
 	  
       <command
             name="%command.clojureShortcut.run.name"
@@ -329,6 +334,11 @@
             commandId="ccw.ui.edit.text.clojure.format.code"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
 			
+      <key
+            sequence="F3"
+            contextId="ccw.ui.clojureEditorScope"
+            commandId="ccw.ui.edit.text.clojure.navigate.to.definition"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
 			
             
 	</extension>
@@ -397,7 +407,13 @@
             <command
                   commandId="ccw.ui.edit.text.clojure.format.code"
                   label="Format clojure code"
-                  style="push">
+                  style="push">                  	
+            </command>
+
+            <command
+                  commandId="ccw.ui.edit.text.clojure.navigate.to.definition"
+                  label="Navigate to definition"
+                  style="push">                     
             </command>
 			
             <visibleWhen
@@ -477,6 +493,13 @@
                   label="Format clojure code"
                   style="push">
             </command>
+			
+            <command
+                  commandId="ccw.ui.edit.text.clojure.navigate.to.definition"
+                  label="Navigate to definition"
+                  style="push">                     
+            </command>
+
 
             <visibleWhen
                   checkEnabled="false">
