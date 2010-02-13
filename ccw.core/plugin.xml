@@ -227,9 +227,9 @@
             id="ccw.ui.edit.text.clojure.format.code">
       </command>
 	  
-	        <command
-            name="%command.navigateToDefition.name"
-            description="%command.navigateToDefition.description"
+	 <command
+            name="%command.navigateToDefinition.name"
+            description="%command.navigateToDefinition.description"
             categoryId="org.eclipse.ui.category.navigate"
             id="ccw.ui.edit.text.clojure.navigate.to.definition">
       </command>
