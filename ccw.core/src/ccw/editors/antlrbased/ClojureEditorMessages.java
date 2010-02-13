@@ -51,6 +51,9 @@ public final class ClojureEditorMessages extends NLS {
     public static String Cannot_find_declaration;
     public static String You_need_a_running_repl;
     
+    public static String Cannot_find_definition;
+    public static String You_need_a_running_repl;
+    
     public static String Compilation_failed;
     public static String Tests_failed;
     public static String Tests_passed;
