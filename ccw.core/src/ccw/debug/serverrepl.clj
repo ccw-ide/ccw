@@ -165,8 +165,7 @@
     (str found-type)))
 ; (remove-ns 'ccw.debug.serverrepl)   
 
-(namespaces-info)
-
-(defn find-symbol [s]
-   (let [intermediate (mapcat :children (:children @ns-info-cache))]
-   (first (filter #(= (:name %) s)  intermediate))))
+(defn find-symbol [s n-s]
+   (let [i (mapcat :children (:children @ns-info-cache))
+    		 j (filter #(= (:name %) s) i)]
+    (first (if (= 1 (count j)) j (filter #(= (:ns %) n-s) j)))))
