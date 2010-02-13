@@ -85,7 +85,6 @@ public class ConsolePageParticipant implements IConsolePageParticipant {
 			bindConsoleToClojureEnvironment();
 		}
 		if (clojureClient != null) {
-			System.out.println("activated");
 			addPatternMatchListener(this.console);
 			if (CCWPlugin.getDefault().getPreferenceStore().getBoolean(
 					PreferenceConstants.SWITCH_TO_NS_ON_REPL_STARTUP)) {
