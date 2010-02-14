@@ -6,7 +6,6 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.source.ISourceViewer;
-
 import ccw.editors.antlrbased.AntlrBasedClojureEditor;
 import ccw.editors.antlrbased.ClojureEditorMessages;
 import ccw.editors.antlrbased.Tokens;

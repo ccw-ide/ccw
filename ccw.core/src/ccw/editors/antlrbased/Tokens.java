@@ -136,7 +136,6 @@ public class Tokens {
     }
 
     public String tokenContents() {
-        tokenAtCaret();
         try {
             return document.get(getTokenOffset(), getTokenLength());
         } catch (BadLocationException e) {

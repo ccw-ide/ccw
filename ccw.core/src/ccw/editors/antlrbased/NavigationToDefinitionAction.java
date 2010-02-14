@@ -20,6 +20,7 @@ public class NavigationToDefinitionAction extends Action {
     public void run() {
         int caretOffset = editor.sourceViewer().getTextWidget().getCaretOffset();
         Tokens tokens = new Tokens(editor.getDocument(), caretOffset);
+        tokens.tokenAtCaret();
         String tokenContents = tokens.tokenContents();
         List<String> split = Arrays.asList(tokenContents.split("/"));
         String symbol = tokenContents;
