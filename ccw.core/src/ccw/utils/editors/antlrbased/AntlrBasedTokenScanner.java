@@ -155,7 +155,7 @@ abstract public class AntlrBasedTokenScanner implements ITokenScanner {
         for (int i = 0; i < size; i++) {
             TokenData tokenInfo = tokensData.get(i);
             if (tokenInfo.offset >= offset) {
-                currentTokenIndex = i - 1;
+                currentTokenIndex =  i - 1;
                 break;
             }
             nextToken(); // called to initialize side effect on variable
