@@ -92,6 +92,9 @@ public class Tokens {
     }
 
     public int sameStructuralOffset(Tokens tokens) {
+        if (tokens.caretOffset == 0) {
+            return 0;
+        }
         int tokenOffset = tokens.offsetOfTokenUnderCaret();
         int offsetFromBeginningOfToken = tokens.caretOffset() - tokenOffset;
         int caretLine = tokens.caretLine();
