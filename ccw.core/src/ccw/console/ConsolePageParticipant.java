@@ -36,147 +36,146 @@ import ccw.outline.NamespaceBrowser;
 import ccw.preferences.PreferenceConstants;
 
 public class ConsolePageParticipant implements IConsolePageParticipant {
-	private IOConsole console;
-	private ClojureClient clojureClient;
-	private IContextActivation contextActivation;
+    private IOConsole console;
+    private ClojureClient clojureClient;
+    private IContextActivation contextActivation;
+    private Thread initializationThread;
 
-	private Thread initializationThread;
+    public void init(IPageBookViewPage page, IConsole console) {
+        assert org.eclipse.debug.ui.console.IConsole.class.isInstance(console);
+        assert TextConsole.class.isInstance(console);
+        this.console = (IOConsole) console;
+        this.initializationThread = new Thread(new Runnable() {
+            public void run() {
+                initNamespaceBrowser();
+            }
+        });
+        initializationThread.start();
+        System.err.println("hai4uuuu " + this);
+    }
 
-	public void init(IPageBookViewPage page, IConsole console) {
-		assert org.eclipse.debug.ui.console.IConsole.class.isInstance(console);
-		assert TextConsole.class.isInstance(console);
+    public void activated() {
+        activateContext("ccw.ui.clojureEditorScope"); //$NON-NLS-1$
+    }
 
-		this.console = (IOConsole) console;
-		this.initializationThread = new Thread(new Runnable() {
-			public void run() {
-				initNamespaceBrowser();
-			}
-		});
-		initializationThread.start();
-	}
+    public void deactivated() {
+        deactivateContext();
+    }
 
-	public void activated() {
-		activateContext("ccw.ui.clojureEditorScope"); //$NON-NLS-1$
-	}
-	
-	public void deactivated() {
-		deactivateContext();
-	}
+    private static IContextService contextService() {
+        return (IContextService) PlatformUI.getWorkbench().getAdapter(IContextService.class);
+    }
 
-	private static IContextService contextService() {
-		return (IContextService) PlatformUI.getWorkbench().getAdapter(
-				IContextService.class);
-	}
-	private void activateContext(String contextId) {
-		contextActivation = contextService().activateContext(contextId);
-	}
+    private void activateContext(String contextId) {
+        System.err.println("contextActivation: " + contextActivation);
+        contextActivation = contextService().activateContext(contextId);
+        System.out.println("started: " + contextActivation);
+        if (contextActivation == null)
+            throw new IllegalStateException("fuck");
+    }
 
-	private void deactivateContext() {
-		if (contextActivation != null) {
-			contextService().deactivateContext(contextActivation);
-			contextActivation = null;
-		}
-	}
+    private void deactivateContext() {
+        System.out.println("deactivating... " + contextActivation);
+        // System.out.println("act: " + contextService().getActiveContextIds());
+        // System.out.println("wat: " +
+        // contextService().getContext("ccw.ui.clojureEditorScope"));
+        if (contextActivation != null) {
+            // System.out.println("act1: " +
+            // contextService().getActiveContextIds());
+            contextService().deactivateContext(contextActivation);
+            // System.out.println("act2: " +
+            // contextService().getActiveContextIds());
+            contextActivation = null;
+        }
+    }
 
+    private synchronized void initNamespaceBrowser() {
+        if (clojureClient == null) {
+            bindConsoleToClojureEnvironment();
+        }
+        if (clojureClient != null) {
+            addPatternMatchListener(this.console);
+            if (CCWPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.SWITCH_TO_NS_ON_REPL_STARTUP)) {
+                try {
+                    org.eclipse.debug.ui.console.IConsole processConsole = (org.eclipse.debug.ui.console.IConsole) console;
+                    List<IFile> files = LaunchUtils.getFilesToLaunchList(processConsole.getProcess().getLaunch().getLaunchConfiguration());
+                    if (files.size() > 0) {
+                        String namespace = ClojureCore.getDeclaredNamespace(files.get(0));
+                        if (namespace != null) {
+                            EvaluateTextAction.evaluateText(this.console, "(in-ns '" + namespace + ")", false);
+                        }
+                    }
+                } catch (CoreException e) {
+                    CCWPlugin.logError("error while trying to guess the ns to which make the REPL console switch", e);
+                }
+            }
+            NamespaceBrowser.setClojureClient(clojureClient);
+        }
+    }
 
+    private void bindConsoleToClojureEnvironment() {
+        org.eclipse.debug.ui.console.IConsole processConsole = (org.eclipse.debug.ui.console.IConsole) console;
+        boolean stop = false;
+        int selfTimeout = 60000; // 60 seconds
+        while (!stop && selfTimeout > 0) {
+            if (Thread.interrupted()) {
+                stop = true;
+            } else {
+                int clojureVMPort = LaunchUtils.getLaunchServerReplPort(processConsole.getProcess().getLaunch());
+                if (clojureVMPort != -1) {
+                    clojureClient = new ClojureClient(clojureVMPort);
+                    stop = true;
+                } else {
+                    try {
+                        Thread.sleep(100);
+                        selfTimeout -= 100;
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        stop = true;
+                    }
+                }
+            }
+        }
+    }
 
-	private synchronized void initNamespaceBrowser() {
-		if (clojureClient == null) {
-			bindConsoleToClojureEnvironment();
-		}
-		if (clojureClient != null) {
-			addPatternMatchListener(this.console);
-			if (CCWPlugin.getDefault().getPreferenceStore().getBoolean(
-					PreferenceConstants.SWITCH_TO_NS_ON_REPL_STARTUP)) {
-				try {
-					org.eclipse.debug.ui.console.IConsole processConsole = (org.eclipse.debug.ui.console.IConsole) console;
-					List<IFile> files = LaunchUtils
-							.getFilesToLaunchList(processConsole.getProcess()
-									.getLaunch().getLaunchConfiguration());
-					if (files.size() > 0) {
-						String namespace = ClojureCore
-								.getDeclaredNamespace(files.get(0));
-						if (namespace != null) {
-							EvaluateTextAction.evaluateText(this.console,
-									"(in-ns '" + namespace + ")", false);
-						}
-					}
-				} catch (CoreException e) {
-					CCWPlugin
-							.logError(
-									"error while trying to guess the ns to which make the REPL console switch",
-									e);
-				}
-			}
-			NamespaceBrowser.setClojureClient(clojureClient);
-		}
-	}
+    public void dispose() {
+        deactivateContext();
+        if (initializationThread.isAlive()) {
+            initializationThread.interrupt();
+        }
+    }
 
-	private void bindConsoleToClojureEnvironment() {
-		org.eclipse.debug.ui.console.IConsole processConsole = (org.eclipse.debug.ui.console.IConsole) console;
-		boolean stop = false;
-		int selfTimeout = 60000; // 60 seconds
-		while (!stop && selfTimeout > 0) {
-			if (Thread.interrupted()) {
-				stop = true;
-			} else {
-				int clojureVMPort = LaunchUtils
-						.getLaunchServerReplPort(processConsole.getProcess()
-								.getLaunch());
-				if (clojureVMPort != -1) {
-					clojureClient = new ClojureClient(clojureVMPort);
-					stop = true;
-				} else {
-					try {
-						Thread.sleep(100);
-						selfTimeout -= 100;
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-						stop = true;
-					}
-				}
-			}
-		}
-	}
+    public Object getAdapter(Class adapter) {
+        return Platform.getAdapterManager().getAdapter(this, adapter);
+    }
 
-	public void dispose() {
-		if (initializationThread.isAlive()) {
-			initializationThread.interrupt();
-		}
-	}
+    private void addPatternMatchListener(TextConsole console) {
+        console.addPatternMatchListener(new IPatternMatchListener() {
+            public int getCompilerFlags() {
+                return 0;
+            }
 
-	public Object getAdapter(Class adapter) {
-		return Platform.getAdapterManager().getAdapter(this, adapter);
-	}
+            public String getLineQualifier() {
+                return null;
+            }
 
-	private void addPatternMatchListener(TextConsole console) {
-		console.addPatternMatchListener(new IPatternMatchListener() {
-			public int getCompilerFlags() {
-				return 0;
-			}
+            public String getPattern() {
+                return ".*\n";
+            }
 
-			public String getLineQualifier() {
-				return null;
-			}
+            public void connect(TextConsole console) {
+                // Nothing
+            }
 
-			public String getPattern() {
-				return ".*\n";
-			}
+            public void disconnect() {
+                // Nothing
+            }
 
-			public void connect(TextConsole console) {
-				// Nothing
-			}
-
-			public void disconnect() {
-				// Nothing
-			}
-
-			public void matchFound(PatternMatchEvent event) {
-				if (clojureClient != null) {
-					NamespaceBrowser.setClojureClient(clojureClient);
-				}
-			}
-		});
-	}
-
+            public void matchFound(PatternMatchEvent event) {
+                if (clojureClient != null) {
+                    NamespaceBrowser.setClojureClient(clojureClient);
+                }
+            }
+        });
+    }
 }
