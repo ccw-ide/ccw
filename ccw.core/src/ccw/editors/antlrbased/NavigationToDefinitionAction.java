@@ -38,8 +38,9 @@ public class NavigationToDefinitionAction extends Action {
             return;
         }
         PersistentArrayMap result2 = (PersistentArrayMap) clojure.remoteLoadRead(command);
+        System.out.println("lol: " + result2);
         List<String> result = (List<String>) result2.get("response");
-        if (result == null || result.isEmpty()) {
+        if (result == null || result.isEmpty() || result2.get("response-type").equals(-1)) {
             editor.setStatusLineErrorMessage(ClojureEditorMessages.Cannot_find_definition);
             return;
         }
