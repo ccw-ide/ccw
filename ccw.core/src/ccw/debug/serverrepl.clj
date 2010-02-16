@@ -167,38 +167,11 @@
     (str found-type)))
 ; (remove-ns 'ccw.debug.serverrepl)   
 
-; (namespaces-info)
-
-(defn find-symbol [s ns1 ns2]
-  (let [a ((ns-aliases (symbol ns1)) (symbol ns2))]
-    ;    (println "a" a)
-    ;    (cond
-    ;      (= "null" ns2) (println "1")
-    ;      a (println "2")
-    ;      :else (println "3"))
-    (map (fn [[k v]] (str v)) (select-keys
-                                (cond
-                                  (= "null" ns2) (meta (if (resolve (symbol ns1 s))
-                                                          (resolve (symbol ns1 s))
-                                                          ((symbol s) (ns-map (the-ns (symbol ns1))))   ))
-                                  a (meta (ns-resolve a (symbol s)))
-                                  :else (meta (resolve (symbol ns2 s))))
+(defn find-symbol [s current-ns qualified-ns]
+  (let [a ((ns-aliases (symbol current-ns)) (symbol qualified-ns))]
+    (map (fn [[k v]] (str v)) (select-keys (meta
+                                             (cond
+                                               (= "null" qualified-ns) ((symbol s) (ns-map (the-ns (symbol current-ns))))
+                                               a (ns-resolve a (symbol s))
+                                               :else (resolve (symbol qualified-ns s))))
                                 [:ns :name :line :file]))))
-
- (defn slurp* [])
-
-(println (find-symbol "slurp*" "ccw.debug.serverrepl" "null"))
-(println (find-symbol "slurp*" "ccw.debug.serverrepl" "cocks"))
-(println (find-symbol "show" "ccw.debug.serverrepl" "null"))
-(println (find-symbol "rec-cat" "ccw.debug.serverrepl" "clojure.contrib.seq-utils"))
-(println (find-symbol "rec-cat" "clojure.contrib.seq-utils" "null"))
-(println (find-symbol "is" "ccw.debug.serverrepl" "null"))
-
-;(ns-map (the-ns 'ccw.debug.serverrepl))
-; (println "lol" ((symbol "cocks") (ns-aliases 'ccw.debug.serverrepl)))
-
- ;(find-symbol "show" "ccw.debug.serverrepl" "cocks")
-; (clojure.contrib.repl-utils/show (the-ns 'ccw.debug.serverrepl))
-; (.lookupAlias (the-ns 'ccw.debug.serverrepl) (symbol "cocks"))
-; (clojure.contrib.pprint/pprint (.getMappings (the-ns 'ccw.debug.serverrepl)))
-; (meta (resolve 'cocks/slurp*))
