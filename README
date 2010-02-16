@@ -1,0 +1,7 @@
+fork of ccw with:
+- formatting
+- open declaration (f3)
+- same word highlighting
+- launch repl with alt-shift-x c
+- run tests in repl with ctrl-t 
+- outward expanding select with ctrl-alt-p.  expand to next outer s-expression with each invocation.
