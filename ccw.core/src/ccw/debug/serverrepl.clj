@@ -10,9 +10,7 @@
 ; *******************************************************************************/
 ; Totally footprint free embedded evaluation server
 ; (do not have any namespace / symbol presence)
-(ns ccw.debug.serverrepl
-  (:require [clojure.contrib.duck-streams :as cocks])
-  (:use clojure.contrib.repl-utils))
+(ns ccw.debug.serverrepl)
 
 ; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; library code
