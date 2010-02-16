@@ -27,8 +27,8 @@ import org.eclipse.ui.contexts.IContextActivation;
 import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.part.IPageBookViewPage;
 
-import ccw.ClojureCore;
 import ccw.CCWPlugin;
+import ccw.ClojureCore;
 import ccw.debug.ClojureClient;
 import ccw.editors.antlrbased.EvaluateTextAction;
 import ccw.launching.LaunchUtils;
@@ -51,7 +51,6 @@ public class ConsolePageParticipant implements IConsolePageParticipant {
             }
         });
         initializationThread.start();
-        System.err.println("hai4uuuu " + this);
     }
 
     public void activated() {
@@ -67,24 +66,15 @@ public class ConsolePageParticipant implements IConsolePageParticipant {
     }
 
     private void activateContext(String contextId) {
-        System.err.println("contextActivation: " + contextActivation);
         contextActivation = contextService().activateContext(contextId);
-        System.out.println("started: " + contextActivation);
-        if (contextActivation == null)
+        if (contextActivation == null) {
             throw new IllegalStateException("fuck");
+        }
     }
 
     private void deactivateContext() {
-        System.out.println("deactivating... " + contextActivation);
-        // System.out.println("act: " + contextService().getActiveContextIds());
-        // System.out.println("wat: " +
-        // contextService().getContext("ccw.ui.clojureEditorScope"));
         if (contextActivation != null) {
-            // System.out.println("act1: " +
-            // contextService().getActiveContextIds());
             contextService().deactivateContext(contextActivation);
-            // System.out.println("act2: " +
-            // contextService().getActiveContextIds());
             contextActivation = null;
         }
     }
