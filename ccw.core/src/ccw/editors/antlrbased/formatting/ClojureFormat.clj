@@ -11,7 +11,6 @@
 (defn -formatCode [this string]
   (format-code string))
 
-
 (defn format-code [string]
   (loop [s string col 0 dstack [] out [] space nil incl false
          insl false incm false lwcr false sups true cmindent nil]
