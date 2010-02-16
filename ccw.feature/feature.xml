@@ -2,7 +2,7 @@
 <feature
       id="ccw.feature"
       label="%featureName"
-      version="0.0.50.miau3"
+      version="0.0.50.miau4"
       provider-name="%providerName"
       plugin="ccw.branding">
 
