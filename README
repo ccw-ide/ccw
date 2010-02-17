@@ -5,3 +5,6 @@ fork of ccw with:
 - launch repl with alt-shift-x c
 - run tests in repl with ctrl-t 
 - outward expanding select with ctrl-alt-p.  expand to next outer s-expression with each invocation.
+
+the eclipse update site is:
+http://miaubiz.github.com/ccw/
