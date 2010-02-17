@@ -7,6 +7,7 @@
 ; *
 ; * Contributors: 
 ; *    Laurent PETIT - initial API and implementation
+; *    Tuomas KARKKAINEN - find-symbol
 ; *******************************************************************************/
 ; Totally footprint free embedded evaluation server
 ; (do not have any namespace / symbol presence)
