@@ -48,7 +48,6 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.debug.ClojureClient;
-import ccw.editors.antlrbased.formatting.FormatAction;
 import ccw.editors.outline.ClojureOutlinePage;
 import ccw.editors.rulesbased.ClojureDocumentProvider;
 import ccw.editors.rulesbased.ClojurePartitionScanner;
@@ -163,9 +162,9 @@ public class AntlrBasedClojureEditor extends TextEditor {
         Action action = new GotoMatchingBracketAction(this);
         action.setActionDefinitionId(IClojureEditorActionDefinitionIds.GOTO_MATCHING_BRACKET);
         setAction(GotoMatchingBracketAction.ID, action);
-        action = new OutwardExpandingSelectAction(this);
-        action.setActionDefinitionId(IClojureEditorActionDefinitionIds.SELECT_TO_MATCHING_BRACKET);
-        setAction(OutwardExpandingSelectAction.ID, action);
+        action = new OutwardExpandingSelectionAction(this);
+        action.setActionDefinitionId(IClojureEditorActionDefinitionIds.OUTWARD_EXPANDING_SELECTION);
+        setAction(OutwardExpandingSelectionAction.ID, action);
         action = new GotoNextMemberAction(this);
         action.setActionDefinitionId(IClojureEditorActionDefinitionIds.GOTO_NEXT_MEMBER);
         setAction(GotoNextMemberAction.ID, action);
@@ -190,9 +189,9 @@ public class AntlrBasedClojureEditor extends TextEditor {
         action = new FormatAction(this);
         action.setActionDefinitionId(IClojureEditorActionDefinitionIds.FORMAT_CODE);
         setAction(FormatAction.ID, action);
-        action = new NavigationToDefinitionAction(this);
-        action.setActionDefinitionId(IClojureEditorActionDefinitionIds.NAVIGATE_TO_DEFINITION);
-        setAction(NavigationToDefinitionAction.ID, action);
+        action = new OpenDeclarationAction(this);
+        action.setActionDefinitionId(IClojureEditorActionDefinitionIds.OPEN_DECLARATION);
+        setAction(OpenDeclarationAction.ID, action);
         action = new Action() {
             @Override
             public void run() {

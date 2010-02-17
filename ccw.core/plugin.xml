@@ -164,9 +164,9 @@
       </command>
       <command
             categoryId="org.eclipse.ui.category.navigate"
-            description="%command.selectToMatchingBracket.description"
-            id="ccw.ui.edit.text.clojure.select.to.matching.bracket"
-            name="%command.selectToMatchingBracket.name">
+            description="%command.outwardExpandingSelection.description"
+            id="ccw.ui.edit.text.clojure.outward.expanding.selection"
+            name="%command.outwardExpandingSelection.name">
       </command>	  
 <!-- navigate -->
       <command
@@ -231,7 +231,7 @@
             name="%command.navigateToDefinition.name"
             description="%command.navigateToDefinition.description"
             categoryId="org.eclipse.ui.category.navigate"
-            id="ccw.ui.edit.text.clojure.navigate.to.definition">
+            id="ccw.ui.edit.text.clojure.open.declaration">
       </command>
 	  
       <command
@@ -337,7 +337,7 @@
       <key
             sequence="F3"
             contextId="ccw.ui.clojureEditorScope"
-            commandId="ccw.ui.edit.text.clojure.navigate.to.definition"
+            commandId="ccw.ui.edit.text.clojure.open.declaration"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
 			
             
@@ -411,7 +411,7 @@
             </command>
 
             <command
-                  commandId="ccw.ui.edit.text.clojure.navigate.to.definition"
+                  commandId="ccw.ui.edit.text.clojure.open.declaration"
                   label="Navigate to definition"
                   style="push">                     
             </command>
@@ -495,7 +495,7 @@
             </command>
 			
             <command
-                  commandId="ccw.ui.edit.text.clojure.navigate.to.definition"
+                  commandId="ccw.ui.edit.text.clojure.open.declaration"
                   label="Navigate to definition"
                   style="push">                     
             </command>
