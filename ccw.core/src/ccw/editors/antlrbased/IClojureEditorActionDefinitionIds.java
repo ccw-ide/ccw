@@ -22,8 +22,7 @@ public interface IClojureEditorActionDefinitionIds extends ITextEditorActionDefi
      * 
      * @since 2.1
      */
-    public static final String GOTO_MATCHING_BRACKET = "ccw.ui.edit.text.clojure.goto.matching.bracket"; //$NON-NLS-1$
-    public static final String SELECT_TO_MATCHING_BRACKET = "ccw.ui.edit.text.clojure.select.to.matching.bracket";
+    public static final String GOTO_MATCHING_BRACKET = "ccw.ui.edit.text.clojure.goto.matching.bracket"; //$NON-NLS-1$    
     /**
      * Action definition ID of the edit -> go to next member action (value
      * <code>"ccw.ui.edit.text.clojure.goto.matching.bracket"</code>).
@@ -60,8 +59,9 @@ public interface IClojureEditorActionDefinitionIds extends ITextEditorActionDefi
      * Action definition ID of the Clojure (or edit ?) -> format action
      */
     public static final String FORMAT_CODE = "ccw.ui.edit.text.clojure.format.code";
+    public static final String OUTWARD_EXPANDING_SELECTION = "ccw.ui.edit.text.clojure.outward.expanding.selection";
     public static final String LAUNCH_REPL = "ccw.ui.edit.text.clojure.launch.repl";
     public static final String HIGHLIGHT_SAME_WORD = "ccw.ui.edit.text.clojure.highlight.same.word";
     public static final String RUN_TESTS = "ccw.ui.edit.text.clojure.run.tests";
-    public static final String NAVIGATE_TO_DEFINITION = "ccw.ui.edit.text.clojure.navigate.to.definition";
+    public static final String OPEN_DECLARATION = "ccw.ui.edit.text.clojure.open.declaration";
 }
