@@ -108,13 +108,9 @@
         [:children
          (apply vector (sort-by :name (map #(var-info (second %)) (ns-interns n))))]))))
 
-(def ns-info-cache (atom nil))
-
 (defn namespaces-info []
-  (let [info
-        {:name "namespaces" :type "namespaces"
-         :children (apply vector (sort-by :name (map ns-info (all-ns))))}]
-    (reset! ns-info-cache info) info))
+  {:name "namespaces" :type "namespaces"
+   :children (apply vector (sort-by :name (map ns-info (all-ns))))})
 
 ; The following function (splitted-match) taken from vimClojure with the permission of the author.
 ; Please look for vimClojure license for more detail
