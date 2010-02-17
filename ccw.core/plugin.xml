@@ -256,7 +256,7 @@
       <key
             sequence="M1+M3+P"
             contextId="ccw.ui.clojureEditorScope"
-            commandId="ccw.ui.edit.text.clojure.select.to.matching.bracket"
+            commandId="ccw.ui.edit.text.clojure.outward.expanding.selection"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
 <!--            sequence="M1+M2+ARROW_UP" -->
       <key
