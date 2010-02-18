@@ -2,15 +2,15 @@
 <feature
       id="ccw.feature"
       label="%featureName"
-      version="0.0.50.miau6"
+      version="0.0.50.A010"
       provider-name="%providerName"
       plugin="ccw.branding">
 
-   <description url="http://github.com/miaubiz/ccw/">
+   <description url="http://code.google.com/p/counterclockwise">
       %description
    </description>
 
-   <copyright url="http://github.com/miaubiz/ccw/">
+   <copyright url="http://code.google.com/p/counterclockwise">
       %copyright
    </copyright>
 
@@ -19,7 +19,7 @@
    </license>
 
    <url>
-      <update label="Counterclockwise Miau Update Site" url="http://miaubiz.github.com/ccw/"/>
+      <update label="Counterclockwise Miau Update Site" url="http://updatesite.counterclockwise.googlecode.com/hg/"/>
    </url>
 
    <requires>

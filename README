@@ -1,4 +1,4 @@
-fork of ccw with:
+merge of miaubiz's fork with ccw:
 - formatting
 - open declaration (f3)
 - same word highlighting
@@ -6,5 +6,4 @@ fork of ccw with:
 - run tests in repl with ctrl-t 
 - outward expanding select with ctrl-alt-p.  expand to next outer s-expression with each invocation.
 
-the eclipse update site is:
-http://miaubiz.github.com/ccw/
+the eclipse update site of miaubiz's fork is http://miaubiz.github.com/ccw/
