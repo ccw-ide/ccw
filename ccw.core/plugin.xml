@@ -357,7 +357,7 @@
                   style="push">
             </command>
 			<command
-                  commandId="ccw.ui.edit.text.clojure.select.to.matching.bracket"
+                  commandId="ccw.ui.edit.text.clojure.outward.expanding.selection"
                   label="Select to matching bracket"
                   style="push">
             </command>
@@ -441,7 +441,7 @@
                   style="push">
             </command>
             <command
-                  commandId="ccw.ui.edit.text.clojure.select.to.matching.bracket"
+                  commandId="ccw.ui.edit.text.clojure.outward.expanding.selection"
                   label="Select to matching bracket"
                   style="push">
             </command>			
