@@ -115,7 +115,8 @@ public class AntlrBasedClojureEditor extends TextEditor {
         ISourceViewer viewer = new ClojureSourceViewer(parent, ruler, getOverviewRuler(), isOverviewRulerVisible(), styles, getPreferenceStore());
         // ensure decoration support has been created and configured.
         getSourceViewerDecorationSupport(viewer);
-        viewer.getTextWidget().addCaretListener(new SameWordHighlightingCaretListener(this));
+        viewer.getTextWidget().addCaretListener(new SameWordHighlightingCaretListener(this, CCWPlugin
+				.getDefault().getColorRegistry()));
         return viewer;
     }
 
@@ -180,7 +181,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
         action = new LoadFileAction(this);
         action.setActionDefinitionId(IClojureEditorActionDefinitionIds.LOAD_FILE);
         setAction(LoadFileAction.ID, action);
-        action = new RunTestsAction(this);
+        action = new RunTestsAction(this, CCWPlugin.getDefault().getColorRegistry());
         action.setActionDefinitionId(IClojureEditorActionDefinitionIds.RUN_TESTS);
         setAction(RunTestsAction.RUN_TESTS_ID, action);
         action = new CompileLibAction(this);
