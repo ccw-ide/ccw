@@ -170,6 +170,7 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
     		getClassesFolder().create(true, true, monitor);
     	}
         getClassesFolder().refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 0));
+        getClassesFolder().setDerived(true, monitor);
 
         deleteMarkers();
     }
