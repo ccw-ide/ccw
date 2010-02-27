@@ -44,7 +44,7 @@ public class OutwardExpandingSelectionAction extends Action {
             caretOffset = selection.getOffset() - 1;
         }
         Tokens tokens = new Tokens(editor.getDocument(), caretOffset);
-        if (tokens.tokenAtCaret().getData() == null) {
+        if (tokens.tokenAtCaret().getData() == null && !previousSelectionExists) {
             showSelection(sourceViewer, tokens.getTokenOffset(), tokens.getTokenLength());
             return;
         }
