@@ -38,7 +38,7 @@ public class OutwardExpandingSelectionAction extends Action {
     private void select() {
         ISourceViewer sourceViewer = editor.sourceViewer();
         IRegion selection = editor.getUnSignedSelection(sourceViewer);
-        boolean previousSelectionExists = Math.abs(selection.getLength()) > 1;
+        boolean previousSelectionExists = Math.abs(selection.getLength()) > 0;
         int caretOffset = selection.getOffset();
         if (previousSelectionExists) {
             caretOffset = selection.getOffset() - 1;
