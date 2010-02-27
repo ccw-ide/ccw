@@ -7,5 +7,6 @@
       ['ccw.ClojureProjectNature
        'ccw.debug.clientrepl
        'ccw.debug.serverrepl
-       'ccw.editors.antlrbased.PareditAutoEditStrategy])))
+       'ccw.editors.antlrbased.PareditAutoEditStrategy
+       'ccw.editors.antlrbased.ClojureFormat])))
 

@@ -14,6 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -50,10 +51,10 @@ import ccw.debug.ClojureClient;
 import ccw.editors.outline.ClojureOutlinePage;
 import ccw.editors.rulesbased.ClojureDocumentProvider;
 import ccw.editors.rulesbased.ClojurePartitionScanner;
+import ccw.launching.ClojureLaunchShortcut;
 
 public class AntlrBasedClojureEditor extends TextEditor {
-	private static final String CONTENT_ASSIST_PROPOSAL = "ContentAssistProposal"; //$NON-NLS-1$
-
+    private static final String CONTENT_ASSIST_PROPOSAL = "ContentAssistProposal"; //$NON-NLS-1$
     public static final String ID = "ccw.antlrbasededitor"; //$NON-NLS-1$
 	/** Preference key for matching brackets */
 	//PreferenceConstants.EDITOR_MATCHING_BRACKETS;
@@ -100,7 +101,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		support.setMatchingCharacterPainterPreferenceKeys(PreferenceConstants.EDITOR_MATCHING_BRACKETS, PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR);
 		super.configureSourceViewerDecorationSupport(support);
 	}
-	
+
 	@Override
 	protected ISourceViewer createSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
 		
@@ -114,7 +115,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
 
 		return viewer;
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.texteditor.ExtendedTextEditor#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */
@@ -130,27 +131,31 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		fProjectionSupport.install();
 		viewer.doOperation(ClojureSourceViewer.TOGGLE);
 	}
-	
+
+    public DefaultCharacterPairMatcher getPairsMatcher() {
+        return pairsMatcher;
+    }
+
+
+
 
     @Override
-	public ISelectionProvider getSelectionProvider() {
-		return getSourceViewer().getSelectionProvider();
-	}
+    public ISelectionProvider getSelectionProvider() {
+        return getSourceViewer().getSelectionProvider();
+    }
 
-	/**
+    /**
      * Create a preference store combined from the Clojure, the EditorsUI and
      * the PlatformUI preference stores to inherit all the default text editor
      * settings from the Eclipse preferences.
      * 
      * @return the combined preference store.
      */
-	private IPreferenceStore createCombinedPreferenceStore() {
-        List<IPreferenceStore> stores= new LinkedList<IPreferenceStore>();
-
+    private IPreferenceStore createCombinedPreferenceStore() {
+        List<IPreferenceStore> stores = new LinkedList<IPreferenceStore>();
         stores.add(CCWPlugin.getDefault().getPreferenceStore());
         stores.add(EditorsUI.getPreferenceStore());
         stores.add(PlatformUI.getPreferenceStore());
-
         return new ChainedPreferenceStore(stores.toArray(new IPreferenceStore[stores.size()]));
     }
 
@@ -169,6 +174,10 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		action = new GotoPreviousMemberAction(this);
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.GOTO_PREVIOUS_MEMBER);
 		setAction(GotoPreviousMemberAction.ID, action);
+
+		action = new OutwardExpandingSelectionAction(this);
+		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.OUTWARD_EXPANDING_SELECTION);
+		setAction(OutwardExpandingSelectionAction.ID, action);
 		
 		action = new SelectTopLevelSExpressionAction(this);
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.SELECT_TOP_LEVEL_S_EXPRESSION);
@@ -185,6 +194,26 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		action = new CompileLibAction(this);
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.COMPILE_LIB);
 		setAction(CompileLibAction.ID, action);
+
+		action = new RunTestsAction(this, CCWPlugin.getDefault().getColorRegistry());
+		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.RUN_TESTS);
+		setAction(RunTestsAction.RUN_TESTS_ID, action);
+
+		action = new FormatAction(this);
+		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.FORMAT_CODE);
+		setAction(FormatAction.ID, action);
+
+		action = new OpenDeclarationAction(this);
+		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.OPEN_DECLARATION);
+		setAction(OpenDeclarationAction.ID, action);
+		action = new Action() {
+			@Override
+			public void run() {
+				new ClojureLaunchShortcut().launch(AntlrBasedClojureEditor.this, ILaunchManager.RUN_MODE);
+			};
+		};
+		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.LAUNCH_REPL);
+		setAction("ClojureLaunchAction", action);
 
 		action = new ContentAssistAction(ClojureEditorMessages.getBundleForConstructedKeys(), CONTENT_ASSIST_PROPOSAL + ".", this);  //$NON-NLS-1$
 		String id = ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS;
@@ -629,11 +658,20 @@ public class AntlrBasedClojureEditor extends TextEditor {
      * @see org.eclipse.ui.texteditor.AbstractTextEditor#setPreferenceStore(org.eclipse.jface.preference.IPreferenceStore)
      * @since 3.0
      */
+    @Override
     protected void setPreferenceStore(IPreferenceStore store) {
         super.setPreferenceStore(store);
-        if (getSourceViewer() instanceof ClojureSourceViewer)
-            ((ClojureSourceViewer)getSourceViewer()).setPreferenceStore(store);
+        if (getSourceViewer() instanceof ClojureSourceViewer) {
+            ((ClojureSourceViewer) getSourceViewer()).setPreferenceStore(store);
+        }
     }
-    
-    
+
+    public final ISourceViewer sourceViewer() {
+        return super.getSourceViewer();
+    }
+
+    @Override
+    public void setStatusLineErrorMessage(String message) {
+        super.setStatusLineMessage(message);
+    }
 }

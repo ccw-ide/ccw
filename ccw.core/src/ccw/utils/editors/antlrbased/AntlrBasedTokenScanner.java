@@ -11,6 +11,11 @@
  *******************************************************************************/
 package ccw.utils.editors.antlrbased;
 
+import static ccw.CCWPlugin.getCCWColor;
+import static ccw.CCWPlugin.getSystemColor;
+import static org.eclipse.jface.text.rules.Token.EOF;
+import static org.eclipse.jface.text.rules.Token.UNDEFINED;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,168 +37,153 @@ import ccw.CCWPlugin;
 import ccw.editors.antlrbased.TokenData;
 import ccw.lexers.ClojureLexer;
 
-import static ccw.CCWPlugin.getCCWColor;
-import static ccw.CCWPlugin.getSystemColor;
-
 abstract public class AntlrBasedTokenScanner implements ITokenScanner {
-	private static int ANTLR_EOF = -1;
-	private Lexer lexer;
-	private final List<TokenData> tokensData;
-	private int currentTokenIndex;
-	private final Map<Object, IToken> antlrTokenTypeToJFaceToken;
-	private String text;
-	private boolean initialized = false;
-	private final IScanContext context;
-	
-	private IToken[] parenLevelTokens = new IToken[] {
-			newParenTokenWith(getSystemColor(SWT.COLOR_RED)),
-			newParenTokenWith(getCCWColor(0)),
-			newParenTokenWith(getSystemColor(SWT.COLOR_GRAY)),
-			newParenTokenWith(getSystemColor(SWT.COLOR_MAGENTA)),
-			newParenTokenWith(getCCWColor(1)),
-			newParenTokenWith(getCCWColor(2)),
-			newParenTokenWith(getCCWColor(3)),
-			newParenTokenWith(getSystemColor(SWT.COLOR_DARK_GRAY)),
-			newParenTokenWith(getCCWColor(4)),
-			newParenTokenWith(getSystemColor(SWT.COLOR_DARK_BLUE)),
-			newParenTokenWith(getCCWColor(5)),
-			newParenTokenWith(getSystemColor(SWT.COLOR_DARK_CYAN)) 
-	};
-	private static IToken newParenTokenWith(Color color) {
-		return new org.eclipse.jface.text.rules.Token(new TextAttribute(color));
-	}
-	private IToken parenErrorToken = new org.eclipse.jface.text.rules.Token(
-			new TextAttribute(
-					Display.getDefault().getSystemColor(SWT.COLOR_WHITE),
-					Display.getDefault().getSystemColor(SWT.COLOR_DARK_RED),
-					TextAttribute.UNDERLINE));
-	private int currentParenLevel = 0;
+    private static int ANTLR_EOF = -1;
+    private final Lexer lexer;
+    private final List<TokenData> tokensData;
+    private int currentTokenIndex;
+    private final Map<Object, IToken> antlrTokenTypeToJFaceToken;
+    private String text;
+    private boolean initialized = false;
+    private final IScanContext context;
+    private final IToken[] parenLevelTokens = new IToken[] { newParenTokenWith(getSystemColor(SWT.COLOR_RED)), newParenTokenWith(getCCWColor(0)), newParenTokenWith(getSystemColor(SWT.COLOR_GRAY)), newParenTokenWith(getSystemColor(SWT.COLOR_MAGENTA)), newParenTokenWith(getCCWColor(1)), newParenTokenWith(getCCWColor(2)), newParenTokenWith(getCCWColor(3)), newParenTokenWith(getSystemColor(SWT.COLOR_DARK_GRAY)), newParenTokenWith(getCCWColor(4)), newParenTokenWith(getSystemColor(SWT.COLOR_DARK_BLUE)), newParenTokenWith(getCCWColor(5)), newParenTokenWith(getSystemColor(SWT.COLOR_DARK_CYAN)) };
 
-	public AntlrBasedTokenScanner(Lexer lexer, IScanContext context) {
-		this.lexer = lexer;
-		this.context = context;
-		
-		tokensData = new ArrayList<TokenData>();
-		
-		antlrTokenTypeToJFaceToken = new HashMap<Object, IToken>();
-		initAntlrTokenTypeToJFaceTokenMap();
-		antlrTokenTypeToJFaceToken.put(ANTLR_EOF, org.eclipse.jface.text.rules.Token.EOF);
-		initialized = true;
-	}
-	
-	abstract protected void initAntlrTokenTypeToJFaceTokenMap();
-	
-	public final void addTokenType(Object tokenIndex, org.eclipse.jface.text.rules.Token token) {
-		if (initialized) throw lifeCycleError();
-		antlrTokenTypeToJFaceToken.put(tokenIndex, token);
-	}
-	
-	public final void addTokenType(Object tokenIndex, TextAttribute textAttribute) {
-		if (initialized) throw lifeCycleError();
-		addTokenType(tokenIndex, new org.eclipse.jface.text.rules.Token(textAttribute));
-	}
+    private static IToken newParenTokenWith(Color color) {
+        return new org.eclipse.jface.text.rules.Token(new TextAttribute(color));
+    }
 
-	public final void addToken(int tokenIndex, String tokenData) {
-		if (initialized) throw lifeCycleError();
-		addTokenType(tokenIndex, new org.eclipse.jface.text.rules.Token(tokenData));
-	}
-	
-	private RuntimeException lifeCycleError() {
-		return new RuntimeException("Object Lifecycle error: method called at an inappropriate time");
-	}
+    private final IToken parenErrorToken = new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_WHITE), Display.getDefault().getSystemColor(SWT.COLOR_DARK_RED), TextAttribute.UNDERLINE));
+    private int currentParenLevel = 0;
 
-	public final int getTokenLength() {
-		return tokensData.get(currentTokenIndex).length;
-	}
+    public AntlrBasedTokenScanner(Lexer lexer, IScanContext context) {
+        this.lexer = lexer;
+        this.context = context;
+        tokensData = new ArrayList<TokenData>();
+        antlrTokenTypeToJFaceToken = new HashMap<Object, IToken>();
+        initAntlrTokenTypeToJFaceTokenMap();
+        antlrTokenTypeToJFaceToken.put(ANTLR_EOF, EOF);
+        initialized = true;
+    }
 
-	public final int getTokenOffset() {
-		return tokensData.get(currentTokenIndex).offset;
-	}
+    abstract protected void initAntlrTokenTypeToJFaceTokenMap();
 
-	public final IToken nextToken() {
-		int nextIndex = currentTokenIndex + 1;
-		if ( nextIndex >= tokensData.size() ) {
-			return org.eclipse.jface.text.rules.Token.EOF;
-		}
-		currentTokenIndex = nextIndex;
-		TokenData token = tokensData.get(currentTokenIndex);
-		if( token != null ){
-			IToken result;
-		    if (token.text.equals("(")) {
-		    	if (currentParenLevel < 0) {
-		    		currentParenLevel = 0;
-		    	}
-		    		result = parenLevelTokens[currentParenLevel % parenLevelTokens.length];
-		    	currentParenLevel += 1;
-		    } else if (token.text.equals(")")) {
-		    	currentParenLevel -= 1;
-		    	if (currentParenLevel < 0) {
-		    		result = parenErrorToken;
-		    	} else {
-		    		result = parenLevelTokens[currentParenLevel % parenLevelTokens.length];
-		    	}
-		    } else {
-		        result = token.iToken;
-		    }
-		    return result;
-		} else {
-			CCWPlugin.logError("nextToken called but null token retrieved ? ! Returning UNDEFINED");
-			return org.eclipse.jface.text.rules.Token.UNDEFINED;
-		}
-	}
+    public final void addTokenType(Object tokenIndex, org.eclipse.jface.text.rules.Token token) {
+        if (initialized) {
+            throw lifeCycleError();
+        }
+        antlrTokenTypeToJFaceToken.put(tokenIndex, token);
+    }
 
-	public final void setRange(IDocument document, int offset, int length) {
-//		System.out.println("++++++++++++++++++++++++++++++++++++++");
-		if (!document.get().equals(text)) {
-			tokensData.clear();
-			text = document.get();
-			
-			lexer.setCharStream(new ANTLRStringStream(text));
+    public final void addTokenType(Object tokenIndex, TextAttribute textAttribute) {
+        if (initialized) {
+            throw lifeCycleError();
+        }
+        addTokenType(tokenIndex, new org.eclipse.jface.text.rules.Token(textAttribute));
+    }
 
-			while (true) {
-				Token token = lexer.nextToken();
-				if( token.getType() == ANTLR_EOF ){
-					break;
-				}
-				addTokenInfo((CommonToken) token);
-			}
-		}
-		repositionCurrentTokenAtOffset(offset);
-	}
+    public final void addToken(int tokenIndex, String tokenData) {
+        if (initialized) {
+            throw lifeCycleError();
+        }
+        addTokenType(tokenIndex, new org.eclipse.jface.text.rules.Token(tokenData));
+    }
 
-	private void repositionCurrentTokenAtOffset(int offset) {
-		currentParenLevel = 0;
-		int size = tokensData.size();
-		for (int i = 0; i < size; i++) {
-			TokenData tokenInfo = tokensData.get(i);
-			if (tokenInfo.offset >= offset) {
-				currentTokenIndex = i - 1;
-				break;
-			}
-			nextToken(); // called to initialize side effect on variable currentParenLevel FIXME do better ?
-		}
-	}
+    private RuntimeException lifeCycleError() {
+        return new RuntimeException("Object Lifecycle error: method called at an inappropriate time");
+    }
 
-	private void addTokenInfo(CommonToken token){
-		assert token != null;
-		IToken retToken;
-		if (token.getType() != ClojureLexer.SYMBOL) {
-			retToken = antlrTokenTypeToJFaceToken.get(token.getType());
-		} else {
-			retToken = guessEclipseTokenForSymbol(token);
-		}
-		if( retToken == null ) {
-			retToken = org.eclipse.jface.text.rules.Token.UNDEFINED; 
-		}
-		tokensData.add(new TokenData(token, retToken));
-	}
-	private IToken guessEclipseTokenForSymbol(CommonToken symbolToken) {
-		String symbol = symbolToken.getText();
-		IScanContext.SymbolType symbolType = context.getSymbolType(symbol);
-		if (symbolType == null) {
-			return null;
-		} else {
-			return antlrTokenTypeToJFaceToken.get(symbolType);
-		}
-	}
+    public final int getTokenLength() {
+        return tokensData.get(currentTokenIndex).length;
+    }
+
+    public final int getTokenOffset() {
+        return tokensData.get(currentTokenIndex).offset;
+    }
+
+    public final IToken nextToken() {
+        int nextIndex = currentTokenIndex + 1;
+        if (nextIndex >= tokensData.size()) {
+            return org.eclipse.jface.text.rules.Token.EOF;
+        }
+        currentTokenIndex = nextIndex;
+        TokenData token = tokensData.get(currentTokenIndex);
+        if (token != null) {
+            IToken result;
+            if (token.text.equals("(")) {
+                if (currentParenLevel < 0) {
+                    currentParenLevel = 0;
+                }
+                result = parenLevelTokens[currentParenLevel % parenLevelTokens.length];
+                currentParenLevel += 1;
+            } else if (token.text.equals(")")) {
+                currentParenLevel -= 1;
+                if (currentParenLevel < 0) {
+                    result = parenErrorToken;
+                } else {
+                    result = parenLevelTokens[currentParenLevel % parenLevelTokens.length];
+                }
+            } else {
+                result = token.iToken;
+            }
+            return result;
+        } else {
+            CCWPlugin.logError("nextToken called but null token retrieved ? ! Returning UNDEFINED");
+            return UNDEFINED;
+        }
+    }
+
+    public final void setRange(IDocument document, int offset, int length) {
+        // System.out.println("++++++++++++++++++++++++++++++++++++++");
+        if (!document.get().equals(text)) {
+            tokensData.clear();
+            text = document.get();
+            lexer.setCharStream(new ANTLRStringStream(text));
+            while (true) {
+                Token token = lexer.nextToken();
+                if (token.getType() == ANTLR_EOF) {
+                    break;
+                }
+                addTokenInfo((CommonToken) token);
+            }
+        }
+        repositionCurrentTokenAtOffset(offset);
+    }
+
+    private void repositionCurrentTokenAtOffset(int offset) {
+        currentParenLevel = 0;
+        int size = tokensData.size();
+        for (int i = 0; i < size; i++) {
+            TokenData tokenInfo = tokensData.get(i);
+            if (tokenInfo.offset >= offset) {
+                currentTokenIndex =  i - 1;
+                break;
+            }
+            nextToken(); // called to initialize side effect on variable
+                         // currentParenLevel FIXME do better ?
+        }
+    }
+
+    private void addTokenInfo(CommonToken token) {
+        assert token != null;
+        IToken retToken;
+        if (token.getType() != ClojureLexer.SYMBOL) {
+            retToken = antlrTokenTypeToJFaceToken.get(token.getType());
+        } else {
+            retToken = guessEclipseTokenForSymbol(token);
+        }
+        if (retToken == null) {
+            retToken = UNDEFINED;
+        }
+        tokensData.add(new TokenData(token, retToken));
+    }
+
+    private IToken guessEclipseTokenForSymbol(CommonToken symbolToken) {
+        String symbol = symbolToken.getText();
+        IScanContext.SymbolType symbolType = context.getSymbolType(symbol);
+        if (symbolType == null) {
+            return null;
+        } else {
+            return antlrTokenTypeToJFaceToken.get(symbolType);
+        }
+    }
 }
