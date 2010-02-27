@@ -243,6 +243,14 @@
             id="ccw.ui.edit.text.clojure.format.code">
       </command>
 	  
+	  <command
+            name="%command.reload.clojure.name"
+            description="%command.reload.clojure.description"
+            categoryId="org.eclipse.ui.category.navigate"
+            id="ccw.ui.edit.text.clojure.reload">
+      </command>
+	  
+	  
 	 <command
             name="%command.navigateToDefinition.name"
             description="%command.navigateToDefinition.description"
@@ -348,6 +356,12 @@
             sequence="M1+M2+F"
             contextId="ccw.ui.clojureEditorScope"
             commandId="ccw.ui.edit.text.clojure.format.code"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+            
+      <key
+            sequence="M1+R"
+            contextId="ccw.ui.clojureEditorScope"
+            commandId="ccw.ui.edit.text.clojure.reload"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
 			
       <key

@@ -64,4 +64,5 @@ public interface IClojureEditorActionDefinitionIds extends ITextEditorActionDefi
     public static final String HIGHLIGHT_SAME_WORD = "ccw.ui.edit.text.clojure.highlight.same.word";
     public static final String RUN_TESTS = "ccw.ui.edit.text.clojure.run.tests";
     public static final String OPEN_DECLARATION = "ccw.ui.edit.text.clojure.open.declaration";
+    public static final String RELOAD_CLOJURE = "ccw.ui.edit.text.clojure.reload";
 }
