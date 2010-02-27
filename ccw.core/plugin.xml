@@ -163,7 +163,7 @@
             name="%command.gotoMatchingBracket.name">
       </command>
       <command
-            categoryId="org.eclipse.ui.category.navigate"
+            categoryId="org.eclipse.ui.category.edit"
             description="%command.outwardExpandingSelection.description"
             id="ccw.ui.edit.text.clojure.outward.expanding.selection"
             name="%command.outwardExpandingSelection.name">
@@ -254,7 +254,7 @@
             commandId="ccw.ui.edit.text.clojure.goto.matching.bracket"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
-            sequence="M1+M3+P"
+            sequence="M2+M3+ARROW_UP"
             contextId="ccw.ui.clojureEditorScope"
             commandId="ccw.ui.edit.text.clojure.outward.expanding.selection"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
@@ -351,30 +351,38 @@
                label="Clojure"
                mnemonic="C"
                tooltip="Menu for Clojure related commands">
-            <command
-                  commandId="ccw.ui.edit.text.clojure.goto.matching.bracket"
-                  label="Go to matching bracket"
-                  style="push">
-            </command>
-			<command
-                  commandId="ccw.ui.edit.text.clojure.outward.expanding.selection"
-                  label="Select to matching bracket"
-                  style="push">
-            </command>
+            <menu
+                  id="ccw.menus.clojure.goTo"
+                  label="%GoTo_label">
+               <command
+                     commandId="ccw.ui.edit.text.clojure.goto.matching.bracket"
+                     label="%GoTo_matchingBracket_label"
+                     style="push">
+               </command>
+               <command
+                     commandId="ccw.ui.edit.text.clojure.goto.previous.member"
+                     label="%GoTo_previousTopLevelSexpr_label"
+                     style="push">
+               </command>
+               <command
+                     commandId="ccw.ui.edit.text.clojure.goto.next.member"
+                     label="%GoTo_nextTopLevelSexpr_label"
+                     style="push">
+               </command>
+            </menu>
+            <menu
+                  id="ccw.menus.clojure.expandSelTo"
+                  label="%ExpandSelectionTo">
+               <command
+                     commandId="ccw.ui.edit.text.clojure.outward.expanding.selection"
+                     label="%ClojureSelectEnclosing_label"
+                     style="push">
+               </command>
+            </menu>
             <separator
                   name="ccw.menus.separator1"
                   visible="true">
             </separator>
-            <command
-                  commandId="ccw.ui.edit.text.clojure.goto.previous.member"
-                  label="Go to the previous top level s-expression"
-                  style="push">
-            </command>
-            <command
-                  commandId="ccw.ui.edit.text.clojure.goto.next.member"
-                  label="Go to the next top level s-expression"
-                  style="push">
-            </command>
             <command
                   commandId="ccw.ui.edit.text.clojure.select.toplevel.s.expression"
                   label="Select top level s-expression"
@@ -415,7 +423,6 @@
                   label="Navigate to definition"
                   style="push">                     
             </command>
-			
             <visibleWhen
                   checkEnabled="false">
                <with
@@ -435,44 +442,52 @@
                label="Clojure"
                mnemonic="C"
                tooltip="Menu for Clojure related commands">
-            <command
-                  commandId="ccw.ui.edit.text.clojure.goto.matching.bracket"
-                  label="Go to matching bracket"
-                  style="push">
-            </command>
-            <command
-                  commandId="ccw.ui.edit.text.clojure.outward.expanding.selection"
-                  label="Select to matching bracket"
-                  style="push">
-            </command>			
+            <menu
+                  id="ccw.menus.clojure.goTo"
+                  label="%GoTo_label">
+               <command
+                     commandId="ccw.ui.edit.text.clojure.goto.matching.bracket"
+                     label="%GoTo_matchingBracket_label"
+                     style="push">
+               </command>
+               <command
+                     commandId="ccw.ui.edit.text.clojure.goto.previous.member"
+                     label="%GoTo_previousTopLevelSexpr_label"
+                     style="push">
+               </command>
+               <command
+                     commandId="ccw.ui.edit.text.clojure.goto.next.member"
+                     label="%GoTo_nextTopLevelSexpr_label"
+                     style="push">
+               </command>
+            </menu>
+            <menu
+                  id="ccw.menus.clojure.expandSelTo"
+                  label="%ExpandSelectionTo">
+               <command
+                     commandId="ccw.ui.edit.text.clojure.outward.expanding.selection"
+                     label="%ClojureSelectEnclosing_label"
+                     style="push">
+               </command>
+            </menu>
             <separator
                   name="ccw.menus.separator1"
                   visible="true">
             </separator>
             <command
-                  commandId="ccw.ui.edit.text.clojure.goto.previous.member"
-                  label="Go to previous top level s-expression"
-                  style="push">
-            </command>
-            <command
-                  commandId="ccw.ui.edit.text.clojure.goto.next.member"
-                  label="Go to next top level s-expression"
-                  style="push">
-            </command>
-            <command
                   commandId="ccw.ui.edit.text.clojure.select.toplevel.s.expression"
                   label="Select top level s-expression"
+                  style="push">
+            </command>
+            <command
+                  commandId="ccw.ui.edit.text.clojure.evaluate.toplevel.s.expression"
+                  label="Evaluate Top Level s-expression"
                   style="push">
             </command>
             <separator
                   name="ccw.menus.separator2"
                   visible="true">
             </separator>
-            <command
-                  commandId="ccw.ui.edit.text.clojure.evaluate.toplevel.s.expression"
-                  label="Evaluate Top Level s-expression"
-                  style="push">
-            </command>
             <command
                   commandId="ccw.ui.edit.text.clojure.load.file"
                   label="Load clojure file in REPL"
@@ -491,15 +506,14 @@
             <command
                   commandId="ccw.ui.edit.text.clojure.format.code"
                   label="Format clojure code"
-                  style="push">
+                  style="push">                     
             </command>
-			
+
             <command
                   commandId="ccw.ui.edit.text.clojure.open.declaration"
                   label="Navigate to definition"
                   style="push">                     
             </command>
-
 
             <visibleWhen
                   checkEnabled="false">
@@ -511,6 +525,67 @@
                </with>
             </visibleWhen>
          </menu>
+      </menuContribution>
+      <menuContribution
+            locationURI="menu:edit?after=additions">
+         <menu
+               id="expandSelectionToMenuId"
+               label="%ExpandSelectionTo">
+         </menu>
+      </menuContribution>
+      <menuContribution
+            locationURI="menu:expandSelectionToMenuId">
+         <command
+               commandId="ccw.ui.edit.text.clojure.outward.expanding.selection"
+               id="ccw.ui.edit.text.clojure.outward.expanding.selection"
+               label="%ClojureSelectEnclosing_label"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                     definitionId="ccw.ui.activeClojureEditorScope.definition">
+               </reference>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+      <menuContribution
+            locationURI="menu:goTo?after=additions">
+         <command
+               commandId="ccw.ui.edit.text.clojure.goto.matching.bracket"
+               id="ccw.ui.edit.text.clojure.goto.matching.bracket"
+               label="%command.gotoMatchingBracket.name"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                     definitionId="ccw.ui.activeClojureEditorScope.definition">
+               </reference>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="ccw.ui.edit.text.clojure.goto.previous.member"
+               id="ccw.ui.edit.text.clojure.goto.previous.member"
+               label="%command.gotoPreviousMember.name"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                     definitionId="ccw.ui.activeClojureEditorScope.definition">
+               </reference>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="ccw.ui.edit.text.clojure.goto.next.member"
+               id="ccw.ui.edit.text.clojure.goto.next.member"
+               label="%command.gotoNextMember.name"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                     definitionId="ccw.ui.activeClojureEditorScope.definition">
+               </reference>
+            </visibleWhen>
+         </command>
       </menuContribution>
    </extension>
    <extension
@@ -667,5 +742,20 @@
           id="ccw.sourceLocator"
           name="Clojure code source lookup director">
     </sourceLocator>
+ </extension>
+ <extension
+       point="org.eclipse.core.expressions.definitions">
+    <definition
+          id="ccw.ui.activeClojureEditorScope.definition">
+       <with
+             variable="activeContexts">
+          <iterate
+                operator="or">
+             <equals
+                   value="ccw.ui.clojureEditorScope">
+             </equals>
+          </iterate>
+       </with>
+    </definition>
  </extension>
 </plugin>

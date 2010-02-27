@@ -10,19 +10,35 @@
  *******************************************************************************/
 package ccw.editors.antlrbased;
 
+import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.ITokenScanner;
 import org.eclipse.swt.custom.CaretEvent;
 import org.eclipse.swt.custom.CaretListener;
 import org.eclipse.swt.custom.StyleRange;
-import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
 
 public class SameWordHighlightingCaretListener implements CaretListener {
+	private static final String COLOR_KEY = "ccw.editors.SameWordHighlightingCaretListener.COLOR_KEY";
+	private static final String OTHER_MATCHES_COLOR_KEY = "ccw.editors.SameWordHighlightingCaretListener.OTHER_MATCHES_COLOR_KEY";
+	
     private final AntlrBasedClojureEditor editor;
+    private final ColorRegistry colorRegistry;
 
-    public SameWordHighlightingCaretListener(AntlrBasedClojureEditor editor) {
+    public SameWordHighlightingCaretListener(AntlrBasedClojureEditor editor, ColorRegistry colorRegistry) {
         this.editor = editor;
+        this.colorRegistry = colorRegistry;
+        initColorRegistry();
+    }
+    
+    private void initColorRegistry() {
+    	if (!colorRegistry.hasValueFor(COLOR_KEY)) {
+    		colorRegistry.put(COLOR_KEY, new RGB(225, 225, 225));
+    	}
+    	if (!colorRegistry.hasValueFor(OTHER_MATCHES_COLOR_KEY)) {
+    		colorRegistry.put(OTHER_MATCHES_COLOR_KEY, new RGB(255, 255, 180));
+    	}
     }
 
     public void caretMoved(CaretEvent event) {
@@ -41,7 +57,7 @@ public class SameWordHighlightingCaretListener implements CaretListener {
     }
 
     private StyleRange createRange(Tokens tokens) {
-        return tokens.styleRange(new Color(editor.sourceViewer().getTextWidget().getDisplay(), 225, 225, 225));
+        return tokens.styleRange(colorRegistry.get(COLOR_KEY));
     }
 
     private void colorOtherMatches(IDocument document, Tokens tokens, String original) {
@@ -52,7 +68,7 @@ public class SameWordHighlightingCaretListener implements CaretListener {
             if (token.getData() == null) {
                 String tokenContents = tokens.tokenContents();
                 if (tokenContents.equals(original)) {
-                    StyleRange range = tokens.styleRange(new Color(editor.sourceViewer().getTextWidget().getDisplay(), 255, 255, 180));
+                    StyleRange range = tokens.styleRange(colorRegistry.get(OTHER_MATCHES_COLOR_KEY));
                     editor.sourceViewer().getTextWidget().setStyleRange(range);
                 }
             }
