@@ -15,14 +15,15 @@
   (:gen-class
     :init init
     :state state
-    :implements [org.eclipse.ui.console.IPatternMatchListenerDelegate]
-    :methods [[doStuff [String] clojure.lang.PersistentArrayMap]]))
+    :implements [org.eclipse.ui.console.IPatternMatchListenerDelegate]))
 
 (defn -init []
-  [[] (ref {})])
+  [[] (ref nil)])
 
 (defn -connect [this console]
-  (dosync (alter (.state this) assoc :console console)))
+  (dosync (ref-set (.state this) console)))
+
+(defn -disconnect [this])
 
 (defn- find-datas [s]
   {:line (Integer/valueOf (second (re-find #":([0-9]+)" s)))
@@ -37,7 +38,7 @@
   (map + [1 0] (map count (s/split s #"\("))))
 
 (defn -matchFound [this event]
-  (let [console (@(.state this) :console)
+  (let [console @(.state this)
         offset (.getOffset event)
         s (.get (.getDocument console) offset (.getLength event))
         [o l] (offset-and-length s)
