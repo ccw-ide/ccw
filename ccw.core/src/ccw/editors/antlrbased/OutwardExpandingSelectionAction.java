@@ -106,6 +106,9 @@ public class OutwardExpandingSelectionAction extends Action {
 
     public boolean previousCharacterIsPound(IDocument document, int adjustedTargetOffset) {
         try {
+            if (adjustedTargetOffset == 0) {
+                return false;
+            }
             String previousCharacter = document.get(adjustedTargetOffset - 1, 1);
             return "#".equals(previousCharacter);
         } catch (BadLocationException e) {
