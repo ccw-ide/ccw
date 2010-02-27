@@ -351,15 +351,24 @@
                  "(foo bar)|" "(foo bar|)",
                  "(foo bar|)" "(foo ba|)"
                  }]
+      #_["C-k"     :paredit-kill
+                {"(foo bar)|     ; Useless comment!"
+                 "(foo bar)|",
+                "(|foo bar)     ; Useful comment!"
+                 "(|)     ; Useful comment!",
+                "|(foo bar)     ; Useless line!"
+                 "|",
+                "(foo \"|bar baz\"\n     quux)"
+                 "(foo \"|\"\n     quux)"}]
     ]
   ])
 
-(def *real-spaces* #{\newline \tab \space})
-(def *extended-spaces* (conj *real-spaces* \,))
-(def *open-brackets* (conj (set "([{") nil)) ; we add nil to the list to also match beginning of text 
-(def *close-brackets* (conj (set ")]}") nil)) ; we add nil to the list to also match end of text
+(def *real-spaces* #{(str \newline) (str \tab) (str \space)})
+(def *extended-spaces* (conj *real-spaces* (str \,)))
+(def *open-brackets* (conj #{"(" "[" "{"} nil)) ; we add nil to the list to also match beginning of text 
+(def *close-brackets* (conj #{")" "]" "}"} nil)) ; we add nil to the list to also match end of text
 
-(def *form-macro-chars* #{\# \~ "~@" \' \` \@ "#^" "#'" "#_"})
+(def *form-macro-chars* #{(str \#) (str \~) (str "~@") (str \') (str \`) (str \@) "#^" "#'" "#_"})
 
 (defn text-spec-to-text 
   "Converts a text spec to text map" 
@@ -378,7 +387,7 @@
         spec (if (zero? (:length text)) spec (insert spec (+ 1 (:offset text) (:length text)) "|"))]
     spec))
 
-(def *not-in-code* #{\" \; \\})
+(def *not-in-code* #{"\"" ";" "\\"})
 
 (defn parsed-in-tags?
   [parsed tags-set]
@@ -422,30 +431,33 @@
 
 ; TODO faire comme next-char sur l'utilisation de length
 ; !! attention pas de gestion de length negative
-(defn previous-char 
-  ([{:keys [#^String text offset length] :as t}] (previous-char t 1))
+(defn previous-char-str 
+  ([{:keys [#^String text offset length] :as t}] (previous-char-str t 1))
   ([{:keys [#^String text offset length] :as t} n]
     (assert (>= length 0))
     (when (< -1 (- offset n) (.length text))
-      (.charAt text (- offset n)))))
+      (str (.charAt text (- offset n))))))
   
-(defn next-char [{:keys [#^String text offset length] :as t}]
+(defn next-char-str [{:keys [#^String text offset length] :as t}]
   (assert (>= length 0))
   (when (< -1 (+ offset length) (.length text))
-    (.charAt text (+ offset length))))
+    (str (.charAt text (+ offset length)))))
   
 (defmulti paredit (fn [k & args] k))
 
 (defn insert-balanced
   [[o c] t chars-with-no-space-before chars-with-no-space-after]
   (let [add-pre-space? (not (contains? chars-with-no-space-before 
-                                       (previous-char t)))
+                                       (previous-char-str t)))
         add-post-space? (not (contains? chars-with-no-space-after 
-                                        (next-char t)))
+                                        (next-char-str t)))
         ins-str (str (if add-pre-space? " " "")
                      (str o c)
                      (if add-post-space? " " ""))
         offset-shift (if add-post-space? -2 -1)]
+    ;(println (type (previous-char-str t)))
+    ;(println (str (apply str \" chars-with-no-space-before) \"))
+    ;(println add-pre-space? (str \" (previous-char-str t) \") add-post-space? (str \" ins-str \"))
     (-> t (insert ins-str) (shift-offset offset-shift))))
 
 (defn open-balanced
@@ -453,7 +465,9 @@
    chars-with-no-space-before chars-with-no-space-after]
   (let [parsed (parse text offset)]
     (if (in-code? parsed)
-      (insert-balanced [o c] t chars-with-no-space-before chars-with-no-space-after)
+      (do
+        ;(println [o c] t chars-with-no-space-before chars-with-no-space-after)
+        (insert-balanced [o c] t chars-with-no-space-before chars-with-no-space-after))
       (-> t (insert (str o))))))
   
 (defn close-balanced
@@ -466,7 +480,7 @@
               match (some #(when (= o (-> % zip/node :tag)) %) up-locs)]
           (if match
             (let [last-node (-> match zip/down zip/rightmost zip/left zip/node)
-                  nb-delete (if (= \space (:tag last-node)) 
+                  nb-delete (if (= (str \space) (:tag last-node)) 
                               (- (:end-offset last-node) (:offset last-node))
                               0)
                   t (if (> nb-delete 0) 
@@ -479,40 +493,40 @@
 (defmethod paredit 
   :paredit-open-round
   [cmd {:keys [text offset length] :as t}]
-  (open-balanced [\( \)] t 
-    (union (conj (into *real-spaces* *open-brackets*) \#) *form-macro-chars*)
+  (open-balanced ["(" ")"] t 
+    (union (conj (into *real-spaces* *open-brackets*) "#") *form-macro-chars*)
     (into *extended-spaces* *close-brackets*)))
     
 (defmethod paredit 
   :paredit-open-square
   [cmd {:keys [text offset length] :as t}]
-  (open-balanced [\[ \]] t
+  (open-balanced ["[" "]"] t
     (union (into *real-spaces* *open-brackets*) *form-macro-chars*)
     (into *extended-spaces* *close-brackets*)))
     
 (defmethod paredit 
   :paredit-open-curly
   [cmd {:keys [text offset length] :as t}]
-  (open-balanced [\{ \}] t
-    (union (conj (into *real-spaces* *open-brackets*) \#) *form-macro-chars*)
+  (open-balanced ["{" "}"] t
+    (union (conj (into *real-spaces* *open-brackets*) "#") *form-macro-chars*)
     (into *extended-spaces* *close-brackets*)))
     
 (defmethod paredit 
   :paredit-close-round
   [cmd {:keys [text offset length] :as t}]
-  (close-balanced [\( \)] t
+  (close-balanced ["(" ")"] t
     nil nil))
 
 (defmethod paredit 
   :paredit-close-square
   [cmd {:keys [text offset length] :as t}]
-  (close-balanced [\[ \]] t
+  (close-balanced ["[" "]"] t
     nil nil))
 
 (defmethod paredit 
   :paredit-close-curly
   [cmd {:keys [text offset length] :as t}]
-  (close-balanced [\{ \}] t
+  (close-balanced ["{" "}"] t
     nil nil))
 
 (defmethod paredit
@@ -524,13 +538,13 @@
         (insert-balanced [\" \"] t
           (conj (into *real-spaces* *open-brackets*) \#)
           (into *extended-spaces* *close-brackets*))
-      (not (parsed-in-tags? parsed #{\"}))
+      (not (parsed-in-tags? parsed #{"\""}))
         (-> t (insert (str \")))
-      (and (= \\ (previous-char t)) (not= \\ (previous-char t 2)))
+      (and (= "\\" (previous-char-str t)) (not= "\\" (previous-char-str t 2)))
         (-> t (insert (str \")))
-      (= \" (next-char t))
+      (= "\"" (next-char-str t))
         (shift-offset t 1)
-        #_(close-balanced [\" \"] t nil nil)
+        #_(close-balanced ["\"" "\""] t nil nil)
       :else
         (-> t (insert (str \\ \"))))))
 
@@ -542,7 +556,7 @@
     (if parse-ok
       (let [offset-loc (-> parsed parsed-root-loc (loc-for-offset offset))
             offset-node (-> offset-loc zip/node)
-            handled-forms (conj *open-brackets* \")
+            handled-forms (conj *open-brackets* "\"")
             in-handled-form (handled-forms (:tag offset-node))]
         (cond 
           (and in-handled-form (= offset (:offset offset-node)))
@@ -567,7 +581,7 @@
     (if parse-ok
       (let [offset-loc (-> parsed parsed-root-loc (loc-for-offset offset))
             offset-node (-> offset-loc zip/node)
-            handled-forms (conj *open-brackets* \")
+            handled-forms (conj *open-brackets* "\"")
             in-handled-form (handled-forms (:tag offset-node))]
         (cond 
           (and in-handled-form (= offset (:offset offset-node)))
