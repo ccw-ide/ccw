@@ -19,7 +19,7 @@
    </license>
 
    <url>
-      <update label="Counterclockwise Miau Update Site" url="http://updatesite.counterclockwise.googlecode.com/hg/"/>
+      <update label="Counterclockwise Update Site" url="http://updatesite.counterclockwise.googlecode.com/hg/"/>
    </url>
 
    <requires>
