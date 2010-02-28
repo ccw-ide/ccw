@@ -15,6 +15,8 @@ import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.console.ConsolePlugin;
+import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleView;
 import org.eclipse.ui.console.IOConsole;
 
@@ -84,51 +86,76 @@ public class ClojureClient {
 		}
 	}
 	
-	public static ClojureClient newClientForActiveRepl() {
-        IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+    public static ClojureClient newClientForActiveRepl() {
+        IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
         if (window != null) {
-            IWorkbenchPage page= window.getActivePage();
+            IWorkbenchPage page = window.getActivePage();
             if (page != null) {
-            	for (IViewReference r: page.getViewReferences()) {
-            		IViewPart v = r.getView(false);
-            		if (IConsoleView.class.isInstance(v) && page.isPartVisible(v)) {
-            			IConsoleView cv = (IConsoleView) v;
-            			if (org.eclipse.debug.ui.console.IConsole.class.isInstance(cv.getConsole())) {
-            				org.eclipse.debug.ui.console.IConsole processConsole = (org.eclipse.debug.ui.console.IConsole) cv.getConsole();
-            				int port = LaunchUtils.getLaunchServerReplPort(processConsole.getProcess().getLaunch());
-    						if (port != -1) {
-    							return new ClojureClient(port);
-    						}
-            			}
-            		}
-            	}
+                for (IViewReference r : page.getViewReferences()) {
+                    IViewPart v = r.getView(false);
+                    if (IConsoleView.class.isInstance(v)) {
+                        ClojureClient clojure = getClojureClientAndActivateRepl(page, v);
+                        if (clojure != null) {
+                            return clojure;
+                        }
+                    }
+                }
             }
         }
         return null;
-	}
+    }
+
+    private static ClojureClient getClojureClientAndActivateRepl(IWorkbenchPage page, IViewPart v) {
+        IConsole[] consoles = ConsolePlugin.getDefault().getConsoleManager().getConsoles();
+        for (IConsole console : consoles) {
+            if (console instanceof org.eclipse.debug.ui.console.IConsole) {
+                org.eclipse.debug.ui.console.IConsole processConsole = (org.eclipse.debug.ui.console.IConsole) console;
+                int port = LaunchUtils.getLaunchServerReplPort(processConsole.getProcess().getLaunch());
+                if (port != -1) {
+                    if (!page.isPartVisible(v)) {
+                        activateReplAndShowConsole(page, v, console);
+                    }
+                    return new ClojureClient(port);
+                }
+            }
+        }
+        return null;
+    }
+
+    private static void activateReplAndShowConsole(IWorkbenchPage page, IViewPart v, IConsole console) {
+        IConsoleView cv = (IConsoleView) v;
+        page.activate(cv);
+        cv.display(console);
+    }
+
 	
-	public static IOConsole findActiveReplConsole() {
-        IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+    public static IOConsole findActiveReplConsole() {
+        IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
         if (window != null) {
-            IWorkbenchPage page= window.getActivePage();
+            IWorkbenchPage page = window.getActivePage();
             if (page != null) {
-            	for (IViewReference r: page.getViewReferences()) {
-            		IViewPart v = r.getView(false);
-            		if (IConsoleView.class.isInstance(v) && page.isPartVisible(v)) {
-            			IConsoleView cv = (IConsoleView) v;
-            			if (org.eclipse.debug.ui.console.IConsole.class.isInstance(cv.getConsole())) {
-            				org.eclipse.debug.ui.console.IConsole processConsole = (org.eclipse.debug.ui.console.IConsole) cv.getConsole();
-            				int port = LaunchUtils.getLaunchServerReplPort(processConsole.getProcess().getLaunch());
-    						if (port != -1) {
-    							assert IOConsole.class.isInstance(processConsole);
-    							return (IOConsole) processConsole;
-    						}
-            			}
-            		}
-            	}
+                for (IViewReference r : page.getViewReferences()) {
+                    IViewPart v = r.getView(false);
+                    if (IConsoleView.class.isInstance(v)) {
+                        IConsole[] consoles = ConsolePlugin.getDefault().getConsoleManager().getConsoles();
+                        for (IConsole console : consoles) {
+                            if (console instanceof org.eclipse.debug.ui.console.IConsole) {
+                                org.eclipse.debug.ui.console.IConsole processConsole = (org.eclipse.debug.ui.console.IConsole) console;
+                                int port = LaunchUtils.getLaunchServerReplPort(processConsole.getProcess().getLaunch());
+                                if (port != -1) {
+                                    if (!page.isPartVisible(v)) {
+                                        activateReplAndShowConsole(page, v, console);
+                                    }
+                                    assert IOConsole.class.isInstance(processConsole);
+                                    return (IOConsole) processConsole;
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
         return null;
-	}
+    }
 
 }
