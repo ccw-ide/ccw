@@ -45,6 +45,7 @@ import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
+import ccw.reload_clojure;
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.debug.ClojureClient;
@@ -189,7 +190,10 @@ public class AntlrBasedClojureEditor extends TextEditor {
         setAction(CompileLibAction.ID, action);
         action = new FormatAction(this);
         action.setActionDefinitionId(IClojureEditorActionDefinitionIds.FORMAT_CODE);
-        setAction(FormatAction.ID, action);
+        setAction(FormatAction.ID, action);        
+        action = new reload_clojure();
+        action.setActionDefinitionId(IClojureEditorActionDefinitionIds.RELOAD_CLOJURE);
+        setAction("reload_clojure", action);        
         action = new OpenDeclarationAction(this);
         action.setActionDefinitionId(IClojureEditorActionDefinitionIds.OPEN_DECLARATION);
         setAction(OpenDeclarationAction.ID, action);
