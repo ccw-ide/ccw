@@ -359,10 +359,17 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
             
       <key
-            sequence="M1+R"
+            sequence="M2+M3+X R"
             contextId="ccw.ui.clojureEditorScope"
             commandId="ccw.ui.edit.text.clojure.reload"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+
+      <key
+            sequence="M1+M3+X R"
+            contextId="ccw.ui.clojureEditorScope"
+            commandId="ccw.ui.edit.text.clojure.reload"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            platform="carbon"/>
 			
       <key
             sequence="F3"

@@ -45,6 +45,7 @@ import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
+import ccw.reload_clojure;
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.debug.ClojureClient;

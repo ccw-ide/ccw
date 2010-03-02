@@ -7,9 +7,10 @@
 ; *
 ; * Contributors: 
 ; *    Tuomas KARKKAINEN - initial API and implementation
+; *    Laurent PETIT     - moved namespace
 ; *******************************************************************************/
 
-(ns ccw.editors.antlrbased.reload-clojure
+(ns ccw.reload-clojure
   (:gen-class
     :init init
     :state state
@@ -17,11 +18,17 @@
 
 (defn -init [])
 
-(defn -run [this]
-  (require :reload '(ccw.editors.antlrbased
-                      [reload-clojure]
+(defn reload-rest []
+  (require :reload '[ccw
+                      [ClojureProjectNature]])
+  (require :reload '[ccw.editors.antlrbased
                       [ClojureFormat]
                       [StacktraceHyperlink]
-                      [PareditAutoEditStrategy])))
+                      [PareditAutoEditStrategy]]))
+
+(defn -run [this]
+  (require :reload 'ccw.reload-clojure)
+  ; now that reload-rest took a chance to be updated via the reload, call it
+  (reload-rest))
 
 

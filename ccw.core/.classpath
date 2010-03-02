@@ -4,7 +4,5 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry exported="true" kind="lib" path="classes" sourcepath="classes"/>
-	<classpathentry kind="lib" path="clojure-source/clojure-contrib-src.jar"/>
-	<classpathentry kind="lib" path="clojure-source/clojure-src.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
