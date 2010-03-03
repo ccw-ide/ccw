@@ -130,6 +130,13 @@
   (or 
     (= (str \space) (:tag node))
     (every? #(and (not (string? %)) (= (str \space) (:tag %))) (:content node))))
+
+(defn char-at 
+  "if index is out of bounds, just returns nil"
+  [s index]
+  (when (< -1 index (.length s))
+    (.charAt s index)))
+    
    
 (defn parse 
 	"TODO: currently the parser assumes a well formed document ... Define a policy if the parser encounters and invalid text
@@ -161,7 +168,9 @@
                     (= "\"" c)
                       (if (= offset 0)
                         (recur (inc offset) line (inc col) (conj parents {:tag c :line line :col col :offset offset}) accumulated-state :ok)
-                        (if (= (str \\) (.charAt text (dec offset)))
+                        (if (and 
+                              (= (str \\) (str (.charAt text (dec offset))))
+                              (not= (str \\) (str (char-at text (dec (dec offset))))))
                           (recur (inc offset) line (inc col) parents accumulated-state :ok)
                           (recur (inc offset) line (inc col) (pop parents) accumulated-state :ok)))
                     :else

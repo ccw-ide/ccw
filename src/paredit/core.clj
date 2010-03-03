@@ -319,7 +319,8 @@
                    "(frob grovel \"foo \\\"|bar\" full lexical)"
                    "(frob grovel \"foo \\\\|bar\" full lexical)",
                    "(frob grovel \"foo \\\\\\\"|bar\" full lexical)",
-                   }]
+                   "\"fo\\\"o\" \"b|ar\"" "\"fo\\\"o\" \"b\\\"|ar\"",
+                   "\"\\\\\" \"b|ar\"" "\"\\\\\" \"b\\\"|ar\""}]
     ]
     ["Deleting & Killing"
       ["Del"     :paredit-forward-delete
