@@ -120,7 +120,6 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 		l.setLayoutData(gd);
 
 		filterText = new Text(control, SWT.FILL | SWT.BORDER);
-		filterText.setTextLimit(10);
 		filterText.setToolTipText("Enter here a word to search. It can be a regexp. e.g. \"-map$\" (without double quotes) for matching strings ending with -map");
 		gd = new GridData();
 		gd.horizontalAlignment = SWT.FILL;
@@ -175,20 +174,40 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 			public boolean select(Viewer viewer, Object parentElement, Object element) {
 				if (patternString == null || patternString.trim().equals("")) {
 					return true;
-				}
-				Map parent = (Map) parentElement;
-				Map elem = (Map) element;
-				if ("var".equals(elem.get(KEYWORD_TYPE))) {
-					String name = (String) elem.get(KEYWORD_NAME);
-					boolean nameMatches = name != null && pattern.matcher(name).find();
-
-					String doc = (String) elem.get(ClojureDocUtils.KEYWORD_DOC);
-					boolean docMatches = doc != null && pattern.matcher(doc).find();
-
-					return nameMatches || docMatches;
 				} else {
-					return true;
+					return recursiveElemMatches(element);
 				}
+			}
+			
+			/** Tests element node, and its children if necessary, recursively */
+			private boolean recursiveElemMatches(Object element) {
+				if (elemMatches(element)) {
+					return true;
+				} else {
+					ITreeContentProvider cp = (ITreeContentProvider) treeViewer.getContentProvider();
+					if (cp.hasChildren(element)) {
+						for (Object c: cp.getChildren(element)) {
+							if (recursiveElemMatches(c)) {
+								return true;
+							}
+						}
+						return false;
+					} else {
+						return false;
+					}
+				}
+			}
+			
+			/** Test just element node, not its children */
+			private boolean elemMatches(Object element) {
+				Map elem = (Map) element;
+				String name = (String) elem.get(KEYWORD_NAME);
+				boolean nameMatches = name != null && pattern.matcher(name).find();
+
+				String doc = (String) elem.get(ClojureDocUtils.KEYWORD_DOC);
+				boolean docMatches = doc != null && pattern.matcher(doc).find();
+
+				return nameMatches || docMatches;
 			}
 		});
 
