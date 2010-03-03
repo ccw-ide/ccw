@@ -127,4 +127,5 @@
 
 (deftest code-formatting
   (is (= "#\"something\"" (format-code "#\"something\"")))
-  (is (= "(resourcefully/put url {\"Content-Type\" \"multipart/form-data\" \"Encoding\" \"UTF-8\"} request)))" (format-code "(resourcefully/put url {\"Content-Type\" \"multipart/form-data\" \"Encoding\" \"UTF-8\"} request)))"))))
+  (is (= "(resourcefully/put url {\"Content-Type\" \"multipart/form-data\" \"Encoding\" \"UTF-8\"} request)))" (format-code "(resourcefully/put url {\"Content-Type\" \"multipart/form-data\" \"Encoding\" \"UTF-8\"} request)))")))
+  (is (= "#_(unread)" (format-code "#_(unread)"))))

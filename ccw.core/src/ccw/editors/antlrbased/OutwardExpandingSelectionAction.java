@@ -38,13 +38,13 @@ public class OutwardExpandingSelectionAction extends Action {
     private void select() {
         ISourceViewer sourceViewer = editor.sourceViewer();
         IRegion selection = editor.getUnSignedSelection(sourceViewer);
-        boolean previousSelectionExists = Math.abs(selection.getLength()) > 1;
+        boolean previousSelectionExists = Math.abs(selection.getLength()) > 0;
         int caretOffset = selection.getOffset();
         if (previousSelectionExists) {
             caretOffset = selection.getOffset() - 1;
         }
         Tokens tokens = new Tokens(editor.getDocument(), caretOffset);
-        if (tokens.tokenAtCaret().getData() == null) {
+        if (tokens.tokenAtCaret().getData() == null && !previousSelectionExists) {
             showSelection(sourceViewer, tokens.getTokenOffset(), tokens.getTokenLength());
             return;
         }
@@ -106,6 +106,9 @@ public class OutwardExpandingSelectionAction extends Action {
 
     public boolean previousCharacterIsPound(IDocument document, int adjustedTargetOffset) {
         try {
+            if (adjustedTargetOffset == 0) {
+                return false;
+            }
             String previousCharacter = document.get(adjustedTargetOffset - 1, 1);
             return "#".equals(previousCharacter);
         } catch (BadLocationException e) {

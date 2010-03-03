@@ -32,13 +32,10 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -50,8 +47,8 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 
-import ccw.ClojureCore;
 import ccw.CCWPlugin;
+import ccw.ClojureCore;
 import ccw.debug.ClojureClient;
 import ccw.util.ClojureDocUtils;
 import ccw.util.DisplayUtil;
@@ -88,8 +85,6 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 	private Text filterText;
 	private String patternString = "";
 	private Pattern pattern;
-	private boolean searchInName = true;
-	private boolean searchInDoc = false;
 	private ISelection selectionBeforePatternSearchBegan;
 	private Object[] expandedElementsBeforeSearchBegan;
 
@@ -114,18 +109,17 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 		control = new Composite(theParent, SWT.NONE);
 
 		GridLayout gl = new GridLayout();
-		gl.numColumns = 4;
+		gl.numColumns = 2;
 		control.setLayout(gl);
 
 		Label l = new Label(control, SWT.NONE);
 		l.setText("Find :");
-		l.setToolTipText("Enter an expression on which the browser will filter, based on name and doc string of symbols");
+		l.setToolTipText("Enter an expression on which the browser will filter, based on name and doc string of vars");
 		GridData gd = new GridData();
 		gd.verticalAlignment = SWT.CENTER;
 		l.setLayoutData(gd);
 
 		filterText = new Text(control, SWT.FILL | SWT.BORDER);
-		filterText.setTextLimit(10);
 		filterText.setToolTipText("Enter here a word to search. It can be a regexp. e.g. \"-map$\" (without double quotes) for matching strings ending with -map");
 		gd = new GridData();
 		gd.horizontalAlignment = SWT.FILL;
@@ -160,39 +154,10 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 			}
 		});
 
-		Button inName = new Button(control, SWT.CHECK);
-		gd = new GridData();
-		gd.verticalAlignment = SWT.CENTER;
-		inName.setLayoutData(gd);
-		inName.setText("in name");
-		inName.setToolTipText("Press to enable the search in the name");
-		inName.setSelection(true);
-		inName.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				searchInName = ((Button) e.getSource()).getSelection();
-				treeViewer.refresh(false);
-			}
-		});
-
-		Button inDoc = new Button(control, SWT.CHECK);
-		gd = new GridData();
-		gd.verticalAlignment = SWT.CENTER;
-		inDoc.setLayoutData(gd);
-		inDoc.setText("in doc");
-		inDoc.setToolTipText("Press to enable the search in the documentation string");
-		inDoc.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				searchInDoc = ((Button) e.getSource()).getSelection();
-				treeViewer.refresh(false);
-			}
-		});
-
 		treeViewer = new TreeViewer(control, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		treeViewer.addSelectionChangedListener(this);
 		gd = new GridData();// SWT.FILL, SWT.FILL, true, true, 2, 1);
-		gd.horizontalSpan = 4;
+		gd.horizontalSpan = 2;
 		gd.horizontalAlignment = SWT.FILL;
 		gd.grabExcessHorizontalSpace = true;
 		gd.verticalAlignment = SWT.FILL;
@@ -209,20 +174,40 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 			public boolean select(Viewer viewer, Object parentElement, Object element) {
 				if (patternString == null || patternString.trim().equals("")) {
 					return true;
-				}
-				Map parent = (Map) parentElement;
-				Map elem = (Map) element;
-				if ("var".equals(elem.get(KEYWORD_TYPE))) {
-					String name = (String) elem.get(KEYWORD_NAME);
-					boolean nameMatches = searchInName && name != null && pattern.matcher(name).find();
-
-					String doc = (String) elem.get(ClojureDocUtils.KEYWORD_DOC);
-					boolean docMatches = searchInDoc && doc != null && pattern.matcher(doc).find();
-
-					return nameMatches || docMatches;
 				} else {
-					return true;
+					return recursiveElemMatches(element);
 				}
+			}
+			
+			/** Tests element node, and its children if necessary, recursively */
+			private boolean recursiveElemMatches(Object element) {
+				if (elemMatches(element)) {
+					return true;
+				} else {
+					ITreeContentProvider cp = (ITreeContentProvider) treeViewer.getContentProvider();
+					if (cp.hasChildren(element)) {
+						for (Object c: cp.getChildren(element)) {
+							if (recursiveElemMatches(c)) {
+								return true;
+							}
+						}
+						return false;
+					} else {
+						return false;
+					}
+				}
+			}
+			
+			/** Test just element node, not its children */
+			private boolean elemMatches(Object element) {
+				Map elem = (Map) element;
+				String name = (String) elem.get(KEYWORD_NAME);
+				boolean nameMatches = name != null && pattern.matcher(name).find();
+
+				String doc = (String) elem.get(ClojureDocUtils.KEYWORD_DOC);
+				boolean docMatches = doc != null && pattern.matcher(doc).find();
+
+				return nameMatches || docMatches;
 			}
 		});
 
