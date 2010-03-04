@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Paredit.clj
 Bundle-SymbolicName: paredit.clj;singleton:=true
-Bundle-Version: 0.1.8.A001
+Bundle-Version: 0.1.8.A002
 Bundle-ClassPath: clj.jar,
  classes/
 Export-Package: paredit

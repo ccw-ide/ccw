@@ -158,23 +158,32 @@
               continue? (continue?-fn text offset line col parents parser-state accumulated-state)] 
   	      (if (or (not continue?) (= :eof parser-state))
   	        (make-result-fn text offset line col parents parser-state accumulated-state)
-  	        (let [c (str (.charAt text offset))  ; c: current char
+  	        (let [c (str (.charAt text offset))
   	              parent-type (-> parents peek :tag)]
   	          (condp = parent-type
   	            "\"" 
                   (cond
-                    (= (str \newline)  c)
+                    (= (str \newline) c)
                       (recur (inc offset) (inc line) (int 0) parents accumulated-state :ok)
+                    (= "\\" c)
+                      (recur (inc offset) line (inc col) (conj parents {:tag "\"\\" :line line :col col :offset offset}) accumulated-state :ok)
                     (= "\"" c)
-                      (if (= offset 0)
-                        (recur (inc offset) line (inc col) (conj parents {:tag c :line line :col col :offset offset}) accumulated-state :ok)
-                        (if (and 
-                              (= (str \\) (str (.charAt text (dec offset))))
-                              (not= (str \\) (str (char-at text (dec (dec offset))))))
-                          (recur (inc offset) line (inc col) parents accumulated-state :ok)
-                          (recur (inc offset) line (inc col) (pop parents) accumulated-state :ok)))
+                      ;(if (= offset 0)
+                      ;  (recur (inc offset) line (inc col) (conj parents {:tag c :line line :col col :offset offset}) accumulated-state :ok)
+                      ;  (if (and 
+                      ;        (= (str \\) (str (.charAt text (dec offset))))
+                      ;        (not= (str \\) (str (char-at text (dec (dec offset))))))
+                      ;    (recur (inc offset) line (inc col) parents accumulated-state :ok)
+                          (recur (inc offset) line (inc col) (pop parents) accumulated-state :ok )
+                          ;))
                     :else
                       (recur (inc offset) line (inc col) parents accumulated-state :ok))
+                "\"\\"
+                  (cond
+                    (= (str \newline) c)
+                      (recur (inc offset) (inc line) (int 0) (pop parents) accumulated-state :ok)
+                    :else
+                      (recur (inc offset) line (inc col) (pop parents) accumulated-state :ok))
                 (str \;) 	          
                   (cond
                     (= (str \newline) c)

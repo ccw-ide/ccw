@@ -315,12 +315,13 @@
                    "(foo \"bar |baz\" quux)"
                    "(foo \"bar \\\"|baz\" quux)",
                    ";|ab" ";\"|ab",
-                   "(frob grovel \"foo \\|bar\" full lexical)",
-                   "(frob grovel \"foo \\\"|bar\" full lexical)"
-                   "(frob grovel \"foo \\\\|bar\" full lexical)",
+                   "(frob grovel \"foo \\|bar\" full lexical)"
+                   "(frob grovel \"foo \\\"|bar\" full lexical)",
+                   "(frob grovel \"foo \\\\|bar\" full lexical)"
                    "(frob grovel \"foo \\\\\\\"|bar\" full lexical)",
                    "\"fo\\\"o\" \"b|ar\"" "\"fo\\\"o\" \"b\\\"|ar\"",
-                   "\"\\\\\" \"b|ar\"" "\"\\\\\" \"b\\\"|ar\""}]
+                   "\"\\\\\" \"b|ar\"" "\"\\\\\" \"b\\\"|ar\"",
+                   "\"\\\\\\\"|a\"" "\"\\\\\\\"\\\"|a\""}]
     ]
     ["Deleting & Killing"
       ["Del"     :paredit-forward-delete
@@ -388,7 +389,7 @@
         spec (if (zero? (:length text)) spec (insert spec (+ 1 (:offset text) (:length text)) "|"))]
     spec))
 
-(def *not-in-code* #{"\"" ";" "\\"})
+(def *not-in-code* #{"\"" "\"\\" ";" "\\"})
 
 (defn parsed-in-tags?
   [parsed tags-set]
