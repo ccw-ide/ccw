@@ -361,7 +361,18 @@
                 "|(foo bar)     ; Useless line!"
                  "|",
                 "(foo \"|bar baz\"\n     quux)"
-                 "(foo \"|\"\n     quux)"}]
+                 "(foo \"|\"\n     quux)"}]]
+    ["Miscellaneous"             
+      ["Tab"     :paredit-indent-line
+                {"foo (let [n (frobbotz)] \n|(display (+ n 1)\nport))\n        bar"
+                 (str "foo (let [n (frobbotz)]"
+                    "\n      |(display (+ n 1)"
+                    "\n        port))\n        bar")}]
+      ["C-j"     :paredit-newline
+                {"foo (let [n (frobbotz)] |(display (+ n 1)\nport))\n        bar"
+                 (str "foo (let [n (frobbotz)]"
+                    "\n      |(display (+ n 1)"
+                    "\n        port))\n        bar")}]
     ]
   ])
 
@@ -573,7 +584,6 @@
             (delete t offset 1)))
       (delete t offset 1))))
 
-
 (defmethod paredit 
   :paredit-backward-delete
   [cmd {:keys [text offset length] :as t}]
@@ -597,6 +607,23 @@
           :else
             (-> t (delete offset 1) (shift-offset -1))))
       (-> t (delete offset 1) (shift-offset -1)))))
+      
+(defmethod paredit
+ :paredit-indent-line
+ [cmd {:keys [text offset length] :as t}] t
+; (let [current line, enclosing node, parent bracket node]
+;   for the current line and all following lines while we're still in the same parent bracket node:
+;     (cond
+;       (or
+;           (start of line in string)
+;           (start of line starts with comment in first col)) ; special case because line probably commented out temporarily
+;         (do not indent line)
+;       :else
+;         (do
+;            (remove the trailing spaces in the previous line)
+;            (compute the number of indentation spaces and correct the current line beginning))) ; (only spaces, no tabs)
+;   endfor)
+)
 
 (defn test-command [title-prefix command]
   (testing (str title-prefix " " (second command) " (\"" (first command) "\")")
