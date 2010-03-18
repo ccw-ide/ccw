@@ -133,7 +133,7 @@
 
 (defn char-at 
   "if index is out of bounds, just returns nil"
-  [s index]
+  [#^String s index]
   (when (< -1 index (.length s))
     (.charAt s index)))
     

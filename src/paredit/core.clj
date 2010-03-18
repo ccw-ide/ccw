@@ -15,6 +15,7 @@
   (:use clojure.test)
   (:use paredit.parser)
   (:use clojure.set)
+  (:use clojure.contrib.core)
   (:require clojure.contrib.pprint)
   (:require [clojure.contrib.str-utils2 :as str2])
   (:require [clojure.zip :as zip]))
@@ -364,11 +365,40 @@
                  "(foo \"|\"\n     quux)"}]]
     ["Miscellaneous"             
       ["Tab"     :paredit-indent-line
-                {"foo (let [n (frobbotz)] \n|(display (+ n 1)\nport))\n        bar"
-                 (str "foo (let [n (frobbotz)]"
-                    "\n      |(display (+ n 1)"
-                    "\n        port))\n        bar")}]
-      ["C-j"     :paredit-newline
+                {"[a\n|b]"  "[a\n |b]"
+                 "([a1\n|b])"  "([a1\n  |b])"
+                 "([a1b\n  |b])" "([a1b\n  |b])"
+                 "(a\n |)" "(a\n  |)"
+                 "(a b c\nd| e)" "(a b c\n  d| e)"
+                 "|(toto)" "|(toto)"
+                 "(a\n  ;sdfdf\n  |b)" "(a\n  ;sdfdf\n  |b)"
+                 "[a\n \"b\n |\"]" "[a\n \"b\n |\"]"
+                 "[a\n|\"a\"]" "[a\n |\"a\"]"
+                 "(a\n\t|b)" "(a\n  |b)"
+                 "(\n|\n)" "(\n  |\n)"
+                 "(\n |\n)" "(\n  |\n)"
+                 "(\n  |\n)" "(\n  |\n)"
+                 "(\n   |\n)" "(\n  |\n)"
+                 "(\n , |\n)" "(\n  |\n)"
+                 "  {\n|a}" "  {\n   |a}"
+                 " (\n|    ab c)" " (\n|   ab c)"
+                 " (\n |   ab c)" " (\n |  ab c)"
+                 " (\n  |  ab c)" " (\n  | ab c)"
+                 " (\n   | ab c)" " (\n   |ab c)"
+                 " (\n    |ab c)" " (\n   |ab c)" 
+                 " (\n    a|b c)" " (\n   a|b c)"  
+                 " (\n    |    ab c)" " (\n|   ab c)" 
+                 " (\n      |  ab c)" " (\n |  ab c)"
+                 " (\n  |ab c)" " (\n   |ab c)"
+                 " (\n| ab c)" " (\n|   ab c)"  
+                 " (\n  | ab c)" " (\n  | ab c)"
+                 ;"foo (let [n (frobbotz)] \n|(display (+ n 1)\nport))\n        bar"
+                 ;(str "foo (let [n (frobbotz)]"
+                 ;   "\n      |(display (+ n 1)"
+                 ;   "\n        port))\n        bar"
+                 ;   )
+                }]
+      #_["C-j"     :paredit-newline
                 {"foo (let [n (frobbotz)] |(display (+ n 1)\nport))\n        bar"
                  (str "foo (let [n (frobbotz)]"
                     "\n      |(display (+ n 1)"
@@ -392,12 +422,15 @@
    :offset offset
    :length (if (> second-pipe 0) (- second-pipe offset) 0)}))
 
+(defn str-insert [#^String s i c] (str (.substring s 0 i) c (.substring s i)))
+(defn str-remove [#^String s i n] (str (.substring s 0 i) (.substring s (+ i n))))
+(defn str-replace [#^String s offset length text] (str (.substring s 0 offset) text (.substring s (+ offset length))))
+
 (defn text-to-text-spec
   "Converts a text map to text spec"
   [text]
-  (let [insert (fn [#^String s i c] (str (.substring s 0 i) c (.substring s i)))
-        spec (insert (:text text) (:offset text) "|")
-        spec (if (zero? (:length text)) spec (insert spec (+ 1 (:offset text) (:length text)) "|"))]
+  (let [spec (str-insert (:text text) (:offset text) "|")
+        spec (if (zero? (:length text)) spec (str-insert spec (+ 1 (:offset text) (:length text)) "|"))]
     spec))
 
 (def *not-in-code* #{"\"" "\"\\" ";" "\\"})
@@ -416,16 +449,17 @@
 
 (defn insert
   "insert what at offset. offset shifted by what's length, selection length unchanged"
-  [{:keys [#^String text offset length modifs] :as where :or {:modifs []}} #^String what]
-  (let [new-offset (+ offset (.length what))]
-    (assoc where 
-      :text (str (.substring text 0 offset) what (.substring text offset))
-      :offset new-offset
-      :modifs (conj modifs {:text what, :offset offset, :length 0})))) 
+  ([{:keys [#^String text offset length modifs] :as where :or {:modifs []}} #^String what]
+    (let [new-offset (+ offset (.length what))]
+      (assoc where 
+        :text (str (.substring text 0 offset) what (.substring text offset))
+        :offset new-offset
+        :modifs (conj modifs {:text what, :offset offset, :length 0}))))) 
 
 (defn delete
   "removes n chars at offset off. offset not shifted, selection length unchanged"
   ; TODO FIXME : decrease length if now that things are removed, length would make the selection overflow the text
+  ; and also adjust :offset if off is before it
   [{:keys [#^String text offset length modifs] :as where :or {:modifs []}} off n]
   (assoc where 
     :text (str (.substring text 0 off) (.substring text (+ off n)))
@@ -563,7 +597,7 @@
 
 (defmethod paredit 
   :paredit-forward-delete
-  [cmd {:keys [text offset length] :as t}]
+  [cmd {:keys [#^String text offset length] :as t}]
   (let [parsed (parse text (.length text))
         parse-ok (not= :ko (:parser-state parsed))]
     (if parse-ok
@@ -586,7 +620,7 @@
 
 (defmethod paredit 
   :paredit-backward-delete
-  [cmd {:keys [text offset length] :as t}]
+  [cmd {:keys [#^String text offset length] :as t}]
   (let [offset (dec offset)
         parsed (parse text (.length text))
         parse-ok (not= :ko (:parser-state parsed))]
@@ -607,23 +641,117 @@
           :else
             (-> t (delete offset 1) (shift-offset -1))))
       (-> t (delete offset 1) (shift-offset -1)))))
-      
+
+(defn rlefts
+  "like clojure.zip/lefts, but in reverse order (optimized lazy sequence)"
+  [loc]
+  (rest (take-while identity (iterate zip/left loc))))
+
+(defn next-leaves
+  "seq of next leaves locs"
+  [loc]
+  (remove zip/branch? (take-while (complement zip/end?) (iterate zip/next loc))))
+
+(defn indent-column 
+  "pre-condition: line-offset is really the starting offset of a line"
+  [root-loc line-offset]
+  (let [loc (loc-for-offset root-loc (dec line-offset))]
+    (if (nil? (zip/up loc))
+      0
+      (let
+        [parent-node (-> loc zip/up zip/node)
+         parent-node (if (= :root (:tag parent-node)) {:line -1 :content [""] :col 0} parent-node)
+         left-nodes (remove #(or (string? %) (= " " (:tag %))) (map zip/node (rlefts loc)))
+         indent (some identity (map (fn [n-1 n] (when (< (:line n-1) (:line n)) (:col n))) 
+                                 (concat (rest left-nodes) [parent-node]) left-nodes))]
+        (or indent
+          (+ (:col parent-node)
+            (.length (-> parent-node :content #^String (get 0)))
+            (if (= "(" (:tag parent-node)) 1 0)))))))
+
+(defn line-start 
+  "returns the offset corresponding to the start of the line of offset offset in s"
+  [#^String s offset]
+  (loop [offset offset]
+    (cond 
+      (<= offset 0) 0
+      (and (<= offset (.length s)) (= \newline (.charAt s (dec offset)))) offset
+      :else (recur (dec offset)))))
+
+(defn line-stop
+  "returns the offset corresponding to the end of the line of offset offset in s (excluding carridge return, newline "
+  [#^String s offset]
+  (loop [offset offset]
+    (cond
+      (>= (inc offset) (.length s)) (.length s)
+      (#{\return \newline} (.charAt s offset)) (inc offset)
+      :else (recur (inc offset)))))
+
+(declare start-offset)
+(defn end-offset [loc]
+  (cond
+    (string? (zip/node loc))
+      (if-let [l (zip/left loc)]
+        (+ (end-offset l) (.length #^String (zip/node loc)))
+        (+ (start-offset (zip/up loc)) 1 (.length #^String (zip/node loc))))
+    :else 
+      (-> loc zip/node :end-offset)))
+
+(defn start-offset [loc]
+  (cond
+    (string? (zip/node loc))
+      (if-let [l (zip/left loc)]
+        (end-offset l)
+        (start-offset (zip/up loc)))
+    :else 
+      (-> loc zip/node :offset)))
+
+(defn loc-count [loc]
+  (cond
+    (string? (zip/node loc)) (.length #^String loc)
+    :else (- (:end-offset loc) (:offset loc))))
+    
+(defn loc-tag [loc]
+  (:tag (zip/node (if (string? (zip/node loc)) (zip/up loc) loc))))
+  
 (defmethod paredit
- :paredit-indent-line
- [cmd {:keys [text offset length] :as t}] t
-; (let [current line, enclosing node, parent bracket node]
-;   for the current line and all following lines while we're still in the same parent bracket node:
-;     (cond
-;       (or
-;           (start of line in string)
-;           (start of line starts with comment in first col)) ; special case because line probably commented out temporarily
-;         (do not indent line)
-;       :else
-;         (do
-;            (remove the trailing spaces in the previous line)
-;            (compute the number of indentation spaces and correct the current line beginning))) ; (only spaces, no tabs)
-;   endfor)
-)
+  :paredit-newline
+  [cmd {:keys [text offset length] :as t}]
+  (paredit :paredit-indent-line 
+    {:text (str-insert text offset "\n") 
+     :offset (inc offset) 
+     :length length 
+     :modifs [{:text "\n" :offset offset :length 0}]}))
+  
+(defmethod paredit
+  :paredit-indent-line
+  [cmd {:keys [#^String text offset length] :as t}]
+  (if-let [rloc (-?> (parse text (.length text)) parsed-root-loc)]
+    (let [line-start (line-start text offset)
+          line-stop (line-stop text offset)
+          loc (-> rloc (loc-for-offset line-start))]
+      (if (and (= (str \") (loc-tag loc)) (< (:offset (zip/node loc)) line-start))
+        t
+        (let [indent (indent-column rloc line-start)
+              cur-indent-col (or (some (fn [l]
+                                         (when (not= (str \space) (loc-tag l)) 
+                                           (- (start-offset l) line-start)))
+                                   (filter (fn [l] (<= line-start (start-offset l) (dec line-stop))) 
+                                     (next-leaves loc)))
+                               (- line-stop line-start 1))
+              to-add (- indent cur-indent-col)]
+          (cond
+            (zero? to-add) t
+            :else (let [t (update-in t [:modifs] conj {:text (str2/repeat " " indent) :offset line-start :length cur-indent-col})
+                        t (update-in t [:text] str-replace line-start cur-indent-col (str2/repeat " " indent))]
+                    (cond 
+                      (>= offset (+ line-start cur-indent-col)) 
+                        (update-in t [:offset] + to-add)
+                      (<= offset (+ line-start indent))
+                        t
+                      :else
+                        (update-in t [:offset] + (max to-add (- line-start offset)))))))))
+    t))
 
 (defn test-command [title-prefix command]
   (testing (str title-prefix " " (second command) " (\"" (first command) "\")")
@@ -632,10 +760,10 @@
 
 (deftest paredit-tests
   (doseq [group *paredit-commands*]
-		(testing (str (first group) ":")
-		  (doseq [command (rest group)]
-		    (test-command "public documentation of paredit command" command)
-		    (test-command "additional non regression tests of paredit command " (assoc command 2 (get command 3)))))))
+    (testing (str (first group) ":")
+      (doseq [command (rest group)]
+        (test-command "public documentation of paredit command" command)
+        (test-command "additional non regression tests of paredit command " (assoc command 2 (get command 3)))))))
 
 (def pts paredit-tests)
 
