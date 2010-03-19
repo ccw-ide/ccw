@@ -151,8 +151,7 @@ public class ClojureSourceViewerConfiguration extends
 			ISourceViewer sourceViewer, final String contentType) {
 		
 		return new IAutoEditStrategy[] { 
-				new PareditAutoEditStrategy(editor, fPreferenceStore)
-		, new org.eclipse.jface.text.DefaultIndentLineAutoEditStrategy() };
+				new PareditAutoEditStrategy(editor, fPreferenceStore) };
 	}
 
 }

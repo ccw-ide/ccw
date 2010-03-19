@@ -12,6 +12,8 @@
    :init init
    :state state))
    
+#_(set! *warn-on-reflection* true)
+
 (defn- -init
   [editor preference-store] [[] (ref {:editor editor :prefs-store preference-store})])   
 
@@ -23,7 +25,10 @@
    ")" :paredit-close-round
    "]" :paredit-close-square
    "}" :paredit-close-curly
-   "\"" :paredit-doublequote})
+   "\"" :paredit-doublequote
+   "\t" :paredit-indent-line
+   "\n" :paredit-newline
+   })
 
 (defn- call-paredit [command document-text]
   (cond
@@ -33,7 +38,7 @@
                {:text (:text document-text) 
                 :offset (:offset command) 
                 :length 0})
-    (and (zero? (-> command :text .length))
+    (and (zero? (-> command #^String (:text) .length))
          (= 1 (:length command)))
       (let [paredit-command (if (= (:offset command) (:caret-offset document-text)) 
                               :paredit-forward-delete :paredit-backward-delete)]
@@ -48,11 +53,10 @@
   (.getBoolean prefs-store ccw.preferences.PreferenceConstants/ACTIVATE_PAREDIT))
 
 (defn -customizeDocumentCommand 
-  [#^IAutoEditStrategy this, #^IDocument document, #^DocumentCommand command]
+  [#^ccw.editors.antlrbased.PareditAutoEditStrategy this, #^IDocument document, #^DocumentCommand command]
   (when (and (paredit-enabled? (-> this .state deref :prefs-store))
              (.doit command))
-    
-    (let [signed-selection (bean (-> this .state deref :editor .getSignedSelection))
+    (let [signed-selection (bean (-> this .state deref #^ccw.editors.antlrbased.AntlrBasedClojureEditor (:editor) .getSignedSelection))
           document-text {:text (.get document) :caret-offset (+ (:offset signed-selection) (:length signed-selection)) :selection-length (:length signed-selection)}
           par-command {:text (.text command) :offset (.offset command) :length (.length command)}
           result (call-paredit par-command document-text)]
@@ -61,7 +65,9 @@
           (do
             (set! (.offset command) (-> result :modifs first :offset))
             (set! (.length command) (-> result :modifs first :length))
-            (set! (.text command) (-> result :modifs first :text)))
+            (set! (.text command) (-> result :modifs first :text))
+            (doseq [{:keys [offset length text]} (rest (-> result :modifs))]
+              (.addCommand command offset length text nil)))
           (do
             (set! (.offset command) (:offset result))
             (set! (.length command) 0)

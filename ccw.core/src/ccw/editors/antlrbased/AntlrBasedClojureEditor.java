@@ -675,4 +675,9 @@ public class AntlrBasedClojureEditor extends TextEditor {
     public void setStatusLineErrorMessage(String message) {
         super.setStatusLineMessage(message);
     }
+    
+    @Override
+    protected boolean isTabsToSpacesConversionEnabled() {
+    	return false;
+    }
 }
