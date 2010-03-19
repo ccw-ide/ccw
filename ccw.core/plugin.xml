@@ -235,13 +235,14 @@
             categoryId="org.eclipse.ui.category.navigate"
             id="ccw.ui.edit.text.clojure.run.tests">
       </command>
-
-      <command
+     
+     <!-- not considered stable enough -->
+      <!--command
             name="%command.formatCode.name"
             description="%command.formatCode.description"
             categoryId="org.eclipse.ui.category.navigate"
             id="ccw.ui.edit.text.clojure.format.code">
-      </command>
+      </command-->
 	  
 	  <command
             name="%command.reload.clojure.name"
@@ -352,11 +353,12 @@
             contextId="ccw.ui.clojureEditorScope"
             commandId="ccw.ui.edit.text.clojure.run.tests"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-      <key
+      <!-- not considered stable enough -->
+      <!--key
             sequence="M1+M2+F"
             contextId="ccw.ui.clojureEditorScope"
             commandId="ccw.ui.edit.text.clojure.format.code"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/-->
             
       <key
             sequence="M2+M3+X R"
