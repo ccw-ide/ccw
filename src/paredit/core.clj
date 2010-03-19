@@ -398,13 +398,21 @@
                  ;   "\n        port))\n        bar"
                  ;   )
                 }]
-      #_["C-j"     :paredit-newline
-                {"foo (let [n (frobbotz)] |(display (+ n 1)\nport))\n        bar"
-                 (str "foo (let [n (frobbotz)]"
-                    "\n      |(display (+ n 1)"
-                    "\n        port))\n        bar")}]
+      ["C-j"     :paredit-newline
+                {"(ab|cd)" "(ab\n  |cd)"
+                 "(ab|     cd)" "(ab\n  |cd)"
+                 ;"foo (let [n (frobbotz)] |(display (+ n 1)\nport))\n        bar"
+                 ;(str "foo (let [n (frobbotz)]"
+                 ;   "\n      |(display (+ n 1)"
+                 ;   "\n        port))\n        bar")
+                 }]
     ]
   ])
+
+
+;;; adaptable paredit configuration
+(def #^String *newline* "\n")
+;;; adaptable paredit configuration
 
 (def *real-spaces* #{(str \newline) (str \tab) (str \space)})
 (def *extended-spaces* (conj *real-spaces* (str \,)))
@@ -502,9 +510,6 @@
                      (str o c)
                      (if add-post-space? " " ""))
         offset-shift (if add-post-space? -2 -1)]
-    ;(println (type (previous-char-str t)))
-    ;(println (str (apply str \" chars-with-no-space-before) \"))
-    ;(println add-pre-space? (str \" (previous-char-str t) \") add-post-space? (str \" ins-str \"))
     (-> t (insert ins-str) (shift-offset offset-shift))))
 
 (defn open-balanced
@@ -513,7 +518,6 @@
   (let [parsed (parse text offset)]
     (if (in-code? parsed)
       (do
-        ;(println [o c] t chars-with-no-space-before chars-with-no-space-after)
         (insert-balanced [o c] t chars-with-no-space-before chars-with-no-space-after))
       (-> t (insert (str o))))))
   
@@ -717,11 +721,18 @@
 (defmethod paredit
   :paredit-newline
   [cmd {:keys [text offset length] :as t}]
-  (paredit :paredit-indent-line 
-    {:text (str-insert text offset "\n") 
-     :offset (inc offset) 
-     :length length 
-     :modifs [{:text "\n" :offset offset :length 0}]}))
+  (let [r (paredit :paredit-indent-line 
+      {:text (str-insert text offset "\n") 
+       :offset (inc offset) 
+       :length length 
+       :modifs [{:text *newline* :offset offset :length 0}]})]
+    (if (-?> r :modifs count (= 2))
+      (let [m1 (get-in r [:modifs 0])
+            m2 (get-in r [:modifs 1])
+            r  (assoc-in r [:modifs] [{:text (str (:text m1) (:text m2)) :offset offset :length (+ (:length m1) (:length m2))}])
+            r  (assoc-in r [:offset] (+ (.length (get-in r [:modifs 0 :text])) offset))]
+        r)
+      r)))
   
 (defmethod paredit
   :paredit-indent-line
