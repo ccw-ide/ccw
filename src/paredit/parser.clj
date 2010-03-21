@@ -297,9 +297,12 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; utility libraries for manipulating the parse-tree
 
-(defn parsed-root-loc [parsed]
-  ; TODO handle the case where the parse is invalid
-  (-> parsed :accumulated-state first zip/xml-zip))
+(defn parsed-root-loc
+  ([parsed] (parsed-root-loc parsed false))
+  ([parsed only-valid?]
+    (let [valid? (= 1 (-> parsed :accumulated-state count))]
+      (when (or valid? (not only-valid?))
+        (-> parsed :accumulated-state first zip/xml-zip)))))
 
 (defn contains-offset?
   "returns the loc itself if it contains the offset, else nil"

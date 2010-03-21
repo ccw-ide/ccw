@@ -22,6 +22,17 @@
 
 #_(set! *warn-on-reflection* true)
 
+#_(defn spy*
+  [msg expr]
+  `(let [expr# ~expr]
+     (do
+       (println (str "::::spying[" ~msg "]:::: " '~expr ":::: '" expr# "'"))
+       expr#)))
+
+#_(defmacro spy 
+  ([expr] (spy* "" expr))
+  ([msg expr] (spy* msg expr)))
+
 ;;; -*- Mode: Emacs-Lisp; outline-regexp: "\n;;;;+" -*-
 
 ;;;;;; Paredit: Parenthesis-Editing Minor Mode
@@ -392,15 +403,17 @@
                  " (\n  |ab c)" " (\n   |ab c)"
                  " (\n| ab c)" " (\n|   ab c)"  
                  " (\n  | ab c)" " (\n  | ab c)"
-                 ;"foo (let [n (frobbotz)] \n|(display (+ n 1)\nport))\n        bar"
-                 ;(str "foo (let [n (frobbotz)]"
-                 ;   "\n      |(display (+ n 1)"
-                 ;   "\n        port))\n        bar"
-                 ;   )
+                 "(a\n |b" "(a\n |b"
+                 ;;;"foo (let [n (frobbotz)] \n|(display (+ n 1)\nport))\n        bar"
+                 ;;;(str "foo (let [n (frobbotz)]"
+                 ;;;   "\n      |(display (+ n 1)"
+                 ;;;   "\n        port))\n        bar"
+                 ;;   )
                 }]
       ["C-j"     :paredit-newline
                 {"(ab|cd)" "(ab\n  |cd)"
                  "(ab|     cd)" "(ab\n  |cd)"
+                 "   a|" "   a\n   |"
                  ;"foo (let [n (frobbotz)] |(display (+ n 1)\nport))\n        bar"
                  ;(str "foo (let [n (frobbotz)]"
                  ;   "\n      |(display (+ n 1)"
@@ -685,10 +698,14 @@
 (defn line-stop
   "returns the offset corresponding to the end of the line of offset offset in s (excluding carridge return, newline "
   [#^String s offset]
+ ;(spy "line-stop" [s offset])
   (loop [offset offset]
     (cond
-      (>= (inc offset) (.length s)) (.length s)
-      (#{\return \newline} (.charAt s offset)) (inc offset)
+      (>= offset (.length s)) (.length s)
+      (and 
+        (> offset 0) 
+        (#{\return \newline} (.charAt s offset)))
+        offset
       :else (recur (inc offset)))))
 
 (declare start-offset)
@@ -722,24 +739,31 @@
   :paredit-newline
   [cmd {:keys [text offset length] :as t}]
   (let [r (paredit :paredit-indent-line 
-      {:text (str-insert text offset "\n") 
-       :offset (inc offset) 
-       :length length 
-       :modifs [{:text *newline* :offset offset :length 0}]})]
+            {:text (str-insert text offset "\n") 
+             :offset (inc offset) 
+             :length length 
+             :modifs [{:text *newline* :offset offset :length 0}]})]
     (if (-?> r :modifs count (= 2))
       (let [m1 (get-in r [:modifs 0])
+            ;_ (spy m1)
             m2 (get-in r [:modifs 1])
+            ;_ (spy m2)
             r  (assoc-in r [:modifs] [{:text (str (:text m1) (:text m2)) :offset offset :length (+ (:length m1) (:length m2))}])
-            r  (assoc-in r [:offset] (+ (.length (get-in r [:modifs 0 :text])) offset))]
+            ;_ (spy r)
+            r  (assoc-in r [:offset] (+ (.length (get-in r [:modifs 0 :text])) offset))
+            ;_ (spy r)
+            ]
         r)
       r)))
   
 (defmethod paredit
   :paredit-indent-line
   [cmd {:keys [#^String text offset length] :as t}]
-  (if-let [rloc (-?> (parse text (.length text)) parsed-root-loc)]
+  (if-let [rloc (-?> (parse text (.length text)) (parsed-root-loc true))]
     (let [line-start (line-start text offset)
+          ;_ (spy line-start)
           line-stop (line-stop text offset)
+          ;_ (spy line-stop)
           loc (-> rloc (loc-for-offset line-start))]
       (if (and (= (str \") (loc-tag loc)) (< (:offset (zip/node loc)) line-start))
         t
@@ -747,9 +771,10 @@
               cur-indent-col (or (some (fn [l]
                                          (when (not= (str \space) (loc-tag l)) 
                                            (- (start-offset l) line-start)))
-                                   (filter (fn [l] (<= line-start (start-offset l) (dec line-stop))) 
+                                   (filter (fn [l] (<= line-start (start-offset l) line-stop)) 
                                      (next-leaves loc)))
-                               (- line-stop line-start 1))
+                               (- line-stop line-start))
+              ;_ (spy cur-indent-col)
               to-add (- indent cur-indent-col)]
           (cond
             (zero? to-add) t
@@ -776,7 +801,17 @@
         (test-command "public documentation of paredit command" command)
         (test-command "additional non regression tests of paredit command " (assoc command 2 (get command 3)))))))
 
-(def pts paredit-tests)
+(deftest line-stop-tests
+  (are [expected s o] (= expected (line-stop s o))
+    0 "" 0
+    1 " " 0
+    5 "   a\n" 5
+    5 "(\n , \n)" 5
+    5 "[a\nb]" 3))
+
+(defn pts []
+  (line-stop-tests)
+  (paredit-tests))
 
 (defvar *text* (atom {:text "" :offset 0 :length 0})
   "defines a text, with :offset being the cursor position,
