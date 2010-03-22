@@ -22,14 +22,14 @@
 
 #_(set! *warn-on-reflection* true)
 
-#_(defn spy*
+(defn spy*
   [msg expr]
   `(let [expr# ~expr]
      (do
        (println (str "::::spying[" ~msg "]:::: " '~expr ":::: '" expr# "'"))
        expr#)))
 
-#_(defmacro spy 
+(defmacro spy 
   ([expr] (spy* "" expr))
   ([msg expr] (spy* msg expr)))
 
@@ -374,6 +374,30 @@
                  "|",
                 "(foo \"|bar baz\"\n     quux)"
                  "(foo \"|\"\n     quux)"}]]
+    
+    ["Depth-Changing Commands"
+     ["M-("       :paredit-wrap-round
+      {"(foo |bar baz)" "(foo (|bar) baz)",
+       ";hel|lo" ";hel|lo",
+       "a |\"hi\"" "a (|\"hi\")"}]
+     ;["M-s"       :paredit-splice-sexp
+     ;           {"(foo (bar| baz) quux)"
+     ;            "(foo bar| baz quux)"}]
+     ;[("M-<up>" "ESC <up>")
+     ;           paredit-splice-sexp-killing-backward
+     ;           ("(foo (let ((x 5)) |(sqrt n)) bar)"
+     ;            "(foo (sqrt n) bar)")]
+     ;(("M-<down>" "ESC <down>")
+     ;           paredit-splice-sexp-killing-forward
+     ;           ("(a (b c| d e) f)"
+     ;            "(a b c f)"))
+     ;("M-r"       paredit-raise-sexp
+     ;           ("(dynamic-wind in (lambda () |body) out)"
+     ;            "(dynamic-wind in |body out)"
+     ;            "|body"))
+     ]
+    
+    
     ["Miscellaneous"             
       ["Tab"     :paredit-indent-line
                 {"[a\n|b]"  "[a\n |b]"
@@ -788,6 +812,23 @@
                       :else
                         (update-in t [:offset] + (max to-add (- line-start offset)))))))))
     t))
+
+(defmethod paredit
+  :paredit-wrap-round
+  [cmd {:keys [#^String text offset length] :as t}]
+  (let [parsed (parse text)]
+    (if-not (in-code? parsed)
+      (spy 1 t)
+      (if-let [rloc (-?> parsed (parsed-root-loc true))]
+        (let [leave (some (fn [l] (when (not= " " (loc-tag l)) l)) (next-leaves (loc-for-offset rloc offset)))]
+          (if (not= (start-offset leave) (start-offset (zip/up leave)))
+            (spy 2 t)
+            (let [text-to-wrap (.substring text (start-offset (zip/up leave)) (end-offset (zip/up leave))) 
+                  new-text (str "(" text-to-wrap ")")
+                  t (update-in t [:text] str-replace (start-offset leave) (.length text-to-wrap) new-text)
+                  t (assoc-in t [:offset] (inc (start-offset leave)))]
+              (spy 3(update-in t [:modifs] conj {:text new-text :offset (start-offset leave) :length (.length text-to-wrap)})))))
+        (spy 4 t)))))
 
 (defn test-command [title-prefix command]
   (testing (str title-prefix " " (second command) " (\"" (first command) "\")")
