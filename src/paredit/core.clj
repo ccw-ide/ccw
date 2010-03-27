@@ -13,7 +13,7 @@
 (ns paredit.core
   (:use clojure.contrib.def)
   (:use clojure.test)
-  (:use paredit.parser)
+  (:use [paredit.parser :exclude [pts]])
   (:use clojure.set)
   (:use clojure.contrib.core)
   (:require clojure.contrib.pprint)
@@ -22,16 +22,6 @@
 
 #_(set! *warn-on-reflection* true)
 
-(defn spy*
-  [msg expr]
-  `(let [expr# ~expr]
-     (do
-       (println (str "::::spying[" ~msg "]:::: " '~expr ":::: '" expr# "'"))
-       expr#)))
-
-(defmacro spy 
-  ([expr] (spy* "" expr))
-  ([msg expr] (spy* msg expr)))
 
 ;;; -*- Mode: Emacs-Lisp; outline-regexp: "\n;;;;+" -*-
 
@@ -378,8 +368,21 @@
     ["Depth-Changing Commands"
      ["M-("       :paredit-wrap-round
       {"(foo |bar baz)" "(foo (|bar) baz)",
-       ";hel|lo" ";hel|lo",
-       "a |\"hi\"" "a (|\"hi\")"}]
+       ";hel|lo" ";hel(|lo",
+       "a |\"hi\"" "a (|\"hi\")",
+       "foo |bar| foo" "foo (|bar|) foo",
+       "foo |bar baz| foo" "foo (|bar baz|) foo",
+       "foo (|bar| baz) foo" "foo ((|bar|) baz) foo"
+       "foo (|bar baz|) foo" "foo ((|bar baz|)) foo"
+       ;; not-yet "foo |(bar| baz) foo" "foo |(bar| baz) foo"
+       ;; not-yet "foo (bar| baz)| foo" "foo (bar| baz)| foo"
+       "foo |(bar baz)| foo" "foo (|(bar baz)|) foo"
+       "foo |(bar\n;comment\n baz)| foo" "foo (|(bar\n;comment\n baz)|) foo"
+       ;; not-yet "foo |bar ba|z foo" "foo |bar ba|z foo",
+       "foo \"|bar ba|z\" foo" "foo \"(|z\" foo",
+       ;; not-yet "foo |\"bar ba|z\" foo" "foo |\"bar ba|z\" foo",
+       
+       }]
      ;["M-s"       :paredit-splice-sexp
      ;           {"(foo (bar| baz) quux)"
      ;            "(foo bar| baz quux)"}]
@@ -455,8 +458,8 @@
 (def *extended-spaces* (conj *real-spaces* (str \,)))
 (def *open-brackets* (conj #{"(" "[" "{"} nil)) ; we add nil to the list to also match beginning of text 
 (def *close-brackets* (conj #{")" "]" "}"} nil)) ; we add nil to the list to also match end of text
-
-(def *form-macro-chars* #{(str \#) (str \~) (str "~@") (str \') (str \`) (str \@) "#^" "#'" "#_"})
+(def *form-macro-chars* #{(str \#) (str \~) "~@" (str \') (str \`) (str \@) "#^" "#'" "#_" "#!"})
+(def *not-in-code* #{"\"" "\"\\" ";" "\\"})
 
 (defn text-spec-to-text 
   "Converts a text spec to text map" 
@@ -478,19 +481,20 @@
         spec (if (zero? (:length text)) spec (str-insert spec (+ 1 (:offset text) (:length text)) "|"))]
     spec))
 
-(def *not-in-code* #{"\"" "\"\\" ";" "\\"})
 
 (defn parsed-in-tags?
   [parsed tags-set]
   (tags-set (-> parsed :parents peek :tag)))
 
-(defn in-code?
+(defn parse-stopped-in-code?
   ; TODO the current function is not general enough, it just works for the offset
   ; the parse stopped at  
   "true if character at offset offset is in a code
    position, e.g. not in a string, regexp, literal char or comment"
   [parsed]
   (not (parsed-in-tags? parsed *not-in-code*)))
+
+(defn in-code? [loc] (not (*not-in-code* (loc-tag loc))))
 
 (defn insert
   "insert what at offset. offset shifted by what's length, selection length unchanged"
@@ -552,11 +556,13 @@
 (defn open-balanced
   [[o c] {:keys [#^String text offset length] :as t} 
    chars-with-no-space-before chars-with-no-space-after]
-  (let [parsed (parse text offset)]
-    (if (in-code? parsed)
-      (do
-        (insert-balanced [o c] t chars-with-no-space-before chars-with-no-space-after))
-      (-> t (insert (str o))))))
+  (if (zero? length) 
+    (let [parsed (parse text offset)]
+      (if (parse-stopped-in-code? parsed)
+        (do
+          (insert-balanced [o c] t chars-with-no-space-before chars-with-no-space-after))
+        (-> t (insert (str o)))))
+    (wrap-with-balanced [o c] t)))
   
 (defn close-balanced
   [[o c] {:keys [#^String text offset length] :as t} 
@@ -622,7 +628,7 @@
   [cmd {:keys [text offset length] :as t}]
   (let [parsed (parse text offset)]
     (cond
-      (in-code? parsed)
+      (parse-stopped-in-code? parsed)
         (insert-balanced [\" \"] t
           (conj (into *real-spaces* *open-brackets*) \#)
           (into *extended-spaces* *close-brackets*))
@@ -683,16 +689,6 @@
             (-> t (delete offset 1) (shift-offset -1))))
       (-> t (delete offset 1) (shift-offset -1)))))
 
-(defn rlefts
-  "like clojure.zip/lefts, but in reverse order (optimized lazy sequence)"
-  [loc]
-  (rest (take-while identity (iterate zip/left loc))))
-
-(defn next-leaves
-  "seq of next leaves locs"
-  [loc]
-  (remove zip/branch? (take-while (complement zip/end?) (iterate zip/next loc))))
-
 (defn indent-column 
   "pre-condition: line-offset is really the starting offset of a line"
   [root-loc line-offset]
@@ -722,7 +718,6 @@
 (defn line-stop
   "returns the offset corresponding to the end of the line of offset offset in s (excluding carridge return, newline "
   [#^String s offset]
- ;(spy "line-stop" [s offset])
   (loop [offset offset]
     (cond
       (>= offset (.length s)) (.length s)
@@ -731,34 +726,48 @@
         (#{\return \newline} (.charAt s offset)))
         offset
       :else (recur (inc offset)))))
-
-(declare start-offset)
-(defn end-offset [loc]
-  (cond
-    (string? (zip/node loc))
-      (if-let [l (zip/left loc)]
-        (+ (end-offset l) (.length #^String (zip/node loc)))
-        (+ (start-offset (zip/up loc)) 1 (.length #^String (zip/node loc))))
-    :else 
-      (-> loc zip/node :end-offset)))
-
-(defn start-offset [loc]
-  (cond
-    (string? (zip/node loc))
-      (if-let [l (zip/left loc)]
-        (end-offset l)
-        (start-offset (zip/up loc)))
-    :else 
-      (-> loc zip/node :offset)))
-
-(defn loc-count [loc]
-  (cond
-    (string? (zip/node loc)) (.length #^String loc)
-    :else (- (:end-offset loc) (:offset loc))))
-    
-(defn loc-tag [loc]
-  (:tag (zip/node (if (string? (zip/node loc)) (zip/up loc) loc))))
   
+(defn wrap-with-balanced
+  [[o c] {:keys [#^String text offset length] :as t}]
+  (let [bypass #(-> t 
+                  (update-in [:text] str-replace offset length o)
+                  (update-in [:offset] + (.length o))
+                  (assoc-in [:length] 0)
+                  (update-in [:modifs] conj {:text o :offset offset :length length}))
+        parsed (parse text)]
+    (if-let [rloc (-?> parsed (parsed-root-loc true))]
+      (let [left-leave (some (fn [l] (when (not= " " (loc-tag l)) l)) (next-leaves (leave-for-offset rloc offset)))
+            right-leave (some (fn [l] (when (not= " " (loc-tag l)) l)) (previous-leaves (leave-for-offset rloc (+ offset length))))
+            right-leave (if (<= (start-offset right-leave) (start-offset left-leave)) left-leave right-leave)]
+        (if (or
+              (not (in-code? (loc-containing-offset rloc offset)))
+              (not (in-code? (loc-containing-offset rloc (+ offset length))))
+              (> offset (start-offset left-leave))
+              (and (not= 0 length) (or (< (+ offset length) (end-offset right-leave))
+                                           (not= (zip/up (loc-parse-node left-leave)) (zip/up (loc-parse-node right-leave))))))
+          (bypass)
+          (let [text-to-wrap (.substring text (start-offset (zip/up left-leave)) (end-offset (zip/up right-leave))) 
+                new-text (str o text-to-wrap c)
+                t (update-in t [:text] str-replace (start-offset left-leave) (.length text-to-wrap) new-text)
+                t (assoc-in t [:offset] (inc (start-offset left-leave)))]
+            (update-in t [:modifs] conj {:text new-text :offset (start-offset left-leave) :length (.length text-to-wrap)})))) 
+      (bypass))))
+
+(defmethod paredit
+  :paredit-wrap-square
+  [cmd t]
+  (wrap-with-balanced ["[" "]"] t))
+
+(defmethod paredit
+  :paredit-wrap-curly
+  [cmd t]
+  (wrap-with-balanced ["{" "}"] t))
+
+(defmethod paredit
+  :paredit-wrap-round
+  [cmd t]
+  (wrap-with-balanced ["(" ")"] t))
+
 (defmethod paredit
   :paredit-newline
   [cmd {:keys [text offset length] :as t}]
@@ -769,14 +778,9 @@
              :modifs [{:text *newline* :offset offset :length 0}]})]
     (if (-?> r :modifs count (= 2))
       (let [m1 (get-in r [:modifs 0])
-            ;_ (spy m1)
             m2 (get-in r [:modifs 1])
-            ;_ (spy m2)
             r  (assoc-in r [:modifs] [{:text (str (:text m1) (:text m2)) :offset offset :length (+ (:length m1) (:length m2))}])
-            ;_ (spy r)
-            r  (assoc-in r [:offset] (+ (.length (get-in r [:modifs 0 :text])) offset))
-            ;_ (spy r)
-            ]
+            r  (assoc-in r [:offset] (+ (.length (get-in r [:modifs 0 :text])) offset))]
         r)
       r)))
   
@@ -785,9 +789,7 @@
   [cmd {:keys [#^String text offset length] :as t}]
   (if-let [rloc (-?> (parse text (.length text)) (parsed-root-loc true))]
     (let [line-start (line-start text offset)
-          ;_ (spy line-start)
           line-stop (line-stop text offset)
-          ;_ (spy line-stop)
           loc (-> rloc (loc-for-offset line-start))]
       (if (and (= (str \") (loc-tag loc)) (< (:offset (zip/node loc)) line-start))
         t
@@ -798,7 +800,6 @@
                                    (filter (fn [l] (<= line-start (start-offset l) line-stop)) 
                                      (next-leaves loc)))
                                (- line-stop line-start))
-              ;_ (spy cur-indent-col)
               to-add (- indent cur-indent-col)]
           (cond
             (zero? to-add) t
@@ -813,22 +814,6 @@
                         (update-in t [:offset] + (max to-add (- line-start offset)))))))))
     t))
 
-(defmethod paredit
-  :paredit-wrap-round
-  [cmd {:keys [#^String text offset length] :as t}]
-  (let [parsed (parse text)]
-    (if-not (in-code? parsed)
-      (spy 1 t)
-      (if-let [rloc (-?> parsed (parsed-root-loc true))]
-        (let [leave (some (fn [l] (when (not= " " (loc-tag l)) l)) (next-leaves (loc-for-offset rloc offset)))]
-          (if (not= (start-offset leave) (start-offset (zip/up leave)))
-            (spy 2 t)
-            (let [text-to-wrap (.substring text (start-offset (zip/up leave)) (end-offset (zip/up leave))) 
-                  new-text (str "(" text-to-wrap ")")
-                  t (update-in t [:text] str-replace (start-offset leave) (.length text-to-wrap) new-text)
-                  t (assoc-in t [:offset] (inc (start-offset leave)))]
-              (spy 3(update-in t [:modifs] conj {:text new-text :offset (start-offset leave) :length (.length text-to-wrap)})))))
-        (spy 4 t)))))
 
 (defn test-command [title-prefix command]
   (testing (str title-prefix " " (second command) " (\"" (first command) "\")")
@@ -850,8 +835,20 @@
     5 "(\n , \n)" 5
     5 "[a\nb]" 3))
 
+(deftest spec-text-tests
+  (are [spec text] (and 
+                     (= text (text-spec-to-text spec))
+                     (= spec (text-to-text-spec text))
+                     )
+    "foo |bar" {:text "foo bar" :offset 4 :length 0}
+    "|" {:text "" :offset 0 :length 0}
+    "|foo" {:text "foo" :offset 0 :length 0}
+    "foo|" {:text "foo" :offset 3 :length 0}
+    "foo |bar| foo" {:text "foo bar foo" :offset 4 :length 3}))
+
 (defn pts []
   (line-stop-tests)
+  (spec-text-tests)
   (paredit-tests))
 
 (defvar *text* (atom {:text "" :offset 0 :length 0})

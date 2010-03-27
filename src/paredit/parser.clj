@@ -18,10 +18,22 @@
 ; * add an explicit error message to :parser-state :ko (unbalanced parens)
 
 (ns paredit.parser
-	(:use [clojure.test])
+  (:use [clojure.test])
+  (:use clojure.contrib.core)
 	(:require [clojure.zip :as zip]))
 
 #_(set! *warn-on-reflection* true)
+
+(defn spy*
+  [msg expr]
+  `(let [expr# ~expr]
+     (do
+       (println (str "::::spying[" ~msg "]:::: " '~expr ":::: '" expr# "'"))
+       expr#)))
+
+(defmacro spy 
+  ([expr] (spy* "" expr))
+  ([msg expr] (spy* msg expr)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; utility code
@@ -297,6 +309,56 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; utility libraries for manipulating the parse-tree
 
+(defn root-loc [loc] (if-let [up (zip/up loc)] (recur up) loc))
+
+(defn rlefts
+  "like clojure.zip/lefts, but in reverse order (optimized lazy sequence)"
+  [loc]
+  (rest (take-while identity (iterate zip/left loc))))
+
+(defn next-leaves
+  "seq of next leaves locs" ;; TODO correct this aberration: next-leaves includes the current leave ... (or change the name ...)
+  [loc]
+  (and loc (remove zip/branch? (take-while (complement zip/end?) (iterate zip/next loc)))))
+
+(defn previous-leaves
+  "seq of previous leaves locs"
+  [loc]
+  (and loc(remove zip/branch? (take-while (complement nil?) (iterate zip/prev (zip/prev loc))))))
+
+(declare start-offset)
+(defn end-offset [loc]
+  (cond
+    (string? (zip/node loc))
+      (if-let [l (zip/left loc)]
+        (+ (end-offset l) (.length #^String (zip/node loc)))
+        (+ (start-offset (zip/up loc)) (.length #^String (zip/node loc))))
+    :else 
+      (-> loc zip/node :end-offset)))
+
+(defn start-offset [loc]
+  (cond
+    (string? (zip/node loc))
+      (if-let [l (zip/left loc)]
+        (end-offset l)
+        (start-offset (zip/up loc)))
+    :else 
+      (-> loc zip/node :offset)))
+
+(defn loc-count [loc]
+  (cond
+    (string? (zip/node loc)) (.length #^String loc)
+    :else (- (:end-offset loc) (:offset loc))))
+    
+(defn loc-tag [loc]
+  (and loc 
+    (:tag (zip/node (if (string? (zip/node loc)) (zip/up loc) loc)))))
+  
+(defn loc-parse-node [loc]
+  (if (string? (zip/node loc))
+    (zip/up loc)
+    loc))
+
 (defn parsed-root-loc
   ([parsed] (parsed-root-loc parsed false))
   ([parsed only-valid?]
@@ -307,16 +369,9 @@
 (defn contains-offset?
   "returns the loc itself if it contains the offset, else nil"
   [loc offset]
-  (let [n (zip/node loc)]
-    (and 
-      (not (string? n))
-      (cond
-        (= :root (:tag n))
-          (<= (:offset n) offset (:end-offset n))
-        :else
-          (and (<= (:offset n) offset) 
-               (< offset (:end-offset n))))
-      loc)))
+   (and
+     (<= (start-offset loc) offset (dec (end-offset loc)))
+     loc))
 
 (defn loc-for-offset 
   "returns a zipper location or nil if does not contain the offset"
@@ -331,7 +386,69 @@
         offset
         loc))))
 
+(deftest loc-for-offset-tests
+  (are [text offset expected-tag] (= expected-tag (-?> (parse text) (parsed-root-loc true) (loc-for-offset offset) (zip/node) :tag))
+    "foo (bar baz) baz" 12 nil
+    "hello" 0 "a"
+    "hello" 1 "a"
+    "hello" 5 :root
+    "a b" 0 "a"
+    "a b" 1 " "
+    "a b" 2 "a"
+    "foo \"bar\" foo" 3 " "
+    "foo \"bar\" foo" 4 "\""))
 
+(defn leave-for-offset 
+  "returns a zipper location of a leave containing or starting at the given offset."
+  ([loc offset]
+    (let [l (first (filter #(do (zip/node %) (contains-offset? % offset)) (next-leaves loc)))]
+      (or l (root-loc loc)))))
+
+(deftest leave-for-offset-tests
+  (are [text offset expected-tag ?expected-node]
+    (let [l (-?> (parse text) (parsed-root-loc true) (leave-for-offset offset))] 
+      (and
+        (= expected-tag (loc-tag l))
+        (or (nil? ?expected-node) (= ?expected-node (zip/node l)))))
+    "foo (bar baz) baz" 12 "(" ")"
+    "hello" 0 "a" nil
+    "hello" 1 "a" nil
+    "hello" 5 :root nil
+    "a b" 0 "a" nil
+    "a b" 1 " " nil
+    "a b" 2 "a" nil
+    "foo \"bar\" foo" 3 " " nil
+    "foo \"bar\" foo" 4 "\"" nil
+    ))
+
+(defn loc-containing-offset
+  ([loc offset]
+    (if (= 0 offset)
+      (root-loc loc)
+      (let [match (some #(contains-offset? % offset) (take-while (complement zip/end?) (iterate zip/next (zip/next (root-loc loc)))))]
+        (cond
+          (nil? match) (root-loc loc)
+          (= offset (start-offset match)) (zip/up match)
+          :else match)))))
+
+(deftest loc-containing-offset-tests
+  (are [text offset expected-tag] (= expected-tag (-?> (parse text) (parsed-root-loc true) (loc-containing-offset offset) (zip/node) :tag))
+    "hello" 1 "a"
+    "foo bar" 3 :root
+    "foo bar" 4 :root
+    "hello" 5 :root
+    "a b" 0 :root
+    "a b" 1 :root
+    "a b" 2 :root
+    "foo \"bar\" foo" 3 :root
+    "foo \"bar\" foo" 4 :root
+    ))
+
+(defn pts []
+  (leave-for-offset-tests)
+  ;(loc-for-offset-tests)
+  ;(loc-containing-offset-tests)
+  )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; test functions
 
