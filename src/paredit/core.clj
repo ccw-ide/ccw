@@ -553,6 +553,8 @@
         offset-shift (if add-post-space? -2 -1)]
     (-> t (insert ins-str) (shift-offset offset-shift))))
 
+(declare wrap-with-balanced)
+
 (defn open-balanced
   [[o c] {:keys [#^String text offset length] :as t} 
    chars-with-no-space-before chars-with-no-space-after]
