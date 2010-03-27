@@ -451,11 +451,11 @@
                   label="Run tests in REPL"
                   style="push">
             </command>
-            <command
+            <!--command
                   commandId="ccw.ui.edit.text.clojure.format.code"
                   label="Format clojure code"
                   style="push">                  	
-            </command>
+            </command-->
 
             <command
                   commandId="ccw.ui.edit.text.clojure.open.declaration"
@@ -542,11 +542,11 @@
                   label="Run tests in REPL"
                   style="push">
             </command>
-            <command
+            <!--command
                   commandId="ccw.ui.edit.text.clojure.format.code"
                   label="Format clojure code"
                   style="push">                     
-            </command>
+            </command-->
 
             <command
                   commandId="ccw.ui.edit.text.clojure.open.declaration"

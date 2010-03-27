@@ -198,11 +198,11 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		action = new RunTestsAction(this, CCWPlugin.getDefault().getColorRegistry());
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.RUN_TESTS);
 		setAction(RunTestsAction.RUN_TESTS_ID, action);
-
+		/*
 		action = new FormatAction(this);
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.FORMAT_CODE);
 		setAction(FormatAction.ID, action);
-
+	    */
 		action = new OpenDeclarationAction(this);
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.OPEN_DECLARATION);
 		setAction(OpenDeclarationAction.ID, action);
