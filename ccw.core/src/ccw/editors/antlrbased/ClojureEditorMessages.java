@@ -38,6 +38,7 @@ public final class ClojureEditorMessages extends NLS {
     public static String GotoNextMember_label;
     public static String GotoPreviousMember_label;
     public static String SelectTopLevelSExpressionAction_label;
+    public static String WrapRoundActionAction_label;
     public static String EvaluateTopLevelSExpressionAction_label;
     public static String LoadFileAction_label;
     public static String CompileLibAction_label;
