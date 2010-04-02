@@ -24,11 +24,15 @@
 
 #_(set! *warn-on-reflection* true)
 
+(def *spy?* (atom false))
+(defn start-spy [] (reset! *spy?* true))
+(defn stop-spy [] (reset! *spy?* false))
+
 (defn spy*
   [msg expr]
   `(let [expr# ~expr]
      (do
-       (println (str "::::spying[" ~msg "]:::: " '~expr ":::: '" expr# "'"))
+       (when  @*spy?* (println (str "::::spying[" ~msg "]:::: " '~expr ":::: '" expr# "'")))
        expr#)))
 
 (defmacro spy 
@@ -309,6 +313,31 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; utility libraries for manipulating the parse-tree
 
+(defn same-parent? [loc & locs]
+  (let [loc-parent-path (butlast (zip/path loc))]
+    (every? #(= (butlast (zip/path %)) loc-parent-path) locs)))
+
+(defn loc-depth 
+  "returns the depth in the tree of the given loc"
+  [loc]
+  (count (zip/path loc)))
+
+(defn up-to-depth
+  "finds from the loc the ancestor loc at the given depth."
+  [loc depth]
+  (let [delta (- (loc-depth loc) depth)]
+    (cond 
+      (zero? delta) loc
+      :else (nth (iterate zip/up loc) delta))))
+
+(defn punct-loc?
+  "true if the loc corresponds to punctuation."
+  [loc]
+  (and
+    loc
+    (string? (zip/node loc)) 
+    (not (#{" " "a" ";" "\\" "\""} (:tag (zip/node (zip/up loc)))))))
+
 (defn root-loc [loc] (if-let [up (zip/up loc)] (recur up) loc))
 
 (defn rlefts
@@ -354,10 +383,25 @@
   (and loc 
     (:tag (zip/node (if (string? (zip/node loc)) (zip/up loc) loc)))))
   
-(defn loc-parse-node [loc]
+(defn loc-parse-node [loc] ; wrong name, and also, will return (foo) if located at ( or at ) ... so definitely wrong name ...
   (if (string? (zip/node loc))
     (zip/up loc)
     loc))
+
+(defn parse-leave
+  "returns a leave which corresponds to a parse information: either a (punct-loc?) (beware: a bare String, not a node with meta-data,
+   or a parse atom" 
+  [loc]
+  (cond 
+    (punct-loc? loc) loc
+    (string? (zip/node loc)) (zip/up loc)
+    :else loc))
+
+(defn parse-node
+  "transforms the loc in a parse-leave, and if a punct, returns the parent loc"
+  [loc]
+  (let [loc (parse-leave loc)] 
+    (if (punct-loc? loc) (zip/up loc) loc)))
 
 (defn parsed-root-loc
   ([parsed] (parsed-root-loc parsed false))
