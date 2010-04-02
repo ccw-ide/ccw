@@ -10,5 +10,6 @@
        'ccw.debug.serverrepl
        'ccw.editors.antlrbased.PareditAutoEditStrategy
        'ccw.editors.antlrbased.ClojureFormat
-       'ccw.editors.antlrbased.StacktraceHyperlink])))
+       'ccw.editors.antlrbased.StacktraceHyperlink
+       'ccw.editors.antlrbased.OutwardExpandingSelectionAction])))
 

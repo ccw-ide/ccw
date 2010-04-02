@@ -24,7 +24,8 @@
   (require :reload '[ccw.editors.antlrbased
                       [ClojureFormat]
                       [StacktraceHyperlink]
-                      [PareditAutoEditStrategy]]))
+                      [PareditAutoEditStrategy]
+                      [OutwardExpandingSelectionAction]]))
 
 (defn -run [this]
   (require :reload 'ccw.reload-clojure)

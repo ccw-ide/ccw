@@ -177,7 +177,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
 
 		action = new OutwardExpandingSelectionAction(this);
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.OUTWARD_EXPANDING_SELECTION);
-		setAction(OutwardExpandingSelectionAction.ID, action);
+		setAction(/*OutwardExpandingSelectionAction.ID*/"ClojureOutwardExpandingSelection", action);
 		
 		action = new SelectTopLevelSExpressionAction(this);
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.SELECT_TOP_LEVEL_S_EXPRESSION);
@@ -337,7 +337,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		return true;
 	}
 	
-	protected IDocument getDocument() {
+	public IDocument getDocument() {
 		ISourceViewer sourceViewer= getSourceViewer();
 		return sourceViewer.getDocument();
 	}
