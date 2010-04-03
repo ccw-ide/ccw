@@ -175,9 +175,17 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.GOTO_PREVIOUS_MEMBER);
 		setAction(GotoPreviousMemberAction.ID, action);
 
-		action = new OutwardExpandingSelectionAction(this);
-		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.OUTWARD_EXPANDING_SELECTION);
-		setAction(/*OutwardExpandingSelectionAction.ID*/"ClojureOutwardExpandingSelection", action);
+		action = new ExpandSelectionUpAction(this);
+		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.EXPAND_SELECTION_UP);
+		setAction(/*ExpandSelectionUpAction.ID*/"ExpandSelectionUpAction", action);
+		
+		action = new ExpandSelectionLeftAction(this);
+		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.EXPAND_SELECTION_LEFT);
+		setAction(/*ExpandSelectionLeftAction.ID*/"ExpandSelectionLeftAction", action);
+		
+		action = new ExpandSelectionRightAction(this);
+		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.EXPAND_SELECTION_RIGHT);
+		setAction(/*ExpandSelectionRightAction.ID*/"ExpandSelectionRightAction", action);
 		
 		action = new SelectTopLevelSExpressionAction(this);
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.SELECT_TOP_LEVEL_S_EXPRESSION);
@@ -235,7 +243,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
 
 		int selectionLength= Math.abs(selection.getLength());
 		if (selectionLength > 1) {
-			setStatusLineErrorMessage(ClojureEditorMessages.GotoMatchingBracket_error_invalidSelection);
+			setStatusLineErrorMessage(ClojureEditorMessages.GotoMatchingBracketAction_error_invalidSelection);
 			sourceViewer.getTextWidget().getDisplay().beep();
 			return;
 		}
@@ -248,7 +256,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
 //
 		IRegion region= pairsMatcher.match(document, sourceCaretOffset);
 		if (region == null) {
-			setStatusLineErrorMessage(ClojureEditorMessages.GotoMatchingBracket_error_noMatchingBracket);
+			setStatusLineErrorMessage(ClojureEditorMessages.GotoMatchingBracketAction_error_noMatchingBracket);
 			sourceViewer.getTextWidget().getDisplay().beep();
 			return;
 		}
@@ -274,7 +282,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		}
 
 		if (!visible) {
-			setStatusLineErrorMessage(ClojureEditorMessages.GotoMatchingBracket_error_bracketOutsideSelectedElement);
+			setStatusLineErrorMessage(ClojureEditorMessages.GotoMatchingBracketAction_error_bracketOutsideSelectedElement);
 			sourceViewer.getTextWidget().getDisplay().beep();
 			return;
 		}
@@ -310,7 +318,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
 	 * Note: the found paren must be in the correct partition (code, not string or comment)
 	 */
 	public void gotoPreviousMember() {
-		if (!checkSelectionAndWarnUserIfProblem(ClojureEditorMessages.GotoMatchingBracket_error_invalidSelection))
+		if (!checkSelectionAndWarnUserIfProblem(ClojureEditorMessages.GotoMatchingBracketAction_error_invalidSelection))
 			return;
 
 		int sourceCaretOffset= getSourceCaretOffset();
@@ -393,7 +401,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
 	}
 	
 	private IRegion getTopLevelSExpression() {
-		if (!checkSelectionAndWarnUserIfProblem(ClojureEditorMessages.GotoMatchingBracket_error_invalidSelection))
+		if (!checkSelectionAndWarnUserIfProblem(ClojureEditorMessages.GotoMatchingBracketAction_error_invalidSelection))
 			return null;
 
 		int sourceCaretOffset = getSourceCaretOffset();
@@ -429,7 +437,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
 	 * Move to end of current or following defun (end-of-defun).
 	 */
 	public void gotoEndOfMember() {
-		if (!checkSelectionAndWarnUserIfProblem(ClojureEditorMessages.GotoMatchingBracket_error_invalidSelection))
+		if (!checkSelectionAndWarnUserIfProblem(ClojureEditorMessages.GotoMatchingBracketAction_error_invalidSelection))
 			return;
 
 		int sourceCaretOffset= getSourceCaretOffset();

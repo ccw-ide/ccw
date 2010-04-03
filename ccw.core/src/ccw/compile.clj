@@ -11,5 +11,7 @@
        'ccw.editors.antlrbased.PareditAutoEditStrategy
        'ccw.editors.antlrbased.ClojureFormat
        'ccw.editors.antlrbased.StacktraceHyperlink
-       'ccw.editors.antlrbased.OutwardExpandingSelectionAction])))
+       'ccw.editors.antlrbased.ExpandSelectionUpAction
+       'ccw.editors.antlrbased.ExpandSelectionLeftAction
+       'ccw.editors.antlrbased.ExpandSelectionRightAction])))
 

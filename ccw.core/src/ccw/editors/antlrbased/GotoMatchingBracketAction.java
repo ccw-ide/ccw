@@ -20,7 +20,7 @@ public class GotoMatchingBracketAction extends Action {
 	private final AntlrBasedClojureEditor editor;
 
 	public GotoMatchingBracketAction(AntlrBasedClojureEditor editor) {
-		super(ClojureEditorMessages.GotoMatchingBracket_label);
+		super(ClojureEditorMessages.GotoMatchingBracketAction_label);
 		Assert.isNotNull(editor);
 		this.editor= editor;
 		setEnabled(true);

@@ -59,7 +59,9 @@ public interface IClojureEditorActionDefinitionIds extends ITextEditorActionDefi
      * Action definition ID of the Clojure (or edit ?) -> format action
      */
     public static final String FORMAT_CODE = "ccw.ui.edit.text.clojure.format.code";
-    public static final String OUTWARD_EXPANDING_SELECTION = "ccw.ui.edit.text.clojure.outward.expanding.selection";
+    public static final String EXPAND_SELECTION_UP = "ccw.ui.edit.text.clojure.expand.selection.up";
+    public static final String EXPAND_SELECTION_LEFT = "ccw.ui.edit.text.clojure.expand.selection.left";
+    public static final String EXPAND_SELECTION_RIGHT = "ccw.ui.edit.text.clojure.expand.selection.right";
     public static final String LAUNCH_REPL = "ccw.ui.edit.text.clojure.launch.repl";
     public static final String HIGHLIGHT_SAME_WORD = "ccw.ui.edit.text.clojure.highlight.same.word";
     public static final String RUN_TESTS = "ccw.ui.edit.text.clojure.run.tests";

@@ -20,7 +20,7 @@ public class GotoPreviousMemberAction extends Action {
 	private final AntlrBasedClojureEditor editor;
 
 	public GotoPreviousMemberAction(AntlrBasedClojureEditor editor) {
-		super(ClojureEditorMessages.GotoPreviousMember_label);
+		super(ClojureEditorMessages.GotoPreviousMemberAction_label);
 		Assert.isNotNull(editor);
 		this.editor= editor;
 		setEnabled(true);

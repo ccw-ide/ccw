@@ -35,19 +35,23 @@ public final class ClojureEditorMessages extends NLS {
         // Not intended to be instanciated
     }
 
-    public static String GotoNextMember_label;
-    public static String GotoPreviousMember_label;
+    public static String GotoNextMemberAction_label;
+    public static String GotoPreviousMemberAction_label;
     public static String SelectTopLevelSExpressionAction_label;
     public static String WrapRoundActionAction_label;
     public static String EvaluateTopLevelSExpressionAction_label;
     public static String LoadFileAction_label;
     public static String CompileLibAction_label;
     public static String FormatAction_label;
-    public static String GotoMatchingBracket_label;
-    public static String GotoMatchingBracket_error_invalidSelection;
-    public static String GotoMatchingBracket_error_noMatchingBracket;
-    public static String GotoMatchingBracket_error_bracketOutsideSelectedElement;
-    public static String OutwardExpandingSelection_label;
+    public static String GotoMatchingBracketAction_label;
+    public static String GotoMatchingBracketAction_error_invalidSelection;
+    public static String GotoMatchingBracketAction_error_noMatchingBracket;
+    public static String GotoMatchingBracketAction_error_bracketOutsideSelectedElement;
+
+    public static String ExpandSelectionUpAction_label;
+    public static String ExpandSelectionLeftAction_label;
+    public static String ExpandSelectionRightAction_label;
+
     
     public static String Cannot_find_declaration;
     public static String You_need_a_running_repl;

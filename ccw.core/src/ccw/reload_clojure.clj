@@ -25,7 +25,9 @@
                       [ClojureFormat]
                       [StacktraceHyperlink]
                       [PareditAutoEditStrategy]
-                      [OutwardExpandingSelectionAction]]))
+                      [ExpandSelectionUpAction]
+                      [ExpandSelectionLeftAction]
+                      [ExpandSelectionRightAction]]))
 
 (defn -run [this]
   (require :reload 'ccw.reload-clojure)
