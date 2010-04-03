@@ -424,6 +424,7 @@
                  "foo (bar [ba|z] |foo)" "foo (bar |[baz] |foo)"
                  "foo (bar [ba|z]) (foo [bar (b|az)])" "foo |(bar [baz]) (foo [bar (baz)])|"
                  "foo |(bar [baz (b|am)])" "foo |(bar [baz (bam)])|"
+                 "(foo bar|)" "(foo |bar|)";
                  }]
      ["Shift+Alt+Right" :paredit-expand-right
                 {
@@ -443,11 +444,11 @@
                  "foo (bar| baz)" "foo (bar| |baz)"
                  "foo (bar |baz)" "foo (bar |baz|)"
                  "foo b|ar| baz" "foo |bar| baz"
-                 "foo (bar baz|)" "foo |(bar baz)|";
-                 "foo (bar |baz|)" "foo |(bar baz)|";
+                 "foo (bar baz|)" "foo |(bar baz)|"
+                 "foo (bar |baz|)" "foo |(bar baz)|"
                  "foo \"bar |baz\"" "foo |\"bar baz\"|"
                  "foo;ba|r\nbaz" "foo|;bar\n|baz"
-                 "foo (bar [ba|z] |foo)" "foo (bar |[baz] |foo)";;
+                 "foo (bar [ba|z] |foo)" "foo (bar |[baz] |foo)"
                  "foo (bar [ba|z]) (foo [bar (b|az)])" "foo |(bar [baz]) (foo [bar (baz)])|"
                  "foo |(bar [baz (b|am)])" "foo |(bar [baz (bam)])|"
                  }]
@@ -461,16 +462,16 @@
                  "foo bar |baz|" "|foo bar baz|"
                  "foo bar| baz|" "|foo bar baz|"
                  "foo |bar baz|" "|foo bar baz|"
-                 "|foo bar baz" "|foo bar baz|";;
+                 "|foo bar baz" "|foo bar baz|"
                  "|f|oo bar baz" "|foo| bar baz"
                  "|foo| bar baz" "|foo bar baz|"
-                 "|foo |bar baz" "|foo bar baz|"
+                 "|foo |bar baz" "|foo bar baz|" 
                  "|foo b|ar baz" "|foo bar| baz"
                  "foo (bar| baz)" "foo |(bar baz)|"
                  "foo (bar |baz)" "foo |(bar baz)|"
                  "foo b|ar| baz" "foo |bar| baz"
-                 "foo (bar baz|)" "foo |(bar baz)|";
-                 "foo (bar |baz|)" "foo |(bar baz)|";
+                 "foo (bar baz|)" "foo |(bar baz)|"
+                 "foo (bar |baz|)" "foo |(bar baz)|"
                  "foo \"bar |baz\"" "foo |\"bar baz\"|"
                  "foo;ba|r\nbaz" "foo|;bar\n|baz"
                  "foo (bar [ba|z] |foo)" "foo (bar |[baz] |foo)"
@@ -827,31 +828,36 @@
    If the selection is not empty, the second loc will give the end (get it via a call to 'loc-end on it).
    Pre-requisites: length >=0, offset >=0. rloc = root loc of the tree"
   [rloc offset length]
-  (spy "+++++++++")
-  (let [left-leave (parse-node (leave-for-offset rloc offset))
-        _ (spy "1st ll" (zip/node left-leave))
-        right-leave (leave-for-offset rloc (+ offset length))
-        _ (spy "1st rl" (zip/node right-leave))
+  ;(spy "+++++++++")
+  (let [left-leave (parse-leave (leave-for-offset rloc offset))
+        ;_ (spy "1st ll" (zip/node left-leave))
+        right-leave (parse-leave (leave-for-offset rloc (+ offset length)))
+        ;_ (spy "1st rl" (zip/node right-leave))
         right-leave (cond 
                       (= :root (loc-tag right-leave)) 
-                        (parse-node (leave-for-offset rloc (dec (+ offset length)))) 
+                        (parse-leave (leave-for-offset rloc (dec (+ offset length)))) 
                       (not= (+ offset length) (start-offset right-leave))
                         (parse-node right-leave) 
                       (nil? (seq (previous-leaves right-leave)))
                         (parse-node right-leave)
                       :else
                         (parse-node (first (previous-leaves right-leave))))
-        _ (spy "2d rl" (zip/node right-leave))
+        ;_ (spy "2d rl" (zip/node right-leave))
         ]
     (if (or
           (= [0 0] [offset length])
           (and 
-            (= (start-offset left-leave) offset) 
-            (= (end-offset right-leave) (+ offset length))  
-            (same-parent? left-leave right-leave))) 
-      (do
+            (= 0 length)
+            (= (start-offset left-leave) offset))
+          (and 
+            (= (start-offset (parse-node left-leave)) offset)
+            (= (end-offset (parse-node right-leave)) (+ offset length))  
+            (same-parent? (parse-node left-leave) (parse-node right-leave)))) 
+      (do ;(spy "already normalized")
         [left-leave (when-not (zero? length) right-leave)])
-      (let [left-leave (parse-node left-leave)
+      (do
+        ;(spy "not yet normalized")
+        (let [left-leave (parse-node left-leave)
             right-leave (parse-node right-leave)
             min-depth (min (loc-depth left-leave) (loc-depth right-leave))
             left-leave (up-to-depth left-leave min-depth)
@@ -861,7 +867,7 @@
             (fn [[l r]] (= (zip/up l) (zip/up r))) 
             (iterate 
               (fn [[l r]] [(zip/up l) (zip/up r)])
-              [left-leave right-leave]))))))) 
+              [left-leave right-leave])))))))) 
 
 (deftest normalized-selection-tests
   (are [text offset length expected-offset expected-length]
@@ -884,6 +890,8 @@
     "foo (bar baz)" 4 4 4 9
     "foo (bar baz)" 9 4 4 9 
     "foo (bar baz)" 0 0 0 0
+    "(foo bar)" 8 0 8 0
+    "foo (bar baz)" 12 1 4 9 
     ))
 
 (defn sel-match-normalized? 
@@ -922,27 +930,40 @@
   [cmd {:keys [#^String text offset length] :as t}]
   (let [parsed (parse text)]
     (if-let [rloc (-?> parsed (parsed-root-loc true))]
-      (let [[l r] (normalized-selection rloc offset length)
-            _ (spy (zip/node l))
-            _ (spy (when r (zip/node r)))
-            r (if (nil? r) l r)
-            _ (spy (when r (zip/node r)))
-            r (if (sel-match-normalized? offset length [l r])
-                (if-let [nr (zip/right r)] nr (zip/up r))
-                (do
-                  (spy [(zip/node r) (and r (zip/node r))])
-                  (spy "not normalized!" r)))
-            _ (spy "before renormalized:" (zip/node l))
-            _ (spy "before renormalized:" (zip/node r))
-            [l r] (normalized-selection rloc (spy (start-offset l)) (spy (- (end-offset r) (start-offset l))))
-            _ (spy "renormalized:" (zip/node l))
-            _ (spy "renormalized:" (when r (zip/node r)))
-            
-            ]
-          (spy (-> t (assoc-in [:offset] (start-offset l))
-                (assoc-in [:length] (if (nil? r) 0 (- (end-offset r) (start-offset l))))))))))
+      (let [[l r] (normalized-selection rloc offset length)]
+        (if-not (sel-match-normalized? offset length [l r])
+          (-> t (assoc-in [:offset] (start-offset l))
+            (assoc-in [:length] (if (nil? r) 0 (- (end-offset r) (start-offset l)))))
+          (let [r (if (nil? r) 
+                    l 
+                    (if-let [nr (zip/right r)] 
+                      nr
+                      (zip/up r)))
+                [l r] (normalized-selection rloc (spy (start-offset l)) (spy (- (end-offset r) (start-offset l))))]
+            (-> t (assoc-in [:offset] (start-offset l))
+              (assoc-in [:length] (if (nil? r) 0 (- (end-offset r) (start-offset l)))))))))))
 
 (defmethod paredit
+  :paredit-expand-up
+  [cmd {:keys [#^String text offset length] :as t}]
+  (let [parsed (parse text)]
+    (if-let [rloc (-?> parsed (parsed-root-loc true))]
+      (let [[l r] (normalized-selection rloc offset length)]
+        (if-not (sel-match-normalized? offset length [l r])
+          (-> t (assoc-in [:offset] (start-offset l))
+            (assoc-in [:length] (if (nil? r) 0 (- (end-offset r) (start-offset l)))))
+          (let [;
+                _ (spy "l before up" (zip/node l))
+                l (if-let [nl (zip/up (if (= offset (start-offset (parse-node l)))
+                                        (parse-node l) 
+                                        (parse-leave l)))]
+                    nl 
+                    l)
+                _ (spy "l after up" (zip/node l))]
+            (-> t (assoc-in [:offset] (start-offset l))
+              (assoc-in [:length] (- (end-offset l) (start-offset l))))))))))
+
+#_(defmethod paredit
   :paredit-expand-up
   [cmd {:keys [#^String text offset length] :as t}]
   (let [parsed (parse text)]
