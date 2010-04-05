@@ -20,7 +20,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.jdt.internal.ui.preferences.OverlayPreferenceStore;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.ColorSelector;
@@ -63,6 +64,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
+import org.osgi.service.prefs.BackingStoreException;
 
 import ccw.CCWPlugin;
 import ccw.editors.antlrbased.ClojureSourceViewer;
@@ -395,9 +397,15 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
     public boolean performOk() {
         fOverlayStore.propagate();
         
-        CCWPlugin.getDefault().savePluginPreferences();
-        
-        return true;
+        boolean result = true;
+        try {
+			Platform.getPreferencesService().getRootNode().node(InstanceScope.SCOPE).node(CCWPlugin.PLUGIN_ID).flush();
+		} catch (BackingStoreException e) {
+			CCWPlugin.logError("Saving Preferences failed", e);
+			result = false;
+		}
+		
+        return result;
     }
 
     /*
@@ -680,10 +688,9 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         
         fPreviewViewer= new ClojureSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER, store);
         
-        CCWPlugin.registerEditorColors(store);
-        
         ClojureSourceViewerConfiguration configuration= new ClojureSourceViewerConfiguration(store, null);
         fPreviewViewer.configure(configuration);
+        fPreviewViewer.initializeViewerColors();
         
         Font font= JFaceResources.getFont(org.eclipse.jdt.ui.PreferenceConstants.EDITOR_TEXT_FONT);
         fPreviewViewer.getTextWidget().setFont(font);

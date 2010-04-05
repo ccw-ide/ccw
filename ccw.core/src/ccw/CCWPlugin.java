@@ -292,21 +292,17 @@ public class CCWPlugin extends AbstractUIPlugin {
                 : defaultColor;
 	}
 	
-    public static void registerEditorColors(IPreferenceStore store) {
+    public static void registerEditorColors(IPreferenceStore store, RGB foregroundColor) {
         final ColorRegistry colorRegistry = getDefault().getColorRegistry();
         
-        // TODO: define separate preferences for the tokens that use black and gray?
-        final RGB black = new RGB(0,0,0);
-        final RGB gray = new RGB(128,128,128);
-        
-        final RGB literalColor = getElementColor(store, PreferenceConstants.EDITOR_LITERAL_COLOR, black);
-        final RGB specialFormColor = getElementColor(store, PreferenceConstants.EDITOR_SPECIAL_FORM_COLOR, black);
-        final RGB functionColor = getElementColor(store, PreferenceConstants.EDITOR_FUNCTION_COLOR, black);
-        final RGB commentColor = getElementColor(store, PreferenceConstants.EDITOR_COMMENT_COLOR, black);
-        final RGB globalVarColor = getElementColor(store, PreferenceConstants.EDITOR_GLOBAL_VAR_COLOR, black);
-        final RGB keywordColor = getElementColor(store, PreferenceConstants.EDITOR_KEYWORD_COLOR, black);
-        final RGB metadataTypehintColor = getElementColor(store, PreferenceConstants.EDITOR_METADATA_TYPEHINT_COLOR, black);
-        final RGB macroColor = getElementColor(store, PreferenceConstants.EDITOR_MACRO_COLOR, black);
+        final RGB literalColor = getElementColor(store, PreferenceConstants.EDITOR_LITERAL_COLOR, foregroundColor);
+        final RGB specialFormColor = getElementColor(store, PreferenceConstants.EDITOR_SPECIAL_FORM_COLOR, foregroundColor);
+        final RGB functionColor = getElementColor(store, PreferenceConstants.EDITOR_FUNCTION_COLOR, foregroundColor);
+        final RGB commentColor = getElementColor(store, PreferenceConstants.EDITOR_COMMENT_COLOR, foregroundColor);
+        final RGB globalVarColor = getElementColor(store, PreferenceConstants.EDITOR_GLOBAL_VAR_COLOR, foregroundColor);
+        final RGB keywordColor = getElementColor(store, PreferenceConstants.EDITOR_KEYWORD_COLOR, foregroundColor);
+        final RGB metadataTypehintColor = getElementColor(store, PreferenceConstants.EDITOR_METADATA_TYPEHINT_COLOR, foregroundColor);
+        final RGB macroColor = getElementColor(store, PreferenceConstants.EDITOR_MACRO_COLOR, foregroundColor);
         
         colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.STRING, literalColor); //$NON-NLS-1$
         colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.REGEX_LITERAL, literalColor); //$NON-NLS-1$
@@ -315,38 +311,37 @@ public class CCWPlugin extends AbstractUIPlugin {
         colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.NIL, literalColor); //$NON-NLS-1$
         colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.BOOLEAN, literalColor); //$NON-NLS-1$
 
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.OPEN_PAREN, black); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.CLOSE_PAREN, black); //$NON-NLS-1$
+        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.OPEN_PAREN, foregroundColor); //$NON-NLS-1$
+        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.CLOSE_PAREN, foregroundColor); //$NON-NLS-1$
         colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.SPECIAL_FORM, specialFormColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.SYMBOL, black); //$NON-NLS-1$
+        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.SYMBOL, foregroundColor); //$NON-NLS-1$
         colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + IScanContext.SymbolType.FUNCTION, functionColor); //$NON-NLS-1$
         colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + IScanContext.SymbolType.GLOBAL_VAR, globalVarColor); //$NON-NLS-1$
         colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + IScanContext.SymbolType.MACRO, macroColor); //$NON-NLS-1$
         colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + IScanContext.SymbolType.SPECIAL_FORM, specialFormColor); //$NON-NLS-1$
         
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + IScanContext.SymbolType.JAVA_CLASS, black); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + IScanContext.SymbolType.JAVA_STATIC_METHOD, black); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + IScanContext.SymbolType.JAVA_INSTANCE_METHOD, black); //$NON-NLS-1$
+        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + IScanContext.SymbolType.JAVA_CLASS, foregroundColor); //$NON-NLS-1$
+        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + IScanContext.SymbolType.JAVA_STATIC_METHOD, foregroundColor); //$NON-NLS-1$
+        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + IScanContext.SymbolType.JAVA_INSTANCE_METHOD, foregroundColor); //$NON-NLS-1$
         
         colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.KEYWORD, keywordColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.SYNTAX_QUOTE, black); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.UNQUOTE_SPLICING, black); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.UNQUOTE, black); //$NON-NLS-1$
+        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.SYNTAX_QUOTE, foregroundColor); //$NON-NLS-1$
+        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.UNQUOTE_SPLICING, foregroundColor); //$NON-NLS-1$
+        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.UNQUOTE, foregroundColor); //$NON-NLS-1$
         colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.COMMENT, commentColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.SPACE, black); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.LAMBDA_ARG, black); //$NON-NLS-1$
+        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.SPACE, foregroundColor); //$NON-NLS-1$
+        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.LAMBDA_ARG, foregroundColor); //$NON-NLS-1$
         colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.METADATA_TYPEHINT, metadataTypehintColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.AMPERSAND, black); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.LEFT_SQUARE_BRACKET, gray); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.RIGHT_SQUARE_BRACKET, gray); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.LEFT_CURLY_BRACKET, gray); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.RIGHT_CURLY_BRACKET, gray); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.BACKSLASH, black); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.CIRCUMFLEX, black); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.COMMERCIAL_AT, black); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.NUMBER_SIGN, black); //$NON-NLS-1$
+        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.AMPERSAND, foregroundColor); //$NON-NLS-1$
+        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.LEFT_SQUARE_BRACKET, foregroundColor); //$NON-NLS-1$
+        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.RIGHT_SQUARE_BRACKET, foregroundColor); //$NON-NLS-1$
+        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.LEFT_CURLY_BRACKET, foregroundColor); //$NON-NLS-1$
+        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.RIGHT_CURLY_BRACKET, foregroundColor); //$NON-NLS-1$
+        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.BACKSLASH, foregroundColor); //$NON-NLS-1$
+        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.CIRCUMFLEX, foregroundColor); //$NON-NLS-1$
+        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.COMMERCIAL_AT, foregroundColor); //$NON-NLS-1$
+        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.NUMBER_SIGN, foregroundColor); //$NON-NLS-1$
     }
-    
     
 	public static IWorkbenchPage getActivePage() {
 		return getDefault().internalGetActivePage();

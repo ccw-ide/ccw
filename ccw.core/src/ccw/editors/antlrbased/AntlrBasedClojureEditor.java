@@ -84,7 +84,6 @@ public class AntlrBasedClojureEditor extends TextEditor {
 
 	public AntlrBasedClojureEditor() {
 	    IPreferenceStore preferenceStore = createCombinedPreferenceStore();
-	    CCWPlugin.registerEditorColors(preferenceStore);
 		setSourceViewerConfiguration(new ClojureSourceViewerConfiguration(preferenceStore, this));
 		setPreferenceStore(preferenceStore);
         setDocumentProvider(new ClojureDocumentProvider()); 
@@ -122,6 +121,15 @@ public class AntlrBasedClojureEditor extends TextEditor {
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
 		ClojureSourceViewer viewer= (ClojureSourceViewer) getSourceViewer();
+		
+		/*
+		 * Need to hook up here to force a re-evaluation of the preferences
+		 * for the syntax coloring, after the token scanner has been
+		 * initialized. Otherwise the very first Clojure editor will not
+		 * have any tokens colored.
+		 */
+	    viewer.propertyChange(null);
+	    
 		fProjectionSupport= new ProjectionSupport(viewer, getAnnotationAccess(), getSharedColors());
 		
 		// TODO remove the 2 following lines ?
@@ -135,9 +143,6 @@ public class AntlrBasedClojureEditor extends TextEditor {
     public DefaultCharacterPairMatcher getPairsMatcher() {
         return pairsMatcher;
     }
-
-
-
 
     @Override
     public ISelectionProvider getSelectionProvider() {
