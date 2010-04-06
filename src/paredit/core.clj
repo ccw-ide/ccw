@@ -424,7 +424,9 @@
                  "foo (bar [ba|z] |foo)" "foo (bar |[baz] |foo)"
                  "foo (bar [ba|z]) (foo [bar (b|az)])" "foo |(bar [baz]) (foo [bar (baz)])|"
                  "foo |(bar [baz (b|am)])" "foo |(bar [baz (bam)])|"
-                 "(foo bar|)" "(foo |bar|)";
+                 "(foo bar|)" "(foo |bar|)"
+                 "fooz foo |(bar)| baz" "fooz foo| (bar)| baz";;
+                 "fooz foo| (bar)| baz" "fooz |foo (bar)| baz"
                  }]
      ["Shift+Alt+Right" :paredit-expand-right
                 {
@@ -910,7 +912,7 @@
             _ (spy (zip/node l))
             _ (spy (when r (zip/node r)))
             l (if (sel-match-normalized? offset length [l r])
-                (if-let [nl (zip/left l)] nl (zip/up l))
+                (if-let [nl (zip/left l)] nl (if (punct-loc? l) (zip/left (zip/up l)) (zip/up l)))
                 (do
                   (spy [(zip/node l) (and r (zip/node r))])
                   (spy "not normalized!" l)))
