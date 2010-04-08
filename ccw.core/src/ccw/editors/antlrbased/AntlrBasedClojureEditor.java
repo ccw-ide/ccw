@@ -76,6 +76,11 @@ public class AntlrBasedClojureEditor extends TextEditor {
 			}
 		}
 	};
+	
+	/** History for structure select action
+	 * STOLEN FROM THE JDT */
+	private SelectionHistory fSelectionHistory;
+
 
 	/** The projection support */
 	private ProjectionSupport fProjectionSupport;
@@ -180,18 +185,6 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.GOTO_PREVIOUS_MEMBER);
 		setAction(GotoPreviousMemberAction.ID, action);
 
-		action = new ExpandSelectionUpAction(this);
-		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.EXPAND_SELECTION_UP);
-		setAction(/*ExpandSelectionUpAction.ID*/"ExpandSelectionUpAction", action);
-		
-		action = new ExpandSelectionLeftAction(this);
-		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.EXPAND_SELECTION_LEFT);
-		setAction(/*ExpandSelectionLeftAction.ID*/"ExpandSelectionLeftAction", action);
-		
-		action = new ExpandSelectionRightAction(this);
-		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.EXPAND_SELECTION_RIGHT);
-		setAction(/*ExpandSelectionRightAction.ID*/"ExpandSelectionRightAction", action);
-		
 		action = new SelectTopLevelSExpressionAction(this);
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.SELECT_TOP_LEVEL_S_EXPRESSION);
 		setAction(SelectTopLevelSExpressionAction.ID, action);
@@ -233,6 +226,26 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		action.setActionDefinitionId(id);
 		setAction(CONTENT_ASSIST_PROPOSAL, action); 
 		markAsStateDependentAction(CONTENT_ASSIST_PROPOSAL, true);
+
+		// Copied directly from JDT (no interest in owning the code currently)
+		fSelectionHistory = new SelectionHistory(this);
+		StructureSelectHistoryAction historyAction= new StructureSelectHistoryAction(this, fSelectionHistory);
+		historyAction.setActionDefinitionId(IClojureEditorActionDefinitionIds.SELECT_LAST);
+		setAction("RestoreSelection", historyAction);
+		fSelectionHistory.setHistoryAction(historyAction);
+
+		action = new ExpandSelectionUpAction(this, fSelectionHistory);
+		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.EXPAND_SELECTION_UP);
+		setAction(/*ExpandSelectionUpAction.ID*/"ExpandSelectionUpAction", action);
+		
+		action = new ExpandSelectionLeftAction(this, fSelectionHistory);
+		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.EXPAND_SELECTION_LEFT);
+		setAction(/*ExpandSelectionLeftAction.ID*/"ExpandSelectionLeftAction", action);
+		
+		action = new ExpandSelectionRightAction(this, fSelectionHistory);
+		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.EXPAND_SELECTION_RIGHT);
+		setAction(/*ExpandSelectionRightAction.ID*/"ExpandSelectionRightAction", action);
+		
 	}
 	
 	/**
@@ -609,6 +622,10 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		if (pairsMatcher != null) {
 			pairsMatcher.dispose();
 			pairsMatcher = null;
+		}
+		if (fSelectionHistory != null) {
+			fSelectionHistory.dispose();
+			fSelectionHistory = null;
 		}
 		super.dispose();
 	}

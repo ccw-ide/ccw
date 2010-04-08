@@ -42,6 +42,13 @@ public interface IClojureEditorActionDefinitionIds extends ITextEditorActionDefi
      * expression action
      */
     public static final String SELECT_TOP_LEVEL_S_EXPRESSION = "ccw.ui.edit.text.clojure.select.toplevel.s.expression";
+
+    /**
+     * Action definition ID of the Clojure -> select last (selection)
+     * expression action
+     */
+    public static final String SELECT_LAST = "ccw.ui.edit.text.clojure.select.last";
+    
     /**
      * Action definition ID of the Clojure (or edit ?) -> evaluate top level s
      * expression or region action
