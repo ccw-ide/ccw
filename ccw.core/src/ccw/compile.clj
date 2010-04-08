@@ -23,5 +23,6 @@
        'ccw.editors.antlrbased.StacktraceHyperlink
        'ccw.editors.antlrbased.ExpandSelectionUpAction
        'ccw.editors.antlrbased.ExpandSelectionLeftAction
-       'ccw.editors.antlrbased.ExpandSelectionRightAction])))
+       'ccw.editors.antlrbased.ExpandSelectionRightAction
+       'ccw.editors.antlrbased.RaiseSelectionAction])))
 

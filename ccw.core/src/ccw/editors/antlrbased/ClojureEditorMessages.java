@@ -53,6 +53,8 @@ public final class ClojureEditorMessages extends NLS {
     public static String ExpandSelectionRightAction_label;
     public static String StructureSelectHistoryAction_label;
     public static String StructureSelectHistoryAction_description;
+    public static String RaiseSelectionAction_label;
+    public static String RaiseSelectionAction_description;
 
     
     public static String Cannot_find_declaration;

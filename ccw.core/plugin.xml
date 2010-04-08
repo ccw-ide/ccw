@@ -201,6 +201,12 @@
             description="%command.selectLast.description"
             id="ccw.ui.edit.text.clojure.select.last"
             name="%command.selectLast.name">
+      </command>
+      <command
+            categoryId="org.eclipse.ui.category.edit"
+            description="%command.raiseSelection.description"
+            id="ccw.ui.edit.text.clojure.select.raise"
+            name="%command.raiseSelection.name">
       </command>	  
 <!-- navigate -->
       <command
@@ -318,6 +324,12 @@
             contextId="ccw.ui.clojureEditorScope"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M2+M3+ARROW_DOWN">
+      </key>
+      <key
+            commandId="ccw.ui.edit.text.clojure.select.raise"
+            contextId="ccw.ui.clojureEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M3+R">
       </key>
 <!--            sequence="M1+M2+ARROW_UP" -->
       <key

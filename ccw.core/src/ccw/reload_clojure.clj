@@ -27,7 +27,8 @@
                       [PareditAutoEditStrategy]
                       [ExpandSelectionUpAction]
                       [ExpandSelectionLeftAction]
-                      [ExpandSelectionRightAction]]))
+                      [ExpandSelectionRightAction]
+                      [RaiseSelectionAction]]))
 
 (defn -run [this]
   (require :reload 'ccw.reload-clojure)

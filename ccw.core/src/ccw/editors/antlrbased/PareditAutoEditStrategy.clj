@@ -58,6 +58,7 @@
 
 (defn -customizeDocumentCommand 
   [#^ccw.editors.antlrbased.PareditAutoEditStrategy this, #^IDocument document, #^DocumentCommand command]
+  (println "Called!")
   (when (and (paredit-enabled? (-> this .state deref :prefs-store))
              (.doit command))
     (let [signed-selection (bean (-> this .state deref #^ccw.editors.antlrbased.AntlrBasedClojureEditor (:editor) .getSignedSelection))

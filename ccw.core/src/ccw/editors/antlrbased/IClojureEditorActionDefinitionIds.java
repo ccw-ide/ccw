@@ -50,6 +50,12 @@ public interface IClojureEditorActionDefinitionIds extends ITextEditorActionDefi
     public static final String SELECT_LAST = "ccw.ui.edit.text.clojure.select.last";
     
     /**
+     * Action definition ID of the Clojure -> raise selection
+     * expression action
+     */
+    public static final String RAISE_SELECTION = "ccw.ui.edit.text.clojure.select.raise";
+    
+    /**
      * Action definition ID of the Clojure (or edit ?) -> evaluate top level s
      * expression or region action
      */
