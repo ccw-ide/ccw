@@ -395,10 +395,12 @@
      ;           paredit-splice-sexp-killing-forward
      ;           ("(a (b c| d e) f)"
      ;            "(a b c f)"))
-     ;("M-r"       paredit-raise-sexp
-     ;           ("(dynamic-wind in (lambda () |body) out)"
-     ;            "(dynamic-wind in |body out)"
-     ;            "|body"))
+     ["M-r"       :paredit-raise-sexp
+                {"(dynamic-wind in (lambda () |body|) out)" "(dynamic-wind in |body out)"
+                 "(dynamic-wind in |body| out)" "|body" 
+                 "(foo bar|)" "(foo bar|)"
+                 "(foo |bar)" "|bar"
+                 }]
      ]
     
     ["Selection"
@@ -830,11 +832,8 @@
    If the selection is not empty, the second loc will give the end (get it via a call to 'loc-end on it).
    Pre-requisites: length >=0, offset >=0. rloc = root loc of the tree"
   [rloc offset length]
-  ;(spy "+++++++++")
   (let [left-leave (parse-leave (leave-for-offset rloc offset))
-        ;_ (spy "1st ll" (zip/node left-leave))
         right-leave (parse-leave (leave-for-offset rloc (+ offset length)))
-        ;_ (spy "1st rl" (zip/node right-leave))
         right-leave (cond 
                       (= :root (loc-tag right-leave)) 
                         (parse-leave (leave-for-offset rloc (dec (+ offset length)))) 
@@ -843,9 +842,7 @@
                       (nil? (seq (previous-leaves right-leave)))
                         (parse-node right-leave)
                       :else
-                        (parse-node (first (previous-leaves right-leave))))
-        ;_ (spy "2d rl" (zip/node right-leave))
-        ]
+                        (parse-node (first (previous-leaves right-leave))))]
     (if (or
           (= [0 0] [offset length])
           (and 
@@ -855,10 +852,9 @@
             (= (start-offset (parse-node left-leave)) offset)
             (= (end-offset (parse-node right-leave)) (+ offset length))  
             (same-parent? (parse-node left-leave) (parse-node right-leave)))) 
-      (do ;(spy "already normalized")
+      (do
         [left-leave (when-not (zero? length) right-leave)])
       (do
-        ;(spy "not yet normalized")
         (let [left-leave (parse-node left-leave)
             right-leave (parse-node right-leave)
             min-depth (min (loc-depth left-leave) (loc-depth right-leave))
@@ -909,23 +905,35 @@
   (let [parsed (parse text)]
     (if-let [rloc (-?> parsed (parsed-root-loc true))]
       (let [[l r] (normalized-selection rloc offset length)
-            _ (spy (zip/node l))
-            _ (spy (when r (zip/node r)))
             l (if (sel-match-normalized? offset length [l r])
                 (if-let [nl (zip/left l)] nl (if (punct-loc? l) (zip/left (zip/up l)) (zip/up l)))
                 (do
                   (spy [(zip/node l) (and r (zip/node r))])
                   (spy "not normalized!" l)))
-            _ (spy "before renormalized:" (zip/node l))
             r (if (nil? r) l r)
-            _ (spy "before renormalized:" (zip/node r))
-            [l r] (normalized-selection rloc (spy (start-offset l)) (spy (- (end-offset r) (start-offset l))))
-            _ (spy "renormalized:" (zip/node l))
-            _ (spy "renormalized:" (when r (zip/node r)))
-            
-            ]
+            [l r] (normalized-selection rloc (spy (start-offset l)) (spy (- (end-offset r) (start-offset l))))]
           (spy (-> t (assoc-in [:offset] (start-offset l))
-                (assoc-in [:length] (if (nil? r) 0 (- (end-offset r) (start-offset l))))))))))
+                (assoc-in [:length] (if (nil? r) 0 (- (end-offset r) (start-offset l)))))))
+      t)))
+
+(defmethod paredit
+  :paredit-expand-up
+  [cmd {:keys [#^String text offset length] :as t}]
+  (let [parsed (parse text)]
+    (if-let [rloc (-?> parsed (parsed-root-loc true))]
+      (let [[l r] (normalized-selection rloc offset length)]
+        (if-not (sel-match-normalized? offset length [l r])
+          (-> t (assoc-in [:offset] (start-offset l))
+            (assoc-in [:length] (if (nil? r) 0 (- (end-offset r) (start-offset l)))))
+          (let [l (if-let [nl (zip/up (if (= offset (start-offset (parse-node l)))
+                                        (parse-node l) 
+                                        (parse-leave l)))]
+                    nl 
+                    l)
+                _ (spy "l after up" (zip/node l))]
+            (-> t (assoc-in [:offset] (start-offset l))
+              (assoc-in [:length] (- (end-offset l) (start-offset l)))))))
+      t)))
 
 (defmethod paredit
   :paredit-expand-right
@@ -943,51 +951,31 @@
                       (zip/up r)))
                 [l r] (normalized-selection rloc (spy (start-offset l)) (spy (- (end-offset r) (start-offset l))))]
             (-> t (assoc-in [:offset] (start-offset l))
-              (assoc-in [:length] (if (nil? r) 0 (- (end-offset r) (start-offset l)))))))))))
+              (assoc-in [:length] (if (nil? r) 0 (- (end-offset r) (start-offset l))))))))
+      t)))
 
 (defmethod paredit
-  :paredit-expand-up
+  :paredit-raise-sexp
   [cmd {:keys [#^String text offset length] :as t}]
   (let [parsed (parse text)]
     (if-let [rloc (-?> parsed (parsed-root-loc true))]
       (let [[l r] (normalized-selection rloc offset length)]
-        (if-not (sel-match-normalized? offset length [l r])
-          (-> t (assoc-in [:offset] (start-offset l))
-            (assoc-in [:length] (if (nil? r) 0 (- (end-offset r) (start-offset l)))))
-          (let [;
-                _ (spy "l before up" (zip/node l))
-                l (if-let [nl (zip/up (if (= offset (start-offset (parse-node l)))
-                                        (parse-node l) 
-                                        (parse-leave l)))]
-                    nl 
-                    l)
-                _ (spy "l after up" (zip/node l))]
-            (-> t (assoc-in [:offset] (start-offset l))
-              (assoc-in [:length] (- (end-offset l) (start-offset l))))))))))
-
-#_(defmethod paredit
-  :paredit-expand-up
-  [cmd {:keys [#^String text offset length] :as t}]
-  (let [parsed (parse text)]
-    (if-let [rloc (-?> parsed (parsed-root-loc true))]
-      (let [[l r] (normalized-selection rloc offset length)
-            _ (spy (zip/node l))
-            _ (spy (when r (zip/node r)))
-            l (if (sel-match-normalized? offset length [l r])
-                (if-let [nl (zip/up l)] nl l)
-                (do
-                  (spy [(zip/node l) (and r (zip/node r))])
-                  (spy "not normalized!" l)))
-            _ (spy "before renormalized:" (zip/node l))
-            r (if (or (nil? r) (= :root (loc-tag l))) l r)
-            _ (spy "before renormalized:" (zip/node r))
-            [l r] (normalized-selection rloc (spy (start-offset l)) (spy (- (end-offset r) (start-offset l))))
-            _ (spy "renormalized:" (zip/node l))
-            _ (spy "renormalized:" (when r (zip/node r)))
-            
-            ]
-          (spy (-> t (assoc-in [:offset] (start-offset l))
-                (assoc-in [:length] (if (nil? r) 0 (- (end-offset r) (start-offset l))))))))))
+        (if-not (and
+                  (sel-match-normalized? offset length [l r]) 
+                  (= offset (start-offset (parse-node l))))
+          t
+          (let  
+            [to-raise-offset (start-offset l)
+             to-raise-length (- (if r (end-offset r) (end-offset l)) (start-offset l))
+             to-raise-text (.substring text to-raise-offset (+ to-raise-offset to-raise-length))
+             l (if-let [nl (zip/up (parse-node l))] nl l)
+             replace-offset (start-offset l)
+             replace-length (- (end-offset l) replace-offset)]
+            (-> t (assoc-in [:text] (str-replace text replace-offset replace-length to-raise-text))
+              (assoc-in [:offset] replace-offset)
+              (assoc-in [:length] 0)
+              (update-in [:modifs] conj {:offset replace-offset :length replace-length :text to-raise-text})))))
+      t)))
 
 (defn wrap-with-balanced
   [[#^String o c] {:keys [#^String text offset length] :as t}]
