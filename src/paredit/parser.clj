@@ -353,7 +353,7 @@
 (defn previous-leaves
   "seq of previous leaves locs"
   [loc]
-  (and loc(remove zip/branch? (take-while (complement nil?) (iterate zip/prev (zip/prev loc))))))
+  (and loc (remove zip/branch? (take-while (complement nil?) (iterate zip/prev (zip/prev loc))))))
 
 (declare start-offset)
 (defn end-offset [loc]
