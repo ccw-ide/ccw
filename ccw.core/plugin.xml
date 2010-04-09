@@ -207,6 +207,12 @@
             description="%command.raiseSelection.description"
             id="ccw.ui.edit.text.clojure.select.raise"
             name="%command.raiseSelection.name">
+      </command>
+      <command
+            categoryId="org.eclipse.ui.category.edit"
+            description="%command.splitSexpr.description"
+            id="ccw.ui.edit.text.clojure.split.sexpr"
+            name="%command.splitSexpr.name">
       </command>	  
 <!-- navigate -->
       <command
@@ -330,6 +336,12 @@
             contextId="ccw.ui.clojureEditorScope"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M3+R">
+      </key>
+      <key
+            commandId="ccw.ui.edit.text.clojure.split.sexpr"
+            contextId="ccw.ui.clojureEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M3+S">
       </key>
 <!--            sequence="M1+M2+ARROW_UP" -->
       <key

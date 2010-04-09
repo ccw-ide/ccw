@@ -249,6 +249,10 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		action = new RaiseSelectionAction(this);
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.RAISE_SELECTION);
 		setAction(/*RaiseSelectionAction.ID*/"RaiseSelectionAction", action);
+
+		action = new SplitSexprAction(this);
+		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.SPLIT_SEXPR);
+		setAction(/*SplitSexprAction.ID*/"SplitSexprAction", action);
 	}
 	
 	/**

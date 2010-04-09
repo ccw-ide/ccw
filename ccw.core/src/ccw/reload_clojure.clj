@@ -28,7 +28,8 @@
                       [ExpandSelectionUpAction]
                       [ExpandSelectionLeftAction]
                       [ExpandSelectionRightAction]
-                      [RaiseSelectionAction]]))
+                      [RaiseSelectionAction]
+                      [SplitSexprAction]]))
 
 (defn -run [this]
   (require :reload 'ccw.reload-clojure)

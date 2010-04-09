@@ -56,6 +56,12 @@ public interface IClojureEditorActionDefinitionIds extends ITextEditorActionDefi
     public static final String RAISE_SELECTION = "ccw.ui.edit.text.clojure.select.raise";
     
     /**
+     * Action definition ID of the Clojure -> split sexpr
+     * expression action
+     */
+    public static final String SPLIT_SEXPR = "ccw.ui.edit.text.clojure.split.sexpr";
+    
+    /**
      * Action definition ID of the Clojure (or edit ?) -> evaluate top level s
      * expression or region action
      */
