@@ -400,6 +400,7 @@
                  "(dynamic-wind in |body| out)" "|body" 
                  "(foo bar|)" "(foo bar|)"
                  "(foo |bar)" "|bar"
+                 "(foo |(bar))" "|(bar)"
                  }]
      ]
     
@@ -538,8 +539,11 @@
                 {"(hello  |  world)" "(hello)| (world)",
                  "\"Hello, |world!\"" "\"Hello, \"| \"world!\"",
                  "(hel|lo)" "(hel)| (lo)",
-                 "[hello |world]" "[hello]| [world]"
-                 "{hello brave |new world}" "{hello brave}| {new world}"
+                 "[hello |world]" "[hello]| [world]",
+                 "{hello brave |new world}" "{hello brave}| {new world}",
+                 ;"{|}" "{|}"
+                 ;"(foo|)" "(foo|)"
+                 ;"(|foo)" "(|foo)"
                  }]
       #_["M-J"    :paredit-join-sexps
                 {"(hello)| (world)" "(hello| world)",
@@ -978,7 +982,7 @@
           t
           (let  
             [to-raise-offset (start-offset l)
-             to-raise-length (- (if r (end-offset r) (end-offset l)) (start-offset l))
+             to-raise-length (- (if r (end-offset r) (end-offset (parse-node l))) (start-offset l))
              to-raise-text (.substring text to-raise-offset (+ to-raise-offset to-raise-length))
              l (if-let [nl (zip/up (parse-node l))] nl l)
              replace-offset (start-offset l)
