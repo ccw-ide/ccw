@@ -569,9 +569,9 @@
   [#^String text-spec]
   (let [offset (.indexOf text-spec "|")
         second-pipe (dec (.indexOf text-spec "|" (inc offset)))]  
-  {:text (str2/replace text-spec "|" "")
-   :offset offset
-   :length (if (> second-pipe 0) (- second-pipe offset) 0)}))
+    {:text (str2/replace text-spec "|" "")
+     :offset offset
+     :length (if (> second-pipe 0) (- second-pipe offset) 0)}))
 
 (defn str-insert [#^String s i c] (str (.substring s 0 i) c (.substring s i)))
 (defn str-remove [#^String s i n] (str (.substring s 0 i) (.substring s (+ i n))))
