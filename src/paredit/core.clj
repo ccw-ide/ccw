@@ -414,6 +414,7 @@
                  "foo bar |baz|" "foo bar| baz|"
                  "foo bar| baz|" "foo |bar baz|"
                  "foo |bar baz|" "foo| bar baz|"
+                 "|(foo bar baz)|" "|(foo bar baz)|"
                  ;;not-yet "|fo|o bar baz" "|foo bar baz|" 
                  ;;not-yet "|foo| bar baz" "|foo bar baz|" 
                  ;;not-yet "|foo |bar baz" "|foo bar baz|" 

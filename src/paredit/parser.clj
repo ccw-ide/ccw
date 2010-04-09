@@ -367,6 +367,7 @@
 
 (defn start-offset [loc]
   (cond
+    (nil? loc) 0
     (string? (zip/node loc))
       (if-let [l (zip/left loc)]
         (end-offset l)
