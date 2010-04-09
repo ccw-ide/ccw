@@ -489,7 +489,7 @@
             </command>
             <command
                   commandId="ccw.ui.edit.text.clojure.evaluate.toplevel.s.expression"
-                  label="Evaluate Top Level s-expression"
+                  label="Evaluate current selection or Top Level S-Expression"
                   style="push">
             </command>
             <separator
@@ -580,7 +580,7 @@
             </command>
             <command
                   commandId="ccw.ui.edit.text.clojure.evaluate.toplevel.s.expression"
-                  label="Evaluate Top Level s-expression"
+                  label="Evaluate current selection or Top Level S-Expression"
                   style="push">
             </command>
             <separator
