@@ -541,9 +541,9 @@
                  "(hel|lo)" "(hel)| (lo)",
                  "[hello |world]" "[hello]| [world]",
                  "{hello brave |new world}" "{hello brave}| {new world}",
-                 ;"{|}" "{|}"
-                 ;"(foo|)" "(foo|)"
-                 ;"(|foo)" "(|foo)"
+                 "{|}" "{}| {}"
+                 "(foo|)" "(foo)| ()"
+                 "({|})" "({}| {})"
                  }]
       #_["M-J"    :paredit-join-sexps
                 {"(hello)| (world)" "(hello| world)",
@@ -1003,26 +1003,29 @@
         (let [[l r] (normalized-selection rloc offset length)
               parent (cond
                        (= (str \") (loc-tag l)) l ; stay at the same level, and let the code take the correct open/close puncts, e.g. \" \"
-                       :else (if-let [nl (zip/up (parse-node l))] nl l))
+                       :else (if-let [nl (zip/up l)] nl l))
               open-punct (loc-tag parent)
-              close-punct (*brackets* open-punct)
-              replace-text (str close-punct " " open-punct)
-              [replace-offset 
-               replace-length] (if (and
-                                     (not= (str \space) (loc-tag l))
-                                     (or
-                                       (= (str \") (loc-tag l))
-                                       (not (and
-                                              (sel-match-normalized? offset length [l r]) 
-                                              (= offset (start-offset (parse-node l)))))))
-                                 [offset 0]
-                                 (let [start (or (some #(when-not (= (str \space) (loc-tag %)) (end-offset %)) (previous-leaves l)) offset)
-                                       end (or (some #(when-not (= (str \space) (loc-tag %)) (start-offset %)) (next-leaves l)) 0)]
-                                   [start (- end start)]))
-                               new-offset (+ replace-offset (.length close-punct))]
-          (-> t (assoc-in [:text] (str-replace text replace-offset replace-length replace-text))
-            (assoc-in [:offset] new-offset)
-            (update-in [:modifs] conj {:offset replace-offset :length replace-length :text replace-text})))
+              _ (spy open-punct)
+              close-punct (*brackets* open-punct)]
+          (if-not close-punct
+            t
+            (let [replace-text (str close-punct " " open-punct)
+                  [replace-offset 
+                   replace-length] (if (and
+                                         (not= (str \space) (loc-tag l))
+                                         (or
+                                           (= (str \") (loc-tag l))
+                                           (not (and
+                                                  (sel-match-normalized? offset length [l r]) 
+                                                  (= offset (start-offset (parse-node l)))))))
+                                     [offset 0]
+                                     (let [start (or (some #(when-not (= (str \space) (loc-tag %)) (end-offset %)) (previous-leaves l)) offset)
+                                           end (or (some #(when-not (= (str \space) (loc-tag %)) (start-offset %)) (next-leaves l)) 0)]
+                                       [start (- end start)]))
+                                   new-offset (+ replace-offset (.length close-punct))]
+              (-> t (assoc-in [:text] (str-replace text replace-offset replace-length replace-text))
+                (assoc-in [:offset] new-offset)
+                (update-in [:modifs] conj {:offset replace-offset :length replace-length :text replace-text})))))
         t))))
 
 (defn wrap-with-balanced
