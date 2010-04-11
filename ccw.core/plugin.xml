@@ -945,4 +945,22 @@
        </with>
     </definition>
  </extension>
+ <extension
+       point="org.eclipse.ui.newWizards">
+       <category
+			name="Kategorie"
+			parentCategory="org.eclipse.ui.Examples"
+			id="ccw.ui.examples">
+		</category>
+		<wizard
+			name="Labrepl Example"
+			class="ccw.wizards.LabreplCreationWizard"
+			category="org.eclipse.ui.Examples/ccw.ui.examples"
+			id="ccw.wizards.LabreplCreationWizard"
+			project="true">
+			<description>
+				Create a Labrepl example project
+			</description>
+		</wizard>
+ </extension>
 </plugin>
