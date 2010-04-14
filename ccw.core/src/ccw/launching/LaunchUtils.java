@@ -122,7 +122,7 @@ public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
     }
     
     private static IPackageFragmentRoot findPackageFragmentRoot(IJavaProject javaProject, IPath filePath) throws JavaModelException {
-    	if (filePath.isEmpty()) {
+    	if (filePath.isEmpty() || filePath.isRoot()) {
     		return null;
     	} else {
     		IResource possibleFragmentResource = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(filePath);
