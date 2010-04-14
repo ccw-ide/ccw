@@ -1,12 +1,10 @@
 (ns ccw.wizards.LabreplCreationWizard
-
-  ; (:use [paredit [core :only [paredit]]])
-  ; (:use [clojure.contrib.core :only [-?>]])  
-  ; (:import
-  ;  [org.eclipse.jface.text IAutoEditStrategy
-  ;                         IDocument
-  ;                          DocumentCommand]
-  ; [ccw.editors.antlrbased AntlrBasedClojureEditor])
+  (:import
+    [org.eclipse.ui.actions WorkspaceModifyDelegatingOperation]
+    [org.eclipse.ui.dialogs IOverwriteQuery]
+    [ccw.wizards LabreplCreateProjectPage
+                 LabreplCreationOperation]
+    )
   (:gen-class
    :implements [org.eclipse.ui.INewWizard]
    :extends org.eclipse.jface.wizard.Wizard
@@ -32,9 +30,9 @@
   [this]
   (println (str "addPages " (class this)))
 	(.super-addPages this)
- (let [main-page (ccw.wizards.LabreplCreateProjectPage. "New Labrepl Project")]
-   (dosync (alter (.state this) assoc :main-page main-page)
-   (.addPage this main-page)))
+ (let [main-page (LabreplCreateProjectPage. "New Labrepl Project")]
+   (dosync (alter (.state this) assoc :main-page main-page))
+   (.addPage this main-page))
   (println (str "addPages nach super" (class this)))
 	nil)
  
@@ -42,10 +40,16 @@
 	[this workbench currentSelection]
 	nil)
 
-(defn performFinish
+(defn -performFinish
 	[this]
+  (println "performFinish")
+  (let 
+    [runnable (LabreplCreationOperation. [(:main-page (.state this))])
+     op (WorkspaceModifyDelegatingOperation. runnable)]
+    (.run (.getContainer this) false true op))
 	true)
 
-(defn setInitializationData
+(defn -setInitializationData
 	[this cfig propertyName data]
+  (println "setInitializationData")
 	nil)
