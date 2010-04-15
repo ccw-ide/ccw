@@ -2,17 +2,18 @@
   (:import
      [org.eclipse.core.runtime NullProgressMonitor
                             SubProgressMonitor]
+     [org.eclipse.ui.dialogs IOverwriteQuery]
      [org.eclipse.core.resources ResourcesPlugin])
   (:gen-class
    :implements [org.eclipse.jface.operation.IRunnableWithProgress]
-   :constructors {[clojure.lang.IPersistentVector] []}
+   :constructors {[clojure.lang.IPersistentVector org.eclipse.ui.dialogs.IOverwriteQuery] []}
    :init myinit
    :state state))
 
 (defn- -myinit
-  [pages]
+  [pages overwrite-query]
   (println "myinit")
-  [[] (ref {:pages pages})])
+  [[] (ref {:pages pages :overwrite-query overwrite-query})])
 
 (defn create-project
   ""

@@ -2,6 +2,9 @@
   (:import
     [org.eclipse.ui.actions WorkspaceModifyDelegatingOperation]
     [org.eclipse.ui.dialogs IOverwriteQuery]
+    [org.eclipse.jface.dialogs IDialogConstants]
+    [org.eclipse.osgi.util NLS]
+    [org.eclipse.jface.dialogs MessageDialog]
     [ccw.wizards LabreplCreateProjectPage
                  LabreplCreationOperation]
     )
@@ -44,10 +47,37 @@
 	[this]
   (println "performFinish")
   (let 
-    [runnable (LabreplCreationOperation. [(:main-page (.state this))])
+    [shell (.getShell this)
+     display (.getDisplay shell)
+     open-dialog
+      (fn [file]
+        (let
+          [result (atom IDialogConstants/CANCEL_ID)
+            title "Overwrite?"
+            msg (str "Do you want to overwrite " file "?")
+            options (into-array String [IDialogConstants/YES_LABEL
+                                       IDialogConstants/NO_LABEL
+                                       IDialogConstants/YES_TO_ALL_LABEL
+                                       IDialogConstants/CANCEL_LABEL])
+            dialog (MessageDialog. shell title nil msg MessageDialog/QUESTION options 0)
+            run-dialog
+              (fn [] (reset! result (.open dialog)))]
+          (.syncExec display run-dialog)
+          (deref result)))
+     import-overwrite-query
+       (proxy [IOverwriteQuery] []
+         (queryOverwrite [file]
+           (let 
+             [return-codes [IOverwriteQuery/YES IOverwriteQuery/NO 
+                            IOverwriteQuery/ALL IOverwriteQuery/CANCEL]
+               return-value (open-dialog file)]
+             (if (< return-value 0)
+               IOverwriteQuery/CANCEL
+               (return-codes return-value)))))
+     runnable (LabreplCreationOperation. [(:main-page (.state this))] #^IOverwriteQuery import-overwrite-query)
      op (WorkspaceModifyDelegatingOperation. runnable)]
-    (.run (.getContainer this) false true op))
-	true)
+  (.run (.getContainer this) false true op)
+	true))
 
 (defn -setInitializationData
 	[this cfig propertyName data]
