@@ -213,6 +213,12 @@
             description="%command.splitSexpr.description"
             id="ccw.ui.edit.text.clojure.split.sexpr"
             name="%command.splitSexpr.name">
+      </command>
+      <command
+            categoryId="org.eclipse.ui.category.edit"
+            description="%command.joinSexpr.description"
+            id="ccw.ui.edit.text.clojure.join.sexpr"
+            name="%command.joinSexpr.name">
       </command>	  
 <!-- navigate -->
       <command
@@ -342,6 +348,12 @@
             contextId="ccw.ui.clojureEditorScope"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M3+S">
+      </key>
+      <key
+            commandId="ccw.ui.edit.text.clojure.join.sexpr"
+            contextId="ccw.ui.clojureEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M3+J">
       </key>
 <!--            sequence="M1+M2+ARROW_UP" -->
       <key

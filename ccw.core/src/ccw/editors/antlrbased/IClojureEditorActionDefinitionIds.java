@@ -62,6 +62,12 @@ public interface IClojureEditorActionDefinitionIds extends ITextEditorActionDefi
     public static final String SPLIT_SEXPR = "ccw.ui.edit.text.clojure.split.sexpr";
     
     /**
+     * Action definition ID of the Clojure -> join sexpr
+     * expression action
+     */
+    public static final String JOIN_SEXPR = "ccw.ui.edit.text.clojure.join.sexpr";
+    
+    /**
      * Action definition ID of the Clojure (or edit ?) -> evaluate top level s
      * expression or region action
      */

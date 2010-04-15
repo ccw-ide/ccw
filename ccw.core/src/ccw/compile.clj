@@ -25,5 +25,6 @@
        'ccw.editors.antlrbased.ExpandSelectionLeftAction
        'ccw.editors.antlrbased.ExpandSelectionRightAction
        'ccw.editors.antlrbased.RaiseSelectionAction
-       'ccw.editors.antlrbased.SplitSexprAction])))
+       'ccw.editors.antlrbased.SplitSexprAction
+       'ccw.editors.antlrbased.JoinSexprAction])))
 

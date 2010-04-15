@@ -253,7 +253,11 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		action = new SplitSexprAction(this);
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.SPLIT_SEXPR);
 		setAction(/*SplitSexprAction.ID*/"SplitSexprAction", action);
-	}
+
+		action = new JoinSexprAction(this);
+		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.JOIN_SEXPR);
+		setAction(/*JoinSexprAction.ID*/"JoinSexprAction", action);
+}
 	
 	/**
 	 * Jumps to the matching bracket.
