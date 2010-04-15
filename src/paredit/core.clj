@@ -545,13 +545,18 @@
                  "(foo|)" "(foo)| ()"
                  "({|})" "({}| {})"
                  }]
-      #_["M-J"    :paredit-join-sexps
+      ["M-J"    :paredit-join-sexps
                 {"(hello)| (world)" "(hello| world)",
                  "\"Hello, \"| \"world!\"" "\"Hello, |world!\"",
-                 "hello-\n|  world" "hello-|world"}]
+                 "hello-\n|  world" "hello-|world"
+                 "({:foo :bar}| {:baz :fooz})" "({:foo :bar| :baz :fooz})"
+                 "({:foo :bar} |{:baz :fooz})" "({:foo :bar |:baz :fooz})"
+                 "({:foo :bar}| {:baz :fooz})" "({:foo :bar| :baz :fooz})"
+                 "({:foo :bar} {|:baz :fooz})" "({:foo :bar} {|:baz :fooz})"
+                 "({:baz :fooz|} {:foo :bar})" "({:baz :fooz|} {:foo :bar})"
+                 }]
     ]
   ])
-
 
 ;;; adaptable paredit configuration
 (def #^String *newline* "\n")
@@ -1026,6 +1031,38 @@
               (-> t (assoc-in [:text] (str-replace text replace-offset replace-length replace-text))
                 (assoc-in [:offset] new-offset)
                 (update-in [:modifs] conj {:offset replace-offset :length replace-length :text replace-text})))))
+        t))))
+
+(defmethod paredit
+  :paredit-join-sexps
+  [cmd {:keys [#^String text offset length] :as t}]
+  (spy "++++" t)
+  (if (not= 0 length)
+    t
+    (let [parsed (parse text)]
+      (if-let [rloc (-?> parsed (parsed-root-loc true))]
+        (let [[l _] (normalized-selection rloc offset length)
+              _ (spy "node" (zip/node l))
+              lf (first (remove #(= (str \space) (loc-tag %)) (previous-leaves l)))
+              _ (spy "lf" (zip/node lf))
+              rf (first (remove #(= (str \space) (loc-tag %)) (cons l (next-leaves l))))
+              _ (spy "lr" (zip/node rf))]
+          (if (or (nil? lf) (nil? rf) (start-punct? lf) (end-punct? rf))
+            t
+            (let [ln (parse-node lf)
+                  rn (parse-node rf)
+                  _ (spy "ln"  (zip/node ln))
+                  _ (spy "rn" (zip/node rn))] 
+              (if-not (and
+                        (= (loc-tag ln) (loc-tag rn)))
+                t
+                (let [replace-offset (- (end-offset ln) (if-let [punct (*brackets* (loc-tag ln))] (.length punct) 0))
+                      replace-length (- (+ (start-offset rn) (if (*brackets* (loc-tag rn)) (.length (loc-tag rn)) 0)) replace-offset)
+                      replace-text   (if (#{(str \") (str \a)} (loc-tag ln)) "" " ")
+                      new-offset (if (= offset (start-offset rn)) (+ replace-offset (.length replace-text)) replace-offset)]
+                  (-> t (assoc-in [:text] (str-replace text replace-offset replace-length replace-text))
+                    (assoc-in [:offset] new-offset)
+                    (update-in [:modifs] conj {:offset replace-offset :length replace-length :text replace-text})))))))
         t))))
 
 (defn wrap-with-balanced

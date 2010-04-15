@@ -489,6 +489,20 @@
     "foo \"bar\" foo" 4 :root
     ))
 
+(defn start-punct?
+  "true if the loc is a punct starting a form"
+  [loc]
+  (and
+    (punct-loc? loc)
+    (= (start-offset loc) (start-offset (parse-node loc)))))
+
+(defn end-punct?
+  "true if the loc is a punct ending a form"
+  [loc]
+  (and
+    (punct-loc? loc)
+    (= (end-offset loc) (end-offset (parse-node loc)))))
+
 (defn pts []
   (leave-for-offset-tests)
   ;(loc-for-offset-tests)
