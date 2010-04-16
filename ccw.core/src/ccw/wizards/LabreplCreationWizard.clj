@@ -6,8 +6,7 @@
     [org.eclipse.osgi.util NLS]
     [org.eclipse.jface.dialogs MessageDialog]
     [ccw.wizards LabreplCreateProjectPage
-                 LabreplCreationOperation]
-    )
+                 LabreplCreationOperation])
   (:gen-class
    :implements [org.eclipse.ui.INewWizard]
    :extends org.eclipse.jface.wizard.Wizard
@@ -18,26 +17,20 @@
 
 (defn- -myinit
   []
-  (println "myinit")
   [[] (ref {})])
 
 (defn- -mypostinit
   [this]
-  (println (str "mypostinit " (class this)))
   (.setDialogSettings this (.getDialogSettings (ccw.CCWPlugin/getDefault)))
 	(.setWindowTitle this "Clojure Labrepl Example project")
-  (.setNeedsProgressMonitor this true)
-  (println "mypostinit"))
+  (.setNeedsProgressMonitor this true))
 
 (defn -addPages
   [this]
-  (println (str "addPages " (class this)))
 	(.super-addPages this)
- (let [main-page (LabreplCreateProjectPage. "New Labrepl Project")]
-   (dosync (alter (.state this) assoc :main-page main-page))
-   (.addPage this main-page))
-  (println (str "addPages nach super" (class this)))
-	nil)
+  (let [main-page (LabreplCreateProjectPage. "New Labrepl Project")]
+    (dosync (alter (.state this) assoc :main-page main-page))
+    (.addPage this main-page)))
  
 (defn -init
 	[this workbench currentSelection]
@@ -45,7 +38,6 @@
 
 (defn -performFinish
 	[this]
-  (println "performFinish")
   (let 
     [shell (.getShell this)
      display (.getDisplay shell)
@@ -74,12 +66,11 @@
              (if (< return-value 0)
                IOverwriteQuery/CANCEL
                (return-codes return-value)))))
-     runnable (LabreplCreationOperation. [(:main-page (.state this))] #^IOverwriteQuery import-overwrite-query)
+     runnable (LabreplCreationOperation. [(:main-page @(.state this))] import-overwrite-query)
      op (WorkspaceModifyDelegatingOperation. runnable)]
   (.run (.getContainer this) false true op)
 	true))
 
 (defn -setInitializationData
 	[this cfig propertyName data]
-  (println "setInitializationData")
 	nil)
