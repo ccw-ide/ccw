@@ -485,7 +485,7 @@
                   id="ccw.menus.clojure.expandSelTo"
                   label="%ExpandSelectionTo">
                <command
-                     commandId="ccw.ui.edit.text.clojure.outward.expanding.selection"
+                     commandId="ccw.ui.edit.text.clojure.expand.selection.up"
                      label="%ClojureSelectEnclosing_label"
                      style="push">
                </command>
@@ -576,7 +576,7 @@
                   id="ccw.menus.clojure.expandSelTo"
                   label="%ExpandSelectionTo">
                <command
-                     commandId="ccw.ui.edit.text.clojure.outward.expanding.selection"
+                     commandId="ccw.ui.edit.text.clojure.expand.selection.up"
                      label="%ClojureSelectEnclosing_label"
                      style="push">
                </command>
@@ -647,8 +647,8 @@
       <menuContribution
             locationURI="menu:expandSelectionToMenuId">
          <command
-               commandId="ccw.ui.edit.text.clojure.outward.expanding.selection"
-               id="ccw.ui.edit.text.clojure.outward.expanding.selection"
+               commandId="ccw.ui.edit.text.clojure.expand.selection.up"
+               id="ccw.ui.edit.text.clojure.expand.selection.up"
                label="%ClojureSelectEnclosing_label"
                style="push">
             <visibleWhen
