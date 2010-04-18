@@ -19,7 +19,8 @@
                             DocumentCommand]
     [ccw.editors.antlrbased AntlrBasedClojureEditor
                             SelectionHistory
-                            ClojureEditorMessages])
+                            ClojureEditorMessages
+                            SourceRange])
   (:gen-class
    :extends org.eclipse.jface.action.Action
    :constructors {[ccw.editors.antlrbased.AntlrBasedClojureEditor ccw.editors.antlrbased.SelectionHistory] [String]}
@@ -45,7 +46,7 @@
         {:keys #{length offset}} (bean (.getUnSignedSelection editor))
         text  (.get (.getDocument #^AntlrBasedClojureEditor editor))
         {new-length :length new-offset :offset} (paredit :paredit-expand-left {:text text :offset offset :length length})]
-    (-> this .state deref :selection-history (.remember (org.eclipse.jdt.internal.core.SourceRange. offset length)))
+    (-> this .state deref :selection-history (.remember (SourceRange. offset length)))
     (try
       (-> this .state deref :selection-history .ignoreSelectionChanges)
       (.selectAndReveal editor new-offset new-length)
