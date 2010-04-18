@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Debug Plug-in
 Bundle-SymbolicName: ccw.debug;singleton:=true
-Bundle-Version: 1.0.4.A002
+Bundle-Version: 1.0.4.STABLE
 Bundle-ClassPath: .
 Bundle-Activator: ccw.debug.Activator
 Require-Bundle: org.eclipse.ui,
