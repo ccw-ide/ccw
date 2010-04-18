@@ -14,7 +14,7 @@
      [ccw CCWPlugin]
      [java.net URL]
      [java.util.zip ZipFile]
-     [org.eclipse.ui.wizards.datatransfer ImportOperation 
+     [org.eclipse.ui.wizards.datatransfer ImportOperation
                                           ZipFileStructureProvider])
   (:gen-class
    :implements [org.eclipse.jface.operation.IRunnableWithProgress]
@@ -74,8 +74,8 @@
 (defn create-project
   [root page monitor overwrite-query]
   (.beginTask monitor "Configuring project..." 1)
-  (let [nature-ids ["org.eclipse.pde.PluginNature" 
-                    "org.eclipse.jdt.core.javanature" 
+  (let [nature-ids ["org.eclipse.pde.PluginNature"
+                    "org.eclipse.jdt.core.javanature"
                     "ccw.nature"]
         project-name (.getProjectName page)
         project (config-new-project root project-name nature-ids monitor)]
@@ -83,7 +83,7 @@
 
 (defn -run
   [this monitor]
-  (let 
+  (let
     [monitor (if monitor monitor (NullProgressMonitor.))
       state @(.state this)
       pages (:pages state)

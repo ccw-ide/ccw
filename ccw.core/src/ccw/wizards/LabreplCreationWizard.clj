@@ -31,14 +31,14 @@
   (let [main-page (LabreplCreateProjectPage. "New Labrepl Project")]
     (dosync (alter (.state this) assoc :main-page main-page))
     (.addPage this main-page)))
- 
+
 (defn -init
 	[this workbench currentSelection]
 	nil)
 
 (defn -performFinish
 	[this]
-  (let 
+  (let
     [shell (.getShell this)
      display (.getDisplay shell)
      open-dialog
@@ -59,8 +59,8 @@
      import-overwrite-query
        (proxy [IOverwriteQuery] []
          (queryOverwrite [file]
-           (let 
-             [return-codes [IOverwriteQuery/YES IOverwriteQuery/NO 
+           (let
+             [return-codes [IOverwriteQuery/YES IOverwriteQuery/NO
                             IOverwriteQuery/ALL IOverwriteQuery/CANCEL]
                return-value (open-dialog file)]
              (if (< return-value 0)
