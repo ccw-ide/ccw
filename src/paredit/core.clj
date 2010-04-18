@@ -544,6 +544,7 @@
                  "{|}" "{}| {}"
                  "(foo|)" "(foo)| ()"
                  "({|})" "({}| {})"
+                 "(defn hello |[world])" "(defn hello)| ([world])"
                  }]
       ["M-J"    :paredit-join-sexps
                 {"(hello)| (world)" "(hello| world)",
@@ -1008,7 +1009,7 @@
         (let [[l r] (normalized-selection rloc offset length)
               parent (cond
                        (= (str \") (loc-tag l)) l ; stay at the same level, and let the code take the correct open/close puncts, e.g. \" \"
-                       :else (if-let [nl (zip/up l)] nl l))
+                       :else (if-let [nl (zip/up (if (start-punct? l) (parse-node l) (parse-leave l)))] nl (parse-leave l)))
               open-punct (loc-tag parent)
               _ (spy open-punct)
               close-punct (*brackets* open-punct)]
