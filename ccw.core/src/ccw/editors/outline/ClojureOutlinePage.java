@@ -18,6 +18,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
@@ -34,9 +36,12 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.texteditor.IDocumentProvider;
@@ -147,6 +152,7 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 	private EditorSelectionChangedListener editorSelectionChangedListener;
 	private DocumentChangedListener documentChangedListener;
 	private ISelection lastSelection;
+	private TreeViewer treeViewer;
 
 	public ClojureOutlinePage(IDocumentProvider documentProvider,
 			AntlrBasedClojureEditor editor) {
@@ -158,8 +164,8 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
-		final TreeViewer viewer = getTreeViewer();
-		viewer.setContentProvider(new ITreeContentProvider() {
+		treeViewer = getTreeViewer();
+		treeViewer.setContentProvider(new ITreeContentProvider() {
 
 			public void inputChanged(Viewer viewer, Object oldInput,
 					Object newInput) {
@@ -187,22 +193,66 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 				return null;
 			}
 		});
-		viewer.setLabelProvider(new DelegatingStyledCellLabelProvider(
+		treeViewer.setLabelProvider(new DelegatingStyledCellLabelProvider(
 				new OutlineLabelProvider()));
-		viewer.addSelectionChangedListener(this);
-		viewer.setInput(new ArrayList<Object>(input));
+		treeViewer.addSelectionChangedListener(this);
+		treeViewer.setInput(new ArrayList<Object>(input));
 		treeSelectionChangedListener = new TreeSelectionChangedListener();
-		viewer.addSelectionChangedListener(treeSelectionChangedListener);
+		treeViewer.addSelectionChangedListener(treeSelectionChangedListener);
 
 		IPostSelectionProvider selectionProvider = (IPostSelectionProvider) editor
 				.getSelectionProvider();
 		editorSelectionChangedListener = new EditorSelectionChangedListener(
-				viewer);
+				treeViewer);
 		selectionProvider
 				.addPostSelectionChangedListener(editorSelectionChangedListener);
 		ISelection selection = selectionProvider.getSelection();
 		selectInOutline(selection);
+		
+		registerToolbarActions();
+	}
 
+	private void registerToolbarActions() {
+		IActionBars actionBars = getSite().getActionBars();
+		IToolBarManager toolBarManager= actionBars.getToolBarManager();
+		toolBarManager.add(new LexicalSortingAction());
+	}
+
+	private class LexicalSortingAction extends Action {
+
+		private ViewerComparator fComparator= new ViewerComparator();
+
+		public LexicalSortingAction() {
+			super();
+			setText("Sort");
+			setImageDescriptor(CCWPlugin.getDefault().getImageRegistry().getDescriptor(CCWPlugin.SORT));
+			setToolTipText("Sort");
+			setDescription("Sort alphabetically");
+
+			boolean checked= CCWPlugin.getDefault().getPreferenceStore().getBoolean("LexicalSortingAction.isChecked"); //$NON-NLS-1$
+			valueChanged(checked, false);
+		}
+
+		public void run() {
+			valueChanged(isChecked(), true);
+		}
+
+		private void valueChanged(final boolean on, boolean store) {
+			setChecked(on);
+			BusyIndicator.showWhile(treeViewer.getControl().getDisplay(), new Runnable() {
+				public void run() {
+					if (on) {
+						treeViewer.setComparator(fComparator);
+					} else {
+						treeViewer.setComparator(null);
+					}
+				}
+			});
+
+			if (store) {
+				CCWPlugin.getDefault().getPreferenceStore().setValue("LexicalSortingAction.isChecked", on); //$NON-NLS-1$
+			}
+		}
 	}
 
 	/**

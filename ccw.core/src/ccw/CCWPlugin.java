@@ -213,11 +213,13 @@ public class CCWPlugin extends AbstractUIPlugin {
     	reg.put(PUBLIC_FUNCTION, ImageDescriptor.createFromURL(getBundle().getEntry("/icons/jdt/methpub_obj.gif")));
         reg.put(PRIVATE_FUNCTION, ImageDescriptor.createFromURL(getBundle().getEntry("/icons/jdt/methpri_obj.gif")));
         reg.put(CLASS, ImageDescriptor.createFromURL(getBundle().getEntry("/icons/jdt/class_obj.gif")));
+        reg.put(SORT, ImageDescriptor.createFromURL(getBundle().getEntry("/icons/jdt/alphab_sort_co.gif")));
     }
     public static final String NS = "icon.namespace";
     public static final String PUBLIC_FUNCTION = "icon.function.public";
     public static final String PRIVATE_FUNCTION = "icon.function.private";
 	public static final String CLASS = "class_obj.gif";
+	public static final String SORT = "alphab_sort_co.gif";
 
 
     private List<ILaunch> launches = new ArrayList<ILaunch>();
