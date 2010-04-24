@@ -4,6 +4,7 @@ Bundle-Name: Counterclockwise Examples Plug-In
 Bundle-SymbolicName: ccw.support.examples;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: ccw.support.labrepl.Activator
+Bundle-Localization: plugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  ccw.clojure;bundle-version="1.1.0"
