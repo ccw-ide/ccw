@@ -1,4 +1,4 @@
-(ns ccw.wizards.LabreplCreateProjectPage
+(ns ccw.support.labrepl.wizards.LabreplCreateProjectPage
   (:gen-class
    :extends org.eclipse.ui.dialogs.WizardNewProjectCreationPage
    :init myinit

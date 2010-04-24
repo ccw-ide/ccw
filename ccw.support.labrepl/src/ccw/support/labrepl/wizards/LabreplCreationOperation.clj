@@ -1,6 +1,8 @@
-(ns ccw.wizards.LabreplCreationOperation
+(ns ccw.support.labrepl.wizards.LabreplCreationOperation
   (:import
      [java.lang.reflect InvocationTargetException]
+     [java.net URL]
+     [java.util.zip ZipFile]
      [org.eclipse.core.runtime NullProgressMonitor
                             SubProgressMonitor
                             CoreException
@@ -11,9 +13,7 @@
      [org.eclipse.ui.dialogs IOverwriteQuery]
      [java.io IOException]
      [org.eclipse.core.resources ResourcesPlugin]
-     [ccw CCWPlugin]
-     [java.net URL]
-     [java.util.zip ZipFile]
+     [ccw.support.labrepl Activator]
      [org.eclipse.ui.wizards.datatransfer ImportOperation
                                           ZipFileStructureProvider])
   (:gen-class
@@ -46,13 +46,13 @@
   [plugin-relative-path]
   (try
     (let
-      [bundle (.getBundle (CCWPlugin/getDefault))
+      [bundle (.getBundle (Activator/getDefault))
         starter-url (URL. (.getEntry bundle "/") plugin-relative-path)]
       (ZipFile. (.getFile (FileLocator/toFileURL starter-url))))
     (catch IOException exception
       (let
         [message (str plugin-relative-path ": " (.getMessage exception))
-          status (Status. IStatus/ERROR CCWPlugin/PLUGIN_ID IStatus/ERROR  message exception)]
+          status (Status. IStatus/ERROR Activator/PLUGIN_ID IStatus/ERROR  message exception)]
         (throw (CoreException. status))))))
 
 (defn import-files-from-zip

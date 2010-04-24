@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Counterclockwise labrepl Plug-In
+Bundle-SymbolicName: ccw.support.labrepl;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: ccw.support.labrepl.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ ccw.clojure;bundle-version="1.1.0",
+ ccw.clojurecontrib;bundle-version="1.1.0"
+Bundle-ClassPath: .,
+ classes/
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: org.eclipse.core.resources,
+ org.eclipse.jdt.core,
+ org.eclipse.jdt.launching,
+ org.eclipse.ui.actions,
+ org.eclipse.ui.dialogs,
+ org.eclipse.ui.wizards.datatransfer,
+ org.eclipse.ui.wizards.newresource
+Eclipse-RegisterBuddy: ccw.clojure
+Bundle-Vendor: Counterclockwise team

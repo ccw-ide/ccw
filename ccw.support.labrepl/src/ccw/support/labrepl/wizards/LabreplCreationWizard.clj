@@ -1,11 +1,13 @@
-(ns ccw.wizards.LabreplCreationWizard
+(ns ccw.support.labrepl.wizards.LabreplCreationWizard
   (:import
     [org.eclipse.ui.actions WorkspaceModifyDelegatingOperation]
     [org.eclipse.ui.dialogs IOverwriteQuery]
     [org.eclipse.jface.dialogs IDialogConstants]
     [org.eclipse.osgi.util NLS]
     [org.eclipse.jface.dialogs MessageDialog]
-    [ccw.wizards LabreplCreateProjectPage
+    [ccw.support.labrepl Activator]
+    [ccw.support.labrepl.wizards
+                 LabreplCreateProjectPage
                  LabreplCreationOperation])
   (:gen-class
    :implements [org.eclipse.ui.INewWizard]
@@ -17,11 +19,12 @@
 
 (defn- -myinit
   []
+  (println "hier LabreplCreationWizard  -myinit")
   [[] (ref {})])
 
 (defn- -mypostinit
   [this]
-  (.setDialogSettings this (.getDialogSettings (ccw.CCWPlugin/getDefault)))
+  (.setDialogSettings this (.getDialogSettings (Activator/getDefault)))
 	(.setWindowTitle this "Clojure Labrepl Example project")
   (.setNeedsProgressMonitor this true))
 
