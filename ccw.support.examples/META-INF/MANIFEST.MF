@@ -1,13 +1,12 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Counterclockwise labrepl Plug-In
-Bundle-SymbolicName: ccw.support.labrepl;singleton:=true
+Bundle-Name: Counterclockwise Examples Plug-In
+Bundle-SymbolicName: ccw.support.examples;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: ccw.support.labrepl.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- ccw.clojure;bundle-version="1.1.0",
- ccw.clojurecontrib;bundle-version="1.1.0"
+ ccw.clojure;bundle-version="1.1.0"
 Bundle-ClassPath: .,
  classes/
 Bundle-ActivationPolicy: lazy
