@@ -7,7 +7,8 @@ Bundle-Activator: ccw.support.labrepl.Activator
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- ccw.clojure;bundle-version="1.1.0"
+ ccw.clojure;bundle-version="1.1.0",
+ ccw.support.leiningen;bundle-version="1.0.0"
 Bundle-ClassPath: .,
  classes/
 Bundle-ActivationPolicy: lazy

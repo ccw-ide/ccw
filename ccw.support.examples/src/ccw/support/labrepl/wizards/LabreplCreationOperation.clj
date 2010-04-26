@@ -26,6 +26,9 @@
      [ccw.support.labrepl Activator]
      [org.eclipse.ui.wizards.datatransfer ImportOperation
                                           ZipFileStructureProvider])
+  (:use
+    [leiningen.core :only [read-project defproject]]
+    [leiningen.deps :only [deps]])
   (:gen-class
    :implements [org.eclipse.jface.operation.IRunnableWithProgress]
    :constructors {[clojure.lang.IPersistentVector org.eclipse.ui.dialogs.IOverwriteQuery] []}
@@ -91,7 +94,12 @@
   (.beginTask monitor "Configuring project..." 1)
   (let [project-name (.getProjectName page)
         project (config-new-project root project-name monitor)]
-     (do-imports project (SubProgressMonitor. monitor 1) overwrite-query)))
+     (do-imports project (SubProgressMonitor. monitor 1) overwrite-query)
+     (let [leiningen-pfile (.toOSString (.getLocation (.getFile project "project.clj")))
+           labrepl-leiningen-project (read-project (str leiningen-pfile))]
+       (println (str "leiningen-pfile " leiningen-pfile))
+       (println (str "labrepl-leiningen-project " labrepl-leiningen-project))
+       (deps labrepl-leiningen-project))))
 
 (defn -run
   [this monitor]
