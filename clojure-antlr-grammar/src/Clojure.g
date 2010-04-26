@@ -128,7 +128,7 @@ SYMBOL:
     ;
 
 METADATA_TYPEHINT:
-		NUMBER_SIGN CIRCUMFLEX ( 'ints' | 'floats' | 'longs' | 'doubles' | 'objects' )*
+		NUMBER_SIGN* CIRCUMFLEX ( 'ints' | 'floats' | 'longs' | 'doubles' | 'objects' | NAME | STRING )*
 	;
 	
 fragment

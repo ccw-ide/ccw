@@ -1,5 +1,5 @@
 package ccw.lexers;
-// $ANTLR 3.0 /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g 2009-11-27 23:33:27
+// $ANTLR 3.0 /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g 2010-04-26 21:59:07
 
 import org.antlr.runtime.*;
 import java.util.Stack;
@@ -1433,47 +1433,353 @@ public class ClojureLexer extends Lexer {
     public final void mMETADATA_TYPEHINT() throws RecognitionException {
         try {
             int _type = METADATA_TYPEHINT;
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:131:3: ( NUMBER_SIGN CIRCUMFLEX ( 'ints' | 'floats' | 'longs' | 'doubles' | 'objects' )* )
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:131:3: NUMBER_SIGN CIRCUMFLEX ( 'ints' | 'floats' | 'longs' | 'doubles' | 'objects' )*
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:131:3: ( ( NUMBER_SIGN )* CIRCUMFLEX ( 'ints' | 'floats' | 'longs' | 'doubles' | 'objects' | NAME | STRING )* )
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:131:3: ( NUMBER_SIGN )* CIRCUMFLEX ( 'ints' | 'floats' | 'longs' | 'doubles' | 'objects' | NAME | STRING )*
             {
-            mNUMBER_SIGN(); 
-            mCIRCUMFLEX(); 
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:131:26: ( 'ints' | 'floats' | 'longs' | 'doubles' | 'objects' )*
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:131:3: ( NUMBER_SIGN )*
             loop17:
             do {
-                int alt17=6;
+                int alt17=2;
+                int LA17_0 = input.LA(1);
+
+                if ( (LA17_0=='#') ) {
+                    alt17=1;
+                }
+
+
+                switch (alt17) {
+            	case 1 :
+            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:131:3: NUMBER_SIGN
+            	    {
+            	    mNUMBER_SIGN(); 
+
+            	    }
+            	    break;
+
+            	default :
+            	    break loop17;
+                }
+            } while (true);
+
+            mCIRCUMFLEX(); 
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:131:27: ( 'ints' | 'floats' | 'longs' | 'doubles' | 'objects' | NAME | STRING )*
+            loop18:
+            do {
+                int alt18=8;
                 switch ( input.LA(1) ) {
                 case 'i':
                     {
-                    alt17=1;
+                    int LA18_2 = input.LA(2);
+
+                    if ( (LA18_2=='n') ) {
+                        int LA18_9 = input.LA(3);
+
+                        if ( (LA18_9=='t') ) {
+                            int LA18_14 = input.LA(4);
+
+                            if ( (LA18_14=='s') ) {
+                                alt18=1;
+                            }
+
+                            else {
+                                alt18=6;
+                            }
+
+                        }
+
+                        else {
+                            alt18=6;
+                        }
+
+                    }
+
+                    else {
+                        alt18=6;
+                    }
+
                     }
                     break;
                 case 'f':
                     {
-                    alt17=2;
+                    int LA18_3 = input.LA(2);
+
+                    if ( (LA18_3=='l') ) {
+                        int LA18_10 = input.LA(3);
+
+                        if ( (LA18_10=='o') ) {
+                            int LA18_15 = input.LA(4);
+
+                            if ( (LA18_15=='a') ) {
+                                int LA18_20 = input.LA(5);
+
+                                if ( (LA18_20=='t') ) {
+                                    int LA18_24 = input.LA(6);
+
+                                    if ( (LA18_24=='s') ) {
+                                        alt18=2;
+                                    }
+
+                                    else {
+                                        alt18=6;
+                                    }
+
+                                }
+
+                                else {
+                                    alt18=6;
+                                }
+
+                            }
+
+                            else {
+                                alt18=6;
+                            }
+
+                        }
+
+                        else {
+                            alt18=6;
+                        }
+
+                    }
+
+                    else {
+                        alt18=6;
+                    }
+
                     }
                     break;
                 case 'l':
                     {
-                    alt17=3;
+                    int LA18_4 = input.LA(2);
+
+                    if ( (LA18_4=='o') ) {
+                        int LA18_11 = input.LA(3);
+
+                        if ( (LA18_11=='n') ) {
+                            int LA18_16 = input.LA(4);
+
+                            if ( (LA18_16=='g') ) {
+                                int LA18_21 = input.LA(5);
+
+                                if ( (LA18_21=='s') ) {
+                                    alt18=3;
+                                }
+
+                                else {
+                                    alt18=6;
+                                }
+
+                            }
+
+                            else {
+                                alt18=6;
+                            }
+
+                        }
+
+                        else {
+                            alt18=6;
+                        }
+
+                    }
+
+                    else {
+                        alt18=6;
+                    }
+
                     }
                     break;
                 case 'd':
                     {
-                    alt17=4;
+                    int LA18_5 = input.LA(2);
+
+                    if ( (LA18_5=='o') ) {
+                        int LA18_12 = input.LA(3);
+
+                        if ( (LA18_12=='u') ) {
+                            int LA18_17 = input.LA(4);
+
+                            if ( (LA18_17=='b') ) {
+                                int LA18_22 = input.LA(5);
+
+                                if ( (LA18_22=='l') ) {
+                                    int LA18_26 = input.LA(6);
+
+                                    if ( (LA18_26=='e') ) {
+                                        int LA18_29 = input.LA(7);
+
+                                        if ( (LA18_29=='s') ) {
+                                            alt18=4;
+                                        }
+
+                                        else {
+                                            alt18=6;
+                                        }
+
+                                    }
+
+                                    else {
+                                        alt18=6;
+                                    }
+
+                                }
+
+                                else {
+                                    alt18=6;
+                                }
+
+                            }
+
+                            else {
+                                alt18=6;
+                            }
+
+                        }
+
+                        else {
+                            alt18=6;
+                        }
+
+                    }
+
+                    else {
+                        alt18=6;
+                    }
+
                     }
                     break;
                 case 'o':
                     {
-                    alt17=5;
+                    int LA18_6 = input.LA(2);
+
+                    if ( (LA18_6=='b') ) {
+                        int LA18_13 = input.LA(3);
+
+                        if ( (LA18_13=='j') ) {
+                            int LA18_18 = input.LA(4);
+
+                            if ( (LA18_18=='e') ) {
+                                int LA18_23 = input.LA(5);
+
+                                if ( (LA18_23=='c') ) {
+                                    int LA18_27 = input.LA(6);
+
+                                    if ( (LA18_27=='t') ) {
+                                        int LA18_30 = input.LA(7);
+
+                                        if ( (LA18_30=='s') ) {
+                                            alt18=5;
+                                        }
+
+                                        else {
+                                            alt18=6;
+                                        }
+
+                                    }
+
+                                    else {
+                                        alt18=6;
+                                    }
+
+                                }
+
+                                else {
+                                    alt18=6;
+                                }
+
+                            }
+
+                            else {
+                                alt18=6;
+                            }
+
+                        }
+
+                        else {
+                            alt18=6;
+                        }
+
+                    }
+
+                    else {
+                        alt18=6;
+                    }
+
+                    }
+                    break;
+                case '!':
+                case '$':
+                case '*':
+                case '+':
+                case '-':
+                case '<':
+                case '=':
+                case '>':
+                case '?':
+                case 'A':
+                case 'B':
+                case 'C':
+                case 'D':
+                case 'E':
+                case 'F':
+                case 'G':
+                case 'H':
+                case 'I':
+                case 'J':
+                case 'K':
+                case 'L':
+                case 'M':
+                case 'N':
+                case 'O':
+                case 'P':
+                case 'Q':
+                case 'R':
+                case 'S':
+                case 'T':
+                case 'U':
+                case 'V':
+                case 'W':
+                case 'X':
+                case 'Y':
+                case 'Z':
+                case '_':
+                case 'a':
+                case 'b':
+                case 'c':
+                case 'e':
+                case 'g':
+                case 'h':
+                case 'j':
+                case 'k':
+                case 'm':
+                case 'n':
+                case 'p':
+                case 'q':
+                case 'r':
+                case 's':
+                case 't':
+                case 'u':
+                case 'v':
+                case 'w':
+                case 'x':
+                case 'y':
+                case 'z':
+                    {
+                    alt18=6;
+                    }
+                    break;
+                case '\"':
+                    {
+                    alt18=7;
                     }
                     break;
 
                 }
 
-                switch (alt17) {
+                switch (alt18) {
             	case 1 :
-            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:131:28: 'ints'
+            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:131:29: 'ints'
             	    {
             	    match("ints"); 
 
@@ -1481,7 +1787,7 @@ public class ClojureLexer extends Lexer {
             	    }
             	    break;
             	case 2 :
-            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:131:37: 'floats'
+            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:131:38: 'floats'
             	    {
             	    match("floats"); 
 
@@ -1489,7 +1795,7 @@ public class ClojureLexer extends Lexer {
             	    }
             	    break;
             	case 3 :
-            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:131:48: 'longs'
+            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:131:49: 'longs'
             	    {
             	    match("longs"); 
 
@@ -1497,7 +1803,7 @@ public class ClojureLexer extends Lexer {
             	    }
             	    break;
             	case 4 :
-            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:131:58: 'doubles'
+            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:131:59: 'doubles'
             	    {
             	    match("doubles"); 
 
@@ -1505,16 +1811,30 @@ public class ClojureLexer extends Lexer {
             	    }
             	    break;
             	case 5 :
-            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:131:70: 'objects'
+            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:131:71: 'objects'
             	    {
             	    match("objects"); 
 
 
             	    }
             	    break;
+            	case 6 :
+            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:131:83: NAME
+            	    {
+            	    mNAME(); 
+
+            	    }
+            	    break;
+            	case 7 :
+            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:131:90: STRING
+            	    {
+            	    mSTRING(); 
+
+            	    }
+            	    break;
 
             	default :
-            	    break loop17;
+            	    break loop18;
                 }
             } while (true);
 
@@ -1536,17 +1856,17 @@ public class ClojureLexer extends Lexer {
             {
             mSYMBOL_HEAD(); 
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:135:21: ( SYMBOL_REST )*
-            loop18:
+            loop19:
             do {
-                int alt18=2;
-                int LA18_0 = input.LA(1);
+                int alt19=2;
+                int LA19_0 = input.LA(1);
 
-                if ( (LA18_0=='!'||(LA18_0>='#' && LA18_0<='$')||(LA18_0>='*' && LA18_0<='+')||(LA18_0>='-' && LA18_0<='.')||(LA18_0>='0' && LA18_0<='9')||(LA18_0>='<' && LA18_0<='?')||(LA18_0>='A' && LA18_0<='Z')||LA18_0=='_'||(LA18_0>='a' && LA18_0<='z')) ) {
-                    alt18=1;
+                if ( (LA19_0=='!'||(LA19_0>='#' && LA19_0<='$')||(LA19_0>='*' && LA19_0<='+')||(LA19_0>='-' && LA19_0<='.')||(LA19_0>='0' && LA19_0<='9')||(LA19_0>='<' && LA19_0<='?')||(LA19_0>='A' && LA19_0<='Z')||LA19_0=='_'||(LA19_0>='a' && LA19_0<='z')) ) {
+                    alt19=1;
                 }
 
 
-                switch (alt18) {
+                switch (alt19) {
             	case 1 :
             	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:135:21: SYMBOL_REST
             	    {
@@ -1556,39 +1876,39 @@ public class ClojureLexer extends Lexer {
             	    break;
 
             	default :
-            	    break loop18;
+            	    break loop19;
                 }
             } while (true);
 
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:135:34: ( ':' ( SYMBOL_REST )+ )*
-            loop20:
+            loop21:
             do {
-                int alt20=2;
-                int LA20_0 = input.LA(1);
+                int alt21=2;
+                int LA21_0 = input.LA(1);
 
-                if ( (LA20_0==':') ) {
-                    alt20=1;
+                if ( (LA21_0==':') ) {
+                    alt21=1;
                 }
 
 
-                switch (alt20) {
+                switch (alt21) {
             	case 1 :
             	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:135:35: ':' ( SYMBOL_REST )+
             	    {
             	    match(':'); 
             	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:135:39: ( SYMBOL_REST )+
-            	    int cnt19=0;
-            	    loop19:
+            	    int cnt20=0;
+            	    loop20:
             	    do {
-            	        int alt19=2;
-            	        int LA19_0 = input.LA(1);
+            	        int alt20=2;
+            	        int LA20_0 = input.LA(1);
 
-            	        if ( (LA19_0=='!'||(LA19_0>='#' && LA19_0<='$')||(LA19_0>='*' && LA19_0<='+')||(LA19_0>='-' && LA19_0<='.')||(LA19_0>='0' && LA19_0<='9')||(LA19_0>='<' && LA19_0<='?')||(LA19_0>='A' && LA19_0<='Z')||LA19_0=='_'||(LA19_0>='a' && LA19_0<='z')) ) {
-            	            alt19=1;
+            	        if ( (LA20_0=='!'||(LA20_0>='#' && LA20_0<='$')||(LA20_0>='*' && LA20_0<='+')||(LA20_0>='-' && LA20_0<='.')||(LA20_0>='0' && LA20_0<='9')||(LA20_0>='<' && LA20_0<='?')||(LA20_0>='A' && LA20_0<='Z')||LA20_0=='_'||(LA20_0>='a' && LA20_0<='z')) ) {
+            	            alt20=1;
             	        }
 
 
-            	        switch (alt19) {
+            	        switch (alt20) {
             	    	case 1 :
             	    	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:135:39: SYMBOL_REST
             	    	    {
@@ -1598,12 +1918,12 @@ public class ClojureLexer extends Lexer {
             	    	    break;
 
             	    	default :
-            	    	    if ( cnt19 >= 1 ) break loop19;
+            	    	    if ( cnt20 >= 1 ) break loop20;
             	                EarlyExitException eee =
-            	                    new EarlyExitException(19, input);
+            	                    new EarlyExitException(20, input);
             	                throw eee;
             	        }
-            	        cnt19++;
+            	        cnt20++;
             	    } while (true);
 
 
@@ -1611,7 +1931,7 @@ public class ClojureLexer extends Lexer {
             	    break;
 
             	default :
-            	    break loop20;
+            	    break loop21;
                 }
             } while (true);
 
@@ -1757,17 +2077,17 @@ public class ClojureLexer extends Lexer {
             {
             match(';'); 
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:178:13: (~ ( '\\r' | '\\n' ) )*
-            loop21:
+            loop22:
             do {
-                int alt21=2;
-                int LA21_0 = input.LA(1);
+                int alt22=2;
+                int LA22_0 = input.LA(1);
 
-                if ( ((LA21_0>='\u0000' && LA21_0<='\t')||(LA21_0>='\u000B' && LA21_0<='\f')||(LA21_0>='\u000E' && LA21_0<='\uFFFE')) ) {
-                    alt21=1;
+                if ( ((LA22_0>='\u0000' && LA22_0<='\t')||(LA22_0>='\u000B' && LA22_0<='\f')||(LA22_0>='\u000E' && LA22_0<='\uFFFE')) ) {
+                    alt22=1;
                 }
 
 
-                switch (alt21) {
+                switch (alt22) {
             	case 1 :
             	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:178:13: ~ ( '\\r' | '\\n' )
             	    {
@@ -1786,29 +2106,29 @@ public class ClojureLexer extends Lexer {
             	    break;
 
             	default :
-            	    break loop21;
+            	    break loop22;
                 }
             } while (true);
 
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:178:29: ( ( '\\r' )? '\\n' )?
-            int alt23=2;
-            int LA23_0 = input.LA(1);
+            int alt24=2;
+            int LA24_0 = input.LA(1);
 
-            if ( (LA23_0=='\n'||LA23_0=='\r') ) {
-                alt23=1;
+            if ( (LA24_0=='\n'||LA24_0=='\r') ) {
+                alt24=1;
             }
-            switch (alt23) {
+            switch (alt24) {
                 case 1 :
                     // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:178:30: ( '\\r' )? '\\n'
                     {
                     // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:178:30: ( '\\r' )?
-                    int alt22=2;
-                    int LA22_0 = input.LA(1);
+                    int alt23=2;
+                    int LA23_0 = input.LA(1);
 
-                    if ( (LA22_0=='\r') ) {
-                        alt22=1;
+                    if ( (LA23_0=='\r') ) {
+                        alt23=1;
                     }
-                    switch (alt22) {
+                    switch (alt23) {
                         case 1 :
                             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:178:30: '\\r'
                             {
@@ -1845,18 +2165,18 @@ public class ClojureLexer extends Lexer {
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:181:9: ( ' ' | '\\t' | ',' | '\\r' | '\\n' )+
             {
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:181:9: ( ' ' | '\\t' | ',' | '\\r' | '\\n' )+
-            int cnt24=0;
-            loop24:
+            int cnt25=0;
+            loop25:
             do {
-                int alt24=2;
-                int LA24_0 = input.LA(1);
+                int alt25=2;
+                int LA25_0 = input.LA(1);
 
-                if ( ((LA24_0>='\t' && LA24_0<='\n')||LA24_0=='\r'||LA24_0==' '||LA24_0==',') ) {
-                    alt24=1;
+                if ( ((LA25_0>='\t' && LA25_0<='\n')||LA25_0=='\r'||LA25_0==' '||LA25_0==',') ) {
+                    alt25=1;
                 }
 
 
-                switch (alt24) {
+                switch (alt25) {
             	case 1 :
             	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:
             	    {
@@ -1875,12 +2195,12 @@ public class ClojureLexer extends Lexer {
             	    break;
 
             	default :
-            	    if ( cnt24 >= 1 ) break loop24;
+            	    if ( cnt25 >= 1 ) break loop25;
                         EarlyExitException eee =
-                            new EarlyExitException(24, input);
+                            new EarlyExitException(25, input);
                         throw eee;
                 }
-                cnt24++;
+                cnt25++;
             } while (true);
 
             channel=HIDDEN;
@@ -1899,10 +2219,10 @@ public class ClojureLexer extends Lexer {
         try {
             int _type = LAMBDA_ARG;
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:186:9: ( '%' '1' .. '9' ( '0' .. '9' )* | '%&' | '%' )
-            int alt26=3;
-            int LA26_0 = input.LA(1);
+            int alt27=3;
+            int LA27_0 = input.LA(1);
 
-            if ( (LA26_0=='%') ) {
+            if ( (LA27_0=='%') ) {
                 switch ( input.LA(2) ) {
                 case '1':
                 case '2':
@@ -1914,42 +2234,42 @@ public class ClojureLexer extends Lexer {
                 case '8':
                 case '9':
                     {
-                    alt26=1;
+                    alt27=1;
                     }
                     break;
                 case '&':
                     {
-                    alt26=2;
+                    alt27=2;
                     }
                     break;
                 default:
-                    alt26=3;}
+                    alt27=3;}
 
             }
             else {
                 NoViableAltException nvae =
-                    new NoViableAltException("185:1: LAMBDA_ARG : ( '%' '1' .. '9' ( '0' .. '9' )* | '%&' | '%' );", 26, 0, input);
+                    new NoViableAltException("185:1: LAMBDA_ARG : ( '%' '1' .. '9' ( '0' .. '9' )* | '%&' | '%' );", 27, 0, input);
 
                 throw nvae;
             }
-            switch (alt26) {
+            switch (alt27) {
                 case 1 :
                     // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:186:9: '%' '1' .. '9' ( '0' .. '9' )*
                     {
                     match('%'); 
                     matchRange('1','9'); 
                     // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:186:22: ( '0' .. '9' )*
-                    loop25:
+                    loop26:
                     do {
-                        int alt25=2;
-                        int LA25_0 = input.LA(1);
+                        int alt26=2;
+                        int LA26_0 = input.LA(1);
 
-                        if ( ((LA25_0>='0' && LA25_0<='9')) ) {
-                            alt25=1;
+                        if ( ((LA26_0>='0' && LA26_0<='9')) ) {
+                            alt26=1;
                         }
 
 
-                        switch (alt25) {
+                        switch (alt26) {
                     	case 1 :
                     	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:186:22: '0' .. '9'
                     	    {
@@ -1959,7 +2279,7 @@ public class ClojureLexer extends Lexer {
                     	    break;
 
                     	default :
-                    	    break loop25;
+                    	    break loop26;
                         }
                     } while (true);
 
@@ -1992,9 +2312,9 @@ public class ClojureLexer extends Lexer {
 
     public void mTokens() throws RecognitionException {
         // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:1:10: ( OPEN_PAREN | CLOSE_PAREN | AMPERSAND | LEFT_SQUARE_BRACKET | RIGHT_SQUARE_BRACKET | LEFT_CURLY_BRACKET | RIGHT_CURLY_BRACKET | BACKSLASH | CIRCUMFLEX | COMMERCIAL_AT | NUMBER_SIGN | APOSTROPHE | SPECIAL_FORM | STRING | REGEX_LITERAL | NUMBER | CHARACTER | HEXDIGIT | NIL | BOOLEAN | SYMBOL | METADATA_TYPEHINT | KEYWORD | SYNTAX_QUOTE | UNQUOTE_SPLICING | UNQUOTE | COMMENT | SPACE | LAMBDA_ARG )
-        int alt27=29;
-        alt27 = dfa27.predict(input);
-        switch (alt27) {
+        int alt28=29;
+        alt28 = dfa28.predict(input);
+        switch (alt28) {
             case 1 :
                 // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:1:10: OPEN_PAREN
                 {
@@ -2204,41 +2524,41 @@ public class ClojureLexer extends Lexer {
     }
 
 
-    protected DFA27 dfa27 = new DFA27(this);
-    static final String DFA27_eotS =
-        "\10\uffff\1\45\2\uffff\1\46\1\uffff\1\53\4\35\1\53\5\35\2\uffff"+
-        "\1\35\1\uffff\1\53\3\uffff\1\75\10\uffff\1\35\1\30\1\uffff\1\30"+
-        "\5\35\1\30\7\35\1\73\3\uffff\2\30\2\35\1\30\2\35\1\30\3\35\1\30"+
-        "\1\125\3\35\1\30\3\35\1\135\2\35\1\uffff\1\30\1\73\1\35\1\73\1\30"+
-        "\1\135\1\30\1\uffff\1\30\11\35\1\30\1\35\1\30";
-    static final String DFA27_eofS =
-        "\153\uffff";
-    static final String DFA27_minS =
-        "\1\11\7\uffff\1\0\2\uffff\1\42\1\uffff\1\41\1\146\1\145\1\165\1"+
-        "\141\1\41\1\145\1\150\1\157\2\145\2\uffff\1\60\1\uffff\1\41\3\uffff"+
-        "\1\100\10\uffff\1\146\1\41\1\uffff\1\41\1\164\2\157\1\162\1\154"+
-        "\1\41\1\143\1\165\1\162\1\156\1\167\1\154\1\164\1\41\3\uffff\2\41"+
-        "\1\160\1\164\1\41\1\163\1\165\1\41\1\145\1\157\1\151\3\41\1\60\1"+
-        "\55\1\41\2\145\1\162\1\41\1\167\1\164\1\uffff\2\41\1\60\4\41\1\uffff"+
-        "\1\41\1\157\1\162\1\55\1\145\1\156\1\151\2\164\1\145\1\41\1\162"+
-        "\1\41";
-    static final String DFA27_maxS =
-        "\1\176\7\uffff\1\ufffe\2\uffff\1\136\1\uffff\1\172\1\146\1\157\1"+
-        "\165\1\141\1\172\1\145\1\162\1\157\1\151\1\145\2\uffff\1\71\1\uffff"+
-        "\1\172\3\uffff\1\100\10\uffff\1\146\1\172\1\uffff\1\172\1\164\2"+
-        "\157\1\162\1\154\1\172\1\143\1\171\1\162\1\156\1\167\1\154\1\164"+
-        "\1\172\3\uffff\2\172\1\160\1\164\1\172\1\163\1\165\1\172\1\145\1"+
-        "\157\1\151\2\172\1\41\2\71\1\172\2\145\1\162\1\172\1\167\1\164\1"+
-        "\uffff\2\172\1\71\4\172\1\uffff\1\172\1\157\1\162\1\55\1\145\1\170"+
-        "\1\151\2\164\1\145\1\172\1\162\1\172";
-    static final String DFA27_acceptS =
-        "\1\uffff\1\1\1\2\1\3\1\4\1\5\1\6\1\7\1\uffff\1\11\1\12\1\uffff\1"+
-        "\14\13\uffff\1\15\1\16\1\uffff\1\20\1\uffff\1\25\1\27\1\30\1\uffff"+
-        "\1\33\1\34\1\35\1\21\1\10\1\13\1\17\1\26\2\uffff\1\22\17\uffff\1"+
-        "\20\1\31\1\32\27\uffff\1\23\7\uffff\1\24\15\uffff";
-    static final String DFA27_specialS =
-        "\153\uffff}>";
-    static final String[] DFA27_transitionS = {
+    protected DFA28 dfa28 = new DFA28(this);
+    static final String DFA28_eotS =
+        "\10\uffff\1\45\1\46\1\uffff\1\50\1\uffff\1\54\4\35\1\54\5\35\2\uffff"+
+        "\1\35\1\uffff\1\54\3\uffff\1\76\11\uffff\1\30\1\35\1\uffff\1\30"+
+        "\5\35\1\30\7\35\1\74\3\uffff\2\30\2\35\1\30\4\35\1\30\1\35\1\30"+
+        "\1\126\3\35\1\30\4\35\1\137\1\35\1\uffff\1\30\1\74\1\35\1\74\1\30"+
+        "\1\137\2\30\1\uffff\12\35\2\30";
+    static final String DFA28_eofS =
+        "\154\uffff";
+    static final String DFA28_minS =
+        "\1\11\7\uffff\1\0\1\41\1\uffff\1\42\1\uffff\1\41\1\146\1\145\1\165"+
+        "\1\141\1\41\1\145\1\150\1\157\2\145\2\uffff\1\60\1\uffff\1\41\3"+
+        "\uffff\1\100\11\uffff\1\41\1\146\1\uffff\1\41\1\164\2\157\1\162"+
+        "\1\154\1\41\1\143\1\162\1\165\1\156\1\167\1\154\1\164\1\41\3\uffff"+
+        "\2\41\1\160\1\164\1\41\1\163\1\165\1\157\1\145\1\41\1\151\3\41\1"+
+        "\60\1\55\1\41\2\145\1\162\1\167\1\41\1\164\1\uffff\2\41\1\60\5\41"+
+        "\1\uffff\1\157\1\162\1\55\1\145\1\156\1\164\1\151\1\145\1\164\1"+
+        "\162\2\41";
+    static final String DFA28_maxS =
+        "\1\176\7\uffff\1\ufffe\1\172\1\uffff\1\136\1\uffff\1\172\1\146\1"+
+        "\157\1\165\1\141\1\172\1\145\1\162\1\157\1\151\1\145\2\uffff\1\71"+
+        "\1\uffff\1\172\3\uffff\1\100\11\uffff\1\172\1\146\1\uffff\1\172"+
+        "\1\164\2\157\1\162\1\154\1\172\1\143\1\162\1\171\1\156\1\167\1\154"+
+        "\1\164\1\172\3\uffff\2\172\1\160\1\164\1\172\1\163\1\165\1\157\1"+
+        "\145\1\172\1\151\2\172\1\41\2\71\1\172\2\145\1\162\1\167\1\172\1"+
+        "\164\1\uffff\2\172\1\71\5\172\1\uffff\1\157\1\162\1\55\1\145\1\170"+
+        "\1\164\1\151\1\145\1\164\1\162\2\172";
+    static final String DFA28_acceptS =
+        "\1\uffff\1\1\1\2\1\3\1\4\1\5\1\6\1\7\2\uffff\1\12\1\uffff\1\14\13"+
+        "\uffff\1\15\1\16\1\uffff\1\20\1\uffff\1\25\1\27\1\30\1\uffff\1\33"+
+        "\1\34\1\35\1\21\1\10\1\11\1\26\1\13\1\17\2\uffff\1\22\17\uffff\1"+
+        "\20\1\31\1\32\27\uffff\1\23\10\uffff\1\24\14\uffff";
+    static final String DFA28_specialS =
+        "\154\uffff}>";
+    static final String[] DFA28_transitionS = {
             "\2\42\2\uffff\1\42\22\uffff\1\42\1\35\1\31\1\13\1\35\1\43\1"+
             "\3\1\14\1\1\1\2\2\35\1\42\1\32\1\30\1\35\12\33\1\36\1\41\4\35"+
             "\1\12\6\34\24\35\1\4\1\10\1\5\1\11\1\35\1\37\3\34\1\15\1\34"+
@@ -2252,64 +2572,66 @@ public class ClojureLexer extends Lexer {
             "",
             "",
             "\uffff\44",
+            "\2\47\1\uffff\1\47\5\uffff\2\47\1\uffff\1\47\16\uffff\4\47\1"+
+            "\uffff\32\47\4\uffff\1\47\1\uffff\32\47",
             "",
-            "",
-            "\1\47\73\uffff\1\50",
+            "\1\51\1\47\72\uffff\1\47",
             "",
             "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\16\35\1\uffff\4\35\1"+
-            "\uffff\32\35\4\uffff\1\35\1\uffff\4\35\1\51\11\35\1\52\13\35",
-            "\1\54",
-            "\1\55\11\uffff\1\56",
-            "\1\57",
+            "\uffff\32\35\4\uffff\1\35\1\uffff\4\35\1\53\11\35\1\52\13\35",
+            "\1\55",
+            "\1\56\11\uffff\1\57",
             "\1\60",
+            "\1\61",
             "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\16\35\1\uffff\4\35\1"+
-            "\uffff\32\35\4\uffff\1\35\1\uffff\1\61\14\35\1\62\14\35",
-            "\1\63",
-            "\1\65\11\uffff\1\64",
-            "\1\66",
-            "\1\67\3\uffff\1\70",
-            "\1\71",
+            "\uffff\32\35\4\uffff\1\35\1\uffff\1\62\14\35\1\63\14\35",
+            "\1\64",
+            "\1\65\11\uffff\1\66",
+            "\1\67",
+            "\1\70\3\uffff\1\71",
+            "\1\72",
             "",
             "",
-            "\12\72",
+            "\12\73",
             "",
-            "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\16\35\1\uffff\4\35\1"+
-            "\uffff\32\35\4\uffff\1\35\1\uffff\32\35",
-            "",
-            "",
-            "",
-            "\1\74",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "\1\76",
             "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\16\35\1\uffff\4\35\1"+
             "\uffff\32\35\4\uffff\1\35\1\uffff\32\35",
+            "",
+            "",
+            "",
+            "\1\75",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
             "",
             "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\16\35\1\uffff\4\35\1"+
             "\uffff\32\35\4\uffff\1\35\1\uffff\32\35",
             "\1\77",
+            "",
+            "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\16\35\1\uffff\4\35\1"+
+            "\uffff\32\35\4\uffff\1\35\1\uffff\32\35",
             "\1\100",
             "\1\101",
             "\1\102",
             "\1\103",
+            "\1\104",
             "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\16\35\1\uffff\4\35\1"+
             "\uffff\32\35\4\uffff\1\35\1\uffff\32\35",
-            "\1\104",
-            "\1\106\3\uffff\1\105",
-            "\1\107",
-            "\1\110",
+            "\1\105",
+            "\1\106",
+            "\1\107\3\uffff\1\110",
             "\1\111",
             "\1\112",
             "\1\113",
-            "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\1\35\1\114\1\35\12\72"+
-            "\1\35\1\uffff\4\35\1\uffff\4\35\1\115\25\35\4\uffff\1\35\1\uffff"+
-            "\4\35\1\115\25\35",
+            "\1\114",
+            "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\1\35\1\115\1\35\12\73"+
+            "\1\35\1\uffff\4\35\1\uffff\4\35\1\116\25\35\4\uffff\1\35\1\uffff"+
+            "\4\35\1\116\25\35",
             "",
             "",
             "",
@@ -2317,41 +2639,41 @@ public class ClojureLexer extends Lexer {
             "\uffff\32\35\4\uffff\1\35\1\uffff\32\35",
             "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\16\35\1\uffff\4\35\1"+
             "\uffff\32\35\4\uffff\1\35\1\uffff\32\35",
-            "\1\116",
             "\1\117",
-            "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\16\35\1\uffff\4\35\1"+
-            "\uffff\32\35\4\uffff\1\35\1\uffff\32\35",
             "\1\120",
-            "\1\121",
             "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\16\35\1\uffff\4\35\1"+
             "\uffff\32\35\4\uffff\1\35\1\uffff\32\35",
+            "\1\121",
             "\1\122",
             "\1\123",
             "\1\124",
             "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\16\35\1\uffff\4\35\1"+
             "\uffff\32\35\4\uffff\1\35\1\uffff\32\35",
+            "\1\125",
             "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\16\35\1\uffff\4\35\1"+
             "\uffff\32\35\4\uffff\1\35\1\uffff\32\35",
-            "\1\126",
-            "\12\127",
-            "\1\130\2\uffff\12\131",
             "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\16\35\1\uffff\4\35\1"+
             "\uffff\32\35\4\uffff\1\35\1\uffff\32\35",
-            "\1\132",
+            "\1\127",
+            "\12\130",
+            "\1\131\2\uffff\12\132",
+            "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\16\35\1\uffff\4\35\1"+
+            "\uffff\32\35\4\uffff\1\35\1\uffff\32\35",
             "\1\133",
             "\1\134",
+            "\1\135",
+            "\1\136",
             "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\16\35\1\uffff\4\35\1"+
             "\uffff\32\35\4\uffff\1\35\1\uffff\32\35",
-            "\1\136",
-            "\1\137",
+            "\1\140",
             "",
             "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\16\35\1\uffff\4\35\1"+
             "\uffff\32\35\4\uffff\1\35\1\uffff\32\35",
-            "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\3\35\12\127\1\35\1\uffff"+
-            "\4\35\1\uffff\4\35\1\115\25\35\4\uffff\1\35\1\uffff\4\35\1\115"+
+            "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\3\35\12\130\1\35\1\uffff"+
+            "\4\35\1\uffff\4\35\1\116\25\35\4\uffff\1\35\1\uffff\4\35\1\116"+
             "\25\35",
-            "\12\131",
-            "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\3\35\12\131\1\35\1\uffff"+
+            "\12\132",
+            "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\3\35\12\132\1\35\1\uffff"+
             "\4\35\1\uffff\32\35\4\uffff\1\35\1\uffff\32\35",
             "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\16\35\1\uffff\4\35\1"+
             "\uffff\32\35\4\uffff\1\35\1\uffff\32\35",
@@ -2359,53 +2681,53 @@ public class ClojureLexer extends Lexer {
             "\uffff\32\35\4\uffff\1\35\1\uffff\32\35",
             "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\16\35\1\uffff\4\35\1"+
             "\uffff\32\35\4\uffff\1\35\1\uffff\32\35",
-            "",
             "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\16\35\1\uffff\4\35\1"+
             "\uffff\32\35\4\uffff\1\35\1\uffff\32\35",
-            "\1\140",
+            "",
             "\1\141",
             "\1\142",
             "\1\143",
-            "\1\145\11\uffff\1\144",
-            "\1\146",
+            "\1\144",
+            "\1\145\11\uffff\1\146",
             "\1\147",
             "\1\150",
             "\1\151",
+            "\1\152",
+            "\1\153",
             "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\16\35\1\uffff\4\35\1"+
             "\uffff\32\35\4\uffff\1\35\1\uffff\32\35",
-            "\1\152",
             "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\16\35\1\uffff\4\35\1"+
             "\uffff\32\35\4\uffff\1\35\1\uffff\32\35"
     };
 
-    static final short[] DFA27_eot = DFA.unpackEncodedString(DFA27_eotS);
-    static final short[] DFA27_eof = DFA.unpackEncodedString(DFA27_eofS);
-    static final char[] DFA27_min = DFA.unpackEncodedStringToUnsignedChars(DFA27_minS);
-    static final char[] DFA27_max = DFA.unpackEncodedStringToUnsignedChars(DFA27_maxS);
-    static final short[] DFA27_accept = DFA.unpackEncodedString(DFA27_acceptS);
-    static final short[] DFA27_special = DFA.unpackEncodedString(DFA27_specialS);
-    static final short[][] DFA27_transition;
+    static final short[] DFA28_eot = DFA.unpackEncodedString(DFA28_eotS);
+    static final short[] DFA28_eof = DFA.unpackEncodedString(DFA28_eofS);
+    static final char[] DFA28_min = DFA.unpackEncodedStringToUnsignedChars(DFA28_minS);
+    static final char[] DFA28_max = DFA.unpackEncodedStringToUnsignedChars(DFA28_maxS);
+    static final short[] DFA28_accept = DFA.unpackEncodedString(DFA28_acceptS);
+    static final short[] DFA28_special = DFA.unpackEncodedString(DFA28_specialS);
+    static final short[][] DFA28_transition;
 
     static {
-        int numStates = DFA27_transitionS.length;
-        DFA27_transition = new short[numStates][];
+        int numStates = DFA28_transitionS.length;
+        DFA28_transition = new short[numStates][];
         for (int i=0; i<numStates; i++) {
-            DFA27_transition[i] = DFA.unpackEncodedString(DFA27_transitionS[i]);
+            DFA28_transition[i] = DFA.unpackEncodedString(DFA28_transitionS[i]);
         }
     }
 
-    class DFA27 extends DFA {
+    class DFA28 extends DFA {
 
-        public DFA27(BaseRecognizer recognizer) {
+        public DFA28(BaseRecognizer recognizer) {
             this.recognizer = recognizer;
-            this.decisionNumber = 27;
-            this.eot = DFA27_eot;
-            this.eof = DFA27_eof;
-            this.min = DFA27_min;
-            this.max = DFA27_max;
-            this.accept = DFA27_accept;
-            this.special = DFA27_special;
-            this.transition = DFA27_transition;
+            this.decisionNumber = 28;
+            this.eot = DFA28_eot;
+            this.eof = DFA28_eof;
+            this.min = DFA28_min;
+            this.max = DFA28_max;
+            this.accept = DFA28_accept;
+            this.special = DFA28_special;
+            this.transition = DFA28_transition;
         }
         public String getDescription() {
             return "1:1: Tokens : ( OPEN_PAREN | CLOSE_PAREN | AMPERSAND | LEFT_SQUARE_BRACKET | RIGHT_SQUARE_BRACKET | LEFT_CURLY_BRACKET | RIGHT_CURLY_BRACKET | BACKSLASH | CIRCUMFLEX | COMMERCIAL_AT | NUMBER_SIGN | APOSTROPHE | SPECIAL_FORM | STRING | REGEX_LITERAL | NUMBER | CHARACTER | HEXDIGIT | NIL | BOOLEAN | SYMBOL | METADATA_TYPEHINT | KEYWORD | SYNTAX_QUOTE | UNQUOTE_SPLICING | UNQUOTE | COMMENT | SPACE | LAMBDA_ARG );";
