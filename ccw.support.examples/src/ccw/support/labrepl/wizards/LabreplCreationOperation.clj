@@ -37,7 +37,7 @@
   [[] (ref {:pages pages :overwrite-query overwrite-query})])
 
 (defn config-new-project
-  [root name nature-ids monitor]
+  [root name monitor]
   (try
     (let
       [project (.getProject root name)]
@@ -45,9 +45,7 @@
       (if (not (.isOpen project)) (.open project nil))
       (let
         [desc (.getDescription project)]
-        (doto desc
-          (.setLocation nil)
-          (.setNatureIds (into-array String nature-ids)))
+        (.setLocation desc nil)
         (.setDescription project desc (SubProgressMonitor. monitor 1))
         project))
     (catch CoreException exception (throw (InvocationTargetException. exception)))))
@@ -72,23 +70,27 @@
       op (ImportOperation. dest-path (.getRoot structure-provider) structure-provider overwrite-query)]
     (.run op monitor)))
 
+(defn make-project-folder
+  [project folder monitor]
+  (let [project-folder (.getFolder project folder)]
+    (.create project-folder true true monitor)))
+
 (defn do-imports
   [project monitor overwrite-query]
   (try
     (let
       [dest-path (.getFullPath project)
+        additional-folders ["lib" "classes"]
         zip-file (get-zipfile-from-plugin-dir "examples/labrepl.zip")]
+      (doall (map #(make-project-folder project % monitor) additional-folders))
       (import-files-from-zip zip-file dest-path (SubProgressMonitor. monitor 1) overwrite-query))
     (catch CoreException exception (throw (InvocationTargetException. exception)))))
 
 (defn create-project
   [root page monitor overwrite-query]
   (.beginTask monitor "Configuring project..." 1)
-  (let [nature-ids ["org.eclipse.pde.PluginNature"
-                    "org.eclipse.jdt.core.javanature"
-                    "ccw.nature"]
-        project-name (.getProjectName page)
-        project (config-new-project root project-name nature-ids monitor)]
+  (let [project-name (.getProjectName page)
+        project (config-new-project root project-name monitor)]
      (do-imports project (SubProgressMonitor. monitor 1) overwrite-query)))
 
 (defn -run
