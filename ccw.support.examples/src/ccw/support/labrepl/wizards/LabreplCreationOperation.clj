@@ -99,7 +99,7 @@
            labrepl-leiningen-project (read-project (str leiningen-pfile))]
        (println (str "leiningen-pfile " leiningen-pfile))
        (println (str "labrepl-leiningen-project " labrepl-leiningen-project))
-       (deps labrepl-leiningen-project))))
+       #_(deps labrepl-leiningen-project))))
 
 (defn -run
   [this monitor]
