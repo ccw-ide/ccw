@@ -46,7 +46,7 @@
           run-repl-button (Button. composite SWT/CHECK)]
       (doto run-lein-deps-button
         (.setText "Run \"lein deps\" to download dependencies")
-        (.setSelection  true)
+        (.setSelection true)
         (.addSelectionListener 
           (proxy [SelectionAdapter] []
             (widgetSelected [_]
@@ -54,7 +54,8 @@
 
       (doto run-repl-button
         (.setText "Run REPL and open web page")
-        (.setSelection  true))
+        (.setSelection true))
+      
       (dosync (alter (.state this) assoc :run-repl-button run-repl-button :run-lein-deps-button run-lein-deps-button))))
   
   (.validatePage this))

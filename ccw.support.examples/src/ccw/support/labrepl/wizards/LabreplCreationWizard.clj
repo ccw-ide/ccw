@@ -40,7 +40,8 @@
 (defn -addPages
   [this]
 	(.super-addPages this)
-  (let [main-page (LabreplCreateProjectPage. "New Labrepl Project")]
+  (let
+    [main-page (LabreplCreateProjectPage. "New Labrepl Project")]
     (dosync (alter (.state this) assoc :main-page main-page))
     (.addPage this main-page)))
 
@@ -53,6 +54,7 @@
   (let
     [shell (.getShell this)
      display (.getDisplay shell)
+     
      open-dialog
       (fn [file]
         (let
@@ -68,6 +70,7 @@
               (fn [] (reset! result (.open dialog)))]
           (.syncExec display run-dialog)
           (deref result)))
+      
      import-overwrite-query
        (proxy [IOverwriteQuery] []
          (queryOverwrite [file]
@@ -78,7 +81,8 @@
              (if (< return-value 0)
                IOverwriteQuery/CANCEL
                (return-codes return-value)))))
-     runnable (LabreplCreationOperation. [(:main-page @(.state this))] import-overwrite-query)
+       
+     runnable (LabreplCreationOperation. (:main-page @(.state this)) import-overwrite-query)
      op (WorkspaceModifyDelegatingOperation. runnable)]
   (.run (.getContainer this) false true op)
 	true))

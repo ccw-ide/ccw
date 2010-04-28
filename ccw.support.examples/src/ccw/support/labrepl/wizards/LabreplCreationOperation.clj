@@ -31,13 +31,13 @@
     [leiningen.deps :only [deps]])
   (:gen-class
    :implements [org.eclipse.jface.operation.IRunnableWithProgress]
-   :constructors {[clojure.lang.IPersistentVector org.eclipse.ui.dialogs.IOverwriteQuery] []}
+   :constructors {[ccw.support.labrepl.wizards.LabreplCreateProjectPage org.eclipse.ui.dialogs.IOverwriteQuery] []}
    :init myinit
    :state state))
 
 (defn- -myinit
   [pages overwrite-query]
-  [[] (ref {:pages pages :overwrite-query overwrite-query})])
+  [[] (ref {:page pages :overwrite-query overwrite-query})])
 
 (defn config-new-project
   [root name monitor]
@@ -91,26 +91,34 @@
 
 (defn create-project
   [root page monitor overwrite-query]
+  
   (.beginTask monitor "Configuring project..." 1)
-  (let [project-name (.getProjectName page)
-        project (config-new-project root project-name monitor)]
-     (do-imports project (SubProgressMonitor. monitor 1) overwrite-query)
-     (let [leiningen-pfile (.toOSString (.getLocation (.getFile project "project.clj")))
-           labrepl-leiningen-project (read-project (str leiningen-pfile))]
-       (println (str "leiningen-pfile " leiningen-pfile))
-       (println (str "labrepl-leiningen-project " labrepl-leiningen-project))
-       #_(deps labrepl-leiningen-project))))
+  
+  (let
+    [project-name (.getProjectName page)
+      project (config-new-project root project-name monitor)
+      page-state @(.state page)
+      run-lein-deps (.getSelection (:run-lein-deps-button page-state))]
+    
+    (do-imports project (SubProgressMonitor. monitor 1) overwrite-query)
+    
+    ; TODO handle run-repl
+    (if run-lein-deps
+      (let
+        [leiningen-pfile (.toOSString (.getLocation (.getFile project "project.clj")))
+          labrepl-leiningen-project (read-project (str leiningen-pfile))
+          run-repl (.getSelection (:run-repl-button page-state))]
+        (deps labrepl-leiningen-project)))))
 
 (defn -run
   [this monitor]
   (let
     [monitor (if monitor monitor (NullProgressMonitor.))
       state @(.state this)
-      pages (:pages state)
-      overwrite-query (:overwrite-query state)
-      page-count (count pages)]
+      page (:page state)
+      overwrite-query (:overwrite-query state)]
     (try
-      (.beginTask monitor "Labrepl Creation" page-count)
+      (.beginTask monitor "Labrepl Creation" 1)
       (let [root (.getRoot (ResourcesPlugin/getWorkspace))]
-        (doall (map #(create-project root (pages %) monitor overwrite-query) (range page-count))))
+        (create-project root page monitor overwrite-query))
       (finally (.done monitor)))))
