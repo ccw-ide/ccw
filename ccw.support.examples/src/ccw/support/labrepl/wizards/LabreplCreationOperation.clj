@@ -21,8 +21,10 @@
                             Status
                             FileLocator]
      [org.eclipse.ui.dialogs IOverwriteQuery]
+     [org.eclipse.jdt.core JavaCore]
      [java.io IOException]
      [org.eclipse.core.resources ResourcesPlugin]
+     [ccw ClojureCore]
      [ccw.support.labrepl Activator]
      [org.eclipse.ui.wizards.datatransfer ImportOperation
                                           ZipFileStructureProvider])
@@ -83,11 +85,25 @@
   (try
     (let
       [dest-path (.getFullPath project)
-        additional-folders ["lib" "classes"]
+       ; additional-folders ["lib" "classes"] TODO lib and classes when live
+       additional-folders ["classes"]
         zip-file (get-zipfile-from-plugin-dir "examples/labrepl.zip")]
       (doall (map #(make-project-folder project % monitor) additional-folders))
       (import-files-from-zip zip-file dest-path (SubProgressMonitor. monitor 1) overwrite-query))
     (catch CoreException exception (throw (InvocationTargetException. exception)))))
+
+(defn fix-libraries
+  "Enter all the JAR files in the lib directory to the Java build path of the project"
+  [project]
+  (let
+    [java-project (.getJavaProject (ClojureCore/getClojureProject project))
+     lib-members (.members (.getFolder project "lib"))
+     lib-entries
+       (into-array 
+         (map #(JavaCore/newLibraryEntry (.getFullPath %) nil nil) lib-members))]
+    (doto java-project
+      (.setRawClasspath lib-entries nil)
+      (.save nil true))))
 
 (defn create-project
   [root page monitor overwrite-query]
@@ -108,7 +124,9 @@
         [leiningen-pfile (.toOSString (.getLocation (.getFile project "project.clj")))
           labrepl-leiningen-project (read-project (str leiningen-pfile))
           run-repl (.getSelection (:run-repl-button page-state))]
-        (deps labrepl-leiningen-project)))))
+        #_(deps labrepl-leiningen-project) ; TODO enable
+        (println "lein deps is disabled")
+        (fix-libraries project)))))
 
 (defn -run
   [this monitor]
