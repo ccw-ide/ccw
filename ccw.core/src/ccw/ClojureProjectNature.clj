@@ -14,7 +14,7 @@
     [java.io IOException File]
     [ccw.builder ClojureBuilder]
     [org.eclipse.core.runtime CoreException Platform Path Status IPath IProgressMonitor FileLocator]
-    [org.eclipse.core.resources WorkspaceJob IResource]
+    [org.eclipse.core.resources WorkspaceJob IResource ResourcesPlugin]
     [org.eclipse.jdt.core JavaCore])
   (:use [clojure.contrib [duck-streams :as cc.stream]])
   (:gen-class
@@ -113,7 +113,18 @@
            (Status. (Status/ERROR)
                     (CCWPlugin/PLUGIN_ID)
                     mess))))
-    
+(defn- make-ws-path
+  "Make a workspace-relative path from the given path if possible"
+  [path]
+  (if path
+    (let
+	    [uri (-> path .toFile .toURI)
+				root (.getRoot (ResourcesPlugin/getWorkspace))
+				files (.findFilesForLocationURI root uri)]
+     (if (pos? (count files))
+				(.getFullPath (aget files 0))
+				path))))
+
 (defn- add-lib-on-classpath!
   [java-project lib-path libSrc-path copy?]
   (io!
@@ -135,12 +146,16 @@
 		      	        									(make-dest-path libSrc-path)))]
       	    (when copy?
       	    	(cc.stream/copy lib-path in-project-lib)
-      	    	(when in-project-libSrc (cc.stream/copy libSrc-path in-project-libSrc))
-      	    	(-> java-project .getProject (.refreshLocal (IResource/DEPTH_ZERO) nil)))
-      	    (let [entries-new (into-array (conj entries-old (JavaCore/newLibraryEntry in-project-lib in-project-libSrc nil)))]
+      	    	(when in-project-libSrc (cc.stream/copy libSrc-path in-project-libSrc)))
+      	    (let 
+             [entries-new 
+               (into-array 
+                 (conj entries-old 
+                   (JavaCore/newLibraryEntry (make-ws-path in-project-lib) (make-ws-path in-project-libSrc) nil)))]
       	      (doto java-project
       	        (.setRawClasspath entries-new nil)
-      	        (.save nil true)))))))))
+      	        (.save nil true)
+                (-> .getProject (.refreshLocal (IResource/DEPTH_ONE) nil))))))))))
 
 (defn- file-to-path
   [file] (Path/fromOSString (.getAbsolutePath file)))
