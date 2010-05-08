@@ -97,12 +97,13 @@
   [project]
   (let
     [java-project (.getJavaProject (ClojureCore/getClojureProject project))
+     old-lib-entries (vec (.getRawClasspath java-project))
      lib-members (.members (.getFolder project "lib"))
-     lib-entries
+     new-lib-entries
        (into-array 
-         (map #(JavaCore/newLibraryEntry (.getFullPath %) nil nil) lib-members))]
+         (concat old-lib-entries (map #(JavaCore/newLibraryEntry (.getFullPath %) nil nil) lib-members)))]
     (doto java-project
-      (.setRawClasspath lib-entries nil)
+      (.setRawClasspath new-lib-entries nil)
       (.save nil true))))
 
 (defn create-project
