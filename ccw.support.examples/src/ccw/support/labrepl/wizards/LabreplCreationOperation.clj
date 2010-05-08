@@ -22,10 +22,13 @@
                             FileLocator]
      [org.eclipse.ui.dialogs IOverwriteQuery]
      [org.eclipse.jdt.core JavaCore]
+     [org.eclipse.debug.core ILaunchManager]
      [java.io IOException]
      [org.eclipse.core.resources ResourcesPlugin]
+     [org.eclipse.jface.viewers StructuredSelection]
      [ccw ClojureCore]
      [ccw.support.labrepl Activator]
+     [ccw.launching ClojureLaunchShortcut]
      [org.eclipse.ui.wizards.datatransfer ImportOperation
                                           ZipFileStructureProvider])
   (:use
@@ -85,8 +88,8 @@
   (try
     (let
       [dest-path (.getFullPath project)
-       ; additional-folders ["lib" "classes"] TODO lib and classes when live
-       additional-folders ["classes"]
+       ; additional-folders ["lib" "classes" "bin"] TODO re-add lib
+       additional-folders ["classes" "bin"]
         zip-file (get-zipfile-from-plugin-dir "examples/labrepl.zip")]
       (doall (map #(make-project-folder project % monitor) additional-folders))
       (import-files-from-zip zip-file dest-path (SubProgressMonitor. monitor 1) overwrite-query))
@@ -127,7 +130,10 @@
           run-repl (.getSelection (:run-repl-button page-state))]
         #_(deps labrepl-leiningen-project) ; TODO enable
         (println "lein deps is disabled")
-        (fix-libraries project)))))
+        (fix-libraries project)
+        (if run-repl
+          (let [startup-file-selection (StructuredSelection. (.getFile (.getFolder project "src") "labrepl.clj"))]
+            (.launch (ClojureLaunchShortcut.) startup-file-selection ILaunchManager/RUN_MODE)))))))
 
 (defn -run
   [this monitor]

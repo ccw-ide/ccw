@@ -9,7 +9,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  ccw.clojure;bundle-version="1.1.0",
  ccw.support.leiningen;bundle-version="1.0.0",
- ccw.core;bundle-version="0.0.56"
+ ccw.core;bundle-version="0.0.56",
+ org.eclipse.debug.core;bundle-version="3.5.1"
 Bundle-ClassPath: .,
  classes/
 Bundle-ActivationPolicy: lazy
