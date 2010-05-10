@@ -24,11 +24,12 @@
      [org.eclipse.jdt.core JavaCore]
      [org.eclipse.debug.core ILaunchManager]
      [java.io IOException]
-     [org.eclipse.core.resources ResourcesPlugin]
+     [org.eclipse.core.resources IResource ResourcesPlugin]
      [org.eclipse.jface.viewers StructuredSelection]
      [ccw ClojureCore]
      [ccw.support.labrepl Activator]
      [ccw.launching ClojureLaunchShortcut]
+     [ccw.editors.antlrbased EvaluateTextAction]
      [org.eclipse.ui.wizards.datatransfer ImportOperation
                                           ZipFileStructureProvider])
   (:use
@@ -88,8 +89,7 @@
   (try
     (let
       [dest-path (.getFullPath project)
-       ; additional-folders ["lib" "classes" "bin"] TODO re-add lib
-       additional-folders ["classes" "bin"]
+        additional-folders ["lib" "classes" "bin"]
         zip-file (get-zipfile-from-plugin-dir "examples/labrepl.zip")]
       (doall (map #(make-project-folder project % monitor) additional-folders))
       (import-files-from-zip zip-file dest-path (SubProgressMonitor. monitor 1) overwrite-query))
@@ -100,8 +100,10 @@
   [project]
   (let
     [java-project (.getJavaProject (ClojureCore/getClojureProject project))
+     lib-folder (.getFolder project "lib")
+     _ (.refreshLocal lib-folder (IResource/DEPTH_ONE) nil)
+     lib-members (.members lib-folder)
      old-lib-entries (vec (.getRawClasspath java-project))
-     lib-members (.members (.getFolder project "lib"))
      new-lib-entries
        (into-array 
          (concat old-lib-entries (map #(JavaCore/newLibraryEntry (.getFullPath %) nil nil) lib-members)))]
@@ -122,18 +124,22 @@
     
     (do-imports project (SubProgressMonitor. monitor 1) overwrite-query)
     
-    ; TODO handle run-repl
     (if run-lein-deps
       (let
         [leiningen-pfile (.toOSString (.getLocation (.getFile project "project.clj")))
           labrepl-leiningen-project (read-project (str leiningen-pfile))
           run-repl (.getSelection (:run-repl-button page-state))]
-        #_(deps labrepl-leiningen-project) ; TODO enable
-        (println "lein deps is disabled")
+        (deps labrepl-leiningen-project)
         (fix-libraries project)
         (if run-repl
-          (let [startup-file-selection (StructuredSelection. (.getFile (.getFolder project "src") "labrepl.clj"))]
-            (.launch (ClojureLaunchShortcut.) startup-file-selection ILaunchManager/RUN_MODE)))))))
+          (let
+            [startup-file-selection (StructuredSelection. (.getFile (.getFolder project "src") "labrepl.clj"))
+              run-labrepl-action
+                (proxy [EvaluateTextAction] ["Start labrepl"]
+                  (run [] (.evaluateText "(labrepl/-main)")))]
+            (.launch (ClojureLaunchShortcut.) startup-file-selection ILaunchManager/RUN_MODE)
+            ; TODO the following does not work
+            #_(.run run-labrepl-action)))))))
 
 (defn -run
   [this monitor]
