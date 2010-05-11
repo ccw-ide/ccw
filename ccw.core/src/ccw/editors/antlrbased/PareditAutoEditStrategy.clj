@@ -31,36 +31,42 @@
    "\n" [:paredit-newline true]
    })
 
+(def *strict-commands*
+  #{:paredit-close-round, :paredit-close-square, :paredit-close-curly, 
+    :paredit-indent-line, :paredit-forward-delete, :paredit-backward-delete})
+
 (defn par-command? [command] (contains? *commands* (:text command)))
 (defn par-command [command] (-> *commands* (get (:text command)) first))
 (defn one-char-par-command? [command] (-> *commands* (get (:text command)) second))
 
-(defn- call-paredit [command document-text]
+(defn- paredit-args [command document-text]
   (cond
     (and (zero? (-> command #^String (:text) .length))
          (= 1 (:length command)))
       (let [paredit-command (if (= (:offset command) (:caret-offset document-text)) 
                               :paredit-forward-delete :paredit-backward-delete)]
-        (paredit paredit-command
+        [paredit-command
                  {:text (:text document-text)
                   :offset (if (= paredit-command :paredit-backward-delete) (inc (:offset command)) (:offset command))
-                  :length 1}))
+                  :length 1}])
     (and (par-command? command)
          (one-char-par-command? command)) ; TODO enhance to also handle the replace of a bunch of text
-      (paredit (par-command command)
+      [(par-command command)
                {:text (:text document-text) 
                 :offset (:offset command) 
-                :length (:length command)})))
+                :length (:length command)}]))
 
-(defn paredit-enabled?
-  [#^org.eclipse.jface.preference.IPreferenceStore prefs-store]
-  (.getBoolean prefs-store ccw.preferences.PreferenceConstants/ACTIVATE_PAREDIT))
+(defn do-command?
+  "Will do command if it is :strict and the editor allows it, or if it is not :strict"
+  [#^AntlrBasedClojureEditor editor par-command]
+  (if (*strict-commands* par-command)
+    (.useStrictStructuralEditing editor)
+    true))
 
 (defn -customizeDocumentCommand 
   [#^ccw.editors.antlrbased.PareditAutoEditStrategy this, #^IDocument document, #^DocumentCommand command]
   (println "Called!")
-  (when (and (paredit-enabled? (-> this .state deref :prefs-store))
-             (.doit command))
+  (when (.doit command)
     (let [signed-selection (bean (-> this .state deref #^ccw.editors.antlrbased.AntlrBasedClojureEditor (:editor) .getSignedSelection))
           _ (println (str "signed-selection:" signed-selection))
           document-text {:text (.get document) 
@@ -68,7 +74,12 @@
                          :selection-length (:length signed-selection)}
           par-command {:text (.text command) :offset (.offset command) :length (.length command)}
           _ (println (str "par-command:" par-command))
-          result (call-paredit par-command document-text)]
+          [par-command par-text] (paredit-args par-command document-text)
+          result (and 
+                   par-command 
+                   (do-command? (-> this .state deref :editor) par-command)
+                   (paredit par-command par-text))
+          #_result #_(call-paredit par-command document-text)]
       (when (and result (not= :ko (-> result :parser-state)))
         (if-let [modif (-?> result :modifs first)]
           (do

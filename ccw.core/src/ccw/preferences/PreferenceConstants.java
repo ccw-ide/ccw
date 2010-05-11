@@ -21,7 +21,7 @@ public class PreferenceConstants {
     
 	public static final String SWITCH_TO_NS_ON_REPL_STARTUP = CCW_PREFERENCE_PREFIX + ".switch_to_ns_on_repl_startup"; //$NON-NLS-1$
 
-	public static final String ACTIVATE_PAREDIT = CCW_PREFERENCE_PREFIX + ".activate_paredit"; //$NON-NLS-1$
+	public static final String USE_STRICT_STRUCTURAL_EDITING_MODE_BY_DEFAULT = CCW_PREFERENCE_PREFIX + ".use_strict_structural_editing_mode_by_default"; //$NON-NLS-1$
 
 	public static final String EDITOR_COLORING_PREFIX = "editor_color"; //$NON-NLS-1$
 	

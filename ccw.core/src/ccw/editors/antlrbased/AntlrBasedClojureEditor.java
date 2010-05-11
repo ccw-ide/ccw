@@ -86,7 +86,21 @@ public class AntlrBasedClojureEditor extends TextEditor {
 	private ProjectionSupport fProjectionSupport;
 
 	private ClojureOutlinePage outlinePage;
+	
+	/** 
+	 * Set to false if structural editing is not possible, because the document
+	 * is not parseable.
+	 */
+	private boolean structuralEditingPossible;
+	/**
+	 * Set to true if the editor is in "Strict" Structural editing mode
+	 */
+	private boolean useStrictStructuralEditing;
 
+	public boolean useStrictStructuralEditing() {
+		return useStrictStructuralEditing;
+	}
+	
 	public AntlrBasedClojureEditor() {
 	    IPreferenceStore preferenceStore = createCombinedPreferenceStore();
 		setSourceViewerConfiguration(new ClojureSourceViewerConfiguration(preferenceStore, this));
@@ -97,6 +111,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
 	@Override
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
 		super.init(site, input);
+		useStrictStructuralEditing = getPreferenceStore().getBoolean(ccw.preferences.PreferenceConstants.USE_STRICT_STRUCTURAL_EDITING_MODE_BY_DEFAULT);
 	}
 	
 	@Override
