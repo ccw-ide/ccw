@@ -78,8 +78,7 @@
           result (and 
                    par-command 
                    (do-command? (-> this .state deref :editor) par-command)
-                   (paredit par-command par-text))
-          #_result #_(call-paredit par-command document-text)]
+                   (paredit par-command par-text))]
       (when (and result (not= :ko (-> result :parser-state)))
         (if-let [modif (-?> result :modifs first)]
           (do
@@ -97,4 +96,5 @@
         (set! (.caretOffset command) (:offset result))
         (when-not (zero? (:length result)) 
           (println (str "result:" result))
-          (.selectAndReveal (-> this .state deref :editor) (:offset result) (:length result)))))))
+          (.selectAndReveal (-> this .state deref :editor) (:offset result) (:length result))))
+      (.setStructuralEditingPossible (-> this .state deref :editor) (true? (and result (not= :ko (-> result :parser-state))))))))

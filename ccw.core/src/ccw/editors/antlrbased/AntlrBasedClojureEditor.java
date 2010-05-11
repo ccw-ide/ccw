@@ -14,6 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jface.action.Action;
@@ -33,6 +34,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
@@ -41,8 +43,12 @@ import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.ContentAssistAction;
+import org.eclipse.ui.texteditor.IStatusField;
+import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
+import org.eclipse.ui.texteditor.StatusLineContributionItem;
+import org.eclipse.ui.texteditor.ITextEditorExtension3.InsertMode;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import ccw.CCWPlugin;
@@ -54,6 +60,8 @@ import ccw.editors.rulesbased.ClojurePartitionScanner;
 import ccw.launching.ClojureLaunchShortcut;
 
 public class AntlrBasedClojureEditor extends TextEditor {
+	public static final String STATUS_CATEGORY_STRUCTURAL_EDITING_POSSIBLE = "CCW.STATUS_CATEGORY_STRUCTURAL_EDITING_POSSIBLE";
+	
     private static final String CONTENT_ASSIST_PROPOSAL = "ContentAssistProposal"; //$NON-NLS-1$
     public static final String ID = "ccw.antlrbasededitor"; //$NON-NLS-1$
 	/** Preference key for matching brackets */
@@ -159,7 +167,37 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		fProjectionSupport.install();
 		viewer.doOperation(ClojureSourceViewer.TOGGLE);
 	}
+	
+	public void setStructuralEditingPossible(boolean state) {
+		if (state != this.structuralEditingPossible) {
+			this.structuralEditingPossible = state;
+			updateStatusField(STATUS_CATEGORY_STRUCTURAL_EDITING_POSSIBLE);
+		}
+	}
+	
+	protected void updateStatusField(String category) {
+		if (!STATUS_CATEGORY_STRUCTURAL_EDITING_POSSIBLE.equals(category)) {
+			super.updateStatusField(category);
+			return;
+		}
 
+		if (category == null)
+			return;
+
+		IStatusField field= getStatusField(category);
+		if (field != null) {
+			/*
+			 * Disabled, because currently structuralEditingPossible is not reliable (some paredit commands stop after having parsed all the text)
+			 * TODO reactivate when paredit has been ported to parsley
+			String text= "Structural Edition: " 
+				+ (structuralEditingPossible ? "enabled" : "disabled");
+				*/
+			String text = "Structural Edition: unknown state";
+			field.setText(text == null ? fErrorLabel : text);
+		}
+	}
+
+	
     public DefaultCharacterPairMatcher getPairsMatcher() {
         return pairsMatcher;
     }

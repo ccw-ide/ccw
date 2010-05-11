@@ -26,7 +26,9 @@ import org.eclipse.ui.texteditor.BasicTextEditorActionContributor;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
+import org.eclipse.ui.texteditor.ITextEditorExtension;
 import org.eclipse.ui.texteditor.RetargetTextEditorAction;
+import org.eclipse.ui.texteditor.StatusLineContributionItem;
 
 /**
  * Common base class for action contributors for Clojure editors.
@@ -39,6 +41,8 @@ public class BasicClojureEditorActionContributor extends BasicTextEditorActionCo
 	private RetargetTextEditorAction gotoPreviousMember;
 	private RetargetTextEditorAction gotoNextMember;
 	
+	private StatusLineContributionItem structuralEditionStatusField; 
+
 	public BasicClojureEditorActionContributor() {
 		super();
 
@@ -52,6 +56,9 @@ public class BasicClojureEditorActionContributor extends BasicTextEditorActionCo
 
 		gotoPreviousMember= new RetargetTextEditorAction( b, "GotoPreviousMember_"); //$NON-NLS-1$
 		gotoPreviousMember.setActionDefinitionId(IClojureEditorActionDefinitionIds.GOTO_PREVIOUS_MEMBER);
+		
+		structuralEditionStatusField = 
+			new StatusLineContributionItem(AntlrBasedClojureEditor.STATUS_CATEGORY_STRUCTURAL_EDITING_POSSIBLE, true, 33);
 	}
 
 	protected final void markAsPartListener(RetargetAction action) {
@@ -64,7 +71,7 @@ public class BasicClojureEditorActionContributor extends BasicTextEditorActionCo
 
 		super.init(bars, page);
 	}
-
+	
 	public void contributeToMenu(IMenuManager menu) {
 
 		super.contributeToMenu(menu);
@@ -74,6 +81,11 @@ public class BasicClojureEditorActionContributor extends BasicTextEditorActionCo
 			gotoMenu.add(new Separator("additions2"));  //$NON-NLS-1$
 			gotoMenu.appendToGroup("additions2", gotoMatchingBracket); //$NON-NLS-1$
 		}
+	}
+	
+	public void contributeToStatusLine(IStatusLineManager statusLineManager) {
+		super.contributeToStatusLine(statusLineManager);
+		statusLineManager.add(structuralEditionStatusField);
 	}
 
 	public void setActiveEditor(IEditorPart part) {
@@ -98,6 +110,13 @@ public class BasicClojureEditorActionContributor extends BasicTextEditorActionCo
 		action= getAction(textEditor, ITextEditorActionConstants.PREVIOUS);
 		actionBars.setGlobalActionHandler(ITextEditorActionDefinitionIds.GOTO_PREVIOUS_ANNOTATION, action);
 		actionBars.setGlobalActionHandler(ITextEditorActionConstants.PREVIOUS, action);
+
+		/** CCW specific Status */ 
+		if (part instanceof ITextEditorExtension) {
+			ITextEditorExtension extension= (ITextEditorExtension) part;
+			
+			extension.setStatusField(structuralEditionStatusField, AntlrBasedClojureEditor.STATUS_CATEGORY_STRUCTURAL_EDITING_POSSIBLE);
+		}
 	}
 
 	public void dispose() {
