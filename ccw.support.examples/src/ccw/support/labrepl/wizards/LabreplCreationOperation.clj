@@ -20,6 +20,7 @@
                             Platform
                             Status
                             FileLocator]
+     [org.eclipse.ui PlatformUI]
      [org.eclipse.ui.dialogs IOverwriteQuery]
      [org.eclipse.jdt.core JavaCore]
      [org.eclipse.debug.core ILaunchManager]
@@ -31,7 +32,9 @@
      [ccw.launching ClojureLaunchShortcut]
      [ccw.editors.antlrbased EvaluateTextAction]
      [org.eclipse.ui.wizards.datatransfer ImportOperation
-                                          ZipFileStructureProvider])
+                                          ZipFileStructureProvider]
+     [org.eclipse.ui.browser IWorkbenchBrowserSupport])
+  
   (:use
     [leiningen.core :only [read-project defproject]]
     [leiningen.deps :only [deps]])
@@ -95,6 +98,20 @@
       (import-files-from-zip zip-file dest-path (SubProgressMonitor. monitor 1) overwrite-query))
     (catch CoreException exception (throw (InvocationTargetException. exception)))))
 
+ (defn open-browser
+   "Open a browser for the running labrepl web page"
+   []
+   (let
+     [browser-support (.getBrowserSupport (PlatformUI/getWorkbench))
+      browser (.createBrowser 
+                browser-support 
+                (reduce bit-or 
+                  [IWorkbenchBrowserSupport/LOCATION_BAR
+                    IWorkbenchBrowserSupport/NAVIGATION_BAR
+                    IWorkbenchBrowserSupport/AS_EDITOR]) 
+                nil "Labrepl" "Labrepl Instructions")]
+     (.openURL browser (URL. "http://localhost:8080"))))
+ 
 (defn fix-libraries
   "Enter all the JAR files in the lib directory to the Java build path of the project"
   [project]
@@ -139,7 +156,8 @@
                   (run [] (.evaluateText "(labrepl/-main)")))]
             (.launch (ClojureLaunchShortcut.) startup-file-selection ILaunchManager/RUN_MODE)
             ; TODO the following does not work
-            #_(.run run-labrepl-action)))))))
+            #_(.run run-labrepl-action)
+            (open-browser)))))))
 
 (defn -run
   [this monitor]
