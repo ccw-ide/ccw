@@ -68,6 +68,13 @@ public interface IClojureEditorActionDefinitionIds extends ITextEditorActionDefi
     public static final String JOIN_SEXPR = "ccw.ui.edit.text.clojure.join.sexpr";
     
     /**
+     * Action definition ID of the Clojure -> Switch structural edition mode
+     * expression action
+     */
+    public static final String SWITCH_STRUCTURAL_EDITION_MODE = "ccw.ui.edit.text.clojure.switch.structuraledition.mode";
+    
+
+    /**
      * Action definition ID of the Clojure (or edit ?) -> evaluate top level s
      * expression or region action
      */

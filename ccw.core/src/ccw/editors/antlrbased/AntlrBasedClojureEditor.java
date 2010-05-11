@@ -14,7 +14,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jface.action.Action;
@@ -34,7 +33,6 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
@@ -44,11 +42,9 @@ import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.ContentAssistAction;
 import org.eclipse.ui.texteditor.IStatusField;
-import org.eclipse.ui.texteditor.ITextEditorActionConstants;
+import org.eclipse.ui.texteditor.IStatusFieldExtension;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
-import org.eclipse.ui.texteditor.StatusLineContributionItem;
-import org.eclipse.ui.texteditor.ITextEditorExtension3.InsertMode;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import ccw.CCWPlugin;
@@ -60,7 +56,7 @@ import ccw.editors.rulesbased.ClojurePartitionScanner;
 import ccw.launching.ClojureLaunchShortcut;
 
 public class AntlrBasedClojureEditor extends TextEditor {
-	public static final String STATUS_CATEGORY_STRUCTURAL_EDITING_POSSIBLE = "CCW.STATUS_CATEGORY_STRUCTURAL_EDITING_POSSIBLE";
+	public static final String STATUS_CATEGORY_STRUCTURAL_EDITION = "CCW.STATUS_CATEGORY_STRUCTURAL_EDITING_POSSIBLE";
 	
     private static final String CONTENT_ASSIST_PROPOSAL = "ContentAssistProposal"; //$NON-NLS-1$
     public static final String ID = "ccw.antlrbasededitor"; //$NON-NLS-1$
@@ -171,12 +167,17 @@ public class AntlrBasedClojureEditor extends TextEditor {
 	public void setStructuralEditingPossible(boolean state) {
 		if (state != this.structuralEditingPossible) {
 			this.structuralEditingPossible = state;
-			updateStatusField(STATUS_CATEGORY_STRUCTURAL_EDITING_POSSIBLE);
+			updateStatusField(STATUS_CATEGORY_STRUCTURAL_EDITION);
 		}
 	}
 	
+	public void toggleStructuralEditionMode() {
+		useStrictStructuralEditing = !useStrictStructuralEditing;
+		updateStatusField(STATUS_CATEGORY_STRUCTURAL_EDITION);
+	}
+	
 	protected void updateStatusField(String category) {
-		if (!STATUS_CATEGORY_STRUCTURAL_EDITING_POSSIBLE.equals(category)) {
+		if (!STATUS_CATEGORY_STRUCTURAL_EDITION.equals(category)) {
 			super.updateStatusField(category);
 			return;
 		}
@@ -185,6 +186,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
 			return;
 
 		IStatusField field= getStatusField(category);
+		IStatusFieldExtension extField = (IStatusFieldExtension) field;
 		if (field != null) {
 			/*
 			 * Disabled, because currently structuralEditingPossible is not reliable (some paredit commands stop after having parsed all the text)
@@ -192,8 +194,12 @@ public class AntlrBasedClojureEditor extends TextEditor {
 			String text= "Structural Edition: " 
 				+ (structuralEditingPossible ? "enabled" : "disabled");
 				*/
-			String text = "Structural Edition: unknown state";
+			String text = "Structural Edition: " + (useStrictStructuralEditing ? "Strict mode" : "Default mode");
 			field.setText(text == null ? fErrorLabel : text);
+			extField.setToolTipText(
+					(useStrictStructuralEditing 
+							? "Strict mode: editor does its best to prevent you from breaking the structure of the code (requires you to know shortcut commands well)"
+						   : "Default mode: helps you with edition, but does not get in your way"));
 		}
 	}
 
@@ -310,6 +316,10 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		action = new JoinSexprAction(this);
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.JOIN_SEXPR);
 		setAction(/*JoinSexprAction.ID*/"JoinSexprAction", action);
+		
+		action = new SwitchStructuralEditionModeAction(this);
+		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.SWITCH_STRUCTURAL_EDITION_MODE);
+		setAction(/*SwitchStructuralEditionModeAction.ID*/"SwitchStructuralEditionModeAction", action);
 }
 	
 	/**

@@ -30,7 +30,8 @@
                       [ExpandSelectionRightAction]
                       [RaiseSelectionAction]
                       [SplitSexprAction]
-                      [JoinSexprAction]]))
+                      [JoinSexprAction]
+                      [SwitchStructuralEditionModeAction]]))
 
 (defn -run [this]
   (require :reload 'ccw.reload-clojure)

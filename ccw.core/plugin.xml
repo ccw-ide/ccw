@@ -219,6 +219,12 @@
             description="%command.joinSexpr.description"
             id="ccw.ui.edit.text.clojure.join.sexpr"
             name="%command.joinSexpr.name">
+      </command>
+      <command
+            categoryId="org.eclipse.ui.category.edit"
+            description="%command.switchStructuralEditionMode.description"
+            id="ccw.ui.edit.text.clojure.switch.structuraledition.mode"
+            name="%command.switchStructuralEditionMode.name">
       </command>	  
 <!-- navigate -->
       <command
@@ -354,6 +360,12 @@
             contextId="ccw.ui.clojureEditorScope"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M3+J">
+      </key>
+      <key
+            commandId="ccw.ui.edit.text.clojure.switch.structuraledition.mode"
+            contextId="ccw.ui.clojureEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M3+D">
       </key>
 <!--            sequence="M1+M2+ARROW_UP" -->
       <key
@@ -553,6 +565,14 @@
                label="Clojure"
                mnemonic="C"
                tooltip="Menu for Clojure related commands">
+            <separator
+                  name="ccw.menus.separator1"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="ccw.ui.edit.text.clojure.switch.structuraledition.mode"
+                  style="push">
+            </command>
             <menu
                   id="ccw.menus.clojure.goTo"
                   label="%GoTo_label">

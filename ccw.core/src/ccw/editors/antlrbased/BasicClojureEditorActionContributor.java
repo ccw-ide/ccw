@@ -58,7 +58,7 @@ public class BasicClojureEditorActionContributor extends BasicTextEditorActionCo
 		gotoPreviousMember.setActionDefinitionId(IClojureEditorActionDefinitionIds.GOTO_PREVIOUS_MEMBER);
 		
 		structuralEditionStatusField = 
-			new StatusLineContributionItem(AntlrBasedClojureEditor.STATUS_CATEGORY_STRUCTURAL_EDITING_POSSIBLE, true, 33);
+			new StatusLineContributionItem(AntlrBasedClojureEditor.STATUS_CATEGORY_STRUCTURAL_EDITION, true, 33);
 	}
 
 	protected final void markAsPartListener(RetargetAction action) {
@@ -115,7 +115,7 @@ public class BasicClojureEditorActionContributor extends BasicTextEditorActionCo
 		if (part instanceof ITextEditorExtension) {
 			ITextEditorExtension extension= (ITextEditorExtension) part;
 			
-			extension.setStatusField(structuralEditionStatusField, AntlrBasedClojureEditor.STATUS_CATEGORY_STRUCTURAL_EDITING_POSSIBLE);
+			extension.setStatusField(structuralEditionStatusField, AntlrBasedClojureEditor.STATUS_CATEGORY_STRUCTURAL_EDITION);
 		}
 	}
 
