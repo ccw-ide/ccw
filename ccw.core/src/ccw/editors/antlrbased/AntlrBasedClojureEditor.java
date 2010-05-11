@@ -174,6 +174,15 @@ public class AntlrBasedClojureEditor extends TextEditor {
 	public void toggleStructuralEditionMode() {
 		useStrictStructuralEditing = !useStrictStructuralEditing;
 		updateStatusField(STATUS_CATEGORY_STRUCTURAL_EDITION);
+		updateTabsToSpacesConversion();
+	}
+	
+	public void updateTabsToSpacesConversion() {
+		if (useStrictStructuralEditing) {
+			uninstallTabsToSpacesConverter();
+		} else {
+			installTabsToSpacesConverter();
+		}
 	}
 	
 	protected void updateStatusField(String category) {
@@ -775,12 +784,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
     }
 
     @Override
-    public void setStatusLineErrorMessage(String message) {
-        super.setStatusLineMessage(message);
-    }
-    
-    @Override
     protected boolean isTabsToSpacesConversionEnabled() {
-    	return false;
+    	return !useStrictStructuralEditing;
     }
 }
