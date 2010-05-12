@@ -2,6 +2,6 @@
 <contexts>
    <context id="ccw.editors.context_help">
       <description>Reference page of the clojure source code editor features</description>
-      <topic href="../ccw.branding/html/reference/editor.html" label="Reference page"/>
+      <topic href="html/reference/editor.html" label="Reference page"/>
    </context>
 </contexts>

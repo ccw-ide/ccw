@@ -23,7 +23,9 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.forms,
  ccw.clojure;bundle-version="1.1.0",
  paredit.clj,
- ccw.clojurecontrib;bundle-version="1.1.0"
+ ccw.clojurecontrib;bundle-version="1.1.0",
+ org.eclipse.help,
+ ccw.branding;bundle-version="0.0.46"
 Export-Package: ccw,
  ccw.actions,
  ccw.builder,
