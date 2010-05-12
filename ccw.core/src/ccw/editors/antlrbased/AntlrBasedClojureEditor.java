@@ -782,6 +782,12 @@ public class AntlrBasedClojureEditor extends TextEditor {
     public final ISourceViewer sourceViewer() {
         return super.getSourceViewer();
     }
+    
+    @Override
+    public void setStatusLineErrorMessage(String message) {
+        // TODO Auto-generated method stub
+        super.setStatusLineErrorMessage(message);
+    }
 
     @Override
     protected boolean isTabsToSpacesConversionEnabled() {
