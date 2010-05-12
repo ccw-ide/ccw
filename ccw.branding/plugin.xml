@@ -21,5 +21,9 @@
             file="toctasks.xml">
       </toc>
    </extension>
+   <extension
+         point="org.eclipse.help.contexts">
+         <contexts file="context_help.xml"/>
+   </extension>
 
 </plugin>

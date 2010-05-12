@@ -903,11 +903,4 @@
        </with>
     </definition>
  </extension>
- <extension
-       point="org.eclipse.help.contexts">
-    <contexts
-          file="context_help.xml"
-          plugin="ccw.branding">
-    </contexts>
- </extension>
 </plugin>

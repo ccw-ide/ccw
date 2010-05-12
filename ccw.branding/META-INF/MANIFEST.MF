@@ -5,3 +5,4 @@ Bundle-SymbolicName: ccw.branding;singleton:=true
 Bundle-Version: 0.0.46.A001
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Counterclockwise team
+Require-Bundle: org.eclipse.help

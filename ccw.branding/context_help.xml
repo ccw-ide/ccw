@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<contexts>
+   <context id="editor_context_help">
+      <description>The Clojure editor provides you with Clojure specific text editing support.</description>
+      <topic href="html/reference/editor.html" label="Reference Page"/>
+   </context>
+</contexts>

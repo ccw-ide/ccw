@@ -12,35 +12,614 @@ Contributors:
 -->
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-    <title>Clojure Editor Features</title>
-    <link rel="stylesheet" href="../../../PRODUCT_PLUGIN/book.css" type="text/css"> 
-    <script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>Clojure Editor Features</title>
+<link rel="stylesheet" href="../../../PRODUCT_PLUGIN/book.css"
+	type="text/css">
+<script language="JavaScript"
+	src="PLUGINS_ROOT/org.eclipse.help/livehelp.js"></script>
 </head>
 
 <body>
 <h1>Clojure Editor Features</h1>
 <h2>Syntax Highlighting</h2>
 <ul>
-    <li>Rainbow parenthesis (different colors for different nesting levels)</li>
-    <li>Highlights in error closing parens that have no matching opening
-    parens</li>
+	<li>Rainbow parenthesis (different colors for different nesting
+	levels)</li>
+	<li>Highlights in error closing parens that have no matching
+	opening parens</li>
 </ul>
 <h3>Code Completion</h3>
-<p>Currently, does what is called &quot;Hippie completion&quot; by Eclipse:
-Code completion for all available words on all open files.</p>
+<p>Currently, does what is called &quot;Hippie completion&quot; by
+Eclipse: Code completion for all available words on all open files.</p>
 <h2>Error Reporting</h2>
 <p>In conjunction with auto-compile functionality, compilation
-    problems are reported as problem markers:</p>
+problems are reported as problem markers:</p>
 <ul>
-<li>A summary of the problems is displayed in the <strong>Problems View</strong></li>
-<li>Files that have problems are marked in the <strong>Package Explorer</strong></li>
-<li>Problems are marked at the correct line in the Clojure editor</li>
-<li>A double-click on a problem in the <strong>Problems  View</strong> jumps to
-the correct line in the Clojure editor</li>
+	<li>A summary of the problems is displayed in the <strong>Problems
+	View</strong></li>
+	<li>Files that have problems are marked in the <strong>Package
+	Explorer</strong></li>
+	<li>Problems are marked at the correct line in the Clojure editor</li>
+	<li>A double-click on a problem in the <strong>Problems
+	View</strong> jumps to the correct line in the Clojure editor</li>
 </ul>
 
-<h2><a name="Edition_modes"/>Edition modes</h2><h3><a name="Conventions"/>Conventions</h3><ul><li><tt>(foo |bar)</tt> represents the text <tt>(foo bar)</tt> with the cursor before the <strong><tt>b</tt></strong> </li><li><tt>(foo |bar|)</tt> represents the text <tt>(foo bar)</tt> with the word <strong><tt>bar</tt></strong> selected </li></ul><h3><a name="Default_Structural_Edition_Mode"/>Default Structural Edition Mode</h3><ol><li> The features in this mode are carefully chosen because they do not surprise or block newcomers to Structural Edition. </li></ol><p><table><tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Win/Linux</strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Mac</strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Description</strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Example(s)</strong> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>&lt;Enter&gt;</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>&lt;Enter&gt;</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> auto-indentation </td><td style="border: 1px solid #aaa; padding: 5px;"> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Win/Linux</strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Mac</strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Description</strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Example(s)</strong> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>(</tt></strong> without selection </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>(</tt></strong> without selection </td><td style="border: 1px solid #aaa; padding: 5px;"> create a new balanced pair </td><td style="border: 1px solid #aaa; padding: 5px;"> <tt>foo|</tt> <tt>    ==&gt;    </tt> <strong><tt>(</tt></strong> <tt>    ==&gt;    </tt> <tt>foo (|)</tt> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>[</tt></strong> without selection </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>[</tt></strong> without selection </td><td style="border: 1px solid #aaa; padding: 5px;"> create a new balanced pair </td><td style="border: 1px solid #aaa; padding: 5px;"> <tt>foo|</tt> <tt>    ==&gt;    </tt> <strong><tt>[</tt></strong> <tt>    ==&gt;    </tt> <tt>foo [|]</tt> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>{</tt></strong> without selection </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>{</tt></strong> without selection </td><td style="border: 1px solid #aaa; padding: 5px;"> create a new balanced pair </td><td style="border: 1px solid #aaa; padding: 5px;"> <tt>foo|</tt> <tt>    ==&gt;    </tt> <strong><tt>{</tt></strong> <tt>    ==&gt;    </tt> <tt>foo {|}</tt> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Win/Linux</strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Mac</strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Description</strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Example(s)</strong> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>Shift+Alt+Up</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>Shift+Command+Up</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> expand selection to enclosing form </td><td style="border: 1px solid #aaa; padding: 5px;"> <tt>(foo [bar b|az])</tt> <tt>    ==&gt;    </tt> <strong><tt>Shift+Alt+Up</tt></strong> <tt>    ==&gt;    </tt> <tt>(foo [bar |baz|])</tt> <tt>    ==&gt;    </tt> <strong><tt>Shift+Alt+Up</tt></strong> <tt>    ==&gt;    </tt> <tt>(foo |[bar baz]|)</tt> <tt>    ==&gt;    </tt> <strong><tt>Shift+Alt+Up</tt></strong> <tt>    ==&gt;    </tt> <tt>|(foo [bar baz])|</tt> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>Shift+Alt+Left</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>Shift+Command+Left</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> expand selection to sibling form on the left (or, if no sibling form on the left, to the enclosing form) </td><td style="border: 1px solid #aaa; padding: 5px;"> <tt>(foo b|ar baz)</tt> <tt>    ==&gt;    </tt> <strong><tt>Shift+Alt+Left</tt></strong> <tt>    ==&gt;    </tt> <tt>(foo |bar| baz)</tt> <tt>    ==&gt;    </tt> <strong><tt>Shift+Alt+Left</tt></strong> <tt>    ==&gt;    </tt> <tt>(foo| bar| baz)</tt> <tt>    ==&gt;    </tt> <strong><tt>Shift+Alt+Left</tt></strong> <tt>    ==&gt;    </tt> <tt>(|foo bar| baz)</tt> <tt>    ==&gt;    </tt> <strong><tt>Shift+Alt+Left</tt></strong> <tt>    ==&gt;    </tt> <tt>|(foo bar baz)|</tt> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>Shift+Alt+Right</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>Shift+Command+Right</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> expand selection to sibling form on the right (or, if no sibling form on the right, to the enclosing form) </td><td style="border: 1px solid #aaa; padding: 5px;"> <tt>(foo b|ar baz)</tt> <tt>    ==&gt;    </tt> <tt>(foo |bar| baz)</tt> <tt>    ==&gt;    </tt> <tt>(foo |bar |baz)</tt> <tt>    ==&gt;    </tt> <tt>(foo |bar baz|)</tt> <tt>    ==&gt;    </tt> <tt>|(foo bar baz)|</tt> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>Shift+Alt+Down</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>Shift+Command+Down</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> restore previous selection </td><td style="border: 1px solid #aaa; padding: 5px;"> <tt>(foo bar| baz|)</tt> <tt>    ==&gt;    </tt> <strong><tt>Shift+Alt+Left</tt></strong> <tt>    ==&gt;    </tt> <tt>(foo |bar baz|)</tt> <tt>    ==&gt;    </tt> <strong><tt>Shift+Alt+Down</tt></strong> <tt>    ==&gt;    </tt> <tt>(foo bar| baz|)</tt> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Win/Linux</strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Mac</strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Description</strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Example(s)</strong> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>(</tt></strong> with selection </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>(</tt></strong> with selection </td><td style="border: 1px solid #aaa; padding: 5px;"> wrap the selection with parens </td><td style="border: 1px solid #aaa; padding: 5px;"> <tt>(foo |(bar baz)|)</tt> <tt>    ==&gt;    </tt> <strong><tt>(</tt></strong> <tt>    ==&gt;    </tt> <tt>(foo (|(bar baz)))</tt> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>[</tt></strong> with selection </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>[</tt></strong> with selection </td><td style="border: 1px solid #aaa; padding: 5px;"> wrap the selection with square brackets </td><td style="border: 1px solid #aaa; padding: 5px;"> <tt>(foo |(bar baz)|)</tt> <tt>    ==&gt;    </tt> <strong><tt>[</tt></strong> <tt>    ==&gt;    </tt> <tt>(foo [|(bar baz)])</tt> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>{</tt></strong> with selection </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>{</tt></strong> with selection </td><td style="border: 1px solid #aaa; padding: 5px;"> wrap the selection with curly braces </td><td style="border: 1px solid #aaa; padding: 5px;"> <tt>(foo |(bar baz)|)</tt> <tt>    ==&gt;    </tt> <strong><tt>{</tt></strong> <tt>    ==&gt;    </tt> <tt>(foo {|(bar baz)})</tt> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Win/Linux</strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Mac</strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Description</strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Example(s)</strong> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>&quot;</tt></strong> inside code without selection </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>&quot;</tt></strong> inside code without selection </td><td style="border: 1px solid #aaa; padding: 5px;"> creates an empty litteral string </td><td style="border: 1px solid #aaa; padding: 5px;"> <tt>foo |bar</tt> <tt>    ==&gt;    </tt> <strong><tt>&quot;</tt></strong> <tt>    ==&gt;    </tt> <tt>foo &quot;|&quot; bar</tt> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>&quot;</tt></strong> around code selection </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>&quot;</tt></strong> around code selection </td><td style="border: 1px solid #aaa; padding: 5px;"> wraps the selection in double quotes </td><td style="border: 1px solid #aaa; padding: 5px;"> <tt>foo |bar|</tt> <tt>    ==&gt;    </tt> <strong><tt>&quot;</tt></strong> <tt>    ==&gt;    </tt> <tt>foo |&quot;bar&quot;|</tt> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>&quot;</tt></strong> when already inside a string literal </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>&quot;</tt></strong> when already inside a string literal </td><td style="border: 1px solid #aaa; padding: 5px;"> inserts an escaped double quote </td><td style="border: 1px solid #aaa; padding: 5px;"> <tt>foo &quot;bar |baz&quot;</tt> <tt>    ==&gt;    </tt> <strong><tt>&quot;</tt></strong> <tt>    ==&gt;    </tt> <tt>foo &quot;bar \&quot;|baz&quot;</tt> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>&quot;</tt></strong> inside a string literal, at the end </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>&quot;</tt></strong> inside a string literal, at the end </td><td style="border: 1px solid #aaa; padding: 5px;"> jumps outside the string literal </td><td style="border: 1px solid #aaa; padding: 5px;"> <tt>foo &quot;bar baz|&quot;</tt> <tt>    ==&gt;    </tt> <strong><tt>&quot;</tt></strong> <tt>    ==&gt;    </tt> <tt>foo &quot;bar baz&quot;|</tt> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Win/Linux</strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Mac</strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Description</strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Example(s)</strong> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>Ctrl+Alt+A</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>Command+Alt+A</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> Go to begin of current or previous top-level form </td><td style="border: 1px solid #aaa; padding: 5px;"> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>Ctrl+Alt+E</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>Command+Alt+E</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> Go to end of current or next top-level form </td><td style="border: 1px solid #aaa; padding: 5px;"> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>Ctrl+Alt+T</tt></strong> <tt>(Ctrl+Alt+H deprecated)</tt> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>Command+Alt+T</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> Select current or following top-level form </td><td style="border: 1px solid #aaa; padding: 5px;"> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Win/Linux</strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Mac</strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Description</strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Example(s)</strong> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong>???</strong> <strong><tt>&lt;Home&gt;</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>Command+Left</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> Go to left sibling form <tt>[todo]</tt> </td><td style="border: 1px solid #aaa; padding: 5px;"> <tt>(foo [bar b|az])</tt> <tt>    ==&gt;    </tt> <strong><tt>Home</tt></strong> <tt>    ==&gt;    </tt> <tt>(foo [bar |baz])</tt> <tt>    ==&gt;    </tt> <strong><tt>Home</tt></strong> <tt>    ==&gt;    </tt> <tt>(foo [bar| baz])</tt> <tt>    ==&gt;    </tt> <tt>(foo [|bar baz])</tt> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong>???</strong> <strong><tt>&lt;End&gt;</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>Command+Right</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> Go to right sibling form <tt>[todo]</tt> </td><td style="border: 1px solid #aaa; padding: 5px;"> <tt>(fo|o {bar baz})</tt> <tt>    ==&gt;    </tt> <strong><tt>End</tt></strong> <tt>    ==&gt;    </tt>  <tt>(foo| {bar baz})</tt> <tt>    ==&gt;    </tt> <strong><tt>End</tt></strong> <tt>    ==&gt;    </tt>  <tt>(foo |{bar baz})</tt> <tt>    ==&gt;    </tt> <strong><tt>End</tt></strong> <tt>    ==&gt;    </tt> <tt>(foo {bar baz}|)</tt>    </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong>???</strong> <strong><tt>Ctrl+&lt;Home&gt;</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>Command+Up</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> Go right before the parent form <tt>[todo]</tt> </td><td style="border: 1px solid #aaa; padding: 5px;"> <tt>(foo {[bar ba|z] blah})</tt> <tt>    ==&gt;    </tt>  <strong><tt>Ctrl+Home</tt></strong> <tt>    ==&gt;    </tt>  <tt>(foo {[bar |baz] blah})</tt> <tt>    ==&gt;    </tt>  <strong><tt>Ctrl+Home</tt></strong> <tt>    ==&gt;    </tt>  <tt>(foo {|[bar baz] blah})</tt> <tt>    ==&gt;    </tt>  <strong><tt>Ctrl+Home</tt></strong> <tt>    ==&gt;    </tt>  <tt>(foo |{[bar baz] blah})</tt> <tt>    ==&gt;    </tt>  <strong><tt>Ctrl+Home</tt></strong> <tt>    ==&gt;    </tt>  <tt>|(foo {[bar baz] blah})</tt> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Win/Linux</strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Mac</strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Description</strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Example(s)</strong> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>Alt+R</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>???</strong> <strong><tt>Alt+R</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> Raise a form over its parent form (replace parent with current selection). Works with empty selections too </td><td style="border: 1px solid #aaa; padding: 5px;"> <tt>(spy |(+ x y) z|) blah</tt> <tt>    ==&gt;    </tt> <strong><tt>Alt+R</tt></strong> <tt>    ==&gt;    </tt> <tt>|(+ x y) z| blah</tt> ; but also: <tt>(spy (+ x y) |z) blah</tt> <tt>    ==&gt;    </tt> <strong><tt>Alt+R</tt></strong> <tt>    ==&gt;    </tt> <tt>|z blah</tt> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>Alt+S</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>???</strong> <strong><tt>Alt+S</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> Split enclosing form or string </td><td style="border: 1px solid #aaa; padding: 5px;"> <tt>(aaa |bbb)</tt> <tt>    ==&gt;    </tt> <strong><tt>Alt+S</tt></strong> <tt>    ==&gt;    </tt> <tt>(aaa)| (bbb)</tt> ; but also <tt>&quot;aaa|bbb&quot;</tt> <tt>    ==&gt;    </tt> <strong><tt>Alt+S</tt></strong> <tt>    ==&gt;    </tt> <tt>&quot;aaa&quot;| &quot;bbb&quot;</tt>` </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>Alt+J</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>???</strong> <strong><tt>Alt+J</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> Join two sibling forms of same type (when cursor is between the forms) </td><td style="border: 1px solid #aaa; padding: 5px;"> <tt>&quot;aaa bbb&quot;| &quot;ccc ddd&quot;</tt> <tt>    ==&gt;    </tt> <strong><tt>Alt+J</tt></strong> <tt>    ==&gt;    </tt> <tt>&quot;aaa bbb|ccc ddd&quot;</tt>; but also: <tt>[3 4]| [5 6 7]</tt> <tt>    ==&gt;    </tt> <strong><tt>Alt+J</tt></strong> <tt>    ==&gt;    </tt> <tt>[3 4| 5 6 7]</tt> </td></tr> </table></p><h3><a name="Strict_Structural_Edition_Mode"/>Strict Structural Edition Mode</h3><ol><li> In addition to the features of the Default Structural Edition Mode, this mode does its best to prevent you from breaking the structure of your code </li><li> Note: You&#x27;ll only feel &quot;at home&quot; in this mode if you know the following commands </li></ol><p><table><tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Win/Linux</strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Mac</strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Description</strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Example(s)</strong> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>&lt;Tab&gt;</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>&lt;Tab&gt;</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> hit with the cursor anywhere in a line, will reindent the line </td><td style="border: 1px solid #aaa; padding: 5px;"> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Win/Linux</strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Mac</strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Description</strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Example(s)</strong> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>)</tt></strong> without selection </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>)</tt></strong> without selection </td><td style="border: 1px solid #aaa; padding: 5px;"> jump after the closing paren of the nearest surrounding form-in-parens </td><td style="border: 1px solid #aaa; padding: 5px;"> <tt>(foo ([bar b|az]))</tt> <tt>    ==&gt;    </tt> <strong><tt>)</tt></strong> <tt>    ==&gt;    </tt> <tt>(foo ([bar baz])|)</tt> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>]</tt></strong> without selection </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>]</tt></strong> without selection </td><td style="border: 1px solid #aaa; padding: 5px;"> jump after the closing square bracket of the nearest surrounding form-in-square-brackets </td><td style="border: 1px solid #aaa; padding: 5px;"> <tt>(let [a (inc |b) c d] blah)</tt> <tt>    ==&gt;    </tt> <strong><tt>]</tt></strong> <tt>    ==&gt;    </tt> <tt>(let [a (inc b) c d]| blah)</tt> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>}</tt></strong> without selection </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>}</tt></strong> without selection </td><td style="border: 1px solid #aaa; padding: 5px;"> jump after the closing curly bracket of the nearest surrounding form-in-curly-brackets </td><td style="border: 1px solid #aaa; padding: 5px;"> <tt>{:a [:b (inc |c)] :e :f}</tt> <tt>    ==&gt;    </tt> <strong><tt>}</tt></strong> <tt>    ==&gt;    </tt> <tt>{:a [:b (inc c)] :e :f}|</tt> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Win/Linux</strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Mac</strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Description</strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Example(s)</strong> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>&lt;Delete&gt;</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>&lt;Delete&gt;</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> suppress chars but jumps over opening and closing parens/square brackets/curly brackets if they are non-empty ; will suppress the whole parens/brackets at once if empty and (currently) right before the closing part </td><td style="border: 1px solid #aaa; padding: 5px;"> <tt>foo| (bar) baz</tt> <tt>    ==&gt;    </tt> <strong><tt>&lt;Delete&gt;</tt></strong> <tt>    ==&gt;    </tt> <tt>foo|(bar) baz</tt> <tt>    ==&gt;    </tt> <strong><tt>&lt;Delete&gt;</tt></strong> <tt>    ==&gt;    </tt> <tt>foo(|bar) baz</tt> <tt>    ==&gt;    </tt> <strong><tt>&lt;Delete&gt;</tt></strong> <tt>    ==&gt;    </tt> <tt>foo(|ar) baz</tt> <tt>    ==&gt;    </tt> <strong><tt>&lt;Delete&gt;</tt></strong> <tt>    ==&gt;    </tt> <tt>foo(|r) baz</tt> <tt>    ==&gt;    </tt> <strong><tt>&lt;Delete&gt;</tt></strong> <tt>    ==&gt;    </tt> <tt>foo(|) baz</tt> <tt>    ==&gt;    </tt> <strong><tt>&lt;Delete&gt;</tt></strong> <tt>    ==&gt;    </tt> <tt>foo| baz</tt> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>&lt;Backspace&gt;</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>&lt;Backspace&gt;</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> suppress chars but jumps over closing and opening parens/square brackets/curly brackets if they are non-empty ; will suppress the whole parens/brackets at once if empty and (currently) right after the opening part </td><td style="border: 1px solid #aaa; padding: 5px;"> <tt>foo (bar)| baz</tt> <tt>    ==&gt;    </tt> <strong><tt>&lt;Backspace&gt;</tt></strong> <tt>    ==&gt;    </tt> <tt>foo (bar|) baz</tt> <tt>    ==&gt;    </tt> <strong><tt>&lt;Backspace&gt;</tt></strong> <tt>    ==&gt;    </tt> <tt>foo (ba|) baz</tt> <tt>    ==&gt;    </tt> <strong><tt>&lt;Backspace&gt;</tt></strong> <tt>    ==&gt;    </tt> <tt>foo (b|) baz</tt> <tt>    ==&gt;    </tt> <strong><tt>&lt;Backspace&gt;</tt></strong> <tt>    ==&gt;    </tt> <tt>foo (|) baz</tt> <tt>    ==&gt;    </tt> <strong><tt>&lt;Backspace&gt;</tt></strong> <tt>    ==&gt;    </tt> <tt>foo | baz</tt> </td></tr> </table></p><h2><a name="Interaction_with_the_REPL"/>Interaction with the REPL</h2><p>REPL stands for &quot;Read Eval Print Loop&quot; an is the clojure/lisp equivalent of so called &quot;interactive shells&quot; of dynamic languages. </p><p><table><tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Win/Linux</strong>       </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Mac</strong>               </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>Description</strong> </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>Ctrl+Alt+X</tt></strong>    </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>Command+Shift+X</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> Evaluate current selection or top-level form in the visible REPL (see Note below) </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>Ctrl+Alt+L</tt></strong>    </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>Command+Alt+L</tt></strong>   </td><td style="border: 1px solid #aaa; padding: 5px;"> Loads the saved version of the currently edited file (via load-file) </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>Ctrl+Alt+K</tt></strong>    </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>Command+Alt+K</tt></strong>   </td><td style="border: 1px solid #aaa; padding: 5px;"> Compiles the file (must correspond to a lib, thus having a (ns) declaration at its top </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>Shift+Alt+X C</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>???</strong> <strong><tt>Shift+Alt+X C</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> Launch a new REPL and automatically loads the edited file into it (note:  </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>Shift+Alt+D C</tt></strong> </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>???</strong> <strong><tt>Shift+Alt+D C</tt></strong>   </td><td style="border: 1px solid #aaa; padding: 5px;"> Launch a new REPL in debug mode and automatically loads the edited file into it </td></tr> <tr><td style="border: 1px solid #aaa; padding: 5px;"> <strong><tt>Ctrl+T</tt></strong>        </td><td style="border: 1px solid #aaa; padding: 5px;"> <strong>???</strong> <strong><tt>Ctrl+T</tt></strong>        </td><td style="border: 1px solid #aaa; padding: 5px;"> automatic (run-tests) for namespace declared by editor, or namespace with same prefix as namespae declared by editor and ending with <tt>-test</tt> </td></tr> </table></p><p>Note: <ul><li>if the visible REPL corresponds to another project than the project containing the edited file, one of the REPLs (if any) corresponding to the active file will be brought to front </li></ul></p>
+<h2><a name="Edition_modes" />Edition modes</h2>
+<h3><a name="Conventions" />Conventions</h3>
+<ul>
+	<li><tt>(foo |bar)</tt> represents the text <tt>(foo bar)</tt>
+	with the cursor before the <strong><tt>b</tt></strong></li>
+	<li><tt>(foo |bar|)</tt> represents the text <tt>(foo bar)</tt>
+	with the word <strong><tt>bar</tt></strong> selected</li>
+</ul>
+<h3><a name="Default_Structural_Edition_Mode" />Default Structural
+Edition Mode</h3>
+<ol>
+	<li>The features in this mode are carefully chosen because they do
+	not surprise or block newcomers to Structural Edition.</li>
+</ol>
+<p>
+<table>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Win/Linux</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Mac</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Description</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Example(s)</strong>
+		</td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>&lt;Enter&gt;</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>&lt;Enter&gt;</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;">
+		auto-indentation</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"></td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Win/Linux</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Mac</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Description</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Example(s)</strong>
+		</td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>(</tt></strong>
+		without selection</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>(</tt></strong>
+		without selection</td>
+		<td style="border: 1px solid #aaa; padding: 5px;">create a new
+		balanced pair</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><tt>foo|</tt> <tt>
+		==&gt; </tt> <strong><tt>(</tt></strong> <tt> ==&gt; </tt> <tt>foo (|)</tt>
+		</td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>[</tt></strong>
+		without selection</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>[</tt></strong>
+		without selection</td>
+		<td style="border: 1px solid #aaa; padding: 5px;">create a new
+		balanced pair</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><tt>foo|</tt> <tt>
+		==&gt; </tt> <strong><tt>[</tt></strong> <tt> ==&gt; </tt> <tt>foo [|]</tt>
+		</td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>{</tt></strong>
+		without selection</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>{</tt></strong>
+		without selection</td>
+		<td style="border: 1px solid #aaa; padding: 5px;">create a new
+		balanced pair</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><tt>foo|</tt> <tt>
+		==&gt; </tt> <strong><tt>{</tt></strong> <tt> ==&gt; </tt> <tt>foo {|}</tt>
+		</td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Win/Linux</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Mac</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Description</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Example(s)</strong>
+		</td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>Shift+Alt+Up</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>Shift+Command+Up</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;">expand
+		selection to enclosing form</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><tt>(foo
+		[bar b|az])</tt> <tt> ==&gt; </tt> <strong><tt>Shift+Alt+Up</tt></strong> <tt>
+		==&gt; </tt> <tt>(foo [bar |baz|])</tt> <tt> ==&gt; </tt> <strong><tt>Shift+Alt+Up</tt></strong>
+		<tt> ==&gt; </tt> <tt>(foo |[bar baz]|)</tt> <tt> ==&gt; </tt> <strong><tt>Shift+Alt+Up</tt></strong>
+		<tt> ==&gt; </tt> <tt>|(foo [bar baz])|</tt></td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>Shift+Alt+Left</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>Shift+Command+Left</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;">expand
+		selection to sibling form on the left (or, if no sibling form on the
+		left, to the enclosing form)</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><tt>(foo
+		b|ar baz)</tt> <tt> ==&gt; </tt> <strong><tt>Shift+Alt+Left</tt></strong> <tt>
+		==&gt; </tt> <tt>(foo |bar| baz)</tt> <tt> ==&gt; </tt> <strong><tt>Shift+Alt+Left</tt></strong>
+		<tt> ==&gt; </tt> <tt>(foo| bar| baz)</tt> <tt> ==&gt; </tt> <strong><tt>Shift+Alt+Left</tt></strong>
+		<tt> ==&gt; </tt> <tt>(|foo bar| baz)</tt> <tt> ==&gt; </tt> <strong><tt>Shift+Alt+Left</tt></strong>
+		<tt> ==&gt; </tt> <tt>|(foo bar baz)|</tt></td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>Shift+Alt+Right</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>Shift+Command+Right</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;">expand
+		selection to sibling form on the right (or, if no sibling form on the
+		right, to the enclosing form)</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><tt>(foo
+		b|ar baz)</tt> <tt> ==&gt; </tt> <tt>(foo |bar| baz)</tt> <tt> ==&gt;
+		</tt> <tt>(foo |bar |baz)</tt> <tt> ==&gt; </tt> <tt>(foo |bar baz|)</tt> <tt>
+		==&gt; </tt> <tt>|(foo bar baz)|</tt></td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>Shift+Alt+Down</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>Shift+Command+Down</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;">restore
+		previous selection</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><tt>(foo
+		bar| baz|)</tt> <tt> ==&gt; </tt> <strong><tt>Shift+Alt+Left</tt></strong>
+		<tt> ==&gt; </tt> <tt>(foo |bar baz|)</tt> <tt> ==&gt; </tt> <strong><tt>Shift+Alt+Down</tt></strong>
+		<tt> ==&gt; </tt> <tt>(foo bar| baz|)</tt></td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Win/Linux</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Mac</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Description</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Example(s)</strong>
+		</td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>(</tt></strong>
+		with selection</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>(</tt></strong>
+		with selection</td>
+		<td style="border: 1px solid #aaa; padding: 5px;">wrap the
+		selection with parens</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><tt>(foo
+		|(bar baz)|)</tt> <tt> ==&gt; </tt> <strong><tt>(</tt></strong> <tt>
+		==&gt; </tt> <tt>(foo (|(bar baz)))</tt></td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>[</tt></strong>
+		with selection</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>[</tt></strong>
+		with selection</td>
+		<td style="border: 1px solid #aaa; padding: 5px;">wrap the
+		selection with square brackets</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><tt>(foo
+		|(bar baz)|)</tt> <tt> ==&gt; </tt> <strong><tt>[</tt></strong> <tt>
+		==&gt; </tt> <tt>(foo [|(bar baz)])</tt></td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>{</tt></strong>
+		with selection</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>{</tt></strong>
+		with selection</td>
+		<td style="border: 1px solid #aaa; padding: 5px;">wrap the
+		selection with curly braces</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><tt>(foo
+		|(bar baz)|)</tt> <tt> ==&gt; </tt> <strong><tt>{</tt></strong> <tt>
+		==&gt; </tt> <tt>(foo {|(bar baz)})</tt></td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Win/Linux</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Mac</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Description</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Example(s)</strong>
+		</td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>&quot;</tt></strong>
+		inside code without selection</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>&quot;</tt></strong>
+		inside code without selection</td>
+		<td style="border: 1px solid #aaa; padding: 5px;">creates an
+		empty litteral string</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><tt>foo
+		|bar</tt> <tt> ==&gt; </tt> <strong><tt>&quot;</tt></strong> <tt>
+		==&gt; </tt> <tt>foo &quot;|&quot; bar</tt></td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>&quot;</tt></strong>
+		around code selection</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>&quot;</tt></strong>
+		around code selection</td>
+		<td style="border: 1px solid #aaa; padding: 5px;">wraps the
+		selection in double quotes</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><tt>foo
+		|bar|</tt> <tt> ==&gt; </tt> <strong><tt>&quot;</tt></strong> <tt>
+		==&gt; </tt> <tt>foo |&quot;bar&quot;|</tt></td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>&quot;</tt></strong>
+		when already inside a string literal</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>&quot;</tt></strong>
+		when already inside a string literal</td>
+		<td style="border: 1px solid #aaa; padding: 5px;">inserts an
+		escaped double quote</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><tt>foo
+		&quot;bar |baz&quot;</tt> <tt> ==&gt; </tt> <strong><tt>&quot;</tt></strong>
+		<tt> ==&gt; </tt> <tt>foo &quot;bar \&quot;|baz&quot;</tt></td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>&quot;</tt></strong>
+		inside a string literal, at the end</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>&quot;</tt></strong>
+		inside a string literal, at the end</td>
+		<td style="border: 1px solid #aaa; padding: 5px;">jumps outside
+		the string literal</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><tt>foo
+		&quot;bar baz|&quot;</tt> <tt> ==&gt; </tt> <strong><tt>&quot;</tt></strong>
+		<tt> ==&gt; </tt> <tt>foo &quot;bar baz&quot;|</tt></td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Win/Linux</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Mac</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Description</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Example(s)</strong>
+		</td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>Ctrl+Alt+A</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>Command+Alt+A</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;">Go to begin of
+		current or previous top-level form</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"></td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>Ctrl+Alt+E</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>Command+Alt+E</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;">Go to end of
+		current or next top-level form</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"></td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>Ctrl+Alt+T</tt></strong>
+		<tt>(Ctrl+Alt+H deprecated)</tt></td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>Command+Alt+T</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;">Select current
+		or following top-level form</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"></td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Win/Linux</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Mac</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Description</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Example(s)</strong>
+		</td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>???</strong>
+		<strong><tt>&lt;Home&gt;</tt></strong></td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>Command+Left</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;">Go to left
+		sibling form <tt>[todo]</tt></td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><tt>(foo
+		[bar b|az])</tt> <tt> ==&gt; </tt> <strong><tt>Home</tt></strong> <tt>
+		==&gt; </tt> <tt>(foo [bar |baz])</tt> <tt> ==&gt; </tt> <strong><tt>Home</tt></strong>
+		<tt> ==&gt; </tt> <tt>(foo [bar| baz])</tt> <tt> ==&gt; </tt> <tt>(foo
+		[|bar baz])</tt></td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>???</strong>
+		<strong><tt>&lt;End&gt;</tt></strong></td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>Command+Right</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;">Go to right
+		sibling form <tt>[todo]</tt></td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><tt>(fo|o
+		{bar baz})</tt> <tt> ==&gt; </tt> <strong><tt>End</tt></strong> <tt>
+		==&gt; </tt> <tt>(foo| {bar baz})</tt> <tt> ==&gt; </tt> <strong><tt>End</tt></strong>
+		<tt> ==&gt; </tt> <tt>(foo |{bar baz})</tt> <tt> ==&gt; </tt> <strong><tt>End</tt></strong>
+		<tt> ==&gt; </tt> <tt>(foo {bar baz}|)</tt></td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>???</strong>
+		<strong><tt>Ctrl+&lt;Home&gt;</tt></strong></td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>Command+Up</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;">Go right before
+		the parent form <tt>[todo]</tt></td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><tt>(foo
+		{[bar ba|z] blah})</tt> <tt> ==&gt; </tt> <strong><tt>Ctrl+Home</tt></strong>
+		<tt> ==&gt; </tt> <tt>(foo {[bar |baz] blah})</tt> <tt> ==&gt; </tt> <strong><tt>Ctrl+Home</tt></strong>
+		<tt> ==&gt; </tt> <tt>(foo {|[bar baz] blah})</tt> <tt> ==&gt; </tt> <strong><tt>Ctrl+Home</tt></strong>
+		<tt> ==&gt; </tt> <tt>(foo |{[bar baz] blah})</tt> <tt> ==&gt; </tt> <strong><tt>Ctrl+Home</tt></strong>
+		<tt> ==&gt; </tt> <tt>|(foo {[bar baz] blah})</tt></td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Win/Linux</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Mac</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Description</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Example(s)</strong>
+		</td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>Alt+R</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>???</strong>
+		<strong><tt>Alt+R</tt></strong></td>
+		<td style="border: 1px solid #aaa; padding: 5px;">Raise a form
+		over its parent form (replace parent with current selection). Works
+		with empty selections too</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><tt>(spy
+		|(+ x y) z|) blah</tt> <tt> ==&gt; </tt> <strong><tt>Alt+R</tt></strong> <tt>
+		==&gt; </tt> <tt>|(+ x y) z| blah</tt> ; but also: <tt>(spy (+ x y)
+		|z) blah</tt> <tt> ==&gt; </tt> <strong><tt>Alt+R</tt></strong> <tt>
+		==&gt; </tt> <tt>|z blah</tt></td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>Alt+S</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>???</strong>
+		<strong><tt>Alt+S</tt></strong></td>
+		<td style="border: 1px solid #aaa; padding: 5px;">Split enclosing
+		form or string</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><tt>(aaa
+		|bbb)</tt> <tt> ==&gt; </tt> <strong><tt>Alt+S</tt></strong> <tt>
+		==&gt; </tt> <tt>(aaa)| (bbb)</tt> ; but also <tt>&quot;aaa|bbb&quot;</tt>
+		<tt> ==&gt; </tt> <strong><tt>Alt+S</tt></strong> <tt> ==&gt; </tt> <tt>&quot;aaa&quot;|
+		&quot;bbb&quot;</tt>`</td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>Alt+J</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>???</strong>
+		<strong><tt>Alt+J</tt></strong></td>
+		<td style="border: 1px solid #aaa; padding: 5px;">Join two
+		sibling forms of same type (when cursor is between the forms)</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><tt>&quot;aaa
+		bbb&quot;| &quot;ccc ddd&quot;</tt> <tt> ==&gt; </tt> <strong><tt>Alt+J</tt></strong>
+		<tt> ==&gt; </tt> <tt>&quot;aaa bbb|ccc ddd&quot;</tt>; but also: <tt>[3
+		4]| [5 6 7]</tt> <tt> ==&gt; </tt> <strong><tt>Alt+J</tt></strong> <tt>
+		==&gt; </tt> <tt>[3 4| 5 6 7]</tt></td>
+	</tr>
+</table>
+</p>
+<h3><a name="Strict_Structural_Edition_Mode" />Strict Structural
+Edition Mode</h3>
+<ol>
+	<li>In addition to the features of the Default Structural Edition
+	Mode, this mode does its best to prevent you from breaking the
+	structure of your code</li>
+	<li>Note: You&#x27;ll only feel &quot;at home&quot; in this mode
+	if you know the following commands</li>
+</ol>
+<p>
+<table>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Win/Linux</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Mac</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Description</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Example(s)</strong>
+		</td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>&lt;Tab&gt;</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>&lt;Tab&gt;</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;">hit with the
+		cursor anywhere in a line, will reindent the line</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"></td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Win/Linux</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Mac</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Description</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Example(s)</strong>
+		</td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>)</tt></strong>
+		without selection</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>)</tt></strong>
+		without selection</td>
+		<td style="border: 1px solid #aaa; padding: 5px;">jump after the
+		closing paren of the nearest surrounding form-in-parens</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><tt>(foo
+		([bar b|az]))</tt> <tt> ==&gt; </tt> <strong><tt>)</tt></strong> <tt>
+		==&gt; </tt> <tt>(foo ([bar baz])|)</tt></td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>]</tt></strong>
+		without selection</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>]</tt></strong>
+		without selection</td>
+		<td style="border: 1px solid #aaa; padding: 5px;">jump after the
+		closing square bracket of the nearest surrounding
+		form-in-square-brackets</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><tt>(let
+		[a (inc |b) c d] blah)</tt> <tt> ==&gt; </tt> <strong><tt>]</tt></strong> <tt>
+		==&gt; </tt> <tt>(let [a (inc b) c d]| blah)</tt></td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>}</tt></strong>
+		without selection</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>}</tt></strong>
+		without selection</td>
+		<td style="border: 1px solid #aaa; padding: 5px;">jump after the
+		closing curly bracket of the nearest surrounding
+		form-in-curly-brackets</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><tt>{:a
+		[:b (inc |c)] :e :f}</tt> <tt> ==&gt; </tt> <strong><tt>}</tt></strong> <tt>
+		==&gt; </tt> <tt>{:a [:b (inc c)] :e :f}|</tt></td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Win/Linux</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Mac</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Description</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Example(s)</strong>
+		</td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>&lt;Delete&gt;</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>&lt;Delete&gt;</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;">suppress chars
+		but jumps over opening and closing parens/square brackets/curly
+		brackets if they are non-empty ; will suppress the whole
+		parens/brackets at once if empty and (currently) right before the
+		closing part</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><tt>foo|
+		(bar) baz</tt> <tt> ==&gt; </tt> <strong><tt>&lt;Delete&gt;</tt></strong> <tt>
+		==&gt; </tt> <tt>foo|(bar) baz</tt> <tt> ==&gt; </tt> <strong><tt>&lt;Delete&gt;</tt></strong>
+		<tt> ==&gt; </tt> <tt>foo(|bar) baz</tt> <tt> ==&gt; </tt> <strong><tt>&lt;Delete&gt;</tt></strong>
+		<tt> ==&gt; </tt> <tt>foo(|ar) baz</tt> <tt> ==&gt; </tt> <strong><tt>&lt;Delete&gt;</tt></strong>
+		<tt> ==&gt; </tt> <tt>foo(|r) baz</tt> <tt> ==&gt; </tt> <strong><tt>&lt;Delete&gt;</tt></strong>
+		<tt> ==&gt; </tt> <tt>foo(|) baz</tt> <tt> ==&gt; </tt> <strong><tt>&lt;Delete&gt;</tt></strong>
+		<tt> ==&gt; </tt> <tt>foo| baz</tt></td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>&lt;Backspace&gt;</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>&lt;Backspace&gt;</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;">suppress chars
+		but jumps over closing and opening parens/square brackets/curly
+		brackets if they are non-empty ; will suppress the whole
+		parens/brackets at once if empty and (currently) right after the
+		opening part</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><tt>foo
+		(bar)| baz</tt> <tt> ==&gt; </tt> <strong><tt>&lt;Backspace&gt;</tt></strong>
+		<tt> ==&gt; </tt> <tt>foo (bar|) baz</tt> <tt> ==&gt; </tt> <strong><tt>&lt;Backspace&gt;</tt></strong>
+		<tt> ==&gt; </tt> <tt>foo (ba|) baz</tt> <tt> ==&gt; </tt> <strong><tt>&lt;Backspace&gt;</tt></strong>
+		<tt> ==&gt; </tt> <tt>foo (b|) baz</tt> <tt> ==&gt; </tt> <strong><tt>&lt;Backspace&gt;</tt></strong>
+		<tt> ==&gt; </tt> <tt>foo (|) baz</tt> <tt> ==&gt; </tt> <strong><tt>&lt;Backspace&gt;</tt></strong>
+		<tt> ==&gt; </tt> <tt>foo | baz</tt></td>
+	</tr>
+</table>
+</p>
+<h2><a name="Interaction_with_the_REPL" />Interaction with the REPL</h2>
+<p>REPL stands for &quot;Read Eval Print Loop&quot; an is the
+clojure/lisp equivalent of so called &quot;interactive shells&quot; of
+dynamic languages.</p>
+<p>
+<table>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Win/Linux</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Mac</strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>Description</strong>
+		</td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>Ctrl+Alt+X</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>Command+Shift+X</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;">Evaluate
+		current selection or top-level form in the visible REPL (see Note
+		below)</td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>Ctrl+Alt+L</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>Command+Alt+L</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;">Loads the saved
+		version of the currently edited file (via load-file)</td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>Ctrl+Alt+K</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>Command+Alt+K</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;">Compiles the
+		file (must correspond to a lib, thus having a (ns) declaration at its
+		top</td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>Shift+Alt+X
+		C</tt></strong></td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>???</strong>
+		<strong><tt>Shift+Alt+X C</tt></strong></td>
+		<td style="border: 1px solid #aaa; padding: 5px;">Launch a new
+		REPL and automatically loads the edited file into it (note:</td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>Shift+Alt+D
+		C</tt></strong></td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>???</strong>
+		<strong><tt>Shift+Alt+D C</tt></strong></td>
+		<td style="border: 1px solid #aaa; padding: 5px;">Launch a new
+		REPL in debug mode and automatically loads the edited file into it</td>
+	</tr>
+	<tr>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong><tt>Ctrl+T</tt></strong>
+		</td>
+		<td style="border: 1px solid #aaa; padding: 5px;"><strong>???</strong>
+		<strong><tt>Ctrl+T</tt></strong></td>
+		<td style="border: 1px solid #aaa; padding: 5px;">automatic
+		(run-tests) for namespace declared by editor, or namespace with same
+		prefix as namespae declared by editor and ending with <tt>-test</tt></td>
+	</tr>
+</table>
+</p>
+<p>Note:
+<ul>
+	<li>if the visible REPL corresponds to another project than the
+	project containing the edited file, one of the REPLs (if any)
+	corresponding to the active file will be brought to front</li>
+</ul>
+</p>
 
 
 </body>

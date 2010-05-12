@@ -56,7 +56,7 @@ import ccw.editors.rulesbased.ClojurePartitionScanner;
 import ccw.launching.ClojureLaunchShortcut;
 
 public class AntlrBasedClojureEditor extends TextEditor {
-	public static final String EDITOR_REFERENCE_HELP_CONTEXT_ID = "ccw.branding.ccw.editors.context_help";
+	public static final String EDITOR_REFERENCE_HELP_CONTEXT_ID = "ccw.branding.editor_context_help";
     public static final String STATUS_CATEGORY_STRUCTURAL_EDITION = "CCW.STATUS_CATEGORY_STRUCTURAL_EDITING_POSSIBLE";
 	
     private static final String CONTENT_ASSIST_PROPOSAL = "ContentAssistProposal"; //$NON-NLS-1$

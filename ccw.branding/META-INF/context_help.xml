@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<contexts>
-   <context id="ccw.editors.context_help">
-      <description>Reference page of the clojure source code editor features</description>
-      <topic href="html/reference/editor.html" label="Reference page"/>
-   </context>
-</contexts>
