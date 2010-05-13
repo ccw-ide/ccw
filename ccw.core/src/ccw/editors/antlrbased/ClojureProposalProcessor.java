@@ -53,7 +53,7 @@ import ccw.outline.NamespaceBrowser;
 import ccw.util.ClojureDocUtils;
 
 public class ClojureProposalProcessor implements IContentAssistProcessor {
-	private static final int MAX_JAVA_SEARCH_RESULT_NUMBER = 200;
+	private static final int MAX_JAVA_SEARCH_RESULT_NUMBER = 50;
 	private static final String ERROR_MESSAGE_TOO_MANY_COMPLETIONS = "Too many proposals found. Only first " + MAX_JAVA_SEARCH_RESULT_NUMBER + " found are shown";
 	private static final String MESSAGE_JAVA_COMPLETION = "Completion for all available java methods";
 	private static final String MESSAGE_CLOJURE_COMPLETION = "Completion for symbols visible from current namespace";
@@ -63,7 +63,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 	
 	private String errorMessage;
 
-	final int JAVA_PREFIX_MIN_LENGTH = 3;
+	final int JAVA_PREFIX_MIN_LENGTH = 4;
 
 	public static class PrefixInfo {
 		public final String prefix;
@@ -139,7 +139,27 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 					// sur le type
 					proposals.addAll(computeAndAddJavaStaticMethodCompletionProposal(prefixInfo, JavaSearchType.STATIC_METHOD));
 				} else {
-					proposals.addAll(computeAndAddJavaStaticMethodCompletionProposal(prefixInfo, JavaSearchType.PACKAGE));
+					 /*
+			        si contient au moins un point
+			            considerer que ce qui est avant le dernier point doit matcher une classe
+			            considerer que ce qui est apres le dernier point doit matcher une m�thode d'instance
+			            chercher completion parmi les noms de classes du classpath avec la methode
+			                si des points
+			                    parmi les noms de classes en considerant que c'est totalement qualifie
+			                      (possibilite d'ecriture en camel case)
+			                sinon
+			                    parmi les noms de classes en cherchant dans n'importe quel package
+			                      (possibilite d'ecriture en camel case)
+			                fin si
+			        fin si
+				 */
+				
+				proposals.addAll(computeClojureNamespacesProposals(prefixInfo));
+
+				proposals.addAll(computeClojureSymbolsProposals(prefixInfo));
+
+				
+				proposals.addAll(computeAndAddJavaStaticMethodCompletionProposal(prefixInfo, JavaSearchType.PACKAGE));
 					/*
 				        chercher completion parmi les noms de classes du classpath
 				            si des points
@@ -151,24 +171,6 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 				            fin si
 					 */
 					proposals.addAll(computeAndAddJavaStaticMethodCompletionProposal(prefixInfo, JavaSearchType.CLASS));
-					 /*
-				        si contient au moins un point
-				            considerer que ce qui est avant le dernier point doit matcher une classe
-				            considerer que ce qui est apres le dernier point doit matcher une m�thode d'instance
-				            chercher completion parmi les noms de classes du classpath avec la methode
-				                si des points
-				                    parmi les noms de classes en considerant que c'est totalement qualifie
-				                      (possibilite d'ecriture en camel case)
-				                sinon
-				                    parmi les noms de classes en cherchant dans n'importe quel package
-				                      (possibilite d'ecriture en camel case)
-				                fin si
-				        fin si
-					 */
-					
-					proposals.addAll(computeClojureNamespacesProposals(prefixInfo));
-
-					proposals.addAll(computeClojureSymbolsProposals(prefixInfo));
 				}
 			}
 			
@@ -275,9 +277,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 			final PrefixInfo prefixInfo) {
 		final List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
 		
-		if (prefixInfo.prefix.length() < JAVA_PREFIX_MIN_LENGTH) {
-			CCWPlugin.logWarning("completion proposal asked for a prefix whose length "
-					+ "is less than the authorized one (" + JAVA_PREFIX_MIN_LENGTH + "):'" + prefixInfo + "' for java completions");
+		if (! checkJavaPrefixLength(prefixInfo)) {
 			return Collections.emptyList();
 		}
 
@@ -401,10 +401,25 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 		/** try to match only if the size of the prefix is equal or greater than this. */
 		public abstract int[] prefixMinLength();
 	}
+	
+	private boolean checkJavaPrefixLength(PrefixInfo prefixInfo) {
+		if (prefixInfo.prefix.length() < JAVA_PREFIX_MIN_LENGTH) {
+			CCWPlugin.logWarning("completion proposal asked for a prefix whose length "
+					+ "is less than the authorized one (" + JAVA_PREFIX_MIN_LENGTH + "):'" + prefixInfo + "' for java completions");
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
 	private List<ICompletionProposal> computeAndAddJavaStaticMethodCompletionProposal(
 			final PrefixInfo prefixInfo, final JavaSearchType searchType) {
 		final List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
 	
+		if (! checkJavaPrefixLength(prefixInfo)) {
+			return Collections.emptyList();
+		}
+
 		int nbPatterns = searchType.matchRule().length;
 		List<SearchPattern> combinedPattern = new ArrayList<SearchPattern>();
 		
