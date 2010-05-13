@@ -20,7 +20,7 @@
   (:require [clojure.contrib.str-utils2 :as str2])
   (:require [clojure.zip :as zip]))
 
-#_(set! *warn-on-reflection* true)
+(set! *warn-on-reflection* true)
 
 
 ;;; -*- Mode: Emacs-Lisp; outline-regexp: "\n;;;;+" -*-
@@ -1012,7 +1012,7 @@
                        :else (if-let [nl (zip/up (if (start-punct? l) (parse-node l) (parse-leave l)))] nl (parse-leave l)))
               open-punct (loc-tag parent)
               _ (spy open-punct)
-              close-punct (*brackets* open-punct)]
+              close-punct #^String (*brackets* open-punct)]
           (if-not close-punct
             t
             (let [replace-text (str close-punct " " open-punct)
@@ -1057,7 +1057,7 @@
               (if-not (and
                         (= (loc-tag ln) (loc-tag rn)))
                 t
-                (let [replace-offset (- (end-offset ln) (if-let [punct (*brackets* (loc-tag ln))] (.length punct) 0))
+                (let [replace-offset (- (end-offset ln) (if-let [punct #^String (*brackets* (loc-tag ln))] (.length punct) 0))
                       replace-length (- (+ (start-offset rn) (if (*brackets* (loc-tag rn)) (.length (loc-tag rn)) 0)) replace-offset)
                       replace-text   (if (#{(str \") (str \a)} (loc-tag ln)) "" " ")
                       new-offset (if (= offset (start-offset rn)) (+ replace-offset (.length replace-text)) replace-offset)]

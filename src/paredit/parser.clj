@@ -22,7 +22,7 @@
   (:use clojure.contrib.core)
 	(:require [clojure.zip :as zip]))
 
-#_(set! *warn-on-reflection* true)
+(set! *warn-on-reflection* true)
 
 (def *spy?* (atom false))
 (defn start-spy [] (reset! *spy?* true))
@@ -380,7 +380,7 @@
     (string? (zip/node loc)) (.length #^String loc)
     :else (- (:end-offset loc) (:offset loc))))
     
-(defn loc-tag [loc]
+(defn #^String loc-tag [loc]
   (and loc 
     (:tag (zip/node (if (string? (zip/node loc)) (zip/up loc) loc)))))
   
