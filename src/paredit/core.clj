@@ -20,7 +20,7 @@
   (:require [clojure.contrib.str-utils2 :as str2])
   (:require [clojure.zip :as zip]))
 
-(set! *warn-on-reflection* true)
+#_(set! *warn-on-reflection* true)
 
 
 ;;; -*- Mode: Emacs-Lisp; outline-regexp: "\n;;;;+" -*-

@@ -22,7 +22,7 @@
   (:use clojure.contrib.core)
 	(:require [clojure.zip :as zip]))
 
-(set! *warn-on-reflection* true)
+#_(set! *warn-on-reflection* true)
 
 (def *spy?* (atom false))
 (defn start-spy [] (reset! *spy?* true))
