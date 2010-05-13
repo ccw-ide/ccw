@@ -72,7 +72,7 @@ public interface IClojureEditorActionDefinitionIds extends ITextEditorActionDefi
      * expression action
      */
     public static final String SWITCH_STRUCTURAL_EDITION_MODE = "ccw.ui.edit.text.clojure.switch.structuraledition.mode";
-    
+    public static final String SWITCH_STRUCTURAL_EDITION_MODE2 = "SwitchStructuralEditionModeAction";
 
     /**
      * Action definition ID of the Clojure (or edit ?) -> evaluate top level s

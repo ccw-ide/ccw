@@ -114,7 +114,7 @@ public class BasicClojureEditorActionContributor extends BasicTextEditorActionCo
 		/** CCW specific Status */ 
 		if (part instanceof ITextEditorExtension) {
 			ITextEditorExtension extension= (ITextEditorExtension) part;
-			
+			structuralEditionStatusField.setActionHandler(getAction(textEditor, IClojureEditorActionDefinitionIds.SWITCH_STRUCTURAL_EDITION_MODE2));
 			extension.setStatusField(structuralEditionStatusField, AntlrBasedClojureEditor.STATUS_CATEGORY_STRUCTURAL_EDITION);
 		}
 	}
