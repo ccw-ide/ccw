@@ -209,8 +209,8 @@ public class AntlrBasedClojureEditor extends TextEditor {
 			field.setText(text == null ? fErrorLabel : text);
 			extField.setToolTipText(
 					(useStrictStructuralEditing 
-							? "Strict mode: editor does its best to prevent you from breaking the structure of the code (requires you to know shortcut commands well)"
-						   : "Default mode: helps you with edition, but does not get in your way"));
+							? "Strict mode: editor does its best to prevent you from breaking the structure of the code (requires you to know shortcut commands well). Click to switch to Default Mode."
+						   : "Default mode: helps you with edition, but does not get in your way Click to switch to Strict Mode."));
 		}
 	}
 
@@ -784,10 +784,10 @@ public class AntlrBasedClojureEditor extends TextEditor {
     public final ISourceViewer sourceViewer() {
         return super.getSourceViewer();
     }
-    
+
+    /** Change the visibility of the method to public */
     @Override
     public void setStatusLineErrorMessage(String message) {
-        // TODO Auto-generated method stub
         super.setStatusLineErrorMessage(message);
     }
 
