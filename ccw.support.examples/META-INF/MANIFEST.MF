@@ -20,6 +20,7 @@ Import-Package: org.eclipse.core.resources,
  org.eclipse.jdt.core,
  org.eclipse.jdt.launching,
  org.eclipse.ui.actions,
+ org.eclipse.ui.console,
  org.eclipse.ui.dialogs,
  org.eclipse.ui.wizards.datatransfer,
  org.eclipse.ui.wizards.newresource

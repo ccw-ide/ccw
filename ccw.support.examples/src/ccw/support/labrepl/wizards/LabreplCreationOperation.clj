@@ -28,12 +28,14 @@
      [org.eclipse.core.resources IResource ResourcesPlugin]
      [org.eclipse.jface.viewers StructuredSelection]
      [ccw ClojureCore]
+     [ccw.debug ClojureClient]
      [ccw.support.labrepl Activator]
-     [ccw.launching ClojureLaunchShortcut]
+     [ccw.launching ClojureLaunchShortcut LaunchUtils]
      [ccw.editors.antlrbased EvaluateTextAction]
      [org.eclipse.ui.wizards.datatransfer ImportOperation
                                           ZipFileStructureProvider]
-     [org.eclipse.ui.browser IWorkbenchBrowserSupport])
+     [org.eclipse.ui.browser IWorkbenchBrowserSupport]
+     [org.eclipse.ui.progress UIJob])
   
   (:use
     [leiningen.core :only [read-project defproject]]
@@ -98,19 +100,20 @@
       (import-files-from-zip zip-file dest-path (SubProgressMonitor. monitor 1) overwrite-query))
     (catch CoreException exception (throw (InvocationTargetException. exception)))))
 
- (defn open-browser
-   "Open a browser for the running labrepl web page"
-   []
-   (let
-     [browser-support (.getBrowserSupport (PlatformUI/getWorkbench))
-      browser (.createBrowser 
-                browser-support 
-                (reduce bit-or 
-                  [IWorkbenchBrowserSupport/LOCATION_BAR
-                    IWorkbenchBrowserSupport/NAVIGATION_BAR
-                    IWorkbenchBrowserSupport/AS_EDITOR]) 
-                nil "Labrepl" "Labrepl Instructions")]
-     (.openURL browser (URL. "http://localhost:8080"))))
+(defn open-browser
+"Open a browser for the running labrepl web page"
+[]
+(let
+  [browser-support (.getBrowserSupport (PlatformUI/getWorkbench))
+   browser
+   (.createBrowser 
+      browser-support 
+      (reduce bit-or 
+        [IWorkbenchBrowserSupport/LOCATION_BAR
+          IWorkbenchBrowserSupport/NAVIGATION_BAR
+          IWorkbenchBrowserSupport/AS_EDITOR]) 
+      nil "Labrepl" "Labrepl Instructions")]
+   (.openURL browser (URL. "http://localhost:8080"))))
  
 (defn fix-libraries
   "Enter all the JAR files in the lib directory to the Java build path of the project"
@@ -127,6 +130,23 @@
     (doto java-project
       (.setRawClasspath new-lib-entries nil)
       (.save nil true))))
+    
+(defn- get-console
+  []
+  (loop
+    [self-timeout 30000]
+    (if (and 
+          (> self-timeout 0) 
+          (not (Thread/interrupted)))
+      (let [process-console (ClojureClient/findActiveReplConsole)]
+        (if process-console
+          process-console
+          (try
+            (Thread/sleep 100)
+            (println "get console time remaining " self-timeout)
+            (recur (- self-timeout 100))
+            (catch InterruptedException e
+              (.printStackTrace e))))))))
 
 (defn create-project
   [root page monitor overwrite-query]
@@ -151,13 +171,20 @@
         (if run-repl
           (let
             [startup-file-selection (StructuredSelection. (.getFile (.getFolder project "src") "labrepl.clj"))
-              run-labrepl-action
-                (proxy [EvaluateTextAction] ["Start labrepl"]
-                  (run [] (.evaluateText "(labrepl/-main)")))]
-            (.launch (ClojureLaunchShortcut.) startup-file-selection ILaunchManager/RUN_MODE)
-            ; TODO the following does not work
-            #_(.run run-labrepl-action)
-            (open-browser)))))))
+              browser-labrepl-job
+                (proxy [UIJob] ["Start Labrepl Session and Browser"]
+			            (runInUIThread [monitor]
+			              (.launch (ClojureLaunchShortcut.) startup-file-selection ILaunchManager/RUN_MODE)
+										(let [console (get-console)]
+                      (if console
+                        (do
+	                        (EvaluateTextAction/evaluateText console "(labrepl/-main)")
+                          ; TODO wait for socket
+                          (Thread/sleep 10000)
+										      (open-browser)
+                          Status/OK_STATUS)
+                        Status/CANCEL_STATUS))))]
+            (.schedule browser-labrepl-job)))))))
 
 (defn -run
   [this monitor]
