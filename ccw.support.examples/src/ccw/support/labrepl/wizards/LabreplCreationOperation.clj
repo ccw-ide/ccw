@@ -44,12 +44,14 @@
   (:gen-class
    :implements [org.eclipse.jface.operation.IRunnableWithProgress]
    :constructors {[ccw.support.labrepl.wizards.LabreplCreateProjectPage org.eclipse.ui.dialogs.IOverwriteQuery] []}
-   :init myinit
+   :init init
    :state state))
 
 (def *port* 8080)
+(def *timeout* 30000)
+(def *step* 100)
 
-(defn- -myinit
+(defn- -init
   [pages overwrite-query]
   [[] (ref {:page pages :overwrite-query overwrite-query})])
 
@@ -134,7 +136,7 @@ never returned a non-nil value before the timeout occurred."
 (defn- open-browser
 "Open a browser for the running labrepl web page"
 []
-	(if (wait-for-resource check-server 30000 100)
+	(if (wait-for-resource check-server *timeout* *step*)
    (let
 	  [browser-support (.getBrowserSupport (PlatformUI/getWorkbench))
 	   browser
@@ -190,12 +192,10 @@ never returned a non-nil value before the timeout occurred."
                 (proxy [UIJob] ["Start Labrepl Session and Browser"]
 			            (runInUIThread [monitor]
 			              (.launch (ClojureLaunchShortcut.) startup-file-selection ILaunchManager/RUN_MODE)
-										(let [console (wait-for-resource #(ClojureClient/findActiveReplConsole) 30000 100)]
+										(let [console (wait-for-resource #(ClojureClient/findActiveReplConsole) *timeout* *step*)]
                       (if console
                         (do
 	                        (EvaluateTextAction/evaluateText console "(labrepl/-main)")
-                          ; (wait-for-server)
-                          (Thread/sleep 10000)
 										      (open-browser)
                           Status/OK_STATUS)
                         Status/CANCEL_STATUS))))]
