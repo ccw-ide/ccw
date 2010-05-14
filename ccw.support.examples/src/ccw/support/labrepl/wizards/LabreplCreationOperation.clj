@@ -40,17 +40,20 @@
   (:use
     [leiningen.core :only [read-project defproject]]
     [leiningen.deps :only [deps]])
+  
   (:gen-class
    :implements [org.eclipse.jface.operation.IRunnableWithProgress]
    :constructors {[ccw.support.labrepl.wizards.LabreplCreateProjectPage org.eclipse.ui.dialogs.IOverwriteQuery] []}
    :init myinit
    :state state))
 
+(def *port* 8080)
+
 (defn- -myinit
   [pages overwrite-query]
   [[] (ref {:page pages :overwrite-query overwrite-query})])
 
-(defn config-new-project
+(defn- config-new-project
   [root name monitor]
   (try
     (let
@@ -64,7 +67,7 @@
         project))
     (catch CoreException exception (throw (InvocationTargetException. exception)))))
 
-(defn get-zipfile-from-plugin-dir
+(defn- get-zipfile-from-plugin-dir
   [plugin-relative-path]
   (try
     (let
@@ -77,19 +80,19 @@
           status (Status. IStatus/ERROR Activator/PLUGIN_ID IStatus/ERROR  message exception)]
         (throw (CoreException. status))))))
 
-(defn import-files-from-zip
+(defn- import-files-from-zip
   [src-zip-file dest-path monitor overwrite-query]
   (let
     [structure-provider (ZipFileStructureProvider. src-zip-file)
       op (ImportOperation. dest-path (.getRoot structure-provider) structure-provider overwrite-query)]
     (.run op monitor)))
 
-(defn make-project-folder
+(defn- make-project-folder
   [project folder monitor]
   (let [project-folder (.getFolder project folder)]
     (.create project-folder true true monitor)))
 
-(defn do-imports
+(defn- do-imports
   [project monitor overwrite-query]
   (try
     (let
@@ -100,22 +103,51 @@
       (import-files-from-zip zip-file dest-path (SubProgressMonitor. monitor 1) overwrite-query))
     (catch CoreException exception (throw (InvocationTargetException. exception)))))
 
-(defn open-browser
+(defn- wait-for-resource
+  "Calls resource-fn until it returns a non-nil value and returns it. If resource-fn
+returns nil, waits for step milliseconds, and repeats. Returns nil if resource-fn
+never returned a non-nil value before the timeout occurred."
+  [resource-fn timeout step]
+  (loop
+    [self-timeout timeout]
+    (if (and 
+          (> self-timeout 0) 
+          (not (Thread/interrupted)))
+      (let [resource (resource-fn)]
+        (if resource
+          resource
+          (try
+            (Thread/sleep step)
+            (recur (- self-timeout step))
+            (catch InterruptedException e
+              (.printStackTrace e)
+              nil)))))))
+
+(defn- check-server
+  []
+  (try
+    (let [socket (java.net.Socket. "localhost" *port*)]
+      socket)
+    (catch Exception _
+      nil)))
+
+(defn- open-browser
 "Open a browser for the running labrepl web page"
 []
-(let
-  [browser-support (.getBrowserSupport (PlatformUI/getWorkbench))
-   browser
-   (.createBrowser 
-      browser-support 
-      (reduce bit-or 
-        [IWorkbenchBrowserSupport/LOCATION_BAR
-          IWorkbenchBrowserSupport/NAVIGATION_BAR
-          IWorkbenchBrowserSupport/AS_EDITOR]) 
-      nil "Labrepl" "Labrepl Instructions")]
-   (.openURL browser (URL. "http://localhost:8080"))))
+	(if (wait-for-resource check-server 30000 100)
+   (let
+	  [browser-support (.getBrowserSupport (PlatformUI/getWorkbench))
+	   browser
+	   (.createBrowser 
+	      browser-support 
+	      (reduce bit-or 
+	        [IWorkbenchBrowserSupport/LOCATION_BAR
+	          IWorkbenchBrowserSupport/NAVIGATION_BAR
+	          IWorkbenchBrowserSupport/AS_EDITOR]) 
+	      nil "Labrepl" "Labrepl Instructions")]
+	   (.openURL browser (URL. (str "http://localhost:" *port*))))))
  
-(defn fix-libraries
+(defn- fix-libraries
   "Enter all the JAR files in the lib directory to the Java build path of the project"
   [project]
   (let
@@ -130,25 +162,8 @@
     (doto java-project
       (.setRawClasspath new-lib-entries nil)
       (.save nil true))))
-    
-(defn- get-console
-  []
-  (loop
-    [self-timeout 30000]
-    (if (and 
-          (> self-timeout 0) 
-          (not (Thread/interrupted)))
-      (let [process-console (ClojureClient/findActiveReplConsole)]
-        (if process-console
-          process-console
-          (try
-            (Thread/sleep 100)
-            (println "get console time remaining " self-timeout)
-            (recur (- self-timeout 100))
-            (catch InterruptedException e
-              (.printStackTrace e))))))))
 
-(defn create-project
+(defn- create-project
   [root page monitor overwrite-query]
   
   (.beginTask monitor "Configuring project..." 1)
@@ -175,11 +190,11 @@
                 (proxy [UIJob] ["Start Labrepl Session and Browser"]
 			            (runInUIThread [monitor]
 			              (.launch (ClojureLaunchShortcut.) startup-file-selection ILaunchManager/RUN_MODE)
-										(let [console (get-console)]
+										(let [console (wait-for-resource #(ClojureClient/findActiveReplConsole) 30000 100)]
                       (if console
                         (do
 	                        (EvaluateTextAction/evaluateText console "(labrepl/-main)")
-                          ; TODO wait for socket
+                          ; (wait-for-server)
                           (Thread/sleep 10000)
 										      (open-browser)
                           Status/OK_STATUS)
