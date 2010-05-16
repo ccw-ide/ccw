@@ -15,6 +15,7 @@
      [java.util.zip ZipFile]
      [org.eclipse.core.runtime NullProgressMonitor
                             SubProgressMonitor
+                            IProgressMonitor
                             CoreException
                             IStatus
                             Platform
@@ -35,7 +36,7 @@
      [org.eclipse.ui.wizards.datatransfer ImportOperation
                                           ZipFileStructureProvider]
      [org.eclipse.ui.browser IWorkbenchBrowserSupport]
-     [org.eclipse.ui.progress UIJob])
+     [org.eclipse.ui.progress WorkbenchJob])
   
   (:use
     [leiningen.core :only [read-project defproject]]
@@ -109,12 +110,13 @@
   "Calls resource-fn until it returns a non-nil value and returns it. If resource-fn
 returns nil, waits for step milliseconds, and repeats. Returns nil if resource-fn
 never returned a non-nil value before the timeout occurred."
-  [resource-fn timeout step]
+  [resource-fn timeout step monitor]
   (loop
     [self-timeout timeout]
     (if (and 
           (> self-timeout 0) 
-          (not (Thread/interrupted)))
+          (not (Thread/interrupted))
+          (not (.isCanceled monitor)))
       (let [resource (resource-fn)]
         (if resource
           resource
@@ -134,20 +136,25 @@ never returned a non-nil value before the timeout occurred."
       nil)))
 
 (defn- open-browser
-"Open a browser for the running labrepl web page"
-[]
-	(if (wait-for-resource check-server *timeout* *step*)
-   (let
-	  [browser-support (.getBrowserSupport (PlatformUI/getWorkbench))
-	   browser
-	   (.createBrowser 
-	      browser-support 
-	      (reduce bit-or 
-	        [IWorkbenchBrowserSupport/LOCATION_BAR
-	          IWorkbenchBrowserSupport/NAVIGATION_BAR
-	          IWorkbenchBrowserSupport/AS_EDITOR]) 
-	      nil "Labrepl" "Labrepl Instructions")]
-	   (.openURL browser (URL. (str "http://localhost:" *port*))))))
+  "Open a browser for the running labrepl web page"
+  [monitor]
+  (try
+    (.beginTask monitor "Opening Browser" IProgressMonitor/UNKNOWN)
+		(if (wait-for-resource check-server *timeout* *step* monitor)
+	   (let
+		  [browser-support (.getBrowserSupport (PlatformUI/getWorkbench))
+		   browser
+		   (.createBrowser 
+		      browser-support 
+		      (reduce bit-or 
+		        [IWorkbenchBrowserSupport/LOCATION_BAR
+		          IWorkbenchBrowserSupport/NAVIGATION_BAR
+		          IWorkbenchBrowserSupport/AS_EDITOR]) 
+		      nil "Labrepl" "Labrepl Instructions")]
+		   (.openURL browser (URL. (str "http://localhost:" *port*)))
+	     Status/OK_STATUS)
+	     Status/CANCEL_STATUS)
+  (finally (.done monitor))))
  
 (defn- fix-libraries
   "Enter all the JAR files in the lib directory to the Java build path of the project"
@@ -189,23 +196,22 @@ never returned a non-nil value before the timeout occurred."
           (let
             [startup-file-selection (StructuredSelection. (.getFile (.getFolder project "src") "labrepl.clj"))
               browser-labrepl-job
-                (proxy [UIJob] ["Start Labrepl Session and Browser"]
+                (proxy [WorkbenchJob] ["Start Labrepl Session and Browser"]
 			            (runInUIThread [monitor]
 			              (.launch (ClojureLaunchShortcut.) startup-file-selection ILaunchManager/RUN_MODE)
-										(let [console (wait-for-resource #(ClojureClient/findActiveReplConsole) *timeout* *step*)]
+										(let [console (wait-for-resource #(ClojureClient/findActiveReplConsole) *timeout* *step* monitor)]
                       (if console
                         (do
 	                        (EvaluateTextAction/evaluateText console "(labrepl/-main)")
-										      (open-browser)
-                          Status/OK_STATUS)
+										      (open-browser (SubProgressMonitor. monitor 5)))
                         Status/CANCEL_STATUS))))]
+            (.setUser browser-labrepl-job true)
             (.schedule browser-labrepl-job)))))))
 
 (defn -run
   [this monitor]
   (let
-    [monitor (if monitor monitor (NullProgressMonitor.))
-      state @(.state this)
+    [state @(.state this)
       page (:page state)
       overwrite-query (:overwrite-query state)]
     (try
