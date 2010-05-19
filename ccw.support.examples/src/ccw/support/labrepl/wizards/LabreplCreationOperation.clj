@@ -10,10 +10,12 @@
 ;*******************************************************************************/
 (ns ccw.support.labrepl.wizards.LabreplCreationOperation
   (:import
+     [ccw.support.labrepl.wizards LabreplAntLogger]
      [java.lang.reflect InvocationTargetException]
      [java.net URL]
      [java.util.zip ZipFile]
      [org.eclipse.core.runtime NullProgressMonitor
+                            SubMonitor
                             SubProgressMonitor
                             IProgressMonitor
                             CoreException
@@ -53,8 +55,8 @@
 (def *step* 100)
 
 (defn- -init
-  [pages overwrite-query]
-  [[] (ref {:page pages :overwrite-query overwrite-query})])
+  [page overwrite-query]
+  [[] (ref {:page page :overwrite-query overwrite-query})])
 
 (defn- config-new-project
   [root name monitor]
@@ -111,21 +113,26 @@
 returns nil, waits for step milliseconds, and repeats. Returns nil if resource-fn
 never returned a non-nil value before the timeout occurred."
   [resource-fn timeout step monitor]
-  (loop
-    [self-timeout timeout]
-    (if (and 
-          (> self-timeout 0) 
-          (not (Thread/interrupted))
-          (not (.isCanceled monitor)))
-      (let [resource (resource-fn)]
-        (if resource
-          resource
-          (try
-            (Thread/sleep step)
-            (recur (- self-timeout step))
-            (catch InterruptedException e
-              (.printStackTrace e)
-              nil)))))))
+  (let [sub-monitor (SubMonitor/convert monitor 10)] 
+    (println "wait for resource")
+    (loop
+	    [self-timeout timeout]
+	    (if (and 
+	          (> self-timeout 0) 
+	          (not (Thread/interrupted))
+	          (not (.isCanceled monitor)))
+	      (let [resource (resource-fn)]
+	        (if resource
+	          resource
+	          (try
+              (println (str "Remaing wait time " self-timeout))
+              (.subTask sub-monitor (str "Remaing wait time " self-timeout))
+	            (Thread/sleep step)
+	            (.worked sub-monitor 1)
+	            (recur (- self-timeout step))
+	            (catch InterruptedException e
+	              (.printStackTrace e)
+	              nil))))))))
 
 (defn- check-server
   []
@@ -138,9 +145,7 @@ never returned a non-nil value before the timeout occurred."
 (defn- open-browser
   "Open a browser for the running labrepl web page"
   [monitor]
-  (try
-    (.beginTask monitor "Opening Browser" IProgressMonitor/UNKNOWN)
-		(if (wait-for-resource check-server *timeout* *step* monitor)
+	(if (wait-for-resource check-server *timeout* *step* monitor)
 	   (let
 		  [browser-support (.getBrowserSupport (PlatformUI/getWorkbench))
 		   browser
@@ -153,8 +158,7 @@ never returned a non-nil value before the timeout occurred."
 		      nil "Labrepl" "Labrepl Instructions")]
 		   (.openURL browser (URL. (str "http://localhost:" *port*)))
 	     Status/OK_STATUS)
-	     Status/CANCEL_STATUS)
-  (finally (.done monitor))))
+	     Status/CANCEL_STATUS))
  
 (defn- fix-libraries
   "Enter all the JAR files in the lib directory to the Java build path of the project"
@@ -172,41 +176,67 @@ never returned a non-nil value before the timeout occurred."
       (.setRawClasspath new-lib-entries nil)
       (.save nil true))))
 
+(defn- make-ant-project-with-progress
+  [progress]
+  (let [proj (org.apache.tools.ant.Project.)
+       logger (LabreplAntLogger. progress)]
+   (doto logger
+     (.setMessageOutputLevel org.apache.tools.ant.Project/MSG_INFO)
+     (.setOutputPrintStream System/out)
+     (.setErrorPrintStream System/err))
+   (doto proj
+     (.init)
+     (.addBuildListener logger))))
+
 (defn- create-project
   [root page monitor overwrite-query]
-  
-  (.beginTask monitor "Configuring project..." 1)
-  
   (let
-    [project-name (.getProjectName page)
-      project (config-new-project root project-name monitor)
+    [progress (SubMonitor/convert monitor 10)
+      project-name (.getProjectName page)
+      project (config-new-project root project-name (.newChild progress 10))
       page-state @(.state page)
-      run-lein-deps (.getSelection (:run-lein-deps-button page-state))]
-    
-    (do-imports project (SubProgressMonitor. monitor 1) overwrite-query)
-    
-    (if run-lein-deps
-      (let
-        [leiningen-pfile (.toOSString (.getLocation (.getFile project "project.clj")))
-          labrepl-leiningen-project (read-project (str leiningen-pfile))
-          run-repl (.getSelection (:run-repl-button page-state))]
-        (deps labrepl-leiningen-project)
-        (fix-libraries project)
-        (if run-repl
-          (let
-            [startup-file-selection (StructuredSelection. (.getFile (.getFolder project "src") "labrepl.clj"))
-              browser-labrepl-job
-                (proxy [WorkbenchJob] ["Start Labrepl Session and Browser"]
-			            (runInUIThread [monitor]
-			              (.launch (ClojureLaunchShortcut.) startup-file-selection ILaunchManager/RUN_MODE)
-										(let [console (wait-for-resource #(ClojureClient/findActiveReplConsole) *timeout* *step* monitor)]
-                      (if console
-                        (do
-	                        (EvaluateTextAction/evaluateText console "(labrepl/-main)")
-										      (open-browser (SubProgressMonitor. monitor 5)))
-                        Status/CANCEL_STATUS))))]
-            (.setUser browser-labrepl-job true)
-            (.schedule browser-labrepl-job)))))))
+      run-lein-deps (.getSelection (:run-lein-deps-button page-state))
+      run-repl (.getSelection (:run-repl-button page-state))
+      setup-job 
+        (proxy [WorkbenchJob] ["Setup of Labrepl Project"]
+          (runInUIThread [monitor]
+            (let [job-progress (SubMonitor/convert monitor 100)]
+              (.subTask job-progress "Doing imports")
+					    (do-imports project (.newChild job-progress 30) overwrite-query)
+					    (.worked job-progress 1)
+					    (if run-lein-deps
+					      (let
+					        [leiningen-pfile (.toOSString (.getLocation (.getFile project "project.clj")))
+					          labrepl-leiningen-project (read-project (str leiningen-pfile))]
+                  (binding [lancet/ant-project (make-ant-project-with-progress job-progress)]
+                    (.subTask job-progress "Running  \"lein deps\"")
+						        (deps labrepl-leiningen-project)
+	                  (.worked job-progress 1)
+	                  
+	                  (.subTask job-progress "Fixing classpath")
+						        (fix-libraries project)
+	                  (.worked job-progress 1)
+	                  
+						        (if run-repl
+						          (let
+						            [startup-file-selection (StructuredSelection. (.getFile (.getFolder project "src") "labrepl.clj"))]
+	                        (.subTask job-progress "Launching REPL")
+						              (.launch (ClojureLaunchShortcut.) startup-file-selection ILaunchManager/RUN_MODE)
+	                        (.worked job-progress 1)
+	                        
+													(let [console (wait-for-resource #(ClojureClient/findActiveReplConsole) *timeout* *step* (.newChild job-progress 30))]
+			                      (if console
+			                        (do
+				                        (EvaluateTextAction/evaluateText console "(labrepl/-main)")
+													      (open-browser (.newChild job-progress 30)))
+			                        Status/CANCEL_STATUS)))
+	                      Status/OK_STATUS)))
+                  Status/OK_STATUS))))]
+      ; TODO If you are running a long running operation in a wizard/wizardPage you should consider running it thru getContainer().run(). This will show the progressBar right there in the wizard dialog itself:
+      ; http://blog.eclipse-tips.com/2009/02/using-progress-bars.html
+      (.setUser setup-job true)
+      (.schedule setup-job)
+      (.showInDialog (.getProgressService (PlatformUI/getWorkbench)) (.getShell page) setup-job)))
 
 (defn -run
   [this monitor]
