@@ -17,16 +17,12 @@
   (:gen-class
    :extends org.eclipse.ui.dialogs.WizardNewProjectCreationPage
    :exposes-methods {createControl super-createControl}
-   :init myinit
-   :post-init mypostinit
+   :init init
    :state state))
 
-(defn- -myinit
+(defn- -init
   [page-name]
   [[page-name] (ref {})])
-
-(defn- -mypostinit
-  [_ page-name])
 
 (defn -createControl
   [this parent]
@@ -45,7 +41,7 @@
     (let [run-lein-deps-button (Button. composite SWT/CHECK)
           run-repl-button (Button. composite SWT/CHECK)]
       (doto run-lein-deps-button
-        (.setText "Run \"lein deps\" to download dependencies")
+        (.setText "Run \"lein deps\" to download dependencies (Internet connection required)")
         (.setSelection true)
         (.addSelectionListener 
           (proxy [SelectionAdapter] []
@@ -53,7 +49,7 @@
               (.setEnabled run-repl-button (.getSelection run-lein-deps-button))))))
 
       (doto run-repl-button
-        (.setText "Run REPL and open web page")
+        (.setText "Run REPL and open tutorial web page")
         (.setSelection true))
       
       (dosync (alter (.state this) assoc :run-repl-button run-repl-button :run-lein-deps-button run-lein-deps-button))))
