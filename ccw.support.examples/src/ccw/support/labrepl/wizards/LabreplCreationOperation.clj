@@ -197,7 +197,26 @@ never returned a non-nil value before the timeout occurred."
       page-state @(.state page)
       run-lein-deps (.getSelection (:run-lein-deps-button page-state))
       run-repl (.getSelection (:run-repl-button page-state))
-      setup-job 
+      test-job
+        (proxy [WorkbenchJob] ["Setup of Labrepl Project"]
+          (runInUIThread [monitor]
+             (let
+               [sleep 100
+                duration 5000
+                ticks (int (/ duration sleep))]
+               (.beginTask monitor "TEST JOB" IProgressMonitor/UNKNOWN)
+               (try
+                 (loop [i 0]
+                    (if (< i ticks)
+                       (do
+                         (.subTask monitor (str "Processing tick #" i))
+                         (println (str "Processing tick #" i))
+                         (Thread/sleep sleep)
+                         (.worked monitor 1)
+                         (recur (inc i)))))
+                 (finally (.done monitor))))
+               Status/OK_STATUS))
+      setup-job
         (proxy [WorkbenchJob] ["Setup of Labrepl Project"]
           (runInUIThread [monitor]
             (let [job-progress (SubMonitor/convert monitor 100)]
@@ -236,7 +255,11 @@ never returned a non-nil value before the timeout occurred."
       ; http://blog.eclipse-tips.com/2009/02/using-progress-bars.html
       (.setUser setup-job true)
       (.schedule setup-job)
-      (.showInDialog (.getProgressService (PlatformUI/getWorkbench)) (.getShell page) setup-job)))
+      (.showInDialog (.getProgressService (PlatformUI/getWorkbench)) (.getShell page) setup-job)
+      ; (.setUser test-job true)
+      ; (.schedule test-job)
+      ; (.showInDialog (.getProgressService (PlatformUI/getWorkbench)) (.getShell page) test-job)
+      ))
 
 (defn -run
   [this monitor]
