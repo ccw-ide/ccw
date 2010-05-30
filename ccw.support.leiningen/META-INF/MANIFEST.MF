@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Counterclockwise Leiningen Plug-in
+Bundle-SymbolicName: ccw.support.leiningen
+Bundle-Version: 1.0.0.qualifier
+Export-Package: leiningen
+Bundle-ClassPath: .,
+ classes/,
+ lib/maven-ant-tasks-2.0.10.jar
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Require-Bundle: ccw.clojure;bundle-version="1.1.0",
+ ccw.clojurecontrib;bundle-version="1.1.0",
+ org.apache.ant;bundle-version="1.7.1"
+Eclipse-RegisterBuddy: ccw.clojure, ccw.clojurecontrib
