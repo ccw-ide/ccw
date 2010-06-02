@@ -12,7 +12,9 @@
 
 package ccw.builder;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
@@ -55,7 +57,7 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
     	}
     	
     	if (kind == AUTO_BUILD || kind == INCREMENTAL_BUILD) {
-	    	if (onlyClassesFolderRelatedDelta()) {
+	    	if (onlyClassesOrOutputFolderRelatedDelta()) {
 	    		return null;
 	    	}
     	}
@@ -78,20 +80,25 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
         return null;
     }
     
-    private boolean onlyClassesFolderRelatedDelta() {
-    	if (getDelta(getProject())==null) {
+    private boolean onlyClassesOrOutputFolderRelatedDelta() throws CoreException {
+    	if (getDelta(getProject()) == null) {
     		return false;
     	}
     	
-    	IPath classesFolderFullPath = getClassesFolder().getFullPath(); 
-
-		for (IResourceDelta d: getDelta(getProject()).getAffectedChildren()) {
-			System.out.println("affected children for build:" + d.getFullPath());
-			if (classesFolderFullPath.isPrefixOf(d.getFullPath())) {
-				continue;
-			} else {
-				return false;
+    	List<IPath> folders = new ArrayList<IPath>();
+    	folders.add(getClassesFolder().getFullPath());
+		for (IFolder outputPath: getSrcFolders().values()) {
+			folders.add(outputPath.getFullPath());
+		}
+		
+		delta_loop: for (IResourceDelta d: getDelta(getProject()).getAffectedChildren()) {
+			for (IPath folder: folders) {
+				if (folder.isPrefixOf(d.getFullPath())) {
+					continue delta_loop;
+				}
 			}
+			System.out.println("affected children for build:" + d.getFullPath());
+			return false;
 		}
 		return true;
 	}
