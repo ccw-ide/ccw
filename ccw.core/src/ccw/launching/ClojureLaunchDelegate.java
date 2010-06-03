@@ -13,7 +13,11 @@ package ccw.launching;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -23,10 +27,11 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
 
 import ccw.CCWPlugin;
+import ccw.ClojureCore;
+import ccw.ClojureProject;
 
 
-public class ClojureLaunchDelegate extends
-        JavaLaunchDelegate {
+public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 	
 	private ILaunch launch;
 	
@@ -89,4 +94,24 @@ public class ClojureLaunchDelegate extends
 		}
 	}
 	
+    @Override
+    public String[] getClasspath(ILaunchConfiguration configuration)
+            throws CoreException {
+       
+        List<String> classpath = new ArrayList<String>(Arrays.asList(super.getClasspath(configuration)));
+       
+        ClojureProject clojureProject = ClojureCore.getClojureProject(LaunchUtils.getProject(configuration));
+        for (IFolder f: clojureProject.sourceFolders()) {
+
+            String sourcePath = f.getLocation().toOSString();
+           
+            while (classpath.contains(sourcePath)) {
+                // The sourcePath already exists, remove it first
+                classpath.remove(sourcePath);
+            }
+           
+            classpath.add(0, sourcePath);
+        }
+        return classpath.toArray(new String[classpath.size()]);
+    }
 }
