@@ -33,6 +33,7 @@ import org.eclipse.jdt.launching.sourcelookup.containers.JavaSourcePathComputer;
 import org.eclipse.jdt.launching.sourcelookup.containers.PackageFragmentRootSourceContainer;
 
 import ccw.CCWPlugin;
+import ccw.ClojureCore;
 
 public class SourcePathComputerDelegate extends JavaSourcePathComputer {
 
@@ -51,7 +52,9 @@ public class SourcePathComputerDelegate extends JavaSourcePathComputer {
 				PackageFragmentRootSourceContainer sc = (PackageFragmentRootSourceContainer) sourceContainer;
 
 				IPath maybeSourcePath =	sc.getPackageFragmentRoot().getSourceAttachmentPath();
+				
 				if (maybeSourcePath != null) {
+					maybeSourcePath = ClojureCore.toOSAbsoluteIPath(maybeSourcePath);
 					if (maybeSourcePath.toFile().isFile()) {
 						result.add(new ExternalArchiveSourceContainer(maybeSourcePath.toOSString(), false));
 					} else {

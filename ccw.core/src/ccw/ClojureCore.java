@@ -280,14 +280,7 @@ public final class ClojureCore {
 				cpe = JavaCore.getResolvedClasspathEntry(cpe); // resolve if there are vars
 				IPath sourcePath = cpe.getSourceAttachmentPath();
 				if (sourcePath != null) {
-					if (isWorkspaceRelativeLibrarySourceAttachment(cpe)) {
-						boolean isFolder = sourcePath.getFileExtension() == null;
-						if (isFolder) {
-							sourcePath = ResourcesPlugin.getWorkspace().getRoot().getFolder(sourcePath).getLocation();
-						} else {
-							sourcePath = ResourcesPlugin.getWorkspace().getRoot().getFile(sourcePath).getLocation();
-						}
-					}
+					sourcePath = toOSAbsoluteIPath(sourcePath);
 					File sourceFile = sourcePath.toFile();
 					if (sourceFile.isDirectory()) {
 						// find whether it's in there or not
@@ -371,8 +364,20 @@ public final class ClojureCore {
 		return false;
 	}
     
-    private static boolean isWorkspaceRelativeLibrarySourceAttachment(IClasspathEntry cpe) {
-    	return ResourcesPlugin.getWorkspace().getRoot().exists(cpe.getSourceAttachmentPath());
+    public static IPath toOSAbsoluteIPath(IPath path) {
+		if (ClojureCore.isWorkspaceRelativeIPath(path)) {
+			boolean isFolder = path.getFileExtension() == null;
+			if (isFolder) {
+				path = ResourcesPlugin.getWorkspace().getRoot().getFolder(path).getLocation();
+			} else {
+				path = ResourcesPlugin.getWorkspace().getRoot().getFile(path).getLocation();
+			}
+		}
+		return path;
+    }
+    
+    public static boolean isWorkspaceRelativeIPath(IPath path) {
+    	return ResourcesPlugin.getWorkspace().getRoot().exists(path);
 	}
 
 	public static String getNsPackageName(String ns) {
