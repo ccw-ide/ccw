@@ -552,7 +552,6 @@
                  "hello-\n|  world" "hello-|world"
                  "({:foo :bar}| {:baz :fooz})" "({:foo :bar| :baz :fooz})"
                  "({:foo :bar} |{:baz :fooz})" "({:foo :bar |:baz :fooz})"
-                 "({:foo :bar}| {:baz :fooz})" "({:foo :bar| :baz :fooz})"
                  "({:foo :bar} {|:baz :fooz})" "({:foo :bar} {|:baz :fooz})"
                  "({:baz :fooz|} {:foo :bar})" "({:baz :fooz|} {:foo :bar})"
                  }]
