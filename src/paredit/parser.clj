@@ -1,4 +1,12 @@
-; note : hiredman's reader http://github.com/hiredman/clojure/blob/readerII/src/clj/clojure/reader.clj#L516
+;adaptations paredit pour pouvoir echanger avec parsley:
+;
+;  1. renommer les tags des noeuds: des keywords :atom, :list, etc.
+;  2. virer :end-offset, :offset, :line, :col
+;  3. regler le "pb" du :root ??
+
+
+
+ ; note : hiredman's reader http://github.com/hiredman/clojure/blob/readerII/src/clj/clojure/reader.clj#L516
 ; still TODO :
 ; 1. done - make parser and function behaviour similar for terminals atom and spaces 
 ; 1.a  (and move the special handling of zipping terminals up on :eof from default-handler to default-maker ?)
@@ -309,6 +317,12 @@
                         (conj parents {:tag (str \a) :offset offset :line line :col col}))
                       accumulated-state
                       :ok))))))))))
+
+(defn parse-tree
+  [state]
+  (-> state))
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; utility libraries for manipulating the parse-tree
