@@ -26,9 +26,10 @@
 ; * add an explicit error message to :parser-state :ko (unbalanced parens)
 
 (ns paredit.parser
-  (:use [clojure.test])
+  (:use clojure.test)
   (:use clojure.contrib.core)
-	(:require [clojure.zip :as zip]))
+	(:require [clojure.zip :as zip])
+  (:require [clojure.contrib.zip-filter :as zf]))
 
 #_(set! *warn-on-reflection* true)
 
@@ -161,6 +162,24 @@
   (when (< -1 index (.length s))
     (.charAt s index)))
     
+(defn purge 
+  [tree]
+  (loop [loc (zip/xml-zip tree)]
+    (if (zip/end? loc)
+      (zip/root loc)
+      (recur 
+        (zip/next 
+          (zip/edit 
+            loc 
+            (fn [n] 
+              (if (string? n) 
+                n 
+                (dissoc n :length :col :line :offset :end-offset)))))))))
+
+(defn remove-shit
+  [state]
+  state
+  #_(update-in state [:accumulated-state 0] purge))
    
 (defn parse 
 	"TODO: currently the parser assumes a well formed document ... Define a policy if the parser encounters and invalid text
@@ -176,12 +195,12 @@
 	         accumulated-state initial-accumulated-state
 	         parser-state :ok]
       (if (= :ko parser-state)
-        (make-result-fn text offset line col parents parser-state accumulated-state)   
+        (remove-shit (make-result-fn text offset line col parents parser-state accumulated-state))   
         (let [parser-state (if (>= offset (.length text)) :eof :ok) ; TODO soon an additional :parser-error state !
               accumulated-state (accumulator-fn text offset line col parents parser-state accumulated-state)
               continue? (continue?-fn text offset line col parents parser-state accumulated-state)] 
   	      (if (or (not continue?) (= :eof parser-state))
-  	        (make-result-fn text offset line col parents parser-state accumulated-state)
+  	        (remove-shit (make-result-fn text offset line col parents parser-state accumulated-state))
   	        (let [c (str (.charAt text offset))
   	              parent-type (-> parents peek :tag)]
   	          (condp = parent-type
@@ -320,7 +339,7 @@
 
 (defn parse-tree
   [state]
-  (-> state))
+  (-> state :accumulated-state))
 
 
 
@@ -389,10 +408,24 @@
     :else 
       (-> loc zip/node :offset)))
 
+(defn loc-col [loc]
+  (loop [loc (zip/prev loc) col 0]
+    (cond
+      (nil? loc) 
+        col
+      (string? (zip/node loc))
+        (if (.contains (zip/node loc) "\n")
+          (+ col (dec (-> (zip/node loc) (.substring (.lastIndexOf (zip/node loc) "\n")) .length)))
+          (recur (zip/prev loc) (+ col (.length (zip/node loc)))))
+      :else
+        (recur (zip/prev loc) col))))
+
+(defn loc-text [loc]
+  (apply str (map zip/node 
+               (filter (comp string? zip/node) (zf/descendants loc)))))
+
 (defn loc-count [loc]
-  (cond
-    (string? (zip/node loc)) (.length #^String loc)
-    :else (- (:end-offset loc) (:offset loc))))
+  (.length #^String (loc-text loc)))
     
 (defn #^String loc-tag [loc]
   (and loc 

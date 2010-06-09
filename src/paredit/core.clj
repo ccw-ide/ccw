@@ -526,7 +526,9 @@
                  ;;;   "\n        port))\n        bar"
                  ;;   )
                 ")|s" ")|s"
-                ")\n|s" ")\n|s"}]
+                ")\n|s" ")\n|s"
+                 "   a\n       |" "   a\n   |"
+                }]
       ["C-j"     :paredit-newline
                 {"(ab|cd)" "(ab\n  |cd)"
                  "(ab|     cd)" "(ab\n  |cd)"
@@ -804,18 +806,27 @@
   "pre-condition: line-offset is really the starting offset of a line"
   [root-loc line-offset]
   (let [loc (loc-for-offset root-loc (dec line-offset))]
-    (if (nil? (zip/up loc))
-      0
-      (let
-        [parent-node (-> loc zip/up zip/node)
-         parent-node (if (= :root (:tag parent-node)) {:line -1 :content [""] :col 0} parent-node)
-         left-nodes (remove #(or (string? %) (= " " (:tag %))) (map zip/node (rlefts loc)))
-         indent (some identity (map (fn [n-1 n] (when (< (:line n-1) (:line n)) (:col n))) 
-                                 (concat (rest left-nodes) [parent-node]) left-nodes))]
-        (or indent
-          (+ (:col parent-node)
-            (.length (-> parent-node :content #^String (get 0)))
-            (if (= "(" (:tag parent-node)) 1 0)))))))
+    (if-let [loc (zip/left loc)]
+      (loop [loc loc seen-loc nil indent 0]
+        (cond
+          (nil? loc)
+            indent
+          (punct-loc? loc)
+            ; we reached the start of the parent form, indent depending on the form's type
+            (+ (loc-col loc)
+              (loc-count loc)    
+              (if (= "(" (loc-text loc)) 1 0))
+          (= " " (loc-tag loc))
+            ; we see a space
+            (if (.contains (loc-text loc) "\n")
+              (if seen-loc
+                (+ indent (dec (-> (loc-text loc) (.substring (.lastIndexOf (loc-text loc) "\n")) .length)))
+                (recur (zip/left loc) nil 0))
+              (recur (zip/left loc) nil (+ indent (-> (loc-text loc) .length))))
+          :else
+            (recur (zip/left loc) loc 0)))
+      ; we are at the start of the file !
+      0)))
 
 (defn line-start 
   "returns the offset corresponding to the start of the line of offset offset in s"
@@ -1126,35 +1137,33 @@
 (defmethod paredit
   :paredit-indent-line
   [cmd {:keys [#^String text offset length] :as t}]
-  (let [parsed (parse text (.length text))
-        rloc (-?> parsed (parsed-root-loc true))]
-    (if (and rloc (not= :ko (:parser-state parsed))) 
-      (let [line-start (line-start text offset)
-            line-stop (line-stop text offset)
-            loc (-> rloc (loc-for-offset line-start))]
-        (if (and (= (str \") (loc-tag loc)) (< (:offset (zip/node loc)) line-start))
-          t
-          (let [indent (indent-column rloc line-start)
-                cur-indent-col (or (some (fn [l]
-                                           (when (not= (str \space) (loc-tag l)) 
-                                             (- (start-offset l) line-start)))
-                                     (filter (fn [l] (<= line-start (start-offset l) line-stop)) 
-                                       (next-leaves loc)))
-                                 (- line-stop line-start))
-                to-add (- indent cur-indent-col)]
-            (cond
-              (zero? to-add) t
-              :else (let [t (update-in t [:modifs] conj {:text (str2/repeat " " indent) :offset line-start :length cur-indent-col})
-                          t (update-in t [:text] str-replace line-start cur-indent-col (str2/repeat " " indent))]
-                      (cond 
-                        (>= offset (+ line-start cur-indent-col)) 
-                          (update-in t [:offset] + to-add)
-                        (<= offset (+ line-start indent))
-                          t
-                        :else
-                          (update-in t [:offset] + (max to-add (- line-start offset)))))))))
-      t)))
-
+  (spy "++++ indent line +++++")
+  (if-let [rloc (-?> (parse text (.length text)) (parsed-root-loc true))]
+    (let [line-start (spy (line-start (spy text) (spy offset)))
+          line-stop (line-stop text offset)
+          loc (-> rloc (loc-for-offset line-start))]
+      (if (and (= (str \") (loc-tag loc)) (< (:offset (zip/node loc)) line-start))
+        t
+        (let [indent (spy (indent-column rloc line-start))
+              cur-indent-col (or (some (fn [l]
+                                         (when (not= (str \space) (loc-tag l)) 
+                                           (- (start-offset l) line-start)))
+                                   (filter (fn [l] (<= line-start (start-offset l) line-stop)) 
+                                     (next-leaves loc)))
+                               (- line-stop line-start))
+              to-add (- indent cur-indent-col)]
+          (cond
+            (zero? to-add) t
+            :else (let [t (update-in t [:modifs] conj {:text (str2/repeat " " indent) :offset line-start :length cur-indent-col})
+                        t (update-in t [:text] str-replace line-start cur-indent-col (str2/repeat " " indent))]
+                    (cond 
+                      (>= offset (+ line-start cur-indent-col)) 
+                        (update-in t [:offset] + to-add)
+                      (<= offset (+ line-start indent))
+                        t
+                      :else
+                        (update-in t [:offset] + (max to-add (- line-start offset)))))))))
+    t))
 
 (defn test-command [title-prefix command]
   (testing (str title-prefix " " (second command) " (\"" (first command) "\")")
