@@ -16,7 +16,7 @@
     [org.eclipse.core.runtime CoreException Platform Path Status IPath IProgressMonitor FileLocator]
     [org.eclipse.core.resources WorkspaceJob IResource ResourcesPlugin]
     [org.eclipse.jdt.core JavaCore])
-  (:use [clojure.contrib [duck-streams :as cc.stream]])
+  (:require [clojure.contrib [duck-streams :as cc.stream]])
   (:gen-class
    :implements [org.eclipse.core.resources.IProjectNature]
    :init init
