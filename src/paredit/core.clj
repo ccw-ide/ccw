@@ -80,18 +80,18 @@
    chars-with-no-space-before chars-with-no-space-after]
     (let [parsed (parse text (.length text))
           offset-loc (-> parsed parsed-root-loc (loc-for-offset offset))]       
-      (if (and offset-loc (not (*not-in-code* (-> offset-loc z/node :tag))))
+      (if (and offset-loc (not (*not-in-code* (loc-tag offset-loc))))
         (let [up-locs (take-while identity (iterate z/up offset-loc))
-              match (some #(when (= o (-> % z/node :tag)) %) up-locs)]
+              match (some #(when (= o (loc-tag %)) %) up-locs)]
           (if match
-            (let [last-node (-> match z/down z/rightmost z/left z/node)
-                  nb-delete (if (= (str \space) (:tag last-node)) 
-                              (- (:end-offset last-node) (:offset last-node))
+            (let [last-loc (-> match z/down z/rightmost z/left)
+                  nb-delete (if (= (str \space) (loc-tag last-loc)) 
+                              (loc-count last-loc)
                               0)
                   t (if (> nb-delete 0) 
-                      (t/delete t (:offset last-node) nb-delete)
+                      (t/delete t (start-offset last-loc) nb-delete)
                       t)] ; z/left because there is the closing node
-              (-> t (t/set-offset (- (-> match z/node (:end-offset)) nb-delete))))
+              (-> t (t/set-offset (- (end-offset match) nb-delete))))
             (-> t (t/insert (str c)))))
         (-> t (t/insert (str c))))))
 
@@ -160,17 +160,16 @@
         parse-ok (not= :ko (:parser-state parsed))]
     (if parse-ok
       (let [offset-loc (-> parsed parsed-root-loc (loc-for-offset offset))
-            offset-node (-> offset-loc z/node)
             handled-forms (conj *open-brackets* "\"")
-            in-handled-form (handled-forms (:tag offset-node))]
+            in-handled-form (handled-forms (loc-tag offset-loc))]
         (cond 
-          (and in-handled-form (= offset (:offset offset-node)))
+          (and in-handled-form (= offset (start-offset offset-loc)))
             (t/shift-offset t 1)
-          (and in-handled-form (= offset (dec (:end-offset offset-node))))
-            (if (> (-> offset-node :content count) 2)
+          (and in-handled-form (= offset (dec (end-offset offset-loc))))
+            (if (> (-> offset-loc z/node :content count) 2)
               t     ; don't move
               (-> t ; delete the form 
-                (t/delete (:offset offset-node) (- (:end-offset offset-node) (:offset offset-node)))
+                (t/delete (start-offset offset-loc) (loc-count offset-loc))
                 (t/shift-offset -1)))
           :else
             (t/delete t offset 1)))
@@ -184,17 +183,16 @@
         parse-ok (not= :ko (:parser-state parsed))]
     (if parse-ok
       (let [offset-loc (-> parsed parsed-root-loc (loc-for-offset offset))
-            offset-node (-> offset-loc z/node)
             handled-forms (conj *open-brackets* "\"")
-            in-handled-form (handled-forms (:tag offset-node))]
+            in-handled-form (handled-forms (loc-tag offset-loc))]
         (cond 
-          (and in-handled-form (= offset (:offset offset-node)))
-            (if (> (-> offset-node :content count) 2)
+          (and in-handled-form (= offset (start-offset offset-loc)))
+            (if (> (-> offset-loc z/node :content count) 2)
               t     ; don't move
               (-> t ; delete the form 
-                (t/delete (:offset offset-node) (- (:end-offset offset-node) (:offset offset-node)))
+                (t/delete (start-offset offset-loc) (loc-count offset-loc))
                 (t/shift-offset -1)))
-          (and in-handled-form (= offset (dec (:end-offset offset-node))))
+          (and in-handled-form (= offset (dec (end-offset offset-loc))))
             (t/shift-offset t -1)
           :else
             (-> t (t/delete offset 1) (t/shift-offset -1))))
