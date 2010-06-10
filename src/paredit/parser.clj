@@ -10,7 +10,7 @@
 ; still TODO :
 ; 1. done - make parser and function behaviour similar for terminals atom and spaces 
 ; 1.a  (and move the special handling of zipping terminals up on :eof from default-handler to default-maker ?)
-; 2. correctly handle clojure specificities : #{} #^ #"" ' ` @ #^ ^ #' #_ #() ~ ~@ foo# #!
+; 2. correctly handle clojure specificities : #{} #^ #"" ' ` @ ^ #' #_ #() ~ ~@ foo# #!
 ; 3. correctly handle the premature :eof on non closed structures (a cause of error)
 ; 4. correctly handle parsetree errors (wrong closing of bracket (this one done), ... TODO finish the exhaustive list)
 ; 5. make the parser restartable
@@ -64,7 +64,7 @@
    (= true (start-like \"bar\" \"b\"))
    (= true (start-like \"\" \"bar\"))
    (= true (start-like \"bar\" \"\"))"
-  [#^String s1 #^String s2]
+  [^String s1 ^String s2]
     (or (.startsWith s1 s2) (.startsWith s2 s1))
     #_(.startsWith s1 (.substring s2 0 (min (.length s2) (.length s1)))))
 
@@ -96,7 +96,7 @@
 (def *spaces* #{(str \space) (str \tab) (str \newline) (str \return) (str \,)})
 (def *atoms* #{ (str \a) (str \space)})
 
-(defn zip-one [#^String text offset line col parents parser-state accumulated-state]
+(defn zip-one [^String text offset line col parents parser-state accumulated-state]
   (let [level (-> accumulated-state peek)
         level-content (get level :content [])
         level-content (if-let [closing-delimiter (-> level :tag *brackets*)]
@@ -112,8 +112,8 @@
 
 ; todo : later on, move offset+line+col+parents inside a proper deftyped type
 (defn default-accumulator
-  [#^String text offset line col parents parser-state accumulated-state]
-    [#^String text offset line col parents parser-state accumulated-state]
+  [^String text offset line col parents parser-state accumulated-state]
+    [^String text offset line col parents parser-state accumulated-state]
     (cond
       (> (count parents) (count accumulated-state))
         ; enter a sublevel
@@ -139,11 +139,11 @@
 (defn make-default-continue?-fn
   [stop-offset]
   (fn default-continue?-fn
-    [#^String text offset line col parents parser-state accumulated-state]
+    [^String text offset line col parents parser-state accumulated-state]
     (< offset stop-offset)))
 
 (defn default-make-result
-  [#^String text offset line col parents parser-state accumulated-state]
+  [^String text offset line col parents parser-state accumulated-state]
   { :parents parents 
     :offset offset 
     :line line 
@@ -158,7 +158,7 @@
 
 (defn char-at 
   "if index is out of bounds, just returns nil"
-  [#^String s index]
+  [^String s index]
   (when (< -1 index (.length s))
     (.charAt s index)))
     
@@ -185,9 +185,9 @@
 	"TODO: currently the parser assumes a well formed document ... Define a policy if the parser encounters and invalid text
 	 TODO: make the parser restartable at a given offset given a state ...
 	 TODO: make the parser fully incremental (via chunks of any possible size ...)"	
-  ([#^String text] (parse text (.length text)))
-  ([#^String text stop-offset] (parse text [] default-accumulator (make-default-continue?-fn stop-offset) default-make-result))
-	([#^String text initial-accumulated-state accumulator-fn continue?-fn make-result-fn]
+  ([^String text] (parse text (.length text)))
+  ([^String text stop-offset] (parse text [] default-accumulator (make-default-continue?-fn stop-offset) default-make-result))
+	([^String text initial-accumulated-state accumulator-fn continue?-fn make-result-fn]
 	  (loop [offset  (int 0)
 	         line    (int 0)
 	         col     (int 0)
@@ -346,225 +346,3 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; utility libraries for manipulating the parse-tree
 
-(defn same-parent? [loc & locs]
-  (let [loc-parent-path (butlast (zip/path loc))]
-    (every? #(= (butlast (zip/path %)) loc-parent-path) locs)))
-
-(defn loc-depth 
-  "returns the depth in the tree of the given loc"
-  [loc]
-  (count (zip/path loc)))
-
-(defn up-to-depth
-  "finds from the loc the ancestor loc at the given depth."
-  [loc depth]
-  (let [delta (- (loc-depth loc) depth)]
-    (cond 
-      (zero? delta) loc
-      :else (nth (iterate zip/up loc) delta))))
-
-(defn punct-loc?
-  "true if the loc corresponds to punctuation."
-  [loc]
-  (and
-    loc
-    (string? (zip/node loc)) 
-    (not (#{" " "a" ";" "\\" "\""} (:tag (zip/node (zip/up loc)))))))
-
-(defn root-loc [loc] (if-let [up (zip/up loc)] (recur up) loc))
-
-(defn rlefts
-  "like clojure.zip/lefts, but in reverse order (optimized lazy sequence)"
-  [loc]
-  (rest (take-while identity (iterate zip/left loc))))
-
-(defn next-leaves
-  "seq of next leaves locs" ;; TODO correct this aberration: next-leaves includes the current leave ... (or change the name ...)
-  [loc]
-  (and loc (remove zip/branch? (take-while (complement zip/end?) (iterate zip/next loc)))))
-
-(defn previous-leaves
-  "seq of previous leaves locs"
-  [loc]
-  (and loc (remove zip/branch? (take-while (complement nil?) (iterate zip/prev (zip/prev loc))))))
-
-(declare start-offset)
-(defn end-offset [loc]
-  (cond
-    (string? (zip/node loc))
-      (if-let [l (zip/left loc)]
-        (+ (end-offset l) (.length #^String (zip/node loc)))
-        (+ (start-offset (zip/up loc)) (.length #^String (zip/node loc))))
-    :else 
-      (-> loc zip/node :end-offset)))
-
-(defn start-offset [loc]
-  (cond
-    (nil? loc) 0
-    (string? (zip/node loc))
-      (if-let [l (zip/left loc)]
-        (end-offset l)
-        (start-offset (zip/up loc)))
-    :else 
-      (-> loc zip/node :offset)))
-
-(defn loc-col [loc]
-  (loop [loc (zip/prev loc) col 0]
-    (cond
-      (nil? loc) 
-        col
-      (string? (zip/node loc))
-        (if (.contains (zip/node loc) "\n")
-          (+ col (dec (-> (zip/node loc) (.substring (.lastIndexOf (zip/node loc) "\n")) .length)))
-          (recur (zip/prev loc) (+ col (.length (zip/node loc)))))
-      :else
-        (recur (zip/prev loc) col))))
-
-(defn loc-text [loc]
-  (apply str (map zip/node 
-               (filter (comp string? zip/node) (zf/descendants loc)))))
-
-(defn loc-count [loc]
-  (.length #^String (loc-text loc)))
-    
-(defn #^String loc-tag [loc]
-  (and loc 
-    (:tag (zip/node (if (string? (zip/node loc)) (zip/up loc) loc)))))
-  
-(defn loc-parse-node [loc] ; wrong name, and also, will return (foo) if located at ( or at ) ... so definitely wrong name ...
-  (if (string? (zip/node loc))
-    (zip/up loc)
-    loc))
-
-(defn parse-leave
-  "returns a leave which corresponds to a parse information: either a (punct-loc?) (beware: a bare String, not a node with meta-data,
-   or a parse atom" 
-  [loc]
-  (cond 
-    (punct-loc? loc) loc
-    (string? (zip/node loc)) (zip/up loc)
-    :else loc))
-
-(defn parse-node
-  "transforms the loc in a parse-leave, and if a punct, returns the parent loc"
-  [loc]
-  (let [loc (parse-leave loc)] 
-    (if (punct-loc? loc) (zip/up loc) loc)))
-
-(defn parsed-root-loc
-  ([parsed] (parsed-root-loc parsed false))
-  ([parsed only-valid?]
-    (let [valid? (= 1 (-> parsed :accumulated-state count))]
-      (when (or valid? (not only-valid?))
-        (-> parsed :accumulated-state first zip/xml-zip)))))
-
-(defn contains-offset?
-  "returns the loc itself if it contains the offset, else nil"
-  [loc offset]
-   (and
-     (<= (start-offset loc) offset (dec (end-offset loc)))
-     loc))
-
-(defn loc-for-offset 
-  "returns a zipper location or nil if does not contain the offset"
-  ([loc offset] (loc-for-offset loc offset nil))
-  ([loc offset last-match]
-    (if (or (nil? loc) (not (contains-offset? loc offset)) (not (zip/branch? loc)))
-      last-match
-      (recur 
-        (some  
-          #(contains-offset? % offset) 
-          (take-while identity (iterate zip/right (zip/down loc)))) 
-        offset
-        loc))))
-
-(deftest loc-for-offset-tests
-  (are [text offset expected-tag] (= expected-tag (-?> (parse text) (parsed-root-loc true) (loc-for-offset offset) (zip/node) :tag))
-    "foo (bar baz) baz" 12 nil
-    "hello" 0 "a"
-    "hello" 1 "a"
-    "hello" 5 :root
-    "a b" 0 "a"
-    "a b" 1 " "
-    "a b" 2 "a"
-    "foo \"bar\" foo" 3 " "
-    "foo \"bar\" foo" 4 "\""))
-
-(defn leave-for-offset 
-  "returns a zipper location of a leave containing or starting at the given offset."
-  ([loc offset]
-    (let [l (first (filter #(do (zip/node %) (contains-offset? % offset)) (next-leaves loc)))]
-      (or l (root-loc loc)))))
-
-(deftest leave-for-offset-tests
-  (are [text offset expected-tag ?expected-node]
-    (let [l (-?> (parse text) (parsed-root-loc true) (leave-for-offset offset))] 
-      (and
-        (= expected-tag (loc-tag l))
-        (or (nil? ?expected-node) (= ?expected-node (zip/node l)))))
-    "foo (bar baz) baz" 12 "(" ")"
-    "hello" 0 "a" nil
-    "hello" 1 "a" nil
-    "hello" 5 :root nil
-    "a b" 0 "a" nil
-    "a b" 1 " " nil
-    "a b" 2 "a" nil
-    "foo \"bar\" foo" 3 " " nil
-    "foo \"bar\" foo" 4 "\"" nil
-    ))
-
-(defn loc-containing-offset
-  ([loc offset]
-    (if (= 0 offset)
-      (root-loc loc)
-      (let [match (some #(contains-offset? % offset) (take-while (complement zip/end?) (iterate zip/next (zip/next (root-loc loc)))))]
-        (cond
-          (nil? match) (root-loc loc)
-          (= offset (start-offset match)) (zip/up match)
-          :else match)))))
-
-(deftest loc-containing-offset-tests
-  (are [text offset expected-tag] (= expected-tag (-?> (parse text) (parsed-root-loc true) (loc-containing-offset offset) (zip/node) :tag))
-    "hello" 1 "a"
-    "foo bar" 3 :root
-    "foo bar" 4 :root
-    "hello" 5 :root
-    "a b" 0 :root
-    "a b" 1 :root
-    "a b" 2 :root
-    "foo \"bar\" foo" 3 :root
-    "foo \"bar\" foo" 4 :root
-    ))
-
-(defn start-punct?
-  "true if the loc is a punct starting a form"
-  [loc]
-  (and
-    (punct-loc? loc)
-    (= (start-offset loc) (start-offset (parse-node loc)))))
-
-(defn end-punct?
-  "true if the loc is a punct ending a form"
-  [loc]
-  (and
-    (punct-loc? loc)
-    (= (end-offset loc) (end-offset (parse-node loc)))))
-
-(defn pts []
-  (leave-for-offset-tests)
-  ;(loc-for-offset-tests)
-  ;(loc-containing-offset-tests)
-  )
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; test functions
-
-(defn parse-lib 
-  ([lib] (parse-lib lib false))
-  ([lib show?]
-    (let [#^String s (slurp (str "/home/lpetit/projects/clojure/src/clj/clojure/" lib ".clj"))
-          res (time (parse s))]
-      (when show? res))))
-(defn parse-core []
-  (parse-lib "core" false))
-(defn parse-set []
-	(parse-lib "set" false))
