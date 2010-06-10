@@ -34,7 +34,9 @@ import ccw.editors.antlrbased.CompileLibAction;
 
 
 public class ClojureVisitor implements IResourceVisitor {
-	private transient Map.Entry<IFolder, IFolder> currentSrcFolder;
+	private Map.Entry<IFolder, IFolder> currentSrcFolder;
+	
+	private Map<IFolder, IFolder> srcFolders;
 	
 	private static final String CLOJURE_EXTENSION = "clj";
 	private final List<String> clojureLibs = new ArrayList<String>();
@@ -48,6 +50,7 @@ public class ClojureVisitor implements IResourceVisitor {
 		this.clojureClient = clojureClient;
 	}
 	public void visit (Map<IFolder, IFolder> srcFolders) throws CoreException {
+		this.srcFolders = new HashMap<IFolder, IFolder>(srcFolders);
         for(Map.Entry<IFolder, IFolder> srcFolderEntry : srcFolders.entrySet()){
         	setSrcFolder(srcFolderEntry);
             srcFolderEntry.getKey().accept(this);
@@ -116,23 +119,25 @@ public class ClojureVisitor implements IResourceVisitor {
 	private void createMarker(final String filename, final int line, final String message) {
 		try {
 			System.out.println("(trying to) create a marker for " + filename);
-			currentSrcFolder.getKey().accept(new IResourceVisitor() {
-				public boolean visit(IResource resource) throws CoreException {
-					if (resource.getType() == IResource.FILE) {
-						System.out.println("    file found: " + resource.getName());
-						if (resource.getName().equals(filename)) {
-							Map attrs = new HashMap();
-							MarkerUtilities.setLineNumber(attrs, line);
-							MarkerUtilities.setMessage(attrs, message);
-							attrs.put(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
-							MarkerUtilities.createMarker(resource, attrs, ClojureBuilder.CLOJURE_COMPILER_PROBLEM_MARKER_TYPE);
-							
-							System.out.println("created marker !");
+			for (IFolder srcFolder: srcFolders.keySet()) {
+				srcFolder.accept(new IResourceVisitor() {
+					public boolean visit(IResource resource) throws CoreException {
+						if (resource.getType() == IResource.FILE) {
+							System.out.println("    file found: " + resource.getName());
+							if (resource.getName().equals(filename)) {
+								Map attrs = new HashMap();
+								MarkerUtilities.setLineNumber(attrs, line);
+								MarkerUtilities.setMessage(attrs, message);
+								attrs.put(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+								MarkerUtilities.createMarker(resource, attrs, ClojureBuilder.CLOJURE_COMPILER_PROBLEM_MARKER_TYPE);
+								
+								System.out.println("created marker !");
+							}
 						}
+						return true;
 					}
-					return true;
-				}
-			});
+				});
+			}
 		} catch (CoreException e) {
 			CCWPlugin.logError("error while creating marker for file : " + filename + " at line " + line 
 					+ " with message :'" + message + "'", e);
