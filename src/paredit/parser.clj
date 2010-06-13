@@ -179,7 +179,7 @@
 (defn remove-shit
   [state]
   state
-  #_(update-in state [:accumulated-state 0] purge))
+  (update-in state [:accumulated-state 0] purge))
    
 (defn parse 
 	"TODO: currently the parser assumes a well formed document ... Define a policy if the parser encounters and invalid text
