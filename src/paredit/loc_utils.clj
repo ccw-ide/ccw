@@ -2,6 +2,9 @@
   (:require [clojure.zip :as zip])
   (:require [clojure.contrib.zip-filter :as zf]))
 
+(defn ^String loc-tag [loc]
+  (and loc 
+    (:tag (zip/node (if (string? (zip/node loc)) (zip/up loc) loc)))))
 
 (defn same-parent? [loc & locs]
   (let [loc-parent-path (butlast (zip/path loc))]
@@ -26,7 +29,7 @@
   (and
     loc
     (string? (zip/node loc)) 
-    (not (#{" " "a" ";" "\\" "\""} (:tag (zip/node (zip/up loc)))))))
+    (not (#{" " "a" ";" "\\" "\""} (loc-tag (zip/up loc))))))
 
 (defn root-loc [loc] (if-let [up (zip/up loc)] (recur up) loc))
 
@@ -84,9 +87,6 @@
 (defn loc-count [loc]
   (.length ^String (loc-text loc)))
     
-(defn ^String loc-tag [loc]
-  (and loc 
-    (:tag (zip/node (if (string? (zip/node loc)) (zip/up loc) loc)))))
   
 (defn loc-parse-node [loc] ; wrong name, and also, will return (foo) if located at ( or at ) ... so definitely wrong name ...
   (if (string? (zip/node loc))

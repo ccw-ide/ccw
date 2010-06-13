@@ -492,7 +492,7 @@
     (let [line-start (spy (t/line-start (spy text) (spy offset)))
           line-stop (t/line-stop text offset)
           loc (-> rloc (loc-for-offset line-start))]
-      (if (and (= (str \") (loc-tag loc)) (< (:offset (z/node loc)) line-start))
+      (if (and (= (str \") (loc-tag loc)) (< (start-offset loc) line-start))
         t
         (let [indent (spy (indent-column rloc line-start))
               cur-indent-col (or (some (fn [l]
