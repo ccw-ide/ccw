@@ -48,15 +48,11 @@
   [loc]
   (and loc (remove zip/branch? (take-while (complement nil?) (iterate zip/prev (zip/prev loc))))))
 
-(declare start-offset)
-(defn end-offset [loc]
-  (cond
-    (string? (zip/node loc))
-      (if-let [l (zip/left loc)]
-        (+ (end-offset l) (.length ^String (zip/node loc)))
-        (+ (start-offset (zip/up loc)) (.length ^String (zip/node loc))))
-    :else 
-      (-> loc zip/node :end-offset)))
+(defn loc-text [loc]
+  (apply str (map zip/node 
+               (filter (comp string? zip/node) (zf/descendants loc)))))
+
+(declare end-offset)
 
 (defn start-offset [loc]
   (cond
@@ -67,6 +63,9 @@
         (start-offset (zip/up loc)))
     :else 
       (-> loc zip/node :offset)))
+
+(defn end-offset [loc]
+  (+ (start-offset loc) (.length ^String (loc-text loc))))
 
 (defn loc-col [loc]
   (loop [loc (zip/prev loc) col 0]
@@ -79,10 +78,6 @@
           (recur (zip/prev loc) (+ col (.length (zip/node loc)))))
       :else
         (recur (zip/prev loc) col))))
-
-(defn loc-text [loc]
-  (apply str (map zip/node 
-               (filter (comp string? zip/node) (zf/descendants loc)))))
 
 (defn loc-count [loc]
   (.length ^String (loc-text loc)))
