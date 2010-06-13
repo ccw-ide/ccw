@@ -2,6 +2,13 @@
   (:require [clojure.zip :as zip])
   (:require [clojure.contrib.zip-filter :as zf]))
 
+(defn loc-text [loc]
+  (apply str (map zip/node 
+               (filter (comp string? zip/node) (zf/descendants loc)))))
+
+(defn loc-count [loc]
+  (.length ^String (loc-text loc)))
+
 (defn ^String loc-tag [loc]
   (and loc 
     (:tag (zip/node (if (string? (zip/node loc)) (zip/up loc) loc)))))
@@ -48,13 +55,17 @@
   [loc]
   (and loc (remove zip/branch? (take-while (complement nil?) (iterate zip/prev (zip/prev loc))))))
 
-(defn loc-text [loc]
-  (apply str (map zip/node 
-               (filter (comp string? zip/node) (zf/descendants loc)))))
-
-(declare end-offset)
-
 (defn start-offset [loc]
+  (cond
+    (nil? loc) 0
+    :else
+      (if-let [l (zip/left loc)]
+        (+ (start-offset l) (loc-count l))
+        (start-offset (zip/up loc)))))
+
+#_(declare end-offset)
+
+#_(defn start-offset [loc]
   (cond
     (nil? loc) 0
     (string? (zip/node loc))
@@ -65,7 +76,7 @@
       (-> loc zip/node :offset)))
 
 (defn end-offset [loc]
-  (+ (start-offset loc) (.length ^String (loc-text loc))))
+  (+ (start-offset loc) (loc-count loc)))
 
 (defn loc-col [loc]
   (loop [loc (zip/prev loc) col 0]
@@ -75,13 +86,9 @@
       (string? (zip/node loc))
         (if (.contains (zip/node loc) "\n")
           (+ col (dec (-> (zip/node loc) (.substring (.lastIndexOf (zip/node loc) "\n")) .length)))
-          (recur (zip/prev loc) (+ col (.length (zip/node loc)))))
+          (recur (zip/prev loc) (+ col (loc-count loc))))
       :else
         (recur (zip/prev loc) col))))
-
-(defn loc-count [loc]
-  (.length ^String (loc-text loc)))
-    
   
 (defn loc-parse-node [loc] ; wrong name, and also, will return (foo) if located at ( or at ) ... so definitely wrong name ...
   (if (string? (zip/node loc))
