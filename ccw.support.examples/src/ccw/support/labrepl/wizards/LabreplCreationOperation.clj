@@ -114,7 +114,6 @@ returns nil, waits for step milliseconds, and repeats. Returns nil if resource-f
 never returned a non-nil value before the timeout occurred."
   [resource-fn desc timeout step monitor]
   (let [sub-monitor (SubMonitor/convert monitor 10)] 
-    (println "wait for resource")
     (loop
 	    [self-timeout timeout]
 	    (if (and 
@@ -204,7 +203,6 @@ never returned a non-nil value before the timeout occurred."
 		      (let
 		        [leiningen-pfile (.toOSString (.getLocation (.getFile project "project.clj")))
 		          labrepl-leiningen-project (read-project (str leiningen-pfile))]
-            (println "run-lein-deps is true")
             (binding [lancet/ant-project (make-ant-project-with-progress progress)]
               (.subTask progress "Running  \"lein deps\"")
 			        (deps labrepl-leiningen-project)
@@ -232,7 +230,6 @@ never returned a non-nil value before the timeout occurred."
 				                        (EvaluateTextAction/evaluateText console "(labrepl/-main)")
 													      (open-browser (.newChild job-progress 30)))
 			                        Status/CANCEL_STATUS)))))]
-                  (println "run-repl is true")
                   (.schedule repl-browser-job))))))))
 
 (defn -run
