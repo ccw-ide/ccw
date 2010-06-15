@@ -112,7 +112,7 @@
   "Calls resource-fn until it returns a non-nil value and returns it. If resource-fn
 returns nil, waits for step milliseconds, and repeats. Returns nil if resource-fn
 never returned a non-nil value before the timeout occurred."
-  [resource-fn timeout step monitor]
+  [resource-fn desc timeout step monitor]
   (let [sub-monitor (SubMonitor/convert monitor 10)] 
     (println "wait for resource")
     (loop
@@ -125,8 +125,8 @@ never returned a non-nil value before the timeout occurred."
 	        (if resource
 	          resource
 	          (try
-              (println (str "Remaing wait time " self-timeout))
-              (.subTask sub-monitor (str "Remaing wait time " self-timeout))
+              (println (str "Remaining wait time " desc " " self-timeout))
+              (.subTask sub-monitor (str "Remaining wait time " desc " " self-timeout))
 	            (Thread/sleep step)
 	            (.worked sub-monitor 1)
 	            (recur (- self-timeout step))
@@ -145,7 +145,7 @@ never returned a non-nil value before the timeout occurred."
 (defn- open-browser
   "Open a browser for the running labrepl web page"
   [monitor]
-	(if (wait-for-resource check-server *timeout* *step* monitor)
+	(if (wait-for-resource check-server "REPL" *timeout* *step* monitor)
 	   (let
 		  [browser-support (.getBrowserSupport (PlatformUI/getWorkbench))
 		   browser
@@ -196,70 +196,44 @@ never returned a non-nil value before the timeout occurred."
       project (config-new-project root project-name (.newChild progress 10))
       page-state @(.state page)
       run-lein-deps (.getSelection (:run-lein-deps-button page-state))
-      run-repl (.getSelection (:run-repl-button page-state))
-      test-job
-        (proxy [WorkbenchJob] ["Setup of Labrepl Project"]
-          (runInUIThread [monitor]
-             (let
-               [sleep 100
-                duration 5000
-                ticks (int (/ duration sleep))]
-               (.beginTask monitor "TEST JOB" IProgressMonitor/UNKNOWN)
-               (try
-                 (loop [i 0]
-                    (if (< i ticks)
-                       (do
-                         (.subTask monitor (str "Processing tick #" i))
-                         (println (str "Processing tick #" i))
-                         (Thread/sleep sleep)
-                         (.worked monitor 1)
-                         (recur (inc i)))))
-                 (finally (.done monitor))))
-               Status/OK_STATUS))
-      setup-job
-        (proxy [WorkbenchJob] ["Setup of Labrepl Project"]
-          (runInUIThread [monitor]
-            (let [job-progress (SubMonitor/convert monitor 100)]
-              (.subTask job-progress "Doing imports")
-					    (do-imports project (.newChild job-progress 30) overwrite-query)
-					    (.worked job-progress 1)
-					    (if run-lein-deps
-					      (let
-					        [leiningen-pfile (.toOSString (.getLocation (.getFile project "project.clj")))
-					          labrepl-leiningen-project (read-project (str leiningen-pfile))]
-                  (binding [lancet/ant-project (make-ant-project-with-progress job-progress)]
-                    (.subTask job-progress "Running  \"lein deps\"")
-						        (deps labrepl-leiningen-project)
-	                  (.worked job-progress 1)
-	                  
-	                  (.subTask job-progress "Fixing classpath")
-						        (fix-libraries project)
-	                  (.worked job-progress 1)
-	                  
-						        (if run-repl
-						          (let
-						            [startup-file-selection (StructuredSelection. (.getFile (.getFolder project "src") "labrepl.clj"))]
+      run-repl (.getSelection (:run-repl-button page-state))]
+        (.subTask progress "Doing imports")
+		    (do-imports project (.newChild progress 30) overwrite-query)
+		    (.worked progress 1)
+		    (if run-lein-deps
+		      (let
+		        [leiningen-pfile (.toOSString (.getLocation (.getFile project "project.clj")))
+		          labrepl-leiningen-project (read-project (str leiningen-pfile))]
+            (println "run-lein-deps is true")
+            (binding [lancet/ant-project (make-ant-project-with-progress progress)]
+              (.subTask progress "Running  \"lein deps\"")
+			        (deps labrepl-leiningen-project)
+              (.worked progress 1)
+              
+              (.subTask progress "Fixing classpath")
+			        (fix-libraries project)
+              (.worked progress 1)
+              
+			        (if run-repl
+			         (let
+                [startup-file-selection (StructuredSelection. (.getFile (.getFolder project "src") "labrepl.clj"))
+                  repl-browser-job 
+                    (proxy [WorkbenchJob] ["Setup of Labrepl Project"]
+		                  (runInUIThread [monitor]
+		                    (let
+                          [job-progress (SubMonitor/convert monitor 100)]
 	                        (.subTask job-progress "Launching REPL")
 						              (.launch (ClojureLaunchShortcut.) startup-file-selection ILaunchManager/RUN_MODE)
-	                        (.worked job-progress 1)
-	                        
-													(let [console (wait-for-resource #(ClojureClient/findActiveReplConsole) *timeout* *step* (.newChild job-progress 30))]
+			                    (.worked job-progress 1)
+			                    
+													(let [console (wait-for-resource #(ClojureClient/findActiveReplConsole) "Console" *timeout* *step* (.newChild job-progress 30))]
 			                      (if console
 			                        (do
 				                        (EvaluateTextAction/evaluateText console "(labrepl/-main)")
 													      (open-browser (.newChild job-progress 30)))
-			                        Status/CANCEL_STATUS)))
-	                      Status/OK_STATUS)))
-                  Status/OK_STATUS))))]
-      ; TODO If you are running a long running operation in a wizard/wizardPage you should consider running it thru getContainer().run(). This will show the progressBar right there in the wizard dialog itself:
-      ; http://blog.eclipse-tips.com/2009/02/using-progress-bars.html
-      (.setUser setup-job true)
-      (.schedule setup-job)
-      (.showInDialog (.getProgressService (PlatformUI/getWorkbench)) (.getShell page) setup-job)
-      ; (.setUser test-job true)
-      ; (.schedule test-job)
-      ; (.showInDialog (.getProgressService (PlatformUI/getWorkbench)) (.getShell page) test-job)
-      ))
+			                        Status/CANCEL_STATUS)))))]
+                  (println "run-repl is true")
+                  (.schedule repl-browser-job))))))))
 
 (defn -run
   [this monitor]
