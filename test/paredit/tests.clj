@@ -78,15 +78,15 @@
 
 (deftest loc-for-offset-tests
   (are [text offset expected-tag] (= expected-tag (-?> (parse text) (parsed-root-loc true) (loc-for-offset offset) (zip/node) :tag))
-    "foo (bar baz) baz" 12 "(" ;nil
-    "hello" 0 "a"
-    "hello" 1 "a"
+    "foo (bar baz) baz" 12 :list ;nil
+    "hello" 0 :atom
+    "hello" 1 :atom
     "hello" 5 nil ;:root
-    "a b" 0 "a"
-    "a b" 1 " "
-    "a b" 2 "a"
-    "foo \"bar\" foo" 3 " "
-    "foo \"bar\" foo" 4 "\""))
+    "a b" 0 :atom
+    "a b" 1 :whitespace
+    "a b" 2 :atom
+    "foo \"bar\" foo" 3 :whitespace
+    "foo \"bar\" foo" 4 :string))
 
 (deftest leave-for-offset-tests
   (are [text offset expected-tag ?expected-node]
@@ -94,20 +94,20 @@
       (and
         (= expected-tag (loc-tag l))
         (or (nil? ?expected-node) (= ?expected-node (zip/node l)))))
-    "foo (bar baz) baz" 12 "(" ")"
-    "hello" 0 "a" nil
-    "hello" 1 "a" nil
+    "foo (bar baz) baz" 12 :list ")"
+    "hello" 0 :atom nil
+    "hello" 1 :atom nil
     "hello" 5 :root nil
-    "a b" 0 "a" nil
-    "a b" 1 " " nil
-    "a b" 2 "a" nil
-    "foo \"bar\" foo" 3 " " nil
-    "foo \"bar\" foo" 4 "\"" nil
+    "a b" 0 :atom nil
+    "a b" 1 :whitespace nil
+    "a b" 2 :atom nil
+    "foo \"bar\" foo" 3 :whitespace nil
+    "foo \"bar\" foo" 4 :string nil
     ))
 
 (deftest loc-containing-offset-tests
   (are [text offset expected-tag] (= expected-tag (-?> (parse text) (parsed-root-loc true) (loc-containing-offset offset) (zip/node) :tag))
-    "hello" 1 "a"
+    "hello" 1 :atom
     "foo bar" 3 :root
     "foo bar" 4 :root
     "hello" 5 :root

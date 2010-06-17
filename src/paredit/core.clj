@@ -21,7 +21,7 @@
   (:require [clojure.zip :as z])
   (:use paredit.loc-utils)) ; TODO avoir un require :as l
 
-(set! *warn-on-reflection* true)
+#_(set! *warn-on-reflection* true)
 
 ;;; adaptable paredit configuration
 (def ^String *newline* "\n")
@@ -32,9 +32,9 @@
 (def *open-brackets* (conj #{"(" "[" "{"} nil)) ; we add nil to the list to also match beginning of text 
 (def *close-brackets* (conj #{")" "]" "}"} nil)) ; we add nil to the list to also match end of text
 (def *form-macro-chars* #{(str \#) (str \~) "~@" (str \') (str \`) (str \@) "^" "#'" "#_" "#!"})
-(def *not-in-code* #{"\"" "\"\\" ";" "\\"})
+(def *not-in-code* #{:string "\"\\" :comment :char})
 
-(defn parsed-in-tags?
+(defn parsed-in-tags? 
   [parsed tags-set]
   (tags-set (-> parsed :parents peek :tag)))
 
@@ -82,10 +82,10 @@
           offset-loc (-> parsed parsed-root-loc (loc-for-offset offset))]       
       (if (and offset-loc (not (*not-in-code* (loc-tag offset-loc))))
         (let [up-locs (take-while identity (iterate z/up offset-loc))
-              match (some #(when (= o (loc-tag %)) %) up-locs)]
+              match (some #(when (= o (*tag-opening-brackets* (loc-tag %))) %) up-locs)]
           (if match
             (let [last-loc (-> match z/down z/rightmost z/left)
-                  nb-delete (if (= (str \space) (loc-tag last-loc)) 
+                  nb-delete (if (= :whitespace (loc-tag last-loc)) 
                               (loc-count last-loc)
                               0)
                   t (if (> nb-delete 0) 
@@ -143,7 +143,7 @@
         (insert-balanced [\" \"] t
           (conj (into *real-spaces* *open-brackets*) \#)
           (into *extended-spaces* *close-brackets*))
-      (not (parsed-in-tags? parsed #{"\""}))
+      (not (parsed-in-tags? parsed #{:string}))
         (-> t (t/insert (str \")))
       (and (= "\\" (t/previous-char-str t)) (not= "\\" (t/previous-char-str t 2)))
         (-> t (t/insert (str \")))
@@ -160,7 +160,7 @@
         parse-ok (not= :ko (:parser-state parsed))]
     (if parse-ok
       (let [offset-loc (-> parsed parsed-root-loc (loc-for-offset offset))
-            handled-forms (conj *open-brackets* "\"")
+            handled-forms (conj *brackets-tags* :string)
             in-handled-form (handled-forms (loc-tag offset-loc))]
         (cond 
           (and in-handled-form (= offset (start-offset offset-loc)))
@@ -183,7 +183,7 @@
         parse-ok (not= :ko (:parser-state parsed))]
     (if parse-ok
       (let [offset-loc (-> parsed parsed-root-loc (loc-for-offset offset))
-            handled-forms (conj *open-brackets* "\"")
+            handled-forms (conj *brackets-tags* :string)
             in-handled-form (handled-forms (loc-tag offset-loc))]
         (cond 
           (and in-handled-form (= offset (start-offset offset-loc)))
@@ -212,7 +212,7 @@
             (+ (loc-col loc)
               (loc-count loc)    
               (if (= "(" (loc-text loc)) 1 0))
-          (= " " (loc-tag loc))
+          (= :whitespace (loc-tag loc))
             ; we see a space
             (if (.contains ^String (loc-text loc) "\n")
               (if seen-loc
@@ -369,25 +369,24 @@
       (if-let [rloc (-?> parsed (parsed-root-loc true))]
         (let [[l r] (normalized-selection rloc offset length)
               parent (cond
-                       (= (str \") (loc-tag l)) l ; stay at the same level, and let the code take the correct open/close puncts, e.g. \" \"
+                       (= :string (loc-tag l)) l ; stay at the same level, and let the code take the correct open/close puncts, e.g. \" \"
                        :else (if-let [nl (z/up (if (start-punct? l) (parse-node l) (parse-leave l)))] nl (parse-leave l)))
-              open-punct (loc-tag parent)
-              _ (spy open-punct)
-              close-punct ^String (*brackets* open-punct)]
+              open-punct (*tag-opening-brackets* (loc-tag parent))
+              close-punct ^String (*tag-closing-brackets* (loc-tag parent))]
           (if-not close-punct
             t
             (let [replace-text (str close-punct " " open-punct)
                   [replace-offset 
                    replace-length] (if (and
-                                         (not= (str \space) (loc-tag l))
+                                         (not= :whitespace (loc-tag l))
                                          (or
-                                           (= (str \") (loc-tag l))
+                                           (= :string (loc-tag l))
                                            (not (and
                                                   (sel-match-normalized? offset length [l r]) 
                                                   (= offset (start-offset (parse-node l)))))))
                                      [offset 0]
-                                     (let [start (or (some #(when-not (= (str \space) (loc-tag %)) (end-offset %)) (previous-leaves l)) offset)
-                                           end (or (some #(when-not (= (str \space) (loc-tag %)) (start-offset %)) (next-leaves l)) 0)]
+                                     (let [start (or (some #(when-not (= :whitespace (loc-tag %)) (end-offset %)) (previous-leaves l)) offset)
+                                           end (or (some #(when-not (= :whitespace (loc-tag %)) (start-offset %)) (next-leaves l)) 0)]
                                        [start (- end start)]))
                                    new-offset (+ replace-offset (.length close-punct))]
               (-> t (assoc-in [:text] (t/str-replace text replace-offset replace-length replace-text))
@@ -405,9 +404,9 @@
       (if-let [rloc (-?> parsed (parsed-root-loc true))]
         (let [[l _] (normalized-selection rloc offset length)
               _ (spy "node" (z/node l))
-              lf (first (remove #(= (str \space) (loc-tag %)) (previous-leaves l)))
+              lf (first (remove #(= :whitespace (loc-tag %)) (previous-leaves l)))
               _ (spy "lf" (z/node lf))
-              rf (first (remove #(= (str \space) (loc-tag %)) (cons l (next-leaves l))))
+              rf (first (remove #(= :whitespace (loc-tag %)) (cons l (next-leaves l))))
               _ (spy "lr" (z/node rf))]
           (if (or (nil? lf) (nil? rf) (start-punct? lf) (end-punct? rf))
             t
@@ -418,9 +417,9 @@
               (if-not (and
                         (= (loc-tag ln) (loc-tag rn)))
                 t
-                (let [replace-offset (- (end-offset ln) (if-let [punct ^String (*brackets* (loc-tag ln))] (.length punct) 0))
-                      replace-length (- (+ (start-offset rn) (if (*brackets* (loc-tag rn)) (.length (loc-tag rn)) 0)) replace-offset)
-                      replace-text   (if (#{(str \") (str \a)} (loc-tag ln)) "" " ")
+                (let [replace-offset (- (end-offset ln) (if-let [punct ^String (*tag-closing-brackets* (loc-tag ln))] (.length punct) 0))
+                      replace-length (- (+ (start-offset rn) (if-let [punct ^String (*tag-closing-brackets* (loc-tag rn))] (.length punct) 0)) replace-offset)
+                      replace-text   (if (#{:string :atom} (loc-tag ln)) "" " ")
                       new-offset (if (= offset (start-offset rn)) (+ replace-offset (.length replace-text)) replace-offset)]
                   (-> t (assoc-in [:text] (t/str-replace text replace-offset replace-length replace-text))
                     (assoc-in [:offset] new-offset)
@@ -436,8 +435,8 @@
                   (update-in [:modifs] conj {:text o :offset offset :length length}))
         parsed (parse text)]
     (if-let [rloc (-?> parsed (parsed-root-loc true))]
-      (let [left-leave (some (fn [l] (when (not= " " (loc-tag l)) l)) (next-leaves (leave-for-offset rloc offset)))
-            right-leave (some (fn [l] (when (not= " " (loc-tag l)) l)) (previous-leaves (leave-for-offset rloc (+ offset length))))
+      (let [left-leave (some (fn [l] (when (not= :whitespace (loc-tag l)) l)) (next-leaves (leave-for-offset rloc offset)))
+            right-leave (some (fn [l] (when (not= :whitespace (loc-tag l)) l)) (previous-leaves (leave-for-offset rloc (+ offset length))))
             right-leave (if (or (nil? right-leave) (<= (start-offset right-leave) (start-offset left-leave))) left-leave right-leave)]
         (if (or
               (not (in-code? (loc-containing-offset rloc offset)))
@@ -492,11 +491,11 @@
     (let [line-start (spy (t/line-start (spy text) (spy offset)))
           line-stop (t/line-stop text offset)
           loc (-> rloc (loc-for-offset line-start))]
-      (if (and (= (str \") (loc-tag loc)) (< (start-offset loc) line-start))
+      (if (and (= :string (loc-tag loc)) (< (start-offset loc) line-start))
         t
         (let [indent (spy (indent-column rloc line-start))
               cur-indent-col (or (some (fn [l]
-                                         (when (not= (str \space) (loc-tag l)) 
+                                         (when (not= :whitespace (loc-tag l)) 
                                            (- (start-offset l) line-start)))
                                    (filter (fn [l] (<= line-start (start-offset l) line-stop)) 
                                      (next-leaves loc)))

@@ -2,7 +2,7 @@
   (:require [clojure.zip :as zip])
   (:require [clojure.contrib.zip-filter :as zf]))
 
-(set! *warn-on-reflection* true)
+#_(set! *warn-on-reflection* true)
 
 (defn loc-text [loc]
   (apply str (map zip/node 
@@ -38,7 +38,7 @@
   (and
     loc
     (string? (zip/node loc)) 
-    (not (#{" " "a" ";" "\\" "\""} (loc-tag (zip/up loc))))))
+    (not (#{:whitespace :atom :comment :char :string} (loc-tag (zip/up loc))))))
 
 (defn root-loc [loc] (if-let [up (zip/up loc)] (recur up) loc))
 
