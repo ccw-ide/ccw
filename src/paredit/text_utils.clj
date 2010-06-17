@@ -1,7 +1,7 @@
 (ns paredit.text-utils
   (:use clojure.test))
 
-#_(set! *warn-on-reflection* true)
+(set! *warn-on-reflection* true)
 
 (defn str-insert [^String s i c] (str (.substring s 0 i) c (.substring s i)))
 (defn str-remove [^String s i n] (str (.substring s 0 i) (.substring s (+ i n))))

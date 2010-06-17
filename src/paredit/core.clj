@@ -21,7 +21,7 @@
   (:require [clojure.zip :as z])
   (:use paredit.loc-utils)) ; TODO avoir un require :as l
 
-#_(set! *warn-on-reflection* true)
+(set! *warn-on-reflection* true)
 
 ;;; adaptable paredit configuration
 (def ^String *newline* "\n")
@@ -214,11 +214,11 @@
               (if (= "(" (loc-text loc)) 1 0))
           (= " " (loc-tag loc))
             ; we see a space
-            (if (.contains (loc-text loc) "\n")
+            (if (.contains ^String (loc-text loc) "\n")
               (if seen-loc
-                (+ indent (dec (-> (loc-text loc) (.substring (.lastIndexOf (loc-text loc) "\n")) .length)))
+                (+ indent (dec (-> ^String (loc-text loc) (.substring (.lastIndexOf ^String (loc-text loc) "\n")) .length)))
                 (recur (z/left loc) nil 0))
-              (recur (z/left loc) nil (+ indent (-> (loc-text loc) .length))))
+              (recur (z/left loc) nil (+ indent (-> ^String (loc-text loc) .length))))
           :else
             (recur (z/left loc) loc 0)))
       ; we are at the start of the file !
@@ -501,6 +501,18 @@
                                    (filter (fn [l] (<= line-start (start-offset l) line-stop)) 
                                      (next-leaves loc)))
                                (- line-stop line-start))
+
+              #_cur-indent-col #_(- 
+                               (loop [o line-start]
+                                 (if (>= o (.length text)) 
+                                   o
+                                   (let [c (.charAt text o)]
+                                     (cond
+                                       (#{\r \n} c) o ; test CR/LF before .isWhitespace !
+                                       (Character/isWhitespace c) (recur (inc o))
+                                       (= \, c) (recur (inc o))
+                                       :else o))))
+                               line-start)
               to-add (- indent cur-indent-col)]
           (cond
             (zero? to-add) t

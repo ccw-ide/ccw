@@ -78,10 +78,10 @@
 
 (deftest loc-for-offset-tests
   (are [text offset expected-tag] (= expected-tag (-?> (parse text) (parsed-root-loc true) (loc-for-offset offset) (zip/node) :tag))
-    "foo (bar baz) baz" 12 nil
+    "foo (bar baz) baz" 12 "(" ;nil
     "hello" 0 "a"
     "hello" 1 "a"
-    "hello" 5 :root
+    "hello" 5 nil ;:root
     "a b" 0 "a"
     "a b" 1 " "
     "a b" 2 "a"

@@ -1,6 +1,8 @@
 (ns paredit.core-commands
   (:use clojure.contrib.def))
 
+(set! *warn-on-reflection* true)
+
 ;;; -*- Mode: Emacs-Lisp; outline-regexp: "\n;;;;+" -*-
 
 ;;;;;; Paredit: Parenthesis-Editing Minor Mode

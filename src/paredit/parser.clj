@@ -31,7 +31,7 @@
 	(:require [clojure.zip :as zip])
   (:require [clojure.contrib.zip-filter :as zf]))
 
-#_(set! *warn-on-reflection* true)
+(set! *warn-on-reflection* true)
 
 (def *spy?* (atom false))
 (defn start-spy [] (reset! *spy?* true))

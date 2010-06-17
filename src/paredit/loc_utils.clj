@@ -2,6 +2,8 @@
   (:require [clojure.zip :as zip])
   (:require [clojure.contrib.zip-filter :as zf]))
 
+(set! *warn-on-reflection* true)
+
 (defn loc-text [loc]
   (apply str (map zip/node 
                (filter (comp string? zip/node) (zf/descendants loc)))))
@@ -84,8 +86,8 @@
       (nil? loc) 
         col
       (string? (zip/node loc))
-        (if (.contains (zip/node loc) "\n")
-          (+ col (dec (-> (zip/node loc) (.substring (.lastIndexOf (zip/node loc) "\n")) .length)))
+        (if (.contains ^String (zip/node loc) "\n")
+          (+ col (dec (-> ^String (zip/node loc) (.substring (.lastIndexOf ^String (zip/node loc) "\n")) .length)))
           (recur (zip/prev loc) (+ col (loc-count loc))))
       :else
         (recur (zip/prev loc) col))))
@@ -120,9 +122,22 @@
 (defn contains-offset?
   "returns the loc itself if it contains the offset, else nil"
   [loc offset]
-   (and
-     (<= (start-offset loc) offset (dec (end-offset loc)))
-     loc))
+   (let [start (start-offset loc)
+         end (+ (loc-count loc) start)] 
+     (and
+       (<= start offset (dec end))
+       loc)))
+
+#_(defn loc-for-offset 
+  "returns a zipper location or nil if does not contain the offset"
+  [loc offset] 
+    (loop [locs (seq (next-leaves (root-loc loc))) best-match loc o 0]
+      (if-not locs
+        (parse-node best-match)
+        (let [end (+ o (.length ^String (zip/node (first locs))))]
+          (if (<= o offset (dec end))
+            (parse-node (first locs))
+            (recur (next locs) (first locs) end))))))
 
 (defn loc-for-offset 
   "returns a zipper location or nil if does not contain the offset"
