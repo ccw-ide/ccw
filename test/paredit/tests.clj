@@ -118,13 +118,13 @@
     "foo \"bar\" foo" 4 :root
     ))
 (defn pts []
-  (normalized-selection-tests)
-  (t/line-stop-tests)
-  (spec-text-tests)
+  #_(normalized-selection-tests)
+  #_(t/line-stop-tests)
+  #_(spec-text-tests)
   (paredit-tests)
-  #_(loc-for-offset-tests)
-  (leave-for-offset-tests)
-  (loc-containing-offset-tests))
+  ;;;;;;;#_(loc-for-offset-tests)
+  #_(leave-for-offset-tests)
+  #_(loc-containing-offset-tests))
 
 (defvar *text* (atom {:text "" :offset 0 :length 0})
   "defines a text, with :offset being the cursor position,

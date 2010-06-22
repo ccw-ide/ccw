@@ -115,9 +115,9 @@
 (defn parsed-root-loc
   ([parsed] (parsed-root-loc parsed false))
   ([parsed only-valid?]
-    (let [valid? (= 1 (-> parsed :accumulated-state count))]
-      (when (or valid? (not only-valid?))
-        (-> parsed :accumulated-state first zip/xml-zip)))))
+    ;(let [valid? (= 1 (-> parsed :accumulated-state count))]
+    (let [chlds (-> parsed first second)]
+      (zip/xml-zip {:tag :root :content chlds}))))
 
 (defn contains-offset?
   "returns the loc itself if it contains the offset, else nil"

@@ -399,8 +399,9 @@
   [cmd {:keys [^String text offset length] :as t}]
   (spy "++++" t)
   (if (not= 0 length)
-    t
+    (spy "doing nothing" t)
     (let [parsed (parse text)]
+      (spy "parsed: " parsed)
       (if-let [rloc (-?> parsed (parsed-root-loc true))]
         (let [[l _] (normalized-selection rloc offset length)
               _ (spy "node" (z/node l))

@@ -29,7 +29,9 @@
   (:use clojure.test)
   (:use clojure.contrib.core)
 	(:require [clojure.zip :as zip])
-  (:require [clojure.contrib.zip-filter :as zf]))
+  (:require [clojure.contrib.zip-filter :as zf])
+  (:require [net.cgrand.parsley.glr :as core] :reload)
+  (:use net.cgrand.parsley :reload))
 
 #_(set! *warn-on-reflection* true)
 
@@ -185,7 +187,52 @@
   state
   (update-in state [:accumulated-state 0] purge))
    
-(defn parse 
+(def sexp 
+  (parser {:space [#{:whitespace :comment :discard}:*]
+            :main :expr*}
+    :expr- #{:atom :list :vector :set :map :string :regex
+             :meta :deprecated-meta :quote 
+             :unquote :syntax-quote :unquote-splicing
+             :deref :var :fn :char}
+    :atom1st- #{{\a \z \A \Z \0 \9} (any-of "!$%&*+-./:<=>?_")}
+    :atom (token :atom1st #{:atom1st \#}:* (?! #{:atom1st \#}))
+    :string (token \" #{(none-of \\ \") [\\ any-char]}:* \")
+    :char (token \\ #{any-char "newline" "space" "tab" "backspace" 
+                      "formfeed" "return"
+                      (into [\u] (repeat 4 {\0 \9 \a \f \A \F}))
+                      [\u :hex :hex :hex :hex]
+                      [\o {\0 \7}]
+                      [\o {\0 \7} {\0 \7}]
+                      [\o {\0 \3} {\0 \7} {\0 \7}]}
+            (?! #{:atom1st \#}))
+    :regex (token \# \" #{(none-of \\ \") [\\ any-char]}:* \") 
+    :list ["(" :expr* ")"]
+    :vector ["[" :expr* "]"]
+    :set ["#{" :expr* "}"]
+    :map ["{" :expr* "}"]
+    :discard ["#_" :expr]
+    :meta ["^" :expr :expr]
+    :quote [\' :expr] 
+    :syntax-quote [\` :expr]
+    :tilda- [\~ (?! \@)]
+    :unquote [:tilda :expr]
+    :unquote-splicing ["~@" :expr]
+    :deprecated-meta ["#^" :expr :expr]
+    :deref [\@ :expr]
+    :var ["#'" :expr]
+    :fn ["#(" :expr* ")"]
+
+    :comment (token #{"#!" ";"} (none-of \newline):* (?! (none-of \newline)))
+    
+    :whitespace (token #{\space \tab \newline \,}:+ (?! #{\space \tab \newline \,}))))
+
+(defn parse
+  ([^String text]
+    (sexp text))
+  ([^String text offset]
+    (sexp text)))
+
+(defn parse-old 
 	"TODO: currently the parser assumes a well formed document ... Define a policy if the parser encounters and invalid text
 	 TODO: make the parser restartable at a given offset given a state ...
 	 TODO: make the parser fully incremental (via chunks of any possible size ...)"	
