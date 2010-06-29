@@ -57,7 +57,8 @@
     (doseq [[input expected] (get command 2)]
       (spy "++++++++++++++++++++")
       (spy (text-spec-to-text input))
-      (is (= expected (text-to-text-spec (paredit (second command) (text-spec-to-text input))))))))
+      (let [{text :text :as t} (text-spec-to-text input)]
+        (is (= expected (text-to-text-spec (paredit (second command) (parse text) t))))))))
 
 (deftest paredit-tests
   (doseq [group *paredit-commands*]
@@ -79,6 +80,8 @@
 (deftest loc-for-offset-tests
   (are [text offset expected-tag] (= expected-tag (-?> (parse text) (parsed-root-loc true) (loc-for-offset offset) (zip/node) :tag))
     "foo (bar baz) baz" 12 :list ;nil
+    "foo (bar baz) baz" 4 :list ;nil
+    "foo (bar baz) baz" 5 :atom ;nil
     "hello" 0 :atom
     "hello" 1 :atom
     "hello" 5 nil ;:root

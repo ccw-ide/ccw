@@ -4,9 +4,13 @@
 
 #_(set! *warn-on-reflection* true)
 
+(defn node-text [n]
+  (if (string? n)
+    n
+    (apply str (map #'node-text (:content n)))))
+
 (defn loc-text [loc]
-  (apply str (map zip/node 
-               (filter (comp string? zip/node) (zf/descendants loc)))))
+  (node-text (zip/node loc)))
 
 (defn loc-count [loc]
   (.length ^String (loc-text loc)))
@@ -65,18 +69,6 @@
         (+ (start-offset l) (loc-count l))
         (start-offset (zip/up loc)))))
 
-#_(declare end-offset)
-
-#_(defn start-offset [loc]
-  (cond
-    (nil? loc) 0
-    (string? (zip/node loc))
-      (if-let [l (zip/left loc)]
-        (end-offset l)
-        (start-offset (zip/up loc)))
-    :else 
-      (-> loc zip/node :offset)))
-
 (defn end-offset [loc]
   (+ (start-offset loc) (loc-count loc)))
 
@@ -128,35 +120,30 @@
        (<= start offset (dec end))
        loc)))
 
-#_(defn loc-for-offset 
+;; TODO when parsley is up and implements (count), then it will be (probably)
+;;      more performant to use (count) to jump over nodes
+(defn leave-loc-for-offset-common 
   "returns a zipper location or nil if does not contain the offset"
   [loc offset] 
-    (loop [locs (seq (next-leaves (root-loc loc))) best-match loc o 0]
+    (loop [locs (seq (next-leaves (root-loc loc))) o 0]
       (if-not locs
-        (parse-node best-match)
+        (root-loc loc) ;best-match
         (let [end (+ o (.length ^String (zip/node (first locs))))]
           (if (<= o offset (dec end))
-            (parse-node (first locs))
-            (recur (next locs) (first locs) end))))))
+            (first locs)
+            (recur (next locs) end))))))
+
+(defn leave-for-offset
+  [loc offset]
+  (if-let [l (leave-loc-for-offset-common loc offset)]
+    l
+    (root-loc loc)))
 
 (defn loc-for-offset 
   "returns a zipper location or nil if does not contain the offset"
-  ([loc offset] (loc-for-offset loc offset nil))
-  ([loc offset last-match]
-    (if (or (nil? loc) (not (contains-offset? loc offset)) (not (zip/branch? loc)))
-      last-match
-      (recur 
-        (some  
-          #(contains-offset? % offset) 
-          (take-while identity (iterate zip/right (zip/down loc)))) 
-        offset
-        loc))))
-
-(defn leave-for-offset 
-  "returns a zipper location of a leave containing or starting at the given offset."
-  ([loc offset]
-    (let [l (first (filter #(do (zip/node %) (contains-offset? % offset)) (next-leaves loc)))]
-      (or l (root-loc loc)))))
+  [loc offset] 
+    (when-let [l (leave-loc-for-offset-common loc offset)]
+      (parse-node l)))
 
 (defn loc-containing-offset
   ([loc offset]

@@ -189,7 +189,8 @@
    
 (def sexp 
   (parser {:space [#{:whitespace :comment :discard}:*]
-            :main :expr*}
+            :main :root}
+    :root :expr*
     :expr- #{:atom :list :vector :set :map :string :regex
              :meta :deprecated-meta :quote 
              :unquote :syntax-quote :unquote-splicing
@@ -384,9 +385,3 @@
 (defn parse-tree
   [state]
   (-> state :accumulated-state))
-
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; utility libraries for manipulating the parse-tree
-
