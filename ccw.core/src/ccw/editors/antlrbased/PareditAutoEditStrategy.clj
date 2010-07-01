@@ -75,22 +75,20 @@
 
 (defn -customizeDocumentCommand 
   [#^ccw.editors.antlrbased.PareditAutoEditStrategy this, #^IDocument document, #^DocumentCommand command]
-  #_(println "Called!")
-  (println "doit?" (.doit command))
   (when (and (.doit command) (not (-> this .state deref #^ccw.editors.antlrbased.AntlrBasedClojureEditor (:editor) .isInEscapeSequence)))
     (let [signed-selection (bean (-> this .state deref #^ccw.editors.antlrbased.AntlrBasedClojureEditor (:editor) .getSignedSelection))
-           #__ #_(println (str "signed-selection:" signed-selection))
+          ;_ (println (str "signed-selection:" signed-selection))
           document-text {:text (.get document) 
                          :caret-offset (+ (:offset signed-selection) (:length signed-selection)) 
                          :selection-length (:length signed-selection)}
           par-command {:text (.text command) :offset (.offset command) :length (.length command)}
-          _ (println (str "par-command:" par-command))
+          ;_ (println (str "par-command:" par-command))
           [par-command par-text] (paredit-args par-command document-text)
           _ (println "here is the par-command:" par-command)
           result (and 
                    par-command 
                    (do-command? (-> this .state deref :editor) par-command)
-                   (paredit par-command par-text))]
+                   (paredit par-command (.getParsed (-> this .state deref #^ccw.editors.antlrbased.AntlrBasedClojureEditor (:editor))) par-text))]
       (when (and result (not= :ko (-> result :parser-state)))
         (if-let [modif (-?> result :modifs first)]
           (do
@@ -107,6 +105,6 @@
         (set! (.shiftsCaret command) false)
         (set! (.caretOffset command) (:offset result))
         (when-not (zero? (:length result)) 
-          #_(println (str "result:" result))
+          ;(println (str "result:" result))
           (.selectAndReveal (-> this .state deref :editor) (:offset result) (:length result))))
       (.setStructuralEditingPossible (-> this .state deref :editor) (true? (and result (not= :ko (-> result :parser-state))))))))

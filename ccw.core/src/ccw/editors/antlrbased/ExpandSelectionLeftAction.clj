@@ -45,7 +45,7 @@
   (let [editor #^AntlrBasedClojureEditor (:editor @(.state this))
         {:keys #{length offset}} (bean (.getUnSignedSelection editor))
         text  (.get (.getDocument #^AntlrBasedClojureEditor editor))
-        {new-length :length new-offset :offset} (paredit :paredit-expand-left {:text text :offset offset :length length})]
+        {new-length :length new-offset :offset} (paredit :paredit-expand-left (.getParsed editor) {:text text :offset offset :length length})]
     (-> this .state deref :selection-history (.remember (SourceRange. offset length)))
     (try
       (-> this .state deref :selection-history .ignoreSelectionChanges)

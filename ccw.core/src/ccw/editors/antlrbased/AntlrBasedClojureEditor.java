@@ -14,12 +14,15 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewerExtension5;
 import org.eclipse.jface.text.Region;
@@ -197,6 +200,46 @@ public class AntlrBasedClojureEditor extends TextEditor {
 
 	public boolean getBooleanPreference(String key) {
 		return getPreferenceStore().getBoolean(key);
+	}
+
+	/** This is manipulated by clojure functions.
+	 * It's a ref, holding a map {:text "the raw text file" :parser parser}
+	 * where state is a future holding the parser's state
+	 */
+	private Object parseRef; 
+
+	private IDocumentListener parseTreeConstructorDocumentListener = new IDocumentListener() {
+		public void documentAboutToBeChanged(DocumentEvent event) { }
+		public void documentChanged(DocumentEvent event) {
+			updateParseRef(event.getDocument().get());
+		}
+	};
+	
+	private void updateParseRef(String text) {
+		parseRef = EditorSupport.updateParseRef(text, parseRef);
+		System.out.println("cached the parser!");
+	}
+	
+	public Object getParsed() {
+		if (parseRef == null) {
+			updateParseRef(getDocument().get());
+		}
+		return EditorSupport.getParser(getDocument().get(), parseRef);
+	}
+	
+	@Override
+	protected void doSetInput(IEditorInput input) throws CoreException {
+		IEditorInput oldEditorInput = getEditorInput();
+		if (oldEditorInput != null) {
+			IDocument oldDocument = getDocumentProvider().getDocument(oldEditorInput);
+			if (oldDocument != null) {
+				oldDocument.removeDocumentListener(parseTreeConstructorDocumentListener);
+			}
+		}
+		super.doSetInput(input);
+		IDocument document = getDocumentProvider().getDocument(getEditorInput());
+		document.addDocumentListener(parseTreeConstructorDocumentListener);
+		updateParseRef(document.get());
 	}
 	
 	public void setStructuralEditingPossible(boolean state) {
