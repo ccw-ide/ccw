@@ -223,9 +223,9 @@
     :var ["#'" :expr]
     :fn ["#(" :expr* ")"]
 
-    :comment (token #{"#!" ";"} (none-of \newline):* (?! (none-of \newline)))
+    :comment (token #{"#!" ";"} (none-of \return \newline):* (?! (none-of \return \newline)))
     
-    :whitespace (token #{\space \tab \newline \,}:+ (?! #{\space \tab \newline \,}))))
+    :whitespace (token #{\space \return \tab \newline \,}:+ (?! #{\space \return \tab \newline \,}))))
 
 (defn parse
   ([^String text]

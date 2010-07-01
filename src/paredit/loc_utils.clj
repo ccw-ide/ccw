@@ -13,6 +13,11 @@
   (node-text (zip/node loc)))
 
 (defn loc-count [loc]
+ ;(cond
+ ;   (nil? loc) 0
+ ;   (string? (zip/node loc)) (.length ^String (zip/node loc))
+ ;   (zip/down loc) (apply + (map #'loc-count (concat [(zip/down loc)] (zip/rights (zip/down loc)))))
+ ;   :else 0))
   (.length ^String (loc-text loc)))
 
 (defn ^String loc-tag [loc]
@@ -62,12 +67,13 @@
   (and loc (remove zip/branch? (take-while (complement nil?) (iterate zip/prev (zip/prev loc))))))
 
 (defn start-offset [loc]
-  (cond
-    (nil? loc) 0
-    :else
-      (if-let [l (zip/left loc)]
-        (+ (start-offset l) (loc-count l))
-        (start-offset (zip/up loc)))))
+  (loop [loc loc offset 0] 
+    (cond
+      (nil? loc) offset
+      :else
+        (if-let [l (zip/left loc)]
+          (recur l (+ offset (loc-count l)))
+          (recur (zip/up loc) offset)))))
 
 (defn end-offset [loc]
   (+ (start-offset loc) (loc-count loc)))
@@ -146,6 +152,16 @@
       (parse-node l)))
 
 (defn loc-containing-offset
+  [loc offset]
+  (if-let [l (leave-loc-for-offset-common loc offset)]
+    (loop [l l]
+      (cond
+        (= (root-loc loc) l) l
+        (= offset (start-offset l)) (recur (zip/up l))
+        :else l))
+    (root-loc loc)))
+
+#_(defn loc-containing-offset
   ([loc offset]
     (if (= 0 offset)
       (root-loc loc)
