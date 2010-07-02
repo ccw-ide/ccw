@@ -62,7 +62,7 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
 	    	}
     	}
     	
-    	fullBuild(monitor);
+    	fullBuild(getProject(), monitor);
 
     	
         // Commented out to not break svn
@@ -86,8 +86,8 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
     	}
     	
     	List<IPath> folders = new ArrayList<IPath>();
-    	folders.add(getClassesFolder().getFullPath());
-		for (IFolder outputPath: getSrcFolders().values()) {
+    	folders.add(getClassesFolder(getProject()).getFullPath());
+		for (IFolder outputPath: getSrcFolders(getProject()).values()) {
 			folders.add(outputPath.getFullPath());
 		}
 		
@@ -109,33 +109,32 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
         
     }
 
-    protected void fullBuild(IProgressMonitor monitor) throws CoreException{
+    public static void fullBuild(IProject project, IProgressMonitor monitor) throws CoreException{
         
         if(monitor == null){
             monitor = new NullProgressMonitor();
         }
         
-        ClojureClient clojureClient = CCWPlugin.getDefault().getProjectClojureClient(getProject());
+        ClojureClient clojureClient = CCWPlugin.getDefault().getProjectClojureClient(project);
         if (clojureClient == null) {
         	return;
         }
         
-        deleteMarkers();
+        deleteMarkers(project);
 
         ClojureVisitor visitor = new ClojureVisitor(clojureClient);
-        visitor.visit(getSrcFolders());
+        visitor.visit(getSrcFolders(project));
         
-        getClassesFolder().refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 0));
+        getClassesFolder(project).refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 0));
     }
     
-    private IFolder getClassesFolder() {
-    	return getProject().getFolder("classes");
+    private static IFolder getClassesFolder(IProject project) {
+    	return project.getFolder("classes");
     }
 
-    private Map<IFolder, IFolder> getSrcFolders() throws CoreException {
+    private static Map<IFolder, IFolder> getSrcFolders(IProject project) throws CoreException {
         Map<IFolder, IFolder> srcFolders = new HashMap<IFolder, IFolder>();
         
-        final IProject project = getProject();
         IJavaProject jProject = JavaCore.create(project);
         IClasspathEntry[] entries = jProject.getResolvedClasspath(true);
         IPath defaultOutputFolder = jProject.getOutputLocation();
@@ -169,21 +168,21 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
     	}
     	
     	try {
-    		getClassesFolder().delete(true, monitor);
-	    	if (!getClassesFolder().exists()) {
-	    		getClassesFolder().create(true, true, monitor);
+    		getClassesFolder(getProject()).delete(true, monitor);
+	    	if (!getClassesFolder(getProject()).exists()) {
+	    		getClassesFolder(getProject()).create(true, true, monitor);
 	    	}
-	        getClassesFolder().refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 0));
-	        getClassesFolder().setDerived(true); //, monitor); removed monitor argument, probably a 3.5/3.6 only stuff
+	        getClassesFolder(getProject()).refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 0));
+	        getClassesFolder(getProject()).setDerived(true); //, monitor); removed monitor argument, probably a 3.5/3.6 only stuff
     	} catch (CoreException e) {
     		CCWPlugin.logError("Unable to correctly clean classes folder", e);
     	}
 
-        deleteMarkers();
+        deleteMarkers(getProject());
     }
     
-    private void deleteMarkers() throws CoreException {
-        for (IFolder srcFolder: getSrcFolders().keySet()) {
+    private static void deleteMarkers(IProject project) throws CoreException {
+        for (IFolder srcFolder: getSrcFolders(project).keySet()) {
         	srcFolder.deleteMarkers(CLOJURE_COMPILER_PROBLEM_MARKER_TYPE, true, IFile.DEPTH_INFINITE);
         }
     }

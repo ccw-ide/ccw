@@ -14,7 +14,9 @@ package ccw.console;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.IConsole;
@@ -29,6 +31,7 @@ import org.eclipse.ui.part.IPageBookViewPage;
 
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
+import ccw.builder.ClojureBuilder;
 import ccw.debug.ClojureClient;
 import ccw.editors.antlrbased.EvaluateTextAction;
 import ccw.launching.LaunchUtils;
@@ -68,7 +71,7 @@ public class ConsolePageParticipant implements IConsolePageParticipant {
     private void activateContext(String contextId) {
         contextActivation = contextService().activateContext(contextId);
         if (contextActivation == null) {
-            throw new IllegalStateException("fuck");
+            throw new IllegalStateException("");
         }
     }
 
@@ -100,6 +103,21 @@ public class ConsolePageParticipant implements IConsolePageParticipant {
                 }
             }
             NamespaceBrowser.setClojureClient(clojureClient);
+            org.eclipse.debug.ui.console.IConsole processConsole = (org.eclipse.debug.ui.console.IConsole) console;
+            // TODO add safeguards: the launch configuration must enable a REPL, and explicit flag (default value from global params) to allow this behaviour
+            // and explicit flag (true by default) to determine the default value for the explicit flag :-)
+            try {
+	            IProject project = LaunchUtils.getProject(processConsole.getProcess().getLaunch().getLaunchConfiguration());
+	            try {
+		            ClojureBuilder.fullBuild(project, new NullProgressMonitor());
+	            } catch (CoreException e) {
+	            	CCWPlugin.logError("Unable to auto-compile project " + project.getName() 
+	            			+ " after having launched a configuration", e);
+	            }
+            } catch (CoreException e) {
+            	CCWPlugin.logError("Unable to auto-compile a project after having launched a configuration "
+            			+ "because the project cannot be retrieved!", e);
+            }
         }
     }
 
