@@ -8,15 +8,15 @@
 ;* Contributors: 
 ;*    Stephan Muehlstrasser - initial API and implementation
 ;*******************************************************************************/
-(ns ccw.support.labrepl.wizards.LabreplCreationWizard
+(ns ccw.support.examples.labrepl.wizards.LabreplCreationWizard
   (:import
     [org.eclipse.ui.actions WorkspaceModifyDelegatingOperation]
     [org.eclipse.ui.dialogs IOverwriteQuery]
     [org.eclipse.jface.dialogs IDialogConstants]
     [org.eclipse.osgi.util NLS]
     [org.eclipse.jface.dialogs MessageDialog]
-    [ccw.support.labrepl Activator]
-    [ccw.support.labrepl.wizards
+    [ccw.support.examples.labrepl Activator]
+    [ccw.support.examples.labrepl.wizards
                  LabreplCreateProjectPage
                  LabreplCreationOperation])
   (:gen-class

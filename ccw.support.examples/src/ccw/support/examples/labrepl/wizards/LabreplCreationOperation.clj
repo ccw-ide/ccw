@@ -8,9 +8,9 @@
 ;* Contributors: 
 ;*    Stephan Muehlstrasser - initial API and implementation
 ;*******************************************************************************/
-(ns ccw.support.labrepl.wizards.LabreplCreationOperation
+(ns ccw.support.examples.labrepl.wizards.LabreplCreationOperation
   (:import
-     [ccw.support.labrepl.wizards LabreplAntLogger]
+     [ccw.support.examples.labrepl.wizards LabreplAntLogger]
      [java.lang.reflect InvocationTargetException]
      [java.net URL]
      [java.util.zip ZipFile]
@@ -32,7 +32,7 @@
      [org.eclipse.jface.viewers StructuredSelection]
      [ccw ClojureCore]
      [ccw.debug ClojureClient]
-     [ccw.support.labrepl Activator]
+     [ccw.support.examples.labrepl Activator]
      [ccw.launching ClojureLaunchShortcut LaunchUtils]
      [ccw.editors.antlrbased EvaluateTextAction]
      [org.eclipse.ui.wizards.datatransfer ImportOperation
@@ -46,7 +46,7 @@
   
   (:gen-class
    :implements [org.eclipse.jface.operation.IRunnableWithProgress]
-   :constructors {[ccw.support.labrepl.wizards.LabreplCreateProjectPage org.eclipse.ui.dialogs.IOverwriteQuery] []}
+   :constructors {[ccw.support.examples.labrepl.wizards.LabreplCreateProjectPage org.eclipse.ui.dialogs.IOverwriteQuery] []}
    :init init
    :state state))
 

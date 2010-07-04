@@ -9,7 +9,7 @@
  *    Stephan Muehlstrasser - initial API and implementation
  *******************************************************************************/
 
-package ccw.support.labrepl;
+package ccw.support.examples.labrepl;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -20,7 +20,7 @@ import org.osgi.framework.BundleContext;
 public class Activator extends AbstractUIPlugin {
 
 	// The plug-in ID
-	public static final String PLUGIN_ID = "ccw.support.labrepl";
+	public static final String PLUGIN_ID = "ccw.support.examples";
 
 	// The shared instance
 	private static Activator plugin;

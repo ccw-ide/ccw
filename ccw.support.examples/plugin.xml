@@ -6,8 +6,8 @@
 			id="ccw.ui.examples">
 		</category>
 		<wizard category="org.eclipse.ui.Examples/ccw.ui.examples"
-			class="ccw.support.labrepl.wizards.LabreplCreationWizard" hasPages="true"
-			id="ccw.support.labrepl.wizards.LabreplCreationWizard" 
+			class="ccw.support.examples.labrepl.wizards.LabreplCreationWizard" hasPages="true"
+			id="ccw.support.examples.labrepl.wizards.LabreplCreationWizard" 
 			name="%wizard.labrepl.name"
 			project="true">
 			<description>%wizard.labrepl.description</description>

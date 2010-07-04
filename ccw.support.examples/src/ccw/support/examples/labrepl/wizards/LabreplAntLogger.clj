@@ -8,7 +8,7 @@
 ;* Contributors: 
 ;*    Stephan Muehlstrasser - initial API and implementation
 ;*******************************************************************************/
-(ns ccw.support.labrepl.wizards.LabreplAntLogger
+(ns ccw.support.examples.labrepl.wizards.LabreplAntLogger
   (:gen-class
    :extends org.apache.tools.ant.NoBannerLogger
    :constructors {[org.eclipse.core.runtime.IProgressMonitor] []}

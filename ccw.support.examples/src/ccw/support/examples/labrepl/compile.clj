@@ -8,16 +8,16 @@
 ;* Contributors: 
 ;*    Stephan Muehlstrasser - initial API and implementation
 ;*******************************************************************************/
-(ns ccw.support.labrepl.compile)
+(ns ccw.support.examples.labrepl.compile)
 
 (defn all []
   (dorun   
     (map
       compile
       [
-       'ccw.support.labrepl.wizards.LabreplAntLogger
-       'ccw.support.labrepl.wizards.LabreplCreateProjectPage
-       'ccw.support.labrepl.wizards.LabreplCreationOperation
-       'ccw.support.labrepl.wizards.LabreplCreationWizard
+       'ccw.support.examples.labrepl.wizards.LabreplAntLogger
+       'ccw.support.examples.labrepl.wizards.LabreplCreateProjectPage
+       'ccw.support.examples.labrepl.wizards.LabreplCreationOperation
+       'ccw.support.examples.labrepl.wizards.LabreplCreationWizard
        ])))
 

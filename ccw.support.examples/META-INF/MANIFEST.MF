@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Counterclockwise Examples Plug-In
 Bundle-SymbolicName: ccw.support.examples;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: ccw.support.labrepl.Activator
+Bundle-Activator: ccw.support.examples.labrepl.Activator
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,

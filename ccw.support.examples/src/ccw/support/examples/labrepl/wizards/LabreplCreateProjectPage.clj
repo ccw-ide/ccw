@@ -8,7 +8,7 @@
 ;* Contributors: 
 ;*    Stephan Muehlstrasser - initial API and implementation
 ;*******************************************************************************/
-(ns ccw.support.labrepl.wizards.LabreplCreateProjectPage
+(ns ccw.support.examples.labrepl.wizards.LabreplCreateProjectPage
   (:import
     [org.eclipse.swt SWT]
     [org.eclipse.swt.widgets Button Composite]
