@@ -198,6 +198,12 @@
       </command>
       <command
             categoryId="org.eclipse.ui.category.edit"
+            description="%command.indentSelection.description"
+            id="ccw.ui.edit.text.clojure.indent.selection"
+            name="%command.indentSelection.name">
+      </command>
+      <command
+            categoryId="org.eclipse.ui.category.edit"
             description="%command.selectLast.description"
             id="ccw.ui.edit.text.clojure.select.last"
             name="%command.selectLast.name">
@@ -356,6 +362,12 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M2+M1+ARROW_RIGHT"
             platform="carbon">
+      </key>
+      <key
+            commandId="ccw.ui.edit.text.clojure.indent.selection"
+            contextId="ccw.ui.clojureEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+I">
       </key>
       <key
             commandId="ccw.ui.edit.text.clojure.select.last"
@@ -534,6 +546,15 @@
                   name="ccw.menus.separator2"
                   visible="true">
             </separator>
+               <command
+                     commandId="ccw.ui.edit.text.clojure.indent.selection"
+                     label="%command.indentSelection.name"
+                     style="push">
+               </command>
+            <separator
+                  name="ccw.menus.separator3"
+                  visible="true">
+            </separator>
             <command
                   commandId="ccw.ui.edit.text.clojure.load.file"
                   label="Load clojure file in REPL"
@@ -631,6 +652,15 @@
             </command>
             <separator
                   name="ccw.menus.separator2"
+                  visible="true">
+            </separator>
+               <command
+                     commandId="ccw.ui.edit.text.clojure.indent.selection"
+                     label="%command.indentSelection.name"
+                     style="push">
+               </command>
+            <separator
+                  name="ccw.menus.separator3"
                   visible="true">
             </separator>
             <command

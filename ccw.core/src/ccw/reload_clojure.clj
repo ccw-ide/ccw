@@ -29,6 +29,7 @@
                       [ExpandSelectionLeftAction]
                       [ExpandSelectionRightAction]
                       [RaiseSelectionAction]
+                      [IndentSelectionAction]
                       [SplitSexprAction]
                       [JoinSexprAction]
                       [SwitchStructuralEditionModeAction]]))

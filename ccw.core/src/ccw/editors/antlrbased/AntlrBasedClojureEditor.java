@@ -316,6 +316,10 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.EXPAND_SELECTION_RIGHT);
 		setAction(/*ExpandSelectionRightAction.ID*/"ExpandSelectionRightAction", action);
 		
+		action = new IndentSelectionAction(this);
+		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.INDENT_SELECTION);
+		setAction(/*IndentSelectionAction.ID*/"IndentSelectionAction", action);
+
 		action = new RaiseSelectionAction(this);
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.RAISE_SELECTION);
 		setAction(/*RaiseSelectionAction.ID*/"RaiseSelectionAction", action);

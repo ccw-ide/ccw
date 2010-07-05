@@ -56,6 +56,12 @@ public interface IClojureEditorActionDefinitionIds extends ITextEditorActionDefi
     public static final String RAISE_SELECTION = "ccw.ui.edit.text.clojure.select.raise";
     
     /**
+     * Action definition ID of the Clojure -> indent selection
+     * expression action
+     */
+    public static final String INDENT_SELECTION = "ccw.ui.edit.text.clojure.indent.selection";
+    
+    /**
      * Action definition ID of the Clojure -> split sexpr
      * expression action
      */

@@ -55,6 +55,8 @@ public final class ClojureEditorMessages extends NLS {
     public static String StructureSelectHistoryAction_description;
     public static String RaiseSelectionAction_label;
     public static String RaiseSelectionAction_description;
+    public static String IndentSelectionAction_label;
+    public static String IndentSelectionAction_description;
     public static String SplitSexprAction_label;
     public static String SplitSexprAction_description;
     public static String JoinSexprAction_label;
