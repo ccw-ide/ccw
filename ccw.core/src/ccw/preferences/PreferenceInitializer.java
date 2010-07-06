@@ -66,6 +66,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	    store.setDefault(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH, 2);
 	    store.setDefault(ccw.preferences.PreferenceConstants.SWITCH_TO_NS_ON_REPL_STARTUP, true);
 	    store.setDefault(ccw.preferences.PreferenceConstants.USE_STRICT_STRUCTURAL_EDITING_MODE_BY_DEFAULT, false);
+	    store.setDefault(ccw.preferences.PreferenceConstants.USE_TAB_FOR_REINDENTING_LINE, true);
 	    
 	    for (SyntaxColoringDefault d: coloringDefaults) {
 	        store.setDefault(d.getPreferenceConstant(),

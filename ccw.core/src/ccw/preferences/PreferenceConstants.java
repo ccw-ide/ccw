@@ -23,6 +23,8 @@ public class PreferenceConstants {
 
 	public static final String USE_STRICT_STRUCTURAL_EDITING_MODE_BY_DEFAULT = CCW_PREFERENCE_PREFIX + ".use_strict_structural_editing_mode_by_default"; //$NON-NLS-1$
 
+	public static final String USE_TAB_FOR_REINDENTING_LINE = CCW_PREFERENCE_PREFIX + ".use_tab_for_reindenting_line";
+	
 	public static final String EDITOR_COLORING_PREFIX = "editor_color"; //$NON-NLS-1$
 	
 	public static final String EDITOR_FUNCTION_COLOR = CCW_PREFERENCE_PREFIX + "." + EDITOR_COLORING_PREFIX + ".function"; //$NON-NLS-1$ //$NON-NLS-2$

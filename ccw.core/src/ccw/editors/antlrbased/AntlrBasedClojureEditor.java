@@ -29,6 +29,7 @@ import org.eclipse.jface.text.source.ICharacterPairMatcher;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.projection.ProjectionSupport;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Point;
@@ -166,6 +167,10 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		viewer.doOperation(ClojureSourceViewer.TOGGLE);
 	}
 	
+	public boolean getBooleanPreference(String key) {
+		return getPreferenceStore().getBoolean(key);
+	}
+	
 	public void setStructuralEditingPossible(boolean state) {
 		if (state != this.structuralEditingPossible) {
 			this.structuralEditingPossible = state;
@@ -176,15 +181,6 @@ public class AntlrBasedClojureEditor extends TextEditor {
 	public void toggleStructuralEditionMode() {
 		useStrictStructuralEditing = !useStrictStructuralEditing;
 		updateStatusField(STATUS_CATEGORY_STRUCTURAL_EDITION);
-		updateTabsToSpacesConversion();
-	}
-	
-	public void updateTabsToSpacesConversion() {
-		if (useStrictStructuralEditing) {
-			uninstallTabsToSpacesConverter();
-		} else {
-			installTabsToSpacesConverter();
-		}
 	}
 	
 	protected void updateStatusField(String category) {
@@ -727,6 +723,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
 	 * @param required the required type
 	 * @return an adapter for the required type or <code>null</code>
 	 */ 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Object getAdapter(Class required) {
 		if (IContentOutlinePage.class.equals(required)) {
@@ -796,7 +793,30 @@ public class AntlrBasedClojureEditor extends TextEditor {
     }
 
     @Override
+	protected void handlePreferenceStoreChanged(PropertyChangeEvent event) {
+		try {
+			ISourceViewer sourceViewer= getSourceViewer();
+			if (sourceViewer == null)
+				return;
+
+			String property= event.getProperty();
+
+			if (ccw.preferences.PreferenceConstants.USE_TAB_FOR_REINDENTING_LINE.equals(property)) {
+				if (isTabsToSpacesConversionEnabled())
+					installTabsToSpacesConverter();
+				else
+					uninstallTabsToSpacesConverter();
+			}
+		} finally {
+			super.handlePreferenceStoreChanged(event);
+		}
+	}
+    @Override
     protected boolean isTabsToSpacesConversionEnabled() {
-    	return !useStrictStructuralEditing;
+    	if (getPreferenceStore().getBoolean(ccw.preferences.PreferenceConstants.USE_TAB_FOR_REINDENTING_LINE)) {
+    		return false;
+    	} else {
+    		return super.isTabsToSpacesConversionEnabled();
+    	}
     }
 }

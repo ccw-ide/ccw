@@ -26,6 +26,8 @@ public class Messages extends NLS {
     public static String ClojurePreferencePage_switch_to_ns_on_repl_startup;
 
     public static String ClojurePreferencePage_use_strict_structural_editing_mode_by_default;
+    
+    public static String ClojurePreferencePage_use_tab_for_reindenting_line;
 
     public static String SyntaxColoringPreferencePage_function;
 

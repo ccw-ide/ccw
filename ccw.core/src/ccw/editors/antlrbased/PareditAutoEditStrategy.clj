@@ -33,7 +33,12 @@
 
 (def *strict-commands*
   #{:paredit-close-round, :paredit-close-square, :paredit-close-curly, 
-    :paredit-indent-line, :paredit-forward-delete, :paredit-backward-delete})
+    :paredit-forward-delete, :paredit-backward-delete})
+
+(def 
+  #^{:doc "{:command configuration-key ...}"} 
+  *configuration-based-commands*
+  {:paredit-indent-line ccw.preferences.PreferenceConstants/USE_TAB_FOR_REINDENTING_LINE})
 
 (defn par-command? [command] (contains? *commands* (:text command)))
 (defn par-command [command] (-> *commands* (get (:text command)) first))
@@ -59,22 +64,29 @@
 (defn do-command?
   "Will do command if it is :strict and the editor allows it, or if it is not :strict"
   [#^AntlrBasedClojureEditor editor par-command]
-  (if (*strict-commands* par-command)
-    (.useStrictStructuralEditing editor)
-    true))
+  (println (str "do-command? : '" par-command "'"))
+  (cond
+    (*strict-commands* par-command)
+      (.useStrictStructuralEditing editor)
+    (*configuration-based-commands* par-command) ; works because I know no value can be nil in *configuration-based-commands* 
+      (.getBooleanPreference editor (*configuration-based-commands* par-command))
+    :else 
+      true))
 
 (defn -customizeDocumentCommand 
   [#^ccw.editors.antlrbased.PareditAutoEditStrategy this, #^IDocument document, #^DocumentCommand command]
-  (println "Called!")
+  #_(println "Called!")
+  (println "doit?" (.doit command))
   (when (.doit command)
     (let [signed-selection (bean (-> this .state deref #^ccw.editors.antlrbased.AntlrBasedClojureEditor (:editor) .getSignedSelection))
-          _ (println (str "signed-selection:" signed-selection))
+           #__ #_(println (str "signed-selection:" signed-selection))
           document-text {:text (.get document) 
                          :caret-offset (+ (:offset signed-selection) (:length signed-selection)) 
                          :selection-length (:length signed-selection)}
           par-command {:text (.text command) :offset (.offset command) :length (.length command)}
           _ (println (str "par-command:" par-command))
           [par-command par-text] (paredit-args par-command document-text)
+          _ (println "here is the par-command:" par-command)
           result (and 
                    par-command 
                    (do-command? (-> this .state deref :editor) par-command)
@@ -95,6 +107,6 @@
         (set! (.shiftsCaret command) false)
         (set! (.caretOffset command) (:offset result))
         (when-not (zero? (:length result)) 
-          (println (str "result:" result))
+          #_(println (str "result:" result))
           (.selectAndReveal (-> this .state deref :editor) (:offset result) (:length result))))
       (.setStructuralEditingPossible (-> this .state deref :editor) (true? (and result (not= :ko (-> result :parser-state))))))))

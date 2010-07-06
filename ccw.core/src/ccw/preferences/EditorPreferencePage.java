@@ -48,6 +48,9 @@ public class EditorPreferencePage extends FieldEditorPreferencePage implements
 
         addField(
         	new BooleanFieldEditor(ccw.preferences.PreferenceConstants.USE_STRICT_STRUCTURAL_EDITING_MODE_BY_DEFAULT, Messages.ClojurePreferencePage_use_strict_structural_editing_mode_by_default, getFieldEditorParent()));
+
+        addField(
+            	new BooleanFieldEditor(ccw.preferences.PreferenceConstants.USE_TAB_FOR_REINDENTING_LINE, Messages.ClojurePreferencePage_use_tab_for_reindenting_line, getFieldEditorParent()));
 }
 
     /* (non-Javadoc)
