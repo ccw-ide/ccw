@@ -452,6 +452,18 @@
             sequence="M1+M3+L"
             contextId="ccw.ui.clojureEditorScope"
             commandId="ccw.ui.edit.text.clojure.load.file"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            platform="win32"/>
+      <key
+            sequence="M1+M3+L"
+            contextId="ccw.ui.clojureEditorScope"
+            commandId="ccw.ui.edit.text.clojure.load.file"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            platform="carbon"/>
+      <key
+            sequence="M1+M3+S"
+            contextId="ccw.ui.clojureEditorScope"
+            commandId="ccw.ui.edit.text.clojure.load.file"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             sequence="M1+M3+K"
