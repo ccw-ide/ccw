@@ -31,7 +31,10 @@ import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.projection.ProjectionSupport;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
@@ -165,8 +168,33 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		
 		fProjectionSupport.install();
 		viewer.doOperation(ClojureSourceViewer.TOGGLE);
+
+		installEscListenerForStructuralEditingEscape();
+	}
+
+	private boolean inEscapeSequence;
+	public boolean isInEscapeSequence() {
+		return inEscapeSequence;
 	}
 	
+	private void installEscListenerForStructuralEditingEscape() {
+		this.getSourceViewer().getTextWidget().addKeyListener(
+				new KeyListener() {
+					public void keyPressed(KeyEvent e) {
+						if (e.character == SWT.ESC) {
+							inEscapeSequence = true;
+							updateTabsToSpacesConverter();
+						}
+					}
+					public void keyReleased(KeyEvent e) {
+						if (inEscapeSequence && !(e.character == SWT.ESC)) {
+							inEscapeSequence = false;
+							updateTabsToSpacesConverter();
+						}
+					}
+				});
+	}
+
 	public boolean getBooleanPreference(String key) {
 		return getPreferenceStore().getBoolean(key);
 	}
@@ -802,18 +830,25 @@ public class AntlrBasedClojureEditor extends TextEditor {
 			String property= event.getProperty();
 
 			if (ccw.preferences.PreferenceConstants.USE_TAB_FOR_REINDENTING_LINE.equals(property)) {
-				if (isTabsToSpacesConversionEnabled())
-					installTabsToSpacesConverter();
-				else
-					uninstallTabsToSpacesConverter();
+				updateTabsToSpacesConverter();
 			}
 		} finally {
 			super.handlePreferenceStoreChanged(event);
 		}
 	}
+    
+    protected void updateTabsToSpacesConverter() {
+		if (isTabsToSpacesConversionEnabled()) {
+			installTabsToSpacesConverter();
+		} else {
+			uninstallTabsToSpacesConverter();
+		}
+    }
+    
     @Override
     protected boolean isTabsToSpacesConversionEnabled() {
-    	if (getPreferenceStore().getBoolean(ccw.preferences.PreferenceConstants.USE_TAB_FOR_REINDENTING_LINE)) {
+    	if (getPreferenceStore().getBoolean(ccw.preferences.PreferenceConstants.USE_TAB_FOR_REINDENTING_LINE)
+    			&& !isInEscapeSequence()) {
     		return false;
     	} else {
     		return super.isTabsToSpacesConversionEnabled();

@@ -77,7 +77,7 @@
   [#^ccw.editors.antlrbased.PareditAutoEditStrategy this, #^IDocument document, #^DocumentCommand command]
   #_(println "Called!")
   (println "doit?" (.doit command))
-  (when (.doit command)
+  (when (and (.doit command) (not (-> this .state deref #^ccw.editors.antlrbased.AntlrBasedClojureEditor (:editor) .isInEscapeSequence)))
     (let [signed-selection (bean (-> this .state deref #^ccw.editors.antlrbased.AntlrBasedClojureEditor (:editor) .getSignedSelection))
            #__ #_(println (str "signed-selection:" signed-selection))
           document-text {:text (.get document) 
