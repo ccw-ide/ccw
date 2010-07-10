@@ -102,61 +102,6 @@
 (def *spaces* #{(str \space) (str \tab) (str \newline) (str \return) (str \,)})
 (def *atoms* #{ :atom :whitespace})
 
-(defn zip-one [^String text offset line col parents parser-state accumulated-state]
-  (let [level (-> accumulated-state peek)
-        level-content (get level :content [])
-        level-content (if-let [closing-delimiter (-> level :tag *tag-closing-brackets*)]
-                        (if (and (= "\"" closing-delimiter) (> (- offset (get level :offset 0)) 2))
-                          [ "\"" (.substring text (inc (get level :offset 0)) (dec offset)) "\""]
-                          (conj level-content (str closing-delimiter)))
-                        (conj level-content (.substring text (get level :offset 0) offset)))
-        level (-> accumulated-state peek (assoc :end-offset offset :content level-content))
-        parent-level (-> accumulated-state pop peek)
-        brothers (get parent-level :content [])
-        parent-level (assoc parent-level :content (conj brothers level))]
-    (-> accumulated-state pop pop (conj parent-level))))
-
-; todo : later on, move offset+line+col+parents inside a proper deftyped type
-(defn default-accumulator
-  [^String text offset line col parents parser-state accumulated-state]
-    [^String text offset line col parents parser-state accumulated-state]
-    (cond
-      (> (count parents) (count accumulated-state))
-        ; enter a sublevel
-        (if (and (= :eof parser-state) (*atoms* (-> parents peek :tag))) ; todo move in default-make-result ?
-          (zip-one 
-            text offset line col parents parser-state 
-            (-> accumulated-state (conj (peek parents))))
-          (let [new-node (peek parents)
-                new-node (assoc new-node :content (if-let [opening-delimiter (*tag-opening-brackets* (:tag new-node))]
-                                           [opening-delimiter]
-                                           []))]
-            (-> accumulated-state (conj new-node)))) 
-      (or
-        (< (count parents) (count accumulated-state))
-        (and (= :eof parser-state) (*atoms* (-> accumulated-state peek :tag))))
-        ; exit a sublevel
-          ; on stocke l'offset de fin du niveau, on l'enregistre en tant
-          ; que fils du parent, on depope le niveau
-        (zip-one text offset line col parents parser-state accumulated-state)
-      :else
-        accumulated-state))
-        
-(defn make-default-continue?-fn
-  [stop-offset]
-  (fn default-continue?-fn
-    [^String text offset line col parents parser-state accumulated-state]
-    (< offset stop-offset)))
-
-(defn default-make-result
-  [^String text offset line col parents parser-state accumulated-state]
-  { :parents parents 
-    :offset offset 
-    :line line 
-    :col col 
-    :accumulated-state (assoc-in accumulated-state [0 :end-offset] offset)
-    :parser-state parser-state})
-
 (defn empty-node? [node]
   (or 
     (= :whitespace (:tag node))
@@ -168,64 +113,50 @@
   (when (< -1 index (.length s))
     (.charAt s index)))
     
-(defn purge 
-  [tree]
-  (loop [loc (zip/xml-zip tree)]
-    (if (zip/end? loc)
-      (zip/root loc)
-      (recur 
-        (zip/next 
-          (zip/edit 
-            loc 
-            (fn [n] 
-              (if (string? n) 
-                n 
-                (dissoc n :length :col :line :offset :end-offset)))))))))
-
-(defn remove-shit
-  [state]
-  state
-  (update-in state [:accumulated-state 0] purge))
-   
 (def sexp 
-  (parser {:space [#{:whitespace :comment :discard}:*]
-            :main :root}
-    :root :expr*
-    :expr- #{:atom :list :vector :set :map :string :regex
-             :meta :deprecated-meta :quote 
-             :unquote :syntax-quote :unquote-splicing
-             :deref :var :fn :char}
-    :atom1st- #{{\a \z \A \Z \0 \9} (any-of "!$%&*+-./:<=>?_")}
-    :atom (token :atom1st #{:atom1st \#}:* (?! #{:atom1st \#}))
-    :string (token \" #{(none-of \\ \") [\\ any-char]}:* \")
-    :char (token \\ #{any-char "newline" "space" "tab" "backspace" 
-                      "formfeed" "return"
-                      (into [\u] (repeat 4 {\0 \9 \a \f \A \F}))
-                      [\u :hex :hex :hex :hex]
-                      [\o {\0 \7}]
-                      [\o {\0 \7} {\0 \7}]
-                      [\o {\0 \3} {\0 \7} {\0 \7}]}
-            (?! #{:atom1st \#}))
-    :regex (token \# \" #{(none-of \\ \") [\\ any-char]}:* \") 
+  (parser {:document-tag :root
+           :main :expr* 
+           :space (unspaced #{:whitespace :comment :discard} :*)}
+    :expr- #{
+             :list 
+             :vector 
+             :map 
+             :set 
+             :quote
+             :meta
+             :deref
+             :syntax-quote
+             :var 
+             :fn 
+             :deprecated-meta 
+             :unquote-splicing
+             :unquote 
+             :string 
+             :regex
+             :atom 
+             :char
+             }
     :list ["(" :expr* ")"]
     :vector ["[" :expr* "]"]
-    :set ["#{" :expr* "}"]
     :map ["{" :expr* "}"]
-    :discard ["#_" :expr]
+    :set ["#{" :expr* "}"] ;;;; problem !
+    :quote [\' :expr]
     :meta ["^" :expr :expr]
-    :quote [\' :expr] 
-    :syntax-quote [\` :expr]
-    :tilda- [\~ (?! \@)]
-    :unquote [:tilda :expr]
-    :unquote-splicing ["~@" :expr]
-    :deprecated-meta ["#^" :expr :expr]
     :deref [\@ :expr]
+    :syntax-quote [\` :expr]
     :var ["#'" :expr]
     :fn ["#(" :expr* ")"]
-
-    :comment (token #{"#!" ";"} (none-of \return \newline):* (?! (none-of \return \newline)))
-    
-    :whitespace (token #{\space \return \tab \newline \,}:+ (?! #{\space \return \tab \newline \,}))))
+    :deprecated-meta ["#^" :expr :expr]
+    :unquote-splicing ["~@" :expr]
+    :tilda- #"(~)[^@]"
+    :unquote [:tilda :expr]
+    :string ["\"" #"(?:\\\"|[^\"])*" :? "\""]
+    :regex  ["#\"" #"(?:\\\"|[^\"])*" :? "\""]
+    :atom #"[a-z|A-Z|0-9|\!|\$|\%|\&|\*|\+|\-|\.|\/|\:|\<|\=|\>|\?|\_][a-z|A-Z|0-9|\!|\$|\%|\&|\*|\+|\-|\.|\/|\:|\<|\=|\>|\?|\_|\#]*"
+    :char #"\\(?:newline|space|tab|backspace|formfeed|return|u[0-9|a-f|A-F]{4}|o[0-3]?[0-7]{1,2}|.)"
+    :whitespace #"(?:,|\s)+"
+    :comment #"(?:\#\!|;)[^\n]*"
+    :discard ["#_" :expr]))
 
 (defn parse
   ([^String text]
@@ -233,155 +164,6 @@
   ([^String text offset]
     (sexp text)))
 
-(defn parse-old 
-	"TODO: currently the parser assumes a well formed document ... Define a policy if the parser encounters and invalid text
-	 TODO: make the parser restartable at a given offset given a state ...
-	 TODO: make the parser fully incremental (via chunks of any possible size ...)"	
-  ([^String text] (parse text (.length text)))
-  ([^String text stop-offset] (parse text [] default-accumulator (make-default-continue?-fn stop-offset) default-make-result))
-	([^String text initial-accumulated-state accumulator-fn continue?-fn make-result-fn]
-	  (loop [offset  (int 0)
-	         line    (int 0)
-	         col     (int 0)
-	         parents [{:tag :root :offset 0 :line 0 :col 0}]
-	         accumulated-state initial-accumulated-state
-	         parser-state :ok]
-      (if (= :ko parser-state)
-        (remove-shit (make-result-fn text offset line col parents parser-state accumulated-state))   
-        (let [parser-state (if (>= offset (.length text)) :eof :ok) ; TODO soon an additional :parser-error state !
-              accumulated-state (accumulator-fn text offset line col parents parser-state accumulated-state)
-              continue? (continue?-fn text offset line col parents parser-state accumulated-state)] 
-  	      (if (or (not continue?) (= :eof parser-state))
-  	        (remove-shit (make-result-fn text offset line col parents parser-state accumulated-state))
-  	        (let [c (str (.charAt text offset))
-  	              parent-type (-> parents peek :tag)]
-  	          (condp = parent-type
-  	            :string 
-                  (cond
-                    (= (str \newline) c)
-                      (recur (inc offset) (inc line) (int 0) parents accumulated-state :ok)
-                    (= "\\" c)
-                      (recur (inc offset) line (inc col) (conj parents {:tag "\"\\" :line line :col col :offset offset}) accumulated-state :ok)
-                    (= "\"" c)
-                      (recur (inc offset) line (inc col) (pop parents) accumulated-state :ok)
-                    :else
-                      (recur (inc offset) line (inc col) parents accumulated-state :ok))
-                "\"\\"
-                  (cond
-                    (= (str \newline) c)
-                      (recur (inc offset) (inc line) (int 0) (pop parents) accumulated-state :ok)
-                    :else
-                      (recur (inc offset) line (inc col) (pop parents) accumulated-state :ok))
-                :comment 	          
-                  (cond
-                    (= (str \newline) c)
-                      (recur (inc offset) (inc line) (int 0) (pop parents) accumulated-state :ok)
-                    :else
-                      (recur (inc offset) line (inc col) parents accumulated-state :ok))
-                :whitespace
-                  (cond 
-                    (= (str \newline) c)
-                      (recur (inc offset) (inc line) (int 0) parents accumulated-state :ok)
-                    (= (str \return) c)
-                      (recur (inc offset) line col parents accumulated-state :ok)
-                    (*spaces* c) ; we know it's not a space related to line jump
-                      (recur (inc offset) line (inc col) parents accumulated-state :ok)
-                    :else ; we know we're going out of spaces
-                      (recur offset line col (pop parents) accumulated-state :ok))
-                :char 
-                  (cond
-                    ; TODO refactor the following stuff. or keep for performance ? (bleh)
-                    (start-like (.substring text (-> parents peek :offset)) "\\newline")
-                      (if (< (inc (- offset (-> parents peek :offset))) (.length "\\newline"))
-                        (recur (inc offset) line (inc col) parents accumulated-state :ok)
-                        (recur (inc offset) line (inc col) (pop parents) accumulated-state :ok))
-                    (start-like (.substring text (-> parents peek :offset)) "\\tab")
-                      (if (< (inc (- offset (-> parents peek :offset))) (.length "\\tab"))
-                        (recur (inc offset) line (inc col) parents accumulated-state :ok)
-                        (recur (inc offset) line (inc col) (pop parents) accumulated-state :ok))
-                    (start-like (.substring text (-> parents peek :offset)) "\\space")
-                      (if (< (inc (- offset (-> parents peek :offset))) (.length "\\space"))
-                        (recur (inc offset) line (inc col) parents accumulated-state :ok)
-                        (recur (inc offset) line (inc col) (pop parents) accumulated-state :ok))
-                    (start-like (.substring text (-> parents peek :offset)) "\\backspace")
-                      (if (< (inc (- offset (-> parents peek :offset))) (.length "\\backspace"))
-                        (recur (inc offset) line (inc col) parents accumulated-state :ok)
-                        (recur (inc offset) line (inc col) (pop parents) accumulated-state :ok))
-                    (start-like (.substring text (-> parents peek :offset)) "\\formfeed")
-                      (if (< (inc (- offset (-> parents peek :offset))) (.length "\\formfeed"))
-                        (recur (inc offset) line (inc col) parents accumulated-state :ok)
-                        (recur (inc offset) line (inc col) (pop parents) accumulated-state :ok))
-                    (start-like (.substring text (-> parents peek :offset)) "\\return")
-                      (if (< (inc (- offset (-> parents peek :offset))) (.length "\\return"))
-                        (recur (inc offset) line (inc col) parents accumulated-state :ok)
-                        (recur (inc offset) line (inc col) (pop parents) accumulated-state :ok))
-                    ; TODO I don't like the fact the next two conditions on \r and \newline are repeated from the default case
-                    ;      clearly a level of indirection is missing regarding the update of line, offset and col
-                    (= "\r" c)
-                      (recur (inc offset) line col parents accumulated-state :ok) ; we do not increment the column    
-                    (= (str \newline) c)
-                      (recur (inc offset) (inc line) (int 0) parents accumulated-state :ok)
-                    :else
-                      (recur (inc offset) line (inc col) (pop parents) accumulated-state :ok))
-                ; last falling case: we are in plain code, neither in a string, regexp or a comment or a space
-                (cond
-                  (*opening-brackets* c)
-                    (if (= :atom parent-type)
-                      (recur offset line col (pop parents) accumulated-state :ok)
-                      (recur 
-                        (inc offset) line (inc col)
-                        (conj parents {:tag (*opening-bracket-tags* c) :offset offset :line line :col col})
-                        accumulated-state
-                        :ok))
-                  (*closing-brackets* c)
-                    (if (= :atom parent-type)
-                      (recur offset line col (pop parents) accumulated-state :ok)
-                      (if (= c (*tag-closing-brackets* parent-type))
-                        (recur 
-                          (inc offset) line (inc col)
-                          (pop  parents)
-                          accumulated-state
-                          :ok)
-                         ; problem: the closing paren does not match
-                        (recur offset line col parents accumulated-state :ko)))
-                  (= "\"" c)
-                    (if (= :atom parent-type)
-                      (recur offset line col (pop parents) accumulated-state :ok)
-                      (recur 
-                        (inc offset) line (inc col) 
-                        (conj parents {:tag :comment :offset offset :line line :col col }) 
-                        accumulated-state :ok))
-                  (= (str \;) c)
-                    (if (= :atom parent-type)
-                      (recur offset line col (pop parents) accumulated-state :ok)
-                      (recur 
-                        (inc offset) line (inc col) 
-                        (conj parents {:tag :comment :offset offset :line line :col col}) 
-                        accumulated-state
-                        :ok))
-                  (= (str \\) c)
-                    (if (= :atom parent-type)
-                      (recur offset line col (pop parents) accumulated-state :ok)
-                      (recur (inc offset) line (inc col) 
-                        (conj parents {:tag :char :offset offset :line line :col col}) 
-                        accumulated-state
-                        :ok))
-                  (*spaces* c)
-                    (if (= :atom parent-type)
-                      (recur offset line col (pop parents) accumulated-state :ok)
-                      (recur 
-                        offset line col 
-                        (conj parents {:tag :whitespace :offset offset :line line :col col})
-                        accumulated-state
-                        :ok))
-                  :else
-                    (recur (inc offset) line (inc col) 
-                      (if (= :atom parent-type) 
-                        parents 
-                        (conj parents {:tag :atom :offset offset :line line :col col}))
-                      accumulated-state
-                      :ok))))))))))
-
 (defn parse-tree
   [state]
-  (-> state :accumulated-state))
+  state)

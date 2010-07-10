@@ -114,8 +114,7 @@
   ([parsed] (parsed-root-loc parsed false))
   ([parsed only-valid?]
     ;(let [valid? (= 1 (-> parsed :accumulated-state count))]
-    (let [chlds (-> parsed first second)]
-      (zip/xml-zip {:tag :root :content chlds}))))
+    (zip/xml-zip parsed)))
 
 (defn contains-offset?
   "returns the loc itself if it contains the offset, else nil"

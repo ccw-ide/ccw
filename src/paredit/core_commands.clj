@@ -446,7 +446,7 @@
      ["Shift+Alt+Up" :paredit-expand-up
                 {
                  "abc defgh|i " "abc |defghi| "
-                 "|abc| defghi " "|abc |defghi "
+                 "|abc| defghi " "|abc defghi |"
                  "foo bar| baz" "|foo bar baz|"
                  "foo bar |baz" "|foo bar baz|"
                  "foo ba|r baz" "foo |bar| baz"
