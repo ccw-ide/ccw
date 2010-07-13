@@ -117,7 +117,7 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
                 
                 if (sourceFilesViewer.getInput() != null) {
                     dialog.setInitialSelections(
-                            ((List)sourceFilesViewer.getInput()).toArray());
+                            ((List<?>)sourceFilesViewer.getInput()).toArray());
                 }
                 dialog.setTitle("Evaluate Clojure source file(s)");
                 dialog.open();
@@ -177,7 +177,7 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
         
         try {
         	if (config.getAttribute(ATTR_MAIN_TYPE_NAME, (String) null) == null) {
-        		config.setAttribute(ATTR_MAIN_TYPE_NAME, LaunchUtils.MAIN_CLASSNAME_FOR_REPL);
+        		config.setAttribute(ATTR_MAIN_TYPE_NAME, LaunchUtils.CLOJURE_MAIN); // Overriden at launch time, set here just to make JavaMainTab happy
         	}
         	config.setAttribute(LaunchUtils.ATTR_CLOJURE_INSTALL_REPL, true);
         	config.setAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN, LaunchUtils.DEFAULT_SERVER_PORT);
@@ -225,10 +225,7 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
 
         LaunchUtils.setFilesToLaunchString(config, (List<IFile>) sourceFilesViewer.getInput());
 
-    	config.setAttribute(ATTR_MAIN_TYPE_NAME, 
-    			installREPLChoice.getSelection() 
-    				? LaunchUtils.MAIN_CLASSNAME_FOR_REPL
-    				: LaunchUtils.MAIN_CLASSNAME);
+    	config.setAttribute(ATTR_MAIN_TYPE_NAME, LaunchUtils.CLOJURE_MAIN); // Overriden at launch time, set here just to make JavaMainTab happy
 
         config.setAttribute(LaunchUtils.ATTR_CLOJURE_INSTALL_REPL, installREPLChoice.getSelection());
         config.setAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN, Integer.valueOf(serverPort.getText()));

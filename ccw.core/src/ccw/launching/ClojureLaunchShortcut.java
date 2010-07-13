@@ -140,7 +140,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
             
             wc.setAttribute(ATTR_PROGRAM_ARGUMENTS, "");
             
-            wc.setAttribute(ATTR_MAIN_TYPE_NAME, LaunchUtils.MAIN_CLASSNAME_FOR_REPL);
+            wc.setAttribute(ATTR_MAIN_TYPE_NAME, LaunchUtils.CLOJURE_MAIN);
             
             wc.setAttribute(ATTR_PROJECT_NAME, project.getName());
             

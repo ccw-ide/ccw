@@ -43,8 +43,8 @@ public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
     
     static public final String LAUNCH_ID = "ccw.launching.clojure";
     
-    static public final String MAIN_CLASSNAME = "clojure.main";
-    static public final String MAIN_CLASSNAME_FOR_REPL = "clojure.contrib.repl_ln";
+    static public final String CLOJURE_MAIN = "clojure.main";
+    static public final String CLOJURE_CONTRIB_REPL_LN = "clojure.contrib.repl_ln";
     
     static public final int DEFAULT_SERVER_PORT = -1;
     
