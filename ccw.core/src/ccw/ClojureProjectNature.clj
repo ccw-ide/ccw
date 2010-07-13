@@ -85,11 +85,11 @@
   (let [p (if (instance? Path searched-path) searched-path (Path. searched-path))]
     (not (nil? (.findElement java-project p)))))
     
-(defn- has-clojure-contrib-on-classpath?
+(defn has-clojure-contrib-on-classpath?
   [java-project]
   (has-path-on-classpath? java-project "clojure/contrib"))
 
-(defn- has-clojure-on-classpath?
+(defn has-clojure-on-classpath?
   [java-project]
   (has-path-on-classpath? java-project "clojure/lang"))  
 

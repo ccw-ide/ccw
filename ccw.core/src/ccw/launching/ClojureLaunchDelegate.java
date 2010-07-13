@@ -24,11 +24,13 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
 
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.ClojureProject;
+import ccw.debug.ClojureClient;
 
 
 public class ClojureLaunchDelegate extends JavaLaunchDelegate {
@@ -91,6 +93,21 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 			String filesToLaunchArguments = LaunchUtils.getFilesToLaunchAsCommandLineList(configuration, true);
 			
 	    	return filesToLaunchArguments + " " + userProgramArguments;
+		}
+	}
+	
+	@Override
+	public String getMainTypeName(ILaunchConfiguration configuration)
+			throws CoreException {
+		IJavaProject jProj = ClojureCore.getJavaProject(LaunchUtils.getProject(configuration));
+		try {
+			if ((Boolean) ClojureClient.invoke("ccw.ClojureProjectNature", "has-clojure-contrib-on-classpath?", jProj)) {
+				return LaunchUtils.MAIN_CLASSNAME_FOR_REPL;
+			} else {
+				return LaunchUtils.MAIN_CLASSNAME;
+			}
+		} catch (Exception e) {
+			return LaunchUtils.MAIN_CLASSNAME;
 		}
 	}
 	

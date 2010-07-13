@@ -86,6 +86,34 @@ public class ClojureClient {
 		}
 	}
 	
+	/**
+	 * Invoke <code>${ns}/${name}</code> clojure callable, requiring the namespace
+	 * first.
+	 */
+	public static Object invoke(String ns, String name, Object... args) throws Exception {
+		loadString("(clojure.core/require '" + ns + ")");
+		
+		Var var = RT.var(ns, name);
+		switch (args.length) {
+		case 0:
+			return var.invoke();
+		case 1:
+			return var.invoke(args[0]);
+		case 2:
+			return var.invoke(args[0], args[1]);
+		case 3:
+			return var.invoke(args[0], args[1], args[2]);
+		case 4:
+			return var.invoke(args[0], args[1], args[2], args[3]);
+		case 5:
+			return var.invoke(args[0], args[1], args[2], args[3], args[4]);
+		case 6:
+			return var.invoke(args[0], args[1], args[2], args[3], args[4], args[5]);
+	    default:
+	    	throw new RuntimeException("ClojureClient.invoke() does not yet handle that much arguments");
+		}
+	}
+	
     public static ClojureClient newClientForActiveRepl() {
         IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
         if (window != null) {
