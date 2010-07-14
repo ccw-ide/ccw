@@ -113,33 +113,36 @@
   (when (< -1 index (.length s))
     (.charAt s index)))
     
-(def sexp 
-  (parser {:document-tag :root
-           :main :expr* 
+(def sexp
+  (parser {:root-tag :root
+           :main :expr*
            :space (unspaced #{:whitespace :comment :discard} :*)}
     :expr- #{
-             :list 
-             :vector 
-             :map 
-             :set 
+             :list
+             :vector
+             :map
+;             :odd-map
+             :set
              :quote
              :meta
              :deref
              :syntax-quote
-             :var 
-             :fn 
-             :deprecated-meta 
+             :var
+             :fn
+             :deprecated-meta
              :unquote-splicing
-             :unquote 
-             :string 
+             :unquote
+             :string
              :regex
-             :atom 
+             :atom
              :char
              }
     :list ["(" :expr* ")"]
     :vector ["[" :expr* "]"]
     :map ["{" :expr* "}"]
-    :set ["#{" :expr* "}"] ;;;; problem !
+;    :map ["{" [:expr :expr]:* "}"]
+ ;   :odd-map ["{" [:expr :expr]:* :expr "}"]
+    :set ["#{" :expr* "}"]
     :quote [\' :expr]
     :meta ["^" :expr :expr]
     :deref [\@ :expr]
@@ -148,10 +151,10 @@
     :fn ["#(" :expr* ")"]
     :deprecated-meta ["#^" :expr :expr]
     :unquote-splicing ["~@" :expr]
-    :tilda- #"(~)[^@]"
-    :unquote [:tilda :expr]
-    :string ["\"" #"(?:\\\"|[^\"])*" :? "\""]
-    :regex  ["#\"" #"(?:\\\"|[^\"])*" :? "\""]
+;    :unquote ["~" :expr]
+    :unquote [#"(~)[^@]" :expr]
+    :string (unspaced \"  #"(?:\\.|[^\\\"])+" :? \")
+    :regex  (unspaced "#\""  #"(?:\\.|[^\\\"])+" :? \")
     :atom #"[a-z|A-Z|0-9|\!|\$|\%|\&|\*|\+|\-|\.|\/|\:|\<|\=|\>|\?|\_][a-z|A-Z|0-9|\!|\$|\%|\&|\*|\+|\-|\.|\/|\:|\<|\=|\>|\?|\_|\#]*"
     :char #"\\(?:newline|space|tab|backspace|formfeed|return|u[0-9|a-f|A-F]{4}|o[0-3]?[0-7]{1,2}|.)"
     :whitespace #"(?:,|\s)+"
