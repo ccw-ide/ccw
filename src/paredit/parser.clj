@@ -153,8 +153,8 @@
     :deprecated-meta ["#^" :expr :expr]
     :unquote-splicing ["~@" :expr]
     :unquote [#"~(?!@)" :expr]
-    :string (unspaced \"  #"(?:\\.|[^\\\"])+" :? \")
-    :regex  (unspaced "#\""  #"(?:\\.|[^\\\"])+" :? \")
+    :string (unspaced \"  #"(?:\\.|[^\\\"])++" :? \")
+    :regex  (unspaced "#\""  #"(?:\\.|[^\\\"])++" :? \")
     :symbol- 
       ;#"(?:\.|\/|\&|(?:(?:[a-z|A-Z|\*|\!|\-(?![0-9])|\_|\?|\>|\<|\=|\$]|\+(?![0-9]))(?:(?:(?:[a-z|A-Z|\*|\!|\-(?![0-9])|\_|\?|\>|\<|\=|\$]|\+(?![0-9]))|[0-9]|\.|\#(?!\()))*(?:\:(?:(?:(?:[a-z|A-Z|\*|\!|\-(?![0-9])|\_|\?|\>|\<|\=|\$]|\+(?![0-9]))|[0-9]|\.|\#(?!\()))+)*)(?:\/(?:(?:[a-z|A-Z|\*|\!|\-(?![0-9])|\_|\?|\>|\<|\=|\$]|\+(?![0-9]))(?:(?:(?:[a-z|A-Z|\*|\!|\-(?![0-9])|\_|\?|\>|\<|\=|\$]|\+(?![0-9]))|[0-9]|\.|\#(?!\()))*(?:\:(?:(?:(?:[a-z|A-Z|\*|\!|\-(?![0-9])|\_|\?|\>|\<|\=|\$]|\+(?![0-9]))|[0-9]|\.|\#(?!\()))+)*))?)"
       (let [symbol-head 
@@ -165,28 +165,24 @@
               ; "." : multiple successive points is allowed by the reader (but will break at evaluation)
               ; "#" : normally # is allowed only in syntax quote forms, in last position
             symbol-name
-              (interpol-regex #"(?:`symbol-head``symbol-rest`*(?:\:`symbol-rest`+)*)")
+              (interpol-regex #"(?:`symbol-head``symbol-rest`*(?:\:`symbol-rest`++)*+)")
               ]
         (interpol-regex #"(?:\.|\/|\&|`symbol-name`(?:\/`symbol-name`)?)"))
         ;:symbol- #"[:]?([\D&&[^/]].*/)?([\D&&[^/]][^/]*)"  
     ; from old definition of symbol :symbol- #"[\%|\&||\.|\/|.*"
     :int- #"[-+]?(?:0(?!\.)|[1-9][0-9]*+(?!\.)|0[xX][0-9A-Fa-f]++(?!\.)|0[0-7]++(?!\.)|[1-9][0-9]?[rR][0-9A-Za-z]++(?!\.)|0[0-9]++(?!\.))"
-    :ratio- #"[-+]?[0-9]+/[0-9]+"
-    :float- #"[-+]?[0-9]+\.[0-9]*(?:[eE][-+]?[0-9]+)?M?"
-    :anon-arg- #"%(?:[0-9|\&])?" ; (?![_|\(])
+    :ratio- #"[-+]?[0-9]++/[0-9]++"
+    :float- #"[-+]?[0-9]++\.[0-9]*+(?:[eE][-+]?+[0-9]++)?+M?+"
+    :anon-arg- #"%(?:[0-9|\&])?+" ; (?![_|\(])
     :keyword- (unspaced #":{1,2}" :symbol)
     :atom #{:symbol :keyword :int :float :ratio :anon-arg}
             ;:atom #"[a-z|A-Z|0-9|\!|\$|\%|\&|\*|\+|\-|\.|\/|\:|\<|\=|\>|\?|\_][a-z|A-Z|0-9|\!|\$|\%|\&|\*|\+|\-|\.|\/|\:|\<|\=|\>|\?|\_|\#]*"
             ;:atom #"[a-z|A-Z|0-9|\!|\$|\%|\&|\*|\+|\-|\.|\/|\:|\<|\=|\>|\?|\_].*"
     ;;;; CAS DU +toto+ -toto-
-    :char #"\\(?:newline|space|tab|backspace|formfeed|return|u[0-9|a-f|A-F]{4}|o[0-3]?[0-7]{1,2}|.)"
-    :whitespace #"(?:,|\s)+"
-    :comment #"(?:\#\!|;)[^\n]*"
+    :char #"\\(?:newline|space|tab|backspace|formfeed|return|u[0-9|a-f|A-F]{4}|o[0-3]?+[0-7]{1,2}|.)"
+    :whitespace #"(?:,|\s)++"
+    :comment #"(?:\#\!|;)[^\n]*+"
     :discard ["#_" :expr]))
-
-((parser {:main :symbol}
-    :symbol ["a" #{"/"} :+]
-    ) "a/")
 
 (defn parse
   ([^String text]
