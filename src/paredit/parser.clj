@@ -28,6 +28,7 @@
 (ns paredit.parser
   (:use clojure.test)
   (:use clojure.contrib.core)
+  (:use paredit.regex-utils)
 	(:require [clojure.zip :as zip])
   (:require [clojure.contrib.zip-filter :as zf])
   (:require [net.cgrand.parsley.glr :as core] :reload)
@@ -151,25 +152,41 @@
     :fn ["#(" :expr* ")"]
     :deprecated-meta ["#^" :expr :expr]
     :unquote-splicing ["~@" :expr]
-;    :unquote ["~" :expr]
     :unquote [#"~(?!@)" :expr]
     :string (unspaced \"  #"(?:\\.|[^\\\"])+" :? \")
     :regex  (unspaced "#\""  #"(?:\\.|[^\\\"])+" :? \")
-    :atom #"[a-z|A-Z|0-9|\!|\$|\%|\&|\*|\+|\-|\.|\/|\:|\<|\=|\>|\?|\_][a-z|A-Z|0-9|\!|\$|\%|\&|\*|\+|\-|\.|\/|\:|\<|\=|\>|\?|\_|\#]*"
- ;   :atom #"[a-z|A-Z|0-9|\!|\$|\%|\&|\*|\+|\-|\.|\/|\:|\<|\=|\>|\?|\_].*"
-    ;:symbol- #"[:]?([\D&&[^/]].*/)?([\D&&[^/]][^/]*)"  
-    :symbol- #"[a-z|A-Z|\!|\$|\%|\&|\*|\+|\-|\.|\/|\:|\<|\=|\>|\?|\_].*"
-    :int- #"([-+]?)(?:(0)|([1-9][0-9]*)|0[xX]([0-9A-Fa-f]+)|0([0-7]+)|([1-9][0-9]?)[rR]([0-9A-Za-z]+)|0[0-9]+)"
-    :ratio- #"([-+]?[0-9]+)/([0-9]+)"
-    :float- #"([-+]?[0-9]+(\.[0-9]*)?([eE][-+]?[0-9]+)?)(M)?"
-    :divide- "/"
-    :anon-arg- #"#([0-9|&])?"
+    :symbol- 
+      ;#"(?:\.|\/|\&|(?:(?:[a-z|A-Z|\*|\!|\-(?![0-9])|\_|\?|\>|\<|\=|\$]|\+(?![0-9]))(?:(?:(?:[a-z|A-Z|\*|\!|\-(?![0-9])|\_|\?|\>|\<|\=|\$]|\+(?![0-9]))|[0-9]|\.|\#(?!\()))*(?:\:(?:(?:(?:[a-z|A-Z|\*|\!|\-(?![0-9])|\_|\?|\>|\<|\=|\$]|\+(?![0-9]))|[0-9]|\.|\#(?!\()))+)*)(?:\/(?:(?:[a-z|A-Z|\*|\!|\-(?![0-9])|\_|\?|\>|\<|\=|\$]|\+(?![0-9]))(?:(?:(?:[a-z|A-Z|\*|\!|\-(?![0-9])|\_|\?|\>|\<|\=|\$]|\+(?![0-9]))|[0-9]|\.|\#(?!\()))*(?:\:(?:(?:(?:[a-z|A-Z|\*|\!|\-(?![0-9])|\_|\?|\>|\<|\=|\$]|\+(?![0-9]))|[0-9]|\.|\#(?!\()))+)*))?)"
+      (let [symbol-head 
+              #"(?:[a-z|A-Z|\*|\!]|\-(?![0-9])|[\_|\?|\>|\<|\=|\$]|\+(?![0-9]))"
+              ; other characters will be allowed eventually, but not all macro characters have been determined
+            symbol-rest 
+              (interpol-regex #"(?:`symbol-head`|[0-9]|\.|\#(?!\())")
+              ; "." : multiple successive points is allowed by the reader (but will break at evaluation)
+              ; "#" : normally # is allowed only in syntax quote forms, in last position
+            symbol-name
+              (interpol-regex #"(?:`symbol-head``symbol-rest`*(?:\:`symbol-rest`+)*)")
+              ]
+        (interpol-regex #"(?:\.|\/|\&|`symbol-name`(?:\/`symbol-name`)?)"))
+        ;:symbol- #"[:]?([\D&&[^/]].*/)?([\D&&[^/]][^/]*)"  
+    ; from old definition of symbol :symbol- #"[\%|\&||\.|\/|.*"
+    :int- #"[-+]?(?:0(?!\.)|[1-9][0-9]*+(?!\.)|0[xX][0-9A-Fa-f]++(?!\.)|0[0-7]++(?!\.)|[1-9][0-9]?[rR][0-9A-Za-z]++(?!\.)|0[0-9]++(?!\.))"
+    :ratio- #"[-+]?[0-9]+/[0-9]+"
+    :float- #"[-+]?[0-9]+\.[0-9]*(?:[eE][-+]?[0-9]+)?M?"
+    :anon-arg- #"%(?:[0-9|\&])?" ; (?![_|\(])
+    :keyword- (unspaced #":{1,2}" :symbol)
+    :atom #{:symbol :keyword :int :float :ratio :anon-arg}
+            ;:atom #"[a-z|A-Z|0-9|\!|\$|\%|\&|\*|\+|\-|\.|\/|\:|\<|\=|\>|\?|\_][a-z|A-Z|0-9|\!|\$|\%|\&|\*|\+|\-|\.|\/|\:|\<|\=|\>|\?|\_|\#]*"
+            ;:atom #"[a-z|A-Z|0-9|\!|\$|\%|\&|\*|\+|\-|\.|\/|\:|\<|\=|\>|\?|\_].*"
     ;;;; CAS DU +toto+ -toto-
-;    :atom #{ :int :ratio :float :divide :anon-arg :symbol}
     :char #"\\(?:newline|space|tab|backspace|formfeed|return|u[0-9|a-f|A-F]{4}|o[0-3]?[0-7]{1,2}|.)"
     :whitespace #"(?:,|\s)+"
     :comment #"(?:\#\!|;)[^\n]*"
     :discard ["#_" :expr]))
+
+((parser {:main :symbol}
+    :symbol ["a" #{"/"} :+]
+    ) "a/")
 
 (defn parse
   ([^String text]
