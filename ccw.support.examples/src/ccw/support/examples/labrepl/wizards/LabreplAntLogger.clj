@@ -12,7 +12,7 @@
   (:gen-class
    :extends org.apache.tools.ant.NoBannerLogger
    :constructors {[org.eclipse.core.runtime.IProgressMonitor] []}
-   :exposes-methods {messageLogged super-messageLogged}
+   :exposes-methods {messageLogged super_messageLogged}
    :init init
    :state monitor))
 
@@ -26,4 +26,4 @@
     (.subTask (.monitor this) message)
     ;(println "LabreplAntLogger: monitor " (.monitor this) " message " message)
     (.worked (.monitor this) 1))
-  (.super-messageLogged this build-event))
+  (.super_messageLogged this build-event))

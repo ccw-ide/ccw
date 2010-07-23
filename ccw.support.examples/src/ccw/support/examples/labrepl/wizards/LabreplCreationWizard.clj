@@ -8,7 +8,10 @@
 ;* Contributors: 
 ;*    Stephan Muehlstrasser - initial API and implementation
 ;*******************************************************************************/
+
 (ns ccw.support.examples.labrepl.wizards.LabreplCreationWizard
+  (:require ccw.support.examples.labrepl.wizards.LabreplCreateProjectPage)
+  (:require ccw.support.examples.labrepl.wizards.LabreplCreationOperation)
   (:import
     [org.eclipse.ui.actions WorkspaceModifyDelegatingOperation]
     [org.eclipse.ui.dialogs IOverwriteQuery]
@@ -22,7 +25,7 @@
   (:gen-class
    :implements [org.eclipse.ui.INewWizard]
    :extends org.eclipse.jface.wizard.Wizard
-   :exposes-methods {addPages super-addPages}
+   :exposes-methods {addPages super_addPages}
    :init myinit
    :post-init mypostinit
    :state state))
@@ -39,7 +42,7 @@
 
 (defn -addPages
   [this]
-	(.super-addPages this)
+	(.super_addPages this)
   (let
     [main-page (LabreplCreateProjectPage. "New Labrepl Project")]
     (dosync (alter (.state this) assoc :main-page main-page))

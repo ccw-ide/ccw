@@ -16,7 +16,7 @@
     [org.eclipse.swt.events SelectionAdapter] )
   (:gen-class
    :extends org.eclipse.ui.dialogs.WizardNewProjectCreationPage
-   :exposes-methods {createControl super-createControl}
+   :exposes-methods {createControl super_createControl}
    :init init
    :state state))
 
@@ -26,7 +26,7 @@
 
 (defn -createControl
   [this parent]
-  (.super-createControl this parent)
+  (.super_createControl this parent)
   (let
     [composite (Composite. (.getControl this) SWT/NONE)
      layout (GridLayout.)]

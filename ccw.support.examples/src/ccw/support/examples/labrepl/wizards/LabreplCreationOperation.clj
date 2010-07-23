@@ -9,6 +9,8 @@
 ;*    Stephan Muehlstrasser - initial API and implementation
 ;*******************************************************************************/
 (ns ccw.support.examples.labrepl.wizards.LabreplCreationOperation
+  (:require ccw.support.examples.labrepl.wizards.LabreplAntLogger)
+  (:require ccw.support.examples.labrepl.wizards.LabreplCreateProjectPage)
   (:import
      [ccw.support.examples.labrepl.wizards LabreplAntLogger]
      [java.lang.reflect InvocationTargetException]
