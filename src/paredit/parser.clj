@@ -94,11 +94,11 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; the parser code
-(def *brackets* {"(" ")", "{" "}", "[" "]", "\"" "\"", "#{" "}"})
-(def *tag-closing-brackets* {:list ")", :map "}", :vector "]", :string "\"", :set "}"})
-(def *tag-opening-brackets* {:list "(", :map "{", :vector "[", :string "\"", :set "#{"})
-(def *brackets-tags* #{:list :map :vector :string :set})
-(def ^{:private true} *opening-bracket-tags* {"(" :list, "{" :map, "[" :vector, "\"" :string, "#{" :set})
+(def *brackets* {"(" ")", "{" "}", "[" "]", "\"" "\"", "#{" "}", "#(" ")"})
+(def *tag-closing-brackets* {:list ")", :map "}", :vector "]", :string "\"", :set "}", :fn ")"})
+(def *tag-opening-brackets* {:list "(", :map "{", :vector "[", :string "\"", :set "#{", :fn "#("})
+(def *brackets-tags* #{:list :map :vector :string :set :fn})
+(def ^{:private true} *opening-bracket-tags* {"(" :list, "{" :map, "[" :vector, "\"" :string, "#{" :set, "#(" :fn})
 (def *opening-brackets* (set (keys *brackets*)))
 (def *closing-brackets* (set (vals *brackets*)))
 (def *spaces* #{(str \space) (str \tab) (str \newline) (str \return) (str \,)})
