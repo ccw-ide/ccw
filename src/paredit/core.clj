@@ -221,18 +221,19 @@
   (with-important-memoized (if parsed
     (let [offset-loc (-> parsed parsed-root-loc (loc-for-offset offset))
           handled-forms (conj *brackets-tags* :string)
-          in-handled-form (handled-forms (loc-tag offset-loc))]
+          in-handled-form (handled-forms (loc-tag offset-loc))
+          open-punct-length (.length (first (:content (z/node offset-loc))))]
       (cond 
         (and in-handled-form (= offset (start-offset offset-loc)))
-        (t/shift-offset t 1)
+          (t/shift-offset t open-punct-length)
         (and in-handled-form (= offset (dec (end-offset offset-loc))))
-        (if (> (-> offset-loc z/node :content count) 2)
-          t     ; don't move
-          (-> t ; delete the form 
-            (t/delete (start-offset offset-loc) (loc-count offset-loc))
-            (t/shift-offset -1)))
+          (if (> (-> offset-loc z/node :content count) 2)
+            t     ; don't move
+            (-> t ; delete the form 
+              (t/delete (start-offset offset-loc) (loc-count offset-loc))
+              (t/shift-offset (- open-punct-length))))
         :else
-        (t/delete t offset 1)))
+          (t/delete t offset 1)))
     (t/delete t offset 1))))
 
 (defmethod paredit 

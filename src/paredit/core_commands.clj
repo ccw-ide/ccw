@@ -331,17 +331,18 @@
                  "(foo (|) bar)" "(foo | bar)"
                  "(foo [|] bar)" "(foo | bar)"
                  "(foo {|} bar)" "(foo | bar)"
-                 #_"(foo #{|} bar)" #_"(foo | bar)"
+                 "(foo #{|} bar)" "(foo | bar)"
                  "(foo \"|\" bar)" "(foo | bar)"
                  "(foo (a|) bar)" "(foo (a|) bar)"
                  "(foo [a|] bar)" "(foo [a|] bar)"
                  "(foo {a|} bar)" "(foo {a|} bar)"
-                 #_"(foo #{a|} bar)" #_"(foo #{a|} bar)"
+                 "(foo #{a|} bar)" "(foo #{a|} bar)"
+                 "(foo #{a |d} bar)" "(foo #{a |} bar)"
                  "(foo \"a|\" bar)" "(foo \"a|\" bar)" 
                  "(|(foo bar))" "((|foo bar))"
                  "(|[foo bar])" "([|foo bar])"
                  "(|{foo bar})" "({|foo bar})"
-                 #_"(|#{foo bar})" #_"(#{|foo bar})"
+                 "(|#{foo bar})" "(#{|foo bar})"
                  }]
       ["BackDel" :paredit-backward-delete
                 {"(\"zot\" q|uux)" "(\"zot\" |uux)",
