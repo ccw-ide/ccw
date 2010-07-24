@@ -213,7 +213,7 @@
 	    ["("         :paredit-open-round
 	                {"(a b |c d)"
 	                 "(a b (|) c d)"
-	                ; pb parsley "(foo \"bar |baz\" quux)" "(foo \"bar (|baz\" quux)"
+	                 "(foo \"bar |baz\" quux)" "(foo \"bar (|baz\" quux)"
                   }
 	                {"(a b|c d)" "(a b (|) c d)"
 	                 "(|)" "((|))"
@@ -223,7 +223,7 @@
 	                 "(a,| b)" "(a, (|) b)"
 	                 "(a,|b)" "(a, (|) b)"
 	                 "(a,|)" "(a, (|))"
-	                ; pb parsley "\\| " "\\(| "
+                   "\\| " "\\(| " 
 	                 "~|" "~(|)"
 	                 "~@|" "~@(|)"
 	                 "\\\\| " "\\\\ (|) "
@@ -255,7 +255,7 @@
 	                 "; (Foo.)|"}]
       ["["         :paredit-open-square
                  {"(a b |c d)"  "(a b [|] c d)"
-                  ; pb parsley "(foo \"bar |baz\" quux)" "(foo \"bar [|baz\" quux)"
+                  "(foo \"bar |baz\" quux)" "(foo \"bar [|baz\" quux)" 
                   }
                   {"(a b|c d)" "(a b [|] c d)"
                    "(|)" "([|])"
@@ -265,7 +265,7 @@
                    "(a,| b)" "(a, [|] b)"
                    "(a,|b)" "(a, [|] b)"
                    "(a,|)" "(a, [|])"
-                   ; pb parsley "\\| " "\\[| "
+                   "\\| " "\\[| " 
                    "\\\\| " "\\\\ [|] "}]
       ["]"         :paredit-close-square
                   {"(define-key keymap [frob|  ] 'frobnicate)"
@@ -282,7 +282,7 @@
                    }]
       ["{"         :paredit-open-curly
                  {"(a b |c d)"  "(a b {|} c d)"
-                  ; pb parsley "(foo \"bar |baz\" quux)" "(foo \"bar {|baz\" quux)"
+                  "(foo \"bar |baz\" quux)" "(foo \"bar {|baz\" quux)" 
                   }
                   {"(a b|c d)" "(a b {|} c d)"
                    "(|)" "({|})"
@@ -293,7 +293,7 @@
                    "(a,| b)" "(a, {|} b)"
                    "(a,|b)" "(a, {|} b)"
                    "(a,|)" "(a, {|})"
-                   ; pb parsley "\\| " "\\{| "
+                   "\\| " "\\{| " 
                    "\\\\| " "\\\\ {|} "
                    }]
       ["}"         :paredit-close-curly
@@ -305,7 +305,7 @@
                    "foo \\|" "foo \\}|"
                    "({(foo |bar}))" "({(foo bar}|))"
                    }]
-      #_["\""        :paredit-doublequote ; pbs parsley
+      ["\""        :paredit-doublequote
                   {"(frob grovel |full lexical)"
                    "(frob grovel \"|\" full lexical)",
                    "(frob grovel \"|\" full lexical)"
@@ -337,7 +337,7 @@
                  "(foo [a|] bar)" "(foo [a|] bar)"
                  "(foo {a|} bar)" "(foo {a|} bar)"
                  #_"(foo #{a|} bar)" #_"(foo #{a|} bar)"
-                 ; pb parsley "(foo \"a|\" bar)" "(foo \"a|\" bar)"
+                 "(foo \"a|\" bar)" "(foo \"a|\" bar)" 
                  "(|(foo bar))" "((|foo bar))"
                  "(|[foo bar])" "([|foo bar])"
                  "(|{foo bar})" "({|foo bar})"
@@ -423,12 +423,12 @@
                  "foo b|ar| baz" "foo |bar| baz"
                  "foo1 (|bar| baz)" "foo1 |(bar baz)|"
                  "foo \"bar |baz\"" "foo |\"bar baz\"|"
-                 ; pb parsley "foo;ba|r\nbaz" "foo|;bar\n|baz"
+                 "foo;ba|r\nbaz" "foo|;bar|\nbaz"
                  "foo (bar [ba|z] |foo)" "foo (bar |[baz] |foo)"
                  "foo (bar [ba|z]) (foo [bar (b|az)])" "foo |(bar [baz]) (foo [bar (baz)])|"
                  "foo |(bar [baz (b|am)])" "foo |(bar [baz (bam)])|"
                  "(foo bar|)" "(foo |bar|)"
-                 "fooz foo |(bar)| baz" "fooz foo| (bar)| baz";;
+                 "fooz foo |(bar)| baz" "fooz foo| (bar)| baz"
                  "fooz foo| (bar)| baz" "fooz |foo (bar)| baz"
                  ;with :chimera
                  "(foo bar|]" "(foo |bar|]"
@@ -455,7 +455,7 @@
                  "foo2 (bar baz|)" "foo2 |(bar baz)|"
                  "foo3 (bar |baz|)" "foo3 |(bar baz)|"
                  "foo \"bar |baz\"" "foo |\"bar baz\"|"
-                 ; pb parsley "foo;ba|r\nbaz" "foo|;bar\n|baz"
+                 "foo;ba|r\nbaz" "foo|;bar|\nbaz"
                  "foo (bar [ba|z] |foo)" "foo (bar |[baz] |foo)"
                  "foo (bar [ba|z]) (foo [bar (b|az)])" "foo |(bar [baz]) (foo [bar (baz)])|"
                  "foo |(bar [baz (b|am)])" "foo |(bar [baz (bam)])|"
@@ -486,7 +486,7 @@
                  "foo6 (bar baz|)" "foo6 |(bar baz)|"
                  "foo7 (bar |baz|)" "foo7 |(bar baz)|"
                  "foo \"bar |baz\"" "foo |\"bar baz\"|"
-                 ; pb parsley "foo;ba|r\nbaz" "foo|;bar\n|baz"
+                 "foo;ba|r\nbaz" "foo|;bar|\nbaz"
                  "foo (bar [ba|z] |foo)" "foo (bar |[baz] |foo)"
                  "foo (bar [ba|z]) (foo [bar (b|az)])" "foo |(bar [baz]) (foo [bar (baz)])|"
                  "foo |(bar [baz (b|am)])" "foo |(bar [baz (bam)])|"
@@ -529,7 +529,7 @@
                  " (\n  |ab c)" " (\n   |ab c)"
                  " (\n| ab c)" " (\n|   ab c)"  
                  " (\n  | ab c)" " (\n  | ab c)"
-                 ;pb parsley "(a\n |b" "(a\n |b"
+                 "(a\n |b" "(a\n  |b" 
                  ;;;"foo (let [n (frobbotz)] \n|(display (+ n 1)\nport))\n        bar"
                  ;;;(str "foo (let [n (frobbotz)]"
                  ;;;   "\n      |(display (+ n 1)"
@@ -562,8 +562,7 @@
                  "{hello brave |new world}" "{hello brave}| {new world}",
                  "{|}" "{}| {}"
                  "(foo|)" "(foo)| ()"
-                 ;parsley pb"({|})" "({}| {})"
-                 ; Le pb = que (parse "({})") renvoit un :content ["{}"] au lieu de :content ["{" "}"]
+                 "({|})" "({}| {})"
                  "(defn hello |[world])" "(defn hello)| ([world])"
                  }]
       ["M-J"    :paredit-join-sexps

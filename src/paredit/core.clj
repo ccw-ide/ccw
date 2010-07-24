@@ -107,7 +107,7 @@
   [parsed]
   (not (parsed-in-tags? parsed *not-in-code*)))
 
-(defn in-code? [loc] (not (*not-in-code* (loc-tag loc))))
+(defn in-code? [loc] (and loc (not (*not-in-code* (loc-tag loc)))))
   
 (defmulti paredit (fn [k & args] k))
 
@@ -129,17 +129,17 @@
   [parsed [o c] {:keys [^String text offset length] :as t} 
    chars-with-no-space-before chars-with-no-space-after]
   (if (zero? length) 
-    (if (parse-stopped-in-code? parsed)
-      (do
-        (insert-balanced [o c] t chars-with-no-space-before chars-with-no-space-after))
-      (-> t (t/insert (str o))))
+    (let [offset-loc (-> parsed parsed-root-loc (loc-for-offset offset))]
+      (if (in-code? offset-loc)
+        (insert-balanced [o c] t chars-with-no-space-before chars-with-no-space-after)
+        (-> t (t/insert (str o)))))
     (wrap-with-balanced parsed [o c] t)))
   
 (defn close-balanced
   [parsed [o c] {:keys [^String text offset length] :as t} 
    chars-with-no-space-before chars-with-no-space-after]
     (let [offset-loc (-> parsed parsed-root-loc (loc-for-offset offset))]       
-      (if (and offset-loc (not (*not-in-code* (loc-tag offset-loc))))
+      (if (in-code? offset-loc)
         (let [up-locs (take-while identity (iterate z/up offset-loc))
               match (some #(when (= c (peek (:content (z/node %)))) %) up-locs)]
           (if match
@@ -157,9 +157,10 @@
 (defmethod paredit 
   :paredit-open-round
   [cmd parsed {:keys [text offset length] :as t}]
-  (with-important-memoized (open-balanced parsed ["(" ")"] t 
-    (union (conj (into *real-spaces* *open-brackets*) "#") *form-macro-chars*)
-    (into *extended-spaces* *close-brackets*))))
+  (with-important-memoized 
+    (open-balanced parsed ["(" ")"] t 
+      (union (conj (into *real-spaces* *open-brackets*) "#") *form-macro-chars*)
+      (into *extended-spaces* *close-brackets*))))
     
 (defmethod paredit 
   :paredit-open-square
@@ -196,20 +197,23 @@
 (defmethod paredit
   :paredit-doublequote
   [cmd parsed {:keys [text offset length] :as t}]
-  (with-important-memoized (cond
-    (parse-stopped-in-code? parsed)
-      (insert-balanced [\" \"] t
-        (conj (into *real-spaces* *open-brackets*) \#)
-        (into *extended-spaces* *close-brackets*))
-    (not (parsed-in-tags? parsed #{:string}))
-      (-> t (t/insert (str \")))
-    (and (= "\\" (t/previous-char-str t)) (not= "\\" (t/previous-char-str t 2)))
-      (-> t (t/insert (str \")))
-    (= "\"" (t/next-char-str t))
-      (t/shift-offset t 1)
-      #_(close-balanced ["\"" "\""] t nil nil)
-    :else
-      (-> t (t/insert (str \\ \"))))))
+  (with-important-memoized 
+    (let [offset-loc (-> parsed parsed-root-loc (loc-for-offset offset))] 
+      (cond
+        ;(parse-stopped-in-code? parsed)
+        (in-code? offset-loc)
+          (insert-balanced [\" \"] t
+            (conj (into *real-spaces* *open-brackets*) \#)
+            (into *extended-spaces* *close-brackets*))
+        (not= :string (loc-tag offset-loc))
+          (-> t (t/insert (str \")))
+        (and (= "\\" (t/previous-char-str t)) (not= "\\" (t/previous-char-str t 2)))
+          (-> t (t/insert (str \")))
+        (= "\"" (t/next-char-str t))
+          (t/shift-offset t 1)
+        #_(close-balanced ["\"" "\""] t nil nil)
+        :else
+          (-> t (t/insert (str \\ \")))))))
 
 (defmethod paredit 
   :paredit-forward-delete
