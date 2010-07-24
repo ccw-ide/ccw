@@ -558,7 +558,7 @@
                  "(a\n|]" "(a\n  |]"
                  " #(a\n|]" " #(a\n    |]"
                  }]
-      #_["C-j"     :paredit-newline
+      #"C-j"     :paredit-newline
                 {"(ab|cd)" "(ab\n  |cd)"
                  "(ab|     cd)" "(ab\n  |cd)"
                  "   a|" "   a\n   |"
