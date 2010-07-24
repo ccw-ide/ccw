@@ -31,8 +31,9 @@
   (:use paredit.regex-utils)
 	(:require [clojure.zip :as zip])
   (:require [clojure.contrib.zip-filter :as zf])
-  (:require [net.cgrand.parsley.glr :as core] :reload)
-  (:use net.cgrand.parsley :reload))
+  ;(:require [net.cgrand.parsley.glr :as core] :reload)
+  (:use net.cgrand.parsley :reload)
+  (:require [net.cgrand.parsley.lr-plus :as lr+]))
 
 #_(set! *warn-on-reflection* true)
 
@@ -93,7 +94,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; the parser code
-(def ^{:private true} *brackets* {"(" ")", "{" "}", "[" "]", "\"" "\""})
+(def *brackets* {"(" ")", "{" "}", "[" "]", "\"" "\""})
 (def *tag-closing-brackets* {:list ")", :map "}", :vector "]", :string "\""})
 (def *tag-opening-brackets* {:list "(", :map "{", :vector "[", :string "\""})
 (def *brackets-tags* #{:list :map :vector :string})
@@ -114,6 +115,12 @@
   (when (< -1 index (.length s))
     (.charAt s index)))
     
+(defn eof [s eof?]
+  (and (= 0 (.length s)) eof? [0 eof]))
+
+(defn bracket-end [s eof?]
+  (lr+/match #{")" "]" "}" eof} s eof?))
+
 (def sexp
   (parser {:root-tag :root
            :main :expr*
@@ -137,13 +144,24 @@
              :regex
              :atom
              :char
+             ;:unexpected-close
+             :chimera
              }
-    :list ["(" :expr* ")"]
-    :vector ["[" :expr* "]"]
-    :map ["{" :expr* "}"]
+    :list ["(" :expr* ")"] ;#{")" "]" "}" eof}]
+    :chimera #{ ["("  :expr* #{"]" "}" eof}] 
+                ["["  :expr* #{")" "}" eof}]
+                ["{" :expr* #{")" "]" eof}]
+                ["#(" :expr* #{"]" "}" eof}]
+                ["#{" :expr* #{")" "]" eof}]
+                (unspaced \"    #"(?:\\.|[^\\\"])++(?!\")" :? eof)
+                (unspaced "#\"" #"(?:\\.|[^\\\"])++(?!\")" :? eof)
+                ;(unspaced \" #"(?:\\.|[^\\\"])*+" eof)
+                }
+    :vector ["[" :expr* "]"] ;#{")" "]" "}" eof}]
+    :map ["{" :expr* "}"] ;#{")" "]" "}" eof}]
 ;    :map ["{" [:expr :expr]:* "}"]
  ;   :odd-map ["{" [:expr :expr]:* :expr "}"]
-    :set ["#{" :expr* "}"]
+    :set ["#{" :expr* "}"] ;#{")" "]" "}" eof}]
     :quote [\' :expr]
     :meta ["^" :expr :expr]
     :deref [\@ :expr]
@@ -153,8 +171,8 @@
     :deprecated-meta ["#^" :expr :expr]
     :unquote-splicing ["~@" :expr]
     :unquote [#"~(?!@)" :expr]
-    :string (unspaced \"  #"(?:\\.|[^\\\"])++" :? \")
-    :regex  (unspaced "#\""  #"(?:\\.|[^\\\"])++" :? \")
+    :string (unspaced \"    #"(?:\\.|[^\\\"])++(?=\")" :? \")
+    :regex  (unspaced "#\"" #"(?:\\.|[^\\\"])++(?=\")" :? \")
     :symbol- 
       ;#"(?:\.|\/|\&|(?:(?:[a-z|A-Z|\*|\!|\-(?![0-9])|\_|\?|\>|\<|\=|\$]|\+(?![0-9]))(?:(?:(?:[a-z|A-Z|\*|\!|\-(?![0-9])|\_|\?|\>|\<|\=|\$]|\+(?![0-9]))|[0-9]|\.|\#(?!\()))*(?:\:(?:(?:(?:[a-z|A-Z|\*|\!|\-(?![0-9])|\_|\?|\>|\<|\=|\$]|\+(?![0-9]))|[0-9]|\.|\#(?!\()))+)*)(?:\/(?:(?:[a-z|A-Z|\*|\!|\-(?![0-9])|\_|\?|\>|\<|\=|\$]|\+(?![0-9]))(?:(?:(?:[a-z|A-Z|\*|\!|\-(?![0-9])|\_|\?|\>|\<|\=|\$]|\+(?![0-9]))|[0-9]|\.|\#(?!\()))*(?:\:(?:(?:(?:[a-z|A-Z|\*|\!|\-(?![0-9])|\_|\?|\>|\<|\=|\$]|\+(?![0-9]))|[0-9]|\.|\#(?!\()))+)*))?)"
       (let [symbol-head 
@@ -182,7 +200,9 @@
     :char #"\\(?:newline|space|tab|backspace|formfeed|return|u[0-9|a-f|A-F]{4}|o[0-3]?+[0-7]{1,2}|.)"
     :whitespace #"(?:,|\s)++"
     :comment #"(?:\#\!|;)[^\n]*+"
-    :discard ["#_" :expr]))
+    :discard ["#_" :expr]
+    ;:unexpected-close #{#"}" #"\)" #"]"}
+    ))
 
 (defn parse
   ([^String text]

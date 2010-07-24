@@ -141,7 +141,7 @@
     (let [offset-loc (-> parsed parsed-root-loc (loc-for-offset offset))]       
       (if (and offset-loc (not (*not-in-code* (loc-tag offset-loc))))
         (let [up-locs (take-while identity (iterate z/up offset-loc))
-              match (some #(when (= o (*tag-opening-brackets* (loc-tag %))) %) up-locs)]
+              match (some #(when (= c (peek (:content (z/node %)))) %) up-locs)]
           (if match
             (let [last-loc (-> match z/down z/rightmost z/left)
                   nb-delete (if (= :whitespace (loc-tag last-loc)) 
@@ -253,7 +253,7 @@
     (-> t (t/delete offset 1) (t/shift-offset -1)))))
 
 (defn indent-column 
-  "pre-condition: line-offset is really the starting offset of a line"
+  "pre-condition: line-offset is already the starting offset of a line"
   [root-loc line-offset]
   (let [loc (loc-for-offset root-loc (dec line-offset))]
     (if-let [loc (z/left loc)]
@@ -265,7 +265,7 @@
             ; we reached the start of the parent form, indent depending on the form's type
             (+ (loc-col loc)
               (loc-count loc)    
-              (if (= "(" (loc-text loc)) 1 0))
+              (if (#{"(" "#("} (loc-text loc)) 1 0))
           (= :whitespace (loc-tag loc))
             ; we see a space
             (if (.contains ^String (loc-text loc) "\n")

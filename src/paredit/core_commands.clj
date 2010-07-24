@@ -226,7 +226,8 @@
 	                ; pb parsley "\\| " "\\(| "
 	                 "~|" "~(|)"
 	                 "~@|" "~@(|)"
-	                 "\\\\| " "\\\\ (|) "}]
+	                 "\\\\| " "\\\\ (|) "
+                  }]
 	    [")"         :paredit-close-round
 	                {"(a |b)" "(a b)|"
 	                 "(a |b) cd" "(a b)| cd"
@@ -242,7 +243,11 @@
 	                 "; Hello,| world!"  "; Hello,)| world!"
 	                 "(  \"Hello,| world!\" foo )" "(  \"Hello,)| world!\" foo )"
 	                 "  \"Hello,| world!" "  \"Hello,)| world!"
-	                 "foo \\|" "foo \\)|"}]
+	                 "foo \\|" "foo \\)|"
+                  ; tests with the new :chimera
+                   "({foo |bar])" "({foo bar])|"
+                   "({[foo |bar)})" "({[foo bar)|})"
+                  }]
 	    #_["M-)"       :paredit-close-round-and-newline
 	                {"(defun f (x|  ))"
 	                 "(defun f (x)\n  |)"
@@ -268,7 +273,13 @@
                    "; [Bar.|" "; [Bar.]|"
                    "  \"Hello,| world!\" foo" "  \"Hello,]| world!\" foo"
                    "  \"Hello,| world!" "  \"Hello,]| world!"
-                   "foo \\|" "foo \\]|"}]
+                   "foo \\|" "foo \\]|"
+                   ; tests with the new :chimera
+                   "({foo |bar])" "({foo bar]|)"
+                   "({(foo |bar]))" "({(foo bar]|))"
+                   "({[foo |bar)})" "({[foo ]|bar)})"
+                   "[foo (bar [baz {bleh |blah}))]" "[foo (bar [baz {bleh blah}))]|"
+                   }]
       ["{"         :paredit-open-curly
                  {"(a b |c d)"  "(a b {|} c d)"
                   ; pb parsley "(foo \"bar |baz\" quux)" "(foo \"bar {|baz\" quux)"
@@ -291,7 +302,9 @@
                    "; Hello,}| world!"
                    "  \"Hello,| world!\" foo" "  \"Hello,}| world!\" foo"
                    "  \"Hello,| world!" "  \"Hello,}| world!"
-                   "foo \\|" "foo \\}|"}]
+                   "foo \\|" "foo \\}|"
+                   "({(foo |bar}))" "({(foo bar}|))"
+                   }]
       #_["\""        :paredit-doublequote ; pbs parsley
                   {"(frob grovel |full lexical)"
                    "(frob grovel \"|\" full lexical)",
@@ -386,6 +399,7 @@
                  "(foo bar|)" "(foo bar|)"
                  "(foo |bar)" "|bar"
                  "(foo |(bar))" "|(bar)"
+                 "(foo |(bar]|)" "|(bar]"
                  }]
      ]
     
@@ -416,6 +430,9 @@
                  "(foo bar|)" "(foo |bar|)"
                  "fooz foo |(bar)| baz" "fooz foo| (bar)| baz";;
                  "fooz foo| (bar)| baz" "fooz |foo (bar)| baz"
+                 ;with :chimera
+                 "(foo bar|]" "(foo |bar|]"
+                 "(foo {bar)|]" "(foo |{bar)|]"
                  }]
      ["Shift+Alt+Right" :paredit-expand-right
                 {
@@ -442,6 +459,9 @@
                  "foo (bar [ba|z] |foo)" "foo (bar |[baz] |foo)"
                  "foo (bar [ba|z]) (foo [bar (b|az)])" "foo |(bar [baz]) (foo [bar (baz)])|"
                  "foo |(bar [baz (b|am)])" "foo |(bar [baz (bam)])|"
+                 ;with :chimera
+                 "(foo |bar]" "(foo |bar|]"
+                 "(foo |{bar)]" "(foo |{bar)|]"
                  }]
      ["Shift+Alt+Up" :paredit-expand-up
                 {
@@ -475,6 +495,9 @@
                  "foo ([b|a|r])" "foo ([|bar|])"
                  "foo ([|bar|])" "foo (|[bar]|)"
                  "foo (|[bar]|)" "foo |([bar])|"
+                 ;with :chimera
+                 "(foo |bar]" "|(foo bar]|"
+                 "(foo |{bar)]" "|(foo {bar)]|"
                  }]
      ]
     ["Miscellaneous"             
@@ -513,7 +536,15 @@
                  ;;;   "\n        port))\n        bar"
                  ;;   )
                  "   a\n       |" "   a\n   |"
-                }]
+                 ")|s" ")|s"
+                 ")\n|s" ")\n|s"
+                 "#(a\n|)" "#(a\n   |)"
+                 ; with chimera
+                 "(a\n|(])" "(a\n  |(])"
+                 "(a\n|" "(a\n  |"
+                 "(a\n|]" "(a\n  |]"
+                 " #(a\n|]" " #(a\n    |]"
+                 }]
       #_["C-j"     :paredit-newline
                 {"(ab|cd)" "(ab\n  |cd)"
                  "(ab|     cd)" "(ab\n  |cd)"
