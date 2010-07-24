@@ -97,7 +97,7 @@
 (def *brackets* {"(" ")", "{" "}", "[" "]", "\"" "\"", "#{" "}", "#(" ")"})
 (def *tag-closing-brackets* {:list ")", :map "}", :vector "]", :string "\"", :set "}", :fn ")"})
 (def *tag-opening-brackets* {:list "(", :map "{", :vector "[", :string "\"", :set "#{", :fn "#("})
-(def *brackets-tags* #{:list :map :vector :string :set :fn})
+(def *brackets-tags* #{:list :map :vector :string :set :fn :regex})
 (def ^{:private true} *opening-bracket-tags* {"(" :list, "{" :map, "[" :vector, "\"" :string, "#{" :set, "#(" :fn})
 (def *opening-brackets* (set (keys *brackets*)))
 (def *closing-brackets* (set (vals *brackets*)))
