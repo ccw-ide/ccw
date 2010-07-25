@@ -16,4 +16,6 @@ Contributors:
         </topic>
         <topic href="html/gettingstarted/play-with-repl.html" label="Play With a REPL">
         </topic>
+        <topic href="html/gettingstarted/labrepl-wizard.html" label="Create Labrepl Project">
+        </topic>
 </toc>

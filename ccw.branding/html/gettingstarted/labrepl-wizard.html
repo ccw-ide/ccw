@@ -1,0 +1,150 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!--
+Copyright (c) 2010 Stephan Muehlstrasser
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Eclipse Public License v1.0
+which accompanies this distribution, and is available at
+http://www.eclipse.org/legal/epl-v10.html
+
+Contributors: 
+    Stephan Muehlstrasser - Initial description of labrepl wizard
+-->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>Play With a REPL</title>
+<link rel="stylesheet" href="../../../PRODUCT_PLUGIN/book.css"
+	type="text/css">
+<script language="JavaScript"
+	src="PLUGINS_ROOT/org.eclipse.help/livehelp.js"></script>
+<title>Create Labrepl Project Wizard</title>
+</head>
+<body>
+<h1>Create Labrepl Project Wizard</h1>
+<h2>About This Wizard</h2>
+<p>When the optional <b>Counterclockwise Examples Plug-In</b> is
+installed, it contains a full copy of "labrepl for Clojure". The <a
+	href="http://github.com/relevance/labrepl">original labrepl for
+Clojure</a> is maintained on <a href="http://github.com">github</a>. Its <a
+	href="http://github.com/relevance/labrepl/blob/master/README.markdown">README
+file</a> contains an overview of the features of labrepl.</p>
+<p>With the <a class="command-link"
+	href='javascript:executeCommand("org.eclipse.ui.newWizard(newWizardId=ccw.support.examples.labrepl.wizards.LabreplCreationWizard)")'>
+<img src="PLUGINS_ROOT/org.eclipse.help/command_link.png"
+	alt="Opens the Create Labrepl Project wizard"><b>Create
+Labrepl Project</b></a> wizard it is possible to create a Clojure project that
+contains the labrepl code. Optionally it is possible to
+automatically download its dependencies from the <a
+	href="http://clojars.org/">Clojars repository</a>, and to start a REPL
+session running the labrepl tutorial environment, with a web
+browser showing the labrepl tutorial web pages (whether Eclipse's internal web browser
+or an external web browser will be opened, depends on the  <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.ui.browser.preferencePage)")'> 
+  <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png"> 
+  <strong>General &gt; Web Browser</strong></a> preferences). There is no need to manually
+install any additional software.</p>
+<h2>Using the Create Labrepl Project Wizard</h2>
+<p>
+To open the <b>New Example</b> wizard in the workbench, use <b>File &gt; New &gt; Example...</b>. Then
+select <b>Create Labrepl Project</b> from the <b>Counterclockwise Examples</b>
+category.
+</p>
+<table border="1" cellspacing="0" cellpadding="5"
+	summary="Create Labrepl Project Options">
+	<caption>Create Labrepl Project Options</caption>
+
+	<tr>
+		<th>Option</th>
+
+		<th>Description</th>
+
+		<th>Default</th>
+	</tr>
+
+	<tr>
+		<td align="left" valign="top">Project name</td>
+
+		<td align="left" valign="top">Enter a name for the Clojure project to be created with the labrepl contents.</td>
+
+		<td align="left" valign="top">&lt;blank&gt;</td>
+	</tr>
+
+	<tr>
+		<td align="left" valign="top">Location</td>
+
+		<td align="left" valign="top">The location in the file system where the project will
+be created. De-select "Use default location" to specify a location other
+than the default. You can type the new location or browse to select
+a file system location for the new project.</td>
+
+		<td align="left" valign="top">The workspace root directory</td>
+	</tr>
+	
+	<tr>
+		<td align="left" valign="top">Run "lein deps" to download dependencies</td>
+
+		<td align="left" valign="top">The Counterclockwise Example Plug-in only contains the
+		labrepl code itself, which in turn requires a lot of other Clojure code to run. labrepl
+		relies on the <a href="http://github.com/technomancy/leiningen">Leiningen</a> build tool
+		to download the necessary dependencies. With this option checked the 
+		wizard will run <b>lein deps</b> to download the dependencies from the <a href="http://clojars.org/">Clojars repository</a>.<br></br>
+		Disclaimer: The Counterclockwise Plug-in does not have any control about what exactly will be downloaded from Clojars.
+		What will be downloaded is a consequence of the dependency information stored
+		in the labrepl project's <b>project.clj</b> Leiningen build file and of the current state of the Clojars repository. 
+		If unsure about this,
+		please uncheck this option and review the dependencies in the <b>project.clj</b> file after
+		the labrepl project has been created in the workspace.<br>
+		An active Internet connection is required for downloading the dependencies. This can
+		take a significant amount of time.</td>
+
+		<td align="left" valign="top">On</td>
+	</tr>
+	
+	<tr>
+		<td align="left" valign="top">Run REPL and open tutorial web page</td>
+
+		<td align="left" valign="top">After downloading the dependencies the wizard
+		will automatically start a REPL for the labrepl tutorial and open a web browser
+		for the labrepl tutorial web pages.</td>
+
+		<td align="left" valign="top">On</td>
+	</tr>
+</table>
+<h2>Manual Steps</h2>
+<h3>Running <b>lein deps</b> Manually</h3>
+If you did choose not to run <b>lein deps</b> automatically from the wizard,
+you will need to run it manually, and it is necessary to have a full copy of the 
+<a href="http://github.com/technomancy/leiningen">Leiningen</a> build tool installed. It is currently
+not possible to run <b>lein deps</b> explicitly from the Eclipse workbench with the Leiningen tool that is built 
+into the <b>Counterclockwise Examples Plug-In</b>. You need to open a command prompt in the root directory of the labrepl project
+that was created by the wizard, and run <b>lein deps</b> from the command prompt.
+<h3>Starting the labrepl Session Manually</h3>
+If you did choose not to start a REPL for the labrepl tutorial automatically from the wizard, or
+if you want to start the labrepl tutorial another time after it had been set up by the wizard,
+right-click on the <b>labrepl.clj</b> file in the <b>src</b> folder of the labrepl project that was created by the
+ wizard, and select <b>Run As &gt; Clojure REPL</b>. In the console view that is opened
+type <b>(labrepl/-main)</b> and hit &lt;ENTER&gt;. Browse to <a href="http://localhost:8080">http://localhost:8080</a>
+to view the labrepl tutorial web pages.
+<h2>Known Issues</h2>
+The Create Labrepl Project wizard is currently considered beta. The following known
+issues exist:
+<ul>
+<li>No user feedback after <b>lein deps</b> is finished until the REPL is started:<br>
+If the option <b>Run "lein deps" to download dependencies</b> is switched on, the wizard
+dialog will show progress messages about the dependencies that are downloaded. If the 
+option <b>Run REPL and open tutorial web page</b> is also switched on, there will be
+a delay until the REPL console view and the corresponding web browser is opened. During the
+delay there is no feedback to the user that something is still happening.
+</li>
+<li>Error message <b>java.lang.Exception: Unmatched delimiter: )</b>:<br>
+After the labrepl tutorial was started in the REPL console, an error message
+ <b>java.lang.Exception: Unmatched delimiter: )</b> appears. This can be safely ignored.</li>
+ <li>labrepl tutorial does not start:<br>
+ It sporadically happens that the labrepl tutorial session does not start in the
+ REPL console after the creation of the labrepl project and after the download of the dependencies.
+Also the browser for the tutorial web pages does not open. In that case kill the running
+REPL in the REPL console view and delete the labrepl project that was just created. Then
+re-run the <b>Create Labrepl Project</b> wizard. Normally the wizard will run successfully the
+second time.</li>
+</ul>
+</body>
+</html>
