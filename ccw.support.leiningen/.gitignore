@@ -2,6 +2,7 @@ sample/lib
 sample/classes/
 sample/nomnomnom.jar
 lib/
+bin
 leiningen.jar
 leiningen-standalone.jar
 pom.xml
