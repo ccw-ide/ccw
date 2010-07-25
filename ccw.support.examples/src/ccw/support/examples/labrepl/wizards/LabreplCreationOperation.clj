@@ -229,7 +229,7 @@ never returned a non-nil value before the timeout occurred."
 													(let [console (wait-for-resource #(ClojureClient/findActiveReplConsole) "Console" *timeout* *step* (.newChild job-progress 30))]
 			                      (if console
 			                        (do
-				                        (EvaluateTextAction/evaluateText console "(labrepl/-main)")
+				                        (EvaluateTextAction/evaluateText console "(org.apache.log4j.BasicConfigurator/configure (org.apache.log4j.varia.NullAppender.)) (labrepl/-main)")
 													      (open-browser (.newChild job-progress 30)))
 			                        Status/CANCEL_STATUS)))))]
                   (.schedule repl-browser-job))))))))
