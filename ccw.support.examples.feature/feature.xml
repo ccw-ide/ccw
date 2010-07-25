@@ -2,7 +2,7 @@
 <feature
       id="ccw.support.examples.feature"
       label="%featureName"
-      version="1.0.0.qualifier"
+      version="0.0.1"
       provider-name="%providerName">
 
    <description url="feature.properties">
