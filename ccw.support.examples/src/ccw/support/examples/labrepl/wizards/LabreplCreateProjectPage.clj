@@ -41,7 +41,7 @@
     (let [run-lein-deps-button (Button. composite SWT/CHECK)
           run-repl-button (Button. composite SWT/CHECK)]
       (doto run-lein-deps-button
-        (.setText "Run \"lein deps\" to download dependencies (Internet connection required)")
+        (.setText "Run \"lein deps\" to download dependencies (Internet connection required,\ndownloads third-party software from Clojars repository)")
         (.setSelection true)
         (.addSelectionListener 
           (proxy [SelectionAdapter] []
