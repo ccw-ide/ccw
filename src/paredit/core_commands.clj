@@ -306,20 +306,24 @@
                    "({(foo |bar}))" "({(foo bar}|))"
                    }]
       ["\""        :paredit-doublequote
-                  {"(frob grovel |full lexical)"
-                   "(frob grovel \"|\" full lexical)",
-                   "(frob grovel \"|\" full lexical)"
-                   "(frob grovel \"\"| full lexical)",
-                   "(foo \"bar |baz\" quux)"
-                   "(foo \"bar \\\"|baz\" quux)",
-                   ";|ab" ";\"|ab",
+                  { "(frob grovel |full lexical)" "(frob grovel \"|\" full lexical)",
+                   "(frob grovel \"|\" full lexical)" "(frob grovel \"\"| full lexical)",
+                   "(foo \"bar |baz\" quux)" "(foo \"bar \\\"|baz\" quux)",
+                   ";|ab" ";\"|ab", 
                    "(frob grovel \"foo \\|bar\" full lexical)"
-                   "(frob grovel \"foo \\\"|bar\" full lexical)",
+                     "(frob grovel \"foo \\\"|bar\" full lexical)",
                    "(frob grovel \"foo \\\\|bar\" full lexical)"
-                   "(frob grovel \"foo \\\\\\\"|bar\" full lexical)",
+                     "(frob grovel \"foo \\\\\\\"|bar\" full lexical)",
                    "\"fo\\\"o\" \"b|ar\"" "\"fo\\\"o\" \"b\\\"|ar\"",
-                   "\"\\\\\" \"b|ar\"" "\"\\\\\" \"b\\\"|ar\"",
-                   "\"\\\\\\\"|a\"" "\"\\\\\\\"\\\"|a\""}]
+                     "\"\\\\\" \"b|ar\"" "\"\\\\\" \"b\\\"|ar\"",
+                   "\"\\\\\\\"|a\"" "\"\\\\\\\"\\\"|a\"",
+                   "\"fo|o\"" "\"fo\\\"|o\"",
+                   ;"#\"fo|o\"" "#\"fo\\\"|o\"",
+                   ;;;"#\"foo\"" "#\"foo\""
+
+                  ;; "#|" "#\"|\"" ; specific to clojure regexs
+
+                   }]
     ]
     ["Deleting & Killing"
       ["Del"     :paredit-forward-delete
@@ -357,12 +361,14 @@
                  "(|{foo bar})" "({|foo bar})"
                  }]
       ["BackDel" :paredit-backward-delete
-                {"(\"zot\" q|uux)" "(\"zot\" |uux)",
-                "(\"zot\"| quux)" "(\"zot|\" quux)",
-                 "(\"zot|\" quux)" "(\"zo|\" quux)",
-                 "(foo (|) bar)" "(foo | bar)",
-                 "(foo bar)|" "(foo bar|)",
-                 "(foo bar|)" "(foo ba|)"
+                {;"(\"zot\" q|uux)" "(\"zot\" |uux)",
+                 ;"(\"zot\"| quux)" "(\"zot|\" quux)",
+                 ;"(\"zot|\" quux)" "(\"zo|\" quux)",
+                 ;"(foo (|) bar)" "(foo | bar)",
+                 ;"(foo bar)|" "(foo bar|)",
+                 ;"(foo bar|)" "(foo ba|)",
+                 ;;;;"#(|)" "|",
+                 "#{|}" "|"
                  }]
       ;#_["C-k"     :paredit-kill
       ;          {"(foo bar)|     ; Useless comment!"
