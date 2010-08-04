@@ -359,6 +359,8 @@
                  "(|(foo bar))" "((|foo bar))"
                  "(|[foo bar])" "([|foo bar])"
                  "(|{foo bar})" "({|foo bar})"
+                 
+                 "|" "|"
                  }]
       ["BackDel" :paredit-backward-delete
                 {
