@@ -47,7 +47,7 @@
   (and
     loc
     (string? (zip/node loc)) 
-    (not (#{:whitespace :atom :comment :char :string} (loc-tag (zip/up loc))))))
+    (not (#{:whitespace :atom :comment :char :string :regex} (loc-tag (zip/up loc))))))
 
 (defn root-loc [loc] (if-let [up (zip/up loc)] (recur up) loc))
 

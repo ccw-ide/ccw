@@ -361,13 +361,33 @@
                  "(|{foo bar})" "({|foo bar})"
                  }]
       ["BackDel" :paredit-backward-delete
-                {;"(\"zot\" q|uux)" "(\"zot\" |uux)",
-                 ;"(\"zot\"| quux)" "(\"zot|\" quux)",
-                 ;"(\"zot|\" quux)" "(\"zo|\" quux)",
-                 ;"(foo (|) bar)" "(foo | bar)",
-                 ;"(foo bar)|" "(foo bar|)",
-                 ;"(foo bar|)" "(foo ba|)",
-                 ;;;;"#(|)" "|",
+                {
+                 "(\"zot\" q|uux)" "(\"zot\" |uux)",
+                 "(\"zot\"| quux)" "(\"zot|\" quux)",
+                 "(\"zot|\" quux)" "(\"zo|\" quux)",
+
+                 "(#\"zot\"| quux)" "(#\"zot|\" quux)",
+                 "(#\"zot|\" quux)" "(#\"zo|\" quux)",
+                 
+                 "(foo (|) bar)" "(foo | bar)",
+                 "(foo #(|) bar)" "(foo | bar)",
+                 "(foo #{|} bar)" "(foo | bar)",
+                 
+                 "(foo bar)|" "(foo bar|)",
+                 "(foo bar|)" "(foo ba|)",
+                 
+                 "|" "|"
+                 
+                 "\"\"|" "\"|\""
+                 "\"|\"" "|"
+                 "#\"\"|" "#\"|\""
+                 "#\"|\"" "|"
+                 
+                 "#(foo bar)|" "#(foo bar|)",
+                 "#(foo bar|)" "#(foo ba|)",
+                 "#{foo bar}|" "#{foo bar|}",
+                 "#{foo bar|}" "#{foo ba|}",
+                 "#(|)" "|",
                  "#{|}" "|"
                  }]
       ;#_["C-k"     :paredit-kill

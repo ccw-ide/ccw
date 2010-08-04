@@ -32,7 +32,7 @@
 (def *open-brackets* (conj #{"(" "[" "{"} nil)) ; we add nil to the list to also match beginning of text 
 (def *close-brackets* (conj #{")" "]" "}"} nil)) ; we add nil to the list to also match end of text
 (def *form-macro-chars* #{(str \#) (str \~) "~@" (str \') (str \`) (str \@) "^" "#'" "#_" "#!"})
-(def *not-in-code* #{:string "\"\\" :comment :char})
+(def *not-in-code* #{:string "\"\\" :comment :char :regex})
 
 (defmacro with-memoized [func-names & body]
   `(binding [~@(mapcat 
@@ -107,14 +107,14 @@
   [parsed]
   (not (parsed-in-tags? parsed *not-in-code*)))
 
-(defn in-code? [loc] (and loc (not (*not-in-code* (loc-tag loc)))))
+(defn in-code? [loc] (and loc (not (*not-in-code* (loc-tag (parse-node loc))))))
   
 (defmulti paredit (fn [k & args] k))
 
 (defn insert-balanced
   [[o c] t chars-with-no-space-before chars-with-no-space-after]
   (let [add-pre-space? (not (contains? chars-with-no-space-before 
-                                       (t/previous-char-str t)))
+                                       (t/previous-char-str t 1 #_(count o))))
         add-post-space? (not (contains? chars-with-no-space-after 
                                         (t/next-char-str t)))
         ins-str (str (if add-pre-space? " " "")
@@ -202,7 +202,7 @@
       (cond
         ;(parse-stopped-in-code? parsed)
         (in-code? offset-loc)
-          (insert-balanced [\" \"] t
+          (insert-balanced [\" \"] t ; todo voir si on utilise open balanced ? (mais quid echappement?)
             (conj (into *real-spaces* *open-brackets*) \#)
             (into *extended-spaces* *close-brackets*))
         (not= :string (loc-tag offset-loc))
@@ -211,7 +211,6 @@
           (-> t (t/insert (str \")))
         (= "\"" (t/next-char-str t))
           (t/shift-offset t 1)
-        #_(close-balanced ["\"" "\""] t nil nil)
         :else
           (-> t (t/insert (str \\ \")))))))
 
@@ -220,7 +219,7 @@
   [cmd parsed {:keys [^String text offset length] :as t}]
   (with-important-memoized (if parsed
     (let [offset-loc (-> parsed parsed-root-loc (loc-for-offset offset))
-          handled-forms (conj *brackets-tags* :string)
+          handled-forms *brackets-tags*
           in-handled-form (handled-forms (loc-tag offset-loc))
           open-punct-length (.length (first (:content (z/node offset-loc))))]
       (cond 
@@ -237,25 +236,35 @@
     (t/delete t offset 1))))
 
 (defmethod paredit 
-  :paredit-backward-delete
-  [cmd parsed {:keys [^String text offset length] :as t}]
-  (with-important-memoized (if parsed
-    (let [offset (dec offset)
-          offset-loc (-> parsed parsed-root-loc (loc-for-offset offset))
-          handled-forms (conj *brackets-tags* :string)
-          in-handled-form (handled-forms (loc-tag offset-loc))]
-      (cond 
-        (and in-handled-form (= offset (start-offset offset-loc)))
-            (if (> (-> offset-loc z/node :content count) 2)
-              t     ; don't move
-              (-> t ; delete the form 
-                (t/delete (start-offset offset-loc) (loc-count offset-loc))
-                (t/shift-offset -1)))
-        (and in-handled-form (= offset (dec (end-offset offset-loc))))
-            (t/shift-offset t -1)
-        :else
-            (-> t (t/delete offset 1) (t/shift-offset -1))))
-    (-> t (t/delete offset 1) (t/shift-offset -1)))))
+   :paredit-backward-delete
+   [cmd parsed {:keys [^String text offset length] :as t}]
+   (if (zero? (count text))
+     t
+     (with-important-memoized 
+       (if parsed
+         (let [offset (dec offset)
+               offset-loc (-> parsed parsed-root-loc (loc-for-offset offset))
+               ;_ (println "offset-loc:" (z/node offset-loc))
+               handled-forms *brackets-tags*
+               in-handled-form (handled-forms (loc-tag offset-loc))
+               ;_ (println "in-handled-form:" in-handled-form)
+               ]
+           (cond 
+             (and in-handled-form (<= (start-offset offset-loc) offset (+ (start-offset offset-loc) (dec (-> offset-loc z/down loc-count)))))
+               (if (> (-> offset-loc z/node :content count) 2)
+                 t     ; don't move
+                 (do ;(println "delete the form:" (start-offset offset-loc) (loc-count offset-loc))
+                   (-> t ; delete the form 
+                     (t/delete (start-offset offset-loc) (loc-count offset-loc))
+                     (t/shift-offset (- (-> offset-loc z/down loc-count))))))
+             (and in-handled-form (= offset (dec (end-offset offset-loc))))
+               (do
+                 ;(println "final t:") 
+                 ;(println (start-offset offset-loc) (loc-count offset-loc))
+                 (t/shift-offset t -1))
+             :else
+               (-> t (t/delete offset 1) (t/shift-offset -1))))
+         (-> t (t/delete offset 1) (t/shift-offset -1))))))
 
 (defn indent-column 
   "pre-condition: line-offset is already the starting offset of a line"
