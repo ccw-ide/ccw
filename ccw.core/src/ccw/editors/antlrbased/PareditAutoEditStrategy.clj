@@ -33,7 +33,9 @@
 
 (def *strict-commands*
   #{:paredit-close-round, :paredit-close-square, :paredit-close-curly, 
-    :paredit-forward-delete, :paredit-backward-delete})
+    :paredit-forward-delete, :paredit-backward-delete,
+    :paredit-open-round, :paredit-open-square, :paredit-open-curly,
+    :paredit-doublequote})
 
 (def 
   #^{:doc "{:command configuration-key ...}"} 
@@ -64,7 +66,7 @@
 (defn do-command?
   "Will do command if it is :strict and the editor allows it, or if it is not :strict"
   [#^AntlrBasedClojureEditor editor par-command]
-  (println (str "do-command? : '" par-command "'"))
+  ;(println (str "do-command? : '" par-command "'"))
   (cond
     (*strict-commands* par-command)
       (.useStrictStructuralEditing editor)
@@ -84,7 +86,7 @@
           par-command {:text (.text command) :offset (.offset command) :length (.length command)}
           ;_ (println (str "par-command:" par-command))
           [par-command par-text] (paredit-args par-command document-text)
-          _ (println "here is the par-command:" par-command)
+          ;_ (println "here is the par-command:" par-command)
           result (and 
                    par-command 
                    (do-command? (-> this .state deref :editor) par-command)

@@ -217,7 +217,6 @@ public class AntlrBasedClojureEditor extends TextEditor {
 	
 	private void updateParseRef(String text) {
 		parseRef = EditorSupport.updateParseRef(text, parseRef);
-		System.out.println("cached the parser!");
 	}
 	
 	public Object getParsed() {
