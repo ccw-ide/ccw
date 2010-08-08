@@ -29,7 +29,10 @@
   (let [editor #^AntlrBasedClojureEditor (:editor @(.state this))
         {:keys #{length offset}} (bean (.getUnSignedSelection editor))
         text  (.get (.getDocument #^AntlrBasedClojureEditor editor))
-        result (paredit :paredit-indent-line {:text text :offset offset :length length})]
+        result (paredit 
+                 :paredit-indent-line
+                 (.getParsed (-> this .state deref #^ccw.editors.antlrbased.AntlrBasedClojureEditor (:editor)))
+                 {:text text :offset offset :length length})] 
     (when-let [modif (-?> result :modifs first)]
       (let [{:keys #{length offset text}} modif
             document (-> (:editor @(.state this)) .getDocument)]
