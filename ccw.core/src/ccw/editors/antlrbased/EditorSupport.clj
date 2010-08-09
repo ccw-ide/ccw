@@ -33,7 +33,7 @@
   (let [r (if (nil? r) (ref nil) r)] 
     (dosync
       (if-let [rv @r] (cancel (:parser rv)))
-      (ref-set r {:text text :parser (timed-delay 3000 #(time (p/parse text)))}))
+      (ref-set r {:text text :parser (timed-delay 800 #(time (p/parse text)))}))
     r))
 
 (defn -getParser [text r]
