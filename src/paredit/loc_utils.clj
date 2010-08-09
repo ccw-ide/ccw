@@ -17,7 +17,7 @@
 
 (defn split [cs idx]
   (when cs
-    [(subvec 0 idx cs) (cs idx) (subvec (inc idx))]))
+    [(subvec cs 0 idx) (cs idx) (subvec cs (inc idx))]))
 
 (defn vdown
   "Returns the loc of the child at index idx of the node at this loc, or
@@ -97,6 +97,8 @@
   [loc]
   (and loc (remove zip/branch? (take-while (complement nil?) (iterate zip/prev (zip/prev loc))))))
 
+;; TODO we should be able to locate the offset by first looking at the loc index, 
+;; and then get the :content-cumulative-count, etc.
 (defn start-offset [loc]
   (loop [loc loc offset 0] 
     (cond
@@ -145,7 +147,7 @@
   ([parsed] (parsed-root-loc parsed false))
   ([parsed only-valid?]
     ;(let [valid? (= 1 (-> parsed :accumulated-state count))]
-    (zip/xml-zip parsed)))
+    (xml-vzip parsed)))
 
 (defn contains-offset?
   "returns the loc itself if it contains the offset, else nil"
@@ -156,18 +158,29 @@
        (<= start offset (dec end))
        loc)))
 
-;; TODO when parsley is up and implements (count), then it will be (probably)
-;;      more performant to use (count) to jump over nodes
-(defn leave-loc-for-offset-common 
+(defn leave-loc-for-offset-common
   "returns a zipper location or nil if does not contain the offset"
-  [loc offset] 
-    (loop [locs (seq (next-leaves (root-loc loc))) o 0]
-      (if-not locs
-        (root-loc loc) ;best-match
-        (let [end (+ o (.length ^String (zip/node (first locs))))]
-          (if (<= o offset (dec end))
-            (first locs)
-            (recur (next locs) end))))))
+  [loc offset]
+  (if (not (zip/branch? loc))
+    (if (< offset (count (zip/node loc))) loc (root-loc loc))
+    (let [[cloc offset] 
+            (loop [start (int 0) end (int (count (-> loc zip/node :content)))]
+              (if (<= end start)
+                (if (= start (count (-> loc zip/node :content)))
+                  [(root-loc loc) 0] ; problem, no loc found (end of text, will return root-loc instead)
+                  [(vdown loc start) (- offset (-> loc zip/node :content-cumulative-count (get start)))])
+                (let [n (int (+ start (quot (- end start) 2)))
+                      n-offset (-> loc zip/node :content-cumulative-count (get n))
+                      n-node (-> loc zip/node :content (get n))
+                      n-count (if (string? n-node) (count n-node) (or (:count n-node) 0))] 
+                  (cond
+                    (< offset n-offset)
+                      (recur start (dec n))
+                    (< offset (+ n-offset n-count))
+                      [(vdown loc n) (- offset n-offset)]
+                    :else
+                      (recur (inc n) end)))))]
+      (if (zero? offset) cloc (recur cloc offset)))))
 
 (defn leave-for-offset
   [loc offset]

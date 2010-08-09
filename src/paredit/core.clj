@@ -537,4 +537,4 @@
                       :else
                         (update-in t [:offset] + (max to-add (- line-start 
                                                                offset)))))))))
-    t)))
+      t)))
