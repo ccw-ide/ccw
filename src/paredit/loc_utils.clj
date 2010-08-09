@@ -4,6 +4,35 @@
 
 #_(set! *warn-on-reflection* true)
 
+(defn xml-vzip
+  "Returns a zipper for xml elements (as from xml/parse),
+  given a root element"
+  {:added "1.0"}
+  [root]
+    (zip/zipper (complement string?) 
+            :content
+            (fn [node children]
+              (assoc node :content children))
+            root))
+
+(defn split [cs idx]
+  (when cs
+    [(subvec 0 idx cs) (cs idx) (subvec (inc idx))]))
+
+(defn vdown
+  "Returns the loc of the child at index idx of the node at this loc, or
+  nil if no children"
+  {:added "1.0"}
+  [loc idx]
+    (when (zip/branch? loc)
+      (let [[node path] loc
+            [l c r :as cs] (split (zip/children loc) idx)]
+        (when cs
+          (with-meta [c {:l l
+                         :pnodes (if path (conj (:pnodes path) node) [node]) 
+                         :ppath path 
+                         :r r}] (meta loc))))))
+
 (defn node-text [n]
   (if (string? n)
     n
@@ -18,7 +47,9 @@
  ;   (string? (zip/node loc)) (.length ^String (zip/node loc))
  ;   (zip/down loc) (apply + (map #'loc-count (concat [(zip/down loc)] (zip/rights (zip/down loc)))))
  ;   :else 0))
-  (.length ^String (loc-text loc)))
+ (if (zip/branch? loc)
+   (or (:count (zip/node loc)) 0) 
+   (count (zip/node loc))))
 
 (defn ^String loc-tag [loc]
   (and loc 
