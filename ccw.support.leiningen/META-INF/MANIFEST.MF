@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Counterclockwise Leiningen Plug-in
 Bundle-SymbolicName: ccw.support.leiningen
-Bundle-Version: 1.1.0
+Bundle-Version: 1.1.1.STABLE01
 Export-Package: leiningen
 Bundle-ClassPath: .,
  classes/,
