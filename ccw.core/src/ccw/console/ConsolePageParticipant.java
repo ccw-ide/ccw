@@ -106,13 +106,10 @@ public class ConsolePageParticipant implements IConsolePageParticipant {
             // and explicit flag (true by default) to determine the default value for the explicit flag :-)
             try {
 	            IProject project = LaunchUtils.getProject(processConsole.getProcess().getLaunch().getLaunchConfiguration());
-	            project.touch(null);
-//	            try {
-//		            ClojureBuilder.fullBuild(project, new NullProgressMonitor());
-//	            } catch (CoreException e) {
-//	            	CCWPlugin.logError("Unable to auto-compile project " + project.getName() 
-//	            			+ " after having launched a configuration", e);
-//	            }
+	            // Only block the full load of the project's content in the started JVM if it's started with one or more files on the command line
+	            if (LaunchUtils.getFilesToLaunchList(processConsole.getProcess().getLaunch().getLaunchConfiguration()).size() == 0) {
+	                project.touch(null);
+	            }
             } catch (CoreException e) {
             	CCWPlugin.logError("Unable to auto-compile a project after having launched a configuration "
             			+ "because the project cannot be retrieved!", e);
