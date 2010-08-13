@@ -96,7 +96,7 @@
             class="ccw.launching.ClojureLaunchShortcut"
             icon="icons/clojure16x16.png"
             id="ccw.launching.clojureShortcut"
-            label="Clojure REPL"
+            label="New Clojure JVM with REPL"
             modes="run, debug">
          <perspective id="org.eclipse.jdt.ui.JavaPerspective"/>
          <perspective id="org.eclipse.jdt.ui.JavaHierarchyPerspective"/>
