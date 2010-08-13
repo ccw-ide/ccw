@@ -57,7 +57,7 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
     	}
     	
     	if (kind == AUTO_BUILD || kind == INCREMENTAL_BUILD) {
-	    	if (onlyClassesOrOutputFolderRelatedDelta()) {
+	    	if (onlyClassesOrOutputFolderRelatedDelta() && !onlyProjectTouched() ) {
 	    		return null;
 	    	}
     	}
@@ -78,6 +78,12 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
 //            }
 //        }
         return null;
+    }
+    
+    /** Only project touch is treated similarly to a full build request */
+    private boolean onlyProjectTouched() {
+        IResourceDelta delta = getDelta(getProject());
+        return delta.getResource().equals(getProject()) && delta.getAffectedChildren().length == 0;
     }
     
     private boolean onlyClassesOrOutputFolderRelatedDelta() throws CoreException {
