@@ -96,7 +96,48 @@
             class="ccw.launching.ClojureLaunchShortcut"
             icon="icons/clojure16x16.png"
             id="ccw.launching.clojureShortcut"
-            label="New Clojure JVM with REPL"
+            label="New Clojure project&apos;s JVM, with a REPL"
+            modes="run, debug">
+         <perspective
+               id="org.eclipse.jdt.ui.JavaPerspective">
+         </perspective>
+         <perspective
+               id="org.eclipse.jdt.ui.JavaHierarchyPerspective">
+         </perspective>
+         <perspective
+               id="org.eclipse.jdt.ui.JavaBrowsingPerspective">
+         </perspective>
+         <perspective
+               id="org.eclipse.debug.ui.DebugPerspective">
+         </perspective>
+         <perspective
+               id="org.eclipse.pde.ui.PDEPerspective">
+         </perspective>
+         <contextualLaunch>
+            <enablement>
+               <with
+                     variable="selection">
+                  <count
+                        value="1">
+                  </count>
+                  <iterate>
+                     <adapt
+                           type="org.eclipse.core.resources.IProject">
+                        <test
+                              forcePluginActivation="true"
+                              property="ccw.propertyTester.hasClojureNature">
+                        </test>
+                     </adapt>
+                  </iterate>
+               </with>
+            </enablement>
+         </contextualLaunch>
+      </shortcut>
+      <shortcut
+            class="ccw.launching.ClojureLaunchShortcut"
+            icon="icons/clojure16x16.png"
+            id="ccw.launching.clojureShortcut"
+            label="New Clojure project&apos;s JVM, load selected file, with a REPL"
             modes="run, debug">
          <perspective id="org.eclipse.jdt.ui.JavaPerspective"/>
          <perspective id="org.eclipse.jdt.ui.JavaHierarchyPerspective"/>
@@ -113,20 +154,13 @@
                         value="1">
                   </count>
                   <iterate>
-                     <or>
+                     <and>
                         <test
                               forcePluginActivation="true"
                               property="org.eclipse.debug.ui.matchesPattern"
                               value="*.clj">
                         </test>
-                        <adapt
-                              type="org.eclipse.core.resources.IProject">
-                           <test
-                                 forcePluginActivation="true"
-                                 property="ccw.propertyTester.hasClojureNature">
-                           </test>
-                        </adapt>
-                     </or>
+                     </and>
                   </iterate>
                </with>
             </enablement>
