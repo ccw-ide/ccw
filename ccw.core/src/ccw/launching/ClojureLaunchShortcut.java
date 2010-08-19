@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -44,23 +45,31 @@ import org.eclipse.ui.part.FileEditorInput;
 public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfigurationConstants {
 
     public void launch(IEditorPart editor, String mode) {
-    	launchEditorPart(editor, mode);
+    	launchEditorPart(editor, mode, null);
     }
-    public ILaunch launchEditorPart(IEditorPart editor, String mode) {
+    public ILaunch launchEditorPart(IEditorPart editor, String mode, Boolean activateAutoReload) {
         IEditorInput input = editor.getEditorInput();
         if (input instanceof FileEditorInput) {
             FileEditorInput fei = (FileEditorInput) input;
             return launchProject(fei.getFile().getProject(), new IFile[] { fei
-                    .getFile() }, mode);
+                    .getFile() }, mode, activateAutoReload);
         } else {
         	return null;
         }
     }
 
     public void launch(ISelection selection, String mode) {
-    	launchSelection(selection, mode);
+    	launchSelection(selection, mode, null);
     }
-    public ILaunch launchSelection(ISelection selection, String mode) {
+    
+    /**
+     * 
+     * @param selection
+     * @param mode
+     * @param activateAutoReload if null, then will be automatically detected
+     * @return
+     */
+    public ILaunch launchSelection(ISelection selection, String mode, Boolean activateAutoReload) {
         if (selection instanceof IStructuredSelection) {
             IStructuredSelection strSel = (IStructuredSelection) selection;
             List<IFile> files = new ArrayList<IFile>();
@@ -76,28 +85,37 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
                 }
                 IProject p = (IProject) Platform.getAdapterManager().getAdapter(o, IProject.class);
                 if ( p != null  &&  strSel.size() == 1) {
-                    return launchProject(p, new IFile[] {}, mode);
+                    return launchProject(p, new IFile[] {}, mode, activateAutoReload);
                 }
             }
             if (proj != null && !files.isEmpty()) {
-                return launchProject(proj, files.toArray(new IFile[] {}), mode);
+                return launchProject(proj, files.toArray(new IFile[] {}), mode, activateAutoReload);
             }
         }
         return null;
     }
-    public ILaunch launchProject(IProject project, String mode) {
+    public ILaunch launchProject(IProject project, String mode, Boolean activateAutoReload) {
     	StructuredSelection sel = new StructuredSelection(project);
-    	return launchSelection(sel, mode);
+    	return launchSelection(sel, mode, activateAutoReload);
     }
 
-    protected ILaunch launchProject(IProject project, IFile[] files, String mode) {
+    protected ILaunch launchProject(IProject project, IFile[] files, String mode, Boolean activateAutoReload) {
+    	activateAutoReload = activateAutoReload==null ? files.length==0 : activateAutoReload;
         try {
             ILaunchConfiguration config = findLaunchConfiguration(project, files);
             if (config == null) {
                 config = createConfiguration(project, files);
             }
             if (config != null) {
-            	return config.launch(mode, null);
+            	String randomCopyName = UUID.randomUUID().toString();
+            	ILaunchConfigurationWorkingCopy runnableConfiguration = config.copy(randomCopyName);
+            	try {
+	            	runnableConfiguration.setAttribute("ccw.activateAutoReload", activateAutoReload); // TODO no magic string
+	            	ILaunch launch = runnableConfiguration.launch(mode, null);
+	            	return launch;
+            	} finally {
+            		runnableConfiguration.delete();
+            	}
             } else {
             	return null;
             }

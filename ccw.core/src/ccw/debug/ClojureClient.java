@@ -165,9 +165,12 @@ public class ClojureClient {
 	 *        create one if <code>createOneIfNoneFound</code> is true, else return null.
 	 * @param project null if <code>createOneIfNoneFound</code> is false, or the project
 	 *        for which to start a new Clojure JVM
+	 * @param if true, then the started clojure VM will reload the contents of the project
+	 *        when project files are saved, and also load the contents of the project when
+	 *        it is started
 	 * @return
 	 */
-    public static IOConsole findActiveReplConsole(boolean createOneIfNoneFound, IProject project) {
+    public static IOConsole findActiveReplConsole(boolean createOneIfNoneFound, IProject project, boolean activateAutoReload) {
     	IOConsole ioc = findActiveReplConsole();
     	if (ioc != null) {
     		System.out.println("active console found");
@@ -180,7 +183,7 @@ public class ClojureClient {
     		} else {
 	    		// Start a new one
 	    		System.out.println("will start new one");
-				new ClojureLaunchShortcut().launchProject(project, ILaunchManager.RUN_MODE);
+				new ClojureLaunchShortcut().launchProject(project, ILaunchManager.RUN_MODE, activateAutoReload);
 				System.out.println("launchEditorPart called, launch returned");
 				IOConsole console = findActiveReplConsole();
 				System.out.println("console found after creation of new ILaunch");
@@ -189,7 +192,7 @@ public class ClojureClient {
     	}
     }
 
-    private static IOConsole findActiveReplConsole() {
+    public static IOConsole findActiveReplConsole() {
         IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
         if (window != null) {
             IWorkbenchPage page = window.getActivePage();

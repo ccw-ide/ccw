@@ -234,7 +234,7 @@ public final class ClojureCore {
      */
     public static void openInEditor(String searchedNS, String searchedFileName, int line) {
 		try {
-			org.eclipse.debug.ui.console.IConsole console = (org.eclipse.debug.ui.console.IConsole) ClojureClient.findActiveReplConsole(false, null);
+			org.eclipse.debug.ui.console.IConsole console = (org.eclipse.debug.ui.console.IConsole) ClojureClient.findActiveReplConsole();
 			if (console == null) {
 				return;
 			}

@@ -42,7 +42,7 @@ abstract public class EvaluateTextAction extends Action {
 	}
 	public static final void evaluateText(final String text, IProject project) {
 		System.out.println("before findActiveReplConsole()");
-		IOConsole console = ClojureClient.findActiveReplConsole(true, project);
+		IOConsole console = ClojureClient.findActiveReplConsole(true, project, false);
 		System.out.println("after findActiveReplConsole()");
 		evaluateText(console, text);
 	}
