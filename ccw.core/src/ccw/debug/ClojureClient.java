@@ -10,6 +10,8 @@
  *******************************************************************************/
 package ccw.debug;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbenchPage;
@@ -22,6 +24,7 @@ import org.eclipse.ui.console.IConsoleView;
 import org.eclipse.ui.console.IOConsole;
 
 import ccw.CCWPlugin;
+import ccw.launching.ClojureLaunchShortcut;
 import ccw.launching.LaunchUtils;
 import clojure.lang.RT;
 import clojure.lang.Var;
@@ -157,8 +160,36 @@ public class ClojureClient {
         cv.display(console);
     }
 
-	
-    public static IOConsole findActiveReplConsole() {
+	/**
+	 * @param createOneIfNoneFound If no active Repl Console is found for the project,
+	 *        create one if <code>createOneIfNoneFound</code> is true, else return null.
+	 * @param project null if <code>createOneIfNoneFound</code> is false, or the project
+	 *        for which to start a new Clojure JVM
+	 * @return
+	 */
+    public static IOConsole findActiveReplConsole(boolean createOneIfNoneFound, IProject project) {
+    	IOConsole ioc = findActiveReplConsole();
+    	if (ioc != null) {
+    		System.out.println("active console found");
+    		return ioc;
+    	} else {
+    		System.out.print("no active console found...");
+    		if (!createOneIfNoneFound) {
+    			System.out.println("but createOneIfNoneFound=false, thus will not try to create a new one");
+    			return null;
+    		} else {
+	    		// Start a new one
+	    		System.out.println("will start new one");
+				new ClojureLaunchShortcut().launchProject(project, ILaunchManager.RUN_MODE);
+				System.out.println("launchEditorPart called, launch returned");
+				IOConsole console = findActiveReplConsole();
+				System.out.println("console found after creation of new ILaunch");
+				return console;
+    		}
+    	}
+    }
+
+    private static IOConsole findActiveReplConsole() {
         IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
         if (window != null) {
             IWorkbenchPage page = window.getActivePage();
@@ -190,5 +221,4 @@ public class ClojureClient {
         }
         return null;
     }
-
 }

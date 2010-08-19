@@ -20,7 +20,7 @@ public class LoadFileAction extends EvaluateTextAction {
 	private final AntlrBasedClojureEditor editor;
 
 	public LoadFileAction(AntlrBasedClojureEditor editor) {
-		super(ClojureEditorMessages.LoadFileAction_label);
+		super(ClojureEditorMessages.LoadFileAction_label, editor.getProject());
 		Assert.isNotNull(editor);
 		this.editor= editor;
 		setEnabled(true);

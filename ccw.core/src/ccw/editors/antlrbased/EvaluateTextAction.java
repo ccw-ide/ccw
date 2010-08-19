@@ -12,6 +12,7 @@ package ccw.editors.antlrbased;
 
 import java.io.IOException;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
@@ -26,13 +27,24 @@ import ccw.util.DisplayUtil;
 import ccw.util.IOUtils;
 
 abstract public class EvaluateTextAction extends Action {
+	protected final IProject project;
 	
-	public EvaluateTextAction(String text) {
-		super(text);
+	public EvaluateTextAction(String name, IProject project) {
+		super(name);
+		
+		assert project != null;
+		
+		this.project = project;
 	}
 	
-	public static final void evaluateText(final String text) {
-		evaluateText(ClojureClient.findActiveReplConsole(), text);
+	public final void evaluateText(final String text) {
+		EvaluateTextAction.evaluateText(text, project);
+	}
+	public static final void evaluateText(final String text, IProject project) {
+		System.out.println("before findActiveReplConsole()");
+		IOConsole console = ClojureClient.findActiveReplConsole(true, project);
+		System.out.println("after findActiveReplConsole()");
+		evaluateText(console, text);
 	}
 	
 	public static final void evaluateText(IOConsole console, final String text) {

@@ -23,7 +23,7 @@ public class CompileLibAction extends EvaluateTextAction {
 	private final AntlrBasedClojureEditor editor;
 
 	public CompileLibAction(AntlrBasedClojureEditor editor) {
-		super(ClojureEditorMessages.CompileLibAction_label);
+		super(ClojureEditorMessages.CompileLibAction_label, editor.getProject());
 		Assert.isNotNull(editor);
 		this.editor= editor;
 		setEnabled(true);

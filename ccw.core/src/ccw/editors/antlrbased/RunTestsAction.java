@@ -68,7 +68,7 @@ public class RunTestsAction extends Action {
     }
 
     private void setReplBackgroundColor(Color background) {
-        IOConsole replConsole = ClojureClient.findActiveReplConsole();
+        IOConsole replConsole = ClojureClient.findActiveReplConsole(true, editor.getProject());
         replConsole.setBackground(background);
     }
 

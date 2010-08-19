@@ -21,6 +21,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -33,6 +34,7 @@ import org.eclipse.jdt.internal.debug.ui.launcher.LauncherMessages;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -42,15 +44,23 @@ import org.eclipse.ui.part.FileEditorInput;
 public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfigurationConstants {
 
     public void launch(IEditorPart editor, String mode) {
+    	launchEditorPart(editor, mode);
+    }
+    public ILaunch launchEditorPart(IEditorPart editor, String mode) {
         IEditorInput input = editor.getEditorInput();
         if (input instanceof FileEditorInput) {
             FileEditorInput fei = (FileEditorInput) input;
-            launchProject(fei.getFile().getProject(), new IFile[] { fei
+            return launchProject(fei.getFile().getProject(), new IFile[] { fei
                     .getFile() }, mode);
+        } else {
+        	return null;
         }
     }
 
     public void launch(ISelection selection, String mode) {
+    	launchSelection(selection, mode);
+    }
+    public ILaunch launchSelection(ISelection selection, String mode) {
         if (selection instanceof IStructuredSelection) {
             IStructuredSelection strSel = (IStructuredSelection) selection;
             List<IFile> files = new ArrayList<IFile>();
@@ -66,24 +76,30 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
                 }
                 IProject p = (IProject) Platform.getAdapterManager().getAdapter(o, IProject.class);
                 if ( p != null  &&  strSel.size() == 1) {
-                    launchProject(p, new IFile[] {}, mode);
-                    return;
+                    return launchProject(p, new IFile[] {}, mode);
                 }
             }
             if (proj != null && !files.isEmpty()) {
-                launchProject(proj, files.toArray(new IFile[] {}), mode);
+                return launchProject(proj, files.toArray(new IFile[] {}), mode);
             }
         }
+        return null;
+    }
+    public ILaunch launchProject(IProject project, String mode) {
+    	StructuredSelection sel = new StructuredSelection(project);
+    	return launchSelection(sel, mode);
     }
 
-    protected void launchProject(IProject project, IFile[] files, String mode) {
+    protected ILaunch launchProject(IProject project, IFile[] files, String mode) {
         try {
             ILaunchConfiguration config = findLaunchConfiguration(project, files);
             if (config == null) {
                 config = createConfiguration(project, files);
             }
             if (config != null) {
-            	config.launch(mode, null);
+            	return config.launch(mode, null);
+            } else {
+            	return null;
             }
         } catch (CoreException e) {
             throw new RuntimeException(e);
