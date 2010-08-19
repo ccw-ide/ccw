@@ -10,10 +10,13 @@
  *******************************************************************************/
 package ccw.debug;
 
+import java.util.logging.Logger;
+
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
@@ -162,22 +165,24 @@ public class ClojureClient {
         if (window != null) {
             IWorkbenchPage page = window.getActivePage();
             if (page != null) {
-                for (IViewReference r : page.getViewReferences()) {
-                    IViewPart v = r.getView(false);
-                    if (IConsoleView.class.isInstance(v)) {
-                        IConsole[] consoles = ConsolePlugin.getDefault().getConsoleManager().getConsoles();
-                        for (IConsole console : consoles) {
-                            if (console instanceof org.eclipse.debug.ui.console.IConsole) {
-                                org.eclipse.debug.ui.console.IConsole processConsole = (org.eclipse.debug.ui.console.IConsole) console;
-                                int port = LaunchUtils.getLaunchServerReplPort(processConsole.getProcess().getLaunch());
-                                if (port != -1) {
-                                    if (!page.isPartVisible(v)) {
-                                        activateReplAndShowConsole(page, v, console);
-                                    }
-                                    assert IOConsole.class.isInstance(processConsole);
-                                    return (IOConsole) processConsole;
-                                }
+            	IConsoleView v;
+				try {
+					v = (IConsoleView) page.showView("org.eclipse.ui.console.ConsoleView");
+				} catch (PartInitException e) {
+					e.printStackTrace(); // Improbable, or Eclipse would have been wrongly initialized
+					return null;
+				}
+                IConsole[] consoles = ConsolePlugin.getDefault().getConsoleManager().getConsoles();
+                for (IConsole console : consoles) {
+                    if (console instanceof org.eclipse.debug.ui.console.IConsole) {
+                        org.eclipse.debug.ui.console.IConsole processConsole = (org.eclipse.debug.ui.console.IConsole) console;
+                        int port = LaunchUtils.getLaunchServerReplPort(processConsole.getProcess().getLaunch());
+                        if (port != -1) {
+                            if (!page.isPartVisible(v)) {
+                                activateReplAndShowConsole(page, v, console);
                             }
+                            assert IOConsole.class.isInstance(processConsole);
+                            return (IOConsole) processConsole;
                         }
                     }
                 }
