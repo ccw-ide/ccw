@@ -10,8 +10,6 @@
  *******************************************************************************/
 package ccw.debug;
 
-import java.util.logging.Logger;
-
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbenchPage;
@@ -176,13 +174,15 @@ public class ClojureClient {
                 for (IConsole console : consoles) {
                     if (console instanceof org.eclipse.debug.ui.console.IConsole) {
                         org.eclipse.debug.ui.console.IConsole processConsole = (org.eclipse.debug.ui.console.IConsole) console;
-                        int port = LaunchUtils.getLaunchServerReplPort(processConsole.getProcess().getLaunch());
-                        if (port != -1) {
-                            if (!page.isPartVisible(v)) {
-                                activateReplAndShowConsole(page, v, console);
-                            }
-                            assert IOConsole.class.isInstance(processConsole);
-                            return (IOConsole) processConsole;
+                        if (!processConsole.getProcess().isTerminated()) {
+	                        int port = LaunchUtils.getLaunchServerReplPort(processConsole.getProcess().getLaunch());
+	                        if (port != -1) {
+	                            if (!page.isPartVisible(v)) {
+	                                activateReplAndShowConsole(page, v, console);
+	                            }
+	                            assert IOConsole.class.isInstance(processConsole);
+	                            return (IOConsole) processConsole;
+	                        }
                         }
                     }
                 }
