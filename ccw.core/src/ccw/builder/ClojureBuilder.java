@@ -122,7 +122,7 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
         }
         
         ClojureClient clojureClient = CCWPlugin.getDefault().getProjectClojureClient(project);
-        if (clojureClient == null) {
+        if (clojureClient == null || !clojureClient.isAutoReloadEnabled()) {
         	return;
         }
         

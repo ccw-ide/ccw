@@ -61,6 +61,8 @@ public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
 
 	public static final String ATTR_CLOJURE_INSTALL_REPL = "CCW_ATTR_CLOJURE_INSTALL_REPL";
 
+	public static final String ATTR_IS_AUTO_RELOAD_ENABLED = "CCW_ATTR_IS_AUTO_RELOAD_ENABLED";
+
 	/**
 	 * @param files
 	 * @param lastFileAsScript if true, does not install the last arg as a resource to load, but as

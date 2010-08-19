@@ -11,6 +11,7 @@
 package ccw.debug;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewReference;
@@ -33,23 +34,34 @@ public class ClojureClient {
 	private static final Var remoteLoad;
 	private static final Var remoteLoadRead;
 	private static final Var loadString;
-//	private static final Var localLoadRead;
 	private static final Var starPort;
+	
 	private final int port;
+	private final boolean isAutoReloadEnabled;
 	
 	static {
 		remoteLoad = RT.var("ccw.debug.clientrepl", "remote-load");
 		remoteLoadRead = RT.var("ccw.debug.clientrepl", "remote-load-read");
 		loadString = RT.var("clojure.core", "load-string");
-//		localLoadRead = RT.var("clojure.core", "local-load-read");
 		starPort = RT.var("ccw.debug.clientrepl", "*default-repl-port*");
 	}
 	
-	public ClojureClient(int port) {
+	public static ClojureClient create(ILaunch launch) {
+        int clojureVMPort = LaunchUtils.getLaunchServerReplPort(launch);
+        if (clojureVMPort != -1) {
+        	return new ClojureClient(clojureVMPort, CCWPlugin.isAutoReloadEnabled(launch));
+        } else {
+        	return null;
+        }
+	}
+	
+	private ClojureClient(int port, boolean isAutoReloadEnabled) {
 		this.port = port;
+		this.isAutoReloadEnabled = isAutoReloadEnabled;
 	}
 	
 	public int getPort() { return port; }
+	public boolean isAutoReloadEnabled() { return isAutoReloadEnabled; }
 
 	public String remoteLoad(String remoteCode) {
 		Object result = invokeClojureVarWith(remoteLoad, remoteCode);
@@ -63,10 +75,6 @@ public class ClojureClient {
 	public static Object loadString(String localCode) {
 		return invokeLocalClojureVarWith(loadString, localCode);
 	}
-	
-//	public Object localLoadRead(String localCode) {
-//		return invokeClojureVarWith(localLoadRead, localCode);
-//	}
 	
 	private Object invokeClojureVarWith(Var varToInvoke, String code) {
 		try {
@@ -147,7 +155,7 @@ public class ClojureClient {
                     if (!page.isPartVisible(v)) {
                         activateReplAndShowConsole(page, v, console);
                     }
-                    return new ClojureClient(port);
+                    return ClojureClient.create(processConsole.getProcess().getLaunch());
                 }
             }
         }

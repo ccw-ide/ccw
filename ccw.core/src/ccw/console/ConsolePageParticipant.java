@@ -107,7 +107,8 @@ public class ConsolePageParticipant implements IConsolePageParticipant {
             try {
 	            IProject project = LaunchUtils.getProject(processConsole.getProcess().getLaunch().getLaunchConfiguration());
 	            // Only block the full load of the project's content in the started JVM if it's started with one or more files on the command line
-	            if (LaunchUtils.getFilesToLaunchList(processConsole.getProcess().getLaunch().getLaunchConfiguration()).size() == 0) {
+	            if (LaunchUtils.getFilesToLaunchList(processConsole.getProcess().getLaunch().getLaunchConfiguration()).size() == 0
+	            		&& clojureClient.isAutoReloadEnabled()) {
 	                project.touch(null);
 	            }
             } catch (CoreException e) {
@@ -125,9 +126,8 @@ public class ConsolePageParticipant implements IConsolePageParticipant {
             if (Thread.interrupted()) {
                 stop = true;
             } else {
-                int clojureVMPort = LaunchUtils.getLaunchServerReplPort(processConsole.getProcess().getLaunch());
-                if (clojureVMPort != -1) {
-                    clojureClient = new ClojureClient(clojureVMPort);
+            	clojureClient = ClojureClient.create(processConsole.getProcess().getLaunch());
+                if (clojureClient != null) {
                     stop = true;
                 } else {
                     try {

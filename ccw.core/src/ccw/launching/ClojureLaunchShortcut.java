@@ -110,7 +110,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
             	String randomCopyName = UUID.randomUUID().toString();
             	ILaunchConfigurationWorkingCopy runnableConfiguration = config.copy(randomCopyName);
             	try {
-	            	runnableConfiguration.setAttribute("ccw.activateAutoReload", activateAutoReload); // TODO no magic string
+	            	runnableConfiguration.setAttribute(LaunchUtils.ATTR_IS_AUTO_RELOAD_ENABLED, activateAutoReload);
 	            	ILaunch launch = runnableConfiguration.launch(mode, null);
 	            	return launch;
             	} finally {

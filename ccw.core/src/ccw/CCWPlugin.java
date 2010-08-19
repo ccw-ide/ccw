@@ -253,6 +253,9 @@ public class CCWPlugin extends AbstractUIPlugin {
 			return -1;
 		}
 	}
+	public static boolean isAutoReloadEnabled(ILaunch launch) {
+		return (Boolean.parseBoolean(launch.getAttribute(LaunchUtils.ATTR_IS_AUTO_RELOAD_ENABLED)));
+	}
 	
     private void startLaunchListener() {
 		stopLaunchListener();
@@ -271,7 +274,7 @@ public class CCWPlugin extends AbstractUIPlugin {
 			}
 			String launchProject = launch.getAttribute(LaunchUtils.ATTR_PROJECT_NAME);
 			if (launchProject != null && launchProject.equals(project.getName())) {
-				return new ClojureClient(findClojurePort(launch));
+				return ClojureClient.create(launch);
 			}
 		}
 		return null;

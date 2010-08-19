@@ -51,6 +51,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 				throw new CoreException(Status.CANCEL_STATUS); // TODO do better than that ?
 			}
         }
+        launch.setAttribute(LaunchUtils.ATTR_IS_AUTO_RELOAD_ENABLED, Boolean.toString(configuration.getAttribute(LaunchUtils.ATTR_IS_AUTO_RELOAD_ENABLED, false)));
         this.launch = launch;
         super.launch(configuration, mode, launch, monitor);
     }
