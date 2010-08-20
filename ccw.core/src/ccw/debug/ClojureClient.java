@@ -193,11 +193,34 @@ public class ClojureClient {
 	    		System.out.println("will start new one");
 				new ClojureLaunchShortcut().launchProject(project, ILaunchManager.RUN_MODE, activateAutoReload);
 				System.out.println("launchEditorPart called, launch returned");
-				IOConsole console = findActiveReplConsole();
+				IOConsole console = findActiveReplConsole(5000);
 				System.out.println("console found after creation of new ILaunch");
 				return console;
     		}
     	}
+    }
+    
+    /**
+     * Blocking call
+     * @param timeoutMillisec
+     * @return
+     */
+    public static IOConsole findActiveReplConsole(long timeoutMillisec) {
+    	long timeoutTime = System.currentTimeMillis() + timeoutMillisec;
+    	IOConsole console = null;
+    	while (System.currentTimeMillis() < timeoutTime) {
+    		console = findActiveReplConsole();
+    		if (console != null) {
+    			break;
+    		} else {
+    			try {
+    				Thread.sleep(50);
+    			} catch(InterruptedException e) {
+    				// continue
+    			}
+    		}
+    	}
+    	return console;
     }
 
     public static IOConsole findActiveReplConsole() {
