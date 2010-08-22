@@ -979,4 +979,24 @@
        </with>
     </definition>
  </extension>
+ <extension
+       point="org.eclipse.ui.workbench.texteditor.hyperlinkDetectors">
+    <hyperlinkDetector
+          activate="true"
+          class="ccw.editors.antlrbased.ClojureHyperlinkDetector"
+          id="ccw.texteditor.hyperlinkDetector"
+          name="%clojureHyperlinkDetector"
+          targetId="ccw.ui.clojureCode">
+    </hyperlinkDetector>
+ </extension>
+ <extension
+       point="org.eclipse.ui.workbench.texteditor.hyperlinkDetectorTargets">
+    <target
+          id="ccw.ui.clojureCode"
+          name="Clojure Editor">
+       <context
+             type="ccw.editors.antlrbased.AntlrBasedClojureEditor">
+       </context>
+    </target>
+ </extension>
 </plugin>

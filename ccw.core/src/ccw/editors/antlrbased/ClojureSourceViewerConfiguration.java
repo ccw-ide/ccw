@@ -12,6 +12,9 @@
  *******************************************************************************/
 package ccw.editors.antlrbased;
 
+import java.util.Map;
+
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.internal.text.html.HTMLTextPresenter;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.DefaultInformationControl;
@@ -25,6 +28,8 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
+import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
+import org.eclipse.jface.text.hyperlink.IHyperlinkPresenter;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.reconciler.IReconciler;
@@ -153,5 +158,18 @@ public class ClojureSourceViewerConfiguration extends
 		return new IAutoEditStrategy[] { 
 				new PareditAutoEditStrategy(editor, fPreferenceStore) };
 	}
-
+	@Override
+	public IHyperlinkDetector[] getHyperlinkDetectors(ISourceViewer sourceViewer) {
+		// TODO see if this must be overriden ...
+		return super.getHyperlinkDetectors(sourceViewer);
+	}
+	
+	@Override
+	protected Map getHyperlinkDetectorTargets(ISourceViewer sourceViewer) {
+		Map<String, IAdaptable> map = (Map<String, IAdaptable>) super.getHyperlinkDetectorTargets(sourceViewer);
+		map.put(ClojureHyperlinkDetector.TARGET_ID, editor);
+		
+		return map;
+	}
+	
 }
