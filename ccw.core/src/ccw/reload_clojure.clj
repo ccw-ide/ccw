@@ -33,7 +33,9 @@
                       [SplitSexprAction]
                       [JoinSexprAction]
                       [SwitchStructuralEditionModeAction]
-                      [EditorSupport]]))
+                      [EditorSupport]
+                      [ClojureHyperlinkDetector]
+                      [ClojureHyperlink]]))
 
 (defn -run [this]
   (require :reload 'ccw.reload-clojure)
