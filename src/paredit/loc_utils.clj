@@ -1,4 +1,5 @@
 (ns paredit.loc-utils
+  (:use paredit.parser)
   (:require [clojure.zip :as zip])
   (:require [clojure.contrib.zip-filter :as zf]))
 
@@ -78,7 +79,7 @@
   (and
     loc
     (string? (zip/node loc)) 
-    (not (#{:whitespace :atom :comment :char :string :regex} (loc-tag (zip/up loc))))))
+    (not ((conj *atom* :whitespace :comment :char :string :regex) (loc-tag (zip/up loc))))))
 
 (defn root-loc [loc] (if-let [up (zip/up loc)] (recur up) loc))
 

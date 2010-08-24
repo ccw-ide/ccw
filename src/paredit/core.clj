@@ -437,7 +437,7 @@
                   t
                   (let [replace-offset (- (end-offset ln) (if-let [punct ^String (*tag-closing-brackets* (loc-tag ln))] (.length punct) 0))
                         replace-length (- (+ (start-offset rn) (if-let [punct ^String (*tag-closing-brackets* (loc-tag rn))] (.length punct) 0)) replace-offset)
-                        replace-text   (if (#{:string :atom} (loc-tag ln)) "" " ")
+                        replace-text   (if ((conj *atom* :string) (loc-tag ln)) "" " ")
                         new-offset (if (= offset (start-offset rn)) (+ replace-offset (.length replace-text)) replace-offset)]
                     (-> t (assoc-in [:text] (t/str-replace text replace-offset replace-length replace-text))
                       (assoc-in [:offset] new-offset)
