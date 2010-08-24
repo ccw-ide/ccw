@@ -32,4 +32,4 @@
     (when (= :symbol (-> l z/node :tag))
       (into-array 
         [(ClojureHyperlink. (Region. (lu/start-offset l) (-> l z/node :count)) 
-                            nil)]))))
+                            #(ccw.editors.antlrbased.OpenDeclarationAction/run (lu/loc-text l) (editor this)))]))))

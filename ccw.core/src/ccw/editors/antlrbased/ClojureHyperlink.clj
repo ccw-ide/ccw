@@ -22,4 +22,4 @@
   [this] "static hyperlink label")
 
 (defn -open
-  [this])
+  [this] ((:open (state-val this))))

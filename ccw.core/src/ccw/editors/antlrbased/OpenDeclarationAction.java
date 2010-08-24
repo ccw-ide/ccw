@@ -29,10 +29,16 @@ public class OpenDeclarationAction extends Action {
 
     @Override
     public void run() {
+    	// TODO factorize with ClojureHyperlinkDetector
         int caretOffset = editor.getUnSignedSelection(editor.sourceViewer()).getOffset();
         Tokens tokens = new Tokens(editor.getDocument(), caretOffset);
         tokens.tokenAtCaret();
         String tokenContents = tokens.tokenContents();
+        
+        run(tokenContents, editor);
+    }
+    
+    public static void run(String tokenContents, AntlrBasedClojureEditor editor) {
         List<String> split = Arrays.asList(tokenContents.split("/"));
         String symbol = tokenContents;
         String declaringNamespace = editor.getDeclaringNamespace();
