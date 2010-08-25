@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -47,7 +48,6 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.TextEditor;
-import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.ContentAssistAction;
 import org.eclipse.ui.texteditor.IStatusField;
@@ -899,7 +899,17 @@ public class AntlrBasedClojureEditor extends TextEditor {
     	}
     }
     
+    /**
+     * @return the project, or null if unknown 
+     * (case when clojure file open from a Jar via a JarEditorInput, etc.)
+     */
     public IProject getProject() {
-    	return ((FileEditorInput) getEditorInput()).getFile().getProject();
+    	IResource resource = (IResource) getEditorInput().getAdapter(IResource.class);
+    	if (resource != null) {
+    		return resource.getProject();
+    	} else {
+    		return null;
+    	}
+    	
     }
 }

@@ -181,20 +181,16 @@ public class ClojureClient {
     public static IOConsole findActiveReplConsole(boolean createOneIfNoneFound, IProject project, boolean activateAutoReload) {
     	IOConsole ioc = findActiveReplConsole();
     	if (ioc != null) {
-    		System.out.println("active console found");
     		return ioc;
     	} else {
-    		System.out.print("no active console found...");
-    		if (!createOneIfNoneFound) {
-    			System.out.println("but createOneIfNoneFound=false, thus will not try to create a new one");
+    		if (!createOneIfNoneFound 
+    				|| project == null // if passed project is unknown, then of course we cannot automatically open a REPL ...
+    				) { 
     			return null;
     		} else {
 	    		// Start a new one
-	    		System.out.println("will start new one");
 				new ClojureLaunchShortcut().launchProject(project, ILaunchManager.RUN_MODE, activateAutoReload);
-				System.out.println("launchEditorPart called, launch returned");
 				IOConsole console = findActiveReplConsole(5000);
-				System.out.println("console found after creation of new ILaunch");
 				return console;
     		}
     	}

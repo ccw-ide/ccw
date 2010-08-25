@@ -31,9 +31,7 @@ abstract public class EvaluateTextAction extends Action {
 	
 	public EvaluateTextAction(String name, IProject project) {
 		super(name);
-		
-		assert project != null;
-		
+
 		this.project = project;
 	}
 	
@@ -41,10 +39,7 @@ abstract public class EvaluateTextAction extends Action {
 		EvaluateTextAction.evaluateText(text, project);
 	}
 	public static final void evaluateText(final String text, IProject project) {
-		System.out.println("before findActiveReplConsole()");
-		System.out.println("Will evaluate text'" + text + "'");
 		IOConsole console = ClojureClient.findActiveReplConsole(true, project, false);
-		System.out.println("after findActiveReplConsole()");
 		evaluateText(console, text);
 	}
 	

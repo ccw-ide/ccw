@@ -19,7 +19,9 @@ public class EvaluateTopLevelSExpressionAction extends EvaluateTextAction {
 	private final AntlrBasedClojureEditor editor;
 
 	public EvaluateTopLevelSExpressionAction(AntlrBasedClojureEditor editor) {
-		super(ClojureEditorMessages.EvaluateTopLevelSExpressionAction_label, editor.getProject());
+		super(ClojureEditorMessages.EvaluateTopLevelSExpressionAction_label, 
+				editor.getProject() // TODO remove this constraint when the new REPL support is done
+				);
 		Assert.isNotNull(editor);
 		this.editor= editor;
 		setEnabled(true);
