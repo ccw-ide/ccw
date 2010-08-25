@@ -62,10 +62,6 @@ public class OpenDeclarationAction extends Action {
         String file = result.get(0);
         Integer line = Integer.valueOf(result.get(1));
         String ns = result.get(3);
-        if (file.endsWith(editor.getPartName())) {
-            ClojureCore.gotoEditorLine(editor, line);
-        } else {
-            ClojureCore.openInEditor(ns, file, line);
-        }
+        ClojureCore.openInEditor(ns, file, line);
     }
 }
