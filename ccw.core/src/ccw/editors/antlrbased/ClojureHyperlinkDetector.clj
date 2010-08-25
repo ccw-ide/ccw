@@ -29,7 +29,11 @@
   [this textViewer region canShowMultipleHyperlinks?]
   (let [rloc (-> this editor .getParsed lu/parsed-root-loc)
         l (lu/loc-for-offset rloc (.getOffset region))]
-    (when (= :symbol (-> l z/node :tag))
+    
+    (when-let [{:strs #{ns file line}} (and (= :symbol (-> l z/node :tag)) 
+                      (ccw.editors.antlrbased.OpenDeclarationAction/findDecl 
+                        (lu/loc-text l) (editor this)))]
       (into-array 
-        [(ClojureHyperlink. (Region. (lu/start-offset l) (-> l z/node :count)) 
-                            #(ccw.editors.antlrbased.OpenDeclarationAction/run (lu/loc-text l) (editor this)))]))))
+        [(ClojureHyperlink. 
+           (Region. (lu/start-offset l) (-> l z/node :count)) 
+           #(ccw.ClojureCore/openInEditor ns file line))]))))

@@ -11,7 +11,9 @@
 package ccw.editors.antlrbased;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jface.action.Action;
 
@@ -29,16 +31,25 @@ public class OpenDeclarationAction extends Action {
 
     @Override
     public void run() {
-    	// TODO factorize with ClojureHyperlinkDetector
         int caretOffset = editor.getUnSignedSelection(editor.sourceViewer()).getOffset();
+        // TODO factorize with ClojureHyperlinkDetector concerning the retrieval of the symbol ...
         Tokens tokens = new Tokens(editor.getDocument(), caretOffset);
         tokens.tokenAtCaret();
         String tokenContents = tokens.tokenContents();
         
-        run(tokenContents, editor);
+        Map<String, Object> decl = findDecl(tokenContents, editor);
+        String file = (String) decl.get("file");
+        Integer line = (Integer) decl.get("line");
+        String ns = (String) decl.get("ns");
+        ClojureCore.openInEditor(ns, file, line);
     }
     
-    public static void run(String tokenContents, AntlrBasedClojureEditor editor) {
+    /**
+     * @return a map with keys: "file": filename, "line": line in file, 
+     *         "ns": searched namespace
+     */
+    @SuppressWarnings("unchecked")
+	public static Map<String, Object> findDecl(String tokenContents, AntlrBasedClojureEditor editor) {
         List<String> split = Arrays.asList(tokenContents.split("/"));
         String symbol = tokenContents;
         String declaringNamespace = editor.getDeclaringNamespace();
@@ -51,17 +62,18 @@ public class OpenDeclarationAction extends Action {
         ClojureClient clojure = ClojureClient.newClientForActiveRepl();
         if (clojure == null) {
             editor.setStatusLineErrorMessage(ClojureEditorMessages.You_need_a_running_repl);
-            return;
+            return null;
         }
         PersistentArrayMap result2 = (PersistentArrayMap) clojure.remoteLoadRead(command);
         List<String> result = (List<String>) result2.get("response");
         if (result == null || result.isEmpty() || result2.get("response-type").equals(-1)) {
             editor.setStatusLineErrorMessage(ClojureEditorMessages.Cannot_find_declaration);
-            return;
+            return null;
         }
-        String file = result.get(0);
-        Integer line = Integer.valueOf(result.get(1));
-        String ns = result.get(3);
-        ClojureCore.openInEditor(ns, file, line);
+        Map<String, Object> r = new HashMap<String, Object>(3);
+        r.put("file", result.get(0));
+        r.put("line", (Integer) Integer.valueOf(result.get(1)));
+        r.put("ns", result.get(3));
+        return r;
     }
 }
