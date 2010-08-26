@@ -349,7 +349,8 @@ public class AntlrBasedClojureEditor extends TextEditor {
 	    */
 		action = new OpenDeclarationAction(this);
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.OPEN_DECLARATION);
-		setAction(OpenDeclarationAction.ID, action);
+		setAction(IHyperlinkConstants.OpenDeclarationAction_ID, action);
+		
 		action = new Action() {
 			@Override
 			public void run() {

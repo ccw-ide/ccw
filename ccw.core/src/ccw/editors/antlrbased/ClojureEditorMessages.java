@@ -63,7 +63,8 @@ public final class ClojureEditorMessages extends NLS {
     public static String JoinSexprAction_description;
     public static String SwitchStructuralEditionModeAction_label;
     public static String SwitchStructuralEditionModeAction_description;
-
+    public static String OpenDeclarationAction_label;
+    public static String OpenDeclarationAction_description;
     
     public static String Cannot_find_declaration;
     public static String You_need_a_running_repl;

@@ -29,6 +29,7 @@
        'ccw.editors.antlrbased.SplitSexprAction
        'ccw.editors.antlrbased.JoinSexprAction
        'ccw.editors.antlrbased.SwitchStructuralEditionModeAction
+       'ccw.editors.antlrbased.OpenDeclarationAction
        'ccw.editors.antlrbased.EditorSupport
        'ccw.editors.antlrbased.ClojureHyperlinkDetector
        'ccw.editors.antlrbased.ClojureHyperlink])))

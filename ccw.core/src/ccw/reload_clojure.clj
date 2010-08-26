@@ -33,6 +33,7 @@
                       [SplitSexprAction]
                       [JoinSexprAction]
                       [SwitchStructuralEditionModeAction]
+                      [OpenDeclarationAction]
                       [EditorSupport]
                       [ClojureHyperlinkDetector]
                       [ClojureHyperlink]]))
