@@ -157,17 +157,11 @@ public class ClojureSourceViewerConfiguration extends
 		return new IAutoEditStrategy[] { 
 				new PareditAutoEditStrategy(editor, fPreferenceStore) };
 	}
-	@Override
-	public IHyperlinkDetector[] getHyperlinkDetectors(ISourceViewer sourceViewer) {
-		// TODO see if this must be overriden ...
-		return super.getHyperlinkDetectors(sourceViewer);
-	}
 	
 	@Override
 	protected Map getHyperlinkDetectorTargets(ISourceViewer sourceViewer) {
 		Map<String, IAdaptable> map = (Map<String, IAdaptable>) super.getHyperlinkDetectorTargets(sourceViewer);
 		map.put(IHyperlinkConstants.ClojureHyperlinkDetector_TARGET_ID, editor);
-		
 		return map;
 	}
 	
