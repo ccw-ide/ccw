@@ -127,7 +127,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     private ILaunchConfiguration findLaunchConfiguration(IProject project, IFile[] files) {
         ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
         ILaunchConfigurationType type =
-            lm.getLaunchConfigurationType(LaunchUtils.LAUNCH_ID);
+            lm.getLaunchConfigurationType(LaunchUtils.LAUNCH_CONFIG_ID);
         
         List candidateConfigs = Collections.EMPTY_LIST;
         
@@ -159,7 +159,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
         try {
             ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
             ILaunchConfigurationType type =
-                lm.getLaunchConfigurationType(LaunchUtils.LAUNCH_ID);
+                lm.getLaunchConfigurationType(LaunchUtils.LAUNCH_CONFIG_ID);
             
             String basename = project.getName() + " REPL";
             if (files.length == 1) {
@@ -177,8 +177,6 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
             wc.setAttribute(ATTR_MAIN_TYPE_NAME, LaunchUtils.CLOJURE_MAIN);
             
             wc.setAttribute(ATTR_PROJECT_NAME, project.getName());
-            
-            wc.setAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN, LaunchUtils.DEFAULT_SERVER_PORT);
             
             wc.setMappedResources(new IResource[] {project});
             

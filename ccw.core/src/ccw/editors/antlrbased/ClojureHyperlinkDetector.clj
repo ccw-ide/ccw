@@ -1,7 +1,9 @@
 (ns ccw.editors.antlrbased.ClojureHyperlinkDetector
   (:require [clojure.zip :as z]
             [paredit.loc-utils :as lu]
+            [cemerick.nrepl :as repl]
             [ccw.editors.antlrbased.ClojureHyperlink])
+  (:use clojure.contrib.core)
   (:import 
     [org.eclipse.jface.text BadLocationException
                             IRegion
@@ -35,18 +37,20 @@
         declaring-ns (.getDeclaringNamespace editor)
         command (String/format "(ccw.debug.serverrepl/find-symbol \"%s\" \"%s\" \"%s\")"
                   (into-array Object [s declaring-ns n]))
-        clojure-client (ClojureClient/newClientForActiveRepl)]
-    (if-not clojure-client
+        {:keys [send]} (-?> editor .getCorrespondingREPL .getToolingConnection .conn)]
+    (if-not send
       (do
         (.setStatusLineErrorMessage editor ClojureEditorMessages/You_need_a_running_repl)
         nil)
-      (let [result2 (.remoteLoadRead clojure-client command)
-            result (result2 "response")]
-        (if (or (nil? result) (.isEmpty result) (= -1 (result2 "response-type")))
+      (let [[result2] (repl/response-values (send command))
+            [file line ns :as result] (result2 "response")]
+        (if (and file line ns)
+          {"file" file
+           "line" (Integer/valueOf line)
+           "ns" ns}
           (do
             (.setStatusLineErrorMessage editor ClojureEditorMessages/Cannot_find_declaration)
-            nil)
-          {"file" (nth result 0) "line" (Integer/valueOf (nth result 1)) "ns" (nth result 3)})))))
+            nil))))))
 
 (defn detect-hyperlinks
   [offset editor]

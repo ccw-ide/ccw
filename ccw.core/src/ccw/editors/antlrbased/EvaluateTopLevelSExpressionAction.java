@@ -15,6 +15,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.ui.console.IOConsole;
 
 import ccw.debug.ClojureClient;
+import ccw.repl.REPLView;
 
 public class EvaluateTopLevelSExpressionAction extends Action {
 
@@ -36,9 +37,9 @@ public class EvaluateTopLevelSExpressionAction extends Action {
 			selectedText = editor.getCurrentOrNextTopLevelSExpression();
 		}
 
-		IOConsole console = ClojureClient.findActiveReplConsole(true, editor.getProject(), false);
-		if (console != null) {
-			EvaluateTextUtil.evaluateText(console, selectedText, true);
+		REPLView repl = REPLView.activeREPL.get();
+		if (repl != null && !repl.isDisposed()) {
+			EvaluateTextUtil.evaluateText(repl, selectedText, true);
 		}
 	}
 }

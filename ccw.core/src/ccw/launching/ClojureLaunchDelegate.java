@@ -12,84 +12,141 @@ package ccw.launching;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.UUID;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.ProgressMonitorWrapper;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
+import org.eclipse.ui.WorkbenchException;
+import org.eclipse.ui.console.ConsolePlugin;
+import org.eclipse.ui.console.IConsole;
+import org.eclipse.ui.console.IConsoleListener;
 
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.ClojureProject;
-import ccw.debug.ClojureClient;
-
+import ccw.repl.REPLView;
+import ccw.util.DisplayUtil;
+import cemerick.nrepl.SafeFn;
+import clojure.lang.AFn;
+import clojure.lang.RT;
+import clojure.lang.Symbol;
+import clojure.lang.Var;
 
 public class ClojureLaunchDelegate extends JavaLaunchDelegate {
-	
-	private ILaunch launch;
-	
-    @Override
-    public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor) throws CoreException {
-    	int port = LaunchUtils.getLaunchServerReplPort(launch); 
-        launch.setAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN, 
-        		Integer.toString(port));
-        launch.setAttribute(LaunchUtils.ATTR_PROJECT_NAME, configuration.getAttribute(LaunchUtils.ATTR_PROJECT_NAME, (String) null));
-        if (port == -1) {
-        	try {
-				launch.setAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_FILE_PORT, 
-						File.createTempFile(LaunchUtils.SERVER_FILE_PORT_PREFIX, LaunchUtils.SERVER_FILE_PORT_SUFFFIX).getAbsolutePath());
-			} catch (IOException e) {
-				throw new CoreException(Status.CANCEL_STATUS); // TODO do better than that ?
-			}
+
+    private static Var currentLaunch = Var.create();
+    private static IConsole lastConsoleOpened;
+    
+    private static ServerSocket ackREPLServer;
+    static {
+        try {
+            ackREPLServer = (ServerSocket)((List)Var.find(Symbol.intern("cemerick.nrepl/start-server")).invoke()).get(0);
+        } catch (Exception e) {
+            CCWPlugin.logError("Could not start plugin-hosted REPL server for launch ack", e);
         }
-        launch.setAttribute(LaunchUtils.ATTR_IS_AUTO_RELOAD_ENABLED, Boolean.toString(configuration.getAttribute(LaunchUtils.ATTR_IS_AUTO_RELOAD_ENABLED, false)));
-        this.launch = launch;
-        super.launch(configuration, mode, launch, monitor);
+        
+        ConsolePlugin.getDefault().getConsoleManager().addConsoleListener(new IConsoleListener() {
+            public void consolesRemoved(IConsole[] consoles) {}
+            public void consolesAdded(IConsole[] consoles) {
+                lastConsoleOpened = consoles.length > 0 ? consoles[0] : null;
+            }
+        });
     }
     
+    private class REPLViewLaunchMonitor extends ProgressMonitorWrapper {
+        private ILaunch launch;
+        
+        private REPLViewLaunchMonitor (IProgressMonitor m, ILaunch launch) {
+            super(m);
+            this.launch = launch;
+        }
+
+        public void done() {
+            super.done();
+            
+            final Integer port = (Integer)SafeFn.find("cemerick.nrepl", "wait-for-ack").sInvoke(10000);
+            if (port == null) {
+                CCWPlugin.logError("Waiting for new REPL process ack timed out");
+                return;
+            }
+            DisplayUtil.asyncExec(new Runnable() {
+                public void run() {
+                    try {
+                        REPLView replView = REPLView.connect("localhost", port);
+                        if (replView != null) {
+                            replView.setConsole(lastConsoleOpened);
+                            replView.setLaunch(launch);
+                        }
+                    } catch (Exception e) {
+                        CCWPlugin.logError("Could not connect REPL to local launch", e);
+                    }
+                }
+            });
+        }
+    }
+    
+    
+    @Override
+    public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor) throws CoreException {
+        launch.setAttribute(LaunchUtils.ATTR_PROJECT_NAME, configuration.getAttribute(LaunchUtils.ATTR_PROJECT_NAME, (String) null));
+        launch.setAttribute(LaunchUtils.ATTR_IS_AUTO_RELOAD_ENABLED, Boolean.toString(configuration.getAttribute(LaunchUtils.ATTR_IS_AUTO_RELOAD_ENABLED, false)));
+        SafeFn.find("cemerick.nrepl", "reset-ack-port!").sInvoke();
+        try {
+            Var.pushThreadBindings(RT.map(currentLaunch, launch));
+            super.launch(configuration, mode, launch, (monitor == null || !isLaunchREPL(configuration)) ?
+                    monitor : new REPLViewLaunchMonitor(monitor, launch));
+        } finally {
+            Var.popThreadBindings();
+        }
+    }
+	
 	@Override
 	public String getVMArguments(ILaunchConfiguration configuration) throws CoreException {
-		int port = LaunchUtils.getLaunchServerReplPort(launch);
-		StringBuilder sb = new StringBuilder();
-		sb.append(" -D" + "clojure.remote.server.port" + "=" + Integer.toString(port));
-		if (port == -1) {
-			sb.append(" -D" + LaunchUtils.ATTR_CLOJURE_SERVER_FILE_PORT + "=" + launch.getAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_FILE_PORT));
-		}
-		sb.append(" " + super.getVMArguments(configuration));
-		return sb.toString();
+	    String launchId = UUID.randomUUID().toString();
+	    return String.format(" -D%s=%s %s",
+	            LaunchUtils.SYSPROP_LAUNCH_ID,
+	            launchId,
+	            super.getVMArguments(configuration));
 	}
 	
 	@Override
 	public String getProgramArguments(ILaunchConfiguration configuration) throws CoreException {
 		String userProgramArguments = super.getProgramArguments(configuration);
 
-		if (configuration.getAttribute(LaunchUtils.ATTR_CLOJURE_INSTALL_REPL, true)) {
+		if (isLaunchREPL(configuration)) {
 			String filesToLaunchArguments = LaunchUtils.getFilesToLaunchAsCommandLineList(configuration, false);
 			
-			// Add serverrepl as a file to launch to install a remote server
+			// TODO why don't we just add the ccw stuff to the classpath as we do for nrepl?
+			String toolingFile = null;
 			try {
-				URL serverReplBundleUrl = CCWPlugin.getDefault().getBundle().getResource("ccw/debug/serverrepl.clj");
-				URL serverReplFileUrl = FileLocator.toFileURL(serverReplBundleUrl);
-				String serverRepl = serverReplFileUrl.getFile(); 
-				filesToLaunchArguments = 
-					"-i " + '\"' + serverRepl + "\" " 
-					+ filesToLaunchArguments
-				    // doesn't work + "-e \"(doseq [[v b] {(var *print-length*) 10000, (var *print-level*) 100}] (var-set v b))\" ";
-					;
+				URL toolingFileURL = CCWPlugin.getDefault().getBundle().getResource("ccw/debug/serverrepl.clj");
+				toolingFile = FileLocator.toFileURL(toolingFileURL).getFile();
 			} catch (IOException e) {
-				e.printStackTrace();
+				throw new WorkbenchException("Could not find ccw.debug.serverrepl source file", e);
 			}
 			
-	    	return filesToLaunchArguments + " --repl " + userProgramArguments;
+			String nREPLInit = "(require 'cemerick.nrepl)" + 
+			    // don't want start-server return value printed
+			    String.format("(do (cemerick.nrepl/start-server 0 %s) nil)", ackREPLServer.getLocalPort());
+			
+			return String.format("-i \"%s\" -e \"%s\" %s %s", toolingFile, nREPLInit,
+			        filesToLaunchArguments, userProgramArguments);
 		} else {
 			String filesToLaunchArguments = LaunchUtils.getFilesToLaunchAsCommandLineList(configuration, true);
 			
@@ -97,19 +154,19 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 		}
 	}
 	
-	@Override
+	private static boolean isLaunchREPL(ILaunchConfiguration configuration) throws CoreException {
+        return configuration.getAttribute(LaunchUtils.ATTR_CLOJURE_START_REPL, true);
+    }
+	
+	public static boolean isAutoReloadEnabled (ILaunch launch) {
+	    return Boolean.valueOf(launch.getAttribute(LaunchUtils.ATTR_IS_AUTO_RELOAD_ENABLED));
+	}
+
+    @Override
 	public String getMainTypeName(ILaunchConfiguration configuration)
 			throws CoreException {
-		IJavaProject jProj = ClojureCore.getJavaProject(LaunchUtils.getProject(configuration));
-		try {
-			if ((Boolean) ClojureClient.invoke("ccw.ClojureProjectNature", "has-path-on-classpath?", jProj, "clojure/contrib/repl_ln.class")) {
-				return LaunchUtils.CLOJURE_CONTRIB_REPL_LN;
-			} else {
-				return LaunchUtils.CLOJURE_MAIN;
-			}
-		} catch (Exception e) {
-			return LaunchUtils.CLOJURE_MAIN;
-		}
+	    String main = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, (String)null); 
+	    return main == null ? clojure.main.class.getName() : main;
 	}
 	
     @Override
@@ -120,7 +177,6 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
        
         ClojureProject clojureProject = ClojureCore.getClojureProject(LaunchUtils.getProject(configuration));
         for (IFolder f: clojureProject.sourceFolders()) {
-
             String sourcePath = f.getLocation().toOSString();
            
             while (classpath.contains(sourcePath)) {
@@ -130,6 +186,14 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
            
             classpath.add(0, sourcePath);
         }
+        
+        try {
+            File repllib = FileLocator.getBundleFile(Platform.getBundle("nrepl-module"));
+            classpath.add(repllib.getAbsolutePath());
+        } catch (IOException e) {
+            throw new WorkbenchException("Failed to find nrepl library", e);
+        }
+        
         return classpath.toArray(new String[classpath.size()]);
     }
 }

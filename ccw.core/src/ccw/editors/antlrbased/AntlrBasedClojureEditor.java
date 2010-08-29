@@ -10,21 +10,18 @@
  *******************************************************************************/
 package ccw.editors.antlrbased;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewerExtension5;
 import org.eclipse.jface.text.Region;
@@ -36,19 +33,11 @@ import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.projection.ProjectionSupport;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.TextEditor;
-import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.ContentAssistAction;
 import org.eclipse.ui.texteditor.IStatusField;
 import org.eclipse.ui.texteditor.IStatusFieldExtension;
@@ -57,14 +46,14 @@ import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import ccw.CCWPlugin;
-import ccw.ClojureCore;
-import ccw.debug.ClojureClient;
 import ccw.editors.outline.ClojureOutlinePage;
 import ccw.editors.rulesbased.ClojureDocumentProvider;
 import ccw.editors.rulesbased.ClojurePartitionScanner;
 import ccw.launching.ClojureLaunchShortcut;
+import ccw.repl.REPLView;
+import cemerick.nrepl.Connection;
 
-public class AntlrBasedClojureEditor extends TextEditor {
+public class AntlrBasedClojureEditor extends TextEditor implements IClojureEditor {
 	public static final String EDITOR_REFERENCE_HELP_CONTEXT_ID = "ccw.branding.editor_context_help";
     public static final String STATUS_CATEGORY_STRUCTURAL_EDITION = "CCW.STATUS_CATEGORY_STRUCTURAL_EDITING_POSSIBLE";
 	
@@ -115,10 +104,14 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		return useStrictStructuralEditing;
 	}
 	
+	public boolean isStructuralEditingEnabled () {
+	    // @todo eliminate non-idomatic useStrictStructuralEditing method
+	    return useStrictStructuralEditing();
+	}
+	
 	public AntlrBasedClojureEditor() {
-	    IPreferenceStore preferenceStore = createCombinedPreferenceStore();
-		setSourceViewerConfiguration(new ClojureSourceViewerConfiguration(preferenceStore, this));
-		setPreferenceStore(preferenceStore);
+        setPreferenceStore(CCWPlugin.getDefault().getCombinedPreferenceStore());
+		setSourceViewerConfiguration(new ClojureSourceViewerConfiguration(getPreferenceStore(), this));
         setDocumentProvider(new ClojureDocumentProvider()); 
         setHelpContextId(EDITOR_REFERENCE_HELP_CONTEXT_ID);
 	}
@@ -162,6 +155,8 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		 * for the syntax coloring, after the token scanner has been
 		 * initialized. Otherwise the very first Clojure editor will not
 		 * have any tokens colored.
+		 * 
+         * TODO this is repeated in REPLView...surely we can make the source viewer self-sufficient here
 		 */
 	    viewer.propertyChange(null);
 	    
@@ -173,74 +168,10 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		
 		fProjectionSupport.install();
 		viewer.doOperation(ClojureSourceViewer.TOGGLE);
-
-		installEscListenerForStructuralEditingEscape();
-	}
-
-	private boolean inEscapeSequence;
-	public boolean isInEscapeSequence() {
-		return inEscapeSequence;
 	}
 	
-	private void installEscListenerForStructuralEditingEscape() {
-		this.getSourceViewer().getTextWidget().addKeyListener(
-				new KeyListener() {
-					public void keyPressed(KeyEvent e) {
-						if (e.character == SWT.ESC) {
-							inEscapeSequence = true;
-							updateTabsToSpacesConverter();
-						}
-					}
-					public void keyReleased(KeyEvent e) {
-						if (inEscapeSequence && !(e.character == SWT.ESC)) {
-							inEscapeSequence = false;
-							updateTabsToSpacesConverter();
-						}
-					}
-				});
-	}
-
-	public boolean getBooleanPreference(String key) {
-		return getPreferenceStore().getBoolean(key);
-	}
-
-	/** This is manipulated by clojure functions.
-	 * It's a ref, holding a map {:text "the raw text file" :parser parser}
-	 * where state is a future holding the parser's state
-	 */
-	private Object parseRef; 
-
-	private IDocumentListener parseTreeConstructorDocumentListener = new IDocumentListener() {
-		public void documentAboutToBeChanged(DocumentEvent event) { }
-		public void documentChanged(DocumentEvent event) {
-			updateParseRef(event.getDocument().get());
-		}
-	};
-	
-	private void updateParseRef(String text) {
-		parseRef = EditorSupport.updateParseRef(text, parseRef);
-	}
-	
-	public Object getParsed() {
-		if (parseRef == null) {
-			updateParseRef(getDocument().get());
-		}
-		return EditorSupport.getParser(getDocument().get(), parseRef);
-	}
-	
-	@Override
-	protected void doSetInput(IEditorInput input) throws CoreException {
-		IEditorInput oldEditorInput = getEditorInput();
-		if (oldEditorInput != null) {
-			IDocument oldDocument = getDocumentProvider().getDocument(oldEditorInput);
-			if (oldDocument != null) {
-				oldDocument.removeDocumentListener(parseTreeConstructorDocumentListener);
-			}
-		}
-		super.doSetInput(input);
-		IDocument document = getDocumentProvider().getDocument(getEditorInput());
-		document.addDocumentListener(parseTreeConstructorDocumentListener);
-		updateParseRef(document.get());
+	public boolean isInEscapeSequence () {
+	    return ((ClojureSourceViewer)getSourceViewer()).isInEscapeSequence();
 	}
 	
 	public void setStructuralEditingPossible(boolean state) {
@@ -292,25 +223,11 @@ public class AntlrBasedClojureEditor extends TextEditor {
         return getSourceViewer().getSelectionProvider();
     }
 
-    /**
-     * Create a preference store combined from the Clojure, the EditorsUI and
-     * the PlatformUI preference stores to inherit all the default text editor
-     * settings from the Eclipse preferences.
-     * 
-     * @return the combined preference store.
-     */
-    private IPreferenceStore createCombinedPreferenceStore() {
-        List<IPreferenceStore> stores = new LinkedList<IPreferenceStore>();
-        stores.add(CCWPlugin.getDefault().getPreferenceStore());
-        stores.add(EditorsUI.getPreferenceStore());
-        stores.add(PlatformUI.getPreferenceStore());
-        return new ChainedPreferenceStore(stores.toArray(new IPreferenceStore[stores.size()]));
-    }
-
 	@Override
 	protected void createActions() {
 		super.createActions();
 		
+		// @todo push many (if not most) of these into ClojureSourceViewer (somehow, that's SWT and actions are eclipse-land :-/)
 		Action action= new GotoMatchingBracketAction(this);
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.GOTO_MATCHING_BRACKET);
 		setAction(GotoMatchingBracketAction.ID, action);
@@ -415,7 +332,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		if (document == null)
 			return;
 
-		IRegion selection= getSignedSelection(sourceViewer);
+		IRegion selection= getSignedSelection();
 
 		int selectionLength= Math.abs(selection.getLength());
 		if (selectionLength > 1) {
@@ -509,7 +426,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		if (getDocument() == null)
 			return false;
 		
-		IRegion selection= getSignedSelection(getSourceViewer());
+		IRegion selection= getSignedSelection();
 
 		int selectionLength= Math.abs(selection.getLength());
 		if (selectionLength > 0) {
@@ -531,7 +448,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
 	 * @return
 	 */
 	public int getSourceCaretOffset() {
-		IRegion selection= getSignedSelection(getSourceViewer());
+		IRegion selection= getSignedSelection();
 		return selection.getOffset() + selection.getLength();
 	}
 	
@@ -688,84 +605,12 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		return false;
 	}
 
-	/**
-	 * Returns the signed current selection.
-	 * The length will be negative if the resulting selection
-	 * is right-to-left (RtoL).
-	 * <p>
-	 * The selection offset is model based.
-	 * </p>
-	 *
-	 * @param sourceViewer the source viewer
-	 * @return a region denoting the current signed selection, for a resulting RtoL selections length is < 0
-	 */
-	public IRegion getSignedSelection(ISourceViewer sourceViewer) {
-		if (sourceViewer == null) {
-			sourceViewer = getSourceViewer();
-		}
-		StyledText text= sourceViewer.getTextWidget();
-		Point selection= text.getSelectionRange();
-
-		if (text.getCaretOffset() == selection.x) {
-			selection.x= selection.x + selection.y;
-			selection.y= -selection.y;
-		}
-
-		selection.x= widgetOffset2ModelOffset(sourceViewer, selection.x);
-
-		return new Region(selection.x, selection.y);
+	public IRegion getUnSignedSelection () {
+	    return ((ClojureSourceViewer)getSourceViewer()).getUnSignedSelection();
 	}
 	
-	/**
-	 * Returns the signed current selection.
-	 * The length will be negative if the resulting selection
-	 * is right-to-left (RtoL).
-	 * <p>
-	 * The selection offset is model based.
-	 * </p>
-	 *
-	 * @param sourceViewer the source viewer
-	 * @return a region denoting the current signed selection, for a resulting RtoL selections length is < 0
-	 */
-	public IRegion getSignedSelection() {
-		return getSignedSelection(null);
-	}
-	
-	
-	/**
-	 * Returns the unsigned current selection.
-	 * The length will always be positive.
-	 * <p>
-	 * The selection offset is model based.
-	 * </p>
-	 *
-	 * @param sourceViewer the source viewer
-	 * @return a region denoting the current unsigned selection
-	 */
-	public IRegion getUnSignedSelection(ISourceViewer sourceViewer) {
-		if (sourceViewer == null) {
-			sourceViewer = getSourceViewer();
-		}
-		StyledText text= sourceViewer.getTextWidget();
-		Point selection= text.getSelectionRange();
-
-		selection.x= widgetOffset2ModelOffset(sourceViewer, selection.x);
-
-		return new Region(selection.x, selection.y);
-	}
-	
-	/**
-	 * Returns the unsigned current selection.
-	 * The length will always be positive.
-	 * <p>
-	 * The selection offset is model based.
-	 * </p>
-	 *
-	 * @param sourceViewer the source viewer
-	 * @return a region denoting the current unsigned selection
-	 */
-	public IRegion getUnSignedSelection() {
-		return getUnSignedSelection(null);
+	public IRegion getSignedSelection () {
+	    return ((ClojureSourceViewer)getSourceViewer()).getSignedSelection();
 	}
 	
 	/*
@@ -818,7 +663,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
 	}
 
 	public String getSelectedText() {
-		IRegion r = getUnSignedSelection(getSourceViewer());
+		IRegion r = getUnSignedSelection();
 		
 		if (r != null) {
 			try {
@@ -831,14 +676,18 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		}
 	}
 
-	public String getDeclaringNamespace() {
-		return ClojureCore.getDeclaringNamespace(getDocument().get());
+	public IJavaProject getAssociatedProject () {
+	    return JavaCore.create(((IFile)getEditorInput().getAdapter(IFile.class)).getProject());
 	}
 	
-	public ClojureClient getCorrespondingClojureClient() {
+	public String getDeclaringNamespace () {
+		return ((ClojureSourceViewer)getSourceViewer()).getDeclaringNamespace();
+	}
+	
+	public REPLView getCorrespondingREPL () {
 		IFile file = (IFile) getEditorInput().getAdapter(IFile.class);
 		if (file != null)
-			return CCWPlugin.getDefault().getProjectClojureClient(file.getProject());
+			return CCWPlugin.getDefault().getProjectREPL(file.getProject());
 		else 
 			return null;
 	}
@@ -882,7 +731,7 @@ public class AntlrBasedClojureEditor extends TextEditor {
 		}
 	}
     
-    protected void updateTabsToSpacesConverter() {
+    public void updateTabsToSpacesConverter() {
 		if (isTabsToSpacesConversionEnabled()) {
 			installTabsToSpacesConverter();
 		} else {

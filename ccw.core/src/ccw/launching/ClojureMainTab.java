@@ -66,8 +66,7 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
 
     protected TableViewer sourceFilesViewer;
     
-    private Button installREPLChoice; 
-    private Text serverPort;
+    private Button installREPLChoice;
     
     public String getName() {
         return "Clojure";
@@ -143,25 +142,15 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
                 2, 1, 0);
         
         installREPLChoice = SWTFactory.createCheckButton(
-        		section, "Install a REPL (see tooltip for detail)", null, true, 2);
-        installREPLChoice.setToolTipText("If checked, the main class will be clojure.contrib.repl_ln, all files listed will be loaded"
-        		+ " with the -i option.\n If unchecked, the main class will be clojure.main, all files listed but the last will be loaded"
-        		+ " with the -i option, and the last file will be loaded as a script.");
-        
-        SWTFactory.createLabel(section, "Remote server must listen on port: ", 1);
-        serverPort = SWTFactory.createSingleText(section, 0);
+        		section, "Run with REPL (see tooltip for detail)", null, true, 2);
+        installREPLChoice.setToolTipText("If checked, all files listed will be loaded with the -i option, " +
+        		"and a new REPL view will be opened and connected to the new process.\n" +
+        		"If unchecked, all files listed will be loaded with the -i option, " +
+        		"except for the last which will be loaded as a script.");
 
         installREPLChoice.addSelectionListener( new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {}
-
 			public void widgetSelected(SelectionEvent e) {
-				serverPort.setEnabled(installREPLChoice.getSelection());
-				updateLaunchConfigurationDialog();
-			}
-		});
-        
-        serverPort.addModifyListener( new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
 				updateLaunchConfigurationDialog();
 			}
 		});
@@ -179,8 +168,7 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
         	if (config.getAttribute(ATTR_MAIN_TYPE_NAME, (String) null) == null) {
         		config.setAttribute(ATTR_MAIN_TYPE_NAME, LaunchUtils.CLOJURE_MAIN); // Overriden at launch time, set here just to make JavaMainTab happy
         	}
-        	config.setAttribute(LaunchUtils.ATTR_CLOJURE_INSTALL_REPL, true);
-        	config.setAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN, LaunchUtils.DEFAULT_SERVER_PORT);
+        	config.setAttribute(LaunchUtils.ATTR_CLOJURE_START_REPL, true);
             
             config.doSave();
         }
@@ -200,15 +188,10 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
         }
         
         try {
-        	installREPLChoice.setSelection(config.getAttribute(
-        			LaunchUtils.ATTR_CLOJURE_INSTALL_REPL, true));
-            serverPort.setText(Integer.toString(config.getAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN, LaunchUtils.DEFAULT_SERVER_PORT)));
-            serverPort.setEnabled(installREPLChoice.getSelection());
+        	installREPLChoice.setSelection(config.getAttribute(LaunchUtils.ATTR_CLOJURE_START_REPL, true));
         } catch (CoreException e) {
         	CCWPlugin.logError("error while initializing serverPort", e);
         	installREPLChoice.setSelection(true);
-        	serverPort.setEnabled(true);
-        	serverPort.setText("");
         }
         try {    
         	sourceFilesViewer.setInput(LaunchUtils.getFilesToLaunchList(config));
@@ -227,8 +210,7 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
 
     	config.setAttribute(ATTR_MAIN_TYPE_NAME, LaunchUtils.CLOJURE_MAIN); // Overriden at launch time, set here just to make JavaMainTab happy
 
-        config.setAttribute(LaunchUtils.ATTR_CLOJURE_INSTALL_REPL, installREPLChoice.getSelection());
-        config.setAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN, Integer.valueOf(serverPort.getText()));
+        config.setAttribute(LaunchUtils.ATTR_CLOJURE_START_REPL, installREPLChoice.getSelection());
         
         mapResources(config);
     }

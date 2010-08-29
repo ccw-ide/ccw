@@ -11,52 +11,35 @@
 package ccw.editors.antlrbased;
 
 import java.io.IOException;
-
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.SWT;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.console.IOConsole;
-import org.eclipse.ui.console.IOConsoleInputStream;
-import org.eclipse.ui.console.IOConsoleOutputStream;
 
+import ccw.repl.REPLView;
 import ccw.util.DisplayUtil;
-import ccw.util.IOUtils;
 
 final public class EvaluateTextUtil {
 	private EvaluateTextUtil() {
 		// Not intended to be subclassed
 	}
 	
-	public static final void evaluateText(IOConsole console, final String text, boolean verboseMode) {
-		if (text == null)
-			return;
-
-		if (console == null)
-			return;
-		
-		IOConsoleOutputStream os = null;
-		IOConsoleInputStream is = console.getInputStream();
-		try {
-			if (verboseMode) {
-				os = console.newOutputStream();
-				os.setColor(is.getColor());
-				os.setFontStyle(SWT.ITALIC);
-				os.write("\nCode sent for evaluation:\n" + text + "\n");
-			}
-			is.appendData(text + "\n");
-			return;
-		} catch (IOException e) {
-			DisplayUtil.syncExec(new Runnable() {
-				public void run() {
-					MessageDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), 
-							"Expression evaluation", 
-							"Unable to write to active REPL.\nThe following expression has not been launched:\n\n" + text);
-				}
-			});
-		} finally {
-			IOUtils.safeClose(os);
-		}
+	public static final void evaluateText(final String text, boolean verbose) {
+		evaluateText(REPLView.activeREPL.get(), text, verbose);
+	}
+	
+	public static final void evaluateText(REPLView console, final String text, boolean verbose) {
+	    if (console == null || console.isDisposed()) {
+            DisplayUtil.syncExec(new Runnable() {
+                public void run() {
+                    MessageDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), 
+                            "Expression evaluation", 
+                            "Please activate a running REPL session before attempting to evaluate code.");
+                }
+            });
+        } else {
+            console.evalExpression(text, verbose);
+        }
 	}
 	
 	/**

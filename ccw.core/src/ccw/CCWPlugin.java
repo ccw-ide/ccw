@@ -13,8 +13,7 @@
 package ccw;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.FileLocator;
@@ -30,23 +29,38 @@ import org.eclipse.jface.resource.FontRegistry;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.console.ConsolePlugin;
+import org.eclipse.ui.console.IConsole;
+import org.eclipse.ui.console.IConsoleView;
+import org.eclipse.ui.console.IOConsole;
+import org.eclipse.ui.editors.text.EditorsUI;
+import org.eclipse.ui.internal.Workbench;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.eclipse.ui.texteditor.ChainedPreferenceStore;
+import org.eclipse.ui.views.IViewDescriptor;
+import org.eclipse.ui.views.IViewRegistry;
 import org.osgi.framework.BundleContext;
 
-import ccw.debug.ClojureClient;
 import ccw.editors.antlrbased.AntlrBasedClojureEditor;
 import ccw.launching.LaunchUtils;
 import ccw.lexers.ClojureLexer;
 import ccw.preferences.PreferenceConstants;
 import ccw.preferences.SyntaxColoringPreferencePage;
+import ccw.repl.REPLView;
 import ccw.util.DisplayUtil;
 import ccw.utils.editors.antlrbased.IScanContext;
+import cemerick.nrepl.Connection;
 import clojure.lang.Compiler;
+import clojure.lang.Symbol;
+import clojure.lang.Var;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -94,7 +108,6 @@ public class CCWPlugin extends AbstractUIPlugin {
         loadPluginClojureCode();
         initializeParenRainbowColors();
         createColorRegistry();
-        startLaunchListener();
     }
     
     private void createColorRegistry() {
@@ -135,17 +148,41 @@ public class CCWPlugin extends AbstractUIPlugin {
         return getFontRegistry().getItalic("");
     }
 
+    private IPreferenceStore prefs;
+    
+    /**
+     * Create a preference store combined from the Clojure, the EditorsUI and
+     * the PlatformUI preference stores to inherit all the default text editor
+     * settings from the Eclipse preferences.
+     * 
+     * @return the combined preference store.
+     */
+    public IPreferenceStore getCombinedPreferenceStore() {
+        if (prefs == null) {
+            prefs = new ChainedPreferenceStore(new IPreferenceStore[] {
+                    CCWPlugin.getDefault().getPreferenceStore(),
+                    EditorsUI.getPreferenceStore(),
+                    PlatformUI.getPreferenceStore()});
+        }
+        return prefs;
+    }
+
     private void loadPluginClojureCode() throws Exception {
 		URL clientReplBundleUrl = CCWPlugin.getDefault().getBundle().getResource("ccw/debug/clientrepl.clj");
 		URL clientReplFileUrl = FileLocator.toFileURL(clientReplBundleUrl);
 		String clientRepl = clientReplFileUrl.getFile(); 
 
 		Compiler.loadFile(clientRepl);
+
+        try {
+            Var.find(Symbol.intern("clojure.core/require")).invoke(Symbol.intern("cemerick.nrepl"));
+        } catch (Exception e) {
+            throw new IllegalStateException("Could not initialize nrepl library.", e);
+        }
     }
     
     public void stop(BundleContext context) throws Exception {
     	disposeParenRainbowColors();
-    	stopLaunchListener();
     	// We don't remove colors when deregistered, because, well, we don't have a
     	// corresponding method on the ColorRegistry instance!
     	// We also don't remove fonts when deregistered
@@ -221,65 +258,38 @@ public class CCWPlugin extends AbstractUIPlugin {
 	public static final String CLASS = "class_obj.gif";
 	public static final String SORT = "alphab_sort_co.gif";
 
-
-    private List<ILaunch> launches = new ArrayList<ILaunch>();
-    private ILaunchListener launchListener = new ILaunchListener() {
-		public void launchAdded(ILaunch launch) {
-			updateLaunchList(launch);
-		}
-		public void launchChanged(ILaunch launch) {
-			updateLaunchList(launch);
-		}
-		private void updateLaunchList(ILaunch launch) {
-			if (isClojureEnabledLaunch(launch)) {
-				launches.add(launch);
-			} else {
-				launches.remove(launch);
-			}
-		}
-		public void launchRemoved(ILaunch launch) {
-			launches.remove(launch);
-		}
-	};
-	public static boolean isClojureEnabledLaunch(ILaunch launch) {
-		return (launch.getAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN) != null);
-	}
-	
-	public static int findClojurePort(ILaunch launch) {
-		String portAttr = launch.getAttribute(LaunchUtils.ATTR_CLOJURE_SERVER_LISTEN);
-		if (portAttr != null) {
-			return Integer.valueOf(portAttr);
-		} else {
-			return -1;
-		}
-	}
 	public static boolean isAutoReloadEnabled(ILaunch launch) {
 		return (Boolean.parseBoolean(launch.getAttribute(LaunchUtils.ATTR_IS_AUTO_RELOAD_ENABLED)));
 	}
-	
-    private void startLaunchListener() {
-		stopLaunchListener();
-		DebugPlugin.getDefault().getLaunchManager().addLaunchListener(launchListener);
+    
+    public REPLView getProjectREPL (IProject project) {
+        IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+        if (window != null) {
+            IWorkbenchPage page = window.getActivePage();
+            if (page != null) {
+                for (IViewReference r : page.getViewReferences()) {
+                    IViewPart v = r.getView(false);
+                    if (REPLView.class.isInstance(v)) {
+                        REPLView replView = (REPLView)v;
+                        ILaunch launch = replView.getLaunch();
+                        if (!launch.isTerminated()) {
+                            String launchProject = launch.getAttribute(LaunchUtils.ATTR_PROJECT_NAME);
+                            if (launchProject != null && launchProject.equals(project.getName())) {
+                                return replView;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        return null;
     }
     
-    private void stopLaunchListener() {
-		DebugPlugin.getDefault().getLaunchManager().removeLaunchListener(launchListener);
-		launches.clear();
+    public Connection getProjectREPLConnection (IProject project) {
+        REPLView repl = getProjectREPL(project);
+        return repl == null ? null : repl.getToolingConnection();
     }
-    
-	public ClojureClient getProjectClojureClient(IProject project) {
-		for (ILaunch launch: launches) {
-			if (launch.isTerminated()) {
-				continue;
-			}
-			String launchProject = launch.getAttribute(LaunchUtils.ATTR_PROJECT_NAME);
-			if (launchProject != null && launchProject.equals(project.getName())) {
-				return ClojureClient.create(launch);
-			}
-		}
-		return null;
-	}
-
 	
 	private IScanContext scanContext;
 

@@ -56,8 +56,8 @@ public class CompileLibAction extends Action {
 			return;
 		}
 		
-		IOConsole console = ClojureClient.findActiveReplConsole(true, editor.getProject(), false);
-		EvaluateTextUtil.evaluateText(console, compileLibCommand(lib), true);
+		
+		EvaluateTextUtil.evaluateText(editor.getCorrespondingREPL(), compileLibCommand(lib), true);
 		// TODO: send the compile via the server to synchronize with the compilation end before refreshing the project
 		try {
 			editorFile.getProject().getFolder("classes").refreshLocal(IFolder.DEPTH_INFINITE, null);
@@ -66,7 +66,7 @@ public class CompileLibAction extends Action {
 		}
 	}
 	
-	public static String compileLibCommand(String libName) {
-		return "(clojure.core/binding [clojure.core/*compile-path* \"classes\"] (clojure.core/compile '" + libName + "))";
+	public static String compileLibCommand (String libName) {
+		return "(ccw.debug.serverrepl/with-exception-serialization (clojure.core/binding [clojure.core/*compile-path* \"classes\"] (clojure.core/compile '" + libName + ")))";
 	}
 }

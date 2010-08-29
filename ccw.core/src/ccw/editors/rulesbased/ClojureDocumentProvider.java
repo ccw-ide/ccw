@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.TextUtilities;
@@ -22,24 +23,32 @@ import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.editors.text.FileDocumentProvider;
 
 import ccw.StorageMarkerAnnotationModel;
+import ccw.editors.antlrbased.ClojureSourceViewer;
 
 public class ClojureDocumentProvider extends FileDocumentProvider {
+    
+    /**
+     * Configures the given document to be useful for Clojure content.
+     * Not necessary in an editor context (this is applied automatically
+     * by this provider in that case).
+     */
+    public static IDocument configure (IDocument document) {
+        IDocumentPartitioner partitioner = new ClojurePartitioner(new ClojurePartitionScanner(), 
+                ClojurePartitionScanner.CLOJURE_CONTENT_TYPES);
 
+        Map<String, IDocumentPartitioner> m = new HashMap<String, IDocumentPartitioner>();
+        m.put(ClojurePartitionScanner.CLOJURE_PARTITIONING, partitioner);
+        
+        TextUtilities.addDocumentPartitioners(document, m);
+        
+        return document;
+    }
+    
     @Override
     protected IDocument createDocument(Object element) throws CoreException {
         IDocument document = super.createDocument(element);
-        if (document != null) {
-        	IDocumentPartitioner partitioner = new ClojurePartitioner(new ClojurePartitionScanner(), 
-        			ClojurePartitionScanner.CLOJURE_CONTENT_TYPES);
-
-        	Map<String, IDocumentPartitioner> m = new HashMap<String, IDocumentPartitioner>();
-        	m.put(ClojurePartitionScanner.CLOJURE_PARTITIONING, partitioner);
-        	
-        	TextUtilities.addDocumentPartitioners(document, m);
-        }
-        else {
-            return null;
-        }
+        if (document != null) document = configure(document);
+        
         return document;
     }
 

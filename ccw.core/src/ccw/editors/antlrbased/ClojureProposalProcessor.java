@@ -48,9 +48,9 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.TextStyle;
 
 import ccw.CCWPlugin;
-import ccw.debug.ClojureClient;
 import ccw.outline.NamespaceBrowser;
 import ccw.util.ClojureDocUtils;
+import cemerick.nrepl.Connection;
 
 public class ClojureProposalProcessor implements IContentAssistProcessor {
 	private static final int MAX_JAVA_SEARCH_RESULT_NUMBER = 50;
@@ -58,7 +58,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 	private static final String MESSAGE_JAVA_COMPLETION = "Completion for all available java methods";
 	private static final String MESSAGE_CLOJURE_COMPLETION = "Completion for symbols visible from current namespace";
 	
-	private final AntlrBasedClojureEditor editor;
+	private final IClojureEditor editor;
 	private final ContentAssistant assistant;
 	
 	private String errorMessage;
@@ -71,7 +71,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 		public final boolean fullyQualified;
 		public final String nsPart;
 		public final String symbolPrefix;
-		public PrefixInfo(final AntlrBasedClojureEditor editor, final String prefix, final int prefixOffset) {
+		public PrefixInfo(final IClojureEditor editor, final String prefix, final int prefixOffset) {
 			this.prefix = prefix;
 			this.prefixOffset = prefixOffset;
 			if (prefix.indexOf('/') > 0) {
@@ -87,7 +87,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 		}
 	}
 
-	public ClojureProposalProcessor(AntlrBasedClojureEditor editor, ContentAssistant assistant) {
+	public ClojureProposalProcessor(IClojureEditor editor, ContentAssistant assistant) {
 		this.editor = editor;
 		this.assistant = assistant;
 	}
@@ -294,7 +294,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 					? SearchPattern.R_PATTERN_MATCH 
 					: SearchPattern.R_PREFIX_MATCH);
 		if (pattern != null) {
-			IJavaProject editedFileProject = JavaCore.create(((IFile) editor.getEditorInput().getAdapter(IFile.class)).getProject());
+			IJavaProject editedFileProject = editor.getAssociatedProject();
 			if (editedFileProject != null) {
 				IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { editedFileProject });
 				SearchRequestor requestor = new SearchRequestor() {
@@ -354,7 +354,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 			public String[] patternStr(PrefixInfo prefixInfo) {
 				return new String[] { prefixInfo.nsPart + "." + prefixInfo.symbolPrefix };
 			}
-			public AbstractLazyCompletionProposal lazyCompletionProposal(PrefixInfo prefixInfo, AntlrBasedClojureEditor editor, SearchMatch match) {
+			public AbstractLazyCompletionProposal lazyCompletionProposal(PrefixInfo prefixInfo, IClojureEditor editor, SearchMatch match) {
 				return new MethodLazyCompletionProposal(
 						(IMethod) match.getElement(),
 						prefixInfo.nsPart + "/" + prefixInfo.symbolPrefix,
@@ -369,7 +369,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 			public String[] patternStr(PrefixInfo prefixInfo) {
 				return new String[] { prefixInfo.prefix, prefixInfo.prefix + "*" };
 			}
-			public AbstractLazyCompletionProposal lazyCompletionProposal(PrefixInfo prefixInfo, AntlrBasedClojureEditor editor, SearchMatch match) {
+			public AbstractLazyCompletionProposal lazyCompletionProposal(PrefixInfo prefixInfo, IClojureEditor editor, SearchMatch match) {
 				return new ClassLazyCompletionProposal(
 						(IType) match.getElement(),
 						prefixInfo.prefix,
@@ -384,7 +384,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 			public String[] patternStr(PrefixInfo prefixInfo) {
 				return new String[] { prefixInfo.prefix + "*" };
 			}
-			public AbstractLazyCompletionProposal lazyCompletionProposal(PrefixInfo prefixInfo, AntlrBasedClojureEditor editor, SearchMatch match) {
+			public AbstractLazyCompletionProposal lazyCompletionProposal(PrefixInfo prefixInfo, IClojureEditor editor, SearchMatch match) {
 				return new PackageLazyCompletionProposal(
 						(IPackageFragment) match.getElement(),
 						prefixInfo.prefix,
@@ -396,7 +396,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 		
 		public abstract int[] searchFor();
 		public abstract String[] patternStr(PrefixInfo prefixInfo);
-		public abstract AbstractLazyCompletionProposal lazyCompletionProposal(PrefixInfo prefixInfo, AntlrBasedClojureEditor editor, SearchMatch match);
+		public abstract AbstractLazyCompletionProposal lazyCompletionProposal(PrefixInfo prefixInfo, IClojureEditor editor, SearchMatch match);
 		public abstract int[] matchRule();
 		/** try to match only if the size of the prefix is equal or greater than this. */
 		public abstract int[] prefixMinLength();
@@ -436,7 +436,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 			combinedPattern.add(pattern);
 		}
 		
-		IJavaProject editedFileProject = JavaCore.create(((IFile) editor.getEditorInput().getAdapter(IFile.class)).getProject());
+		IJavaProject editedFileProject = editor.getAssociatedProject();
 		if (editedFileProject != null) {
 			IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { editedFileProject });
 			SearchRequestor requestor = new SearchRequestor() {
@@ -475,7 +475,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 		private final String prefix;
 		private final int prefixOffset;
 		private final String ns;
-		private final AntlrBasedClojureEditor editor;
+		private final IClojureEditor editor;
 		private String displayString; 
 		private CompletionProposal completionProposal;
 
@@ -550,7 +550,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 			return completionProposal;
 		}
 		
-		public AbstractLazyCompletionProposal(IMethod method, String methodPrefix, int methodPrefixOffset, String ns, AntlrBasedClojureEditor editor) {
+		public AbstractLazyCompletionProposal(IMethod method, String methodPrefix, int methodPrefixOffset, String ns, IClojureEditor editor) {
 			this.method = method;
 			this.prefix = methodPrefix;
 			this.prefixOffset = methodPrefixOffset;
@@ -590,7 +590,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 	}
 	
 	private static class MethodLazyCompletionProposal extends AbstractLazyCompletionProposal {
-		public MethodLazyCompletionProposal(IMethod method, String methodPrefix, int methodPrefixOffset, String ns, AntlrBasedClojureEditor editor) {
+		public MethodLazyCompletionProposal(IMethod method, String methodPrefix, int methodPrefixOffset, String ns, IClojureEditor editor) {
 			super(method, methodPrefix, methodPrefixOffset, ns, editor);
 		}
 		public Image getImage() {
@@ -603,7 +603,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 		private final String prefix;
 		private final int prefixOffset;
 		private final String ns;
-		private final AntlrBasedClojureEditor editor;
+		private final IClojureEditor editor;
 		private String displayString; 
 		private CompletionProposal completionProposal;
 		
@@ -615,10 +615,9 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 			if (completionProposal == null) {
 				
 				String replacementString = null;
-				ClojureClient client = editor.getCorrespondingClojureClient();
+				Connection client = editor.getCorrespondingREPL().getToolingConnection();
 				if (client != null) {
-					Map result = (Map) client
-						.remoteLoadRead("(ccw.debug.serverrepl/imported-class \"" + ns + "\" \"" + method.getElementName() + "\")");
+					Map result = (Map)client.send("(ccw.debug.serverrepl/imported-class \"" + ns + "\" \"" + method.getElementName() + "\")").values().get(0);
 					if (result != null && result.get("response-type").equals(0) && result.get("response") != null) {
 						replacementString = (String) result.get("response");
 					}
@@ -645,7 +644,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 			return completionProposal;
 		}
 		
-		public ClassLazyCompletionProposal(IType method, String methodPrefix, int methodPrefixOffset, String ns, AntlrBasedClojureEditor editor) {
+		public ClassLazyCompletionProposal(IType method, String methodPrefix, int methodPrefixOffset, String ns, IClojureEditor editor) {
 			super(null, methodPrefix, methodPrefixOffset, ns, editor); // TODO vraiment nulle comme technique !
 			this.method = method;
 			this.prefix = methodPrefix;
@@ -669,7 +668,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 		private final String prefix;
 		private final int prefixOffset;
 		private final String ns;
-		private final AntlrBasedClojureEditor editor;
+		private final IClojureEditor editor;
 		private String displayString; 
 		private CompletionProposal completionProposal;
 		
@@ -694,7 +693,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 			return completionProposal;
 		}
 		
-		public PackageLazyCompletionProposal(IPackageFragment method, String methodPrefix, int methodPrefixOffset, String ns, AntlrBasedClojureEditor editor) {
+		public PackageLazyCompletionProposal(IPackageFragment method, String methodPrefix, int methodPrefixOffset, String ns, IClojureEditor editor) {
 			super(null, methodPrefix, methodPrefixOffset, ns, editor); // TODO vraiment nulle comme technique !
 			this.method = method;
 			this.prefix = methodPrefix;
@@ -721,7 +720,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 		}
 		return false;
 	}
-	private static List<List> dynamicComplete(String namespace, String prefix, AntlrBasedClojureEditor editor, boolean findOnlyPublic) {
+	private static List<List> dynamicComplete(String namespace, String prefix, IClojureEditor editor, boolean findOnlyPublic) {
 		if (namespace == null) {
 			return Collections.emptyList();
 		}
@@ -729,15 +728,11 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 			return Collections.emptyList();
 		}
 		
-		ClojureClient clojureClient = editor.getCorrespondingClojureClient();
-		if (clojureClient == null) {
-			return Collections.emptyList();
-		}
+		Connection repl = editor.getCorrespondingREPL().getToolingConnection();
+		if (repl == null) return Collections.emptyList();
 		
-		Map result = (Map) clojureClient.remoteLoadRead("(ccw.debug.serverrepl/code-complete \"" + namespace + "\" \"" + prefix + "\" " + (findOnlyPublic ? "true" : "false") + ")");
-		if (result == null) {
-			return Collections.emptyList();
-		}
+		Map result = (Map)repl.send("(ccw.debug.serverrepl/code-complete \"" + namespace + "\" \"" + prefix + "\" " + (findOnlyPublic ? "true" : "false") + ")").values().get(0);
+		if (result == null) return Collections.emptyList();
 		
 		if (result.get("response-type").equals(0)) {
 			if (result.get("response") == null) {
@@ -753,16 +748,12 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 		if (prefix == null) {
 			return Collections.emptyList();
 		}
+        
+        Connection repl = editor.getCorrespondingREPL().getToolingConnection();
+        if (repl == null) return Collections.emptyList();
 		
-		ClojureClient clojureClient = editor.getCorrespondingClojureClient();
-		if (clojureClient == null) {
-			return Collections.emptyList();
-		}
-		
-		Map result = (Map) clojureClient.remoteLoadRead("(ccw.debug.serverrepl/code-complete-ns \"" + prefix + "\")");
-		if (result == null) {
-			return Collections.emptyList();
-		}
+		Map result = (Map)repl.send("(ccw.debug.serverrepl/code-complete-ns \"" + prefix + "\")").values().get(0);
+		if (result == null) return Collections.emptyList();
 		
 		if (result.get("response-type").equals(0)) {
 			if (result.get("response") == null) {

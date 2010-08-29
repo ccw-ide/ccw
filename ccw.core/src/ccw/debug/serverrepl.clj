@@ -9,53 +9,16 @@
 ; *    Laurent PETIT - initial API and implementation
 ; *    Tuomas KARKKAINEN - find-symbol
 ; *******************************************************************************/
-; Totally footprint free embedded evaluation server
-; (do not have any namespace / symbol presence)
 (ns ccw.debug.serverrepl)
 
 ; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; library code
 
-(defn on-thread [f] (.start (new Thread f)))
-
-(defn create-server
-  "creates and returns a server socket on port, will pass the client
-   socket to accept-socket on connection"
-  [accept-socket port file-name]
-  (on-thread
-    #(loop []
-       ; (println "port=" port " ; file-name=" file-name)
-       (let [ss (java.net.ServerSocket. (if (= port -1) 0 port))]
-         (when (= port -1)
-           (with-open [fw (java.io.FileWriter. file-name)]
-             (.write fw (str (.getLocalPort ss)))))
-         (loop []
-           (when-not (.isClosed ss)
-             (try
-               (let [s (.accept ss)]
-                 (on-thread (fn []
-                              (with-open [s s]
-                                (try
-                                  (accept-socket s)
-                                  (catch Exception e (println "create-server:accept-socket: unexpected exception " (.getMessage e)) (throw e)))))))
-               (catch java.net.SocketException e (println "socket exception " (.getMessage e)))
-               (catch Exception e (println "create-server: unexpected exception " (.getMessage e))))
-             (recur)))
-         (recur))))
-  nil)
-
-(defn- push-answer [type answer-sexpr dos]
-  (let [answer (pr-str answer-sexpr)
-        answer-bytes (.getBytes answer "UTF-8")]
-    (.writeInt dos type) ; 0 = OK, -1 = KO (exception)
-    (.writeInt dos (alength answer-bytes))
-    (.write dos answer-bytes 0 (alength answer-bytes))
-    (.flush dos)))
-
 ; currently just [file-name line-number message]
-(defn- serialize-exception
-  ([e] (serialize-exception e []))
-  ([e v]
+(defn serialize-exception
+  [e]
+  (loop [e e
+         v []]
     (if-not e
       v
       (let [stack-traces (.getStackTrace e)
@@ -68,23 +31,13 @@
                    "line-number" line-number
                    "message" message}))))))
 
-(defn socket-repl
-  "starts a repl thread on the iostreams of supplied socket"
-  [s]
-  (with-open [dis (new java.io.DataInputStream
-                    (new java.io.BufferedInputStream (.getInputStream s)))]
-    (with-open [dos (new java.io.DataOutputStream (.getOutputStream s))]
-      (let [question-bytes-length (.readInt dis)
-            question-bytes (make-array Byte/TYPE question-bytes-length)]
-        (.readFully dis question-bytes 0 question-bytes-length)
-        (try
-          (load-string (new String question-bytes "UTF-8"))
-          (push-answer 0 (load-string (new String question-bytes "UTF-8")) dos)
-          (catch Exception e (push-answer -1 (serialize-exception e) dos)))))))
-
-(create-server socket-repl
-  (Integer/valueOf (System/getProperty "clojure.remote.server.port" "-1"))
-  (System/getProperty "ccw.debug.serverrepl.file.port"))
+(defmacro with-exception-serialization
+  [& body]
+  `(try
+     ~@body
+     (catch Exception e#
+       {"response-type" -1
+        "response" (serialize-exception e#)})))
 
 ; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; support code  
@@ -118,7 +71,7 @@
 (defn splitted-match
   "Splits pattern and candidate at the given delimiters and matches
   the parts of the pattern with the parts of the candidate. Match
-  means �startsWith� here."
+  means \"startsWith\" here."
   [pattern candidate delimiters]
   (if-let [delimiters (seq delimiters)]
     (let [delim (first delimiters)

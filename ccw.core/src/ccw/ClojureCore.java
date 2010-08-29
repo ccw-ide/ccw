@@ -60,8 +60,8 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import ccw.debug.ClojureClient;
 import ccw.editors.antlrbased.AntlrBasedClojureEditor;
+import ccw.repl.REPLView;
 import clojure.lang.RT;
 
 /**
@@ -197,10 +197,6 @@ public final class ClojureCore {
         p = new ClojureProject(project);
         return p;
     }
-    
-    public static ClojureClient getProjectClojureClient(IProject project) {
-    	return null;
-    }
 
     /**
      * Gets all the Clojure projects in the workspace
@@ -234,12 +230,11 @@ public final class ClojureCore {
      */
     public static void openInEditor(String searchedNS, String searchedFileName, int line) {
 		try {
-			org.eclipse.debug.ui.console.IConsole console = (org.eclipse.debug.ui.console.IConsole) ClojureClient.findActiveReplConsole();
-			if (console == null) {
-				return;
-			}
-			String projectName = console.getProcess().getLaunch().getLaunchConfiguration().getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, (String) null);
-	    	openInEditor(searchedNS, searchedFileName, line, projectName, false);
+		    REPLView replView = REPLView.activeREPL.get();
+		    if (replView != null) {
+    			String projectName = replView.getLaunch().getLaunchConfiguration().getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, (String) null);
+    	    	openInEditor(searchedNS, searchedFileName, line, projectName, false);
+		    }
 		} catch (CoreException e) {
 			CCWPlugin.logError("error while trying to obtain project's name from configuration, while trying to show source file of a symbol", e);
 		}

@@ -40,7 +40,7 @@ public class FormatAction extends Action {
     }
 
     private void replaceOriginalWithFormatted(IDocument original, ISourceViewer sourceViewer, String formatted) {
-        IRegion selection = editor.getSignedSelection(sourceViewer);
+        IRegion selection = editor.getSignedSelection();
         Tokens tokens = new Tokens(original, selection);
         Document formattedDocument = new Document(formatted);
         Tokens formattedTokens = new Tokens(formattedDocument);

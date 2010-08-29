@@ -33,7 +33,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import ccw.CCWPlugin;
-import ccw.debug.ClojureClient;
+import ccw.launching.ClojureLaunchDelegate;
+import ccw.repl.REPLView;
+import cemerick.nrepl.Connection;
 
 /*
  * gaetan.morice:
@@ -121,14 +123,14 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
             monitor = new NullProgressMonitor();
         }
         
-        ClojureClient clojureClient = CCWPlugin.getDefault().getProjectClojureClient(project);
-        if (clojureClient == null || !clojureClient.isAutoReloadEnabled()) {
+        REPLView repl = CCWPlugin.getDefault().getProjectREPL(project);
+        if (repl == null || repl.isDisposed() || !ClojureLaunchDelegate.isAutoReloadEnabled(repl.getLaunch())) {
         	return;
         }
         
         deleteMarkers(project);
 
-        ClojureVisitor visitor = new ClojureVisitor(clojureClient);
+        ClojureVisitor visitor = new ClojureVisitor(repl.getToolingConnection());
         visitor.visit(getSrcFolders(project));
         
         getClassesFolder(project).refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 0));

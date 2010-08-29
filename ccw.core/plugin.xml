@@ -347,6 +347,19 @@
             categoryId="org.eclipse.debug.ui.category.run"
             id="ccw.debug.ui.clojureShortcut.run">
       </command>
+      <command
+            categoryId="org.eclipse.debug.ui.category.run"
+            defaultHandler="ccw.actions.ConnectToREPL"
+            description="%command.connectToREPL.description"
+            id="ccw.ui.repl.connect"
+            name="%command.connectToREPL.name">
+      </command>
+      <command
+            categoryId="org.eclipse.debug.ui.category.run"
+            defaultHandler="ccw.repl.ReconnectReplAction"
+            id="ccw.ui.repl.reconnect"
+            name="Reconnect REPL">
+      </command>
       
    </extension>
    
@@ -808,6 +821,18 @@
             </visibleWhen>
          </command>
       </menuContribution>
+      <menuContribution
+            locationURI="menu:window?before=preferences">
+         <command
+               commandId="ccw.ui.repl.connect"
+               icon="icons/clojure16x16.png"
+               id="ccw.ui.repl.connect"
+               label="%command.connectToREPL.name"
+               mode="FORCE_TEXT"
+               style="push"
+               tooltip="%command.connectToREPL.description">
+         </command>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.popupMenus">
@@ -833,18 +858,6 @@
     </launchConfigurationTypeImage>
 	</extension>
  <extension
-       point="org.eclipse.ui.console.consolePageParticipants">
-    <consolePageParticipant
-          class="ccw.console.ConsolePageParticipant"
-          id="ccw.consolePageParticipant.replConsole">
-       <enablement>
-          <instanceof
-                value="org.eclipse.debug.internal.ui.views.console.ProcessConsole">
-          </instanceof>
-       </enablement>
-    </consolePageParticipant>
- </extension>
- <extension
        point="org.eclipse.ui.views">
     <view
           category="ccw.category.views"
@@ -858,6 +871,15 @@
           id="ccw.category.views"
           name="Clojure Views">
     </category>
+    <view
+          allowMultiple="true"
+          category="ccw.category.views"
+          class="ccw.repl.REPLView"
+          icon="icons/clojure16x16.png"
+          id="ccw.view.repl"
+          name="REPL"
+          restorable="false">
+    </view>
  </extension>
  <extension
        point="org.eclipse.ui.perspectiveExtensions">
@@ -999,4 +1021,19 @@
        </context>
     </target>
  </extension>
+ <extension point="org.eclipse.ui.viewActions">
+    <viewContribution
+          id="ccw.view.repl.actions"
+          targetID="ccw.view.repl">
+       <action
+             class="ccw.repl.ReconnectReplAction"
+             enablesFor="?"
+             id="ccw.view.repl.actions.reconnect"
+             label="Reconnect"
+             mode="FORCE_TEXT"
+             style="push"
+             tooltip="Reconnect to this REPL&apos;s host and port (first disconnecting if necessary)">
+       </action>
+    </viewContribution>
+    </extension>
 </plugin>

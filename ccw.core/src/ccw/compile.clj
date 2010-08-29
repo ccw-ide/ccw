@@ -18,6 +18,7 @@
        'ccw.ClojureProjectNature
        'ccw.debug.clientrepl
        'ccw.debug.serverrepl
+       'ccw.repl.view-helpers
        'ccw.editors.antlrbased.PareditAutoEditStrategy
        'ccw.editors.antlrbased.ClojureFormat
        'ccw.editors.antlrbased.StacktraceHyperlink

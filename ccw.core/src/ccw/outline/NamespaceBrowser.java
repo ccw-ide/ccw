@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
@@ -49,9 +52,13 @@ import org.eclipse.ui.part.ViewPart;
 
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
-import ccw.debug.ClojureClient;
+import ccw.editors.antlrbased.EvaluateTextUtil;
+import ccw.launching.LaunchUtils;
+import ccw.preferences.PreferenceConstants;
 import ccw.util.ClojureDocUtils;
 import ccw.util.DisplayUtil;
+import cemerick.nrepl.Connection;
+import cemerick.nrepl.Connection.Response;
 import clojure.lang.Keyword;
 
 public class NamespaceBrowser extends ViewPart implements ISelectionProvider, ISelectionChangedListener {
@@ -78,8 +85,6 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 	private ListenerList selectionChangedListeners = new ListenerList();
 
 	private TreeViewer treeViewer;
-
-	private ClojureClient clojureClient;
 
 	private Composite control;
 	private Text filterText;
@@ -322,29 +327,18 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 		}
 	}
 
-	private Map<String, List<String>> getRemoteNsTree() {
-		if (clojureClient == null)
-			return Collections.emptyMap();
-		
-		Map result = (Map) clojureClient.remoteLoadRead("(ccw.debug.serverrepl/namespaces-info)");
-		if (result==null) {
-			System.out.println("no result, connection problem");
-			return null;
-		}
-		if (result.get("response-type").equals(0)) {
-			return (Map<String, List<String>>) result.get("response");
-		} else {
-			// error detected
-			Map error = (Map) result.get("response");
-			System.out.println("error :"
-					+ "line: " + error.get("line-number")
-					+ "file: " + error.get("file-name")
-					+ "message:" + error.get("message"));
-			return null;
-		}
+	@SuppressWarnings("unchecked")
+    private Map<String, List<String>> getRemoteNsTree (Connection repl) {
+		try {
+		    Response res = repl.send("(ccw.debug.serverrepl/namespaces-info)");
+            return (Map<String, List<String>>)res.values().get(0);
+        } catch (Exception e) {
+            System.out.println(e);
+            return null;
+        }
 	}
 
-	public void resetInput() {
+	public void reset (final Connection repl) {
 		Job job = new Job("Namespace browser tree refresh") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -353,7 +347,8 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 				}
 
 				Object oldInput = treeViewer.getInput();
-				final Object newInput = getRemoteNsTree();
+				ensureNSUtilsIntalled(repl);
+				final Object newInput = getRemoteNsTree(repl);
 				if (oldInput != null && oldInput.equals(newInput)) {
 					return Status.CANCEL_STATUS;
 				}
@@ -485,17 +480,15 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 		}
 	}
 
-	/**
-	 * @param clojureClient
-	 */
-	public static void setClojureClient(final ClojureClient clojureClient) {
-		DisplayUtil.asyncExec(new Runnable() {
-			public void run() {
-				inUIThreadSetClojureClient(clojureClient);
-			}});
+	public static void setREPLConnection (final Connection repl) {
+	    if (repl != null)
+	        DisplayUtil.asyncExec(new Runnable() {
+	            public void run() {
+	                inUIThreadSetREPLConnection(repl);
+	            }});
 	}
 	
-	private static void inUIThreadSetClojureClient(ClojureClient clojureClient) {
+	private static void inUIThreadSetREPLConnection (Connection repl) {
 		IViewPart[] views = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getViews();			
 		NamespaceBrowser co = null;
 		for (IViewPart v: views) {
@@ -508,8 +501,27 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 			return;
 		}
 
-		co.clojureClient = clojureClient;
-		co.resetInput();
+		co.reset(repl);
 	}
+
+    private static void ensureNSUtilsIntalled (Connection repl) {
+        
+        // from the ConsolePageParticipant
+        // TODO this *looks* like a no-op, but the comments seem to imply that a "full load" of the project's clojure
+        // files should happen in conjunction with initializing the namespace browser; seems like a very unfriendly notion?
+        /*org.eclipse.debug.ui.console.IConsole processConsole = (org.eclipse.debug.ui.console.IConsole) console;
+        // TODO add safeguards: the launch configuration must enable a REPL, and explicit flag (default value from global params) to allow this behaviour
+        // and explicit flag (true by default) to determine the default value for the explicit flag :-)
+        try {
+            IProject project = LaunchUtils.getProject(processConsole.getProcess().getLaunch().getLaunchConfiguration());
+            // Only block the full load of the project's content in the started JVM if it's started with one or more files on the command line
+            if (LaunchUtils.getFilesToLaunchList(processConsole.getProcess().getLaunch().getLaunchConfiguration()).size() == 0) {
+                project.touch(null);
+            }
+        } catch (CoreException e) {
+            CCWPlugin.logError("Unable to auto-compile a project after having launched a configuration "
+                    + "because the project cannot be retrieved!", e);
+        }*/
+    }
 	
 }

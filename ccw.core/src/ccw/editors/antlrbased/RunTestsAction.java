@@ -10,6 +10,8 @@
  *******************************************************************************/
 package ccw.editors.antlrbased;
 
+import java.util.Map;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.CoreException;
@@ -17,9 +19,13 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
-import org.eclipse.ui.console.IOConsole;
 
-import ccw.debug.ClojureClient;
+import clojure.lang.Keyword;
+
+import ccw.CCWPlugin;
+import ccw.repl.REPLView;
+import cemerick.nrepl.Connection;
+import cemerick.nrepl.Connection.Response;
 
 public class RunTestsAction extends Action {
     public static final String RUN_TESTS_ID = "RunTestsAction";
@@ -43,22 +49,26 @@ public class RunTestsAction extends Action {
     }
     @Override
     public void run() {
-        super.run();
-        String lib = editor.getDeclaringNamespace();
-        ClojureClient clojure = ClojureClient.newClientForActiveRepl();
-        String compilationResult = clojure.remoteLoad(CompileLibAction.compileLibCommand(lib));
-        refreshCompilationResults();
-        if (compilationResult.contains("\"response-type\" 0,")) {
-            runTests(lib, clojure);
-        } else {
-            editor.setStatusLineErrorMessage(ClojureEditorMessages.Compilation_failed);
-            setReplBackgroundColor(colorRegistry.get(FAILED_TESTS_COLOR_KEY));
+        try {
+            String lib = editor.getDeclaringNamespace();
+            REPLView replView = editor.getCorrespondingREPL();
+            Connection repl = replView.getToolingConnection();
+            Response compilationResult = repl.send(CompileLibAction.compileLibCommand(lib));
+            refreshCompilationResults();
+            if (new Integer(0).equals(((Map)compilationResult.values().get(0)).get("response-type"))) {
+                runTests(lib, repl);
+            } else {
+                editor.setStatusLineErrorMessage(ClojureEditorMessages.Compilation_failed);
+                setReplBackgroundColor(colorRegistry.get(FAILED_TESTS_COLOR_KEY));
+            }
+        } catch (Exception e) {
+            CCWPlugin.logError("Failed running tests against editor " + editor.getPartName(), e);
         }
     }
 
-    private void runTests(String lib, ClojureClient clojure) {
-        String results = clojure.remoteLoad(runTestsCommand(lib));
-        if (results.contains(":fail 0, :error 0")) {
+    private void runTests(String lib, Connection repl) throws Exception {
+        Response results = repl.send(runTestsCommand(lib));
+        if (((String)results.combinedResponse().get(Keyword.intern("out"))).contains(":fail 0, :error 0")) {
             editor.setStatusLineErrorMessage(ClojureEditorMessages.Tests_passed);
             setReplBackgroundColor(colorRegistry.get(PASSED_TESTS_COLOR_KEY));
         } else {
@@ -68,8 +78,7 @@ public class RunTestsAction extends Action {
     }
 
     private void setReplBackgroundColor(Color background) {
-        IOConsole replConsole = ClojureClient.findActiveReplConsole();
-        replConsole.setBackground(background);
+        // TODO push this over to REPLView? Changing background colors seems harsh -- how does the bgcolor get reverted?  
     }
 
     private void refreshCompilationResults() {

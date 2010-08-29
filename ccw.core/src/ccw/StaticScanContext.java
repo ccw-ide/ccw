@@ -71,7 +71,7 @@ public class StaticScanContext implements IScanContext {
 		if (clojureSymbolTypesCache.containsKey(symbol)) {
 			return clojureSymbolTypesCache.get(symbol);
 		} else {
-			Object symbolType = ClojureClient.loadString("(ccw.debug.clientrepl/core-symbol-type \"" + symbol + "\")");;		
+			Object symbolType = ClojureClient.loadString("(ccw.debug.clientrepl/core-symbol-type \"" + symbol + "\")");	
 	
 			if (symbolType == null) {
 				clojureSymbolTypesCache.put(symbol, null);

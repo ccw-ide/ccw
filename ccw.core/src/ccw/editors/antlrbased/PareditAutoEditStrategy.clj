@@ -5,10 +5,10 @@
     [org.eclipse.jface.text IAutoEditStrategy
                             IDocument
                             DocumentCommand]
-    [ccw.editors.antlrbased AntlrBasedClojureEditor])
+    [ccw.editors.antlrbased IClojureEditor])
   (:gen-class
    :implements [org.eclipse.jface.text.IAutoEditStrategy]
-   :constructors {[ccw.editors.antlrbased.AntlrBasedClojureEditor org.eclipse.jface.preference.IPreferenceStore] []}
+   :constructors {[ccw.editors.antlrbased.IClojureEditor org.eclipse.jface.preference.IPreferenceStore] []}
    :init init
    :state state))
    
@@ -63,50 +63,55 @@
                 :offset (:offset command) 
                 :length (:length command)}]))
 
+(defn- ccw-prefs
+  []
+  (.getCombinedPreferenceStore (ccw.CCWPlugin/getDefault)))
+
 (defn do-command?
   "Will do command if it is :strict and the editor allows it, or if it is not :strict"
-  [#^AntlrBasedClojureEditor editor par-command]
+  [#^IClojureEditor editor par-command]
   ;(println (str "do-command? : '" par-command "'"))
   (cond
     (*strict-commands* par-command)
-      (.useStrictStructuralEditing editor)
-    (*configuration-based-commands* par-command) ; works because I know no value can be nil in *configuration-based-commands* 
-      (.getBooleanPreference editor (*configuration-based-commands* par-command))
+      (.isStructuralEditingEnabled editor)
+    (*configuration-based-commands* par-command) ; works because I know no value can be nil in *configuration-based-commands*
+      (.getBoolean (ccw-prefs) (*configuration-based-commands* par-command))
     :else 
       true))
 
 (defn -customizeDocumentCommand 
   [#^ccw.editors.antlrbased.PareditAutoEditStrategy this, #^IDocument document, #^DocumentCommand command]
-  (when (and (.doit command) (not (-> this .state deref #^ccw.editors.antlrbased.AntlrBasedClojureEditor (:editor) .isInEscapeSequence)))
-    (let [signed-selection (bean (-> this .state deref #^ccw.editors.antlrbased.AntlrBasedClojureEditor (:editor) .getSignedSelection))
-          ;_ (println (str "signed-selection:" signed-selection))
-          document-text {:text (.get document) 
-                         :caret-offset (+ (:offset signed-selection) (:length signed-selection)) 
-                         :selection-length (:length signed-selection)}
-          par-command {:text (.text command) :offset (.offset command) :length (.length command)}
-          ;_ (println (str "par-command:" par-command))
-          [par-command par-text] (paredit-args par-command document-text)
-          ;_ (println "here is the par-command:" par-command)
-          result (and 
-                   par-command 
-                   (do-command? (-> this .state deref :editor) par-command)
-                   (paredit par-command (.getParsed (-> this .state deref #^ccw.editors.antlrbased.AntlrBasedClojureEditor (:editor))) par-text))]
-      (when (and result (not= :ko (-> result :parser-state)))
-        (if-let [modif (-?> result :modifs first)]
-          (do
-            (set! (.offset command) (-> result :modifs first :offset))
-            (set! (.length command) (-> result :modifs first :length))
-            (set! (.text command) (-> result :modifs first :text))
-            (doseq [{:keys [offset length text]} (rest (-> result :modifs))]
-              (.addCommand command offset length text nil)))
-          (do
-            (set! (.offset command) (:offset result))
-            (set! (.length command) 0)
-            (set! (.text command) "")
-            (set! (.doit command) false)))
-        (set! (.shiftsCaret command) false)
-        (set! (.caretOffset command) (:offset result))
-        (when-not (zero? (:length result)) 
-          ;(println (str "result:" result))
-          (.selectAndReveal (-> this .state deref :editor) (:offset result) (:length result))))
-      (.setStructuralEditingPossible (-> this .state deref :editor) (true? (and result (not= :ko (-> result :parser-state))))))))
+  (let [^IClojureEditor editor (-> this .state deref :editor)]
+    (when (and (.doit command) (not (.isInEscapeSequence editor)))
+      (let [signed-selection (bean (.getSignedSelection editor))
+            ;_ (println (str "signed-selection:" signed-selection))
+            document-text {:text (.get document) 
+                           :caret-offset (+ (:offset signed-selection) (:length signed-selection)) 
+                           :selection-length (:length signed-selection)}
+            par-command {:text (.text command) :offset (.offset command) :length (.length command)}
+            ;_ (println (str "par-command:" par-command))
+            [par-command par-text] (paredit-args par-command document-text)
+            ;_ (println "here is the par-command:" par-command)
+            result (and 
+                     par-command 
+                     (do-command? editor par-command)
+                     (paredit par-command (.getParsed editor) par-text))]
+        (when (and result (not= :ko (-> result :parser-state)))
+          (if-let [modif (-?> result :modifs first)]
+            (do
+              (set! (.offset command) (-> result :modifs first :offset))
+              (set! (.length command) (-> result :modifs first :length))
+              (set! (.text command) (-> result :modifs first :text))
+              (doseq [{:keys [offset length text]} (rest (-> result :modifs))]
+                (.addCommand command offset length text nil)))
+            (do
+              (set! (.offset command) (:offset result))
+              (set! (.length command) 0)
+              (set! (.text command) "")
+              (set! (.doit command) false)))
+          (set! (.shiftsCaret command) false)
+          (set! (.caretOffset command) (:offset result))
+          (when-not (zero? (:length result)) 
+            ;(println (str "result:" result))
+          (.selectAndReveal editor (:offset result) (:length result))))
+        (.setStructuralEditingPossible editor (true? (and result (not= :ko (-> result :parser-state)))))))))

@@ -11,16 +11,28 @@
 
 package ccw.editors.antlrbased;
 
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.text.DocumentEvent;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentListener;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextInputListener;
+import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.source.IOverviewRuler;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -28,9 +40,12 @@ import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import ccw.CCWPlugin;
+import ccw.ClojureCore;
+import ccw.repl.REPLView;
+import cemerick.nrepl.Connection;
 
 public class ClojureSourceViewer extends ProjectionViewer implements
-        IPropertyChangeListener {
+        IClojureEditor, IPropertyChangeListener {
     /**
      * The preference store.
      */
@@ -66,10 +81,43 @@ public class ClojureSourceViewer extends ProjectionViewer implements
      * Is this source viewer configured?
      */
     private boolean fIsConfigured;
+
+    private boolean inEscapeSequence;
     
     public ClojureSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles, IPreferenceStore store) {
         super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles);
         setPreferenceStore(store);
+        
+        getTextWidget().addKeyListener(new KeyListener() {
+            public void keyPressed(KeyEvent e) {
+                if (e.character == SWT.ESC) {
+                    inEscapeSequence = true;
+                    updateTabsToSpacesConverter();
+                }
+            }
+
+            public void keyReleased(KeyEvent e) {
+                if (inEscapeSequence && !(e.character == SWT.ESC)) {
+                    inEscapeSequence = false;
+                    updateTabsToSpacesConverter();
+                }
+            }
+        });
+        
+        addTextInputListener(new ITextInputListener() {
+            public void inputDocumentChanged(IDocument oldInput, IDocument newInput) {
+                if (newInput != null) {
+                    newInput.addDocumentListener(parseTreeConstructorDocumentListener);
+                    updateParseRef(newInput.get());
+                }
+            }
+            
+            public void inputDocumentAboutToBeChanged(IDocument oldInput,
+                    IDocument newInput) {
+                if (oldInput != null)
+                    oldInput.removeDocumentListener(parseTreeConstructorDocumentListener);
+            }
+        });
     }
 
     public void propertyChange(PropertyChangeEvent event) {
@@ -222,8 +270,83 @@ public class ClojureSourceViewer extends ProjectionViewer implements
             fPreferenceStore.removePropertyChangeListener(this);
 
         super.unconfigure();
-
         fIsConfigured= false;
         fConfiguration = null;
     }
+
+    /** This is manipulated by clojure functions.
+     * It's a ref, holding a map {:text "the raw text file" :parser parser}
+     * where state is a future holding the parser's state
+     */
+    private Object parseRef; 
+
+    private IDocumentListener parseTreeConstructorDocumentListener = new IDocumentListener() {
+        public void documentAboutToBeChanged(DocumentEvent event) { }
+        public void documentChanged(DocumentEvent event) {
+            updateParseRef(event.getDocument().get());
+        }
+    };
+    
+    private void updateParseRef (String text) {
+        parseRef = EditorSupport.updateParseRef(text, parseRef);
+    }
+    
+    public Object getParsed () {
+        if (parseRef == null) {
+            updateParseRef(getDocument().get());
+        }
+        return EditorSupport.getParser(getDocument().get(), parseRef);
+    }
+    
+    public IRegion getSignedSelection () {
+        StyledText text = getTextWidget();
+        Point selection = text.getSelectionRange();
+
+        if (text.getCaretOffset() == selection.x) {
+            selection.x = selection.x + selection.y;
+            selection.y = -selection.y;
+        }
+
+        selection.x = widgetOffset2ModelOffset(selection.x);
+
+        return new Region(selection.x, selection.y);
+    }
+    
+    public IRegion getUnSignedSelection () {
+        StyledText text = getTextWidget();
+        Point selection = text.getSelectionRange();
+
+        selection.x = widgetOffset2ModelOffset(selection.x);
+
+        return new Region(selection.x, selection.y);
+    }
+
+    public void selectAndReveal(int start, int length) {
+        setSelection(new TextSelection(start, length), true);
+    }
+
+    public boolean isStructuralEditingEnabled() {
+        return true;
+    }
+
+    public boolean isInEscapeSequence () {
+        return inEscapeSequence;
+    }
+    
+    public String getDeclaringNamespace() {
+        return ClojureCore.getDeclaringNamespace(getDocument().get());
+    }
+
+    public IJavaProject getAssociatedProject() {
+        return null;
+    }
+    
+    public REPLView getCorrespondingREPL () {
+        // this gets overridden in REPLView as appropriate so that the toolConnection there gets returned
+        return null;
+    }
+    
+    public void setStructuralEditingPossible (boolean possible) {}
+    
+    public void updateTabsToSpacesConverter () {}
 }

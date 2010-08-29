@@ -16,6 +16,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.ui.console.IOConsole;
 
 import ccw.debug.ClojureClient;
+import ccw.repl.REPLView;
 
 public class LoadFileAction extends Action {
 
@@ -47,15 +48,15 @@ public class LoadFileAction extends Action {
 		String absoluteFilePath = editorFile.getLocation().toOSString();
 		String text = "(clojure.core/load-file \"" + absoluteFilePath.replaceAll("\\\\","\\\\\\\\").replaceAll("\"", "\\\\\"") + "\")";
 
-		IOConsole console = ClojureClient.findActiveReplConsole(false, editor.getProject(), false);
-		boolean mustStartNew = (console == null);
-		if (mustStartNew) {
-			console = ClojureClient.findActiveReplConsole(true, editor.getProject(), false);
-		}
-		EvaluateTextUtil.evaluateText(console, text, true);
-		if (mustStartNew && editor.getDeclaringNamespace() != null) {
-			EvaluateTextUtil.evaluateText(console, "(clojure.core/in-ns '" + editor.getDeclaringNamespace() + ")", true);
-		}
+		// TODO surely namespace switching should be a completely separate action? - Chas
+        if (editor.getDeclaringNamespace() != null) {
+            text = text + "(clojure.core/in-ns '" + editor.getDeclaringNamespace() + ")";
+        }
+
+        REPLView repl = REPLView.activeREPL.get();
+        if (repl != null && !repl.isDisposed()) {
+    		EvaluateTextUtil.evaluateText(repl, text, true);
+        }
 	}
 
 }
