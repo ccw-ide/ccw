@@ -80,7 +80,7 @@
   [java-project]
   (not (nil? (.findPackageFragmentRoot java-project (-> java-project .getProject (.getFolder "classes") .getLocation)))))     
 
-(defn- has-path-on-classpath? 
+(defn has-path-on-classpath? 
   [java-project searched-path]
   (let [p (if (instance? Path searched-path) searched-path (Path. searched-path))]
     (not (nil? (.findElement java-project p)))))

@@ -102,7 +102,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 			throws CoreException {
 		IJavaProject jProj = ClojureCore.getJavaProject(LaunchUtils.getProject(configuration));
 		try {
-			if ((Boolean) ClojureClient.invoke("ccw.ClojureProjectNature", "has-clojure-contrib-on-classpath?", jProj)) {
+			if ((Boolean) ClojureClient.invoke("ccw.ClojureProjectNature", "has-path-on-classpath?", jProj, "clojure/contrib/repl_ln.class")) {
 				return LaunchUtils.CLOJURE_CONTRIB_REPL_LN;
 			} else {
 				return LaunchUtils.CLOJURE_MAIN;
