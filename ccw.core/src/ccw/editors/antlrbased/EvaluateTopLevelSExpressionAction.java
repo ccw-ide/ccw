@@ -36,7 +36,9 @@ public class EvaluateTopLevelSExpressionAction extends Action {
 			selectedText = editor.getCurrentOrNextTopLevelSExpression();
 		}
 
-		IOConsole console = ClojureClient.findActiveReplConsole(true, editor.getProject(), false);
-		EvaluateTextUtil.evaluateText(console, selectedText, true);
+		IOConsole console = ClojureClient.findActiveReplConsole(false, editor.getProject(), false);
+		if (console != null) {
+			EvaluateTextUtil.evaluateText(console, selectedText, true);
+		}
 	}
 }

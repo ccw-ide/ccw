@@ -47,8 +47,15 @@ public class LoadFileAction extends Action {
 		String absoluteFilePath = editorFile.getLocation().toOSString();
 		String text = "(clojure.core/load-file \"" + absoluteFilePath.replaceAll("\\\\","\\\\\\\\").replaceAll("\"", "\\\\\"") + "\")";
 
-		IOConsole console = ClojureClient.findActiveReplConsole(true, editor.getProject(), false);
+		IOConsole console = ClojureClient.findActiveReplConsole(false, editor.getProject(), false);
+		boolean mustStartNew = (console == null);
+		if (mustStartNew) {
+			console = ClojureClient.findActiveReplConsole(true, editor.getProject(), false);
+		}
 		EvaluateTextUtil.evaluateText(console, text, true);
+		if (mustStartNew && editor.getDeclaringNamespace() != null) {
+			EvaluateTextUtil.evaluateText(console, "(clojure.core/in-ns '" + editor.getDeclaringNamespace() + ")", true);
+		}
 	}
 
 }

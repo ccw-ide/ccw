@@ -62,7 +62,6 @@ public class CompileLibAction extends Action {
 		try {
 			editorFile.getProject().getFolder("classes").refreshLocal(IFolder.DEPTH_INFINITE, null);
 		} catch (CoreException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
