@@ -14,16 +14,20 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.ui.console.IOConsole;
 
-public class CompileLibAction extends EvaluateTextAction {
+import ccw.debug.ClojureClient;
+
+public class CompileLibAction extends Action {
 
 	public final static String ID = "CompileLibAction"; //$NON-NLS-1$
 
 	private final AntlrBasedClojureEditor editor;
 
 	public CompileLibAction(AntlrBasedClojureEditor editor) {
-		super(ClojureEditorMessages.CompileLibAction_label, editor.getProject());
+		super(ClojureEditorMessages.CompileLibAction_label);
 		Assert.isNotNull(editor);
 		this.editor= editor;
 		setEnabled(true);
@@ -32,7 +36,7 @@ public class CompileLibAction extends EvaluateTextAction {
 	public void run() {
 		String title = "File Compiler and loader";
 		String message = "The editor has pending changes. Clicking OK will save the changes and compile+load the file.";
-		if (!canProceed(editor, title, message))
+		if (!EvaluateTextUtil.canProceed(editor, title, message))
 			return;
 		
 		compileLoadFile();
@@ -52,7 +56,8 @@ public class CompileLibAction extends EvaluateTextAction {
 			return;
 		}
 		
-		evaluateText(compileLibCommand(lib));
+		IOConsole console = ClojureClient.findActiveReplConsole(true, editor.getProject(), false);
+		EvaluateTextUtil.evaluateText(console, compileLibCommand(lib), true);
 		// TODO: send the compile via the server to synchronize with the compilation end before refreshing the project
 		try {
 			editorFile.getProject().getFolder("classes").refreshLocal(IFolder.DEPTH_INFINITE, null);

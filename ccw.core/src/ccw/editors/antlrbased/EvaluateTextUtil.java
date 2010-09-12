@@ -12,8 +12,6 @@ package ccw.editors.antlrbased;
 
 import java.io.IOException;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.ui.IEditorPart;
@@ -22,29 +20,12 @@ import org.eclipse.ui.console.IOConsole;
 import org.eclipse.ui.console.IOConsoleInputStream;
 import org.eclipse.ui.console.IOConsoleOutputStream;
 
-import ccw.debug.ClojureClient;
 import ccw.util.DisplayUtil;
 import ccw.util.IOUtils;
 
-abstract public class EvaluateTextAction extends Action {
-	protected final IProject project;
-	
-	public EvaluateTextAction(String name, IProject project) {
-		super(name);
-
-		this.project = project;
-	}
-	
-	public final void evaluateText(final String text) {
-		EvaluateTextAction.evaluateText(text, project);
-	}
-	public static final void evaluateText(final String text, IProject project) {
-		IOConsole console = ClojureClient.findActiveReplConsole(true, project, false);
-		evaluateText(console, text);
-	}
-	
-	public static final void evaluateText(IOConsole console, final String text) {
-		evaluateText(console, text, true);
+final public class EvaluateTextUtil {
+	private EvaluateTextUtil() {
+		// Not intended to be subclassed
 	}
 	
 	public static final void evaluateText(IOConsole console, final String text, boolean verboseMode) {
@@ -83,7 +64,7 @@ abstract public class EvaluateTextAction extends Action {
 	 * saved, we ask the user for the permission to save the file and continue
 	 * @return true if it is ok to do the action, false if the action is cancelled
 	 */
-	protected boolean canProceed(IEditorPart editor, String title, String message) {
+	public static boolean canProceed(IEditorPart editor, String title, String message) {
 		if (editor.isDirty()) {
 			boolean saveAndCompileLoad = MessageDialog.openConfirm(editor.getSite().getShell(), title, message);
 			if (saveAndCompileLoad) {

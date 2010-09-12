@@ -12,15 +12,19 @@ package ccw.editors.antlrbased;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.jface.action.Action;
+import org.eclipse.ui.console.IOConsole;
 
-public class LoadFileAction extends EvaluateTextAction {
+import ccw.debug.ClojureClient;
+
+public class LoadFileAction extends Action {
 
 	public final static String ID = "LoadFileAction"; //$NON-NLS-1$
 
 	private final AntlrBasedClojureEditor editor;
 
 	public LoadFileAction(AntlrBasedClojureEditor editor) {
-		super(ClojureEditorMessages.LoadFileAction_label, editor.getProject());
+		super(ClojureEditorMessages.LoadFileAction_label);
 		Assert.isNotNull(editor);
 		this.editor= editor;
 		setEnabled(true);
@@ -29,7 +33,7 @@ public class LoadFileAction extends EvaluateTextAction {
 	public void run() {
 		String title = "File Loader";
 		String message = "The editor has pending changes. Clicking OK will save the changes and load the file.";
-		if (!canProceed(editor, title, message))
+		if (!EvaluateTextUtil.canProceed(editor, title, message))
 			return;
 
 		loadFile();
@@ -43,7 +47,8 @@ public class LoadFileAction extends EvaluateTextAction {
 		String absoluteFilePath = editorFile.getLocation().toOSString();
 		String text = "(clojure.core/load-file \"" + absoluteFilePath.replaceAll("\\\\","\\\\\\\\").replaceAll("\"", "\\\\\"") + "\")";
 
-		evaluateText(text);
+		IOConsole console = ClojureClient.findActiveReplConsole(true, editor.getProject(), false);
+		EvaluateTextUtil.evaluateText(console, text, true);
 	}
 
 }

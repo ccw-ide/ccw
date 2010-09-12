@@ -31,7 +31,7 @@ import org.eclipse.ui.part.IPageBookViewPage;
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.debug.ClojureClient;
-import ccw.editors.antlrbased.EvaluateTextAction;
+import ccw.editors.antlrbased.EvaluateTextUtil;
 import ccw.launching.LaunchUtils;
 import ccw.outline.NamespaceBrowser;
 import ccw.preferences.PreferenceConstants;
@@ -93,7 +93,7 @@ public class ConsolePageParticipant implements IConsolePageParticipant {
                     if (files.size() > 0) {
                         String namespace = ClojureCore.getDeclaredNamespace(files.get(0));
                         if (namespace != null) {
-                            EvaluateTextAction.evaluateText(this.console, "(in-ns '" + namespace + ")", false);
+                            EvaluateTextUtil.evaluateText(this.console, "(in-ns '" + namespace + ")", false);
                         }
                     }
                 } catch (CoreException e) {

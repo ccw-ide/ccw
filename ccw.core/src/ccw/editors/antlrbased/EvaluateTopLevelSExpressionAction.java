@@ -11,17 +11,19 @@
 package ccw.editors.antlrbased;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.jface.action.Action;
+import org.eclipse.ui.console.IOConsole;
 
-public class EvaluateTopLevelSExpressionAction extends EvaluateTextAction {
+import ccw.debug.ClojureClient;
+
+public class EvaluateTopLevelSExpressionAction extends Action {
 
 	public final static String ID = "EvaluateTopLevelSExpressionAction"; //$NON-NLS-1$
 
 	private final AntlrBasedClojureEditor editor;
 
 	public EvaluateTopLevelSExpressionAction(AntlrBasedClojureEditor editor) {
-		super(ClojureEditorMessages.EvaluateTopLevelSExpressionAction_label, 
-				editor.getProject() // TODO remove this constraint when the new REPL support is done
-				);
+		super(ClojureEditorMessages.EvaluateTopLevelSExpressionAction_label);
 		Assert.isNotNull(editor);
 		this.editor= editor;
 		setEnabled(true);
@@ -34,6 +36,7 @@ public class EvaluateTopLevelSExpressionAction extends EvaluateTextAction {
 			selectedText = editor.getCurrentOrNextTopLevelSExpression();
 		}
 
-		evaluateText(selectedText);
+		IOConsole console = ClojureClient.findActiveReplConsole(true, editor.getProject(), false);
+		EvaluateTextUtil.evaluateText(console, selectedText, true);
 	}
 }
