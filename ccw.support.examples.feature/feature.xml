@@ -2,7 +2,7 @@
 <feature
       id="ccw.support.examples.feature"
       label="%featureName"
-      version="0.0.2.STABLE02"
+      version="0.0.3.BETA05"
       provider-name="%providerName">
 
    <description url="feature.properties">
@@ -47,7 +47,6 @@
          id="ccw.support.leiningen"
          download-size="0"
          install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
 </feature>

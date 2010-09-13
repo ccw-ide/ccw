@@ -36,7 +36,7 @@
      [ccw.debug ClojureClient]
      [ccw.support.examples.labrepl Activator]
      [ccw.launching ClojureLaunchShortcut LaunchUtils]
-     [ccw.editors.antlrbased EvaluateTextAction]
+     [ccw.editors.antlrbased EvaluateTextUtil]
      [org.eclipse.ui.wizards.datatransfer ImportOperation
                                           ZipFileStructureProvider]
      [org.eclipse.ui.browser IWorkbenchBrowserSupport]
@@ -229,7 +229,7 @@ never returned a non-nil value before the timeout occurred."
 													(let [console (wait-for-resource #(ClojureClient/findActiveReplConsole) "Console" *timeout* *step* (.newChild job-progress 30))]
 			                      (if console
 			                        (do
-				                        (EvaluateTextAction/evaluateText console "(org.apache.log4j.BasicConfigurator/configure (org.apache.log4j.varia.NullAppender.)) (labrepl/-main)")
+				                        (EvaluateTextUtil/evaluateText console "(org.apache.log4j.BasicConfigurator/configure (org.apache.log4j.varia.NullAppender.)) (labrepl/-main)" true)
 													      (open-browser (.newChild job-progress 30)))
 			                        Status/CANCEL_STATUS)))))]
                   (.schedule repl-browser-job))))))))
