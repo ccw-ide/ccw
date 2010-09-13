@@ -33,7 +33,7 @@
   (:require [clojure.contrib.zip-filter :as zf])
   ;(:require [net.cgrand.parsley.glr :as core] :reload)
   (:use net.cgrand.parsley :reload)
-  (:require [net.cgrand.parsley.lr-plus :as lr+]))
+  (:require [net.cgrand.parsley.lrplus :as lr+]))
 
 #_(set! *warn-on-reflection* true)
 
