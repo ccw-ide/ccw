@@ -105,8 +105,13 @@ public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
     	try {
     		IPackageFragmentRoot filePFR = findPackageFragmentRoot(javaProject, filePath);
 	    	if (filePFR != null) {
-	    		IPath pfrPath = filePFR.getResource().getLocation();// getResource();
-    			String classpathRelativeArg = filePath.makeRelativeTo(pfrPath).toString();
+	    		IPath pfrPath = filePFR.getResource().getLocation();
+	    		// TODO we can use .makeRelativeTo again when we decide not to support Eclipse 3.4 anymore
+//    			String classpathRelativeArg = filePath.makeRelativeTo(pfrPath).toString();
+	    		String classpathRelativeArg = filePath.toString().substring(pfrPath.toString().length()); 
+	    		if (classpathRelativeArg.startsWith("/")) {
+	    			classpathRelativeArg = classpathRelativeArg.substring(1);
+	    		}
             	return " \"@/" + classpathRelativeArg + "\"";
 	    	} else {
 	    		CCWPlugin.logError(FILE_ARG_ERROR_PREFIX + 
