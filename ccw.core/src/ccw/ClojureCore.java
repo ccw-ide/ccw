@@ -254,7 +254,7 @@ public final class ClojureCore {
     	// (when I estimate everybody is using the newer clojure version
     	if (searchedFileName.contains("/")) {
     		// new clojure version with namespace in searchedFileName
-    		searchedNS = searchedFileName.substring(0, searchedFileName.lastIndexOf('.')).replace('/', '.');
+    		//searchedNS = searchedFileName.substring(0, searchedFileName.lastIndexOf('.')).replace('/', '.');
     		searchedFileName = searchedFileName.substring(1 + searchedFileName.lastIndexOf('/'));
     	} else {
     		// old clojure version without namespace in searchedFileName
