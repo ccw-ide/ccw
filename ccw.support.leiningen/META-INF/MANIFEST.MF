@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Counterclockwise Leiningen Plug-in
 Bundle-SymbolicName: ccw.support.leiningen
-Bundle-Version: 1.1.1.STABLE07
+Bundle-Version: 1.1.1.STABLE08
 Export-Package: hidden.org.codehaus.plexus.interpolation,
  hidden.org.codehaus.plexus.interpolation.os,
  hidden.org.codehaus.plexus.interpolation.reflection,
