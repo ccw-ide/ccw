@@ -2,14 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Paredit.clj
 Bundle-SymbolicName: paredit.clj;singleton:=true
-Bundle-Version: 0.11.0.STABLE01
-Bundle-ClassPath: clj.jar,
+Bundle-Version: 0.11.1.BETA05
+Bundle-ClassPath: .,
  classes/
-Export-Package: paredit
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Laurent Petit
-Require-Bundle: ccw.clojure;bundle-version="1.2.0",
- ccw.clojurecontrib;bundle-version="1.2.0",
- parsley;bundle-version="0.0.0"
+Require-Bundle: parsley;bundle-version="0.0.0";visibility:=reexport,
+ ccw.clojure;bundle-version="1.2.0",
+ ccw.clojurecontrib;bundle-version="1.2.0"
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Eclipse-RegisterBuddy: ccw.clojure
+Export-Package: paredit
