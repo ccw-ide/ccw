@@ -2,7 +2,14 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Counterclockwise Leiningen Plug-in
 Bundle-SymbolicName: ccw.support.leiningen
-Bundle-Version: 1.1.1.STABLE08
+Bundle-Version: 1.1.2.BETA07
+Bundle-ClassPath: .,
+ classes/,
+ lib/maven-ant-tasks-2.0.10.jar
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Require-Bundle: org.apache.ant;visibility:=reexport,
+ ccw.clojure;bundle-version="1.2.0",
+ ccw.clojurecontrib;bundle-version="1.2.0"
 Export-Package: hidden.org.codehaus.plexus.interpolation,
  hidden.org.codehaus.plexus.interpolation.os,
  hidden.org.codehaus.plexus.interpolation.reflection,
@@ -102,13 +109,4 @@ Export-Package: hidden.org.codehaus.plexus.interpolation,
  org.codehaus.plexus.personality.plexus.lifecycle.phase,
  org.codehaus.plexus.util.xml,
  org.codehaus.plexus.util.xml.pull
-Bundle-ClassPath: .,
- classes/,
- lib/maven-ant-tasks-2.0.10.jar
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Require-Bundle: ccw.clojure,
- ccw.clojurecontrib,
- org.apache.ant
-Eclipse-RegisterBuddy: ccw.clojure,
- ccw.clojurecontrib
-
+Bundle-ActivationPolicy: lazy

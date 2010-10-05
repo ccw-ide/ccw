@@ -12,12 +12,10 @@
  *******************************************************************************/
 package ccw;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
@@ -30,8 +28,8 @@ import org.eclipse.jface.resource.FontRegistry;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -46,7 +44,7 @@ import ccw.preferences.PreferenceConstants;
 import ccw.preferences.SyntaxColoringPreferencePage;
 import ccw.util.DisplayUtil;
 import ccw.utils.editors.antlrbased.IScanContext;
-import clojure.lang.Compiler;
+import clojure.osgi.ClojureOSGi;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -91,7 +89,7 @@ public class CCWPlugin extends AbstractUIPlugin {
         super.start(context);
         
         plugin = this;
-        loadPluginClojureCode();
+        startClojureCode(context);
         initializeParenRainbowColors();
         createColorRegistry();
         startLaunchListener();
@@ -135,12 +133,25 @@ public class CCWPlugin extends AbstractUIPlugin {
         return getFontRegistry().getItalic("");
     }
 
-    private void loadPluginClojureCode() throws Exception {
-		URL clientReplBundleUrl = CCWPlugin.getDefault().getBundle().getResource("ccw/debug/clientrepl.clj");
-		URL clientReplFileUrl = FileLocator.toFileURL(clientReplBundleUrl);
-		String clientRepl = clientReplFileUrl.getFile(); 
+    private void startClojureCode(BundleContext bundleContext) throws Exception {
+    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.ClojureProjectNature");
+    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.PareditAutoEditStrategy");
+    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.ClojureFormat");
+    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.StacktraceHyperlink");
+    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.ExpandSelectionUpAction");
+    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.ExpandSelectionLeftAction");
+    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.ExpandSelectionRightAction");
+    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.RaiseSelectionAction");
+    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.IndentSelectionAction");
+    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.SplitSexprAction");
+    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.JoinSexprAction");
+    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.SwitchStructuralEditionModeAction");
+    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.OpenDeclarationAction");
+    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.EditorSupport");
+    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.ClojureHyperlinkDetector");
+    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.ClojureHyperlink");
 
-		Compiler.loadFile(clientRepl);
+    	ClojureOSGi.require(bundleContext, "ccw.debug.clientrepl");
     }
     
     public void stop(BundleContext context) throws Exception {

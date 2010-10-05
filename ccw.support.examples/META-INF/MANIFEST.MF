@@ -2,16 +2,19 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Counterclockwise Examples Plug-In
 Bundle-SymbolicName: ccw.support.examples;singleton:=true
-Bundle-Version: 0.0.3.STABLE01
+Bundle-Version: 0.0.4.BETA07
 Bundle-Activator: ccw.support.examples.labrepl.Activator
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- ccw.clojure,
+ org.eclipse.debug.core,
+ org.eclipse.ui.browser,
+ org.apache.ant,
  ccw.support.leiningen,
  ccw.core,
- org.eclipse.debug.core,
- org.eclipse.ui.browser
+ ccw.clojure;bundle-version="1.2.0",
+ ccw.clojurecontrib;bundle-version="1.2.0",
+ clojure.osgi;bundle-version="0.0.1"
 Bundle-ClassPath: .,
  classes/
 Bundle-ActivationPolicy: lazy
@@ -25,5 +28,4 @@ Import-Package: org.apache.tools.ant,
  org.eclipse.ui.dialogs,
  org.eclipse.ui.wizards.datatransfer,
  org.eclipse.ui.wizards.newresource
-Eclipse-RegisterBuddy: ccw.clojure
 Bundle-Vendor: Counterclockwise team
