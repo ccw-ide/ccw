@@ -119,7 +119,7 @@
     (.charAt s index)))
     
 (defn eof [s eof?]
-  (and (= 0 (.length s)) eof? [0 eof]))
+  (when (and (= 0 (.length s)) eof?) [0 eof]))
 
 (defn bracket-end [s eof?]
   (lr+/match #{")" "]" "}" eof} s eof?))
