@@ -1,5 +1,5 @@
 package ccw.lexers;
-// $ANTLR 3.0 /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g 2010-04-26 21:59:07
+// $ANTLR 3.0 /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g 2010-10-08 23:44:18
 
 import org.antlr.runtime.*;
 import java.util.Stack;
@@ -28,7 +28,7 @@ public class ClojureLexer extends Lexer {
     public static final int BOOLEAN=26;
     public static final int NIL=25;
     public static final int UNQUOTE=35;
-    public static final int UnicodeEscape=20;
+    public static final int UnicodeEscape=21;
     public static final int LAMBDA_ARG=38;
     public static final int NUMBER_SIGN=14;
     public static final int SPECIAL_FORM=16;
@@ -38,12 +38,12 @@ public class ClojureLexer extends Lexer {
     public static final int REGEX_LITERAL=19;
     public static final int COMMENT=36;
     public static final int EscapeSequence=17;
-    public static final int OctalEscape=21;
+    public static final int OctalEscape=22;
     public static final int CIRCUMFLEX=12;
     public static final int UNQUOTE_SPLICING=34;
     public static final int STRING=18;
     public static final int BACKSLASH=11;
-    public static final int HEXDIGIT=22;
+    public static final int HEXDIGIT=20;
     public ClojureLexer() {;} 
     public ClojureLexer(CharStream input) {
         super(input);
@@ -740,89 +740,14 @@ public class ClojureLexer extends Lexer {
     // $ANTLR start EscapeSequence
     public final void mEscapeSequence() throws RecognitionException {
         try {
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:82:9: ( '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' ) | UnicodeEscape | OctalEscape )
-            int alt4=3;
-            int LA4_0 = input.LA(1);
-
-            if ( (LA4_0=='\\') ) {
-                switch ( input.LA(2) ) {
-                case 'u':
-                    {
-                    alt4=2;
-                    }
-                    break;
-                case '\"':
-                case '\'':
-                case '\\':
-                case 'b':
-                case 'f':
-                case 'n':
-                case 'r':
-                case 't':
-                    {
-                    alt4=1;
-                    }
-                    break;
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                    {
-                    alt4=3;
-                    }
-                    break;
-                default:
-                    NoViableAltException nvae =
-                        new NoViableAltException("80:1: fragment EscapeSequence : ( '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' ) | UnicodeEscape | OctalEscape );", 4, 1, input);
-
-                    throw nvae;
-                }
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:82:11: ( '\\\\' . )
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:82:11: '\\\\' .
+            {
+            match('\\'); 
+            matchAny(); 
 
             }
-            else {
-                NoViableAltException nvae =
-                    new NoViableAltException("80:1: fragment EscapeSequence : ( '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' ) | UnicodeEscape | OctalEscape );", 4, 0, input);
 
-                throw nvae;
-            }
-            switch (alt4) {
-                case 1 :
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:82:9: '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' )
-                    {
-                    match('\\'); 
-                    if ( input.LA(1)=='\"'||input.LA(1)=='\''||input.LA(1)=='\\'||input.LA(1)=='b'||input.LA(1)=='f'||input.LA(1)=='n'||input.LA(1)=='r'||input.LA(1)=='t' ) {
-                        input.consume();
-
-                    }
-                    else {
-                        MismatchedSetException mse =
-                            new MismatchedSetException(null,input);
-                        recover(mse);    throw mse;
-                    }
-
-
-                    }
-                    break;
-                case 2 :
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:83:9: UnicodeEscape
-                    {
-                    mUnicodeEscape(); 
-
-                    }
-                    break;
-                case 3 :
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:84:9: OctalEscape
-                    {
-                    mOctalEscape(); 
-
-                    }
-                    break;
-
-            }
         }
         finally {
         }
@@ -832,8 +757,8 @@ public class ClojureLexer extends Lexer {
     // $ANTLR start UnicodeEscape
     public final void mUnicodeEscape() throws RecognitionException {
         try {
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:90:9: ( '\\\\' 'u' HEXDIGIT HEXDIGIT HEXDIGIT HEXDIGIT )
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:90:9: '\\\\' 'u' HEXDIGIT HEXDIGIT HEXDIGIT HEXDIGIT
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:91:9: ( '\\\\' 'u' HEXDIGIT HEXDIGIT HEXDIGIT HEXDIGIT )
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:91:9: '\\\\' 'u' HEXDIGIT HEXDIGIT HEXDIGIT HEXDIGIT
             {
             match('\\'); 
             match('u'); 
@@ -853,87 +778,59 @@ public class ClojureLexer extends Lexer {
     // $ANTLR start OctalEscape
     public final void mOctalEscape() throws RecognitionException {
         try {
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:96:9: ( '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) )
-            int alt5=3;
-            int LA5_0 = input.LA(1);
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:97:9: ( '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) )
+            int alt4=3;
+            int LA4_0 = input.LA(1);
 
-            if ( (LA5_0=='\\') ) {
-                int LA5_1 = input.LA(2);
+            if ( (LA4_0=='\\') ) {
+                int LA4_1 = input.LA(2);
 
-                if ( ((LA5_1>='0' && LA5_1<='3')) ) {
-                    int LA5_2 = input.LA(3);
+                if ( ((LA4_1>='0' && LA4_1<='3')) ) {
+                    int LA4_2 = input.LA(3);
 
-                    if ( ((LA5_2>='0' && LA5_2<='7')) ) {
-                        int LA5_4 = input.LA(4);
+                    if ( ((LA4_2>='0' && LA4_2<='7')) ) {
+                        int LA4_5 = input.LA(4);
 
-                        if ( ((LA5_4>='0' && LA5_4<='7')) ) {
-                            alt5=1;
+                        if ( ((LA4_5>='0' && LA4_5<='7')) ) {
+                            alt4=1;
                         }
                         else {
-                            alt5=2;}
+                            alt4=2;}
                     }
                     else {
-                        alt5=3;}
+                        alt4=3;}
                 }
-                else if ( ((LA5_1>='4' && LA5_1<='7')) ) {
-                    int LA5_3 = input.LA(3);
+                else if ( ((LA4_1>='4' && LA4_1<='7')) ) {
+                    int LA4_3 = input.LA(3);
 
-                    if ( ((LA5_3>='0' && LA5_3<='7')) ) {
-                        alt5=2;
+                    if ( ((LA4_3>='0' && LA4_3<='7')) ) {
+                        alt4=2;
                     }
                     else {
-                        alt5=3;}
+                        alt4=3;}
                 }
                 else {
                     NoViableAltException nvae =
-                        new NoViableAltException("94:1: fragment OctalEscape : ( '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) );", 5, 1, input);
+                        new NoViableAltException("95:1: fragment OctalEscape : ( '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) );", 4, 1, input);
 
                     throw nvae;
                 }
             }
             else {
                 NoViableAltException nvae =
-                    new NoViableAltException("94:1: fragment OctalEscape : ( '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) );", 5, 0, input);
+                    new NoViableAltException("95:1: fragment OctalEscape : ( '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) );", 4, 0, input);
 
                 throw nvae;
             }
-            switch (alt5) {
+            switch (alt4) {
                 case 1 :
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:96:9: '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' )
+                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:97:9: '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' )
                     {
                     match('\\'); 
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:96:14: ( '0' .. '3' )
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:96:15: '0' .. '3'
+                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:97:14: ( '0' .. '3' )
+                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:97:15: '0' .. '3'
                     {
                     matchRange('0','3'); 
-
-                    }
-
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:96:25: ( '0' .. '7' )
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:96:26: '0' .. '7'
-                    {
-                    matchRange('0','7'); 
-
-                    }
-
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:96:36: ( '0' .. '7' )
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:96:37: '0' .. '7'
-                    {
-                    matchRange('0','7'); 
-
-                    }
-
-
-                    }
-                    break;
-                case 2 :
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:97:9: '\\\\' ( '0' .. '7' ) ( '0' .. '7' )
-                    {
-                    match('\\'); 
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:97:14: ( '0' .. '7' )
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:97:15: '0' .. '7'
-                    {
-                    matchRange('0','7'); 
 
                     }
 
@@ -944,15 +841,43 @@ public class ClojureLexer extends Lexer {
 
                     }
 
+                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:97:36: ( '0' .. '7' )
+                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:97:37: '0' .. '7'
+                    {
+                    matchRange('0','7'); 
+
+                    }
+
 
                     }
                     break;
-                case 3 :
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:98:9: '\\\\' ( '0' .. '7' )
+                case 2 :
+                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:98:9: '\\\\' ( '0' .. '7' ) ( '0' .. '7' )
                     {
                     match('\\'); 
                     // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:98:14: ( '0' .. '7' )
                     // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:98:15: '0' .. '7'
+                    {
+                    matchRange('0','7'); 
+
+                    }
+
+                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:98:25: ( '0' .. '7' )
+                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:98:26: '0' .. '7'
+                    {
+                    matchRange('0','7'); 
+
+                    }
+
+
+                    }
+                    break;
+                case 3 :
+                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:99:9: '\\\\' ( '0' .. '7' )
+                    {
+                    match('\\'); 
+                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:99:14: ( '0' .. '7' )
+                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:99:15: '0' .. '7'
                     {
                     matchRange('0','7'); 
 
@@ -973,19 +898,19 @@ public class ClojureLexer extends Lexer {
     public final void mNUMBER() throws RecognitionException {
         try {
             int _type = NUMBER;
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:103:9: ( ( '-' )? ( '0' .. '9' )+ ( '.' ( '0' .. '9' )+ )? ( ( 'e' | 'E' ) ( '-' )? ( '0' .. '9' )+ )? )
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:103:9: ( '-' )? ( '0' .. '9' )+ ( '.' ( '0' .. '9' )+ )? ( ( 'e' | 'E' ) ( '-' )? ( '0' .. '9' )+ )?
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:104:9: ( ( '-' )? ( '0' .. '9' )+ ( '.' ( '0' .. '9' )+ )? ( ( 'e' | 'E' ) ( '-' )? ( '0' .. '9' )+ )? )
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:104:9: ( '-' )? ( '0' .. '9' )+ ( '.' ( '0' .. '9' )+ )? ( ( 'e' | 'E' ) ( '-' )? ( '0' .. '9' )+ )?
             {
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:103:9: ( '-' )?
-            int alt6=2;
-            int LA6_0 = input.LA(1);
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:104:9: ( '-' )?
+            int alt5=2;
+            int LA5_0 = input.LA(1);
 
-            if ( (LA6_0=='-') ) {
-                alt6=1;
+            if ( (LA5_0=='-') ) {
+                alt5=1;
             }
-            switch (alt6) {
+            switch (alt5) {
                 case 1 :
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:103:9: '-'
+                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:104:9: '-'
                     {
                     match('-'); 
 
@@ -994,21 +919,21 @@ public class ClojureLexer extends Lexer {
 
             }
 
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:103:14: ( '0' .. '9' )+
-            int cnt7=0;
-            loop7:
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:104:14: ( '0' .. '9' )+
+            int cnt6=0;
+            loop6:
             do {
-                int alt7=2;
-                int LA7_0 = input.LA(1);
+                int alt6=2;
+                int LA6_0 = input.LA(1);
 
-                if ( ((LA7_0>='0' && LA7_0<='9')) ) {
-                    alt7=1;
+                if ( ((LA6_0>='0' && LA6_0<='9')) ) {
+                    alt6=1;
                 }
 
 
-                switch (alt7) {
+                switch (alt6) {
             	case 1 :
-            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:103:14: '0' .. '9'
+            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:104:14: '0' .. '9'
             	    {
             	    matchRange('0','9'); 
 
@@ -1016,41 +941,41 @@ public class ClojureLexer extends Lexer {
             	    break;
 
             	default :
-            	    if ( cnt7 >= 1 ) break loop7;
+            	    if ( cnt6 >= 1 ) break loop6;
                         EarlyExitException eee =
-                            new EarlyExitException(7, input);
+                            new EarlyExitException(6, input);
                         throw eee;
                 }
-                cnt7++;
+                cnt6++;
             } while (true);
 
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:103:24: ( '.' ( '0' .. '9' )+ )?
-            int alt9=2;
-            int LA9_0 = input.LA(1);
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:104:24: ( '.' ( '0' .. '9' )+ )?
+            int alt8=2;
+            int LA8_0 = input.LA(1);
 
-            if ( (LA9_0=='.') ) {
-                alt9=1;
+            if ( (LA8_0=='.') ) {
+                alt8=1;
             }
-            switch (alt9) {
+            switch (alt8) {
                 case 1 :
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:103:25: '.' ( '0' .. '9' )+
+                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:104:25: '.' ( '0' .. '9' )+
                     {
                     match('.'); 
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:103:29: ( '0' .. '9' )+
-                    int cnt8=0;
-                    loop8:
+                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:104:29: ( '0' .. '9' )+
+                    int cnt7=0;
+                    loop7:
                     do {
-                        int alt8=2;
-                        int LA8_0 = input.LA(1);
+                        int alt7=2;
+                        int LA7_0 = input.LA(1);
 
-                        if ( ((LA8_0>='0' && LA8_0<='9')) ) {
-                            alt8=1;
+                        if ( ((LA7_0>='0' && LA7_0<='9')) ) {
+                            alt7=1;
                         }
 
 
-                        switch (alt8) {
+                        switch (alt7) {
                     	case 1 :
-                    	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:103:29: '0' .. '9'
+                    	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:104:29: '0' .. '9'
                     	    {
                     	    matchRange('0','9'); 
 
@@ -1058,12 +983,12 @@ public class ClojureLexer extends Lexer {
                     	    break;
 
                     	default :
-                    	    if ( cnt8 >= 1 ) break loop8;
+                    	    if ( cnt7 >= 1 ) break loop7;
                                 EarlyExitException eee =
-                                    new EarlyExitException(8, input);
+                                    new EarlyExitException(7, input);
                                 throw eee;
                         }
-                        cnt8++;
+                        cnt7++;
                     } while (true);
 
 
@@ -1072,16 +997,16 @@ public class ClojureLexer extends Lexer {
 
             }
 
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:103:41: ( ( 'e' | 'E' ) ( '-' )? ( '0' .. '9' )+ )?
-            int alt12=2;
-            int LA12_0 = input.LA(1);
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:104:41: ( ( 'e' | 'E' ) ( '-' )? ( '0' .. '9' )+ )?
+            int alt11=2;
+            int LA11_0 = input.LA(1);
 
-            if ( (LA12_0=='E'||LA12_0=='e') ) {
-                alt12=1;
+            if ( (LA11_0=='E'||LA11_0=='e') ) {
+                alt11=1;
             }
-            switch (alt12) {
+            switch (alt11) {
                 case 1 :
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:103:42: ( 'e' | 'E' ) ( '-' )? ( '0' .. '9' )+
+                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:104:42: ( 'e' | 'E' ) ( '-' )? ( '0' .. '9' )+
                     {
                     if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
                         input.consume();
@@ -1093,16 +1018,16 @@ public class ClojureLexer extends Lexer {
                         recover(mse);    throw mse;
                     }
 
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:103:52: ( '-' )?
-                    int alt10=2;
-                    int LA10_0 = input.LA(1);
+                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:104:52: ( '-' )?
+                    int alt9=2;
+                    int LA9_0 = input.LA(1);
 
-                    if ( (LA10_0=='-') ) {
-                        alt10=1;
+                    if ( (LA9_0=='-') ) {
+                        alt9=1;
                     }
-                    switch (alt10) {
+                    switch (alt9) {
                         case 1 :
-                            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:103:52: '-'
+                            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:104:52: '-'
                             {
                             match('-'); 
 
@@ -1111,21 +1036,21 @@ public class ClojureLexer extends Lexer {
 
                     }
 
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:103:57: ( '0' .. '9' )+
-                    int cnt11=0;
-                    loop11:
+                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:104:57: ( '0' .. '9' )+
+                    int cnt10=0;
+                    loop10:
                     do {
-                        int alt11=2;
-                        int LA11_0 = input.LA(1);
+                        int alt10=2;
+                        int LA10_0 = input.LA(1);
 
-                        if ( ((LA11_0>='0' && LA11_0<='9')) ) {
-                            alt11=1;
+                        if ( ((LA10_0>='0' && LA10_0<='9')) ) {
+                            alt10=1;
                         }
 
 
-                        switch (alt11) {
+                        switch (alt10) {
                     	case 1 :
-                    	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:103:57: '0' .. '9'
+                    	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:104:57: '0' .. '9'
                     	    {
                     	    matchRange('0','9'); 
 
@@ -1133,12 +1058,12 @@ public class ClojureLexer extends Lexer {
                     	    break;
 
                     	default :
-                    	    if ( cnt11 >= 1 ) break loop11;
+                    	    if ( cnt10 >= 1 ) break loop10;
                                 EarlyExitException eee =
-                                    new EarlyExitException(11, input);
+                                    new EarlyExitException(10, input);
                                 throw eee;
                         }
-                        cnt11++;
+                        cnt10++;
                     } while (true);
 
 
@@ -1161,68 +1086,68 @@ public class ClojureLexer extends Lexer {
     public final void mCHARACTER() throws RecognitionException {
         try {
             int _type = CHARACTER;
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:107:9: ( '\\\\newline' | '\\\\space' | '\\\\tab' | '\\\\u' HEXDIGIT HEXDIGIT HEXDIGIT HEXDIGIT | BACKSLASH . )
-            int alt13=5;
-            int LA13_0 = input.LA(1);
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:108:9: ( '\\\\newline' | '\\\\space' | '\\\\tab' | '\\\\u' HEXDIGIT HEXDIGIT HEXDIGIT HEXDIGIT | BACKSLASH . )
+            int alt12=5;
+            int LA12_0 = input.LA(1);
 
-            if ( (LA13_0=='\\') ) {
-                int LA13_1 = input.LA(2);
+            if ( (LA12_0=='\\') ) {
+                int LA12_1 = input.LA(2);
 
-                if ( (LA13_1=='t') ) {
-                    int LA13_2 = input.LA(3);
+                if ( (LA12_1=='u') ) {
+                    int LA12_2 = input.LA(3);
 
-                    if ( (LA13_2=='a') ) {
-                        alt13=3;
+                    if ( ((LA12_2>='0' && LA12_2<='9')||(LA12_2>='A' && LA12_2<='F')||(LA12_2>='a' && LA12_2<='f')) ) {
+                        alt12=4;
                     }
                     else {
-                        alt13=5;}
+                        alt12=5;}
                 }
-                else if ( (LA13_1=='n') ) {
-                    int LA13_3 = input.LA(3);
+                else if ( (LA12_1=='s') ) {
+                    int LA12_3 = input.LA(3);
 
-                    if ( (LA13_3=='e') ) {
-                        alt13=1;
+                    if ( (LA12_3=='p') ) {
+                        alt12=2;
                     }
                     else {
-                        alt13=5;}
+                        alt12=5;}
                 }
-                else if ( (LA13_1=='s') ) {
-                    int LA13_4 = input.LA(3);
+                else if ( (LA12_1=='t') ) {
+                    int LA12_4 = input.LA(3);
 
-                    if ( (LA13_4=='p') ) {
-                        alt13=2;
+                    if ( (LA12_4=='a') ) {
+                        alt12=3;
                     }
                     else {
-                        alt13=5;}
+                        alt12=5;}
                 }
-                else if ( (LA13_1=='u') ) {
-                    int LA13_5 = input.LA(3);
+                else if ( (LA12_1=='n') ) {
+                    int LA12_5 = input.LA(3);
 
-                    if ( ((LA13_5>='0' && LA13_5<='9')||(LA13_5>='A' && LA13_5<='F')||(LA13_5>='a' && LA13_5<='f')) ) {
-                        alt13=4;
+                    if ( (LA12_5=='e') ) {
+                        alt12=1;
                     }
                     else {
-                        alt13=5;}
+                        alt12=5;}
                 }
-                else if ( ((LA13_1>='\u0000' && LA13_1<='m')||(LA13_1>='o' && LA13_1<='r')||(LA13_1>='v' && LA13_1<='\uFFFE')) ) {
-                    alt13=5;
+                else if ( ((LA12_1>='\u0000' && LA12_1<='m')||(LA12_1>='o' && LA12_1<='r')||(LA12_1>='v' && LA12_1<='\uFFFE')) ) {
+                    alt12=5;
                 }
                 else {
                     NoViableAltException nvae =
-                        new NoViableAltException("106:1: CHARACTER : ( '\\\\newline' | '\\\\space' | '\\\\tab' | '\\\\u' HEXDIGIT HEXDIGIT HEXDIGIT HEXDIGIT | BACKSLASH . );", 13, 1, input);
+                        new NoViableAltException("107:1: CHARACTER : ( '\\\\newline' | '\\\\space' | '\\\\tab' | '\\\\u' HEXDIGIT HEXDIGIT HEXDIGIT HEXDIGIT | BACKSLASH . );", 12, 1, input);
 
                     throw nvae;
                 }
             }
             else {
                 NoViableAltException nvae =
-                    new NoViableAltException("106:1: CHARACTER : ( '\\\\newline' | '\\\\space' | '\\\\tab' | '\\\\u' HEXDIGIT HEXDIGIT HEXDIGIT HEXDIGIT | BACKSLASH . );", 13, 0, input);
+                    new NoViableAltException("107:1: CHARACTER : ( '\\\\newline' | '\\\\space' | '\\\\tab' | '\\\\u' HEXDIGIT HEXDIGIT HEXDIGIT HEXDIGIT | BACKSLASH . );", 12, 0, input);
 
                 throw nvae;
             }
-            switch (alt13) {
+            switch (alt12) {
                 case 1 :
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:107:9: '\\\\newline'
+                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:108:9: '\\\\newline'
                     {
                     match("\\newline"); 
 
@@ -1230,7 +1155,7 @@ public class ClojureLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:108:9: '\\\\space'
+                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:109:9: '\\\\space'
                     {
                     match("\\space"); 
 
@@ -1238,7 +1163,7 @@ public class ClojureLexer extends Lexer {
                     }
                     break;
                 case 3 :
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:109:9: '\\\\tab'
+                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:110:9: '\\\\tab'
                     {
                     match("\\tab"); 
 
@@ -1246,7 +1171,7 @@ public class ClojureLexer extends Lexer {
                     }
                     break;
                 case 4 :
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:110:9: '\\\\u' HEXDIGIT HEXDIGIT HEXDIGIT HEXDIGIT
+                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:111:9: '\\\\u' HEXDIGIT HEXDIGIT HEXDIGIT HEXDIGIT
                     {
                     match("\\u"); 
 
@@ -1258,7 +1183,7 @@ public class ClojureLexer extends Lexer {
                     }
                     break;
                 case 5 :
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:111:9: BACKSLASH .
+                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:112:9: BACKSLASH .
                     {
                     mBACKSLASH(); 
                     matchAny(); 
@@ -1278,7 +1203,7 @@ public class ClojureLexer extends Lexer {
     public final void mHEXDIGIT() throws RecognitionException {
         try {
             int _type = HEXDIGIT;
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:115:9: ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' )
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:116:9: ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' )
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:
             {
             if ( (input.LA(1)>='0' && input.LA(1)<='9')||(input.LA(1)>='A' && input.LA(1)<='F')||(input.LA(1)>='a' && input.LA(1)<='f') ) {
@@ -1305,8 +1230,8 @@ public class ClojureLexer extends Lexer {
     public final void mNIL() throws RecognitionException {
         try {
             int _type = NIL;
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:117:9: ( 'nil' )
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:117:9: 'nil'
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:118:9: ( 'nil' )
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:118:9: 'nil'
             {
             match("nil"); 
 
@@ -1324,25 +1249,25 @@ public class ClojureLexer extends Lexer {
     public final void mBOOLEAN() throws RecognitionException {
         try {
             int _type = BOOLEAN;
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:121:9: ( 'true' | 'false' )
-            int alt14=2;
-            int LA14_0 = input.LA(1);
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:122:9: ( 'true' | 'false' )
+            int alt13=2;
+            int LA13_0 = input.LA(1);
 
-            if ( (LA14_0=='t') ) {
-                alt14=1;
+            if ( (LA13_0=='t') ) {
+                alt13=1;
             }
-            else if ( (LA14_0=='f') ) {
-                alt14=2;
+            else if ( (LA13_0=='f') ) {
+                alt13=2;
             }
             else {
                 NoViableAltException nvae =
-                    new NoViableAltException("120:1: BOOLEAN : ( 'true' | 'false' );", 14, 0, input);
+                    new NoViableAltException("121:1: BOOLEAN : ( 'true' | 'false' );", 13, 0, input);
 
                 throw nvae;
             }
-            switch (alt14) {
+            switch (alt13) {
                 case 1 :
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:121:9: 'true'
+                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:122:9: 'true'
                     {
                     match("true"); 
 
@@ -1350,7 +1275,7 @@ public class ClojureLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:122:9: 'false'
+                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:123:9: 'false'
                     {
                     match("false"); 
 
@@ -1370,44 +1295,44 @@ public class ClojureLexer extends Lexer {
     public final void mSYMBOL() throws RecognitionException {
         try {
             int _type = SYMBOL;
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:126:9: ( '/' | NAME ( '/' NAME )? )
-            int alt16=2;
-            int LA16_0 = input.LA(1);
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:127:9: ( '/' | NAME ( '/' NAME )? )
+            int alt15=2;
+            int LA15_0 = input.LA(1);
 
-            if ( (LA16_0=='/') ) {
-                alt16=1;
+            if ( (LA15_0=='/') ) {
+                alt15=1;
             }
-            else if ( (LA16_0=='!'||LA16_0=='$'||(LA16_0>='*' && LA16_0<='+')||LA16_0=='-'||(LA16_0>='<' && LA16_0<='?')||(LA16_0>='A' && LA16_0<='Z')||LA16_0=='_'||(LA16_0>='a' && LA16_0<='z')) ) {
-                alt16=2;
+            else if ( (LA15_0=='!'||LA15_0=='$'||(LA15_0>='*' && LA15_0<='+')||LA15_0=='-'||(LA15_0>='<' && LA15_0<='?')||(LA15_0>='A' && LA15_0<='Z')||LA15_0=='_'||(LA15_0>='a' && LA15_0<='z')) ) {
+                alt15=2;
             }
             else {
                 NoViableAltException nvae =
-                    new NoViableAltException("125:1: SYMBOL : ( '/' | NAME ( '/' NAME )? );", 16, 0, input);
+                    new NoViableAltException("126:1: SYMBOL : ( '/' | NAME ( '/' NAME )? );", 15, 0, input);
 
                 throw nvae;
             }
-            switch (alt16) {
+            switch (alt15) {
                 case 1 :
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:126:9: '/'
+                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:127:9: '/'
                     {
                     match('/'); 
 
                     }
                     break;
                 case 2 :
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:127:9: NAME ( '/' NAME )?
+                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:128:9: NAME ( '/' NAME )?
                     {
                     mNAME(); 
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:127:14: ( '/' NAME )?
-                    int alt15=2;
-                    int LA15_0 = input.LA(1);
+                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:128:14: ( '/' NAME )?
+                    int alt14=2;
+                    int LA14_0 = input.LA(1);
 
-                    if ( (LA15_0=='/') ) {
-                        alt15=1;
+                    if ( (LA14_0=='/') ) {
+                        alt14=1;
                     }
-                    switch (alt15) {
+                    switch (alt14) {
                         case 1 :
-                            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:127:15: '/' NAME
+                            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:128:15: '/' NAME
                             {
                             match('/'); 
                             mNAME(); 
@@ -1433,23 +1358,23 @@ public class ClojureLexer extends Lexer {
     public final void mMETADATA_TYPEHINT() throws RecognitionException {
         try {
             int _type = METADATA_TYPEHINT;
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:131:3: ( ( NUMBER_SIGN )* CIRCUMFLEX ( 'ints' | 'floats' | 'longs' | 'doubles' | 'objects' | NAME | STRING )* )
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:131:3: ( NUMBER_SIGN )* CIRCUMFLEX ( 'ints' | 'floats' | 'longs' | 'doubles' | 'objects' | NAME | STRING )*
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:132:3: ( ( NUMBER_SIGN )* CIRCUMFLEX ( 'ints' | 'floats' | 'longs' | 'doubles' | 'objects' | NAME | STRING )* )
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:132:3: ( NUMBER_SIGN )* CIRCUMFLEX ( 'ints' | 'floats' | 'longs' | 'doubles' | 'objects' | NAME | STRING )*
             {
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:131:3: ( NUMBER_SIGN )*
-            loop17:
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:132:3: ( NUMBER_SIGN )*
+            loop16:
             do {
-                int alt17=2;
-                int LA17_0 = input.LA(1);
+                int alt16=2;
+                int LA16_0 = input.LA(1);
 
-                if ( (LA17_0=='#') ) {
-                    alt17=1;
+                if ( (LA16_0=='#') ) {
+                    alt16=1;
                 }
 
 
-                switch (alt17) {
+                switch (alt16) {
             	case 1 :
-            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:131:3: NUMBER_SIGN
+            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:132:3: NUMBER_SIGN
             	    {
             	    mNUMBER_SIGN(); 
 
@@ -1457,253 +1382,253 @@ public class ClojureLexer extends Lexer {
             	    break;
 
             	default :
-            	    break loop17;
+            	    break loop16;
                 }
             } while (true);
 
             mCIRCUMFLEX(); 
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:131:27: ( 'ints' | 'floats' | 'longs' | 'doubles' | 'objects' | NAME | STRING )*
-            loop18:
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:132:27: ( 'ints' | 'floats' | 'longs' | 'doubles' | 'objects' | NAME | STRING )*
+            loop17:
             do {
-                int alt18=8;
+                int alt17=8;
                 switch ( input.LA(1) ) {
                 case 'i':
                     {
-                    int LA18_2 = input.LA(2);
+                    int LA17_2 = input.LA(2);
 
-                    if ( (LA18_2=='n') ) {
-                        int LA18_9 = input.LA(3);
+                    if ( (LA17_2=='n') ) {
+                        int LA17_9 = input.LA(3);
 
-                        if ( (LA18_9=='t') ) {
-                            int LA18_14 = input.LA(4);
+                        if ( (LA17_9=='t') ) {
+                            int LA17_14 = input.LA(4);
 
-                            if ( (LA18_14=='s') ) {
-                                alt18=1;
+                            if ( (LA17_14=='s') ) {
+                                alt17=1;
                             }
 
                             else {
-                                alt18=6;
+                                alt17=6;
                             }
 
                         }
 
                         else {
-                            alt18=6;
+                            alt17=6;
                         }
 
                     }
 
                     else {
-                        alt18=6;
+                        alt17=6;
                     }
 
                     }
                     break;
                 case 'f':
                     {
-                    int LA18_3 = input.LA(2);
+                    int LA17_3 = input.LA(2);
 
-                    if ( (LA18_3=='l') ) {
-                        int LA18_10 = input.LA(3);
+                    if ( (LA17_3=='l') ) {
+                        int LA17_10 = input.LA(3);
 
-                        if ( (LA18_10=='o') ) {
-                            int LA18_15 = input.LA(4);
+                        if ( (LA17_10=='o') ) {
+                            int LA17_15 = input.LA(4);
 
-                            if ( (LA18_15=='a') ) {
-                                int LA18_20 = input.LA(5);
+                            if ( (LA17_15=='a') ) {
+                                int LA17_20 = input.LA(5);
 
-                                if ( (LA18_20=='t') ) {
-                                    int LA18_24 = input.LA(6);
+                                if ( (LA17_20=='t') ) {
+                                    int LA17_24 = input.LA(6);
 
-                                    if ( (LA18_24=='s') ) {
-                                        alt18=2;
+                                    if ( (LA17_24=='s') ) {
+                                        alt17=2;
                                     }
 
                                     else {
-                                        alt18=6;
+                                        alt17=6;
                                     }
 
                                 }
 
                                 else {
-                                    alt18=6;
+                                    alt17=6;
                                 }
 
                             }
 
                             else {
-                                alt18=6;
+                                alt17=6;
                             }
 
                         }
 
                         else {
-                            alt18=6;
+                            alt17=6;
                         }
 
                     }
 
                     else {
-                        alt18=6;
+                        alt17=6;
                     }
 
                     }
                     break;
                 case 'l':
                     {
-                    int LA18_4 = input.LA(2);
+                    int LA17_4 = input.LA(2);
 
-                    if ( (LA18_4=='o') ) {
-                        int LA18_11 = input.LA(3);
+                    if ( (LA17_4=='o') ) {
+                        int LA17_11 = input.LA(3);
 
-                        if ( (LA18_11=='n') ) {
-                            int LA18_16 = input.LA(4);
+                        if ( (LA17_11=='n') ) {
+                            int LA17_16 = input.LA(4);
 
-                            if ( (LA18_16=='g') ) {
-                                int LA18_21 = input.LA(5);
+                            if ( (LA17_16=='g') ) {
+                                int LA17_21 = input.LA(5);
 
-                                if ( (LA18_21=='s') ) {
-                                    alt18=3;
+                                if ( (LA17_21=='s') ) {
+                                    alt17=3;
                                 }
 
                                 else {
-                                    alt18=6;
+                                    alt17=6;
                                 }
 
                             }
 
                             else {
-                                alt18=6;
+                                alt17=6;
                             }
 
                         }
 
                         else {
-                            alt18=6;
+                            alt17=6;
                         }
 
                     }
 
                     else {
-                        alt18=6;
+                        alt17=6;
                     }
 
                     }
                     break;
                 case 'd':
                     {
-                    int LA18_5 = input.LA(2);
+                    int LA17_5 = input.LA(2);
 
-                    if ( (LA18_5=='o') ) {
-                        int LA18_12 = input.LA(3);
+                    if ( (LA17_5=='o') ) {
+                        int LA17_12 = input.LA(3);
 
-                        if ( (LA18_12=='u') ) {
-                            int LA18_17 = input.LA(4);
+                        if ( (LA17_12=='u') ) {
+                            int LA17_17 = input.LA(4);
 
-                            if ( (LA18_17=='b') ) {
-                                int LA18_22 = input.LA(5);
+                            if ( (LA17_17=='b') ) {
+                                int LA17_22 = input.LA(5);
 
-                                if ( (LA18_22=='l') ) {
-                                    int LA18_26 = input.LA(6);
+                                if ( (LA17_22=='l') ) {
+                                    int LA17_26 = input.LA(6);
 
-                                    if ( (LA18_26=='e') ) {
-                                        int LA18_29 = input.LA(7);
+                                    if ( (LA17_26=='e') ) {
+                                        int LA17_29 = input.LA(7);
 
-                                        if ( (LA18_29=='s') ) {
-                                            alt18=4;
+                                        if ( (LA17_29=='s') ) {
+                                            alt17=4;
                                         }
 
                                         else {
-                                            alt18=6;
+                                            alt17=6;
                                         }
 
                                     }
 
                                     else {
-                                        alt18=6;
+                                        alt17=6;
                                     }
 
                                 }
 
                                 else {
-                                    alt18=6;
+                                    alt17=6;
                                 }
 
                             }
 
                             else {
-                                alt18=6;
+                                alt17=6;
                             }
 
                         }
 
                         else {
-                            alt18=6;
+                            alt17=6;
                         }
 
                     }
 
                     else {
-                        alt18=6;
+                        alt17=6;
                     }
 
                     }
                     break;
                 case 'o':
                     {
-                    int LA18_6 = input.LA(2);
+                    int LA17_6 = input.LA(2);
 
-                    if ( (LA18_6=='b') ) {
-                        int LA18_13 = input.LA(3);
+                    if ( (LA17_6=='b') ) {
+                        int LA17_13 = input.LA(3);
 
-                        if ( (LA18_13=='j') ) {
-                            int LA18_18 = input.LA(4);
+                        if ( (LA17_13=='j') ) {
+                            int LA17_18 = input.LA(4);
 
-                            if ( (LA18_18=='e') ) {
-                                int LA18_23 = input.LA(5);
+                            if ( (LA17_18=='e') ) {
+                                int LA17_23 = input.LA(5);
 
-                                if ( (LA18_23=='c') ) {
-                                    int LA18_27 = input.LA(6);
+                                if ( (LA17_23=='c') ) {
+                                    int LA17_27 = input.LA(6);
 
-                                    if ( (LA18_27=='t') ) {
-                                        int LA18_30 = input.LA(7);
+                                    if ( (LA17_27=='t') ) {
+                                        int LA17_30 = input.LA(7);
 
-                                        if ( (LA18_30=='s') ) {
-                                            alt18=5;
+                                        if ( (LA17_30=='s') ) {
+                                            alt17=5;
                                         }
 
                                         else {
-                                            alt18=6;
+                                            alt17=6;
                                         }
 
                                     }
 
                                     else {
-                                        alt18=6;
+                                        alt17=6;
                                     }
 
                                 }
 
                                 else {
-                                    alt18=6;
+                                    alt17=6;
                                 }
 
                             }
 
                             else {
-                                alt18=6;
+                                alt17=6;
                             }
 
                         }
 
                         else {
-                            alt18=6;
+                            alt17=6;
                         }
 
                     }
 
                     else {
-                        alt18=6;
+                        alt17=6;
                     }
 
                     }
@@ -1766,20 +1691,20 @@ public class ClojureLexer extends Lexer {
                 case 'y':
                 case 'z':
                     {
-                    alt18=6;
+                    alt17=6;
                     }
                     break;
                 case '\"':
                     {
-                    alt18=7;
+                    alt17=7;
                     }
                     break;
 
                 }
 
-                switch (alt18) {
+                switch (alt17) {
             	case 1 :
-            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:131:29: 'ints'
+            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:132:29: 'ints'
             	    {
             	    match("ints"); 
 
@@ -1787,7 +1712,7 @@ public class ClojureLexer extends Lexer {
             	    }
             	    break;
             	case 2 :
-            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:131:38: 'floats'
+            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:132:38: 'floats'
             	    {
             	    match("floats"); 
 
@@ -1795,7 +1720,7 @@ public class ClojureLexer extends Lexer {
             	    }
             	    break;
             	case 3 :
-            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:131:49: 'longs'
+            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:132:49: 'longs'
             	    {
             	    match("longs"); 
 
@@ -1803,7 +1728,7 @@ public class ClojureLexer extends Lexer {
             	    }
             	    break;
             	case 4 :
-            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:131:59: 'doubles'
+            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:132:59: 'doubles'
             	    {
             	    match("doubles"); 
 
@@ -1811,7 +1736,7 @@ public class ClojureLexer extends Lexer {
             	    }
             	    break;
             	case 5 :
-            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:131:71: 'objects'
+            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:132:71: 'objects'
             	    {
             	    match("objects"); 
 
@@ -1819,14 +1744,14 @@ public class ClojureLexer extends Lexer {
             	    }
             	    break;
             	case 6 :
-            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:131:83: NAME
+            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:132:83: NAME
             	    {
             	    mNAME(); 
 
             	    }
             	    break;
             	case 7 :
-            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:131:90: STRING
+            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:132:90: STRING
             	    {
             	    mSTRING(); 
 
@@ -1834,7 +1759,7 @@ public class ClojureLexer extends Lexer {
             	    break;
 
             	default :
-            	    break loop18;
+            	    break loop17;
                 }
             } while (true);
 
@@ -1851,24 +1776,24 @@ public class ClojureLexer extends Lexer {
     // $ANTLR start NAME
     public final void mNAME() throws RecognitionException {
         try {
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:135:9: ( SYMBOL_HEAD ( SYMBOL_REST )* ( ':' ( SYMBOL_REST )+ )* )
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:135:9: SYMBOL_HEAD ( SYMBOL_REST )* ( ':' ( SYMBOL_REST )+ )*
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:136:9: ( SYMBOL_HEAD ( SYMBOL_REST )* ( ':' ( SYMBOL_REST )+ )* )
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:136:9: SYMBOL_HEAD ( SYMBOL_REST )* ( ':' ( SYMBOL_REST )+ )*
             {
             mSYMBOL_HEAD(); 
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:135:21: ( SYMBOL_REST )*
-            loop19:
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:136:21: ( SYMBOL_REST )*
+            loop18:
             do {
-                int alt19=2;
-                int LA19_0 = input.LA(1);
+                int alt18=2;
+                int LA18_0 = input.LA(1);
 
-                if ( (LA19_0=='!'||(LA19_0>='#' && LA19_0<='$')||(LA19_0>='*' && LA19_0<='+')||(LA19_0>='-' && LA19_0<='.')||(LA19_0>='0' && LA19_0<='9')||(LA19_0>='<' && LA19_0<='?')||(LA19_0>='A' && LA19_0<='Z')||LA19_0=='_'||(LA19_0>='a' && LA19_0<='z')) ) {
-                    alt19=1;
+                if ( (LA18_0=='!'||(LA18_0>='#' && LA18_0<='$')||(LA18_0>='*' && LA18_0<='+')||(LA18_0>='-' && LA18_0<='.')||(LA18_0>='0' && LA18_0<='9')||(LA18_0>='<' && LA18_0<='?')||(LA18_0>='A' && LA18_0<='Z')||LA18_0=='_'||(LA18_0>='a' && LA18_0<='z')) ) {
+                    alt18=1;
                 }
 
 
-                switch (alt19) {
+                switch (alt18) {
             	case 1 :
-            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:135:21: SYMBOL_REST
+            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:136:21: SYMBOL_REST
             	    {
             	    mSYMBOL_REST(); 
 
@@ -1876,41 +1801,41 @@ public class ClojureLexer extends Lexer {
             	    break;
 
             	default :
-            	    break loop19;
+            	    break loop18;
                 }
             } while (true);
 
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:135:34: ( ':' ( SYMBOL_REST )+ )*
-            loop21:
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:136:34: ( ':' ( SYMBOL_REST )+ )*
+            loop20:
             do {
-                int alt21=2;
-                int LA21_0 = input.LA(1);
+                int alt20=2;
+                int LA20_0 = input.LA(1);
 
-                if ( (LA21_0==':') ) {
-                    alt21=1;
+                if ( (LA20_0==':') ) {
+                    alt20=1;
                 }
 
 
-                switch (alt21) {
+                switch (alt20) {
             	case 1 :
-            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:135:35: ':' ( SYMBOL_REST )+
+            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:136:35: ':' ( SYMBOL_REST )+
             	    {
             	    match(':'); 
-            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:135:39: ( SYMBOL_REST )+
-            	    int cnt20=0;
-            	    loop20:
+            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:136:39: ( SYMBOL_REST )+
+            	    int cnt19=0;
+            	    loop19:
             	    do {
-            	        int alt20=2;
-            	        int LA20_0 = input.LA(1);
+            	        int alt19=2;
+            	        int LA19_0 = input.LA(1);
 
-            	        if ( (LA20_0=='!'||(LA20_0>='#' && LA20_0<='$')||(LA20_0>='*' && LA20_0<='+')||(LA20_0>='-' && LA20_0<='.')||(LA20_0>='0' && LA20_0<='9')||(LA20_0>='<' && LA20_0<='?')||(LA20_0>='A' && LA20_0<='Z')||LA20_0=='_'||(LA20_0>='a' && LA20_0<='z')) ) {
-            	            alt20=1;
+            	        if ( (LA19_0=='!'||(LA19_0>='#' && LA19_0<='$')||(LA19_0>='*' && LA19_0<='+')||(LA19_0>='-' && LA19_0<='.')||(LA19_0>='0' && LA19_0<='9')||(LA19_0>='<' && LA19_0<='?')||(LA19_0>='A' && LA19_0<='Z')||LA19_0=='_'||(LA19_0>='a' && LA19_0<='z')) ) {
+            	            alt19=1;
             	        }
 
 
-            	        switch (alt20) {
+            	        switch (alt19) {
             	    	case 1 :
-            	    	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:135:39: SYMBOL_REST
+            	    	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:136:39: SYMBOL_REST
             	    	    {
             	    	    mSYMBOL_REST(); 
 
@@ -1918,12 +1843,12 @@ public class ClojureLexer extends Lexer {
             	    	    break;
 
             	    	default :
-            	    	    if ( cnt20 >= 1 ) break loop20;
+            	    	    if ( cnt19 >= 1 ) break loop19;
             	                EarlyExitException eee =
-            	                    new EarlyExitException(20, input);
+            	                    new EarlyExitException(19, input);
             	                throw eee;
             	        }
-            	        cnt20++;
+            	        cnt19++;
             	    } while (true);
 
 
@@ -1931,7 +1856,7 @@ public class ClojureLexer extends Lexer {
             	    break;
 
             	default :
-            	    break loop21;
+            	    break loop20;
                 }
             } while (true);
 
@@ -1947,7 +1872,7 @@ public class ClojureLexer extends Lexer {
     // $ANTLR start SYMBOL_HEAD
     public final void mSYMBOL_HEAD() throws RecognitionException {
         try {
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:140:9: ( 'a' .. 'z' | 'A' .. 'Z' | '*' | '+' | '!' | '-' | '_' | '?' | '>' | '<' | '=' | '$' )
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:141:9: ( 'a' .. 'z' | 'A' .. 'Z' | '*' | '+' | '!' | '-' | '_' | '?' | '>' | '<' | '=' | '$' )
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:
             {
             if ( input.LA(1)=='!'||input.LA(1)=='$'||(input.LA(1)>='*' && input.LA(1)<='+')||input.LA(1)=='-'||(input.LA(1)>='<' && input.LA(1)<='?')||(input.LA(1)>='A' && input.LA(1)<='Z')||input.LA(1)=='_'||(input.LA(1)>='a' && input.LA(1)<='z') ) {
@@ -1972,7 +1897,7 @@ public class ClojureLexer extends Lexer {
     // $ANTLR start SYMBOL_REST
     public final void mSYMBOL_REST() throws RecognitionException {
         try {
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:146:9: ( SYMBOL_HEAD | '0' .. '9' | '.' | NUMBER_SIGN )
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:147:9: ( SYMBOL_HEAD | '0' .. '9' | '.' | NUMBER_SIGN )
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:
             {
             if ( input.LA(1)=='!'||(input.LA(1)>='#' && input.LA(1)<='$')||(input.LA(1)>='*' && input.LA(1)<='+')||(input.LA(1)>='-' && input.LA(1)<='.')||(input.LA(1)>='0' && input.LA(1)<='9')||(input.LA(1)>='<' && input.LA(1)<='?')||(input.LA(1)>='A' && input.LA(1)<='Z')||input.LA(1)=='_'||(input.LA(1)>='a' && input.LA(1)<='z') ) {
@@ -1998,8 +1923,8 @@ public class ClojureLexer extends Lexer {
     public final void mKEYWORD() throws RecognitionException {
         try {
             int _type = KEYWORD;
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:162:9: ( ':' SYMBOL )
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:162:9: ':' SYMBOL
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:163:9: ( ':' SYMBOL )
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:163:9: ':' SYMBOL
             {
             match(':'); 
             mSYMBOL(); 
@@ -2017,8 +1942,8 @@ public class ClojureLexer extends Lexer {
     public final void mSYNTAX_QUOTE() throws RecognitionException {
         try {
             int _type = SYNTAX_QUOTE;
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:166:9: ( '`' )
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:166:9: '`'
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:167:9: ( '`' )
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:167:9: '`'
             {
             match('`'); 
 
@@ -2035,8 +1960,8 @@ public class ClojureLexer extends Lexer {
     public final void mUNQUOTE_SPLICING() throws RecognitionException {
         try {
             int _type = UNQUOTE_SPLICING;
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:170:9: ( '~@' )
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:170:9: '~@'
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:171:9: ( '~@' )
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:171:9: '~@'
             {
             match("~@"); 
 
@@ -2054,8 +1979,8 @@ public class ClojureLexer extends Lexer {
     public final void mUNQUOTE() throws RecognitionException {
         try {
             int _type = UNQUOTE;
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:174:9: ( '~' )
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:174:9: '~'
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:175:9: ( '~' )
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:175:9: '~'
             {
             match('~'); 
 
@@ -2072,24 +1997,24 @@ public class ClojureLexer extends Lexer {
     public final void mCOMMENT() throws RecognitionException {
         try {
             int _type = COMMENT;
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:178:9: ( ';' (~ ( '\\r' | '\\n' ) )* ( ( '\\r' )? '\\n' )? )
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:178:9: ';' (~ ( '\\r' | '\\n' ) )* ( ( '\\r' )? '\\n' )?
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:179:9: ( ';' (~ ( '\\r' | '\\n' ) )* ( ( '\\r' )? '\\n' )? )
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:179:9: ';' (~ ( '\\r' | '\\n' ) )* ( ( '\\r' )? '\\n' )?
             {
             match(';'); 
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:178:13: (~ ( '\\r' | '\\n' ) )*
-            loop22:
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:179:13: (~ ( '\\r' | '\\n' ) )*
+            loop21:
             do {
-                int alt22=2;
-                int LA22_0 = input.LA(1);
+                int alt21=2;
+                int LA21_0 = input.LA(1);
 
-                if ( ((LA22_0>='\u0000' && LA22_0<='\t')||(LA22_0>='\u000B' && LA22_0<='\f')||(LA22_0>='\u000E' && LA22_0<='\uFFFE')) ) {
-                    alt22=1;
+                if ( ((LA21_0>='\u0000' && LA21_0<='\t')||(LA21_0>='\u000B' && LA21_0<='\f')||(LA21_0>='\u000E' && LA21_0<='\uFFFE')) ) {
+                    alt21=1;
                 }
 
 
-                switch (alt22) {
+                switch (alt21) {
             	case 1 :
-            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:178:13: ~ ( '\\r' | '\\n' )
+            	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:179:13: ~ ( '\\r' | '\\n' )
             	    {
             	    if ( (input.LA(1)>='\u0000' && input.LA(1)<='\t')||(input.LA(1)>='\u000B' && input.LA(1)<='\f')||(input.LA(1)>='\u000E' && input.LA(1)<='\uFFFE') ) {
             	        input.consume();
@@ -2106,31 +2031,31 @@ public class ClojureLexer extends Lexer {
             	    break;
 
             	default :
-            	    break loop22;
+            	    break loop21;
                 }
             } while (true);
 
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:178:29: ( ( '\\r' )? '\\n' )?
-            int alt24=2;
-            int LA24_0 = input.LA(1);
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:179:29: ( ( '\\r' )? '\\n' )?
+            int alt23=2;
+            int LA23_0 = input.LA(1);
 
-            if ( (LA24_0=='\n'||LA24_0=='\r') ) {
-                alt24=1;
+            if ( (LA23_0=='\n'||LA23_0=='\r') ) {
+                alt23=1;
             }
-            switch (alt24) {
+            switch (alt23) {
                 case 1 :
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:178:30: ( '\\r' )? '\\n'
+                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:179:30: ( '\\r' )? '\\n'
                     {
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:178:30: ( '\\r' )?
-                    int alt23=2;
-                    int LA23_0 = input.LA(1);
+                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:179:30: ( '\\r' )?
+                    int alt22=2;
+                    int LA22_0 = input.LA(1);
 
-                    if ( (LA23_0=='\r') ) {
-                        alt23=1;
+                    if ( (LA22_0=='\r') ) {
+                        alt22=1;
                     }
-                    switch (alt23) {
+                    switch (alt22) {
                         case 1 :
-                            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:178:30: '\\r'
+                            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:179:30: '\\r'
                             {
                             match('\r'); 
 
@@ -2161,22 +2086,22 @@ public class ClojureLexer extends Lexer {
     public final void mSPACE() throws RecognitionException {
         try {
             int _type = SPACE;
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:181:9: ( ( ' ' | '\\t' | ',' | '\\r' | '\\n' )+ )
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:181:9: ( ' ' | '\\t' | ',' | '\\r' | '\\n' )+
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:182:9: ( ( ' ' | '\\t' | ',' | '\\r' | '\\n' )+ )
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:182:9: ( ' ' | '\\t' | ',' | '\\r' | '\\n' )+
             {
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:181:9: ( ' ' | '\\t' | ',' | '\\r' | '\\n' )+
-            int cnt25=0;
-            loop25:
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:182:9: ( ' ' | '\\t' | ',' | '\\r' | '\\n' )+
+            int cnt24=0;
+            loop24:
             do {
-                int alt25=2;
-                int LA25_0 = input.LA(1);
+                int alt24=2;
+                int LA24_0 = input.LA(1);
 
-                if ( ((LA25_0>='\t' && LA25_0<='\n')||LA25_0=='\r'||LA25_0==' '||LA25_0==',') ) {
-                    alt25=1;
+                if ( ((LA24_0>='\t' && LA24_0<='\n')||LA24_0=='\r'||LA24_0==' '||LA24_0==',') ) {
+                    alt24=1;
                 }
 
 
-                switch (alt25) {
+                switch (alt24) {
             	case 1 :
             	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:
             	    {
@@ -2195,12 +2120,12 @@ public class ClojureLexer extends Lexer {
             	    break;
 
             	default :
-            	    if ( cnt25 >= 1 ) break loop25;
+            	    if ( cnt24 >= 1 ) break loop24;
                         EarlyExitException eee =
-                            new EarlyExitException(25, input);
+                            new EarlyExitException(24, input);
                         throw eee;
                 }
-                cnt25++;
+                cnt24++;
             } while (true);
 
             channel=HIDDEN;
@@ -2218,12 +2143,17 @@ public class ClojureLexer extends Lexer {
     public final void mLAMBDA_ARG() throws RecognitionException {
         try {
             int _type = LAMBDA_ARG;
-            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:186:9: ( '%' '1' .. '9' ( '0' .. '9' )* | '%&' | '%' )
-            int alt27=3;
-            int LA27_0 = input.LA(1);
+            // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:187:9: ( '%' '1' .. '9' ( '0' .. '9' )* | '%&' | '%' )
+            int alt26=3;
+            int LA26_0 = input.LA(1);
 
-            if ( (LA27_0=='%') ) {
+            if ( (LA26_0=='%') ) {
                 switch ( input.LA(2) ) {
+                case '&':
+                    {
+                    alt26=2;
+                    }
+                    break;
                 case '1':
                 case '2':
                 case '3':
@@ -2234,44 +2164,39 @@ public class ClojureLexer extends Lexer {
                 case '8':
                 case '9':
                     {
-                    alt27=1;
-                    }
-                    break;
-                case '&':
-                    {
-                    alt27=2;
+                    alt26=1;
                     }
                     break;
                 default:
-                    alt27=3;}
+                    alt26=3;}
 
             }
             else {
                 NoViableAltException nvae =
-                    new NoViableAltException("185:1: LAMBDA_ARG : ( '%' '1' .. '9' ( '0' .. '9' )* | '%&' | '%' );", 27, 0, input);
+                    new NoViableAltException("186:1: LAMBDA_ARG : ( '%' '1' .. '9' ( '0' .. '9' )* | '%&' | '%' );", 26, 0, input);
 
                 throw nvae;
             }
-            switch (alt27) {
+            switch (alt26) {
                 case 1 :
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:186:9: '%' '1' .. '9' ( '0' .. '9' )*
+                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:187:9: '%' '1' .. '9' ( '0' .. '9' )*
                     {
                     match('%'); 
                     matchRange('1','9'); 
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:186:22: ( '0' .. '9' )*
-                    loop26:
+                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:187:22: ( '0' .. '9' )*
+                    loop25:
                     do {
-                        int alt26=2;
-                        int LA26_0 = input.LA(1);
+                        int alt25=2;
+                        int LA25_0 = input.LA(1);
 
-                        if ( ((LA26_0>='0' && LA26_0<='9')) ) {
-                            alt26=1;
+                        if ( ((LA25_0>='0' && LA25_0<='9')) ) {
+                            alt25=1;
                         }
 
 
-                        switch (alt26) {
+                        switch (alt25) {
                     	case 1 :
-                    	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:186:22: '0' .. '9'
+                    	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:187:22: '0' .. '9'
                     	    {
                     	    matchRange('0','9'); 
 
@@ -2279,7 +2204,7 @@ public class ClojureLexer extends Lexer {
                     	    break;
 
                     	default :
-                    	    break loop26;
+                    	    break loop25;
                         }
                     } while (true);
 
@@ -2287,7 +2212,7 @@ public class ClojureLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:187:9: '%&'
+                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:188:9: '%&'
                     {
                     match("%&"); 
 
@@ -2295,7 +2220,7 @@ public class ClojureLexer extends Lexer {
                     }
                     break;
                 case 3 :
-                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:188:9: '%'
+                    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:189:9: '%'
                     {
                     match('%'); 
 
@@ -2312,9 +2237,9 @@ public class ClojureLexer extends Lexer {
 
     public void mTokens() throws RecognitionException {
         // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:1:10: ( OPEN_PAREN | CLOSE_PAREN | AMPERSAND | LEFT_SQUARE_BRACKET | RIGHT_SQUARE_BRACKET | LEFT_CURLY_BRACKET | RIGHT_CURLY_BRACKET | BACKSLASH | CIRCUMFLEX | COMMERCIAL_AT | NUMBER_SIGN | APOSTROPHE | SPECIAL_FORM | STRING | REGEX_LITERAL | NUMBER | CHARACTER | HEXDIGIT | NIL | BOOLEAN | SYMBOL | METADATA_TYPEHINT | KEYWORD | SYNTAX_QUOTE | UNQUOTE_SPLICING | UNQUOTE | COMMENT | SPACE | LAMBDA_ARG )
-        int alt28=29;
-        alt28 = dfa28.predict(input);
-        switch (alt28) {
+        int alt27=29;
+        alt27 = dfa27.predict(input);
+        switch (alt27) {
             case 1 :
                 // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:1:10: OPEN_PAREN
                 {
@@ -2524,41 +2449,41 @@ public class ClojureLexer extends Lexer {
     }
 
 
-    protected DFA28 dfa28 = new DFA28(this);
-    static final String DFA28_eotS =
+    protected DFA27 dfa27 = new DFA27(this);
+    static final String DFA27_eotS =
         "\10\uffff\1\45\1\46\1\uffff\1\50\1\uffff\1\54\4\35\1\54\5\35\2\uffff"+
-        "\1\35\1\uffff\1\54\3\uffff\1\76\11\uffff\1\30\1\35\1\uffff\1\30"+
-        "\5\35\1\30\7\35\1\74\3\uffff\2\30\2\35\1\30\4\35\1\30\1\35\1\30"+
-        "\1\126\3\35\1\30\4\35\1\137\1\35\1\uffff\1\30\1\74\1\35\1\74\1\30"+
-        "\1\137\2\30\1\uffff\12\35\2\30";
-    static final String DFA28_eofS =
+        "\1\35\1\uffff\1\54\3\uffff\1\76\11\uffff\1\35\1\30\1\uffff\1\30"+
+        "\5\35\1\30\7\35\1\74\3\uffff\2\30\2\35\1\30\2\35\1\30\3\35\1\30"+
+        "\1\126\3\35\1\30\3\35\1\136\2\35\1\uffff\1\30\1\74\1\35\1\74\1\30"+
+        "\1\136\1\30\1\uffff\1\30\12\35\2\30";
+    static final String DFA27_eofS =
         "\154\uffff";
-    static final String DFA28_minS =
+    static final String DFA27_minS =
         "\1\11\7\uffff\1\0\1\41\1\uffff\1\42\1\uffff\1\41\1\146\1\145\1\165"+
         "\1\141\1\41\1\145\1\150\1\157\2\145\2\uffff\1\60\1\uffff\1\41\3"+
-        "\uffff\1\100\11\uffff\1\41\1\146\1\uffff\1\41\1\164\2\157\1\162"+
-        "\1\154\1\41\1\143\1\162\1\165\1\156\1\167\1\154\1\164\1\41\3\uffff"+
-        "\2\41\1\160\1\164\1\41\1\163\1\165\1\157\1\145\1\41\1\151\3\41\1"+
-        "\60\1\55\1\41\2\145\1\162\1\167\1\41\1\164\1\uffff\2\41\1\60\5\41"+
-        "\1\uffff\1\157\1\162\1\55\1\145\1\156\1\164\1\151\1\145\1\164\1"+
-        "\162\2\41";
-    static final String DFA28_maxS =
+        "\uffff\1\100\11\uffff\1\146\1\41\1\uffff\1\41\1\164\2\157\1\162"+
+        "\1\154\1\41\1\143\1\165\1\162\1\156\1\167\1\154\1\164\1\41\3\uffff"+
+        "\2\41\1\160\1\164\1\41\1\163\1\165\1\41\1\145\1\157\1\151\3\41\1"+
+        "\60\1\55\1\41\2\145\1\162\1\41\1\167\1\164\1\uffff\2\41\1\60\4\41"+
+        "\1\uffff\1\41\1\157\1\162\1\55\1\145\1\156\1\164\1\151\1\145\1\164"+
+        "\1\162\2\41";
+    static final String DFA27_maxS =
         "\1\176\7\uffff\1\ufffe\1\172\1\uffff\1\136\1\uffff\1\172\1\146\1"+
         "\157\1\165\1\141\1\172\1\145\1\162\1\157\1\151\1\145\2\uffff\1\71"+
-        "\1\uffff\1\172\3\uffff\1\100\11\uffff\1\172\1\146\1\uffff\1\172"+
-        "\1\164\2\157\1\162\1\154\1\172\1\143\1\162\1\171\1\156\1\167\1\154"+
-        "\1\164\1\172\3\uffff\2\172\1\160\1\164\1\172\1\163\1\165\1\157\1"+
-        "\145\1\172\1\151\2\172\1\41\2\71\1\172\2\145\1\162\1\167\1\172\1"+
-        "\164\1\uffff\2\172\1\71\5\172\1\uffff\1\157\1\162\1\55\1\145\1\170"+
-        "\1\164\1\151\1\145\1\164\1\162\2\172";
-    static final String DFA28_acceptS =
+        "\1\uffff\1\172\3\uffff\1\100\11\uffff\1\146\1\172\1\uffff\1\172"+
+        "\1\164\2\157\1\162\1\154\1\172\1\143\1\171\1\162\1\156\1\167\1\154"+
+        "\1\164\1\172\3\uffff\2\172\1\160\1\164\1\172\1\163\1\165\1\172\1"+
+        "\145\1\157\1\151\2\172\1\41\2\71\1\172\2\145\1\162\1\172\1\167\1"+
+        "\164\1\uffff\2\172\1\71\4\172\1\uffff\1\172\1\157\1\162\1\55\1\145"+
+        "\1\170\1\164\1\151\1\145\1\164\1\162\2\172";
+    static final String DFA27_acceptS =
         "\1\uffff\1\1\1\2\1\3\1\4\1\5\1\6\1\7\2\uffff\1\12\1\uffff\1\14\13"+
         "\uffff\1\15\1\16\1\uffff\1\20\1\uffff\1\25\1\27\1\30\1\uffff\1\33"+
         "\1\34\1\35\1\21\1\10\1\11\1\26\1\13\1\17\2\uffff\1\22\17\uffff\1"+
-        "\20\1\31\1\32\27\uffff\1\23\10\uffff\1\24\14\uffff";
-    static final String DFA28_specialS =
+        "\20\1\31\1\32\27\uffff\1\23\7\uffff\1\24\15\uffff";
+    static final String DFA27_specialS =
         "\154\uffff}>";
-    static final String[] DFA28_transitionS = {
+    static final String[] DFA27_transitionS = {
             "\2\42\2\uffff\1\42\22\uffff\1\42\1\35\1\31\1\13\1\35\1\43\1"+
             "\3\1\14\1\1\1\2\2\35\1\42\1\32\1\30\1\35\12\33\1\36\1\41\4\35"+
             "\1\12\6\34\24\35\1\4\1\10\1\5\1\11\1\35\1\37\3\34\1\15\1\34"+
@@ -2578,7 +2503,7 @@ public class ClojureLexer extends Lexer {
             "\1\51\1\47\72\uffff\1\47",
             "",
             "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\16\35\1\uffff\4\35\1"+
-            "\uffff\32\35\4\uffff\1\35\1\uffff\4\35\1\53\11\35\1\52\13\35",
+            "\uffff\32\35\4\uffff\1\35\1\uffff\4\35\1\52\11\35\1\53\13\35",
             "\1\55",
             "\1\56\11\uffff\1\57",
             "\1\60",
@@ -2586,7 +2511,7 @@ public class ClojureLexer extends Lexer {
             "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\16\35\1\uffff\4\35\1"+
             "\uffff\32\35\4\uffff\1\35\1\uffff\1\62\14\35\1\63\14\35",
             "\1\64",
-            "\1\65\11\uffff\1\66",
+            "\1\66\11\uffff\1\65",
             "\1\67",
             "\1\70\3\uffff\1\71",
             "\1\72",
@@ -2609,9 +2534,9 @@ public class ClojureLexer extends Lexer {
             "",
             "",
             "",
+            "\1\77",
             "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\16\35\1\uffff\4\35\1"+
             "\uffff\32\35\4\uffff\1\35\1\uffff\32\35",
-            "\1\77",
             "",
             "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\16\35\1\uffff\4\35\1"+
             "\uffff\32\35\4\uffff\1\35\1\uffff\32\35",
@@ -2623,8 +2548,8 @@ public class ClojureLexer extends Lexer {
             "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\16\35\1\uffff\4\35\1"+
             "\uffff\32\35\4\uffff\1\35\1\uffff\32\35",
             "\1\105",
-            "\1\106",
-            "\1\107\3\uffff\1\110",
+            "\1\107\3\uffff\1\106",
+            "\1\110",
             "\1\111",
             "\1\112",
             "\1\113",
@@ -2645,10 +2570,10 @@ public class ClojureLexer extends Lexer {
             "\uffff\32\35\4\uffff\1\35\1\uffff\32\35",
             "\1\121",
             "\1\122",
-            "\1\123",
-            "\1\124",
             "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\16\35\1\uffff\4\35\1"+
             "\uffff\32\35\4\uffff\1\35\1\uffff\32\35",
+            "\1\123",
+            "\1\124",
             "\1\125",
             "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\16\35\1\uffff\4\35\1"+
             "\uffff\32\35\4\uffff\1\35\1\uffff\32\35",
@@ -2662,9 +2587,9 @@ public class ClojureLexer extends Lexer {
             "\1\133",
             "\1\134",
             "\1\135",
-            "\1\136",
             "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\16\35\1\uffff\4\35\1"+
             "\uffff\32\35\4\uffff\1\35\1\uffff\32\35",
+            "\1\137",
             "\1\140",
             "",
             "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\16\35\1\uffff\4\35\1"+
@@ -2681,9 +2606,9 @@ public class ClojureLexer extends Lexer {
             "\uffff\32\35\4\uffff\1\35\1\uffff\32\35",
             "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\16\35\1\uffff\4\35\1"+
             "\uffff\32\35\4\uffff\1\35\1\uffff\32\35",
+            "",
             "\1\35\1\uffff\2\35\5\uffff\2\35\1\uffff\16\35\1\uffff\4\35\1"+
             "\uffff\32\35\4\uffff\1\35\1\uffff\32\35",
-            "",
             "\1\141",
             "\1\142",
             "\1\143",
@@ -2700,34 +2625,34 @@ public class ClojureLexer extends Lexer {
             "\uffff\32\35\4\uffff\1\35\1\uffff\32\35"
     };
 
-    static final short[] DFA28_eot = DFA.unpackEncodedString(DFA28_eotS);
-    static final short[] DFA28_eof = DFA.unpackEncodedString(DFA28_eofS);
-    static final char[] DFA28_min = DFA.unpackEncodedStringToUnsignedChars(DFA28_minS);
-    static final char[] DFA28_max = DFA.unpackEncodedStringToUnsignedChars(DFA28_maxS);
-    static final short[] DFA28_accept = DFA.unpackEncodedString(DFA28_acceptS);
-    static final short[] DFA28_special = DFA.unpackEncodedString(DFA28_specialS);
-    static final short[][] DFA28_transition;
+    static final short[] DFA27_eot = DFA.unpackEncodedString(DFA27_eotS);
+    static final short[] DFA27_eof = DFA.unpackEncodedString(DFA27_eofS);
+    static final char[] DFA27_min = DFA.unpackEncodedStringToUnsignedChars(DFA27_minS);
+    static final char[] DFA27_max = DFA.unpackEncodedStringToUnsignedChars(DFA27_maxS);
+    static final short[] DFA27_accept = DFA.unpackEncodedString(DFA27_acceptS);
+    static final short[] DFA27_special = DFA.unpackEncodedString(DFA27_specialS);
+    static final short[][] DFA27_transition;
 
     static {
-        int numStates = DFA28_transitionS.length;
-        DFA28_transition = new short[numStates][];
+        int numStates = DFA27_transitionS.length;
+        DFA27_transition = new short[numStates][];
         for (int i=0; i<numStates; i++) {
-            DFA28_transition[i] = DFA.unpackEncodedString(DFA28_transitionS[i]);
+            DFA27_transition[i] = DFA.unpackEncodedString(DFA27_transitionS[i]);
         }
     }
 
-    class DFA28 extends DFA {
+    class DFA27 extends DFA {
 
-        public DFA28(BaseRecognizer recognizer) {
+        public DFA27(BaseRecognizer recognizer) {
             this.recognizer = recognizer;
-            this.decisionNumber = 28;
-            this.eot = DFA28_eot;
-            this.eof = DFA28_eof;
-            this.min = DFA28_min;
-            this.max = DFA28_max;
-            this.accept = DFA28_accept;
-            this.special = DFA28_special;
-            this.transition = DFA28_transition;
+            this.decisionNumber = 27;
+            this.eot = DFA27_eot;
+            this.eof = DFA27_eof;
+            this.min = DFA27_min;
+            this.max = DFA27_max;
+            this.accept = DFA27_accept;
+            this.special = DFA27_special;
+            this.transition = DFA27_transition;
         }
         public String getDescription() {
             return "1:1: Tokens : ( OPEN_PAREN | CLOSE_PAREN | AMPERSAND | LEFT_SQUARE_BRACKET | RIGHT_SQUARE_BRACKET | LEFT_CURLY_BRACKET | RIGHT_CURLY_BRACKET | BACKSLASH | CIRCUMFLEX | COMMERCIAL_AT | NUMBER_SIGN | APOSTROPHE | SPECIAL_FORM | STRING | REGEX_LITERAL | NUMBER | CHARACTER | HEXDIGIT | NIL | BOOLEAN | SYMBOL | METADATA_TYPEHINT | KEYWORD | SYNTAX_QUOTE | UNQUOTE_SPLICING | UNQUOTE | COMMENT | SPACE | LAMBDA_ARG );";
