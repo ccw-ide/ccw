@@ -1,5 +1,5 @@
 package ccw.lexers;
-// $ANTLR 3.0 /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g 2010-10-08 23:44:18
+// $ANTLR 3.0 /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g 2010-10-09 00:00:57
 
 import org.antlr.runtime.*;
 import java.util.Stack;
@@ -130,7 +130,7 @@ public class ClojureParser extends Parser {
             	case 1 :
             	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:197:11: form
             	    {
-            	    pushFollow(FOLLOW_form_in_file1283);
+            	    pushFollow(FOLLOW_form_in_file1297);
             	    form();
             	    _fsp--;
 
@@ -259,14 +259,14 @@ public class ClojureParser extends Parser {
                     if ( !(this.inLambda) ) {
                         throw new FailedPredicateException(input, "form", "this.inLambda");
                     }
-                    match(input,LAMBDA_ARG,FOLLOW_LAMBDA_ARG_in_form1316); 
+                    match(input,LAMBDA_ARG,FOLLOW_LAMBDA_ARG_in_form1330); 
 
                     }
                     break;
                 case 2 :
                     // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:203:10: literal
                     {
-                    pushFollow(FOLLOW_literal_in_form1327);
+                    pushFollow(FOLLOW_literal_in_form1341);
                     literal();
                     _fsp--;
 
@@ -276,14 +276,14 @@ public class ClojureParser extends Parser {
                 case 3 :
                     // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:205:7: COMMENT
                     {
-                    match(input,COMMENT,FOLLOW_COMMENT_in_form1353); 
+                    match(input,COMMENT,FOLLOW_COMMENT_in_form1367); 
 
                     }
                     break;
                 case 4 :
                     // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:206:9: AMPERSAND
                     {
-                    match(input,AMPERSAND,FOLLOW_AMPERSAND_in_form1363); 
+                    match(input,AMPERSAND,FOLLOW_AMPERSAND_in_form1377); 
 
                     }
                     break;
@@ -301,7 +301,7 @@ public class ClojureParser extends Parser {
                         case 1 :
                             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:207:9: metadataForm
                             {
-                            pushFollow(FOLLOW_metadataForm_in_form1373);
+                            pushFollow(FOLLOW_metadataForm_in_form1387);
                             metadataForm();
                             _fsp--;
 
@@ -350,7 +350,7 @@ public class ClojureParser extends Parser {
                         case 1 :
                             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:207:25: SPECIAL_FORM
                             {
-                            match(input,SPECIAL_FORM,FOLLOW_SPECIAL_FORM_in_form1378); 
+                            match(input,SPECIAL_FORM,FOLLOW_SPECIAL_FORM_in_form1392); 
 
                             }
                             break;
@@ -358,7 +358,7 @@ public class ClojureParser extends Parser {
                             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:207:40: s= SYMBOL
                             {
                             s=(Token)input.LT(1);
-                            match(input,SYMBOL,FOLLOW_SYMBOL_in_form1384); 
+                            match(input,SYMBOL,FOLLOW_SYMBOL_in_form1398); 
                              symbols.add(s.getText()); 
 
                             }
@@ -366,7 +366,7 @@ public class ClojureParser extends Parser {
                         case 3 :
                             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:207:81: list
                             {
-                            pushFollow(FOLLOW_list_in_form1390);
+                            pushFollow(FOLLOW_list_in_form1404);
                             list();
                             _fsp--;
 
@@ -376,7 +376,7 @@ public class ClojureParser extends Parser {
                         case 4 :
                             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:207:88: vector
                             {
-                            pushFollow(FOLLOW_vector_in_form1394);
+                            pushFollow(FOLLOW_vector_in_form1408);
                             vector();
                             _fsp--;
 
@@ -386,7 +386,7 @@ public class ClojureParser extends Parser {
                         case 5 :
                             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:207:97: map
                             {
-                            pushFollow(FOLLOW_map_in_form1398);
+                            pushFollow(FOLLOW_map_in_form1412);
                             map();
                             _fsp--;
 
@@ -402,7 +402,7 @@ public class ClojureParser extends Parser {
                 case 6 :
                     // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:208:9: macroForm
                     {
-                    pushFollow(FOLLOW_macroForm_in_form1410);
+                    pushFollow(FOLLOW_macroForm_in_form1424);
                     macroForm();
                     _fsp--;
 
@@ -412,7 +412,7 @@ public class ClojureParser extends Parser {
                 case 7 :
                     // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:209:9: dispatchMacroForm
                     {
-                    pushFollow(FOLLOW_dispatchMacroForm_in_form1420);
+                    pushFollow(FOLLOW_dispatchMacroForm_in_form1434);
                     dispatchMacroForm();
                     _fsp--;
 
@@ -422,7 +422,7 @@ public class ClojureParser extends Parser {
                 case 8 :
                     // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:210:9: set
                     {
-                    pushFollow(FOLLOW_set_in_form1430);
+                    pushFollow(FOLLOW_set_in_form1444);
                     set();
                     _fsp--;
 
@@ -491,7 +491,7 @@ public class ClojureParser extends Parser {
                 case 1 :
                     // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:214:9: quoteForm
                     {
-                    pushFollow(FOLLOW_quoteForm_in_macroForm1461);
+                    pushFollow(FOLLOW_quoteForm_in_macroForm1475);
                     quoteForm();
                     _fsp--;
 
@@ -501,7 +501,7 @@ public class ClojureParser extends Parser {
                 case 2 :
                     // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:215:9: metaForm
                     {
-                    pushFollow(FOLLOW_metaForm_in_macroForm1471);
+                    pushFollow(FOLLOW_metaForm_in_macroForm1485);
                     metaForm();
                     _fsp--;
 
@@ -511,7 +511,7 @@ public class ClojureParser extends Parser {
                 case 3 :
                     // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:216:9: derefForm
                     {
-                    pushFollow(FOLLOW_derefForm_in_macroForm1481);
+                    pushFollow(FOLLOW_derefForm_in_macroForm1495);
                     derefForm();
                     _fsp--;
 
@@ -521,7 +521,7 @@ public class ClojureParser extends Parser {
                 case 4 :
                     // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:217:9: syntaxQuoteForm
                     {
-                    pushFollow(FOLLOW_syntaxQuoteForm_in_macroForm1491);
+                    pushFollow(FOLLOW_syntaxQuoteForm_in_macroForm1505);
                     syntaxQuoteForm();
                     _fsp--;
 
@@ -534,7 +534,7 @@ public class ClojureParser extends Parser {
                     if ( !( this.syntaxQuoteDepth > 0 ) ) {
                         throw new FailedPredicateException(input, "macroForm", " this.syntaxQuoteDepth > 0 ");
                     }
-                    pushFollow(FOLLOW_unquoteSplicingForm_in_macroForm1501);
+                    pushFollow(FOLLOW_unquoteSplicingForm_in_macroForm1515);
                     unquoteSplicingForm();
                     _fsp--;
 
@@ -547,7 +547,7 @@ public class ClojureParser extends Parser {
                     if ( !( this.syntaxQuoteDepth > 0 ) ) {
                         throw new FailedPredicateException(input, "macroForm", " this.syntaxQuoteDepth > 0 ");
                     }
-                    pushFollow(FOLLOW_unquoteForm_in_macroForm1511);
+                    pushFollow(FOLLOW_unquoteForm_in_macroForm1525);
                     unquoteForm();
                     _fsp--;
 
@@ -605,14 +605,14 @@ public class ClojureParser extends Parser {
                 case 1 :
                     // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:223:9: REGEX_LITERAL
                     {
-                    match(input,REGEX_LITERAL,FOLLOW_REGEX_LITERAL_in_dispatchMacroForm1538); 
+                    match(input,REGEX_LITERAL,FOLLOW_REGEX_LITERAL_in_dispatchMacroForm1552); 
 
                     }
                     break;
                 case 2 :
                     // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:224:9: varQuoteForm
                     {
-                    pushFollow(FOLLOW_varQuoteForm_in_dispatchMacroForm1548);
+                    pushFollow(FOLLOW_varQuoteForm_in_dispatchMacroForm1562);
                     varQuoteForm();
                     _fsp--;
 
@@ -625,7 +625,7 @@ public class ClojureParser extends Parser {
                     if ( !(!this.inLambda) ) {
                         throw new FailedPredicateException(input, "dispatchMacroForm", "!this.inLambda");
                     }
-                    pushFollow(FOLLOW_lambdaForm_in_dispatchMacroForm1560);
+                    pushFollow(FOLLOW_lambdaForm_in_dispatchMacroForm1574);
                     lambdaForm();
                     _fsp--;
 
@@ -657,7 +657,7 @@ public class ClojureParser extends Parser {
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:228:9: o= OPEN_PAREN ( form )* c= CLOSE_PAREN
             {
             o=(Token)input.LT(1);
-            match(input,OPEN_PAREN,FOLLOW_OPEN_PAREN_in_list1581); 
+            match(input,OPEN_PAREN,FOLLOW_OPEN_PAREN_in_list1595); 
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:228:22: ( form )*
             loop7:
             do {
@@ -673,7 +673,7 @@ public class ClojureParser extends Parser {
             	case 1 :
             	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:228:22: form
             	    {
-            	    pushFollow(FOLLOW_form_in_list1583);
+            	    pushFollow(FOLLOW_form_in_list1597);
             	    form();
             	    _fsp--;
 
@@ -687,7 +687,7 @@ public class ClojureParser extends Parser {
             } while (true);
 
             c=(Token)input.LT(1);
-            match(input,CLOSE_PAREN,FOLLOW_CLOSE_PAREN_in_list1589); 
+            match(input,CLOSE_PAREN,FOLLOW_CLOSE_PAREN_in_list1603); 
              parensMatching.put(Integer.valueOf(o.getTokenIndex()), Integer.valueOf(c.getTokenIndex())); parensMatching.put(Integer.valueOf(c.getTokenIndex()), Integer.valueOf(o.getTokenIndex())); 
 
             }
@@ -711,7 +711,7 @@ public class ClojureParser extends Parser {
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:231:10: ( LEFT_SQUARE_BRACKET ( form )* RIGHT_SQUARE_BRACKET )
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:231:10: LEFT_SQUARE_BRACKET ( form )* RIGHT_SQUARE_BRACKET
             {
-            match(input,LEFT_SQUARE_BRACKET,FOLLOW_LEFT_SQUARE_BRACKET_in_vector1608); 
+            match(input,LEFT_SQUARE_BRACKET,FOLLOW_LEFT_SQUARE_BRACKET_in_vector1622); 
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:231:30: ( form )*
             loop8:
             do {
@@ -727,7 +727,7 @@ public class ClojureParser extends Parser {
             	case 1 :
             	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:231:30: form
             	    {
-            	    pushFollow(FOLLOW_form_in_vector1610);
+            	    pushFollow(FOLLOW_form_in_vector1624);
             	    form();
             	    _fsp--;
 
@@ -740,7 +740,7 @@ public class ClojureParser extends Parser {
                 }
             } while (true);
 
-            match(input,RIGHT_SQUARE_BRACKET,FOLLOW_RIGHT_SQUARE_BRACKET_in_vector1613); 
+            match(input,RIGHT_SQUARE_BRACKET,FOLLOW_RIGHT_SQUARE_BRACKET_in_vector1627); 
 
             }
 
@@ -763,7 +763,7 @@ public class ClojureParser extends Parser {
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:234:9: ( LEFT_CURLY_BRACKET ( form form )* RIGHT_CURLY_BRACKET )
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:234:9: LEFT_CURLY_BRACKET ( form form )* RIGHT_CURLY_BRACKET
             {
-            match(input,LEFT_CURLY_BRACKET,FOLLOW_LEFT_CURLY_BRACKET_in_map1632); 
+            match(input,LEFT_CURLY_BRACKET,FOLLOW_LEFT_CURLY_BRACKET_in_map1646); 
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:234:28: ( form form )*
             loop9:
             do {
@@ -779,11 +779,11 @@ public class ClojureParser extends Parser {
             	case 1 :
             	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:234:29: form form
             	    {
-            	    pushFollow(FOLLOW_form_in_map1635);
+            	    pushFollow(FOLLOW_form_in_map1649);
             	    form();
             	    _fsp--;
 
-            	    pushFollow(FOLLOW_form_in_map1637);
+            	    pushFollow(FOLLOW_form_in_map1651);
             	    form();
             	    _fsp--;
 
@@ -796,7 +796,7 @@ public class ClojureParser extends Parser {
                 }
             } while (true);
 
-            match(input,RIGHT_CURLY_BRACKET,FOLLOW_RIGHT_CURLY_BRACKET_in_map1641); 
+            match(input,RIGHT_CURLY_BRACKET,FOLLOW_RIGHT_CURLY_BRACKET_in_map1655); 
 
             }
 
@@ -820,8 +820,8 @@ public class ClojureParser extends Parser {
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:240:8: ( APOSTROPHE form )
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:240:8: APOSTROPHE form
             {
-            match(input,APOSTROPHE,FOLLOW_APOSTROPHE_in_quoteForm1674); 
-            pushFollow(FOLLOW_form_in_quoteForm1676);
+            match(input,APOSTROPHE,FOLLOW_APOSTROPHE_in_quoteForm1688); 
+            pushFollow(FOLLOW_form_in_quoteForm1690);
             form();
             _fsp--;
 
@@ -848,8 +848,8 @@ public class ClojureParser extends Parser {
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:243:13: ( CIRCUMFLEX form )
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:243:13: CIRCUMFLEX form
             {
-            match(input,CIRCUMFLEX,FOLLOW_CIRCUMFLEX_in_metaForm1690); 
-            pushFollow(FOLLOW_form_in_metaForm1692);
+            match(input,CIRCUMFLEX,FOLLOW_CIRCUMFLEX_in_metaForm1704); 
+            pushFollow(FOLLOW_form_in_metaForm1706);
             form();
             _fsp--;
 
@@ -875,8 +875,8 @@ public class ClojureParser extends Parser {
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:246:13: ( COMMERCIAL_AT form )
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:246:13: COMMERCIAL_AT form
             {
-            match(input,COMMERCIAL_AT,FOLLOW_COMMERCIAL_AT_in_derefForm1709); 
-            pushFollow(FOLLOW_form_in_derefForm1711);
+            match(input,COMMERCIAL_AT,FOLLOW_COMMERCIAL_AT_in_derefForm1723); 
+            pushFollow(FOLLOW_form_in_derefForm1725);
             form();
             _fsp--;
 
@@ -903,8 +903,8 @@ public class ClojureParser extends Parser {
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:253:9: ( SYNTAX_QUOTE form )
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:253:9: SYNTAX_QUOTE form
             {
-            match(input,SYNTAX_QUOTE,FOLLOW_SYNTAX_QUOTE_in_syntaxQuoteForm1751); 
-            pushFollow(FOLLOW_form_in_syntaxQuoteForm1753);
+            match(input,SYNTAX_QUOTE,FOLLOW_SYNTAX_QUOTE_in_syntaxQuoteForm1765); 
+            pushFollow(FOLLOW_form_in_syntaxQuoteForm1767);
             form();
             _fsp--;
 
@@ -932,8 +932,8 @@ public class ClojureParser extends Parser {
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:260:9: ( UNQUOTE form )
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:260:9: UNQUOTE form
             {
-            match(input,UNQUOTE,FOLLOW_UNQUOTE_in_unquoteForm1793); 
-            pushFollow(FOLLOW_form_in_unquoteForm1795);
+            match(input,UNQUOTE,FOLLOW_UNQUOTE_in_unquoteForm1807); 
+            pushFollow(FOLLOW_form_in_unquoteForm1809);
             form();
             _fsp--;
 
@@ -961,8 +961,8 @@ public class ClojureParser extends Parser {
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:267:9: ( UNQUOTE_SPLICING form )
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:267:9: UNQUOTE_SPLICING form
             {
-            match(input,UNQUOTE_SPLICING,FOLLOW_UNQUOTE_SPLICING_in_unquoteSplicingForm1835); 
-            pushFollow(FOLLOW_form_in_unquoteSplicingForm1837);
+            match(input,UNQUOTE_SPLICING,FOLLOW_UNQUOTE_SPLICING_in_unquoteSplicingForm1849); 
+            pushFollow(FOLLOW_form_in_unquoteSplicingForm1851);
             form();
             _fsp--;
 
@@ -989,8 +989,8 @@ public class ClojureParser extends Parser {
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:270:9: ( NUMBER_SIGN LEFT_CURLY_BRACKET ( form )* RIGHT_CURLY_BRACKET )
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:270:9: NUMBER_SIGN LEFT_CURLY_BRACKET ( form )* RIGHT_CURLY_BRACKET
             {
-            match(input,NUMBER_SIGN,FOLLOW_NUMBER_SIGN_in_set1856); 
-            match(input,LEFT_CURLY_BRACKET,FOLLOW_LEFT_CURLY_BRACKET_in_set1858); 
+            match(input,NUMBER_SIGN,FOLLOW_NUMBER_SIGN_in_set1870); 
+            match(input,LEFT_CURLY_BRACKET,FOLLOW_LEFT_CURLY_BRACKET_in_set1872); 
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:270:40: ( form )*
             loop10:
             do {
@@ -1006,7 +1006,7 @@ public class ClojureParser extends Parser {
             	case 1 :
             	    // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:270:40: form
             	    {
-            	    pushFollow(FOLLOW_form_in_set1860);
+            	    pushFollow(FOLLOW_form_in_set1874);
             	    form();
             	    _fsp--;
 
@@ -1019,7 +1019,7 @@ public class ClojureParser extends Parser {
                 }
             } while (true);
 
-            match(input,RIGHT_CURLY_BRACKET,FOLLOW_RIGHT_CURLY_BRACKET_in_set1863); 
+            match(input,RIGHT_CURLY_BRACKET,FOLLOW_RIGHT_CURLY_BRACKET_in_set1877); 
 
             }
 
@@ -1042,8 +1042,8 @@ public class ClojureParser extends Parser {
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:274:9: ( NUMBER_SIGN CIRCUMFLEX ( map | SYMBOL | KEYWORD | STRING ) )
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:274:9: NUMBER_SIGN CIRCUMFLEX ( map | SYMBOL | KEYWORD | STRING )
             {
-            match(input,NUMBER_SIGN,FOLLOW_NUMBER_SIGN_in_metadataForm1883); 
-            match(input,CIRCUMFLEX,FOLLOW_CIRCUMFLEX_in_metadataForm1885); 
+            match(input,NUMBER_SIGN,FOLLOW_NUMBER_SIGN_in_metadataForm1897); 
+            match(input,CIRCUMFLEX,FOLLOW_CIRCUMFLEX_in_metadataForm1899); 
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:274:32: ( map | SYMBOL | KEYWORD | STRING )
             int alt11=4;
             switch ( input.LA(1) ) {
@@ -1078,7 +1078,7 @@ public class ClojureParser extends Parser {
                 case 1 :
                     // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:274:33: map
                     {
-                    pushFollow(FOLLOW_map_in_metadataForm1888);
+                    pushFollow(FOLLOW_map_in_metadataForm1902);
                     map();
                     _fsp--;
 
@@ -1088,21 +1088,21 @@ public class ClojureParser extends Parser {
                 case 2 :
                     // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:274:39: SYMBOL
                     {
-                    match(input,SYMBOL,FOLLOW_SYMBOL_in_metadataForm1892); 
+                    match(input,SYMBOL,FOLLOW_SYMBOL_in_metadataForm1906); 
 
                     }
                     break;
                 case 3 :
                     // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:274:46: KEYWORD
                     {
-                    match(input,KEYWORD,FOLLOW_KEYWORD_in_metadataForm1894); 
+                    match(input,KEYWORD,FOLLOW_KEYWORD_in_metadataForm1908); 
 
                     }
                     break;
                 case 4 :
                     // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:274:54: STRING
                     {
-                    match(input,STRING,FOLLOW_STRING_in_metadataForm1896); 
+                    match(input,STRING,FOLLOW_STRING_in_metadataForm1910); 
 
                     }
                     break;
@@ -1131,9 +1131,9 @@ public class ClojureParser extends Parser {
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:278:9: ( NUMBER_SIGN APOSTROPHE form )
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:278:9: NUMBER_SIGN APOSTROPHE form
             {
-            match(input,NUMBER_SIGN,FOLLOW_NUMBER_SIGN_in_varQuoteForm1917); 
-            match(input,APOSTROPHE,FOLLOW_APOSTROPHE_in_varQuoteForm1919); 
-            pushFollow(FOLLOW_form_in_varQuoteForm1921);
+            match(input,NUMBER_SIGN,FOLLOW_NUMBER_SIGN_in_varQuoteForm1931); 
+            match(input,APOSTROPHE,FOLLOW_APOSTROPHE_in_varQuoteForm1933); 
+            pushFollow(FOLLOW_form_in_varQuoteForm1935);
             form();
             _fsp--;
 
@@ -1162,8 +1162,8 @@ public class ClojureParser extends Parser {
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:288:7: ( NUMBER_SIGN list )
             // /home/lpetit/projects/ccw/clojure-antlr-grammar/src/Clojure.g:288:7: NUMBER_SIGN list
             {
-            match(input,NUMBER_SIGN,FOLLOW_NUMBER_SIGN_in_lambdaForm1948); 
-            pushFollow(FOLLOW_list_in_lambdaForm1950);
+            match(input,NUMBER_SIGN,FOLLOW_NUMBER_SIGN_in_lambdaForm1962); 
+            pushFollow(FOLLOW_list_in_lambdaForm1964);
             list();
             _fsp--;
 
@@ -1188,65 +1188,65 @@ public class ClojureParser extends Parser {
  
 
     public static final BitSet FOLLOW_set_in_literal0 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_form_in_file1283 = new BitSet(new long[]{0x0000005F178DF2D2L});
-    public static final BitSet FOLLOW_LAMBDA_ARG_in_form1316 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_literal_in_form1327 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_COMMENT_in_form1353 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_AMPERSAND_in_form1363 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_metadataForm_in_form1373 = new BitSet(new long[]{0x0000000010010290L});
-    public static final BitSet FOLLOW_SPECIAL_FORM_in_form1378 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_SYMBOL_in_form1384 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_list_in_form1390 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_vector_in_form1394 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_map_in_form1398 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_macroForm_in_form1410 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_dispatchMacroForm_in_form1420 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_set_in_form1430 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_quoteForm_in_macroForm1461 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_metaForm_in_macroForm1471 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_derefForm_in_macroForm1481 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_syntaxQuoteForm_in_macroForm1491 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_unquoteSplicingForm_in_macroForm1501 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_unquoteForm_in_macroForm1511 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_REGEX_LITERAL_in_dispatchMacroForm1538 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_varQuoteForm_in_dispatchMacroForm1548 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_lambdaForm_in_dispatchMacroForm1560 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_OPEN_PAREN_in_list1581 = new BitSet(new long[]{0x0000005F178DF2F0L});
-    public static final BitSet FOLLOW_form_in_list1583 = new BitSet(new long[]{0x0000005F178DF2F0L});
-    public static final BitSet FOLLOW_CLOSE_PAREN_in_list1589 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_LEFT_SQUARE_BRACKET_in_vector1608 = new BitSet(new long[]{0x0000005F178DF3D0L});
-    public static final BitSet FOLLOW_form_in_vector1610 = new BitSet(new long[]{0x0000005F178DF3D0L});
-    public static final BitSet FOLLOW_RIGHT_SQUARE_BRACKET_in_vector1613 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_LEFT_CURLY_BRACKET_in_map1632 = new BitSet(new long[]{0x0000005F178DF6D0L});
-    public static final BitSet FOLLOW_form_in_map1635 = new BitSet(new long[]{0x0000005F178DF2D0L});
-    public static final BitSet FOLLOW_form_in_map1637 = new BitSet(new long[]{0x0000005F178DF6D0L});
-    public static final BitSet FOLLOW_RIGHT_CURLY_BRACKET_in_map1641 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_APOSTROPHE_in_quoteForm1674 = new BitSet(new long[]{0x0000005F178DF2D0L});
-    public static final BitSet FOLLOW_form_in_quoteForm1676 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_CIRCUMFLEX_in_metaForm1690 = new BitSet(new long[]{0x0000005F178DF2D0L});
-    public static final BitSet FOLLOW_form_in_metaForm1692 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_COMMERCIAL_AT_in_derefForm1709 = new BitSet(new long[]{0x0000005F178DF2D0L});
-    public static final BitSet FOLLOW_form_in_derefForm1711 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_SYNTAX_QUOTE_in_syntaxQuoteForm1751 = new BitSet(new long[]{0x0000005F178DF2D0L});
-    public static final BitSet FOLLOW_form_in_syntaxQuoteForm1753 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_UNQUOTE_in_unquoteForm1793 = new BitSet(new long[]{0x0000005F178DF2D0L});
-    public static final BitSet FOLLOW_form_in_unquoteForm1795 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_UNQUOTE_SPLICING_in_unquoteSplicingForm1835 = new BitSet(new long[]{0x0000005F178DF2D0L});
-    public static final BitSet FOLLOW_form_in_unquoteSplicingForm1837 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_NUMBER_SIGN_in_set1856 = new BitSet(new long[]{0x0000000000000200L});
-    public static final BitSet FOLLOW_LEFT_CURLY_BRACKET_in_set1858 = new BitSet(new long[]{0x0000005F178DF6D0L});
-    public static final BitSet FOLLOW_form_in_set1860 = new BitSet(new long[]{0x0000005F178DF6D0L});
-    public static final BitSet FOLLOW_RIGHT_CURLY_BRACKET_in_set1863 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_NUMBER_SIGN_in_metadataForm1883 = new BitSet(new long[]{0x0000000000001000L});
-    public static final BitSet FOLLOW_CIRCUMFLEX_in_metadataForm1885 = new BitSet(new long[]{0x0000000110040200L});
-    public static final BitSet FOLLOW_map_in_metadataForm1888 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_SYMBOL_in_metadataForm1892 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_KEYWORD_in_metadataForm1894 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_STRING_in_metadataForm1896 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_NUMBER_SIGN_in_varQuoteForm1917 = new BitSet(new long[]{0x0000000000008000L});
-    public static final BitSet FOLLOW_APOSTROPHE_in_varQuoteForm1919 = new BitSet(new long[]{0x0000005F178DF2D0L});
-    public static final BitSet FOLLOW_form_in_varQuoteForm1921 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_NUMBER_SIGN_in_lambdaForm1948 = new BitSet(new long[]{0x0000000000000010L});
-    public static final BitSet FOLLOW_list_in_lambdaForm1950 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_form_in_file1297 = new BitSet(new long[]{0x0000005F178DF2D2L});
+    public static final BitSet FOLLOW_LAMBDA_ARG_in_form1330 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_literal_in_form1341 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_COMMENT_in_form1367 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_AMPERSAND_in_form1377 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_metadataForm_in_form1387 = new BitSet(new long[]{0x0000000010010290L});
+    public static final BitSet FOLLOW_SPECIAL_FORM_in_form1392 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_SYMBOL_in_form1398 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_list_in_form1404 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_vector_in_form1408 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_map_in_form1412 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_macroForm_in_form1424 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_dispatchMacroForm_in_form1434 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_set_in_form1444 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_quoteForm_in_macroForm1475 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_metaForm_in_macroForm1485 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_derefForm_in_macroForm1495 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_syntaxQuoteForm_in_macroForm1505 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_unquoteSplicingForm_in_macroForm1515 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_unquoteForm_in_macroForm1525 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_REGEX_LITERAL_in_dispatchMacroForm1552 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_varQuoteForm_in_dispatchMacroForm1562 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_lambdaForm_in_dispatchMacroForm1574 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_OPEN_PAREN_in_list1595 = new BitSet(new long[]{0x0000005F178DF2F0L});
+    public static final BitSet FOLLOW_form_in_list1597 = new BitSet(new long[]{0x0000005F178DF2F0L});
+    public static final BitSet FOLLOW_CLOSE_PAREN_in_list1603 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_LEFT_SQUARE_BRACKET_in_vector1622 = new BitSet(new long[]{0x0000005F178DF3D0L});
+    public static final BitSet FOLLOW_form_in_vector1624 = new BitSet(new long[]{0x0000005F178DF3D0L});
+    public static final BitSet FOLLOW_RIGHT_SQUARE_BRACKET_in_vector1627 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_LEFT_CURLY_BRACKET_in_map1646 = new BitSet(new long[]{0x0000005F178DF6D0L});
+    public static final BitSet FOLLOW_form_in_map1649 = new BitSet(new long[]{0x0000005F178DF2D0L});
+    public static final BitSet FOLLOW_form_in_map1651 = new BitSet(new long[]{0x0000005F178DF6D0L});
+    public static final BitSet FOLLOW_RIGHT_CURLY_BRACKET_in_map1655 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_APOSTROPHE_in_quoteForm1688 = new BitSet(new long[]{0x0000005F178DF2D0L});
+    public static final BitSet FOLLOW_form_in_quoteForm1690 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_CIRCUMFLEX_in_metaForm1704 = new BitSet(new long[]{0x0000005F178DF2D0L});
+    public static final BitSet FOLLOW_form_in_metaForm1706 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_COMMERCIAL_AT_in_derefForm1723 = new BitSet(new long[]{0x0000005F178DF2D0L});
+    public static final BitSet FOLLOW_form_in_derefForm1725 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_SYNTAX_QUOTE_in_syntaxQuoteForm1765 = new BitSet(new long[]{0x0000005F178DF2D0L});
+    public static final BitSet FOLLOW_form_in_syntaxQuoteForm1767 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_UNQUOTE_in_unquoteForm1807 = new BitSet(new long[]{0x0000005F178DF2D0L});
+    public static final BitSet FOLLOW_form_in_unquoteForm1809 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_UNQUOTE_SPLICING_in_unquoteSplicingForm1849 = new BitSet(new long[]{0x0000005F178DF2D0L});
+    public static final BitSet FOLLOW_form_in_unquoteSplicingForm1851 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_NUMBER_SIGN_in_set1870 = new BitSet(new long[]{0x0000000000000200L});
+    public static final BitSet FOLLOW_LEFT_CURLY_BRACKET_in_set1872 = new BitSet(new long[]{0x0000005F178DF6D0L});
+    public static final BitSet FOLLOW_form_in_set1874 = new BitSet(new long[]{0x0000005F178DF6D0L});
+    public static final BitSet FOLLOW_RIGHT_CURLY_BRACKET_in_set1877 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_NUMBER_SIGN_in_metadataForm1897 = new BitSet(new long[]{0x0000000000001000L});
+    public static final BitSet FOLLOW_CIRCUMFLEX_in_metadataForm1899 = new BitSet(new long[]{0x0000000110040200L});
+    public static final BitSet FOLLOW_map_in_metadataForm1902 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_SYMBOL_in_metadataForm1906 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_KEYWORD_in_metadataForm1908 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_STRING_in_metadataForm1910 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_NUMBER_SIGN_in_varQuoteForm1931 = new BitSet(new long[]{0x0000000000008000L});
+    public static final BitSet FOLLOW_APOSTROPHE_in_varQuoteForm1933 = new BitSet(new long[]{0x0000005F178DF2D0L});
+    public static final BitSet FOLLOW_form_in_varQuoteForm1935 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_NUMBER_SIGN_in_lambdaForm1962 = new BitSet(new long[]{0x0000000000000010L});
+    public static final BitSet FOLLOW_list_in_lambdaForm1964 = new BitSet(new long[]{0x0000000000000002L});
 
 }

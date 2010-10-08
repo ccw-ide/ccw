@@ -160,7 +160,7 @@ literal:
     ;    
 
 KEYWORD:
-        ':' SYMBOL
+        ':' (':')? SYMBOL_REST+ ('/' SYMBOL_REST+)?
     ;
 
 SYNTAX_QUOTE:
