@@ -226,7 +226,7 @@ public class ClojureClient {
             if (page != null) {
             	IConsoleView v;
 				try {
-					v = (IConsoleView) page.showView("org.eclipse.ui.console.ConsoleView");
+					v = (IConsoleView) page.showView("org.eclipse.ui.console.ConsoleView", null, IWorkbenchPage.VIEW_VISIBLE);
 				} catch (PartInitException e) {
 					e.printStackTrace(); // Improbable, or Eclipse would have been wrongly initialized
 					return null;
