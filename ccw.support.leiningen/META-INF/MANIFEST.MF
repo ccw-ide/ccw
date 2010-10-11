@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Counterclockwise Leiningen Plug-in
 Bundle-SymbolicName: ccw.support.leiningen
-Bundle-Version: 1.1.2.BETA10
+Bundle-Version: 1.1.2.STABLE01
 Bundle-ClassPath: .,
  classes/,
  lib/maven-ant-tasks-2.0.10.jar
