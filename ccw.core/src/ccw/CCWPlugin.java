@@ -13,15 +13,12 @@
 package ccw;
 
 import java.net.URL;
-import java.util.HashSet;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
-import org.eclipse.debug.core.ILaunchListener;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.ColorRegistry;
@@ -37,16 +34,9 @@ import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.console.ConsolePlugin;
-import org.eclipse.ui.console.IConsole;
-import org.eclipse.ui.console.IConsoleView;
-import org.eclipse.ui.console.IOConsole;
 import org.eclipse.ui.editors.text.EditorsUI;
-import org.eclipse.ui.internal.Workbench;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
-import org.eclipse.ui.views.IViewDescriptor;
-import org.eclipse.ui.views.IViewRegistry;
 import org.osgi.framework.BundleContext;
 
 import ccw.editors.antlrbased.AntlrBasedClojureEditor;
