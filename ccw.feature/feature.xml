@@ -2,7 +2,7 @@
 <feature
       id="ccw.feature"
       label="%featureName"
-      version="0.0.63.STABLE01"
+      version="0.0.64.STABLE01"
       provider-name="%providerName"
       plugin="ccw.branding">
 
@@ -24,7 +24,6 @@
 
    <requires>
       <import plugin="org.eclipse.core.runtime" version="3.4.0" match="greaterOrEqual"/>
-      <import plugin="ccw.clojure" version="1.1.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.jface.text"/>
       <import plugin="org.eclipse.ui.editors"/>
@@ -41,8 +40,6 @@
       <import plugin="org.eclipse.core.filesystem"/>
       <import plugin="org.eclipse.core.expressions"/>
       <import plugin="org.eclipse.ui.forms"/>
-      <import plugin="paredit.clj" version="0.1.0" match="greaterOrEqual"/>
-      <import plugin="ccw.clojurecontrib" version="1.1.0" match="greaterOrEqual"/>
    </requires>
 
    <plugin
@@ -51,18 +48,6 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-
-   <plugin
-         id="ccw.clojure"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="ccw.clojurecontrib"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
 
    <plugin
          id="ccw.branding"
@@ -92,6 +77,25 @@
 
    <plugin
          id="parsley"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="clojure.osgi"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="ccw.clojure"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="ccw.clojurecontrib"
          download-size="0"
          install-size="0"
          version="0.0.0"/>

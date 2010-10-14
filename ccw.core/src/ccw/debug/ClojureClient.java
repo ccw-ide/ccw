@@ -148,22 +148,25 @@ public class ClojureClient {
         if (window != null) {
             IWorkbenchPage page = window.getActivePage();
             if (page != null) {
-                for (IViewReference r : page.getViewReferences()) {
-                    IViewPart v = r.getView(false);
-                    if (IConsoleView.class.isInstance(v)) {
-                        IConsole[] consoles = ConsolePlugin.getDefault().getConsoleManager().getConsoles();
-                        for (IConsole console : consoles) {
-                            if (console instanceof org.eclipse.debug.ui.console.IConsole) {
-                                org.eclipse.debug.ui.console.IConsole processConsole = (org.eclipse.debug.ui.console.IConsole) console;
-                                int port = LaunchUtils.getLaunchServerReplPort(processConsole.getProcess().getLaunch());
-                                if (port != -1) {
-                                    if (!page.isPartVisible(v)) {
-                                        activateReplAndShowConsole(page, v, console);
-                                    }
-                                    assert IOConsole.class.isInstance(processConsole);
-                                    return (IOConsole) processConsole;
-                                }
-                            }
+				try {
+					v = (IConsoleView) page.showView("org.eclipse.ui.console.ConsoleView", null, IWorkbenchPage.VIEW_VISIBLE);
+				} catch (PartInitException e) {
+					e.printStackTrace(); // Improbable, or Eclipse would have been wrongly initialized
+					return null;
+				}
+                IConsole[] consoles = ConsolePlugin.getDefault().getConsoleManager().getConsoles();
+                for (IConsole console : consoles) {
+                    if (console instanceof org.eclipse.debug.ui.console.IConsole) {
+                        org.eclipse.debug.ui.console.IConsole processConsole = (org.eclipse.debug.ui.console.IConsole) console;
+                        if (!processConsole.getProcess().isTerminated()) {
+	                        int port = LaunchUtils.getLaunchServerReplPort(processConsole.getProcess().getLaunch());
+	                        if (port != -1) {
+	                            if (!page.isPartVisible(v)) {
+	                                activateReplAndShowConsole(page, v, console);
+	                            }
+	                            assert IOConsole.class.isInstance(processConsole);
+	                            return (IOConsole) processConsole;
+	                        }
                         }
                     }
                 }

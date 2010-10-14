@@ -10,7 +10,7 @@
 ;*******************************************************************************/
 
 (ns ccw.editors.antlrbased.EditorSupport 
-  (:require [paredit.parser :as p])
+  (require [paredit.parser :as p])
   (:gen-class
     :methods [^{:static true} [updateParseRef [String Object] Object]
               ^{:static true} [getParser [String Object] Object]]))

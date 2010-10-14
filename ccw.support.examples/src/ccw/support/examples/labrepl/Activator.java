@@ -7,12 +7,15 @@
  *
  * Contributors: 
  *    Stephan Muehlstrasser - initial API and implementation
+ *    Laurent Petit         - adaptation to clojure.osgi 
  *******************************************************************************/
 
 package ccw.support.examples.labrepl;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+
+import clojure.osgi.ClojureOSGi;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -38,6 +41,7 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		startClojureCode(context);
 	}
 
 	/*
@@ -56,6 +60,13 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	public static Activator getDefault() {
 		return plugin;
+	}
+	
+	private void startClojureCode(BundleContext bundleContext) throws Exception {
+		ClojureOSGi.loadAOTClass(bundleContext, "ccw.support.examples.labrepl.wizards.LabreplAntLogger");
+		ClojureOSGi.loadAOTClass(bundleContext, "ccw.support.examples.labrepl.wizards.LabreplCreateProjectPage");
+		ClojureOSGi.loadAOTClass(bundleContext, "ccw.support.examples.labrepl.wizards.LabreplCreationOperation");
+		ClojureOSGi.loadAOTClass(bundleContext, "ccw.support.examples.labrepl.wizards.LabreplCreationWizard");
 	}
 
 }

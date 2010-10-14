@@ -79,9 +79,10 @@ REGEX_LITERAL
 // taken from the java grammar example of Terrence Parr
 fragment
 EscapeSequence
-    :   '\\' ('b'|'t'|'n'|'f'|'r'|'\"'|'\''|'\\')
-    |   UnicodeEscape
-    |   OctalEscape
+      :   '\\' .
+//    :   '\\' ('b'|'t'|'n'|'f'|'r'|'\"'|'\''|'\\')
+//    |   UnicodeEscape
+//    |   OctalEscape
     ;
 
 // taken from the java grammar example of Terrence Parr
@@ -159,7 +160,7 @@ literal:
     ;    
 
 KEYWORD:
-        ':' SYMBOL
+        ':' (':')? SYMBOL_REST+ ('/' SYMBOL_REST+)?
     ;
 
 SYNTAX_QUOTE:

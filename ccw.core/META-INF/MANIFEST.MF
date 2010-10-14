@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Counterclockwise Clojure Plug-in
 Bundle-SymbolicName: ccw.core;singleton:=true
-Bundle-Version: 0.0.63.STABLE01
+Bundle-Version: 0.0.64.STABLE01
 Bundle-Localization: plugin
 Bundle-Activator: ccw.CCWPlugin
 Require-Bundle: org.eclipse.ui,
@@ -21,13 +21,18 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.filesystem,
  org.eclipse.core.expressions,
  org.eclipse.ui.forms,
- ccw.clojure;bundle-version="1.2.0",
  paredit.clj,
- ccw.clojurecontrib;bundle-version="1.2.0",
  org.eclipse.help,
  ccw.branding;bundle-version="0.0.46",
  org.eclipse.ui.workbench.texteditor,
- nrepl-module;bundle-version="0.0.1"
+ nrepl-module;bundle-version="0.0.1",
+ clojure.osgi,
+ ccw.clojure;bundle-version="1.2.0",
+ ccw.clojurecontrib;bundle-version="1.2.0"
+Bundle-ClassPath: .,
+ classes/
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-Vendor: Counterclockwise team
 Export-Package: ccw,
  ccw.actions,
  ccw.builder,
@@ -42,10 +47,4 @@ Export-Package: ccw,
  ccw.util,
  ccw.utils.editors.antlrbased,
  ccw.wizards
-Bundle-ClassPath: .,
- classes/
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Bundle-Vendor: Counterclockwise team
 Bundle-ActivationPolicy: lazy
-Eclipse-RegisterBuddy: ccw.clojure, ccw.cloju
- recontrib, paredit.clj
