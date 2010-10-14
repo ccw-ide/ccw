@@ -231,7 +231,7 @@ public class REPLView extends ViewPart {
         SashForm split = new SashForm(parent, SWT.VERTICAL);
         
         logPanel = new StyledText(split, SWT.V_SCROLL | SWT.WRAP);
-        logPanel.setWrapIndent(4);
+        logPanel.setIndent(4);
         logPanel.setEditable(false);
         logPanel.setFont(JFaceResources.getFont(JFaceResources.TEXT_FONT));
         
