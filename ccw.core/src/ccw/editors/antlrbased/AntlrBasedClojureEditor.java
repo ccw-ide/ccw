@@ -13,7 +13,6 @@ package ccw.editors.antlrbased;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -51,7 +50,6 @@ import ccw.editors.rulesbased.ClojureDocumentProvider;
 import ccw.editors.rulesbased.ClojurePartitionScanner;
 import ccw.launching.ClojureLaunchShortcut;
 import ccw.repl.REPLView;
-import cemerick.nrepl.Connection;
 
 public class AntlrBasedClojureEditor extends TextEditor implements IClojureEditor {
 	public static final String EDITOR_REFERENCE_HELP_CONTEXT_ID = "ccw.branding.editor_context_help";
@@ -704,8 +702,8 @@ public class AntlrBasedClojureEditor extends TextEditor implements IClojureEdito
         }
     }
 
-    public final ISourceViewer sourceViewer() {
-        return super.getSourceViewer();
+    public final ClojureSourceViewer sourceViewer() {
+        return (ClojureSourceViewer) super.getSourceViewer();
     }
 
     /** Change the visibility of the method to public */
