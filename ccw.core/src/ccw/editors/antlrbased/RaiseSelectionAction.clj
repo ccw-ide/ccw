@@ -29,7 +29,7 @@
   (let [editor #^AntlrBasedClojureEditor (:editor @(.state this))
         {:keys #{length offset}} (bean (.getUnSignedSelection editor))
         text  (.get (.getDocument #^AntlrBasedClojureEditor editor))
-        result (paredit :paredit-raise-sexp (.getParsed (.sourceViewer editor)) {:text text :offset offset :length length})]
+        result (paredit :paredit-raise-sexp (.getParsed editor) {:text text :offset offset :length length})]
     (when-let [modif (-?> result :modifs first)]
       (let [{:keys #{length offset text}} modif
             document (-> (:editor @(.state this)) .getDocument)]

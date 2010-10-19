@@ -54,7 +54,7 @@
 
 (defn detect-hyperlinks
   [offset editor]
-  (let [rloc (-> editor .sourceViewer .getParsed lu/parsed-root-loc)
+  (let [rloc (-> editor .getParsed lu/parsed-root-loc)
         l (lu/loc-for-offset rloc offset)]
     (when-let [{:strs #{ns file line}} (and (= :symbol (-> l z/node :tag)) ; TODO transform :strs -> :keys
                                          (find-decl (lu/loc-text l) editor))]

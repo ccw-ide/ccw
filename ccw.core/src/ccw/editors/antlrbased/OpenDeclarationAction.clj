@@ -44,6 +44,6 @@
 (defn -run
   [this]
   (let [editor (editor this)
-        caret-offset (-> editor (.getUnSignedSelection (.sourceViewer editor)) .getOffset)]
+        caret-offset (-> editor (.getUnSignedSelection editor) .getOffset)]
     (if-let [[{open :open}] (hlu/detect-hyperlinks caret-offset editor)]
       (open))))
