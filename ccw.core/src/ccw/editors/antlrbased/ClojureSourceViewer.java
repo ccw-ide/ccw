@@ -42,7 +42,6 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.repl.REPLView;
-import cemerick.nrepl.Connection;
 
 public class ClojureSourceViewer extends ProjectionViewer implements
         IClojureEditor, IPropertyChangeListener {

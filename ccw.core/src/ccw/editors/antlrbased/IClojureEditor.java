@@ -5,7 +5,6 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import ccw.repl.REPLView;
-import cemerick.nrepl.Connection;
 
 /**
  * A callback interface allowing various facilities to treat
@@ -64,6 +63,8 @@ public interface IClojureEditor {
      */
     public IJavaProject getAssociatedProject ();
 
+    public Object getParsed ();
+    
     /**
      * Can be null...
      */

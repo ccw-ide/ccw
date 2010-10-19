@@ -760,4 +760,8 @@ public class AntlrBasedClojureEditor extends TextEditor implements IClojureEdito
     	}
     	
     }
+    
+    public Object getParsed() {
+    	return sourceViewer().getParsed();
+    }
 }

@@ -95,7 +95,7 @@
             result (and 
                      par-command 
                      (do-command? editor par-command)
-                     (paredit par-command (.getParsed (.sourceViewer editor)) par-text))]
+                     (paredit par-command (.getParsed editor) par-text))]
         (when (and result (not= :ko (-> result :parser-state)))
           (if-let [modif (-?> result :modifs first)]
             (do
