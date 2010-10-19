@@ -42,8 +42,7 @@
       (do
         (.setStatusLineErrorMessage editor ClojureEditorMessages/You_need_a_running_repl)
         nil)
-      (let [[result2] (repl/response-values (send command))
-            [file line ns :as result] (result2 "response")]
+      (let [[ [file line _ ns] ] (repl/response-values (send command))]
         (if (and file line ns)
           {"file" file
            "line" (Integer/valueOf line)
