@@ -1,6 +1,7 @@
 package ccw.editors.antlrbased;
 
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
@@ -73,4 +74,8 @@ public interface IClojureEditor {
     public void setStructuralEditingPossible (boolean possible);
     
     public void updateTabsToSpacesConverter ();
+
+	public IDocument getDocument();
+
+	public void setStatusLineErrorMessage(String you_need_a_running_repl);
 }

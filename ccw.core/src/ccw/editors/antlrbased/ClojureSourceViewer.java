@@ -43,7 +43,7 @@ import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.repl.REPLView;
 
-public class ClojureSourceViewer extends ProjectionViewer implements
+public abstract class ClojureSourceViewer extends ProjectionViewer implements
         IClojureEditor, IPropertyChangeListener {
     /**
      * The preference store.

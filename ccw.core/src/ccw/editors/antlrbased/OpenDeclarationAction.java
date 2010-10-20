@@ -12,9 +12,9 @@ package ccw.editors.antlrbased;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.ui.part.WorkbenchPart;
 
 import ccw.ClojureCore;
 import ccw.repl.REPLView;
@@ -22,9 +22,9 @@ import cemerick.nrepl.Connection;
 
 public class OpenDeclarationAction extends Action {
     public final static String ID = "OpenDeclarationAction"; //$NON-NLS-1$
-    private final AntlrBasedClojureEditor editor;
+    private final IClojureEditor editor;
 
-    public OpenDeclarationAction(AntlrBasedClojureEditor editor) {
+    public OpenDeclarationAction(IClojureEditor editor) {
         this.editor = editor;
     }
 
@@ -58,7 +58,8 @@ public class OpenDeclarationAction extends Action {
             String file = result.get(0);
             Integer line = Integer.valueOf(result.get(1));
             String ns = result.get(3);
-            if (file.endsWith(editor.getPartName())) {
+            // TODO fix this (or not), the cast is ugly
+            if ((editor instanceof WorkbenchPart) && file.endsWith(((WorkbenchPart) editor).getPartName())) {
                 ClojureCore.gotoEditorLine(editor, line);
             } else {
                 ClojureCore.openInEditor(ns, file, line);

@@ -4,6 +4,8 @@ import java.net.ConnectException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.debug.core.ILaunch;
+import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.commands.ActionHandler;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
@@ -20,16 +22,21 @@ import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.IKeyBindingService;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
+import org.eclipse.ui.contexts.IContextService;
+import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.part.ViewPart;
 
 import ccw.CCWPlugin;
 import ccw.editors.antlrbased.ClojureSourceViewer;
 import ccw.editors.antlrbased.ClojureSourceViewerConfiguration;
+import ccw.editors.antlrbased.IClojureEditorActionDefinitionIds;
+import ccw.editors.antlrbased.OpenDeclarationAction;
 import ccw.editors.rulesbased.ClojureDocumentProvider;
 import ccw.outline.NamespaceBrowser;
 import cemerick.nrepl.Connection;
@@ -71,6 +78,7 @@ public class REPLView extends ViewPart {
     private IConsole console;
     private ILaunch launch;
     
+    private String currentNamespaceName = "user";
     private final Atom requests = new Atom(PersistentTreeMap.EMPTY);
     
     public REPLView () {}
@@ -131,7 +139,8 @@ public class REPLView extends ViewPart {
     public void setCurrentNamespace (String ns) {
         // TODO waaaay better to put a dropdown namespace chooser in the view's toolbar,
         // and this would just change its selection
-        setPartName(String.format("REPL @ %s:%s (%s)", interactive.host, interactive.port, ns));
+    	this.currentNamespaceName = ns;
+        setPartName(String.format("REPL @ %s:%s (%s)", interactive.host, interactive.port, currentNamespaceName));
     }
     
     @SuppressWarnings("unchecked")
@@ -139,7 +148,7 @@ public class REPLView extends ViewPart {
         try {
             interactive = new Connection(host, port);
             toolConnection = new Connection(host, port);
-            setCurrentNamespace("user");
+            setCurrentNamespace(currentNamespaceName);
             evalExpression("(println \"Clojure\" (clojure-version))", false);
             return true;
         } catch (ConnectException e) {
@@ -240,6 +249,18 @@ public class REPLView extends ViewPart {
                 // we'll be connected by the time this is called
                 return toolConnection;
             }
+            public void setStatusLineErrorMessage(String msg) {
+            	IStatusLineManager slm = (IStatusLineManager) REPLView.super.getSite().getService(IStatusLineManager.class);
+            	slm.setErrorMessage(msg);
+            };
+            public String getDeclaringNamespace() {
+            	String inline = super.getDeclaringNamespace();
+            	if (inline != null) {
+            		return inline;
+            	} else {
+            		return currentNamespaceName;
+            	}
+            };
         };
         viewerConfig = new ClojureSourceViewerConfiguration(prefs, viewer);
         viewer.configure(viewerConfig);
@@ -269,6 +290,14 @@ public class REPLView extends ViewPart {
                 activeREPL.compareAndSet(REPLView.this, null);
             }
         });
+        
+        ((IContextService) getSite().getService(IContextService.class)).activateContext("ccw.ui.clojureEditorScope"); // TODO magic constant 
+        IHandlerService handlerService = (IHandlerService) getSite().getService(IHandlerService.class);
+
+        OpenDeclarationAction action = new OpenDeclarationAction(viewer);
+		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.OPEN_DECLARATION);
+        handlerService.activateHandler("ccw.ui.edit.text.clojure.open.declaration", new ActionHandler(action));
+        
     }
     
     @Override

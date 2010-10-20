@@ -686,7 +686,11 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         IPreferenceStore generalTextStore= EditorsUI.getPreferenceStore();
         IPreferenceStore store= new ChainedPreferenceStore(new IPreferenceStore[] { fOverlayStore, generalTextStore });
         
-        fPreviewViewer= new ClojureSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER, store);
+        fPreviewViewer= new ClojureSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER, store) {
+			public void setStatusLineErrorMessage(String you_need_a_running_repl) {
+				// Do nothing
+			}
+        };
         
         ClojureSourceViewerConfiguration configuration= new ClojureSourceViewerConfiguration(store, null);
         fPreviewViewer.configure(configuration);

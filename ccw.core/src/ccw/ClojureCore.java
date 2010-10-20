@@ -434,12 +434,12 @@ public final class ClojureCore {
 		return false;
     }
 
-	public static void gotoEditorLine(IEditorPart editor, int line) {
+	public static void gotoEditorLine(Object editor, int line) {
 		if (ITextEditor.class.isInstance(editor)) {
 			ITextEditor textEditor = (ITextEditor) editor;
 			IRegion lineRegion;
 			try {
-				lineRegion = textEditor.getDocumentProvider().getDocument(editor.getEditorInput()).getLineInformation(line - 1);
+				lineRegion = textEditor.getDocumentProvider().getDocument(textEditor.getEditorInput()).getLineInformation(line - 1);
 				textEditor.selectAndReveal(lineRegion.getOffset(), lineRegion.getLength());
 			} catch (BadLocationException e) {
 				// TODO popup for a feedback to the user ?

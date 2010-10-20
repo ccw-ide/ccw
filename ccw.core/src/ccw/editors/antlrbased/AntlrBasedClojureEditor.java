@@ -134,10 +134,14 @@ public class AntlrBasedClojureEditor extends TextEditor implements IClojureEdito
 		fOverviewRuler= createOverviewRuler(getSharedColors());
 		
 		// ISourceViewer viewer= new ProjectionViewer(parent, ruler, getOverviewRuler(), isOverviewRulerVisible(), styles);
-		ISourceViewer viewer= new ClojureSourceViewer(parent, ruler, getOverviewRuler(), isOverviewRulerVisible(), styles, getPreferenceStore());
+		ISourceViewer viewer= new ClojureSourceViewer(parent, ruler, getOverviewRuler(), isOverviewRulerVisible(), styles, getPreferenceStore()) {
+			public void setStatusLineErrorMessage(String message) {
+				AntlrBasedClojureEditor.this.setStatusLineErrorMessage(message);
+				
+			}
+		};
 		// ensure decoration support has been created and configured.
 		getSourceViewerDecorationSupport(viewer);
-
 		return viewer;
 	}
 
