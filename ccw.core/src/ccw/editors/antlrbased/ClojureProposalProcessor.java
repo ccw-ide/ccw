@@ -50,7 +50,7 @@ import org.eclipse.swt.graphics.TextStyle;
 import ccw.CCWPlugin;
 import ccw.outline.NamespaceBrowser;
 import ccw.util.ClojureDocUtils;
-import cemerick.nrepl.Connection;
+import clojure.tools.nrepl.Connection;
 
 public class ClojureProposalProcessor implements IContentAssistProcessor {
 	private static final int MAX_JAVA_SEARCH_RESULT_NUMBER = 50;

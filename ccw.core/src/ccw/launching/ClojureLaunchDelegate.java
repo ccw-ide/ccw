@@ -42,7 +42,7 @@ import ccw.ClojureCore;
 import ccw.ClojureProject;
 import ccw.repl.REPLView;
 import ccw.util.DisplayUtil;
-import cemerick.nrepl.SafeFn;
+import clojure.tools.nrepl.SafeFn;
 import clojure.lang.AFn;
 import clojure.lang.RT;
 import clojure.lang.Symbol;
@@ -56,7 +56,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
     private static ServerSocket ackREPLServer;
     static {
         try {
-            ackREPLServer = (ServerSocket)((List)Var.find(Symbol.intern("cemerick.nrepl/start-server")).invoke()).get(0);
+            ackREPLServer = (ServerSocket)((List)Var.find(Symbol.intern("clojure.tools.nrepl/start-server")).invoke()).get(0);
         } catch (Exception e) {
             CCWPlugin.logError("Could not start plugin-hosted REPL server for launch ack", e);
         }
@@ -80,7 +80,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
         public void done() {
             super.done();
             
-            final Integer port = (Integer)SafeFn.find("cemerick.nrepl", "wait-for-ack").sInvoke(10000);
+            final Integer port = (Integer)SafeFn.find("clojure.tools.nrepl", "wait-for-ack").sInvoke(10000);
             if (port == null) {
                 CCWPlugin.logError("Waiting for new REPL process ack timed out");
                 return;
@@ -106,7 +106,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
     public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor) throws CoreException {
         launch.setAttribute(LaunchUtils.ATTR_PROJECT_NAME, configuration.getAttribute(LaunchUtils.ATTR_PROJECT_NAME, (String) null));
         launch.setAttribute(LaunchUtils.ATTR_IS_AUTO_RELOAD_ENABLED, Boolean.toString(configuration.getAttribute(LaunchUtils.ATTR_IS_AUTO_RELOAD_ENABLED, false)));
-        SafeFn.find("cemerick.nrepl", "reset-ack-port!").sInvoke();
+        SafeFn.find("clojure.tools.nrepl", "reset-ack-port!").sInvoke();
         try {
             Var.pushThreadBindings(RT.map(currentLaunch, launch));
             super.launch(configuration, mode, launch, (monitor == null || !isLaunchREPL(configuration)) ?
@@ -141,9 +141,9 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 				throw new WorkbenchException("Could not find ccw.debug.serverrepl source file", e);
 			}
 			
-			String nREPLInit = "(require 'cemerick.nrepl)" + 
+			String nREPLInit = "(require 'clojure.tools.nrepl)" + 
 			    // don't want start-server return value printed
-			    String.format("(do (cemerick.nrepl/start-server 0 %s) nil)", ackREPLServer.getLocalPort());
+			    String.format("(do (clojure.tools.nrepl/start-server 0 %s) nil)", ackREPLServer.getLocalPort());
 			
 			return String.format("-i \"%s\" -e \"%s\" %s %s", toolingFile, nREPLInit,
 			        filesToLaunchArguments, userProgramArguments);
@@ -188,7 +188,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
         }
         
         try {
-            File repllib = FileLocator.getBundleFile(Platform.getBundle("nrepl-module"));
+            File repllib = FileLocator.getBundleFile(Platform.getBundle("org.clojure.tools.nrepl"));
             classpath.add(repllib.getAbsolutePath());
         } catch (IOException e) {
             throw new WorkbenchException("Failed to find nrepl library", e);

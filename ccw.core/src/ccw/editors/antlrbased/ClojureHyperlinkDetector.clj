@@ -1,7 +1,7 @@
 (ns ccw.editors.antlrbased.ClojureHyperlinkDetector
   (:require [clojure.zip :as z]
             [paredit.loc-utils :as lu]
-            [cemerick.nrepl :as repl]
+            [clojure.tools.nrepl :as repl]
             [ccw.editors.antlrbased.ClojureHyperlink])
   (:use clojure.contrib.core)
   (:import 

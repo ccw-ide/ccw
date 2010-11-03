@@ -31,8 +31,8 @@ import org.eclipse.ui.texteditor.MarkerUtilities;
 
 import ccw.CCWPlugin;
 import ccw.editors.antlrbased.CompileLibAction;
-import cemerick.nrepl.Connection;
-import cemerick.nrepl.Connection.Response;
+import clojure.tools.nrepl.Connection;
+import clojure.tools.nrepl.Connection.Response;
 
 
 public class ClojureVisitor implements IResourceVisitor {

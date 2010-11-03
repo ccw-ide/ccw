@@ -35,7 +35,7 @@ import org.eclipse.jdt.core.JavaCore;
 import ccw.CCWPlugin;
 import ccw.launching.ClojureLaunchDelegate;
 import ccw.repl.REPLView;
-import cemerick.nrepl.Connection;
+import clojure.tools.nrepl.Connection;
 
 /*
  * gaetan.morice:

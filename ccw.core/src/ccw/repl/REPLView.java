@@ -39,7 +39,7 @@ import ccw.editors.antlrbased.IClojureEditorActionDefinitionIds;
 import ccw.editors.antlrbased.OpenDeclarationAction;
 import ccw.editors.rulesbased.ClojureDocumentProvider;
 import ccw.outline.NamespaceBrowser;
-import cemerick.nrepl.Connection;
+import clojure.tools.nrepl.Connection;
 import clojure.lang.Atom;
 import clojure.lang.PersistentTreeMap;
 import clojure.lang.Symbol;

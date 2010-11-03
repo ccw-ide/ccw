@@ -18,7 +18,7 @@ import org.eclipse.ui.part.WorkbenchPart;
 
 import ccw.ClojureCore;
 import ccw.repl.REPLView;
-import cemerick.nrepl.Connection;
+import clojure.tools.nrepl.Connection;
 
 public class OpenDeclarationAction extends Action {
     public final static String ID = "OpenDeclarationAction"; //$NON-NLS-1$

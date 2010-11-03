@@ -25,10 +25,10 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.help,
  ccw.branding;bundle-version="0.0.46",
  org.eclipse.ui.workbench.texteditor,
- nrepl-module;bundle-version="0.0.1",
  clojure.osgi,
  ccw.clojure;bundle-version="1.2.0",
- ccw.clojurecontrib;bundle-version="1.2.0"
+ ccw.clojurecontrib;bundle-version="1.2.0",
+ org.clojure.tools.nrepl;bundle-version="0.0.2"
 Bundle-ClassPath: .,
  classes/
 Bundle-RequiredExecutionEnvironment: J2SE-1.5

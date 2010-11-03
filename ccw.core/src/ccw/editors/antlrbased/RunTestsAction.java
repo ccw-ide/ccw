@@ -24,8 +24,8 @@ import clojure.lang.Keyword;
 
 import ccw.CCWPlugin;
 import ccw.repl.REPLView;
-import cemerick.nrepl.Connection;
-import cemerick.nrepl.Connection.Response;
+import clojure.tools.nrepl.Connection;
+import clojure.tools.nrepl.Connection.Response;
 
 public class RunTestsAction extends Action {
     public static final String RUN_TESTS_ID = "RunTestsAction";

@@ -57,8 +57,8 @@ import ccw.launching.LaunchUtils;
 import ccw.preferences.PreferenceConstants;
 import ccw.util.ClojureDocUtils;
 import ccw.util.DisplayUtil;
-import cemerick.nrepl.Connection;
-import cemerick.nrepl.Connection.Response;
+import clojure.tools.nrepl.Connection;
+import clojure.tools.nrepl.Connection.Response;
 import clojure.lang.Keyword;
 
 public class NamespaceBrowser extends ViewPart implements ISelectionProvider, ISelectionChangedListener {

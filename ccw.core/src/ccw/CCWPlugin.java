@@ -44,7 +44,7 @@ import ccw.preferences.SyntaxColoringPreferencePage;
 import ccw.repl.REPLView;
 import ccw.util.DisplayUtil;
 import ccw.utils.editors.antlrbased.IScanContext;
-import cemerick.nrepl.Connection;
+import clojure.tools.nrepl.Connection;
 import clojure.osgi.ClojureOSGi;
 
 /**

@@ -1,5 +1,5 @@
 (ns ccw.repl.view-helpers
-  (:require [cemerick.nrepl :as repl])
+  (:require [clojure.tools.nrepl :as repl])
   (:use clojure.contrib.def)
   (:import ccw.CCWPlugin
     org.eclipse.ui.PlatformUI
