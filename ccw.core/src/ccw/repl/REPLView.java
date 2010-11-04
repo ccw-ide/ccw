@@ -271,8 +271,6 @@ public class REPLView extends ViewPart {
         viewerWidget.setFont(JFaceResources.getFont(JFaceResources.TEXT_FONT));
         viewerWidget.addVerifyKeyListener(new REPLInputVerifier());
 
-        split.setWeights(new int[] {80, 20});
-        
         /*
          * Need to hook up here to force a re-evaluation of the preferences
          * for the syntax coloring, after the token scanner has been
@@ -298,6 +296,7 @@ public class REPLView extends ViewPart {
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.OPEN_DECLARATION);
         handlerService.activateHandler("ccw.ui.edit.text.clojure.open.declaration", new ActionHandler(action));
         
+        split.setWeights(new int[] {100, 75});
     }
     
     @Override
