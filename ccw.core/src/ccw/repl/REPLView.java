@@ -19,9 +19,13 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
+import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IKeyBindingService;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -270,6 +274,19 @@ public class REPLView extends ViewPart {
         
         viewerWidget.setFont(JFaceResources.getFont(JFaceResources.TEXT_FONT));
         viewerWidget.addVerifyKeyListener(new REPLInputVerifier());
+
+        // push all keyboard input delivered to log panel into input widget
+        logPanel.addListener(SWT.KeyDown, new Listener() {
+            public void handleEvent(Event e) {
+                // this prevents focus switch on cut/copy
+                // no event that would trigger a paste is sent as long as logPanel is uneditable,
+                // so we can't redirect it :-(
+                boolean modifier = (e.keyCode & SWT.MODIFIER_MASK) != 0;
+                if (modifier) return;
+                viewerWidget.notifyListeners(SWT.KeyDown, e);
+                viewerWidget.setFocus();
+            }
+        });
 
         /*
          * Need to hook up here to force a re-evaluation of the preferences
