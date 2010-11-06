@@ -3,6 +3,8 @@ package ccw.repl;
 import java.net.ConnectException;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.commands.ActionHandler;
@@ -42,10 +44,13 @@ import ccw.editors.antlrbased.ClojureSourceViewerConfiguration;
 import ccw.editors.antlrbased.IClojureEditorActionDefinitionIds;
 import ccw.editors.antlrbased.OpenDeclarationAction;
 import ccw.editors.rulesbased.ClojureDocumentProvider;
+import ccw.launching.LaunchUtils;
 import ccw.outline.NamespaceBrowser;
 import clojure.tools.nrepl.Connection;
 import clojure.lang.Atom;
+import clojure.lang.IFn;
 import clojure.lang.PersistentTreeMap;
+import clojure.lang.PersistentVector;
 import clojure.lang.Symbol;
 import clojure.lang.Var;
 
@@ -54,12 +59,12 @@ public class REPLView extends ViewPart {
     public static final AtomicReference<REPLView> activeREPL = new AtomicReference();
 
     private static Var log;
-    private static Var evalExpression;
+    private static Var configureREPLView;
     static {
         try {
             Var.find(Symbol.intern("clojure.core/require")).invoke(Symbol.intern("ccw.repl.view-helpers"));
             log = Var.find(Symbol.intern("ccw.repl.view-helpers/log"));
-            evalExpression = Var.find(Symbol.intern("ccw.repl.view-helpers/eval-expression"));
+            configureREPLView = Var.find(Symbol.intern("ccw.repl.view-helpers/configure-repl-view"));
         } catch (Exception e) {
             throw new IllegalStateException("Could not initialize view helpers.", e);
         }
@@ -73,7 +78,7 @@ public class REPLView extends ViewPart {
     //     and another range that is editable and has full paredit, code completion, etc.
     private StyledText logPanel;
     private ClojureSourceViewer viewer;
-    private StyledText viewerWidget;
+    public StyledText viewerWidget; // public only to simplify interop with helpers impl'd in Clojure
     private ClojureSourceViewerConfiguration viewerConfig;
     
     private Connection interactive;
@@ -84,6 +89,7 @@ public class REPLView extends ViewPart {
     
     private String currentNamespaceName = "user";
     private final Atom requests = new Atom(PersistentTreeMap.EMPTY);
+    private IFn evalExpression;
     
     public REPLView () {}
     
@@ -116,10 +122,9 @@ public class REPLView extends ViewPart {
         try {
             if (s.trim().length() > 0) {
                 if (copyToLog) log.invoke(logPanel, s, null);
-                evalExpression.invoke(this, logPanel, interactive.conn, requests, s);
+                evalExpression.invoke(s);
             }
         } catch (Exception e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
@@ -147,13 +152,18 @@ public class REPLView extends ViewPart {
         setPartName(String.format("REPL @ %s:%s (%s)", interactive.host, interactive.port, currentNamespaceName));
     }
     
+    private void prepareView () throws Exception {
+        evalExpression = (IFn)configureREPLView.invoke(this, logPanel, interactive.conn, requests);
+    }
+    
     @SuppressWarnings("unchecked")
     public boolean configure (String host, int port) throws Exception {
         try {
             interactive = new Connection(host, port);
             toolConnection = new Connection(host, port);
             setCurrentNamespace(currentNamespaceName);
-            evalExpression("(println \"Clojure\" (clojure-version))", false);
+            prepareView();
+            logPanel.append("Clojure " + toolConnection.send("(clojure-version)").values().get(0) + "\n");
             return true;
         } catch (ConnectException e) {
             closeView();
@@ -162,22 +172,6 @@ public class REPLView extends ViewPart {
             return false;
         }
     }
-    
-    /*
-     if (CCWPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.SWITCH_TO_NS_ON_REPL_STARTUP)) {
-            try {
-                List<IFile> files = LaunchUtils.getFilesToLaunchList(processConsole.getProcess().getLaunch().getLaunchConfiguration());
-                if (files.size() > 0) {
-                    String namespace = ClojureCore.getDeclaredNamespace(files.get(0));
-                    if (namespace != null) {
-                        EvaluateTextAction.evaluateText(this.console, "(in-ns '" + namespace + ")", false);
-                    }
-                }
-            } catch (CoreException e) {
-                CCWPlugin.logError("error while trying to guess the ns to which make the REPL console switch", e);
-            }
-        }
-     */
     
     public static REPLView connect () throws Exception {
         IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
@@ -235,6 +229,14 @@ public class REPLView extends ViewPart {
 
     public void setLaunch(ILaunch launch) {
         this.launch = launch;
+        
+        // need to re-prepare eval to pick up project command history
+        try {
+            prepareView();
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     @Override

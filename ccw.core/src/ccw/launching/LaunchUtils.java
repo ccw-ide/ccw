@@ -81,12 +81,21 @@ public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
     }
     
     public static IProject getProject(ILaunchConfiguration configuration) throws CoreException {
-    	String projectName = configuration.getAttribute(LaunchUtils.ATTR_PROJECT_NAME, (String) null);
-    	if (projectName == null) {
-    		return null;
-    	} else {
-    		return ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-    	}
+        return getProject(configuration.getAttribute(LaunchUtils.ATTR_PROJECT_NAME, (String) null));
+    }
+    
+    // TODO total duplication of above; begs to be in Clojure
+    public static IProject getProject (ILaunch launch) throws CoreException {
+        return getProject(getProjectName(launch));
+    }
+    
+    public static String getProjectName (ILaunch launch) {
+        return launch.getAttribute(LaunchUtils.ATTR_PROJECT_NAME);
+    }
+
+    public static IProject getProject (String projectName) {
+        // here fundamentally to simplify things for repl cmd history
+        return projectName == null ? null : ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
     }
     
     private static String fileArg(IProject project, IFile file) {
