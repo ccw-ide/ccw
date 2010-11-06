@@ -130,6 +130,10 @@
       (fn [expr]
         (reset! retained-input nil)
         (reset! current-step -1)
-        (swap! history #(subvec (conj % expr)
+        (swap! history #(subvec
+                          ; don't add duplicate expressions to the history
+                          (if (= expr (last %))
+                            %
+                            (conj % expr))
                           (-> % count (- history/max-history) (max 0))))
         expr))))

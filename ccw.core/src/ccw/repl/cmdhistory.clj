@@ -69,6 +69,9 @@
               (save-history project-name (->> (reverse exprs)
                                            (concat history)
                                            (take-last max-history)
+                                           ; prevent consecutive duplicate expressions
+                                           (partition-by identity)
+                                           (mapcat (partial take 1))
                                            vec)))
             (.done pm)
             (.schedule this persist-schedule-ms)
