@@ -195,7 +195,13 @@ public class REPLView extends ViewPart {
     }
     
     public static REPLView connect (String host, int port) throws Exception {
+        return connect(host, port, null, null);
+    }
+    
+    public static REPLView connect (String host, int port, IConsole console, ILaunch launch) throws Exception {
         REPLView repl = (REPLView)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(VIEW_ID, host + "@" + port, IWorkbenchPage.VIEW_ACTIVATE);
+        repl.console = console;
+        repl.launch = launch;
         return repl.configure(host, port) ? repl : null;
     }
     
@@ -215,28 +221,12 @@ public class REPLView extends ViewPart {
         return console;
     }
     
-    public void setConsole (IConsole console) {
-        this.console = console;
-    }
-    
     public void showConsole () {
         if (console != null) ConsolePlugin.getDefault().getConsoleManager().showConsoleView(console);
     }
     
     public ILaunch getLaunch() {
         return launch;
-    }
-
-    public void setLaunch(ILaunch launch) {
-        this.launch = launch;
-        
-        // need to re-prepare eval to pick up project command history
-        try {
-            prepareView();
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
     }
 
     @Override

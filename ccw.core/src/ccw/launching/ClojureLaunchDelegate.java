@@ -57,6 +57,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
     static {
         try {
             ackREPLServer = (ServerSocket)((List)Var.find(Symbol.intern("clojure.tools.nrepl/start-server")).invoke()).get(0);
+            CCWPlugin.log("Started ccw nREPL server on port " + ackREPLServer.getLocalPort());
         } catch (Exception e) {
             CCWPlugin.logError("Could not start plugin-hosted REPL server for launch ack", e);
         }
@@ -88,11 +89,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
             DisplayUtil.asyncExec(new Runnable() {
                 public void run() {
                     try {
-                        REPLView replView = REPLView.connect("localhost", port);
-                        if (replView != null) {
-                            replView.setConsole(lastConsoleOpened);
-                            replView.setLaunch(launch);
-                        }
+                        REPLView.connect("localhost", port, lastConsoleOpened, launch);
                     } catch (Exception e) {
                         CCWPlugin.logError("Could not connect REPL to local launch", e);
                     }
