@@ -237,6 +237,10 @@ public class CCWPlugin extends AbstractUIPlugin {
                 new Status(IStatus.WARNING, PLUGIN_ID, e.getMessage(), e));
     }
 
+    public static void log (String msg) {
+        plugin.getLog().log(new Status(IStatus.INFO, PLUGIN_ID, msg));
+    }
+    
     @Override
     protected void initializeImageRegistry(ImageRegistry reg) {
     	reg.put(NS, ImageDescriptor.createFromURL(getBundle().getEntry("/icons/jdt/package_obj.gif")));
