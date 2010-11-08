@@ -16,6 +16,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunch;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.ColorRegistry;
@@ -77,6 +78,8 @@ public class CCWPlugin extends AbstractUIPlugin {
     private static CCWPlugin plugin;
 
     /** "Read-only" table, do not alter */
+    // TODO presumably, the color registry is where *all* colors should go, but that API is
+    // clear as mud to me at the moment
     public Color[] allColors;
     
     private ColorRegistry colorRegistry;
@@ -100,6 +103,7 @@ public class CCWPlugin extends AbstractUIPlugin {
     		DisplayUtil.syncExec(new Runnable() {
 				public void run() {
 		    		colorRegistry = new ColorRegistry(getWorkbench().getDisplay());
+		    		colorRegistry.put("ccw.repl.expressionBackground", new RGB(0xf0, 0xf0, 0xf0));
 				}});
     	}
     }
@@ -202,6 +206,8 @@ public class CCWPlugin extends AbstractUIPlugin {
         		}
             }
     	}
+    	
+    	
     }
 
     /**

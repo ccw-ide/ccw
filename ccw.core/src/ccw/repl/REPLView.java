@@ -24,8 +24,12 @@ import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IKeyBindingService;
@@ -76,7 +80,7 @@ public class REPLView extends ViewPart {
     // 2. Even if (1) were fixed/changed, it's not clear to me how to "partition" an IDocument, or compose IDocuments
     //     so that we can have one range that is still *highlighted* for clojure content (and not editable),
     //     and another range that is editable and has full paredit, code completion, etc.
-    private StyledText logPanel;
+    StyledText logPanel;
     private ClojureSourceViewer viewer;
     public StyledText viewerWidget; // public only to simplify interop with helpers impl'd in Clojure
     private ClojureSourceViewerConfiguration viewerConfig;
@@ -95,12 +99,15 @@ public class REPLView extends ViewPart {
     
     private void copyToLog (StyledText s) {
         int start = logPanel.getCharCount();
+        int lineCnt = logPanel.getLineCount();
         try {
             log.invoke(logPanel, s.getText(), null);
             for (StyleRange sr : s.getStyleRanges()) {
                 sr.start += start;
                 logPanel.setStyleRange(sr);
             }
+            logPanel.setLineBackground(lineCnt - 1, logPanel.getLineCount() - lineCnt,
+                    CCWPlugin.getDefault().getColorRegistry().get("ccw.repl.expressionBackground"));
         } catch (Exception e) {
             // should never happen
             CCWPlugin.logError("Could not copy expression to log", e);
@@ -114,7 +121,6 @@ public class REPLView extends ViewPart {
     }
     
     public void evalExpression (String s) {
-        // TODO add highlighting of evaluated code pushed from editors
         evalExpression(s, true);
     }
     
