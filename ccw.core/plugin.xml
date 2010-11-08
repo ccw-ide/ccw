@@ -354,6 +354,13 @@
             id="ccw.ui.repl.connect"
             name="%command.connectToREPL.name">
       </command>
+      <command
+            categoryId="org.eclipse.ui.category.navigate"
+            defaultHandler="ccw.repl.Actions$ShowActiveREPL"
+            description="Show active REPL"
+            id="ccw.ui.repl.showActiveREPL"
+            name="Show active REPL">
+      </command>
       
    </extension>
    
@@ -540,6 +547,12 @@
             sequence="F3"
             contextId="ccw.ui.clojureEditorScope"
             commandId="ccw.ui.edit.text.clojure.open.declaration"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+            
+      <key
+            sequence="M1+M3+Q R"
+            contextId="org.eclipse.ui.contexts.window"
+            commandId="ccw.ui.repl.showActiveREPL"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
 			
             
@@ -825,6 +838,19 @@
                mode="FORCE_TEXT"
                style="push"
                tooltip="%command.connectToREPL.description">
+         </command>
+      </menuContribution>
+      <menuContribution
+            locationURI="menu:window?before=preferences">
+         <command
+               commandId="ccw.ui.repl.showActiveREPL"
+               icon="icons/repl/showActive.png"
+               disabledIcon="icons/repl/showActive_disabled.png"
+               id="ccw.ui.repl.showActiveREPL"
+               label="Show active REPL"
+               mode="FORCE_TEXT"
+               style="push"
+               tooltip="Show last-focused REPL, where all code will be sent to be evaluated.">
          </command>
       </menuContribution>
    </extension>
