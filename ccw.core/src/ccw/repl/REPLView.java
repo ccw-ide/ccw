@@ -53,6 +53,7 @@ import ccw.outline.NamespaceBrowser;
 import clojure.tools.nrepl.Connection;
 import clojure.lang.Atom;
 import clojure.lang.IFn;
+import clojure.lang.Keyword;
 import clojure.lang.PersistentTreeMap;
 import clojure.lang.PersistentVector;
 import clojure.lang.Symbol;
@@ -73,6 +74,8 @@ public class REPLView extends ViewPart {
             throw new IllegalStateException("Could not initialize view helpers.", e);
         }
     }
+    
+    private static final Keyword inputExprLogType = Keyword.intern("in-expr");
     
     // TODO would like to eliminate separate log view, but:
     // 1. PareditAutoEditStrategy gets all text from a source document, and bails badly if its not well-formed
@@ -99,15 +102,12 @@ public class REPLView extends ViewPart {
     
     private void copyToLog (StyledText s) {
         int start = logPanel.getCharCount();
-        int lineCnt = logPanel.getLineCount();
         try {
-            log.invoke(logPanel, s.getText(), null);
+            log.invoke(logPanel, s.getText(), inputExprLogType);
             for (StyleRange sr : s.getStyleRanges()) {
                 sr.start += start;
                 logPanel.setStyleRange(sr);
             }
-            logPanel.setLineBackground(lineCnt - 1, logPanel.getLineCount() - lineCnt,
-                    CCWPlugin.getDefault().getColorRegistry().get("ccw.repl.expressionBackground"));
         } catch (Exception e) {
             // should never happen
             CCWPlugin.logError("Could not copy expression to log", e);
@@ -127,7 +127,7 @@ public class REPLView extends ViewPart {
     public void evalExpression (String s, boolean copyToLog) {
         try {
             if (s.trim().length() > 0) {
-                if (copyToLog) log.invoke(logPanel, s, null);
+                if (copyToLog) log.invoke(logPanel, s, inputExprLogType);
                 evalExpression.invoke(s);
             }
         } catch (Exception e) {

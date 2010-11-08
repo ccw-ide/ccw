@@ -38,9 +38,10 @@
   (let [colored-style #(let [s (StyleRange.)]
                          (set! (.foreground s) (CCWPlugin/getSystemColor %))
                          s)]
-    {:err (partial set-style-range #(colored-style SWT/COLOR_DARK_RED))
-     :out default-log-style
-     :value (partial set-style-range #(colored-style SWT/COLOR_DARK_GREEN))}))
+    {:err [(partial set-style-range #(colored-style SWT/COLOR_DARK_RED)) nil]
+     :out [default-log-style nil]
+     :value [(partial set-style-range #(colored-style SWT/COLOR_DARK_GREEN)) nil]
+     :in-expr [default-log-style "ccw.repl.expressionBackground"]}))
 
 (defn- cursor-at-end
   "Puts the cursor at the end of the text in the given widget."
@@ -51,14 +52,19 @@
   [^StyledText log ^String s type]
   (ui-sync
     (let [s (.replaceAll s "\\s+\\Z" "")
-          charcnt (.getCharCount log)]
+          charcnt (.getCharCount log)
+          [log-style line-background-color-name] (get log-styles type [default-log-style nil])
+          linecnt (.getLineCount log)]
       (.append log s)
       (when (and (seq s) (not (Character/isWhitespace (last s))))
         (.append log "\n"))
       (doto log
         cursor-at-end
         .showSelection
-        (.setStyleRange ((get log-styles type default-log-style) charcnt (- (.getCharCount log) charcnt)))))))
+        (.setStyleRange (log-style charcnt (- (.getCharCount log) charcnt))))
+      (when line-background-color-name
+        (.setLineBackground log (dec linecnt) (- (.getLineCount log) linecnt)
+          (-> (CCWPlugin/getDefault) .getColorRegistry (.get line-background-color-name)))))))
 
 (defn eval-failure-msg
   [status s]
