@@ -45,9 +45,11 @@
   (schedule-job) ; ensure that history persistence job is scheduled upon first access
   (let [pref-node (get-pref-node project-name)]
     (if pref-node
-      [(-?> pref-node
-         (.get history-key "[]")
-         read-string)
+      [(into (or (-?> pref-node
+                   (.get history-key "[]")
+                   read-string)
+               [])
+         (@queued-commands project-name))
        (partial queue-expression project-name)]
       [[] identity])))
 
