@@ -36,9 +36,7 @@
 
 (defvar- log-styles
   (let [colored-style #(let [s (StyleRange.)]
-                         (set! (.foreground s) (-> (PlatformUI/getWorkbench)
-                                                 .getDisplay
-                                                 (.getSystemColor %)))
+                         (set! (.foreground s) (CCWPlugin/getSystemColor %))
                          s)]
     {:err (partial set-style-range #(colored-style SWT/COLOR_DARK_RED))
      :out default-log-style
