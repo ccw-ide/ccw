@@ -142,6 +142,7 @@ public class REPLView extends ViewPart {
     
     public void reconnect () throws Exception {
         closeConnections();
+        logPanel.append(";; Reconnecting...\n");
         configure(interactive.host, interactive.port);
     }
     
@@ -163,7 +164,7 @@ public class REPLView extends ViewPart {
             toolConnection = new Connection(host, port);
             setCurrentNamespace(currentNamespaceName);
             prepareView();
-            logPanel.append("Clojure " + toolConnection.send("(clojure-version)").values().get(0) + "\n");
+            logPanel.append(";; Clojure " + toolConnection.send("(clojure-version)").values().get(0) + "\n");
             return true;
         } catch (ConnectException e) {
             closeView();
