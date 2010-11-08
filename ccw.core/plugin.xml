@@ -349,16 +349,10 @@
       </command>
       <command
             categoryId="org.eclipse.debug.ui.category.run"
-            defaultHandler="ccw.actions.ConnectToREPL"
+            defaultHandler="ccw.repl.Actions$Connect"
             description="%command.connectToREPL.description"
             id="ccw.ui.repl.connect"
             name="%command.connectToREPL.name">
-      </command>
-      <command
-            categoryId="org.eclipse.debug.ui.category.run"
-            defaultHandler="ccw.repl.ReconnectReplAction"
-            id="ccw.ui.repl.reconnect"
-            name="Reconnect REPL">
       </command>
       
    </extension>
@@ -1020,20 +1014,44 @@
              type="ccw.editors.antlrbased.AntlrBasedClojureEditor">
        </context>
     </target>
- </extension>
- <extension point="org.eclipse.ui.viewActions">
-    <viewContribution
-          id="ccw.view.repl.actions"
-          targetID="ccw.view.repl">
-       <action
-             class="ccw.repl.ReconnectReplAction"
-             enablesFor="?"
-             id="ccw.view.repl.actions.reconnect"
-             label="Reconnect"
-             mode="FORCE_TEXT"
-             style="push"
-             tooltip="Reconnect to this REPL&apos;s host and port (first disconnecting if necessary)">
-       </action>
-    </viewContribution>
-    </extension>
+    
+</extension>
+  <extension point = "org.eclipse.ui.viewActions">
+    <viewContribution id="ccw.view.repl.actions.reconnect" targetID="ccw.view.repl">        
+       <action id="ccw.view.repl.actions.reconnect"
+              label="Reconnect"
+              menubarPath="additions"
+              toolbarPath="additions" 
+              icon="icons/repl/reconnect.gif" 
+              tooltip="Reconnect to this REPL&apos;s host and port (first disconnecting if necessary)" 
+              class="ccw.repl.Actions$Reconnect"/>
+  </viewContribution>
+</extension>
+ 
+<extension point = "org.eclipse.ui.viewActions">
+  <viewContribution id="ccw.view.repl.actions.showConsole" targetID="ccw.view.repl">        
+   <action id="ccw.view.repl.actions.showConsole"
+          label="Show Console"
+          menubarPath="additions"
+          toolbarPath="additions" 
+          icon="icons/repl/console.gif"
+          disabledIcon="icons/repl/console_disabled.gif" 
+          tooltip="Show the console for the JVM process to which this REPL is connected" 
+          class="ccw.repl.Actions$ShowConsole"/>
+  </viewContribution>
+</extension>
+ 
+<extension point = "org.eclipse.ui.viewActions">
+  <viewContribution id="ccw.view.repl.actions.clearLog" targetID="ccw.view.repl">        
+   <action id="ccw.view.repl.actions.clearLog"
+          label="Clear Log"
+          menubarPath="additions"
+          toolbarPath="additions" 
+          icon="icons/repl/clear.gif"
+          disabledIcon="icons/repl/clear_disabled.gif" 
+          tooltip="Clear the REPL log" 
+          class="ccw.repl.Actions$ClearLog"/>
+  </viewContribution>
+</extension>
+    
 </plugin>
