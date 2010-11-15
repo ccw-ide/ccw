@@ -13,6 +13,7 @@ package ccw.launching;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -43,7 +44,17 @@ import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.part.FileEditorInput;
 
 public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfigurationConstants {
-
+    private final HashMap<String, Integer> tempLaunchCounters = new HashMap();
+    
+    private int incTempLaunchCount (String projectName) {
+        synchronized (tempLaunchCounters) {
+            Integer cnt = tempLaunchCounters.get(projectName);
+            cnt = cnt == null ? 1 : cnt + 1;
+            tempLaunchCounters.put(projectName, cnt);
+            return cnt;
+        }
+    }
+    
     public void launch(IEditorPart editor, String mode) {
     	launchEditorPart(editor, mode, null);
     }
@@ -98,7 +109,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     	StructuredSelection sel = new StructuredSelection(project);
     	return launchSelection(sel, mode, activateAutoReload);
     }
-
+    
     protected ILaunch launchProject(IProject project, IFile[] files, String mode, Boolean activateAutoReload) {
     	activateAutoReload = activateAutoReload==null ? files.length==0 : activateAutoReload;
         try {
@@ -107,8 +118,8 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
                 config = createConfiguration(project, files);
             }
             if (config != null) {
-            	String randomCopyName = UUID.randomUUID().toString();
-            	ILaunchConfigurationWorkingCopy runnableConfiguration = config.copy(randomCopyName);
+            	ILaunchConfigurationWorkingCopy runnableConfiguration =
+            	    config.copy(config.getName() + " #" + incTempLaunchCount(project.getName()));;
             	try {
 	            	runnableConfiguration.setAttribute(LaunchUtils.ATTR_IS_AUTO_RELOAD_ENABLED, activateAutoReload);
 	            	ILaunch launch = runnableConfiguration.launch(mode, null);
