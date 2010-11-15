@@ -58,6 +58,7 @@ import clojure.lang.PersistentTreeMap;
 import clojure.lang.PersistentVector;
 import clojure.lang.Symbol;
 import clojure.lang.Var;
+import clojure.osgi.ClojureOSGi;
 
 public class REPLView extends ViewPart {
     public static final String VIEW_ID = "ccw.view.repl";
@@ -67,11 +68,11 @@ public class REPLView extends ViewPart {
     private static Var configureREPLView;
     static {
         try {
-            Var.find(Symbol.intern("clojure.core/require")).invoke(Symbol.intern("ccw.repl.view-helpers"));
+            ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), "ccw.repl.view-helpers");
             log = Var.find(Symbol.intern("ccw.repl.view-helpers/log"));
             configureREPLView = Var.find(Symbol.intern("ccw.repl.view-helpers/configure-repl-view"));
         } catch (Exception e) {
-            throw new IllegalStateException("Could not initialize view helpers.", e);
+            CCWPlugin.logError("Could not initialize view helpers.", e);
         }
     }
     

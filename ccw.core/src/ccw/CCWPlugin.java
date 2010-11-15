@@ -46,6 +46,8 @@ import ccw.repl.REPLView;
 import ccw.util.DisplayUtil;
 import ccw.utils.editors.antlrbased.IScanContext;
 import clojure.tools.nrepl.Connection;
+import clojure.lang.Symbol;
+import clojure.lang.Var;
 import clojure.osgi.ClojureOSGi;
 
 /**
@@ -175,7 +177,6 @@ public class CCWPlugin extends AbstractUIPlugin {
     	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.ClojureHyperlink");
 
     	ClojureOSGi.require(bundleContext, "ccw.debug.clientrepl");
-    	ClojureOSGi.require(bundleContext, "ccw.repl.view-helpers");
     }
     
     public void stop(BundleContext context) throws Exception {
