@@ -84,10 +84,14 @@
               (doseq [{:keys [out err value ns status] :as resp} (repl/response-seq response-fn)]
                 (ui-sync
                   (when ns
+                    ; TODO: need to make sure that a response from an earlier request doesn't
+                    ; override the current namespace in the view based on a response from a later
+                    ; request...or is that just too much of an edge case?
                     (.setCurrentNamespace repl-view ns))
-                  (doseq [[k v] resp]
-                    (when (#{:out :err :value} k)
-                      (log log-component v k)))
+                  (doseq [[k v] (dissoc resp :id :ns :status)]
+                    (if (log-styles k)
+                      (log log-component v k)
+                      (CCWPlugin/log (str "Cannot handle REPL response: " k (pr-str resp)))))
                   (case status
                     ("timeout" "interrupted") (log log-component (eval-failure-msg status out) :err)
                     nil)))
