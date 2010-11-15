@@ -26,6 +26,7 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.ProgressMonitorWrapper;
 import org.eclipse.debug.core.ILaunch;
@@ -184,11 +185,14 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
             classpath.add(0, sourcePath);
         }
         
-        try {
-            File repllib = FileLocator.getBundleFile(Platform.getBundle("org.clojure.tools.nrepl"));
-            classpath.add(repllib.getAbsolutePath());
-        } catch (IOException e) {
-            throw new WorkbenchException("Failed to find nrepl library", e);
+        
+        if (clojureProject.getJavaProject().findElement(new Path("clojure/tools/nrepl")) == null) {
+            try {
+                File repllib = FileLocator.getBundleFile(Platform.getBundle("org.clojure.tools.nrepl"));
+                classpath.add(repllib.getAbsolutePath());
+            } catch (IOException e) {
+                throw new WorkbenchException("Failed to find nrepl library", e);
+            }
         }
         
         return classpath.toArray(new String[classpath.size()]);
