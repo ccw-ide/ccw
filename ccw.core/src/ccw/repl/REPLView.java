@@ -95,7 +95,7 @@ public class REPLView extends ViewPart {
     private IConsole console;
     private ILaunch launch;
     
-    private String currentNamespaceName = "user";
+    private String currentNamespace = "user";
     private final Atom requests = new Atom(PersistentTreeMap.EMPTY);
     private IFn evalExpression;
     
@@ -156,8 +156,12 @@ public class REPLView extends ViewPart {
     public void setCurrentNamespace (String ns) {
         // TODO waaaay better to put a dropdown namespace chooser in the view's toolbar,
         // and this would just change its selection
-    	this.currentNamespaceName = ns;
-        setPartName(String.format("REPL @ %s:%s (%s)", interactive.host, interactive.port, currentNamespaceName));
+    	currentNamespace = ns;
+        setPartName(String.format("REPL @ %s:%s (%s)", interactive.host, interactive.port, currentNamespace));
+    }
+    
+    public String getCurrentNamespace () {
+        return currentNamespace;
     }
     
     private void prepareView () throws Exception {
@@ -169,7 +173,7 @@ public class REPLView extends ViewPart {
         try {
             interactive = new Connection(host, port);
             toolConnection = new Connection(host, port);
-            setCurrentNamespace(currentNamespaceName);
+            setCurrentNamespace(currentNamespace);
             prepareView();
             logPanel.append(";; Clojure " + toolConnection.send("(clojure-version)").values().get(0) + "\n");
             return true;
@@ -262,7 +266,7 @@ public class REPLView extends ViewPart {
             	if (inline != null) {
             		return inline;
             	} else {
-            		return currentNamespaceName;
+            		return currentNamespace;
             	}
             };
         };
