@@ -13,6 +13,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ST;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
@@ -282,14 +283,32 @@ public class REPLView extends ViewPart {
         // push all keyboard input delivered to log panel into input widget
         logPanel.addListener(SWT.KeyDown, new Listener() {
             public void handleEvent(Event e) {
-                // this prevents focus switch on cut/copy
-                // no event that would trigger a paste is sent as long as logPanel is uneditable,
-                // so we can't redirect it :-(
-                boolean modifier = (e.keyCode & SWT.MODIFIER_MASK) != 0;
-                if (modifier) return;
-                viewerWidget.notifyListeners(SWT.KeyDown, e);
-                viewerWidget.setFocus();
+                if (!(e.keyCode == SWT.PAGE_DOWN || e.keyCode == SWT.PAGE_UP)) {
+                    // this prevents focus switch on cut/copy
+                    // no event that would trigger a paste is sent as long as logPanel is uneditable,
+                    // so we can't redirect it :-(
+                    boolean modifier = (e.keyCode & SWT.MODIFIER_MASK) != 0;
+                    if (modifier) return;
+                    viewerWidget.notifyListeners(SWT.KeyDown, e);
+                    viewerWidget.setFocus();
+                }
             }
+        });
+        
+        // page up/down in input area should control log
+        viewerWidget.setKeyBinding(SWT.PAGE_DOWN, SWT.NULL);
+        viewerWidget.setKeyBinding(SWT.PAGE_UP, SWT.NULL);
+        viewerWidget.addListener(SWT.KeyDown, new Listener () {
+           public void handleEvent (Event e) {
+               switch (e.keyCode) {
+                   case SWT.PAGE_DOWN:
+                       logPanel.invokeAction(ST.PAGE_DOWN);
+                       break;
+                   case SWT.PAGE_UP:
+                       logPanel.invokeAction(ST.PAGE_UP);
+                       break;
+               }
+           }
         });
 
         /*
