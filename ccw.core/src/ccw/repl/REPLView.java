@@ -117,20 +117,20 @@ public class REPLView extends ViewPart {
     }
     
     private void evalExpression () {
-        evalExpression(viewerWidget.getText(), false);
+        evalExpression(viewerWidget.getText(), true, false);
         copyToLog(viewerWidget);
         viewerWidget.setText("");
     }
     
     public void evalExpression (String s) {
-        evalExpression(s, true);
+        evalExpression(s, true, true);
     }
     
-    public void evalExpression (String s, boolean copyToLog) {
+    public void evalExpression (String s, boolean userInput, boolean logExpression) {
         try {
             if (s.trim().length() > 0) {
-                if (copyToLog) log.invoke(logPanel, s, inputExprLogType);
-                evalExpression.invoke(s);
+                if (logExpression) log.invoke(logPanel, s, inputExprLogType);
+                evalExpression.invoke(s, userInput);
             }
         } catch (Exception e) {
             e.printStackTrace();

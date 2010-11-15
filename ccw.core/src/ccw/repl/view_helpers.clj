@@ -136,13 +136,14 @@
     
     (comp (apply partial eval-expression args)
       retain-expr-fn
-      (fn [expr]
+      (fn [expr add-to-log?]
         (reset! retained-input nil)
         (reset! current-step -1)
-        (swap! history #(subvec
-                          ; don't add duplicate expressions to the history
-                          (if (= expr (last %))
-                            %
-                            (conj % expr))
-                          (-> % count (- history/max-history) (max 0))))
+        (when add-to-log?
+          (swap! history #(subvec
+                            ; don't add duplicate expressions to the history
+                            (if (= expr (last %))
+                              %
+                              (conj % expr))
+                            (-> % count (- history/max-history) (max 0)))))
         expr))))

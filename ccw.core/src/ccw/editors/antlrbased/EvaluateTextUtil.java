@@ -24,11 +24,11 @@ final public class EvaluateTextUtil {
 		// Not intended to be subclassed
 	}
 	
-	public static final void evaluateText(final String text, boolean verbose) {
-		evaluateText(REPLView.activeREPL.get(), text, verbose);
+	public static final void evaluateText(final String text, boolean userInput) {
+		evaluateText(REPLView.activeREPL.get(), text, userInput);
 	}
 	
-	public static final void evaluateText(REPLView console, final String text, boolean verbose) {
+	public static final void evaluateText(REPLView console, final String text, boolean userInput) {
 	    if (console == null || console.isDisposed()) {
             DisplayUtil.syncExec(new Runnable() {
                 public void run() {
@@ -38,7 +38,7 @@ final public class EvaluateTextUtil {
                 }
             });
         } else {
-            console.evalExpression(text, verbose);
+            console.evalExpression(text, userInput, userInput);
         }
 	}
 	
