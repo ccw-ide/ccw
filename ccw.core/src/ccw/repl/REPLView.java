@@ -46,6 +46,7 @@ import org.eclipse.ui.part.ViewPart;
 import ccw.CCWPlugin;
 import ccw.editors.antlrbased.ClojureSourceViewer;
 import ccw.editors.antlrbased.ClojureSourceViewerConfiguration;
+import ccw.editors.antlrbased.EvaluateTextUtil;
 import ccw.editors.antlrbased.IClojureEditorActionDefinitionIds;
 import ccw.editors.antlrbased.OpenDeclarationAction;
 import ccw.editors.rulesbased.ClojureDocumentProvider;
@@ -135,6 +136,10 @@ public class REPLView extends ViewPart {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void printErrorDetail() {
+        evalExpression("(binding [*out* *err*] (clojure.tools.nrepl/*print-error-detail* *e))", false, false);
     }
     
     public void closeView () throws Exception {
@@ -309,6 +314,19 @@ public class REPLView extends ViewPart {
                        break;
                }
            }
+        });
+        
+        viewerWidget.addVerifyKeyListener(new VerifyKeyListener() {
+            public void verifyKey (VerifyEvent e) {
+                // TODO I desperately want this to be a proper, reconfigurable keybinding, but
+                //   doing so looks like a PITA: http://www.eclipsezone.com/eclipse/forums/t69603.html
+                //   http://dev.eclipse.org/newslists/news.eclipse.platform/msg60894.html
+                //   http://wiki.eclipse.org/index.php/Platform_Command_Framework
+                if (e.stateMask == SWT.CTRL && e.keyCode == 'j') {
+                    printErrorDetail();
+                    e.doit = false;
+                }
+            }
         });
 
         /*

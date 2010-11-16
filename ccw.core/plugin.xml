@@ -1079,9 +1079,6 @@
               tooltip="Reconnect to this REPL&apos;s host and port (first disconnecting if necessary)" 
               class="ccw.repl.Actions$Reconnect"/>
   </viewContribution>
-</extension>
- 
-<extension point = "org.eclipse.ui.viewActions">
   <viewContribution id="ccw.view.repl.actions.showConsole" targetID="ccw.view.repl">        
    <action id="ccw.view.repl.actions.showConsole"
           label="Show Console"
@@ -1092,9 +1089,6 @@
           tooltip="Show the console for the JVM process to which this REPL is connected" 
           class="ccw.repl.Actions$ShowConsole"/>
   </viewContribution>
-</extension>
- 
-<extension point = "org.eclipse.ui.viewActions">
   <viewContribution id="ccw.view.repl.actions.clearLog" targetID="ccw.view.repl">        
    <action id="ccw.view.repl.actions.clearLog"
           label="Clear Log"
@@ -1105,6 +1099,14 @@
           tooltip="Clear the REPL log" 
           class="ccw.repl.Actions$ClearLog"/>
   </viewContribution>
+  <viewContribution id="ccw.view.repl.actions.printErrorDetail" targetID="ccw.view.repl">        
+   <action id="ccw.view.repl.actions.printErrorDetail"
+          label="Print Last Error Detail"
+          menubarPath="additions"
+          toolbarPath="additions" 
+          icon="icons/repl/print_last_error.gif" 
+          tooltip="Print detailed output from the last exception.   Ctrl+J" 
+          class="ccw.repl.Actions$PrintErrorDetail"/>
+  </viewContribution>
 </extension>
-    
 </plugin>

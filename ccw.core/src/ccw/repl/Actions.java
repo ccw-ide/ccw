@@ -15,6 +15,8 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.activities.WorkbenchActivityHelper;
 import org.eclipse.ui.console.ConsolePlugin;
 
+import ccw.editors.antlrbased.EvaluateTextUtil;
+
 public class Actions {
     private Actions () {}
     
@@ -74,6 +76,12 @@ public class Actions {
         }
         public boolean isEnabled () {
             return repl.getConsole() != null;
+        }
+    }
+    
+    public static class PrintErrorDetail extends REPLViewAction {
+        public void run (IAction action) {
+            repl.printErrorDetail();
         }
     }
     
