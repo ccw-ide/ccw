@@ -298,6 +298,12 @@
             id="ccw.ui.edit.text.clojure.load.file">
       </command>
       <command
+            name="%command.switchNamespace.name"
+            description="%command.switchNamespace.description"
+            categoryId="org.eclipse.ui.category.navigate"
+            id="ccw.ui.edit.text.clojure.switchNamespace">
+      </command>
+      <command
             name="%command.compileLib.name"
             description="%command.compileLib.description"
             categoryId="org.eclipse.ui.category.navigate"
@@ -514,6 +520,17 @@
             commandId="ccw.ui.edit.text.clojure.load.file"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
+            sequence="M1+M3+N"
+            contextId="ccw.ui.clojureEditorScope"
+            commandId="ccw.ui.edit.text.clojure.switchNamespace"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M3+M4+N"
+            contextId="ccw.ui.clojureEditorScope"
+            commandId="ccw.ui.edit.text.clojure.switchNamespace"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            platform="carbon"/>
+      <key
             sequence="M1+M3+K"
             contextId="ccw.ui.clojureEditorScope"
             commandId="ccw.ui.edit.text.clojure.compile.lib"
@@ -623,12 +640,17 @@
             </separator>
             <command
                   commandId="ccw.ui.edit.text.clojure.load.file"
-                  label="Load clojure file in REPL"
+                  label="Load file in REPL"
+                  style="push">
+            </command>
+            <command
+                  commandId="ccw.ui.edit.text.clojure.switchNamespace"
+                  label="Switch REPL to File's Namespace"
                   style="push">
             </command>
             <command
                   commandId="ccw.ui.edit.text.clojure.compile.lib"
-                  label="Compile clojure file in REPL"
+                  label="Compile file in REPL"
                   style="push">
             </command>
             <command
@@ -731,12 +753,17 @@
             </separator>
             <command
                   commandId="ccw.ui.edit.text.clojure.load.file"
-                  label="Load clojure file in REPL"
+                  label="Load file in REPL"
+                  style="push">
+            </command>
+            <command
+                  commandId="ccw.ui.edit.text.clojure.switchNamespace"
+                  label="Switch REPL to File's Namespace"
                   style="push">
             </command>
             <command
                   commandId="ccw.ui.edit.text.clojure.compile.lib"
-                  label="Compile clojure file in REPL"
+                  label="Compile file in REPL"
                   style="push">
             </command>
             <command

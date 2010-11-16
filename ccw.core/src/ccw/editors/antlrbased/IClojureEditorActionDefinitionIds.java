@@ -90,6 +90,10 @@ public interface IClojureEditorActionDefinitionIds extends ITextEditorActionDefi
      */
     public static final String LOAD_FILE = "ccw.ui.edit.text.clojure.load.file";
     /**
+     * Action definition ID of the Clojure (or edit ?) -> switch REPL to file's namespace
+     */
+    public static final String SWITCH_NS = "ccw.ui.edit.text.clojure.switchNamespace";
+    /**
      * Action definition ID of the Clojure (or edit ?) -> compile lib action
      */
     public static final String COMPILE_LIB = "ccw.ui.edit.text.clojure.compile.lib";

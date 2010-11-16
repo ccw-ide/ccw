@@ -78,11 +78,6 @@ public class LoadFileAction extends Action {
 		    }
 		}
 
-		// TODO surely namespace switching should be a completely separate action? - Chas
-//        if (editor.getDeclaringNamespace() != null) {
-//            text = text + "(clojure.core/in-ns '" + editor.getDeclaringNamespace() + ")";
-//        }
-
         REPLView repl = REPLView.activeREPL.get();
         if (repl != null && !repl.isDisposed()) {
             EvaluateTextUtil.evaluateText(repl, ";; Loading file " + editorFile.getProjectRelativePath().toOSString(), true);
@@ -90,7 +85,6 @@ public class LoadFileAction extends Action {
                 EvaluateTextUtil.evaluateText(repl, (String)loadFileCommand.invoke(new java.io.File(filePath), sourcePath), false);
             } catch (Exception e) {
                 CCWPlugin.logError("Could not load file " + filePath, e);
-                
             }
         }
 	}

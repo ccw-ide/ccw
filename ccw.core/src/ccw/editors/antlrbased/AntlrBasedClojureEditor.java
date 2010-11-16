@@ -254,6 +254,10 @@ public class AntlrBasedClojureEditor extends TextEditor implements IClojureEdito
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.LOAD_FILE);
 		setAction(LoadFileAction.ID, action);
 
+        action = new SwitchNamespaceAction(this);
+        action.setActionDefinitionId(IClojureEditorActionDefinitionIds.SWITCH_NS);
+        setAction(SwitchNamespaceAction.ID, action);
+
 		action = new CompileLibAction(this);
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.COMPILE_LIB);
 		setAction(CompileLibAction.ID, action);
