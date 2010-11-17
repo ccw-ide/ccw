@@ -3,7 +3,6 @@
     [ccw.repl.cmdhistory :as history])
   (:use (clojure.contrib def core))
   (:import ccw.CCWPlugin
-    ccw.repl.REPLView
     org.eclipse.ui.PlatformUI
     org.eclipse.swt.SWT
     (org.eclipse.swt.custom StyledText StyleRange)))
@@ -76,7 +75,7 @@
       (.replaceAll "\\n|\\r" " "))))
 
 (defn eval-expression
-  [^REPLView repl-view log-component {:keys [send]} requests-atom expr]
+  [repl-view log-component {:keys [send]} requests-atom expr]
   (let [response-fn (send expr :ns (.getCurrentNamespace repl-view))
         key [(System/currentTimeMillis) expr]]
     (swap! requests-atom assoc key response-fn)
