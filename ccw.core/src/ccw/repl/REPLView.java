@@ -133,7 +133,7 @@ public class REPLView extends ViewPart {
     }
 
     public void printErrorDetail() {
-        evalExpression("(binding [*out* *err*] (clojure.tools.nrepl/*print-error-detail* *e))", false, false);
+        evalExpression("(binding [*out* *err*] (if-not *e (println \"No prior exception bound to *e.\") (clojure.tools.nrepl/*print-error-detail* *e)))", false, false);
     }
     
     public void closeView () throws Exception {
