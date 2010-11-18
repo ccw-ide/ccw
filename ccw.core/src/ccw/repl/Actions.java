@@ -31,20 +31,29 @@ public class Actions {
     }
     
     public static class ShowActiveREPL extends AbstractHandler {
-        public Object execute (ExecutionEvent event) throws ExecutionException {
+        public static boolean execute (boolean activate) {
             REPLView active = REPLView.activeREPL.get();
             if (active != null) {
                 for (IWorkbenchWindow window : PlatformUI.getWorkbench().getWorkbenchWindows()) {
                     for (IWorkbenchPage p : window.getPages()) {
                         for (IViewReference ref : p.getViewReferences()) {
                             if (ref.getPart(false) == active) {
-                                p.activate(active);
-                                return null;
+                                if (activate) {
+                                    p.activate(active);
+                                } else {
+                                    p.bringToTop(active);
+                                }
+                                return true;
                             }
                         }
                     }
                 }
             }
+            return false;
+        }
+        
+        public Object execute (ExecutionEvent event) throws ExecutionException {
+            if (execute(true)) return null;
             
             MessageDialog.openError(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
                     "No Active REPL",

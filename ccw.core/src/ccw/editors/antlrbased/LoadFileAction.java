@@ -27,6 +27,7 @@ import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.ClojureProject;
 import ccw.debug.ClojureClient;
+import ccw.repl.Actions;
 import ccw.repl.REPLView;
 
 public class LoadFileAction extends Action {
@@ -82,7 +83,8 @@ public class LoadFileAction extends Action {
         if (repl != null && !repl.isDisposed()) {
             EvaluateTextUtil.evaluateText(repl, ";; Loading file " + editorFile.getProjectRelativePath().toOSString(), true);
     		try {
-                EvaluateTextUtil.evaluateText(repl, (String)loadFileCommand.invoke(new java.io.File(filePath), sourcePath), false);
+                EvaluateTextUtil.evaluateText(repl, (String)loadFileCommand.invoke(editor.getDocument().get(), filePath, sourcePath), false);
+                Actions.ShowActiveREPL.execute(false);
             } catch (Exception e) {
                 CCWPlugin.logError("Could not load file " + filePath, e);
             }

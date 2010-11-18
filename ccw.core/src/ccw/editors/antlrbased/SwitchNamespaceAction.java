@@ -4,6 +4,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.action.Action;
 
 import ccw.CCWPlugin;
+import ccw.repl.Actions;
 import ccw.repl.REPLView;
 
 public class SwitchNamespaceAction extends Action {
@@ -31,7 +32,9 @@ public class SwitchNamespaceAction extends Action {
             // put error msg in footer instead
             CCWPlugin.logError("Could not switch ns to: " + ns);
         } else {
-            EvaluateTextUtil.evaluateText(repl, String.format("(clojure.core/in-ns '%s)", ns), true);
+            EvaluateTextUtil.evaluateText(repl, String.format(";; Switching to %s namespace", ns), true);
+            EvaluateTextUtil.evaluateText(repl, String.format("(clojure.core/in-ns '%s)", ns), false);
+            Actions.ShowActiveREPL.execute(true);
         }
     }
 }

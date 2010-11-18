@@ -15,6 +15,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.ui.console.IOConsole;
 
 import ccw.debug.ClojureClient;
+import ccw.repl.Actions;
 import ccw.repl.REPLView;
 
 public class EvaluateTopLevelSExpressionAction extends Action {
@@ -40,6 +41,7 @@ public class EvaluateTopLevelSExpressionAction extends Action {
 		REPLView repl = REPLView.activeREPL.get();
 		if (repl != null && !repl.isDisposed()) {
 			EvaluateTextUtil.evaluateText(repl, selectedText, true);
+			Actions.ShowActiveREPL.execute(false);
 		}
 	}
 }
