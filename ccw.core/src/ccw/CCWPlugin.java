@@ -16,7 +16,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunch;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.ColorRegistry;
@@ -45,10 +44,8 @@ import ccw.preferences.SyntaxColoringPreferencePage;
 import ccw.repl.REPLView;
 import ccw.util.DisplayUtil;
 import ccw.utils.editors.antlrbased.IScanContext;
-import clojure.tools.nrepl.Connection;
-import clojure.lang.Symbol;
-import clojure.lang.Var;
 import clojure.osgi.ClojureOSGi;
+import clojure.tools.nrepl.Connection;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -266,28 +263,35 @@ public class CCWPlugin extends AbstractUIPlugin {
 		return (Boolean.parseBoolean(launch.getAttribute(LaunchUtils.ATTR_IS_AUTO_RELOAD_ENABLED)));
 	}
     
-    public REPLView getProjectREPL (IProject project) {
-        IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-        if (window != null) {
-            IWorkbenchPage page = window.getActivePage();
-            if (page != null) {
-                for (IViewReference r : page.getViewReferences()) {
-                    IViewPart v = r.getView(false);
-                    if (REPLView.class.isInstance(v)) {
-                        REPLView replView = (REPLView)v;
-                        ILaunch launch = replView.getLaunch();
-                        if (!launch.isTerminated()) {
-                            String launchProject = launch.getAttribute(LaunchUtils.ATTR_PROJECT_NAME);
-                            if (launchProject != null && launchProject.equals(project.getName())) {
-                                return replView;
-                            }
-                        }
-                    }
-                }
-            }
-        }
+    public REPLView getProjectREPL (final IProject project) {
+    	final REPLView[] ret = new REPLView[1];
+    	
+    	DisplayUtil.syncExec(new Runnable() {
+			public void run() {
+		        IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		        if (window != null) {
+		            IWorkbenchPage page = window.getActivePage();
+		            if (page != null) {
+		                for (IViewReference r : page.getViewReferences()) {
+		                    IViewPart v = r.getView(false);
+		                    if (REPLView.class.isInstance(v)) {
+		                        REPLView replView = (REPLView)v;
+		                        ILaunch launch = replView.getLaunch();
+		                        if (!launch.isTerminated()) {
+		                            String launchProject = launch.getAttribute(LaunchUtils.ATTR_PROJECT_NAME);
+		                            if (launchProject != null && launchProject.equals(project.getName())) {
+		                            	ret[0] = replView;
+		                                return;
+		                            }
+		                        }
+		                    }
+		                }
+		            }
+		        }
+			}
+		});
         
-        return null;
+        return ret[0];
     }
     
     public Connection getProjectREPLConnection (IProject project) {

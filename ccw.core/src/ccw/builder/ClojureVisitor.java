@@ -62,10 +62,11 @@ public class ClojureVisitor implements IResourceVisitor {
     			for (String maybeLibName: clojureLibs) {
     				System.out.println("compiling:'" + maybeLibName + "'");
     				Response res = repl.send(CompileLibAction.compileLibCommand(maybeLibName));
-    				Map resultMap = (Map)res.values().get(0);
-    				System.out.println("ClojureVisitor: " + resultMap);
+    				Object result = res.values().get(0);
+    				System.out.println("ClojureVisitor: " + result);
                     //response-type" -1, "response" "[{\"file-name\" \"Compiler.java\", \"line-number\" 4186, \"message\
-                    if (Integer.valueOf(-1).equals(resultMap.get("response-type"))) {
+                    if (result instanceof Map) {
+                    	Map resultMap = (Map) result;
                         Collection<Map> response = (Collection<Map>)resultMap.get("response");
                         if (response != null) {
                             Map<?,?> errorMap = (Map<?,?>) response.iterator().next();

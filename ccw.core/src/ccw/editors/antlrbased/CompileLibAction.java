@@ -16,9 +16,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.ui.console.IOConsole;
-
-import ccw.debug.ClojureClient;
 
 public class CompileLibAction extends Action {
 

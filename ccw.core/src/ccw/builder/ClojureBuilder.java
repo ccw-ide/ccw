@@ -35,7 +35,6 @@ import org.eclipse.jdt.core.JavaCore;
 import ccw.CCWPlugin;
 import ccw.launching.ClojureLaunchDelegate;
 import ccw.repl.REPLView;
-import clojure.tools.nrepl.Connection;
 
 /*
  * gaetan.morice:
@@ -123,6 +122,7 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
             monitor = new NullProgressMonitor();
         }
         
+        // TODO see if we can do something more clever than having to use the UI thread and get a View object ...
         REPLView repl = CCWPlugin.getDefault().getProjectREPL(project);
         if (repl == null || repl.isDisposed() || !ClojureLaunchDelegate.isAutoReloadEnabled(repl.getLaunch())) {
         	return;

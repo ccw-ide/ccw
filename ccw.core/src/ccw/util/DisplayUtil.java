@@ -26,7 +26,7 @@ public class DisplayUtil {
 		if (Display.getCurrent() == null) {
 			Display display = PlatformUI.getWorkbench().getDisplay();
 			if (!display.isDisposed()) {
-				display.asyncExec(r);
+				display.syncExec(r);
 			}
 		} else {
 			r.run();
