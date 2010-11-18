@@ -49,8 +49,10 @@ import org.eclipse.swt.graphics.TextStyle;
 
 import ccw.CCWPlugin;
 import ccw.outline.NamespaceBrowser;
+import ccw.repl.REPLView;
 import ccw.util.ClojureDocUtils;
 import clojure.tools.nrepl.Connection;
+import clojure.tools.nrepl.Connection.Response;
 
 public class ClojureProposalProcessor implements IContentAssistProcessor {
 	private static final int MAX_JAVA_SEARCH_RESULT_NUMBER = 50;
@@ -728,44 +730,33 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 			return Collections.emptyList();
 		}
 		
-		Connection repl = editor.getCorrespondingREPL().getToolingConnection();
+		REPLView repl = editor.getCorrespondingREPL();
 		if (repl == null) return Collections.emptyList();
+		Connection connection = repl.getToolingConnection();
 		
-		Map result = (Map)repl.send("(ccw.debug.serverrepl/code-complete \"" + namespace + "\" \"" + prefix + "\" " + (findOnlyPublic ? "true" : "false") + ")").values().get(0);
-		if (result == null) return Collections.emptyList();
-		
-		if (result.get("response-type").equals(0)) {
-			if (result.get("response") == null) {
-				return Collections.emptyList();
-			} else {
-				return (List<List>) result.get("response");
-			}
-		} else {
-			return Collections.emptyList();
-		}
+		Response response = connection.send("(ccw.debug.serverrepl/code-complete \"" + namespace + "\" \"" + prefix + "\" " + (findOnlyPublic ? "true" : "false") + ")");
+		return (List<List>) extractSingleValue(response, Collections.emptyList());
 	}
 	private List<List> dynamicNamespaceComplete(String prefix) {
 		if (prefix == null) {
 			return Collections.emptyList();
 		}
         
-        Connection repl = editor.getCorrespondingREPL().getToolingConnection();
+        REPLView repl = editor.getCorrespondingREPL();
         if (repl == null) return Collections.emptyList();
+		Connection connection = repl.getToolingConnection();
 		
-		Map result = (Map)repl.send("(ccw.debug.serverrepl/code-complete-ns \"" + prefix + "\")").values().get(0);
-		if (result == null) return Collections.emptyList();
-		
-		if (result.get("response-type").equals(0)) {
-			if (result.get("response") == null) {
-				return Collections.emptyList();
-			} else {
-				return (List<List>) result.get("response");
-			}
+		Response response = connection.send("(ccw.debug.serverrepl/code-complete-ns \"" + prefix + "\")");
+		return (List<List>) extractSingleValue(response, Collections.emptyList());
+	}
+	private static Object extractSingleValue(Response response, Object defaultValueIfNil) {
+		Object r = response.values().get(0);
+		if (r == null) {
+			return defaultValueIfNil;
 		} else {
-			return Collections.emptyList();
+			return r;
 		}
 	}
-
 	public IContextInformation[] computeContextInformation(ITextViewer viewer, int offset) {
 		return new IContextInformation[] {
 				new IContextInformation() {
