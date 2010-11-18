@@ -319,6 +319,9 @@ public class REPLView extends ViewPart {
                 if (e.stateMask == SWT.CTRL && e.keyCode == 'j') {
                     printErrorDetail();
                     e.doit = false;
+                } else if (e.stateMask == SWT.CTRL && e.keyCode == 'k') {
+                    logPanel.setText("");
+                    e.doit = false;
                 }
             }
         });

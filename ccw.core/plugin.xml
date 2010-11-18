@@ -1096,7 +1096,7 @@
           toolbarPath="additions" 
           icon="icons/repl/clear.gif"
           disabledIcon="icons/repl/clear_disabled.gif" 
-          tooltip="Clear the REPL log" 
+          tooltip="Clear the REPL log   Ctrl+K" 
           class="ccw.repl.Actions$ClearLog"/>
   </viewContribution>
   <viewContribution id="ccw.view.repl.actions.printErrorDetail" targetID="ccw.view.repl">        
