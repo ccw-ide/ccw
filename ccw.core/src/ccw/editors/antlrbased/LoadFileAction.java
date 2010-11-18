@@ -55,34 +55,25 @@ public class LoadFileAction extends Action {
 	}
 
 	public void run() {
-		String title = "File Loader";
-		String message = "The editor has pending changes. Clicking OK will save the changes and load the file.";
-		if (!EvaluateTextUtil.canProceed(editor, title, message))
-			return;
-
-		loadFile();
-	}
-	
-	protected final void loadFile() {
-		IFile editorFile = (IFile) editor.getEditorInput().getAdapter(IFile.class);
-		if (editorFile == null) return;
-		
-		ClojureProject proj = ClojureCore.getClojureProject(editor.getProject());
-		String sourcePath = null;
-		String filePath = editorFile.getLocation().toOSString();
-		if (proj != null) {
-		    for (IFolder f : proj.sourceFolders()) {
-		        if (f.getProjectRelativePath().isPrefixOf(editorFile.getProjectRelativePath())) {
-		            sourcePath = f.getLocation().toOSString();
-		            break;
-		        }
-		    }
-		}
+        IFile editorFile = (IFile) editor.getEditorInput().getAdapter(IFile.class);
+        if (editorFile == null) return;
+        
+        ClojureProject proj = ClojureCore.getClojureProject(editor.getProject());
+        String sourcePath = null;
+        String filePath = editorFile.getLocation().toOSString();
+        if (proj != null) {
+            for (IFolder f : proj.sourceFolders()) {
+                if (f.getProjectRelativePath().isPrefixOf(editorFile.getProjectRelativePath())) {
+                    sourcePath = f.getLocation().toOSString();
+                    break;
+                }
+            }
+        }
 
         REPLView repl = REPLView.activeREPL.get();
         if (repl != null && !repl.isDisposed()) {
             EvaluateTextUtil.evaluateText(repl, ";; Loading file " + editorFile.getProjectRelativePath().toOSString(), true);
-    		try {
+            try {
                 EvaluateTextUtil.evaluateText(repl, (String)loadFileCommand.invoke(editor.getDocument().get(), filePath, sourcePath), false);
                 Actions.ShowActiveREPL.execute(false);
             } catch (Exception e) {
@@ -90,5 +81,4 @@ public class LoadFileAction extends Action {
             }
         }
 	}
-
 }
