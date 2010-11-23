@@ -96,7 +96,7 @@
             class="ccw.launching.ClojureLaunchShortcut"
             icon="icons/clojure16x16.png"
             id="ccw.launching.clojureShortcut"
-            label="Clojure Application REPL"
+            label="Clojure Application"
             modes="run, debug">
          <perspective
                id="org.eclipse.jdt.ui.JavaPerspective">
@@ -137,7 +137,7 @@
             class="ccw.launching.ClojureLaunchShortcut"
             icon="icons/clojure16x16.png"
             id="ccw.launching.clojureShortcut"
-            label="Clojure Application (preload file) REPL"
+            label="Clojure Application (preload file)"
             modes="run, debug">
          <perspective id="org.eclipse.jdt.ui.JavaPerspective"/>
          <perspective id="org.eclipse.jdt.ui.JavaHierarchyPerspective"/>

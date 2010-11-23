@@ -16,16 +16,15 @@ import java.net.ServerSocket;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.ProgressMonitorWrapper;
@@ -43,11 +42,10 @@ import ccw.ClojureCore;
 import ccw.ClojureProject;
 import ccw.repl.REPLView;
 import ccw.util.DisplayUtil;
-import clojure.tools.nrepl.SafeFn;
-import clojure.lang.AFn;
 import clojure.lang.RT;
 import clojure.lang.Symbol;
 import clojure.lang.Var;
+import clojure.tools.nrepl.SafeFn;
 
 public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 
@@ -81,21 +79,47 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 
         public void done() {
             super.done();
-            
-            final Integer port = (Integer)SafeFn.find("clojure.tools.nrepl", "wait-for-ack").sInvoke(10000);
-            if (port == null) {
-                CCWPlugin.logError("Waiting for new REPL process ack timed out");
-                return;
-            }
-            DisplayUtil.asyncExec(new Runnable() {
-                public void run() {
-                    try {
-                        REPLView.connect("localhost", port, lastConsoleOpened, launch);
-                    } catch (Exception e) {
-                        CCWPlugin.logError("Could not connect REPL to local launch", e);
-                    }
-                }
-            });
+            new Thread(new Runnable() {
+				public void run() {
+		            final Integer port = (Integer)SafeFn.find("clojure.tools.nrepl", "wait-for-ack").sInvoke(10000);
+		            if (port == null) {
+		                CCWPlugin.logError("Waiting for new REPL process ack timed out");
+		                return;
+		            }
+		            DisplayUtil.asyncExec(new Runnable() {
+		                public void run() {
+	                    	if (isAutoReloadEnabled(launch) && getProject() != null) {
+                    			try {
+	                    			getProject().touch(new NullProgressMonitor() {
+	                    				public void done() {
+	                    					connectRepl();
+	                    				}
+	                    			});
+                    			} catch (CoreException e) {
+                    				CCWPlugin.logError("unexpected exception during project refresh for auto-load on startup", e);
+	                    		}
+	                    	} else {
+	                    		connectRepl();
+	                    	}
+		                }
+		                private IProject getProject() {
+		            		try {
+		            			return LaunchUtils.getProject(launch);
+		            		} catch (CoreException e) {
+		            			CCWPlugin.logWarning("Unable to get project for launch configuration", e);
+		            			return null;
+		            		}
+		            	}
+		                private void connectRepl() {
+		                    try {
+		                        REPLView.connect("localhost", port, lastConsoleOpened, launch);
+		                    } catch (Exception e) {
+		                        CCWPlugin.logError("Could not connect REPL to local launch", e);
+		                    }
+		                }
+		            });
+				}
+			}).start();
         }
     }
     
