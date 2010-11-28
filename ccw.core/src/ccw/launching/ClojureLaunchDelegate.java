@@ -24,10 +24,13 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.ProgressMonitorWrapper;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
@@ -79,13 +82,24 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 
         public void done() {
             super.done();
-            new Thread(new Runnable() {
-				public void run() {
-		            final Integer port = (Integer)SafeFn.find("clojure.tools.nrepl", "wait-for-ack").sInvoke(10000);
-		            if (port == null) {
+            Job ackJob = new Job("Waiting for new REPL process ack") {
+				@Override
+				protected IStatus run(final IProgressMonitor monitor) {
+					monitor.beginTask("Waiting for new REPL process ack", 10);
+					Integer maybePort = null;
+					for (int i = 0; i < 10; i++) {
+						maybePort = (Integer)SafeFn.find("clojure.tools.nrepl", "wait-for-ack").sInvoke(1000);
+						monitor.worked(1);
+						if (maybePort != null) {
+							break;
+						}
+					}
+					
+		            if (maybePort == null) {
 		                CCWPlugin.logError("Waiting for new REPL process ack timed out");
-		                return;
+		                return new Status(IStatus.ERROR, CCWPlugin.PLUGIN_ID, "Waiting for new REPL process ack timed out");
 		            }
+		            final Integer port = maybePort;
 		            DisplayUtil.asyncExec(new Runnable() {
 		                public void run() {
 	                    	if (isAutoReloadEnabled(launch) && getProject() != null) {
@@ -101,6 +115,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 	                    	} else {
 	                    		connectRepl();
 	                    	}
+	                    	monitor.done();
 		                }
 		                private IProject getProject() {
 		            		try {
@@ -118,8 +133,11 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 		                    }
 		                }
 		            });
+		            return Status.OK_STATUS;
 				}
-			}).start();
+            };
+            ackJob.setUser(true);
+            ackJob.schedule();
         }
     }
     
