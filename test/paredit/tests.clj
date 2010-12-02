@@ -108,6 +108,9 @@
     "foo \"bar\" foo" 4 :string nil
     ))
 
+(deftest parser-tests
+  (is (not= nil (sexp ":"))))
+
 (deftest loc-containing-offset-tests
   (are [text offset expected-tag] (= expected-tag (-?> (parse text) (parsed-root-loc true) (loc-containing-offset offset) (zip/node) :tag))
     "hello" 1 :atom
@@ -125,6 +128,7 @@
   #_(t/line-stop-tests)
   #_(spec-text-tests)
   (paredit-tests)
+  (parser-tests)
   ;;;;;;;#_(loc-for-offset-tests)
   #_(leave-for-offset-tests)
   #_(loc-containing-offset-tests))
