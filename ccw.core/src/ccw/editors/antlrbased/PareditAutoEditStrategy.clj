@@ -82,7 +82,9 @@
 (defn -customizeDocumentCommand 
   [#^ccw.editors.antlrbased.PareditAutoEditStrategy this, #^IDocument document, #^DocumentCommand command]
   (let [^IClojureEditor editor (-> this .state deref :editor)]
-    (when (and (.doit command) (not (.isInEscapeSequence editor)))
+    (when (and (.doit command) 
+               (not (.isInEscapeSequence editor)) 
+               (.getParsed editor))
       (let [signed-selection (bean (.getSignedSelection editor))
             ;_ (println (str "signed-selection:" signed-selection))
             document-text {:text (.get document) 
