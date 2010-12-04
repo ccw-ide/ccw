@@ -13,7 +13,8 @@
   (require [paredit.parser :as p])
   (:gen-class
     :methods [^{:static true} [updateParseRef [String Object] Object]
-              ^{:static true} [getParser [String Object] Object]]))
+              ^{:static true} [getParser [String Object] Object]
+              ^{:static true} [startWatchParseRef [Object Object] Object]]))
 
 ; TODO move in a utility namespace, or remove
 (defprotocol Cancellable (isCancelled [this]) (cancel [this]))
@@ -35,6 +36,13 @@
       (if-let [rv @r] (cancel (:parser rv)))
       (ref-set r {:text text :parser (timed-delay 800 #(try (p/parse text) (catch Exception _ nil)))}))
     r))
+
+(defn -startWatchParseRef [r editor]
+  (add-watch r :track-state (fn [_key _r _old-state new-state] 
+                              (.setStructuralEditionPossible editor 
+                                (let [state (not (nil? @(:parser new-state)))
+                                      state (if (.isEmpty (:text new-state)) true state)]
+                                  state)))))
 
 (defn -getParser [text r]
   (let [rv @r] 

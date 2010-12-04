@@ -116,4 +116,4 @@
           (when-not (zero? (:length result)) 
             ;(println (str "result:" result))
           (.selectAndReveal editor (:offset result) (:length result))))
-        (.setStructuralEditingPossible editor (true? (and result (not= :ko (-> result :parser-state)))))))))
+        #_(.setStructuralEditingPossible editor (true? (and result (not= :ko (-> result :parser-state)))))))))

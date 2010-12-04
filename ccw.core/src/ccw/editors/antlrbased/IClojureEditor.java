@@ -71,8 +71,6 @@ public interface IClojureEditor {
      */
     public REPLView getCorrespondingREPL ();
     
-    public void setStructuralEditingPossible (boolean possible);
-    
     public void updateTabsToSpacesConverter ();
 
 	public IDocument getDocument();

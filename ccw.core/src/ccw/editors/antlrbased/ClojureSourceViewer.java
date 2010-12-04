@@ -21,6 +21,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextInputListener;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextSelection;
+import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IOverviewRuler;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
@@ -42,6 +43,7 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.repl.REPLView;
+import ccw.util.DisplayUtil;
 
 public abstract class ClojureSourceViewer extends ProjectionViewer implements
         IClojureEditor, IPropertyChangeListener {
@@ -287,7 +289,11 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     };
     
     private void updateParseRef (String text) {
+    	boolean firstTime = (parseRef == null);
         parseRef = EditorSupport.updateParseRef(text, parseRef);
+        if (firstTime) {
+        	EditorSupport.startWatchParseRef(parseRef, this);
+        }
     }
     
     public Object getParsed () {
@@ -295,6 +301,21 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
             updateParseRef(getDocument().get());
         }
         return EditorSupport.getParser(getDocument().get(), parseRef);
+    }
+    
+    private boolean structuralEditionPossible = true;
+    public void setStructuralEditionPossible(final boolean state) {
+    	structuralEditionPossible = state;
+    	syncWithStructuralEditionPossibleState();
+    }
+    private void syncWithStructuralEditionPossibleState() {
+    	DisplayUtil.asyncExec(new Runnable() {
+			public void run() {
+				getTextWidget().setBackground(
+						structuralEditionPossible ? null : Display.getCurrent().getSystemColor(SWT.COLOR_GRAY));
+				getTextWidget().setToolTipText(structuralEditionPossible ? null : "Unparseable source code. Structural Edition temporarily disabled.");
+			}
+		});
     }
     
     public IRegion getSignedSelection () {
@@ -345,7 +366,16 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
         return null;
     }
     
-    public void setStructuralEditingPossible (boolean possible) {}
-    
     public void updateTabsToSpacesConverter () {}
+    
+    // TODO get rid of this way of handling document initialization
+    @Override
+    public void setDocument(IDocument document,
+    		IAnnotationModel annotationModel, int modelRangeOffset,
+    		int modelRangeLength) {
+    	super.setDocument(document, annotationModel, modelRangeOffset, modelRangeLength);
+    	if (document != null) {
+    		updateParseRef(document.get());
+    	}
+    }
 }
