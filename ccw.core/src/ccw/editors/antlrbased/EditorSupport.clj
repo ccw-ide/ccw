@@ -41,7 +41,7 @@
   (add-watch r :track-state (fn [_key _r _old-state new-state] 
                               (.setStructuralEditionPossible editor 
                                 (let [state (not (nil? @(:parser new-state)))
-                                      state (if (.isEmpty (:text new-state)) true state)]
+                                      state (or state (.isEmpty (:text new-state)))]
                                   state)))))
 
 (defn -getParser [text r]
