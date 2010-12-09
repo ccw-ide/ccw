@@ -85,10 +85,12 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
             Job ackJob = new Job("Waiting for new REPL process ack") {
 				@Override
 				protected IStatus run(final IProgressMonitor monitor) {
-					monitor.beginTask("Waiting for new REPL process ack", 10);
+					final int STEPS_BEFORE_GIVING_UP = 200;
+					final int MILLIS_BETWEEN_STEPS = 50;
+					monitor.beginTask("Waiting for new REPL process ack", STEPS_BEFORE_GIVING_UP);
 					Integer maybePort = null;
-					for (int i = 0; i < 10; i++) {
-						maybePort = (Integer)SafeFn.find("clojure.tools.nrepl", "wait-for-ack").sInvoke(1000);
+					for (int i = 0; i < STEPS_BEFORE_GIVING_UP; i++) {
+						maybePort = (Integer)SafeFn.find("clojure.tools.nrepl", "wait-for-ack").sInvoke(MILLIS_BETWEEN_STEPS);
 						monitor.worked(1);
 						if (maybePort != null) {
 							break;
