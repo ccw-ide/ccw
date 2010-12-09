@@ -308,10 +308,7 @@ public class REPLView extends ViewPart implements IAdaptable {
                 //   doing so looks like a PITA: http://www.eclipsezone.com/eclipse/forums/t69603.html
                 //   http://dev.eclipse.org/newslists/news.eclipse.platform/msg60894.html
                 //   http://wiki.eclipse.org/index.php/Platform_Command_Framework
-                if (e.stateMask == SWT.CTRL && e.keyCode == 'j') {
-                    printErrorDetail();
-                    e.doit = false;
-                } else if (e.stateMask == SWT.CTRL && e.keyCode == 'k') {
+                	if (e.stateMask == SWT.CTRL && e.keyCode == 'k') {
                     logPanel.setText("");
                     e.doit = false;
                 }

@@ -10,12 +10,11 @@ import org.eclipse.ui.IViewActionDelegate;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.activities.WorkbenchActivityHelper;
 import org.eclipse.ui.console.ConsolePlugin;
-
-import ccw.editors.antlrbased.EvaluateTextUtil;
+import org.eclipse.ui.handlers.HandlerUtil;
 
 public class Actions {
     private Actions () {}
@@ -88,12 +87,18 @@ public class Actions {
         }
     }
     
-    public static class PrintErrorDetail extends REPLViewAction {
-        public void run (IAction action) {
-            repl.printErrorDetail();
-        }
+    public static class PrintErrorHandler extends AbstractHandler {
+		public Object execute(ExecutionEvent event) throws ExecutionException {
+			IWorkbenchPart part = HandlerUtil.getActivePart(event);
+			if (! (part instanceof REPLView)) {
+				return null;
+			}
+			REPLView repl = (REPLView) part;
+			repl.printErrorDetail();
+			return null;
+		}
     }
-    
+
     private static abstract class REPLViewAction extends AbstractHandler implements IViewActionDelegate {
         protected REPLView repl;
 
