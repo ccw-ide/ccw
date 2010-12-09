@@ -270,9 +270,6 @@ public class AntlrBasedClojureEditor extends TextEditor implements IClojureEdito
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.FORMAT_CODE);
 		setAction(FormatAction.ID, action);
 	    */
-		action = new OpenDeclarationAction(this);
-		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.OPEN_DECLARATION);
-		setAction(IHyperlinkConstants.OpenDeclarationAction_ID, action);
 		
 		action = new Action() {
 			@Override
@@ -623,7 +620,7 @@ public class AntlrBasedClojureEditor extends TextEditor implements IClojureEdito
 	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#initializeKeyBindingScopes()
 	 */
 	protected void initializeKeyBindingScopes() {
-		setKeyBindingScopes(new String[] { "ccw.ui.clojureEditorScope" });  //$NON-NLS-1$
+		setKeyBindingScopes(new String[] { IClojureEditor.KEY_BINDING_SCOPE });
 	}
 
 	@Override

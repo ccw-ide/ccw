@@ -14,21 +14,24 @@ import ccw.repl.REPLView;
  * but {@link ClojureSourceViewer} is needed for useful REPL presentation).
  */
 public interface IClojureEditor {
+	
+	String KEY_BINDING_SCOPE = "ccw.ui.clojureEditorScope";   //$NON-NLS-1$
+	
     /**
      * Corresponds to {@link AbstractTextEditor#selectAndReveal(int, int)}
      */
-    public void selectAndReveal (int start, int length);
+    void selectAndReveal (int start, int length);
     
     /**
      * Returns true if paredit-style strict structural editing is enabled.
      */
-    public boolean isStructuralEditingEnabled ();
+    boolean isStructuralEditingEnabled ();
     
     /**
      * Returns true only if the editor is in an "escape sequence", temporarily
      * disabling structural editing mode (if enabled).
      */
-    public boolean isInEscapeSequence ();
+    boolean isInEscapeSequence ();
 
     // @todo -- what does "unsigned"/"signed" mean in this context?
     /**
@@ -40,7 +43,7 @@ public interface IClojureEditor {
      *
      * @return a region denoting the current unsigned selection
      */
-    public IRegion getUnSignedSelection ();
+    IRegion getUnSignedSelection ();
     
     /**
      * Returns the signed current selection.
@@ -52,28 +55,28 @@ public interface IClojureEditor {
      *
      * @return a region denoting the current signed selection, for a resulting RtoL selections length is < 0
      */
-    public IRegion getSignedSelection ();
+    IRegion getSignedSelection ();
     
     /**
      * Returns the current namespace of the editor.
      */
-    public String getDeclaringNamespace ();
+    String getDeclaringNamespace ();
 
     /**
      * Returns the project associated with the editor, can be null.
      */
-    public IJavaProject getAssociatedProject ();
+    IJavaProject getAssociatedProject ();
 
-    public Object getParsed ();
+    Object getParsed ();
     
     /**
      * Can be null...
      */
-    public REPLView getCorrespondingREPL ();
+    REPLView getCorrespondingREPL ();
     
-    public void updateTabsToSpacesConverter ();
+    void updateTabsToSpacesConverter ();
 
-	public IDocument getDocument();
+	IDocument getDocument();
 
-	public void setStatusLineErrorMessage(String you_need_a_running_repl);
+	void setStatusLineErrorMessage(String you_need_a_running_repl);
 }

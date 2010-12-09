@@ -3,9 +3,9 @@ package ccw.repl;
 import java.net.ConnectException;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.jface.action.IStatusLineManager;
-import org.eclipse.jface.commands.ActionHandler;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
@@ -20,12 +20,9 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
-import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.VerifyEvent;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IWorkbenchPage;
@@ -34,29 +31,24 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.contexts.IContextService;
-import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.part.ViewPart;
 
 import ccw.CCWPlugin;
 import ccw.editors.antlrbased.ClojureSourceViewer;
 import ccw.editors.antlrbased.ClojureSourceViewerConfiguration;
-import ccw.editors.antlrbased.EvaluateTextUtil;
-import ccw.editors.antlrbased.IClojureEditorActionDefinitionIds;
-import ccw.editors.antlrbased.OpenDeclarationAction;
+import ccw.editors.antlrbased.IClojureEditor;
 import ccw.editors.rulesbased.ClojureDocumentProvider;
-import ccw.launching.LaunchUtils;
 import ccw.outline.NamespaceBrowser;
-import clojure.tools.nrepl.Connection;
 import clojure.lang.Atom;
 import clojure.lang.IFn;
 import clojure.lang.Keyword;
 import clojure.lang.PersistentTreeMap;
-import clojure.lang.PersistentVector;
 import clojure.lang.Symbol;
 import clojure.lang.Var;
 import clojure.osgi.ClojureOSGi;
+import clojure.tools.nrepl.Connection;
 
-public class REPLView extends ViewPart {
+public class REPLView extends ViewPart implements IAdaptable {
     public static final String VIEW_ID = "ccw.view.repl";
     public static final AtomicReference<REPLView> activeREPL = new AtomicReference();
 
@@ -344,12 +336,7 @@ public class REPLView extends ViewPart {
             }
         });
         
-        ((IContextService) getSite().getService(IContextService.class)).activateContext("ccw.ui.clojureEditorScope"); // TODO magic constant 
-        IHandlerService handlerService = (IHandlerService) getSite().getService(IHandlerService.class);
-
-        OpenDeclarationAction action = new OpenDeclarationAction(viewer);
-		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.OPEN_DECLARATION);
-        handlerService.activateHandler("ccw.ui.edit.text.clojure.open.declaration", new ActionHandler(action));
+        ((IContextService) getSite().getService(IContextService.class)).activateContext(IClojureEditor.KEY_BINDING_SCOPE); 
         
         split.setWeights(new int[] {100, 75});
     }
@@ -399,5 +386,14 @@ public class REPLView extends ViewPart {
                 e.doit = false;
             }
         }
+    }
+    
+    @Override
+    public Object getAdapter(Class adapter) {
+    	if (adapter == IClojureEditor.class) {
+    		return viewer;
+    	} else {
+    		return super.getAdapter(adapter);
+    	}
     }
 }
