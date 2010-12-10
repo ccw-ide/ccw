@@ -35,6 +35,8 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
@@ -112,12 +114,13 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 	                    				}
 	                    			});
                     			} catch (CoreException e) {
-                    				CCWPlugin.logError("unexpected exception during project refresh for auto-load on startup", e);
+                    				final String MSG = "unexpected exception during project refresh for auto-load on startup";
+                    				ErrorDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+                    						"REPL Connexion failure", MSG, e.getStatus());
 	                    		}
 	                    	} else {
 	                    		connectRepl();
 	                    	}
-	                    	monitor.done();
 		                }
 		                private IProject getProject() {
 		            		try {
@@ -135,6 +138,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 		                    }
 		                }
 		            });
+		            monitor.done();
 		            return Status.OK_STATUS;
 				}
             };
