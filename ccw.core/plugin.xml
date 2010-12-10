@@ -373,6 +373,24 @@
             id="ccw.view.repl.commands.printErrorDetail"
             name="Print detailed output from the last exception">
       </command>
+      <command
+            categoryId="org.eclipse.debug.ui.category.run"
+            description="Reconnect to this REPL&apos;s host and port (first disconnecting if necessary)"
+            id="ccw.view.repl.commands.reconnect"
+            name="Reconnect">
+      </command>
+      <command
+            categoryId="org.eclipse.debug.ui.category.run"
+            description="Clear the REPL&apos;s log"
+            id="ccw.view.repl.commands.clearLog"
+            name="Clear REPL log">
+      </command>
+      <command
+            categoryId="org.eclipse.debug.ui.category.run"
+            description="Show the console for the JVM process to which this REPL is connected"
+            id="ccw.view.repl.commands.showConsole"
+            name="Show Console">
+      </command>
       
    </extension>
    
@@ -582,6 +600,12 @@
             contextId="ccw.ui.clojureEditorScope"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+J">
+      </key>
+      <key
+            commandId="ccw.view.repl.commands.clearLog"
+            contextId="ccw.ui.clojureEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+K">
       </key>
 			
             
@@ -899,6 +923,54 @@
                icon="icons/repl/print_last_error.gif"
                style="push">
          </command>
+         <command
+               commandId="ccw.view.repl.commands.reconnect"
+               icon="icons/repl/reconnect.gif"
+               style="push"
+               tooltip="Reconnect to this REPL&apos;s host and port (first disconnecting if necessary)">
+         </command>
+         <command
+               commandId="ccw.view.repl.commands.clearLog"
+               disabledIcon="icons/repl/clear_disabled.gif"
+               icon="icons/repl/clear.gif"
+               style="push"
+               tooltip="Clear the REPL log">
+         </command>
+         <command
+               commandId="ccw.view.repl.commands.showConsole"
+               disabledIcon="icons/repl/showActive_disabled.png"
+               icon="icons/repl/showActive.png"
+               style="push"
+               tooltip="Show the console for the JVM process to which this REPL is connected">
+         </command>
+      </menuContribution>
+      <menuContribution
+            locationURI="menu:ccw.view.repl">
+         <command
+               commandId="ccw.view.repl.commands.printErrorDetail"
+               icon="icons/repl/print_last_error.gif"
+               style="push">
+         </command>
+         <command
+               commandId="ccw.view.repl.commands.reconnect"
+               icon="icons/repl/reconnect.gif"
+               style="push"
+               tooltip="Reconnect to this REPL&apos;s host and port (first disconnecting if necessary)">
+         </command>
+         <command
+               commandId="ccw.view.repl.commands.clearLog"
+               disabledIcon="icons/repl/clear_disabled.gif"
+               icon="icons/repl/clear.gif"
+               style="push"
+               tooltip="Clear the REPL log">
+         </command>
+         <command
+               commandId="ccw.view.repl.commands.showConsole"
+               disabledIcon="icons/repl/showActive_disabled.png"
+               icon="icons/repl/showActive.png"
+               style="push"
+               tooltip="Show the console for the JVM process to which this REPL is connected">
+         </command>
       </menuContribution>
    </extension>
    <extension
@@ -1089,37 +1161,6 @@
     </target>
     
 </extension>
-  <extension point = "org.eclipse.ui.viewActions">
-    <viewContribution id="ccw.view.repl.actions.reconnect" targetID="ccw.view.repl">        
-       <action id="ccw.view.repl.actions.reconnect"
-              label="Reconnect"
-              menubarPath="additions"
-              toolbarPath="additions" 
-              icon="icons/repl/reconnect.gif" 
-              tooltip="Reconnect to this REPL&apos;s host and port (first disconnecting if necessary)" 
-              class="ccw.repl.Actions$Reconnect"/>
-  </viewContribution>
-  <viewContribution id="ccw.view.repl.actions.showConsole" targetID="ccw.view.repl">        
-   <action id="ccw.view.repl.actions.showConsole"
-          label="Show Console"
-          menubarPath="additions"
-          toolbarPath="additions" 
-          icon="icons/repl/console.gif"
-          disabledIcon="icons/repl/console_disabled.gif" 
-          tooltip="Show the console for the JVM process to which this REPL is connected" 
-          class="ccw.repl.Actions$ShowConsole"/>
-  </viewContribution>
-  <viewContribution id="ccw.view.repl.actions.clearLog" targetID="ccw.view.repl">        
-   <action id="ccw.view.repl.actions.clearLog"
-          label="Clear Log"
-          menubarPath="additions"
-          toolbarPath="additions" 
-          icon="icons/repl/clear.gif"
-          disabledIcon="icons/repl/clear_disabled.gif" 
-          tooltip="Clear the REPL log   Ctrl+K" 
-          class="ccw.repl.Actions$ClearLog"/>
-  </viewContribution>
-</extension>
   <extension
         point="org.eclipse.ui.handlers">
      <handler
@@ -1141,6 +1182,54 @@
      <handler
            class="ccw.repl.Actions$PrintErrorHandler"
            commandId="ccw.view.repl.commands.printErrorDetail">
+        <enabledWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </enabledWhen>
+     </handler>
+     <handler
+           class="ccw.repl.Actions$ReconnectHandler"
+           commandId="ccw.view.repl.commands.reconnect">
+        <enabledWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </enabledWhen>
+     </handler>
+     <handler
+           class="ccw.repl.Actions$ClearLogHandler"
+           commandId="ccw.view.repl.commands.clearLog">
+        <enabledWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </enabledWhen>
+     </handler>
+     <handler
+           class="ccw.repl.Actions$ShowConsoleHandler"
+           commandId="ccw.view.repl.commands.showConsole">
         <enabledWhen>
            <with
                  variable="activeContexts">

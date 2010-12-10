@@ -302,19 +302,6 @@ public class REPLView extends ViewPart implements IAdaptable {
            }
         });
         
-        viewerWidget.addVerifyKeyListener(new VerifyKeyListener() {
-            public void verifyKey (VerifyEvent e) {
-                // TODO I desperately want this to be a proper, reconfigurable keybinding, but
-                //   doing so looks like a PITA: http://www.eclipsezone.com/eclipse/forums/t69603.html
-                //   http://dev.eclipse.org/newslists/news.eclipse.platform/msg60894.html
-                //   http://wiki.eclipse.org/index.php/Platform_Command_Framework
-                	if (e.stateMask == SWT.CTRL && e.keyCode == 'k') {
-                    logPanel.setText("");
-                    e.doit = false;
-                }
-            }
-        });
-
         /*
          * Need to hook up here to force a re-evaluation of the preferences
          * for the syntax coloring, after the token scanner has been

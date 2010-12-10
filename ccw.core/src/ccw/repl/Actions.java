@@ -3,11 +3,10 @@ package ccw.repl;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.jface.action.IAction;
+import org.eclipse.core.expressions.IEvaluationContext;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.ui.IViewActionDelegate;
-import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.ISources;
 import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
@@ -15,6 +14,8 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.handlers.HandlerUtil;
+
+import ccw.CCWPlugin;
 
 public class Actions {
     private Actions () {}
@@ -61,55 +62,60 @@ public class Actions {
         }
     }
     
-    public static class ClearLog extends REPLViewAction {        
-        public void run (IAction action) {
+    public static class ShowConsoleHandler extends AbstractREPLViewHandler {
+    	public void doExecute(ExecutionEvent event, REPLView repl) throws ExecutionException {
+            ConsolePlugin.getDefault().getConsoleManager().showConsoleView(repl.getConsole());
+        }
+    	// TODO: see if this ever worked ?
+        @Override
+        public void setEnabled(Object evaluationContext) {
+        	if (evaluationContext != null && (evaluationContext instanceof IEvaluationContext)) {
+        		IWorkbenchPart part = (IWorkbenchPart) ((IEvaluationContext) evaluationContext).getVariable(ISources.ACTIVE_PART_NAME);
+        		if (part != null && (part instanceof REPLView)) {
+        			REPLView repl = (REPLView) part;
+        			setBaseEnabled(repl.getConsole() != null);
+        		}
+        	}
+        }
+    }
+
+    public static class ClearLogHandler extends AbstractREPLViewHandler {        
+    	public void doExecute(ExecutionEvent event, REPLView repl) throws ExecutionException {
             repl.logPanel.setText("");
         }
     }
     
-    public static class Reconnect extends REPLViewAction {
-        public void run (IAction action) {
+    public static class ReconnectHandler extends AbstractREPLViewHandler {
+    	public void doExecute(ExecutionEvent event, REPLView repl) throws ExecutionException {
             try {
                 repl.reconnect();
             } catch (Exception e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+            	final String MSG = "Unexpected exception occured while trying to reconnect REPL view to clojure server"; 
+            	ErrorDialog.openError(
+            			HandlerUtil.getActiveShell(event),
+            			"Reconnection Error",
+            			MSG,
+            			CCWPlugin.createErrorStatus(MSG, e));
             }
         }
     }
     
-    public static class ShowConsole extends REPLViewAction {
-        public void run (IAction action) {
-            ConsolePlugin.getDefault().getConsoleManager().showConsoleView(repl.getConsole());
-        }
-        public boolean isEnabled () {
-            return repl.getConsole() != null;
-        }
+    public static class PrintErrorHandler extends AbstractREPLViewHandler {
+		public void doExecute(ExecutionEvent event, REPLView repl) throws ExecutionException {
+			repl.printErrorDetail();
+		}
     }
     
-    public static class PrintErrorHandler extends AbstractHandler {
-		public Object execute(ExecutionEvent event) throws ExecutionException {
+    private static abstract class AbstractREPLViewHandler extends AbstractHandler {
+		public final Object execute(ExecutionEvent event) throws ExecutionException {
 			IWorkbenchPart part = HandlerUtil.getActivePart(event);
 			if (! (part instanceof REPLView)) {
 				return null;
 			}
-			REPLView repl = (REPLView) part;
-			repl.printErrorDetail();
+			doExecute(event, (REPLView) part);
 			return null;
 		}
+		protected abstract void doExecute(ExecutionEvent event, REPLView part) throws ExecutionException;
     }
-
-    private static abstract class REPLViewAction extends AbstractHandler implements IViewActionDelegate {
-        protected REPLView repl;
-
-        public void selectionChanged (IAction action, ISelection selection) {}
-
-        public void init (IViewPart view) {
-            repl = (REPLView)view;
-        }
-
-        public Object execute(ExecutionEvent event) throws ExecutionException {
-            return null;
-        }
-    }
+    
 }
