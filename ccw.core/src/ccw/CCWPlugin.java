@@ -227,6 +227,10 @@ public class CCWPlugin extends AbstractUIPlugin {
         plugin.getLog().log(
                 new Status(IStatus.ERROR, PLUGIN_ID, e.getMessage(), e));
     }
+    
+    public static IStatus createErrorStatus(String message, Throwable e) {
+    	return new Status(IStatus.ERROR, PLUGIN_ID, message, e);
+    }
 
     public static void logWarning(String msg) {
         plugin.getLog().log(new Status(IStatus.WARNING, PLUGIN_ID, msg));
