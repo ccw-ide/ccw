@@ -1180,6 +1180,22 @@
         </enabledWhen>
      </handler>
      <handler
+           class="ccw.editors.antlrbased.GotoMatchingBracketHandler"
+           commandId="ccw.ui.edit.text.clojure.goto.matching.bracket">
+        <enabledWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </enabledWhen>
+     </handler>
+     <handler
            class="ccw.repl.Actions$PrintErrorHandler"
            commandId="ccw.view.repl.commands.printErrorDetail">
         <enabledWhen>

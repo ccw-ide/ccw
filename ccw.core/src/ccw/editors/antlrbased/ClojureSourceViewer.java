@@ -19,9 +19,12 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextInputListener;
+import org.eclipse.jface.text.ITextViewerExtension5;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextSelection;
+import org.eclipse.jface.text.source.DefaultCharacterPairMatcher;
 import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.ICharacterPairMatcher;
 import org.eclipse.jface.text.source.IOverviewRuler;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
@@ -42,6 +45,7 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
+import ccw.editors.rulesbased.ClojurePartitionScanner;
 import ccw.repl.REPLView;
 import ccw.util.DisplayUtil;
 
@@ -378,4 +382,88 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     		updateParseRef(document.get());
     	}
     }
+    
+    /** Preference key for matching brackets color */
+	//PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR;
+
+	public final static char[] PAIRS= { '{', '}', '(', ')', '[', ']' };
+	
+	private DefaultCharacterPairMatcher pairsMatcher = new DefaultCharacterPairMatcher(PAIRS, ClojurePartitionScanner.CLOJURE_PARTITIONING) {
+		/* tries to match a pair be the cursor after or before a pair start/end element */
+		@Override
+		public IRegion match(IDocument doc, int offset) {
+			IRegion region = super.match(doc, offset);
+			if (region == null && offset < (doc.getLength()-1)) {
+				return super.match(doc, offset + 1);
+			} else {
+				return region;
+			}
+		}
+	};
+    /**
+	 * Jumps to the matching bracket.
+	 */
+	public void gotoMatchingBracket() {
+		IDocument document= getDocument();
+		if (document == null)
+			return;
+
+		IRegion selection= getSignedSelection();
+
+		int selectionLength= Math.abs(selection.getLength());
+		if (selectionLength > 1) {
+			setStatusLineErrorMessage(ClojureEditorMessages.GotoMatchingBracketAction_error_invalidSelection);
+			getTextWidget().getDisplay().beep();
+			return;
+		}
+
+//		// #26314
+		int sourceCaretOffset= selection.getOffset() + selection.getLength();
+		// From JavaEditor, but I don't understand what it does so I maintain it commented out
+//		if (isSurroundedByBrackets(document, sourceCaretOffset))
+//			sourceCaretOffset -= selection.getLength();
+//
+		IRegion region= pairsMatcher.match(document, sourceCaretOffset);
+		if (region == null) {
+			setStatusLineErrorMessage(ClojureEditorMessages.GotoMatchingBracketAction_error_noMatchingBracket);
+			getTextWidget().getDisplay().beep();
+			return;
+		}
+
+		int offset= region.getOffset();
+		int length= region.getLength();
+
+		if (length < 1)
+			return;
+
+		int anchor= pairsMatcher.getAnchor();
+		// http://dev.eclipse.org/bugs/show_bug.cgi?id=34195
+		int targetOffset= (ICharacterPairMatcher.RIGHT == anchor) ? offset + 1: offset + length;
+
+		boolean visible= false;
+		if (this instanceof ITextViewerExtension5) {
+			ITextViewerExtension5 extension= (ITextViewerExtension5) this;
+			visible= (extension.modelOffset2WidgetOffset(targetOffset) > -1);
+		} else {
+			IRegion visibleRegion= getVisibleRegion();
+			// http://dev.eclipse.org/bugs/show_bug.cgi?id=34195
+			visible= (targetOffset >= visibleRegion.getOffset() && targetOffset <= visibleRegion.getOffset() + visibleRegion.getLength());
+		}
+
+		if (!visible) {
+			setStatusLineErrorMessage(ClojureEditorMessages.GotoMatchingBracketAction_error_bracketOutsideSelectedElement);
+			getTextWidget().getDisplay().beep();
+			return;
+		}
+
+		if (selection.getLength() < 0)
+			targetOffset -= selection.getLength();
+
+		setSelectedRange(targetOffset, selection.getLength());
+		revealRange(targetOffset, selection.getLength());
+	}
+
+	public DefaultCharacterPairMatcher getPairsMatcher() {
+		return pairsMatcher;
+	}
 }

@@ -70,7 +70,7 @@ public class Actions {
         @Override
         public void setEnabled(Object evaluationContext) {
         	if (evaluationContext != null && (evaluationContext instanceof IEvaluationContext)) {
-        		IWorkbenchPart part = (IWorkbenchPart) ((IEvaluationContext) evaluationContext).getVariable(ISources.ACTIVE_PART_NAME);
+        		Object part = ((IEvaluationContext) evaluationContext).getVariable(ISources.ACTIVE_PART_NAME);
         		if (part != null && (part instanceof REPLView)) {
         			REPLView repl = (REPLView) part;
         			setBaseEnabled(repl.getConsole() != null);

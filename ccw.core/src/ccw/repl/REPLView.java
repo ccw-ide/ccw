@@ -250,8 +250,10 @@ public class REPLView extends ViewPart implements IAdaptable {
                 return toolConnection;
             }
             public void setStatusLineErrorMessage(String msg) {
-            	IStatusLineManager slm = (IStatusLineManager) REPLView.super.getSite().getService(IStatusLineManager.class);
-            	slm.setErrorMessage(msg);
+            	if (msg != null) {
+	            	IStatusLineManager slm = (IStatusLineManager) REPLView.super.getSite().getService(IStatusLineManager.class);
+	            	slm.setErrorMessage(msg);
+            	}
             };
             public String getDeclaringNamespace() {
             	String inline = super.getDeclaringNamespace();

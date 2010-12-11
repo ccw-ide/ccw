@@ -3,6 +3,7 @@ package ccw.editors.antlrbased;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.source.DefaultCharacterPairMatcher;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import ccw.repl.REPLView;
@@ -79,4 +80,8 @@ public interface IClojureEditor {
 	IDocument getDocument();
 
 	void setStatusLineErrorMessage(String you_need_a_running_repl);
+
+	void gotoMatchingBracket();
+	
+	DefaultCharacterPairMatcher getPairsMatcher();
 }

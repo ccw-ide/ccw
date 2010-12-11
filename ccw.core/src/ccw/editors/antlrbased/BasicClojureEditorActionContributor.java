@@ -17,7 +17,6 @@ import java.util.ResourceBundle;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
-import org.eclipse.jface.action.Separator;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -37,7 +36,6 @@ public class BasicClojureEditorActionContributor extends BasicTextEditorActionCo
 
 	private List<RetargetAction> partListeners= new ArrayList<RetargetAction>();
 
-	private RetargetTextEditorAction gotoMatchingBracket;
 	private RetargetTextEditorAction gotoPreviousMember;
 	private RetargetTextEditorAction gotoNextMember;
 	
@@ -48,9 +46,6 @@ public class BasicClojureEditorActionContributor extends BasicTextEditorActionCo
 
 		ResourceBundle b= ClojureEditorMessages.getBundleForConstructedKeys();
 
-		gotoMatchingBracket= new RetargetTextEditorAction( b, "GotoMatchingBracket_"); //$NON-NLS-1$
-		gotoMatchingBracket.setActionDefinitionId(IClojureEditorActionDefinitionIds.GOTO_MATCHING_BRACKET);
-		
 		gotoNextMember= new RetargetTextEditorAction( b, "GotoNextMember_"); //$NON-NLS-1$
 		gotoNextMember.setActionDefinitionId(IClojureEditorActionDefinitionIds.GOTO_NEXT_MEMBER);
 
@@ -76,11 +71,11 @@ public class BasicClojureEditorActionContributor extends BasicTextEditorActionCo
 
 		super.contributeToMenu(menu);
 
-		IMenuManager gotoMenu= menu.findMenuUsingPath("navigate/goTo"); //$NON-NLS-1$
-		if (gotoMenu != null) {
-			gotoMenu.add(new Separator("additions2"));  //$NON-NLS-1$
-			gotoMenu.appendToGroup("additions2", gotoMatchingBracket); //$NON-NLS-1$
-		}
+//		IMenuManager gotoMenu= menu.findMenuUsingPath("navigate/goTo"); //$NON-NLS-1$
+//		if (gotoMenu != null) {
+//			gotoMenu.add(new Separator("additions2"));  //$NON-NLS-1$
+//			gotoMenu.appendToGroup("additions2", gotoMatchingBracket); //$NON-NLS-1$
+//		}
 	}
 	
 	public void contributeToStatusLine(IStatusLineManager statusLineManager) {
@@ -95,8 +90,6 @@ public class BasicClojureEditorActionContributor extends BasicTextEditorActionCo
 		ITextEditor textEditor= null;
 		if (part instanceof ITextEditor)
 			textEditor= (ITextEditor)part;
-
-		gotoMatchingBracket.setAction(getAction(textEditor, GotoMatchingBracketAction.ID));
 
 		IActionBars actionBars= getActionBars();
 		IStatusLineManager manager= actionBars.getStatusLineManager();

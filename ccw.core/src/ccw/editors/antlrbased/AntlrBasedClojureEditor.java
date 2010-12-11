@@ -22,11 +22,9 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ITextViewerExtension5;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.source.DefaultCharacterPairMatcher;
-import org.eclipse.jface.text.source.ICharacterPairMatcher;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.projection.ProjectionSupport;
@@ -60,23 +58,7 @@ public class AntlrBasedClojureEditor extends TextEditor implements IClojureEdito
 	/** Preference key for matching brackets */
 	//PreferenceConstants.EDITOR_MATCHING_BRACKETS;
 
-	/** Preference key for matching brackets color */
-	//PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR;
-
-	public final static char[] PAIRS= { '{', '}', '(', ')', '[', ']' };
 	
-	private DefaultCharacterPairMatcher pairsMatcher = new DefaultCharacterPairMatcher(PAIRS, ClojurePartitionScanner.CLOJURE_PARTITIONING) {
-		/* tries to match a pair be the cursor after or before a pair start/end element */
-		@Override
-		public IRegion match(IDocument doc, int offset) {
-			IRegion region = super.match(doc, offset);
-			if (region == null && offset < (doc.getLength()-1)) {
-				return super.match(doc, offset + 1);
-			} else {
-				return region;
-			}
-		}
-	};
 	
 	/** History for structure select action
 	 * STOLEN FROM THE JDT */
@@ -120,26 +102,28 @@ public class AntlrBasedClojureEditor extends TextEditor implements IClojureEdito
 		useStrictStructuralEditing = getPreferenceStore().getBoolean(ccw.preferences.PreferenceConstants.USE_STRICT_STRUCTURAL_EDITING_MODE_BY_DEFAULT);
 	}
 	
+	ClojureSourceViewer viewer; // TODO try a way of removing this horrible hack 
+								// (currently if I replace viewer in configureSourceViewerDecorationSupport(),
+								// there's a NPE thrown due to initialization ordering issue
 	@Override
 	protected void configureSourceViewerDecorationSupport(SourceViewerDecorationSupport support) {
-		support.setCharacterPairMatcher(pairsMatcher);
+		support.setCharacterPairMatcher(viewer.getPairsMatcher());
 		support.setMatchingCharacterPainterPreferenceKeys(PreferenceConstants.EDITOR_MATCHING_BRACKETS, PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR);
 		super.configureSourceViewerDecorationSupport(support);
 	}
 
 	@Override
 	protected ISourceViewer createSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
-		
 		fAnnotationAccess= createAnnotationAccess();
 		fOverviewRuler= createOverviewRuler(getSharedColors());
 		
 		// ISourceViewer viewer= new ProjectionViewer(parent, ruler, getOverviewRuler(), isOverviewRulerVisible(), styles);
-		ISourceViewer viewer= new ClojureSourceViewer(parent, ruler, getOverviewRuler(), isOverviewRulerVisible(), styles, getPreferenceStore()) {
+		ClojureSourceViewer viewer= new ClojureSourceViewer(parent, ruler, getOverviewRuler(), isOverviewRulerVisible(), styles, getPreferenceStore()) {
 			public void setStatusLineErrorMessage(String message) {
 				AntlrBasedClojureEditor.this.setStatusLineErrorMessage(message);
-				
 			}
 		};
+		this.viewer = viewer;
 		// ensure decoration support has been created and configured.
 		getSourceViewerDecorationSupport(viewer);
 		return viewer;
@@ -217,7 +201,8 @@ public class AntlrBasedClojureEditor extends TextEditor implements IClojureEdito
 
 	
     public DefaultCharacterPairMatcher getPairsMatcher() {
-        return pairsMatcher;
+        return ((ClojureSourceViewer) getSourceViewer())
+        	.getPairsMatcher();
     }
 
     @Override
@@ -230,9 +215,7 @@ public class AntlrBasedClojureEditor extends TextEditor implements IClojureEdito
 		super.createActions();
 		
 		// @todo push many (if not most) of these into ClojureSourceViewer (somehow, that's SWT and actions are eclipse-land :-/)
-		Action action= new GotoMatchingBracketAction(this);
-		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.GOTO_MATCHING_BRACKET);
-		setAction(GotoMatchingBracketAction.ID, action);
+		Action action;
 		
 		action = new GotoNextMemberAction(this);
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.GOTO_NEXT_MEMBER);
@@ -326,69 +309,7 @@ public class AntlrBasedClojureEditor extends TextEditor implements IClojureEdito
 		setAction(/*SwitchStructuralEditionModeAction.ID*/"SwitchStructuralEditionModeAction", action);
 }
 	
-	/**
-	 * Jumps to the matching bracket.
-	 */
-	public void gotoMatchingBracket() {
-		ISourceViewer sourceViewer= getSourceViewer();
-		IDocument document= sourceViewer.getDocument();
-		if (document == null)
-			return;
-
-		IRegion selection= getSignedSelection();
-
-		int selectionLength= Math.abs(selection.getLength());
-		if (selectionLength > 1) {
-			setStatusLineErrorMessage(ClojureEditorMessages.GotoMatchingBracketAction_error_invalidSelection);
-			sourceViewer.getTextWidget().getDisplay().beep();
-			return;
-		}
-
-//		// #26314
-		int sourceCaretOffset= selection.getOffset() + selection.getLength();
-		// From JavaEditor, but I don't understand what it does so I maintain it commented out
-//		if (isSurroundedByBrackets(document, sourceCaretOffset))
-//			sourceCaretOffset -= selection.getLength();
-//
-		IRegion region= pairsMatcher.match(document, sourceCaretOffset);
-		if (region == null) {
-			setStatusLineErrorMessage(ClojureEditorMessages.GotoMatchingBracketAction_error_noMatchingBracket);
-			sourceViewer.getTextWidget().getDisplay().beep();
-			return;
-		}
-
-		int offset= region.getOffset();
-		int length= region.getLength();
-
-		if (length < 1)
-			return;
-
-		int anchor= pairsMatcher.getAnchor();
-		// http://dev.eclipse.org/bugs/show_bug.cgi?id=34195
-		int targetOffset= (ICharacterPairMatcher.RIGHT == anchor) ? offset + 1: offset + length;
-
-		boolean visible= false;
-		if (sourceViewer instanceof ITextViewerExtension5) {
-			ITextViewerExtension5 extension= (ITextViewerExtension5) sourceViewer;
-			visible= (extension.modelOffset2WidgetOffset(targetOffset) > -1);
-		} else {
-			IRegion visibleRegion= sourceViewer.getVisibleRegion();
-			// http://dev.eclipse.org/bugs/show_bug.cgi?id=34195
-			visible= (targetOffset >= visibleRegion.getOffset() && targetOffset <= visibleRegion.getOffset() + visibleRegion.getLength());
-		}
-
-		if (!visible) {
-			setStatusLineErrorMessage(ClojureEditorMessages.GotoMatchingBracketAction_error_bracketOutsideSelectedElement);
-			sourceViewer.getTextWidget().getDisplay().beep();
-			return;
-		}
-
-		if (selection.getLength() < 0)
-			targetOffset -= selection.getLength();
-
-		sourceViewer.setSelectedRange(targetOffset, selection.getLength());
-		sourceViewer.revealRange(targetOffset, selection.getLength());
-	}
+	
 
 	/**
 	 * Move to beginning of current or preceding defun (beginning-of-defun).
@@ -625,9 +546,8 @@ public class AntlrBasedClojureEditor extends TextEditor implements IClojureEdito
 
 	@Override
 	public void dispose() {
-		if (pairsMatcher != null) {
-			pairsMatcher.dispose();
-			pairsMatcher = null;
+		if (getPairsMatcher() != null) {
+			getPairsMatcher().dispose();
 		}
 		if (fSelectionHistory != null) {
 			fSelectionHistory.dispose();
@@ -769,4 +689,8 @@ public class AntlrBasedClojureEditor extends TextEditor implements IClojureEdito
     public Object getParsed() {
     	return sourceViewer().getParsed();
     }
+
+	public void gotoMatchingBracket() {
+		sourceViewer().gotoMatchingBracket();
+	}
 }

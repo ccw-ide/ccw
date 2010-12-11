@@ -16,7 +16,6 @@ import java.util.List;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.commands.IHandler;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.part.WorkbenchPart;
@@ -27,9 +26,7 @@ import ccw.repl.REPLView;
 import ccw.util.PlatformUtil;
 import clojure.tools.nrepl.Connection;
 
-public class OpenDeclarationHandler extends AbstractHandler implements IHandler {
-    public final static String ID = "OpenDeclarationAction"; //$NON-NLS-1$
-
+public class OpenDeclarationHandler extends AbstractHandler {
     public Object execute(ExecutionEvent event) throws ExecutionException {
     	IWorkbenchPart part = HandlerUtil.getActivePart(event);
     	IClojureEditor clojureEditor = (IClojureEditor) PlatformUtil.getAdapter(part, IClojureEditor.class);
