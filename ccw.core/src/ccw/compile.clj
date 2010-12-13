@@ -25,7 +25,7 @@
        'ccw.editors.antlrbased.ExpandSelectionUpAction
        'ccw.editors.antlrbased.ExpandSelectionLeftAction
        'ccw.editors.antlrbased.ExpandSelectionRightAction
-       'ccw.editors.antlrbased.RaiseSelectionAction
+       'ccw.editors.antlrbased.RaiseSelectionHandler
        'ccw.editors.antlrbased.IndentSelectionAction
        'ccw.editors.antlrbased.SplitSexprAction
        'ccw.editors.antlrbased.JoinSexprAction
@@ -34,5 +34,4 @@
        'ccw.editors.antlrbased.EditorSupport
        'ccw.editors.antlrbased.ClojureHyperlinkDetector
        'ccw.editors.antlrbased.ClojureHyperlink])))
-
 

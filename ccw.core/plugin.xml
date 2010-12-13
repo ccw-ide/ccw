@@ -1259,5 +1259,21 @@
            </with>
         </enabledWhen>
      </handler>
+     <handler
+           class="ccw.editors.antlrbased.RaiseSelectionHandler"
+           commandId="ccw.ui.edit.text.clojure.select.raise">
+        <enabledWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </enabledWhen>
+     </handler>
   </extension>
 </plugin>
