@@ -28,7 +28,6 @@
                       [ExpandSelectionUpAction]
                       [ExpandSelectionLeftAction]
                       [ExpandSelectionRightAction]
-                      [RaiseSelectionHandler]
                       [IndentSelectionAction]
                       [SplitSexprAction]
                       [JoinSexprAction]

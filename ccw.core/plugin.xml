@@ -1260,7 +1260,7 @@
         </enabledWhen>
      </handler>
      <handler
-           class="ccw.editors.antlrbased.RaiseSelectionHandler"
+           class="ccw.util.ClojureHandlerFactory:ccw.editors.antlrbased.handlers/raise"
            commandId="ccw.ui.edit.text.clojure.select.raise">
         <enabledWhen>
            <with
