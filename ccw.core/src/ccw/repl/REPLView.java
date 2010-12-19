@@ -23,6 +23,7 @@ import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IWorkbenchPage;
@@ -252,7 +253,11 @@ public class REPLView extends ViewPart implements IAdaptable {
             public void setStatusLineErrorMessage(String msg) {
             	if (msg != null) {
 	            	IStatusLineManager slm = (IStatusLineManager) REPLView.super.getSite().getService(IStatusLineManager.class);
-	            	slm.setErrorMessage(msg);
+	            	if (slm != null) {
+	            		slm.setErrorMessage(msg);
+	            	} else {
+	            		MessageDialog.openError(Display.getCurrent().getActiveShell(), "REPL View status", msg);
+	            	}
             	}
             };
             public String getDeclaringNamespace() {
