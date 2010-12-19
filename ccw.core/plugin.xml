@@ -391,6 +391,13 @@
             id="ccw.view.repl.commands.showConsole"
             name="Show Console">
       </command>
+      <command
+            categoryId="org.eclipse.ui.category.navigate"
+            defaultHandler="ccw.repl.Actions$ConnecToEclipseNREPL"
+            description="New REPL on Eclipse internal nrepl server (advanced usages)"
+            id="ccw.ui.repl.connectToEclipseNREPL"
+            name="New REPL on Eclipse internal nrepl server (advanced usages)">
+      </command>
       
    </extension>
    
@@ -606,6 +613,12 @@
             contextId="ccw.ui.clojureEditorScope"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+K">
+      </key>
+      <key
+            commandId="ccw.ui.repl.connectToEclipseNREPL"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+M3+E R">
       </key>
 			
             

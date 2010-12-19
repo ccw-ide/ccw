@@ -30,6 +30,16 @@ public class Actions {
         }
     }
     
+    public static class ConnecToEclipseNREPL extends AbstractHandler {
+		public Object execute(ExecutionEvent event) throws ExecutionException {
+            try {
+                return REPLView.connect("127.0.0.1", CCWPlugin.getDefault().getREPLServerPort());
+            } catch (Exception e) {
+                throw new ExecutionException("Could not connect to Eclipse's internal nrepl server", e);
+            }
+		}
+    }
+    
     public static class ShowActiveREPL extends AbstractHandler {
         public static boolean execute (boolean activate) {
             REPLView active = REPLView.activeREPL.get();

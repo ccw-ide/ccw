@@ -12,7 +12,6 @@ package ccw.launching;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,7 +47,6 @@ import ccw.ClojureProject;
 import ccw.repl.REPLView;
 import ccw.util.DisplayUtil;
 import clojure.lang.RT;
-import clojure.lang.Symbol;
 import clojure.lang.Var;
 import clojure.tools.nrepl.SafeFn;
 
@@ -57,15 +55,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
     private static Var currentLaunch = Var.create();
     private static IConsole lastConsoleOpened;
     
-    private static ServerSocket ackREPLServer;
     static {
-        try {
-            ackREPLServer = (ServerSocket)((List)Var.find(Symbol.intern("clojure.tools.nrepl/start-server")).invoke()).get(0);
-            CCWPlugin.log("Started ccw nREPL server on port " + ackREPLServer.getLocalPort());
-        } catch (Exception e) {
-            CCWPlugin.logError("Could not start plugin-hosted REPL server for launch ack", e);
-        }
-        
         ConsolePlugin.getDefault().getConsoleManager().addConsoleListener(new IConsoleListener() {
             public void consolesRemoved(IConsole[] consoles) {}
             public void consolesAdded(IConsole[] consoles) {
@@ -189,7 +179,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 			
 			String nREPLInit = "(require 'clojure.tools.nrepl)" + 
 			    // don't want start-server return value printed
-			    String.format("(do (clojure.tools.nrepl/start-server 0 %s) nil)", ackREPLServer.getLocalPort());
+			    String.format("(do (clojure.tools.nrepl/start-server 0 %s) nil)", CCWPlugin.getDefault().getREPLServerPort());
 			
 			return String.format("-i \"%s\" -e \"%s\" %s %s", toolingFile, nREPLInit,
 			        filesToLaunchArguments, userProgramArguments);

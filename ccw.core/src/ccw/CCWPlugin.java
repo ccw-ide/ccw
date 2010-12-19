@@ -12,7 +12,12 @@
  *******************************************************************************/
 package ccw;
 
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.util.List;
+
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunch;
@@ -44,6 +49,8 @@ import ccw.preferences.SyntaxColoringPreferencePage;
 import ccw.repl.REPLView;
 import ccw.util.DisplayUtil;
 import ccw.utils.editors.antlrbased.IScanContext;
+import clojure.lang.Symbol;
+import clojure.lang.Var;
 import clojure.osgi.ClojureOSGi;
 import clojure.tools.nrepl.Connection;
 
@@ -85,6 +92,27 @@ public class CCWPlugin extends AbstractUIPlugin {
     
     private FontRegistry fontRegistry;
     
+    private ServerSocket ackREPLServer;
+    
+    private synchronized void startREPLServer() throws CoreException {
+    	if (ackREPLServer == null) {
+	        try {
+	            ackREPLServer = (ServerSocket)((List)Var.find(Symbol.intern("clojure.tools.nrepl/start-server")).invoke()).get(0);
+	            CCWPlugin.log("Started ccw nREPL server on port " + ackREPLServer.getLocalPort());
+	        } catch (Exception e) {
+	            CCWPlugin.logError("Could not start plugin-hosted REPL server", e);
+	            throw new CoreException(createErrorStatus("Could not start plugin-hosted REPL server", e));
+	        }
+    	}
+    }
+    
+    public int getREPLServerPort() throws CoreException {
+    	if (ackREPLServer == null) {
+    		startREPLServer();
+    	}
+    	return ackREPLServer.getLocalPort();
+    }
+
     public CCWPlugin() {
     }
     
@@ -93,6 +121,7 @@ public class CCWPlugin extends AbstractUIPlugin {
         
         plugin = this;
         startClojureCode(context);
+        startREPLServer();
         initializeParenRainbowColors();
         createColorRegistry();
     }
@@ -180,8 +209,19 @@ public class CCWPlugin extends AbstractUIPlugin {
     	// We don't remove colors when deregistered, because, well, we don't have a
     	// corresponding method on the ColorRegistry instance!
     	// We also don't remove fonts when deregistered
+    	stopREPLServer();
         plugin = null;
         super.stop(context);
+    }
+    
+    private void stopREPLServer() {
+    	if (ackREPLServer != null) {
+    		try {
+				ackREPLServer.close();
+			} catch (IOException e) {
+				logError("Error while trying to close ccw internal nrepl server", e);
+			}
+    	}
     }
     
     private void initializeParenRainbowColors() {
@@ -203,8 +243,6 @@ public class CCWPlugin extends AbstractUIPlugin {
         		}
             }
     	}
-    	
-    	
     }
 
     /**
