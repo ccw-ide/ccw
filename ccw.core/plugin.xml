@@ -1288,5 +1288,37 @@
            </with>
         </enabledWhen>
      </handler>
+     <handler
+           class="ccw.util.ClojureHandlerFactory:ccw.editors.antlrbased.handlers/split"
+           commandId="ccw.ui.edit.text.clojure.split.sexpr">
+        <enabledWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </enabledWhen>
+     </handler>
+     <handler
+           class="ccw.util.ClojureHandlerFactory:ccw.editors.antlrbased.handlers/join"
+           commandId="ccw.ui.edit.text.clojure.join.sexpr">
+        <enabledWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </enabledWhen>
+     </handler>
   </extension>
 </plugin>

@@ -8,15 +8,16 @@
    
 (defn- editor [event] (PlatformUtil/getAdapter (HandlerUtil/getActivePart event) IClojureEditor))
 
-(defn raise
-  [_ event]
-  (let [editor (editor event)
-        {:keys #{length offset}} (bean (.getUnSignedSelection editor))
+(defn- apply-paredit-command [editor command-key]
+  (let [{:keys #{length offset}} (bean (.getUnSignedSelection editor))
         text  (.get (.getDocument editor))
-        result (pc/paredit :paredit-raise-sexp (.getParsed editor) {:text text :offset offset :length length})]
+        result (pc/paredit command-key (.getParsed editor) {:text text :offset offset :length length})]
     (when-let [modif (-?> result :modifs first)]
       (let [{:keys #{length offset text}} modif
             document (-> editor .getDocument)]
         (.replace document offset length text)
         (.selectAndReveal editor offset (.length text))))))
 
+(defn raise [_ event] (apply-paredit-command (editor event) :paredit-raise-sexp))
+(defn split [_ event] (apply-paredit-command (editor event) :paredit-split-sexp))
+(defn join  [_ event] (apply-paredit-command (editor event) :paredit-join-sexps))

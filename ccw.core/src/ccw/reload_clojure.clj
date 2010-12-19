@@ -29,8 +29,6 @@
                       [ExpandSelectionLeftAction]
                       [ExpandSelectionRightAction]
                       [IndentSelectionAction]
-                      [SplitSexprAction]
-                      [JoinSexprAction]
                       [SwitchStructuralEditionModeAction]
                       [OpenDeclarationAction]
                       [EditorSupport]

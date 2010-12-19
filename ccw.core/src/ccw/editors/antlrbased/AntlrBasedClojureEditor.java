@@ -292,14 +292,6 @@ public class AntlrBasedClojureEditor extends TextEditor implements IClojureEdito
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.INDENT_SELECTION);
 		setAction(/*IndentSelectionAction.ID*/"IndentSelectionAction", action);
 
-		action = new SplitSexprAction(this);
-		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.SPLIT_SEXPR);
-		setAction(/*SplitSexprAction.ID*/"SplitSexprAction", action);
-
-		action = new JoinSexprAction(this);
-		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.JOIN_SEXPR);
-		setAction(/*JoinSexprAction.ID*/"JoinSexprAction", action);
-		
 		action = new SwitchStructuralEditionModeAction(this);
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.SWITCH_STRUCTURAL_EDITION_MODE);
 		setAction(/*SwitchStructuralEditionModeAction.ID*/"SwitchStructuralEditionModeAction", action);

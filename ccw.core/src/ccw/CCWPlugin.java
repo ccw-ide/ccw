@@ -193,8 +193,6 @@ public class CCWPlugin extends AbstractUIPlugin {
     	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.ExpandSelectionLeftAction");
     	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.ExpandSelectionRightAction");
     	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.IndentSelectionAction");
-    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.SplitSexprAction");
-    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.JoinSexprAction");
     	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.SwitchStructuralEditionModeAction");
     	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.OpenDeclarationAction");
     	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.EditorSupport");
