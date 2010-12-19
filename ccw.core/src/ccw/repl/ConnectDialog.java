@@ -40,8 +40,7 @@ public class ConnectDialog extends Dialog {
         new Label(parent, 0).setText("Hostname");
         
         hosts = new Combo(parent, SWT.BORDER);
-        hosts.setText("                       "); // don't know much about swt layouts yet :-(
-        hosts.setFocus();
+        hosts.setText("127.0.0.1"); // don't know much about swt layouts yet :-(
         hosts.setSelection(new Point(0, hosts.getText().length()));
         
         new Label(parent, 0).setText("Port");
@@ -56,6 +55,7 @@ public class ConnectDialog extends Dialog {
             }
         });
         
+        port.setFocus();
         return composite;
     }
 
