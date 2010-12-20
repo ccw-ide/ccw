@@ -6,6 +6,5 @@
   * Fixing editor's Ctrl+Click "open declaration" (No matching field found: getParsed on AntlrBasedClojureEditor -> is on SourceViewer now ?)
   * [TODO] Classify content: what to do to preserve iso-functionality, consider several use cases (inexperimented user "a la Lee's students", power user), consider updating the documentation before releasing, etc.
   
-  
   * Have a proper StatusLineManager for the REPL View (for reporting errors, being able to switch default/strict structural edition mode)
   * Be able, in a REPL View connected to an eclipse embedded nrepl server, to open decls, namespaces, etc., directly from the REPL (provided that the corresponding .clj file on the classpath is not older than the .class file, and adapting the read-only status of the editor to the write possibilities of the file found in the classpath)
