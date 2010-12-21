@@ -60,10 +60,9 @@ public class AntlrBasedClojureEditor extends TextEditor implements IClojureEdito
 
 	
 	
-	/** History for structure select action
-	 * STOLEN FROM THE JDT */
-	private SelectionHistory fSelectionHistory;
-
+	public SelectionHistory getSelectionHistory() {
+		return sourceViewer().getSelectionHistory();
+	}
 
 	/** The projection support */
 	private ProjectionSupport fProjectionSupport;
@@ -269,25 +268,11 @@ public class AntlrBasedClojureEditor extends TextEditor implements IClojureEdito
 		setAction(CONTENT_ASSIST_PROPOSAL, action); 
 		markAsStateDependentAction(CONTENT_ASSIST_PROPOSAL, true);
 
-		// Copied directly from JDT (no interest in owning the code currently)
-		fSelectionHistory = new SelectionHistory(this);
-		StructureSelectHistoryAction historyAction= new StructureSelectHistoryAction(this, fSelectionHistory);
-		historyAction.setActionDefinitionId(IClojureEditorActionDefinitionIds.SELECT_LAST);
-		setAction("RestoreSelection", historyAction);
-		fSelectionHistory.setHistoryAction(historyAction);
+//		StructureSelectHistoryHandler historyAction= new StructureSelectHistoryHandler(this);
+//		historyAction.setActionDefinitionId(IClojureEditorActionDefinitionIds.SELECT_LAST);
+//		setAction("RestoreSelection", historyAction);
+//		sourceViewer().getSelectionHistory().setHistoryAction(historyAction);
 
-		action = new ExpandSelectionUpAction(this, fSelectionHistory);
-		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.EXPAND_SELECTION_UP);
-		setAction(/*ExpandSelectionUpAction.ID*/"ExpandSelectionUpAction", action);
-		
-		action = new ExpandSelectionLeftAction(this, fSelectionHistory);
-		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.EXPAND_SELECTION_LEFT);
-		setAction(/*ExpandSelectionLeftAction.ID*/"ExpandSelectionLeftAction", action);
-		
-		action = new ExpandSelectionRightAction(this, fSelectionHistory);
-		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.EXPAND_SELECTION_RIGHT);
-		setAction(/*ExpandSelectionRightAction.ID*/"ExpandSelectionRightAction", action);
-		
 		action = new IndentSelectionAction(this);
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.INDENT_SELECTION);
 		setAction(/*IndentSelectionAction.ID*/"IndentSelectionAction", action);
@@ -536,10 +521,6 @@ public class AntlrBasedClojureEditor extends TextEditor implements IClojureEdito
 	public void dispose() {
 		if (getPairsMatcher() != null) {
 			getPairsMatcher().dispose();
-		}
-		if (fSelectionHistory != null) {
-			fSelectionHistory.dispose();
-			fSelectionHistory = null;
 		}
 		super.dispose();
 	}

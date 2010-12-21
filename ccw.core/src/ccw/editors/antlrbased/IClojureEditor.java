@@ -4,6 +4,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.source.DefaultCharacterPairMatcher;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import ccw.repl.REPLView;
@@ -58,6 +59,10 @@ public interface IClojureEditor {
      */
     IRegion getSignedSelection ();
     
+	SelectionHistory getSelectionHistory();
+
+    ISelectionProvider getSelectionProvider();
+
     /**
      * Returns the current namespace of the editor.
      */

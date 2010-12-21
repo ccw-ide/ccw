@@ -22,9 +22,6 @@
        'ccw.editors.antlrbased.PareditAutoEditStrategy
        'ccw.editors.antlrbased.ClojureFormat
        'ccw.editors.antlrbased.StacktraceHyperlink
-       'ccw.editors.antlrbased.ExpandSelectionUpAction
-       'ccw.editors.antlrbased.ExpandSelectionLeftAction
-       'ccw.editors.antlrbased.ExpandSelectionRightAction
        'ccw.editors.antlrbased.IndentSelectionAction
        'ccw.editors.antlrbased.SwitchStructuralEditionModeAction
        'ccw.editors.antlrbased.OpenDeclarationAction

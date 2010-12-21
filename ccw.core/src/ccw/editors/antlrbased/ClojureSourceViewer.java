@@ -89,6 +89,14 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 
     private boolean inEscapeSequence;
     
+	/** History for structure select action
+	 * STOLEN FROM THE JDT */
+	private SelectionHistory fSelectionHistory;
+
+	public SelectionHistory getSelectionHistory() {
+		return fSelectionHistory;
+	}
+    
     public ClojureSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles, IPreferenceStore store) {
         super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles);
         setPreferenceStore(store);
@@ -165,8 +173,11 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
         if (configuration instanceof ClojureSourceViewerConfiguration)
             fConfiguration = (ClojureSourceViewerConfiguration) configuration;
 
+		fSelectionHistory = new SelectionHistory(this);
+
         fIsConfigured= true;
     }
+    
     
     /**
      * Creates a color from the information stored in the given preference store.
@@ -273,6 +284,11 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 		
         if (fPreferenceStore != null)
             fPreferenceStore.removePropertyChangeListener(this);
+
+		if (fSelectionHistory != null) {
+			fSelectionHistory.dispose();
+			fSelectionHistory = null;
+		}
 
         super.unconfigure();
         fIsConfigured= false;

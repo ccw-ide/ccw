@@ -12,12 +12,11 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 public class SelectionHistory {
 
 	private List fHistory;
-	private AntlrBasedClojureEditor fEditor;
+	private IClojureEditor fEditor;
 	private ISelectionChangedListener fSelectionListener;
 	private int fSelectionChangeListenerCounter;
-	private StructureSelectHistoryAction fHistoryAction;
 
-	public SelectionHistory(AntlrBasedClojureEditor editor) {
+	public SelectionHistory(IClojureEditor editor) {
 		Assert.isNotNull(editor);
 		fEditor= editor;
 		fHistory= new ArrayList(3);
@@ -30,11 +29,6 @@ public class SelectionHistory {
 		fEditor.getSelectionProvider().addSelectionChangedListener(fSelectionListener);
 	}
 
-	public void setHistoryAction(StructureSelectHistoryAction action) {
-		Assert.isNotNull(action);
-		fHistoryAction= action;
-	}
-
 	public boolean isEmpty() {
 		return fHistory.isEmpty();
 	}
@@ -42,7 +36,7 @@ public class SelectionHistory {
 	public void remember(ISourceRange range) {
 		System.out.println("asked to remember range:" + range);
 		fHistory.add(range);
-		fHistoryAction.update();
+//		fHistoryAction.update(); TODO correctement
 	}
 
 	public ISourceRange getLast() {
@@ -50,7 +44,7 @@ public class SelectionHistory {
 			return null;
 		int size= fHistory.size();
 		ISourceRange result= (ISourceRange)fHistory.remove(size - 1);
-		fHistoryAction.update();
+//		fHistoryAction.update(); TODO correctement
 		return result;
 	}
 
@@ -58,7 +52,7 @@ public class SelectionHistory {
 		if (fHistory.isEmpty())
 			return;
 		fHistory.clear();
-		fHistoryAction.update();
+//		fHistoryAction.update(); TODO correctement
 	}
 
 	public void ignoreSelectionChanges() {
