@@ -58,8 +58,6 @@ public class AntlrBasedClojureEditor extends TextEditor implements IClojureEdito
 	/** Preference key for matching brackets */
 	//PreferenceConstants.EDITOR_MATCHING_BRACKETS;
 
-	
-	
 	public SelectionHistory getSelectionHistory() {
 		return sourceViewer().getSelectionHistory();
 	}
@@ -267,11 +265,6 @@ public class AntlrBasedClojureEditor extends TextEditor implements IClojureEdito
 		action.setActionDefinitionId(id);
 		setAction(CONTENT_ASSIST_PROPOSAL, action); 
 		markAsStateDependentAction(CONTENT_ASSIST_PROPOSAL, true);
-
-//		StructureSelectHistoryHandler historyAction= new StructureSelectHistoryHandler(this);
-//		historyAction.setActionDefinitionId(IClojureEditorActionDefinitionIds.SELECT_LAST);
-//		setAction("RestoreSelection", historyAction);
-//		sourceViewer().getSelectionHistory().setHistoryAction(historyAction);
 
 		action = new IndentSelectionAction(this);
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.INDENT_SELECTION);

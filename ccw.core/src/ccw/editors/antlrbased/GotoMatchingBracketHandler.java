@@ -25,7 +25,7 @@ public class GotoMatchingBracketHandler extends AbstractHandler {
     	IWorkbenchPart part = HandlerUtil.getActivePart(event);
     	IClojureEditor clojureEditor = (IClojureEditor) PlatformUtil.getAdapter(part, IClojureEditor.class);
     	if (clojureEditor == null) {
-    		CCWPlugin.logWarning("Handler " + OpenDeclarationHandler.class.getSimpleName()
+    		CCWPlugin.logWarning("Handler " + GotoMatchingBracketHandler.class.getSimpleName()
     				+ " executed on a IWorkbenchPart (id:" + part.getSite().getId() + ") which is not able to adapt to " + IClojureEditor.class.getSimpleName());
     		return null;
     	}

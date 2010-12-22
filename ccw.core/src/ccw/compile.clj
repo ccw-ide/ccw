@@ -24,7 +24,6 @@
        'ccw.editors.antlrbased.StacktraceHyperlink
        'ccw.editors.antlrbased.IndentSelectionAction
        'ccw.editors.antlrbased.SwitchStructuralEditionModeAction
-       'ccw.editors.antlrbased.OpenDeclarationAction
        'ccw.editors.antlrbased.EditorSupport
        'ccw.editors.antlrbased.ClojureHyperlinkDetector
        'ccw.editors.antlrbased.ClojureHyperlink])))

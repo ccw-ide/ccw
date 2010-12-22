@@ -10,7 +10,8 @@
 ;*******************************************************************************/
 
 (ns ccw.editors.antlrbased.handlers
-  (:require [paredit.core :as pc])
+  (:require [paredit.core :as pc]
+            [ccw.editors.antlrbased.ClojureHyperlinkDetector :as hlu]) ; hlu as HyperLinkUtil
   (:use [clojure.contrib.core :only [-?>]])  
   (:import
     [org.eclipse.ui.handlers HandlerUtil]
@@ -60,3 +61,9 @@
     (when-let [old (-> editor .getSelectionHistory .getLast)]
       (ignoring-selection-changes editor 
         #(.selectAndReveal editor (.getOffset old) (.getLength old))))))
+
+(defn open-declaration [_ event]
+  (let [editor (editor event)
+        caret-offset (-> editor .getUnSignedSelection .getOffset)]
+    (if-let [[{open :open}] (hlu/detect-hyperlinks caret-offset editor)]
+      (open))))

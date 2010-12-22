@@ -246,6 +246,7 @@ public class REPLView extends ViewPart implements IAdaptable {
         logPanel.setFont(JFaceResources.getFont(JFaceResources.TEXT_FONT));
         
         viewer = new ClojureSourceViewer(split, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL, prefs) {
+        	public REPLView getCorrespondingREPL() { return REPLView.this; };
             public Connection getCorrespondingREPLConnection () {
                 // we'll be connected by the time this is called
                 return toolConnection;

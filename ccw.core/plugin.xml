@@ -1177,22 +1177,6 @@
   <extension
         point="org.eclipse.ui.handlers">
      <handler
-           class="ccw.editors.antlrbased.OpenDeclarationHandler"
-           commandId="ccw.ui.edit.text.clojure.open.declaration">
-        <enabledWhen>
-           <with
-                 variable="activeContexts">
-              <iterate
-                    ifEmpty="false"
-                    operator="or">
-                 <equals
-                       value="ccw.ui.clojureEditorScope">
-                 </equals>
-              </iterate>
-           </with>
-        </enabledWhen>
-     </handler>
-     <handler
            class="ccw.editors.antlrbased.GotoMatchingBracketHandler"
            commandId="ccw.ui.edit.text.clojure.goto.matching.bracket">
         <enabledWhen>
@@ -1371,6 +1355,22 @@
      <handler
            class="ccw.util.ClojureHandlerFactory:ccw.editors.antlrbased.handlers/select-last"
            commandId="ccw.ui.edit.text.clojure.select.last">
+        <enabledWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </enabledWhen>
+     </handler>
+     <handler
+           class="ccw.util.ClojureHandlerFactory:ccw.editors.antlrbased.handlers/open-declaration"
+           commandId="ccw.ui.edit.text.clojure.open.declaration">
         <enabledWhen>
            <with
                  variable="activeContexts">

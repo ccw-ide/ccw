@@ -27,7 +27,6 @@
                       [PareditAutoEditStrategy]
                       [IndentSelectionAction]
                       [SwitchStructuralEditionModeAction]
-                      [OpenDeclarationAction]
                       [EditorSupport]
                       [ClojureHyperlinkDetector]
                       [ClojureHyperlink]]))
