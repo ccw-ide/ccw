@@ -189,7 +189,6 @@ public class CCWPlugin extends AbstractUIPlugin {
     	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.PareditAutoEditStrategy");
     	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.ClojureFormat");
     	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.StacktraceHyperlink");
-    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.IndentSelectionAction");
     	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.SwitchStructuralEditionModeAction");
     	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.EditorSupport");
     	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.ClojureHyperlinkDetector");

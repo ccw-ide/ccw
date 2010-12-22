@@ -52,6 +52,8 @@
 (defn expand-left [_ event] (apply-paredit-selection-command (editor event) :paredit-expand-left))
 (defn expand-right [_ event] (apply-paredit-selection-command (editor event) :paredit-expand-right))
 (defn expand-up [_ event] (apply-paredit-selection-command (editor event) :paredit-expand-up))
+(defn indent-selection [_ event] (apply-paredit-selection-command (editor event) :paredit-indent-line))
+
 
 ;; TODO won't work if the ClojureSourceViewer is reused many times via configure/unconfigure (since after a re-configure,
 ;; a fresh SelectionHistory instance will be created)

@@ -266,10 +266,6 @@ public class AntlrBasedClojureEditor extends TextEditor implements IClojureEdito
 		setAction(CONTENT_ASSIST_PROPOSAL, action); 
 		markAsStateDependentAction(CONTENT_ASSIST_PROPOSAL, true);
 
-		action = new IndentSelectionAction(this);
-		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.INDENT_SELECTION);
-		setAction(/*IndentSelectionAction.ID*/"IndentSelectionAction", action);
-
 		action = new SwitchStructuralEditionModeAction(this);
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.SWITCH_STRUCTURAL_EDITION_MODE);
 		setAction(/*SwitchStructuralEditionModeAction.ID*/"SwitchStructuralEditionModeAction", action);
