@@ -328,6 +328,9 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     	structuralEditionPossible = state;
     	syncWithStructuralEditionPossibleState();
     }
+    public boolean isStructuralEditionPossible() {
+    	return structuralEditionPossible;
+    }
     private void syncWithStructuralEditionPossibleState() {
     	DisplayUtil.asyncExec(new Runnable() {
 			public void run() {

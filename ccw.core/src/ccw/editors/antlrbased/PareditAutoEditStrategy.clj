@@ -84,20 +84,25 @@
   (let [^IClojureEditor editor (-> this .state deref :editor)]
     (when (and (.doit command) 
                (not (.isInEscapeSequence editor)) 
-               (.getParsed editor))
+               (.isStructuralEditionPossible editor))
+      ;(println "yo!")
       (let [signed-selection (bean (.getSignedSelection editor))
             ;_ (println (str "signed-selection:" signed-selection))
             document-text {:text (.get document) 
                            :caret-offset (+ (:offset signed-selection) (:length signed-selection)) 
                            :selection-length (:length signed-selection)}
+            ;_ (println "document-text:" document-text)
             par-command {:text (.text command) :offset (.offset command) :length (.length command)}
             ;_ (println (str "par-command:" par-command))
             [par-command par-text] (paredit-args par-command document-text)
             ;_ (println "here is the par-command:" par-command)
+            ;_ (println "do-command?" (do-command? editor par-command))
             result (and 
                      par-command 
                      (do-command? editor par-command)
-                     (paredit par-command (.getParsed editor) par-text))]
+                     (paredit par-command (.getParsed editor) par-text))
+            ;_ (println "result:" result)
+            ]
         (when (and result (not= :ko (-> result :parser-state)))
           (if-let [modif (-?> result :modifs first)]
             (do

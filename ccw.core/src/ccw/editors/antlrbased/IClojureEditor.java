@@ -89,4 +89,6 @@ public interface IClojureEditor {
 	void gotoMatchingBracket();
 	
 	DefaultCharacterPairMatcher getPairsMatcher();
+
+	boolean isStructuralEditionPossible();
 }

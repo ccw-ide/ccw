@@ -651,4 +651,8 @@ public class AntlrBasedClojureEditor extends TextEditor implements IClojureEdito
 	public void gotoMatchingBracket() {
 		sourceViewer().gotoMatchingBracket();
 	}
+
+	public boolean isStructuralEditionPossible() {
+		return sourceViewer().isStructuralEditionPossible();
+	}
 }
