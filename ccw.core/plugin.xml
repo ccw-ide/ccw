@@ -1169,7 +1169,7 @@
           id="ccw.ui.clojureCode"
           name="Clojure Editor">
        <context
-             type="ccw.editors.antlrbased.AntlrBasedClojureEditor">
+             type="ccw.editors.antlrbased.IClojureEditor">
        </context>
     </target>
     

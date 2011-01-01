@@ -1,5 +1,6 @@
 package ccw.editors.antlrbased;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -15,7 +16,7 @@ import ccw.repl.REPLView;
  * interchangeably (necessary because editors cannot be used within views,
  * but {@link ClojureSourceViewer} is needed for useful REPL presentation).
  */
-public interface IClojureEditor {
+public interface IClojureEditor extends IAdaptable {
 	
 	String KEY_BINDING_SCOPE = "ccw.ui.clojureEditorScope";   //$NON-NLS-1$
 	

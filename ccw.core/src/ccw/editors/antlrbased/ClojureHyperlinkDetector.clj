@@ -12,7 +12,7 @@
     [org.eclipse.jface.text.hyperlink AbstractHyperlinkDetector
                                       IHyperlink
                                       IHyperlinkDetector]
-    [ccw.editors.antlrbased AntlrBasedClojureEditor
+    [ccw.editors.antlrbased IClojureEditor
                             ClojureEditorMessages
                             IHyperlinkConstants
                             ClojureHyperlink]
@@ -28,7 +28,7 @@
 (def *ID* (IHyperlinkConstants/ClojureHyperlinkDetector_ID)) 
 (def *TARGET_ID* (IHyperlinkConstants/ClojureHyperlinkDetector_TARGET_ID))  
 
-(defn editor [this] (.getClassAdapter this AntlrBasedClojureEditor))
+(defn editor [this] (.getClassAdapter this IClojureEditor))
 
 (defn find-decl [sym editor]
   (let [split (.split sym "/")

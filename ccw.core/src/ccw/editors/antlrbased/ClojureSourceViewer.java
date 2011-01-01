@@ -485,4 +485,11 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 	public DefaultCharacterPairMatcher getPairsMatcher() {
 		return pairsMatcher;
 	}
+	
+	public Object getAdapter(Class adapter) {
+		if ( IClojureEditor.class == adapter) {
+			return this;
+		}
+		return null;
+	}
 }
