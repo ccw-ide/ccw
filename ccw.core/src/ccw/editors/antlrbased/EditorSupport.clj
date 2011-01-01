@@ -38,11 +38,11 @@
     r))
 
 (defn -startWatchParseRef [r editor]
-  (add-watch r :track-state (fn [_key _r _old-state new-state] 
+  (add-watch r :track-state (fn [_ _ _ new-state] 
                               (.setStructuralEditionPossible editor 
-                                (let [state (not (nil? @(:parser new-state)))
-                                      state (or state (.isEmpty (:text new-state)))]
-                                  state)))))
+                                (let [possible? (not (nil? @(:parser new-state)))
+                                      possible? (or possible? (.isEmpty (:text new-state)))]
+                                  possible?)))))
 
 (defn -getParser [text r]
   (let [rv @r] 
