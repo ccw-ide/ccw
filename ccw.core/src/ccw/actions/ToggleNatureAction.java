@@ -31,7 +31,6 @@ import ccw.ClojureCore;
 /**
  * Inspired from cusp
  * @author Laurent
- *
  */
 public class ToggleNatureAction implements IObjectActionDelegate {
 

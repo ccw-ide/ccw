@@ -69,6 +69,7 @@ import clojure.lang.RT;
  * 
  */
 public final class ClojureCore {
+	
 	static public final String NATURE_ID = "ccw.nature";
     /**
      * Clojure file extension
@@ -207,24 +208,7 @@ public final class ClojureCore {
         return clojureProjects.values().toArray(new ClojureProject[] {});
     }
     
-	/**
-	 * Currently very basic: uses a regexp
-	 * TODO: should also work with in-ns calls ?
-	 * @return
-	 */
-	public static String getDeclaringNamespace(String sourceText) {
-			String searchRegexp = "\\(\\s*ns\\s+([^\\s\\)#\\[\\'\\{]+)";
-			Matcher matcher = Pattern.compile(searchRegexp).matcher(sourceText);
-			
-			String result = null;
-			while (matcher.find()) {
-				result = matcher.group(1);
-			}
-			
-			return result;
-	}
-	
-    /*
+	/*
      *  TODO Still 1 more case to handle:
      *  - when a LIBRARY does not have source file in its classpath, then search attached source files folder/archive 
      */
@@ -313,7 +297,7 @@ public final class ClojureCore {
 				IPackageFragmentRoot[] libPackageFragmentRoots = javaProject.findPackageFragmentRoots(cpe);
 				for (IPackageFragmentRoot pfr: libPackageFragmentRoots) {
 					try {
-						if ("".equals(getNsPackageName(searchedNS))) {
+						if ("".equals(getPackageNameFromNamespaceName(searchedNS))) {
 							try {
 								if (tryNonJavaResources(pfr.getNonJavaResources(), searchedFileName, line)) {
 									return true;
@@ -325,7 +309,7 @@ public final class ClojureCore {
 							}
 						}
 						for (IJavaElement javaElement: pfr.getChildren()) {
-							if (!javaElement.getElementName().equals(getNsPackageName(searchedNS)))
+							if (!javaElement.getElementName().equals(getPackageNameFromNamespaceName(searchedNS)))
 								continue;
 							if (! (javaElement instanceof IPackageFragment))
 								continue;
@@ -375,36 +359,92 @@ public final class ClojureCore {
     	return ResourcesPlugin.getWorkspace().getRoot().exists(path);
 	}
 
-	public static String getNsPackageName(String ns) {
-    	return (ns.lastIndexOf(".") < 0) ? "" : ns.substring(0, ns.lastIndexOf(".")).replace('-', '_');
+	public static String getPackageNameFromNamespaceName(String nsName) {
+    	return (nsName.lastIndexOf(".") < 0) ? "" : nsName.substring(0, nsName.lastIndexOf(".")).replace('-', '_');
     }
-    
-    // Currently based on file name convention
-    // Should be based, later, on static code analysis (and/or dynamic
-    // report of created namespace)
-    public static String getDeclaredNamespace(IFile file) {
+
+	public static String getNamespaceNameFromPackageName(String packageName) {
+		return packageName.toString().replace('/', '.').replace('_', '-');
+	}
+	
+	private final static Pattern SEARCH_DECLARING_NAMESPACE_PATTERN
+		= Pattern.compile("\\(\\s*ns\\s+([^\\s\\)#\\[\\'\\{]+)"); 
+    /**
+	 * TODO: should also work with in-ns calls ?
+	 */
+	public static String getDeclaringNamespace(String sourceText) {
+		Matcher matcher = SEARCH_DECLARING_NAMESPACE_PATTERN.matcher(sourceText);
+		return ( matcher.find() ? matcher.group(1) : null ); 
+	}
+	
+	private final static Pattern HAS_NS_CALL_PATTERN = Pattern.compile("^\\s*\\(ns(\\s.*|$)");
+	/**
+	 * @return true if a ns call is detected by a regex-based heuristic
+	 */
+	private static boolean hasNsCall(String sourceCode) {
+		Matcher matcher = HAS_NS_CALL_PATTERN.matcher(sourceCode);
+		return matcher.find(); 
+	}
+
+	/**
+	 * Get the file's namespace name if the file is a lib.
+	 * <p>
+	 * Checks:
+	 * <ul>
+	 *   <li>if the file is in the classpath</li>
+	 *   <li>if the file ends with .clj</li>
+	 *   <li>if the file contains a ns call(*)</li>
+	 * </ul>
+	 * If check is ko, returns nil, the file does not correspond to a 'lib'
+	 * <br/>
+	 * If check is ok, deduce the 'lib' name from the file path, e.g. a file
+	 * path such as <code>/projectName/src/foo/bar_baz/core.clj</code> will 
+	 * return "foo.bar-baz.core".
+	 * </p>
+	 * <p>
+	 * (*): based on a simplistic regex based heuristic for maximum speed
+	 * </p>
+	 * @param file
+	 * @return null if not a lib, String with lib namespace name if a lib
+	 */
+    public static String findMaybeLibNamespace(IFile file) {
     	try {
     		IJavaProject jProject = JavaCore.create(file.getProject());
     		IPackageFragmentRoot[] froots = jProject.getAllPackageFragmentRoots();
-    		IPath path = null;
     		for (IPackageFragmentRoot froot: froots) {
     			if (froot.getPath().isPrefixOf(file.getFullPath())) {
-    				path = file.getFullPath().removeFirstSegments(froot.getPath().segmentCount()).removeFileExtension();
-    				break;
+    				String ret = findMaybeLibNamespace(file, froot.getPath());
+    				if (ret != null) {
+    					return ret;
+    				} else {
+    					continue;
+    				}
     			}
     		}
-    		if (path == null) {
-    			// file is not on the classpath
-    			return null;
-    		} else {
-//    			return path.toString().replace('/', '.').replace('_', '-');
-    			String ns = getDeclaringNamespace(getFileText(file));
-				return ns;
-    		}
-			
 		} catch (JavaModelException e) {
 			CCWPlugin.logError("unable to determine the fragment root of the file " + file, e);
+		}
+		return null;
+    }
+    /**
+     * @see <code>findMaybeLibNamespace(IFile file)</code>
+     */
+    public static String findMaybeLibNamespace(IFile file, IPath sourcePath) {
+    	if (!CLOJURE_FILE_EXTENSION.equals(file.getFileExtension())) {
+    		return null;
+    	}
+		IPath path = file.getFullPath().removeFirstSegments(sourcePath.segmentCount()).removeFileExtension();
+		if (path == null) {
+			// file is not on the classpath
 			return null;
+		} else {
+			String sourceCode = getFileText(file);
+			if (hasNsCall(sourceCode)) {
+				System.out.println("path.toPortableString()" + path.toPortableString());
+				return getNamespaceNameFromPackageName(path.toPortableString());
+			} else {
+				return null;
+			}
 		}
     }
     

@@ -10,8 +10,6 @@
  *******************************************************************************/
 package ccw.editors.antlrbased;
 
-import java.io.IOException;
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;

@@ -25,11 +25,11 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
 import ccw.CCWPlugin;
+import ccw.ClojureCore;
 import ccw.editors.antlrbased.CompileLibAction;
 import clojure.tools.nrepl.Connection;
 import clojure.tools.nrepl.Connection.Response;
@@ -40,7 +40,6 @@ public class ClojureVisitor implements IResourceVisitor {
 	
 	private Map<IFolder, IFolder> srcFolders;
 	
-	private static final String CLOJURE_EXTENSION = "clj";
 	private final List<String> clojureLibs = new ArrayList<String>();
 	private final Connection repl;
 	
@@ -108,14 +107,10 @@ public class ClojureVisitor implements IResourceVisitor {
 	private static final String NO_SOURCE_FILE = "NO_SOURCE_FILE";
 	
 	public boolean visit(IResource resource) throws CoreException {
-		if(resource instanceof IFile) {
-			IFile file = (IFile) resource;
-			String extension = file.getFileExtension();
-			if(extension != null && extension.equals(CLOJURE_EXTENSION)){
-				// Find corresponding library name
-				IPath maybeLibPath = file.getFullPath().removeFirstSegments(currentSrcFolder.getKey().getFullPath().segmentCount()).removeFileExtension();
-				String maybeLibName = maybeLibPath.toString().replace('/', '.').replace('_', '-');
-				System.out.println("maybelibpath:'" + maybeLibName + "'");
+		if (resource instanceof IFile) {
+			String maybeLibName = ClojureCore.findMaybeLibNamespace(
+					(IFile) resource, currentSrcFolder.getKey().getFullPath());
+			if (maybeLibName != null) {
 				clojureLibs.add(maybeLibName);
 			}
 		}
