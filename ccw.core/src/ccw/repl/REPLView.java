@@ -261,8 +261,8 @@ public class REPLView extends ViewPart implements IAdaptable {
 	            	}
             	}
             };
-            public String getDeclaringNamespace() {
-            	String inline = super.getDeclaringNamespace();
+            public String findDeclaringNamespace() {
+            	String inline = super.findDeclaringNamespace();
             	if (inline != null) {
             		return inline;
             	} else {

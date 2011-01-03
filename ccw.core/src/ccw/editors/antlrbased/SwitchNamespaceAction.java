@@ -27,7 +27,7 @@ public class SwitchNamespaceAction extends Action {
             return;
         }
 
-        String ns = editor.getDeclaringNamespace();
+        String ns = editor.findDeclaringNamespace();
         if (ns == null) {
             // put error msg in footer instead
             CCWPlugin.logError("Could not switch ns to: " + ns);

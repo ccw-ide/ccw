@@ -82,7 +82,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 			    symbolPrefix = parts[1];
 			    fullyQualified = true;
 			} else {
-			    nsPart = editor.getDeclaringNamespace();
+			    nsPart = editor.findDeclaringNamespace();
 			    symbolPrefix = prefix;
 			    fullyQualified = false;
 			}
@@ -360,7 +360,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 				return new MethodLazyCompletionProposal(
 						(IMethod) match.getElement(),
 						prefixInfo.nsPart + "/" + prefixInfo.symbolPrefix,
-						prefixInfo.prefixOffset, editor.getDeclaringNamespace(),
+						prefixInfo.prefixOffset, editor.findDeclaringNamespace(),
 						editor);
 			}
 			public int[] prefixMinLength() { return new int[] { 2 }; }
@@ -375,7 +375,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 				return new ClassLazyCompletionProposal(
 						(IType) match.getElement(),
 						prefixInfo.prefix,
-						prefixInfo.prefixOffset, editor.getDeclaringNamespace(),
+						prefixInfo.prefixOffset, editor.findDeclaringNamespace(),
 						editor);
 			}
 			public int[] prefixMinLength() { return new int[] { 1, 3 }; }
@@ -390,7 +390,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 				return new PackageLazyCompletionProposal(
 						(IPackageFragment) match.getElement(),
 						prefixInfo.prefix,
-						prefixInfo.prefixOffset, editor.getDeclaringNamespace(),
+						prefixInfo.prefixOffset, editor.findDeclaringNamespace(),
 						editor);
 			}
 			public int[] prefixMinLength() { return new int[] { 1 }; }

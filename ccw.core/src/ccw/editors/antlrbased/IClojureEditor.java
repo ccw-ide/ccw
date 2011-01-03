@@ -67,7 +67,7 @@ public interface IClojureEditor extends IAdaptable {
     /**
      * Returns the current namespace of the editor.
      */
-    String getDeclaringNamespace ();
+    String findDeclaringNamespace ();
 
     /**
      * Returns the project associated with the editor, can be null.

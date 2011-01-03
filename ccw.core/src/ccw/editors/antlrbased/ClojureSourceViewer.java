@@ -376,8 +376,8 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
         return inEscapeSequence;
     }
     
-    public String getDeclaringNamespace() {
-        return ClojureCore.getDeclaringNamespace(getDocument().get());
+    public String findDeclaringNamespace() {
+        return ClojureCore.findDeclaringNamespace(getDocument().get());
     }
 
     public IJavaProject getAssociatedProject() {

@@ -561,8 +561,8 @@ public class AntlrBasedClojureEditor extends TextEditor implements IClojureEdito
 	    return JavaCore.create(((IFile)getEditorInput().getAdapter(IFile.class)).getProject());
 	}
 	
-	public String getDeclaringNamespace () {
-		return ((ClojureSourceViewer)getSourceViewer()).getDeclaringNamespace();
+	public String findDeclaringNamespace () {
+		return ((ClojureSourceViewer)getSourceViewer()).findDeclaringNamespace();
 	}
 	
 	public REPLView getCorrespondingREPL () {

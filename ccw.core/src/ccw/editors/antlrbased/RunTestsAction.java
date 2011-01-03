@@ -50,7 +50,7 @@ public class RunTestsAction extends Action {
     @Override
     public void run() {
         try {
-            String lib = editor.getDeclaringNamespace();
+            String lib = editor.findDeclaringNamespace();
             REPLView replView = editor.getCorrespondingREPL();
             Connection repl = replView.getToolingConnection();
             Response compilationResult = repl.send(CompileLibAction.compileLibCommand(lib));

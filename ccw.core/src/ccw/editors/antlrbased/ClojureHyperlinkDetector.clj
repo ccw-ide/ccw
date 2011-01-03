@@ -34,7 +34,7 @@
   (let [split (.split sym "/")
         n (when (= 2 (count split)) (aget split 0))
         s (aget split (if (= 2 (count split)) 1 0))  
-        declaring-ns (.getDeclaringNamespace editor)
+        declaring-ns (.findDeclaringNamespace editor)
         command (String/format "(ccw.debug.serverrepl/find-symbol \"%s\" \"%s\" \"%s\")"
                   (into-array Object [s declaring-ns n]))
         {:keys [send]} (-?> editor .getCorrespondingREPL .getToolingConnection .conn)]

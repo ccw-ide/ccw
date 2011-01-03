@@ -368,12 +368,15 @@ public final class ClojureCore {
 	}
 	
 	private final static Pattern SEARCH_DECLARING_NAMESPACE_PATTERN
-		= Pattern.compile("\\(\\s*ns\\s+([^\\s\\)#\\[\\'\\{]+)"); 
+		= Pattern.compile("\\(\\s*(?:in-)?ns\\s+([^\\s\\)#\\[\\'\\{]+)"); 
     /**
 	 * TODO: should also work with in-ns calls ?
 	 */
-	public static String getDeclaringNamespace(String sourceText) {
+	public static String findDeclaringNamespace(String sourceText) {
 		Matcher matcher = SEARCH_DECLARING_NAMESPACE_PATTERN.matcher(sourceText);
+		if (matcher.find()) {
+			System.out.println("found declaring namespace:" + matcher.group(1));
+		}
 		return ( matcher.find() ? matcher.group(1) : null ); 
 	}
 	

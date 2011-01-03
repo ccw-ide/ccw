@@ -44,7 +44,7 @@ public class CompileLibAction extends Action {
 		if (editorFile == null)
 			return;
 		
-		String lib = editor.getDeclaringNamespace();
+		String lib = editor.findDeclaringNamespace();
 		
 		if (lib == null || lib.trim().equals("")) {
 			String title = "Compilation impossible";
