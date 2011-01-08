@@ -195,6 +195,7 @@ public class CCWPlugin extends AbstractUIPlugin {
     	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.ClojureHyperlink");
 
     	ClojureOSGi.require(bundleContext, "ccw.debug.clientrepl");
+    	ClojureOSGi.require(bundleContext, "ccw.static-analysis");
     }
     
     public void stop(BundleContext context) throws Exception {

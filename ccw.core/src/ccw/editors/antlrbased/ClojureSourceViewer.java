@@ -11,6 +11,8 @@
 
 package ccw.editors.antlrbased;
 
+import java.util.Map;
+
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
@@ -377,7 +379,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     }
     
     public String findDeclaringNamespace() {
-        return ClojureCore.findDeclaringNamespace(getDocument().get());
+        return ClojureCore.findDeclaringNamespace((Map) getParsed());
     }
 
     public IJavaProject getAssociatedProject() {

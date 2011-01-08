@@ -569,7 +569,7 @@ public class AntlrBasedClojureEditor extends TextEditor implements IClojureEdito
 		IFile file = (IFile) getEditorInput().getAdapter(IFile.class);
 		if (file != null)
 			return CCWPlugin.getDefault().getProjectREPL(file.getProject());
-		else 
+		else
 			return null;
 	}
 

@@ -60,9 +60,11 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.texteditor.ITextEditor;
 
+import ccw.debug.ClojureClient;
 import ccw.editors.antlrbased.AntlrBasedClojureEditor;
 import ccw.repl.REPLView;
 import clojure.lang.RT;
+import clojure.lang.Var;
 
 /**
  * This class acts as a Facade for all SDT core functionality.
@@ -369,15 +371,22 @@ public final class ClojureCore {
 	
 	private final static Pattern SEARCH_DECLARING_NAMESPACE_PATTERN
 		= Pattern.compile("\\(\\s*(?:in-)?ns\\s+([^\\s\\)#\\[\\'\\{]+)"); 
-    /**
-	 * TODO: should also work with in-ns calls ?
-	 */
+
 	public static String findDeclaringNamespace(String sourceText) {
-		Matcher matcher = SEARCH_DECLARING_NAMESPACE_PATTERN.matcher(sourceText);
-		if (matcher.find()) {
-			System.out.println("found declaring namespace:" + matcher.group(1));
+		Var sexp = RT.var("paredit.parser", "sexp");
+		try {
+			return (String) findDeclaringNamespace((Map) sexp.invoke(sourceText));
+		} catch (Exception e) {
+			return null;
 		}
-		return ( matcher.find() ? matcher.group(1) : null ); 
+	}
+	public static String findDeclaringNamespace(Map tree) {
+		Var findNamespace = RT.var("ccw.static-analysis", "find-namespace");
+		try {
+			return (String) findNamespace.invoke(tree);
+		} catch (Exception e) {
+			return null;
+		}
 	}
 	
 	private final static Pattern HAS_NS_CALL_PATTERN = Pattern.compile("^\\s*\\(ns(\\s.*|$)");
