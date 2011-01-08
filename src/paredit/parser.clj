@@ -31,7 +31,6 @@
   (:use paredit.regex-utils)
 	(:require [clojure.zip :as zip])
   (:require [clojure.contrib.zip-filter :as zf])
-  ;(:require [net.cgrand.parsley.glr :as core] :reload)
   (:use net.cgrand.parsley :reload)
   (:require [net.cgrand.parsley.lrplus :as lr+]))
 
@@ -124,10 +123,24 @@
 (defn bracket-end [s eof?]
   (lr+/match #{")" "]" "}" eof} s eof?))
 
+(def gspaces #{:whitespace :comment :discard})
+(def only-code (partial remove (comp gspaces :tag)))
+(defn code-children [e] (only-code (:content e)))
+(defn sym-name
+  "returns the symbol name" [e] (and (#{:symbol} (:tag e)) (apply str (:content e))))
+(defn call-of [e c] (and (#{"("} (nth (code-children e) 0)) (#{c} (sym-name (nth (code-children e) 1))) e))
+(defn call-args [e] (-> (code-children e) nnext butlast))
+(defn form 
+  "removes the meta(s) to get to the form" 
+  [e]
+  (if-not (#{:meta} (:tag e))
+    e
+    (recur (nth (code-children e) 2))))
+
 (def sexp
   (parser {:root-tag :root
            :main :expr*
-           :space (unspaced #{:whitespace :comment :discard} :*)}
+           :space (unspaced gspaces :*)}
     :expr- #{
              :list
              :vector
