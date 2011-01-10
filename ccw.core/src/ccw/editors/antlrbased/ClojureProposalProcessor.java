@@ -102,6 +102,9 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 		String prefix = null;
 		int prefixOffset = offset - 1;
 		IDocument doc = viewer.getDocument();
+		if (offset == 0) {
+			return new PrefixInfo(editor, "", 0);
+		}
 		while (!invalidSymbolCharacter(doc.getChar(prefixOffset))) {
 			prefixOffset--;
 			if (prefixOffset < 0) break;

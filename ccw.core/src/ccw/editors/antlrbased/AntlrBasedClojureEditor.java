@@ -22,6 +22,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.source.DefaultCharacterPairMatcher;
@@ -35,10 +36,8 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.editors.text.TextEditor;
-import org.eclipse.ui.texteditor.ContentAssistAction;
 import org.eclipse.ui.texteditor.IStatusField;
 import org.eclipse.ui.texteditor.IStatusFieldExtension;
-import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
@@ -53,7 +52,6 @@ public class AntlrBasedClojureEditor extends TextEditor implements IClojureEdito
 	public static final String EDITOR_REFERENCE_HELP_CONTEXT_ID = "ccw.branding.editor_context_help";
     public static final String STATUS_CATEGORY_STRUCTURAL_EDITION = "CCW.STATUS_CATEGORY_STRUCTURAL_EDITING_POSSIBLE";
 	
-    private static final String CONTENT_ASSIST_PROPOSAL = "ContentAssistProposal"; //$NON-NLS-1$
     public static final String ID = "ccw.antlrbasededitor"; //$NON-NLS-1$
 	/** Preference key for matching brackets */
 	//PreferenceConstants.EDITOR_MATCHING_BRACKETS;
@@ -260,11 +258,7 @@ public class AntlrBasedClojureEditor extends TextEditor implements IClojureEdito
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.LAUNCH_REPL);
 		setAction("ClojureLaunchAction", action);
 
-		action = new ContentAssistAction(ClojureEditorMessages.getBundleForConstructedKeys(), CONTENT_ASSIST_PROPOSAL + ".", this);  //$NON-NLS-1$
-		String id = ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS;
-		action.setActionDefinitionId(id);
-		setAction(CONTENT_ASSIST_PROPOSAL, action); 
-		markAsStateDependentAction(CONTENT_ASSIST_PROPOSAL, true);
+//		TODO: same for content-assist handler ? markAsStateDependentAction(CONTENT_ASSIST_PROPOSAL, true);
 
 		action = new SwitchStructuralEditionModeAction(this);
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.SWITCH_STRUCTURAL_EDITION_MODE);
@@ -539,6 +533,11 @@ public class AntlrBasedClojureEditor extends TextEditor implements IClojureEdito
 			if (adapter != null)
 				return adapter;
 		}
+		
+		if (ITextOperationTarget.class == required) {
+			return sourceViewer();
+		}
+
 		
 		return super.getAdapter(required);
 	}

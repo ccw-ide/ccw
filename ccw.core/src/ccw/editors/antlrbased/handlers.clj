@@ -69,3 +69,12 @@
         caret-offset (-> editor .getUnSignedSelection .getOffset)]
     (if-let [[{open :open}] (hlu/detect-hyperlinks caret-offset editor)]
       (open))))
+
+(defn content-assist [_ event]
+  (when-let [editor (editor event)]
+    ; TODO validateEditorInputState () : if editor read-only ...
+    (org.eclipse.swt.custom.BusyIndicator/showWhile
+      (.getDisplay (HandlerUtil/getActiveShell event))
+      #(-> editor 
+         (.getAdapter org.eclipse.jface.text.ITextOperationTarget) 
+         (.doOperation org.eclipse.jface.text.source.ISourceViewer/CONTENTASSIST_PROPOSALS)))))

@@ -21,6 +21,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextInputListener;
+import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextViewerExtension5;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextSelection;
@@ -490,6 +491,9 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 	
 	public Object getAdapter(Class adapter) {
 		if ( IClojureEditor.class == adapter) {
+			return this;
+		}
+		if (ITextOperationTarget.class == adapter) {
 			return this;
 		}
 		return null;
