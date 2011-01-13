@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="ccw.feature"
+      id="ccw.feature_replui"
       label="%featureName"
-      version="0.0.64.STABLE01"
+      version="0.2.0.RC04"
       provider-name="%providerName"
       plugin="ccw.branding">
 
@@ -99,5 +99,12 @@
          download-size="0"
          install-size="0"
          version="0.0.0"/>
+
+   <plugin
+         id="org.clojure.tools.nrepl"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
 
 </feature>
