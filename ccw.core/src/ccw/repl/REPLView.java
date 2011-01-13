@@ -10,6 +10,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ST;
 import org.eclipse.swt.custom.SashForm;
@@ -32,12 +33,15 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.contexts.IContextService;
+import org.eclipse.ui.internal.editors.text.EditorsPlugin;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 
 import ccw.CCWPlugin;
 import ccw.editors.antlrbased.ClojureSourceViewer;
 import ccw.editors.antlrbased.ClojureSourceViewerConfiguration;
 import ccw.editors.antlrbased.IClojureEditor;
+import ccw.editors.antlrbased.EditorSupport;
 import ccw.editors.rulesbased.ClojureDocumentProvider;
 import ccw.outline.NamespaceBrowser;
 import clojure.lang.Atom;
@@ -87,6 +91,8 @@ public class REPLView extends ViewPart implements IAdaptable {
     private String currentNamespace = "user";
     private final Atom requests = new Atom(PersistentTreeMap.EMPTY);
     private IFn evalExpression;
+    
+    private SourceViewerDecorationSupport fSourceViewerDecorationSupport;
     
     public REPLView () {}
     
@@ -278,6 +284,10 @@ public class REPLView extends ViewPart implements IAdaptable {
         
         viewerWidget.setFont(JFaceResources.getFont(JFaceResources.TEXT_FONT));
         viewerWidget.addVerifyKeyListener(new REPLInputVerifier());
+        
+		// ensure decoration support has been created and configured.
+		getSourceViewerDecorationSupport(viewer).install(prefs);
+
 
         // push all keyboard input delivered to log panel into input widget
         logPanel.addListener(SWT.KeyDown, new Listener() {
@@ -333,9 +343,30 @@ public class REPLView extends ViewPart implements IAdaptable {
         split.setWeights(new int[] {100, 75});
     }
     
+	/**
+	 * Returns the source viewer decoration support.
+	 *
+	 * @param viewer the viewer for which to return a decoration support
+	 * @return the source viewer decoration support
+	 */
+    // From AntlrBasedClojureEditor + AbstractDecoratedTextEditor ...
+	protected SourceViewerDecorationSupport getSourceViewerDecorationSupport(ISourceViewer viewer) {
+		if (fSourceViewerDecorationSupport == null) {
+			fSourceViewerDecorationSupport= new SourceViewerDecorationSupport(
+					viewer, 
+					null/*getOverviewRuler()*/, 
+					null/*getAnnotationAccess()*/, 
+					EditorsPlugin.getDefault().getSharedTextColors()/*getSharedColors()*/
+					);
+			EditorSupport.configureSourceViewerDecorationSupport(fSourceViewerDecorationSupport, viewer);
+		}
+		return fSourceViewerDecorationSupport;
+	}
+
     @Override
     public void dispose() {
         super.dispose();
+        fSourceViewerDecorationSupport = EditorSupport.disposeSourceViewerDecorationSupport(fSourceViewerDecorationSupport);
         interactive.close();
         toolConnection.close();
     }

@@ -102,8 +102,7 @@ public class AntlrBasedClojureEditor extends TextEditor implements IClojureEdito
 								// there's a NPE thrown due to initialization ordering issue
 	@Override
 	protected void configureSourceViewerDecorationSupport(SourceViewerDecorationSupport support) {
-		support.setCharacterPairMatcher(viewer.getPairsMatcher());
-		support.setMatchingCharacterPainterPreferenceKeys(PreferenceConstants.EDITOR_MATCHING_BRACKETS, PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR);
+		EditorSupport.configureSourceViewerDecorationSupport(support, viewer);
 		super.configureSourceViewerDecorationSupport(support);
 	}
 

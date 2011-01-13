@@ -10,11 +10,14 @@
 ;*******************************************************************************/
 
 (ns ccw.editors.antlrbased.EditorSupport 
-  (require [paredit.parser :as p])
+  (:require [paredit.parser :as p])
+  (:import [org.eclipse.jdt.ui PreferenceConstants])
   (:gen-class
     :methods [^{:static true} [updateParseRef [String Object] Object]
               ^{:static true} [getParser [String Object] Object]
-              ^{:static true} [startWatchParseRef [Object Object] Object]]))
+              ^{:static true} [startWatchParseRef [Object Object] Object]
+              ^{:static true} [disposeSourceViewerDecorationSupport [Object] org.eclipse.ui.texteditor.SourceViewerDecorationSupport]
+              ^{:static true} [configureSourceViewerDecorationSupport [Object Object] Object]]))
 
 ; TODO move in a utility namespace, or remove
 (defprotocol Cancellable (isCancelled [this]) (cancel [this]))
@@ -52,3 +55,16 @@
         (println "cached parser miss !")
         (-updateParseRef text r)
         (recur text r)))))
+
+(defn -disposeSourceViewerDecorationSupport [s]
+  (when s
+    (doto s .uninstall .dispose)
+    nil))
+
+(defn -configureSourceViewerDecorationSupport [support viewer]
+		;; TODO more to pick in configureSourceViewerDecorationSupport of AbstractDecoratedTextEditor, if you want ...
+  (doto support
+		(.setCharacterPairMatcher (.getPairsMatcher viewer))
+		(.setMatchingCharacterPainterPreferenceKeys 
+      PreferenceConstants/EDITOR_MATCHING_BRACKETS 
+      PreferenceConstants/EDITOR_MATCHING_BRACKETS_COLOR)))
