@@ -341,6 +341,8 @@ public class REPLView extends ViewPart implements IAdaptable {
         ((IContextService) getSite().getService(IContextService.class)).activateContext(IClojureEditor.KEY_BINDING_SCOPE); 
         
         split.setWeights(new int[] {100, 75});
+        
+        viewer.contributeToStatusLine(getViewSite().getActionBars().getStatusLineManager());
     }
     
 	/**

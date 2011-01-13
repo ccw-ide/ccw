@@ -25,7 +25,6 @@
                       [ClojureFormat]
                       [StacktraceHyperlink]
                       [PareditAutoEditStrategy]
-                      [SwitchStructuralEditionModeAction]
                       [EditorSupport]
                       [ClojureHyperlinkDetector]
                       [ClojureHyperlink]]))

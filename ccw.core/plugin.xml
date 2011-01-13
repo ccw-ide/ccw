@@ -1416,5 +1416,21 @@
            </with>
         </enabledWhen>
      </handler>
+     <handler
+           class="ccw.util.ClojureHandlerFactory:ccw.editors.antlrbased.handlers/toggle-structural-edition-mode"
+           commandId="ccw.ui.edit.text.clojure.switch.structuraledition.mode">
+        <enabledWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </enabledWhen>
+     </handler>
   </extension>
 </plugin>

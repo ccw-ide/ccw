@@ -85,11 +85,13 @@ public interface IClojureEditor extends IAdaptable {
 
 	IDocument getDocument();
 
-	void setStatusLineErrorMessage(String you_need_a_running_repl);
+	void setStatusLineErrorMessage(String msg);
 
 	void gotoMatchingBracket();
 	
 	DefaultCharacterPairMatcher getPairsMatcher();
 
 	boolean isStructuralEditionPossible();
+
+	void toggleStructuralEditionMode();
 }
