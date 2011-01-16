@@ -422,6 +422,7 @@
        ;; not-yet "foo |\"bar ba|z\" foo" "foo |\"bar ba|z\" foo",
        "foo |bar|" "foo (|bar|)"
        "foo |(bar)|" "foo (|(bar)|)"
+       "bar |`foo| baz" "bar (|`foo|) baz"
        }]
      ;["M-s"       :paredit-splice-sexp
      ;           {"(foo (bar| baz) quux)"
