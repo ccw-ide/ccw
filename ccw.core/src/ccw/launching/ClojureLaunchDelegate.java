@@ -77,7 +77,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
             Job ackJob = new Job("Waiting for new REPL process ack") {
 				@Override
 				protected IStatus run(final IProgressMonitor monitor) {
-					final int STEPS_BEFORE_GIVING_UP = 200;
+					final int STEPS_BEFORE_GIVING_UP = 600;
 					final int MILLIS_BETWEEN_STEPS = 50;
 					monitor.beginTask("Waiting for new REPL process ack", STEPS_BEFORE_GIVING_UP);
 					Integer maybePort = null;
