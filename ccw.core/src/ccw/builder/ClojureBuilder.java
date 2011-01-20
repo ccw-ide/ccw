@@ -130,13 +130,18 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
         // We will probably have to refactor stuff to separate things a little bit more, but for the time
         // being, as an experiment and hopefully a temporary patch for the problem, I'll just add a little bit
         // delay in the build:
-        try {
-			Thread.sleep(200);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+        
         // TODO see if we can do something more clever than having to use the UI thread and get a View object ...
         REPLView repl = CCWPlugin.getDefault().getProjectREPL(project);
+        if (repl == null) {
+        	// Another chance, to fight with a hack, temporarily at least, the race condition
+        	try {
+    			Thread.sleep(200);
+    		} catch (InterruptedException e) {
+    			e.printStackTrace();
+    		}
+    		repl = CCWPlugin.getDefault().getProjectREPL(project);
+        }
         if (repl == null || repl.isDisposed() || !ClojureLaunchDelegate.isAutoReloadEnabled(repl.getLaunch())) {
         	return;
         }
