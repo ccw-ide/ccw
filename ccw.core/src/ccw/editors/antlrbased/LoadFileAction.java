@@ -12,23 +12,17 @@ package ccw.editors.antlrbased;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jface.action.Action;
-import org.eclipse.ui.console.IOConsole;
-
-import clojure.lang.Symbol;
-import clojure.lang.Var;
-import clojure.osgi.ClojureOSGi;
 
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.ClojureProject;
-import ccw.debug.ClojureClient;
 import ccw.repl.Actions;
 import ccw.repl.REPLView;
+import clojure.lang.Symbol;
+import clojure.lang.Var;
+import clojure.osgi.ClojureOSGi;
 
 public class LoadFileAction extends Action {
 

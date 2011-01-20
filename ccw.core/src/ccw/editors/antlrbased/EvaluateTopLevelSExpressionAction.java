@@ -12,9 +12,7 @@ package ccw.editors.antlrbased;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.action.Action;
-import org.eclipse.ui.console.IOConsole;
 
-import ccw.debug.ClojureClient;
 import ccw.repl.Actions;
 import ccw.repl.REPLView;
 
