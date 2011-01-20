@@ -60,7 +60,6 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import ccw.debug.ClojureClient;
 import ccw.editors.antlrbased.AntlrBasedClojureEditor;
 import ccw.repl.REPLView;
 import clojure.lang.RT;
@@ -389,7 +388,7 @@ public final class ClojureCore {
 		}
 	}
 	
-	private final static Pattern HAS_NS_CALL_PATTERN = Pattern.compile("^\\s*\\(ns(\\s.*|$)");
+	private final static Pattern HAS_NS_CALL_PATTERN = Pattern.compile("^\\s*\\(ns(\\s.*|$)", Pattern.MULTILINE);
 	/**
 	 * @return true if a ns call is detected by a regex-based heuristic
 	 */
@@ -455,6 +454,7 @@ public final class ClojureCore {
 				System.out.println("path.toPortableString()" + path.toPortableString());
 				return getNamespaceNameFromPackageName(path.toPortableString());
 			} else {
+				System.out.println("did not find a ns call in source code of " + file);
 				return null;
 			}
 		}

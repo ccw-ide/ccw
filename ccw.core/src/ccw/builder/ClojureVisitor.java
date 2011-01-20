@@ -112,6 +112,9 @@ public class ClojureVisitor implements IResourceVisitor {
 					(IFile) resource, currentSrcFolder.getKey().getFullPath());
 			if (maybeLibName != null) {
 				clojureLibs.add(maybeLibName);
+				System.out.println("maybe lib: " + resource.getLocation() + " recognized as a lib");
+			} else {
+				System.out.println("maybe lib: " + resource.getLocation() + " NOT recognized as a lib");
 			}
 		}
 		return true;
