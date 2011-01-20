@@ -53,12 +53,15 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
     @Override
     protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
             throws CoreException {
+    	System.out.println("clojure build required");
     	if (getProject()==null) {
     		return null;
     	}
     	
     	if (kind == AUTO_BUILD || kind == INCREMENTAL_BUILD) {
 	    	if (onlyClassesOrOutputFolderRelatedDelta() && !onlyProjectTouched() ) {
+	    		System.out.println("nothing to build (onlyClassesOrOutputFolderRelatedDelta()=" + onlyClassesOrOutputFolderRelatedDelta()
+	    				+ ", !onlyProjectTouched()=" + !onlyProjectTouched());
 	    		return null;
 	    	}
     	}
@@ -122,6 +125,16 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
             monitor = new NullProgressMonitor();
         }
         
+        // Issue #203 is probably related to the following way of getting a REPLView.
+        // A race condition between the builder and the Eclipse machinery creating the views, etc.
+        // We will probably have to refactor stuff to separate things a little bit more, but for the time
+        // being, as an experiment and hopefully a temporary patch for the problem, I'll just add a little bit
+        // delay in the build:
+        try {
+			Thread.sleep(200);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
         // TODO see if we can do something more clever than having to use the UI thread and get a View object ...
         REPLView repl = CCWPlugin.getDefault().getProjectREPL(project);
         if (repl == null || repl.isDisposed() || !ClojureLaunchDelegate.isAutoReloadEnabled(repl.getLaunch())) {
