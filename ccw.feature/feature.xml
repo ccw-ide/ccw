@@ -2,7 +2,7 @@
 <feature
       id="ccw.feature_replui"
       label="%featureName"
-      version="0.2.0.RC04"
+      version="0.2.0.RC05"
       provider-name="%providerName"
       plugin="ccw.branding">
 
@@ -66,8 +66,7 @@
          id="ccw.core"
          download-size="0"
          install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="paredit.clj"
