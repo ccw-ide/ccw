@@ -2,7 +2,7 @@
 
 paredit in clojure, tailored for clojure
 
-# Build tools "coordinates"
+# "coordinates" for build tools 
 
 ##maven/ivy:
         <dependency>
@@ -18,20 +18,37 @@ paredit in clojure, tailored for clojure
 
 * Clojure 1.2
 * Clojure contrib 1.2
-* Laurent's fork of parsley 0.0.6.STABLE02
+* 0.0.6.STABLE02 of Laurent's fork of Christophe Grand's parsley 
 
 # Design notes
-A central multimethod paredit.core/paredit, whose signature is:
+##A central multimethod paredit.core/paredit, whose signature is:
 
         ([:paredit-command parsetree {:keys [:text :offset :length]})
 
+* :paredit-command is one of the currently accepted commands, see the content of the var paredit.core-commands/*paredit-commands* for the whole list
+* parsetree is the result of applying paredit.parser/parse to :text's value
+* :text's value is the text corresponding to parsetree
+* :offset is the current position of the caret in the text
+* :length is the length of the current selection, or 0 if no selection
+ 
 and which returns: 
 
         {:keys [:text :offset :length] ({:keys [:text :offset :length]} & more) :modifs}   
 
-parsetree is a datastructure returned by invoking the function paredit.parser/parse on the source code:
+* :text's value is the text resulting from applying the command
+* :offset's value is the new offset of the caret
+* :length's value is the new length of the selection
+* :modifs's value is a sequence of deltas to apply to the original text in order to obtain the resulting text, and for each element in :modif's value
+** :offset's value is the start offset of the text to replace
+** :length's value is the length of the text to replace
+** :text's value is the text to insert
+
+##parsetree is a datastructure returned by invoking the function paredit.parser/parse on the source code:
 
         (paredit.parser/parse "(some source code)\n(foo :bar baz")
+
+The result of paredit.parser/parse is a datastructure following clojure.core/xml conventions : :tag is used to name a parsetree node, :content is used
+to list children of a parsetree node. parsetree terminals are always java.lang.Strings.
 
 # Usage example
 ##Require the namespace   
