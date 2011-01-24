@@ -32,3 +32,18 @@ and which returns:
 parsetree is a datastructure returned by invoking the function paredit.parser/parse on the source code:
 
         (paredit.parser/parse "(some source code)\n(foo :bar baz")
+
+# Usage example
+##Require the namespace   
+        user=>(require 'paredit.core) ; automatically requires paredit.parser as well
+        nil
+##Send the source code to the parser
+        user=>(def parse-tree (paredit.parser/parse "(foo bar)"))
+        #'user/parse-tree
+## "raise sexp" example        
+        user=>(paredit.core/paredit :paredit-raise-sexp parse-tree {:text "(foo bar)" :offset 5 :length 0}) ; Let's raise "bar" over "(foo bar)"
+        {:modifs ({:offset 0, :length 9, :text "bar"}), :text "bar", :offset 0, :length 0}
+Note that the result provides the fully replaced text, while you also have a list of deltas to apply to the original text if this better suits your needs        
+## "split expression" example        
+        user=>(paredit.core/paredit :paredit-split-sexp parse-tree {:text "(foo bar)" :offset 5 :length 0}) ; Let's raise "bar" over "(foo bar)"
+        {:modifs ({:offset 4, :length 1, :text ") ("}), :text "(foo) (bar)", :offset 5, :length 0}      
