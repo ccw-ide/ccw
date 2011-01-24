@@ -23,12 +23,12 @@ paredit in clojure, tailored for clojure
 # Design notes
 A central multimethod paredit.core/paredit, whose signature is:
 
-   ([:paredit-command parsetree {:keys [:text :offset :length]})
+        ([:paredit-command parsetree {:keys [:text :offset :length]})
 
 and which returns: 
 
-   {:keys [:text :offset :length] ({:keys [:text :offset :length]} & more) :modifs}   
+        {:keys [:text :offset :length] ({:keys [:text :offset :length]} & more) :modifs}   
 
 parsetree is a datastructure returned by invoking the function paredit.parser/parse on the source code:
 
-  (paredit.parser/parse "(some source code)\n(foo :bar baz")
+        (paredit.parser/parse "(some source code)\n(foo :bar baz")
