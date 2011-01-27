@@ -101,7 +101,7 @@
                 </license>
         </licenses>
 
-        <distributionManagement>
+        <!--distributionManagement>
                 <repository>
                         <uniqueVersion>false</uniqueVersion>
                         <id>clojars.org</id>
@@ -116,6 +116,14 @@
                         <url>http://clojars.org/repo</url>
                         <layout>default</layout>
                 </snapshotRepository>
-        </distributionManagement>
+        </distributionManagement-->
+        <repositories>
+                <repository>
+                        <id>ccw</id>
+                        <layout>p2</layout>
+                        <!--url>file:/home/lpetit/projects/ccw.updatesite</url-->
+                        <url>http://updatesite.counterclockwise.googlecode.com/hg/</url>
+                </repository>
+        </repositories>
 
 </project>
