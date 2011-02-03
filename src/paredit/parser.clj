@@ -5,7 +5,8 @@
 	(:require [clojure.zip :as zip])
   (:require [clojure.contrib.zip-filter :as zf])
   (:use net.cgrand.parsley)
-  (:require [net.cgrand.parsley.lrplus :as lr+]))
+  (:require [net.cgrand.parsley.lrplus :as lr+])
+  (:require [net.cgrand.regex :as r]))
 
 #_(set! *warn-on-reflection* true)
 
@@ -102,14 +103,14 @@
               (interpol-regex #"(?:`symbol-head``symbol-rest`*(?:\:`symbol-rest`++)*+)")
               ]
         (interpol-regex #"(?:\.|\/|\&|`symbol-name`(?:\/`symbol-name`)?)"))
-    :int #"[-+]?(?:0(?!\.)|[1-9][0-9]*+(?!\.)|0[xX][0-9A-Fa-f]++(?!\.)|0[0-7]++(?!\.)|[1-9][0-9]?[rR][0-9A-Za-z]++(?!\.)|0[0-9]++(?!\.))"
-    :ratio #"[-+]?[0-9]++/[0-9]++"
-    :float #"[-+]?[0-9]++\.[0-9]*+(?:[eE][-+]?+[0-9]++)?+M?+"
+    :int #"(?:[-+]?(?:0(?!\.)|[1-9][0-9]*+(?!\.)|0[xX][0-9A-Fa-f]+(?!\.)|0[0-7]+(?!\.)|[1-9][0-9]?[rR][0-9A-Za-z]+(?!\.)|0[0-9]+(?!\.))(?!/))"
+    :ratio #"[-+]?[0-9]+/[0-9]+"
+    :float #"[-+]?[0-9]+\.[0-9]*+(?:[eE][-+]?+[0-9]+)?+M?"
     :anon-arg #"%(?:[0-9|\&])?+"
-    :keyword (unspaced #":{1,2}" #"[^\(\[\{\'\^\@\`\~\"\\\,\s\;\)\]\}]*+")
+    :keyword (unspaced #":{1,2}" #"[^\(\[\{\'\^\@\`\~\"\\\,\s\;\)\]\}]*")
     :char #"\\(?:newline|space|tab|backspace|formfeed|return|u[0-9|a-f|A-F]{4}|o[0-3]?+[0-7]{1,2}|.)"
-    :whitespace #"(?:,|\s)++"
-    :comment #"(?:\#\!|;)[^\n]*+"
+    :whitespace #"(?:,|\s)+"
+    :comment #"(?:\#\!|;)[^\n]*"
     :discard ["#_" :expr]
     ))
 

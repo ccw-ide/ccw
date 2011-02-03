@@ -148,7 +148,9 @@
 
 (deftest parsetree-tests
   (doseq [s [""
-             "(defn "]]
+             "(defn "
+             "3/4"
+             "-3/4"]]
     (is (= s (parsetree-to-string (sexp s)))))
   (doseq [r ["paredit/compile.clj" 
              "paredit/core_commands.clj"
