@@ -10,6 +10,21 @@
   (:require [clojure.zip :as zip])
   (:use paredit.loc-utils))
 
+(def *spy?* (atom false))
+(defn start-spy [] (reset! *spy?* true))
+(defn stop-spy [] (reset! *spy?* false))
+
+(defn spy*
+  [msg expr]
+  `(let [expr# ~expr]
+     (do
+       (when  @*spy?* (println (str "::::spying[" ~msg "]:::: " '~expr ":::: '" expr# "'")))
+       expr#)))
+
+(defmacro spy 
+  ([expr] (spy* "" expr))
+  ([msg expr] (spy* msg expr)))
+
 (defn text-spec-to-text 
   "Converts a text spec to text map" 
   [^String text-spec]
@@ -123,12 +138,33 @@
     "foo \"bar\" foo" 3 :root
     "foo \"bar\" foo" 4 :root
     ))
+
+(defn parsetree-to-string [parsetree]
+  (->> parsetree 
+    clojure.zip/xml-zip 
+    paredit.loc-utils/next-leaves 
+    (map clojure.zip/node) 
+    (apply str)))
+
+(deftest parsetree-tests
+  (doseq [s [""
+             "(defn "]]
+    (is (= s (parsetree-to-string (sexp s)))))
+  (doseq [r ["paredit/compile.clj" 
+             "paredit/core_commands.clj"
+             "paredit/core.clj"
+             "paredit/loc_utils.clj"
+             "clojure/core.clj"]]
+    (let [s (slurp (.getResourceAsStream (clojure.lang.RT/baseLoader) r))]
+      (is (= s (parsetree-to-string (sexp s)))))))
+
 (defn pts []
   #_(normalized-selection-tests)
   #_(t/line-stop-tests)
   #_(spec-text-tests)
   (paredit-tests)
   (parser-tests)
+  (parsetree-tests)
   ;;;;;;;#_(loc-for-offset-tests)
   #_(leave-for-offset-tests)
   #_(loc-containing-offset-tests))

@@ -320,12 +320,12 @@
           l (if (sel-match-normalized? offset length [l r])
               (if-let [nl (z/left l)] nl (if (punct-loc? l) (z/left (z/up l)) (z/up l)))
               (do
-                (spy [(z/node l) (and r (z/node r))])
-                (spy "not normalized!" l)))
+                [(z/node l) (and r (z/node r))]
+                l))
           r (if (nil? r) l r)
-          [l r] (normalized-selection rloc (spy (start-offset l)) (spy (- (end-offset r) (start-offset l))))]
-      (spy (-> t (assoc-in [:offset] (start-offset l))
-             (assoc-in [:length] (if (nil? r) 0 (- (end-offset r) (start-offset l)))))))
+          [l r] (normalized-selection rloc (start-offset l) (- (end-offset r) (start-offset l)))]
+      (-> t (assoc-in [:offset] (start-offset l))
+             (assoc-in [:length] (if (nil? r) 0 (- (end-offset r) (start-offset l))))))
       t)))
 
 (defmethod paredit
@@ -358,7 +358,7 @@
                   (if-let [nr (z/right r)] 
                     nr
                     (z/up r)))
-              [l r] (normalized-selection rloc (spy (start-offset l)) (spy (- (end-offset r) (start-offset l))))]
+              [l r] (normalized-selection rloc (start-offset l) (- (end-offset r) (start-offset l)))]
           (-> t (assoc-in [:offset] (start-offset l))
             (assoc-in [:length] (if (nil? r) 0 (- (end-offset r) (start-offset l))))))))
     t)))
@@ -508,7 +508,7 @@
   [cmd parsed {:keys [^String text offset length] :as t}]
   (with-important-memoized 
     (if-let [rloc (-?> parsed (parsed-root-loc true))]
-      (let [line-start (spy (t/line-start (spy text) (spy offset)))
+      (let [line-start (t/line-start text offset)
             line-stop (t/line-stop text offset)
             loc (loc-for-offset rloc line-start)]
         (if (and (= :string (loc-tag loc)) (< (start-offset loc) line-start))
