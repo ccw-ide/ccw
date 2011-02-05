@@ -156,7 +156,8 @@
              "::éà"
              "or#"
              "^"
-             "#"]]
+             "#"
+             "'"]]
     (is (= s (parsetree-to-string (sexp s)))))
   (doseq [r ["paredit/compile.clj" 
              "paredit/core_commands.clj"

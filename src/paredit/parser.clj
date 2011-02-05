@@ -110,7 +110,7 @@
     :vector [open-vector :expr* "]"]
     :map [open-map :expr* "}"]
     :set [open-set :expr* "}"]
-    :quote [open-quote :expr]
+    :quote [open-quote :expr*]
     :meta [open-meta :expr :? :expr :?]
     :deref [open-deref :expr]
     :syntax-quote [open-syntax-quote :expr]
