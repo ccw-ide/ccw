@@ -75,12 +75,6 @@
          version="0.0.0"/>
 
    <plugin
-         id="parsley"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
          id="clojure.osgi"
          download-size="0"
          install-size="0"
@@ -105,5 +99,17 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+
+   <plugin
+         id="net.cgrand.parsley"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="net.cgrand.regex"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
 
 </feature>
