@@ -8,7 +8,7 @@
         <groupId>org.lpetit</groupId>
         <artifactId>paredit.clj</artifactId>
         <packaging>eclipse-plugin</packaging>
-        <version>0.12.2-SNAPSHOT</version>
+        <version>0.12.4-SNAPSHOT</version>
         
         <name>Paredit.clj</name>
         <description>paredit in clojure, tailored for clojure</description>
@@ -55,22 +55,12 @@
                                         <namespaces>
                                                 <namespace>paredit.core</namespace>
                                         </namespaces>
-                                        <!--compileDeclaredNamespaceOnly>true</compileDeclaredNamespaceOnly-->
+                                        <compileDeclaredNamespaceOnly>true</compileDeclaredNamespaceOnly>
                                         <!-- To take advantage of the compilers syntax checking, 
                                              but wish to prevent any AOT classes from appearing 
                                              in the maven generated JAR file -->
-                                        <!--temporaryOutputDirectory>true</temporaryOutputDirectory-->
+                                        <temporaryOutputDirectory>true</temporaryOutputDirectory>
                                 </configuration>
-                                <!--
-                                <executions>
-                                        <execution>
-                                                <phase>compile</phase>
-                                                <goals>
-                                                        <goal>compile</goal>
-                                                </goals>
-                                        </execution>
-                                </executions>
-                                -->
                         </plugin>
                </plugins>
         </build>
@@ -89,12 +79,12 @@
                 <dependency>
                         <groupId>org.lpetit</groupId>
                         <artifactId>net.cgrand.parsley</artifactId>
-                        <version>0.0.6.STABLE02</version>
+                        <version>0.0.7.STABLE02</version>
                 </dependency>
                 <dependency>
                         <groupId>org.lpetit</groupId>
                         <artifactId>net.cgrand.regex</artifactId>
-                        <version>0.0.1</version>
+                        <version>0.0.3.STABLE01</version>
                 </dependency>
         </dependencies>
         
@@ -123,6 +113,11 @@
                 </snapshotRepository>
         </distributionManagement-->
         <repositories>
+                <repository>
+                        <id>clojars.org</id>
+                        <layout>default</layout>
+                        <url>http://clojars.org/repo/</url>
+                </repository>
                 <repository>
                         <id>ccw</id>
                         <layout>p2</layout>
