@@ -150,13 +150,20 @@
   (doseq [s [""
              "(defn "
              "3/4"
-             "-3/4"]]
+             "-3/4"
+             "3/"
+             ":éà"
+             "::éà"
+             "or#"
+             "^"
+             "#"]]
     (is (= s (parsetree-to-string (sexp s)))))
   (doseq [r ["paredit/compile.clj" 
              "paredit/core_commands.clj"
              "paredit/core.clj"
              "paredit/loc_utils.clj"
-             "clojure/core.clj"]]
+             "clojure/core.clj"
+             ]]
     (let [s (slurp (.getResourceAsStream (clojure.lang.RT/baseLoader) r))]
       (is (= s (parsetree-to-string (sexp s)))))))
 

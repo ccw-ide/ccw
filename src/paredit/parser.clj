@@ -42,6 +42,33 @@
     e
     (recur (nth (code-children e) 2))))
 
+(def open-list "(")
+(def open-vector "[")
+(def open-map "{")
+(def open-set "#{")
+(def open-quote \')
+(def open-meta "^")
+(def open-deref \@)         ;"#(?:[\{\(\'\^\"\_\!])" 
+(def open-syntax-quote \`)
+(def open-fn "#(")
+(def open-var "#'")
+(def open-deprecated-meta "#^")
+(def open-string \")
+(def open-regex "#\"")
+(def open-unquote-splicing "~@")
+(def open-unquote #"~(?!@)")
+(def open-anon-arg "%")
+(def open-keyword #":{1,2}")
+(def open-discard "#_")
+(def whitespace #"(?:,|\s)+")
+(def open-comment #"(?:\#\!|;)")
+(def open-char "\\")
+(def symbol-exclusion #"[^\(\[\#\{\\\"\~\%\:\,\s\!\;\'\@\`;0-9]")
+(def ^{:private true} prefixes
+  #{open-list open-vector open-map open-set open-quote open-meta open-deref open-syntax-quote
+    open-fn open-var open-deprecated-meta open-string open-regex open-unquote-splicing
+    open-unquote open-anon-arg open-keyword open-discard whitespace open-comment
+    open-char})
 (def sexp
   (parser {:root-tag :root
            :main :expr*
@@ -71,47 +98,40 @@
              :char
              :chimera
              }
-    :list ["(" :expr* ")"]
-    :chimera #{ ["("  :expr* #{"]" "}" eof}] 
-                ["["  :expr* #{")" "}" eof}]
-                ["{" :expr* #{")" "]" eof}]
-                ["#(" :expr* #{"]" "}" eof}]
-                ["#{" :expr* #{")" "]" eof}]
-                (unspaced \"    #"(?:\\.|[^\\\"])++(?!\")" :? eof)
-                (unspaced "#\"" #"(?:\\.|[^\\\"])++(?!\")" :? eof)
+    :list [open-list :expr* ")"]
+    :chimera #{ [open-list  :expr* #{"]" "}" eof}] 
+                [open-vector  :expr* #{")" "}" eof}]
+                [open-map :expr* #{")" "]" eof}]
+                [open-fn :expr* #{"]" "}" eof}]
+                [open-set :expr* #{")" "]" eof}]
+                (unspaced open-string #"(?:\\.|[^\\\"])++(?!\")" :? eof)
+                (unspaced open-regex #"(?:\\.|[^\\\"])++(?!\")" :? eof)
                 }
-    :vector ["[" :expr* "]"]
-    :map ["{" :expr* "}"]
-    :set ["#{" :expr* "}"]
-    :quote [\' :expr]
-    :meta ["^" :expr :expr]
-    :deref [\@ :expr]
-    :syntax-quote [\` :expr]
-    :var ["#'" :expr]
-    :fn ["#(" :expr* ")"]
-    :deprecated-meta ["#^" :expr :expr]
-    :unquote-splicing ["~@" :expr]
-    :unquote [#"~(?!@)" :expr]
-    :string (unspaced \"    #"(?:\\.|[^\\\"])++(?=\")" :? \")
-    :regex  (unspaced "#\"" #"(?:\\.|[^\\\"])++(?=\")" :? \")
-    :symbol 
-      (let [symbol-head 
-              #"(?:[a-z|A-Z|\*|\!]|\-(?![0-9])|[\_|\?|\>|\<|\=|\$]|\+(?![0-9]))"
-            symbol-rest 
-              (interpol-regex #"(?:`symbol-head`|[0-9]|\.|\#(?!\())")
-            symbol-name
-              (interpol-regex #"(?:`symbol-head``symbol-rest`*(?:\:`symbol-rest`++)*+)")
-              ]
-        (interpol-regex #"(?:\.|\/|\&|`symbol-name`(?:\/`symbol-name`)?)"))
+    :vector [open-vector :expr* "]"]
+    :map [open-map :expr* "}"]
+    :set [open-set :expr* "}"]
+    :quote [open-quote :expr]
+    :meta [open-meta :expr :? :expr :?]
+    :deref [open-deref :expr]
+    :syntax-quote [open-syntax-quote :expr]
+    :var [open-var :expr]
+    :fn [open-fn :expr* ")"]
+    :deprecated-meta [open-deprecated-meta :expr :expr]
+    :unquote-splicing [open-unquote-splicing :expr]
+    :unquote [open-unquote :expr]
+    :string (unspaced open-string #"(?:\\.|[^\\\"])++(?=\")" :? \")
+    :regex  (unspaced open-regex #"(?:\\.|[^\\\"])++(?=\")" :? \")
+    :symbol ; "#(?![\{\(\'\^\"\_\!])"
+      #"(?:[\-\+](?![0-9])[^\^\(\[\#\{\\\"\~\%\:\,\s\;\'\@\`\)\]\}]*)|(?:[^\^\(\[\#\{\\\"\~\%\:\,\s\;\'\@\`\)\]\}\-\+;0-9][^\^\(\[\#\{\\\"\~\%\:\,\s\;\'\@\`\)\]\}]*|#(?![\{\(\'\^\"\_\!])[^\^\(\[\#\{\\\"\~\%\:\,\s\;\'\@\`\)\]\}]*)#?"
+    :keyword (unspaced open-keyword #"[^\(\[\{\'\^\@\`\~\"\\\,\s\;\)\]\}]*"); factorize with symbol
     :int #"(?:[-+]?(?:0(?!\.)|[1-9][0-9]*+(?!\.)|0[xX][0-9A-Fa-f]+(?!\.)|0[0-7]+(?!\.)|[1-9][0-9]?[rR][0-9A-Za-z]+(?!\.)|0[0-9]+(?!\.))(?!/))"
-    :ratio #"[-+]?[0-9]+/[0-9]+"
+    :ratio #"[-+]?[0-9]+/[0-9]*"
     :float #"[-+]?[0-9]+\.[0-9]*+(?:[eE][-+]?+[0-9]+)?+M?"
-    :anon-arg #"%(?:[0-9|\&])?+"
-    :keyword (unspaced #":{1,2}" #"[^\(\[\{\'\^\@\`\~\"\\\,\s\;\)\]\}]*")
-    :char #"\\(?:newline|space|tab|backspace|formfeed|return|u[0-9|a-f|A-F]{4}|o[0-3]?+[0-7]{1,2}|.)"
-    :whitespace #"(?:,|\s)+"
-    :comment #"(?:\#\!|;)[^\n]*"
-    :discard ["#_" :expr]
+    :anon-arg (unspaced open-anon-arg #"(?:[0-9|\&])?+")
+    :char (unspaced open-char #"(?:newline|space|tab|backspace|formfeed|return|u[0-9|a-f|A-F]{4}|o[0-3]?+[0-7]{1,2}|.)")
+    :whitespace whitespace
+    :comment (unspaced open-comment #"[^\n]*")
+    :discard [open-discard :expr]
     ))
 
 (defn parse
