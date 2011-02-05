@@ -111,14 +111,14 @@
     :map [open-map :expr* "}"]
     :set [open-set :expr* "}"]
     :quote [open-quote :expr*]
-    :meta [open-meta :expr :? :expr :?]
-    :deref [open-deref :expr]
+    :meta [open-meta :expr? :expr?]
+    :deref [open-deref :expr?]
     :syntax-quote [open-syntax-quote :expr]
     :var [open-var :expr]
     :fn [open-fn :expr* ")"]
-    :deprecated-meta [open-deprecated-meta :expr :expr]
-    :unquote-splicing [open-unquote-splicing :expr]
-    :unquote [open-unquote :expr]
+    :deprecated-meta [open-deprecated-meta :expr? :expr?]
+    :unquote-splicing [open-unquote-splicing :expr?]
+    :unquote [open-unquote :expr?]
     :string (unspaced open-string #"(?:\\.|[^\\\"])++(?=\")" :? \")
     :regex  (unspaced open-regex #"(?:\\.|[^\\\"])++(?=\")" :? \")
     :symbol ; "#(?![\{\(\'\^\"\_\!])"
@@ -131,7 +131,7 @@
     :char (unspaced open-char #"(?:newline|space|tab|backspace|formfeed|return|u[0-9|a-f|A-F]{4}|o[0-3]?+[0-7]{1,2}|.)")
     :whitespace whitespace
     :comment (unspaced open-comment #"[^\n]*")
-    :discard [open-discard :expr]
+    :discard [open-discard :expr?]
     ))
 
 (defn parse
