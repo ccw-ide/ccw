@@ -194,6 +194,8 @@ public class CCWPlugin extends AbstractUIPlugin {
     	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.ClojureHyperlink");
 
     	ClojureOSGi.require(bundleContext, "ccw.debug.clientrepl");
+    	ClojureOSGi.require(bundleContext, "ccw.debug.serverrepl"); // <= to enable REPLView 
+    	                                                            //    server-side tooling
     	ClojureOSGi.require(bundleContext, "ccw.static-analysis");
     }
     
@@ -311,7 +313,7 @@ public class CCWPlugin extends AbstractUIPlugin {
 		                    if (REPLView.class.isInstance(v)) {
 		                        REPLView replView = (REPLView)v;
 		                        ILaunch launch = replView.getLaunch();
-		                        if (!launch.isTerminated()) {
+		                        if (launch!=null && !launch.isTerminated()) {
 		                            String launchProject = launch.getAttribute(LaunchUtils.ATTR_PROJECT_NAME);
 		                            if (launchProject != null && launchProject.equals(project.getName())) {
 		                            	ret[0] = replView;

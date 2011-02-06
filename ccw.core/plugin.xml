@@ -392,11 +392,11 @@
             name="Show Console">
       </command>
       <command
-            categoryId="org.eclipse.ui.category.navigate"
+            categoryId="org.eclipse.debug.ui.category.run"
             defaultHandler="ccw.repl.Actions$ConnecToEclipseNREPL"
-            description="New REPL on Eclipse internal nrepl server (advanced usages)"
+            description="New REPL client for Eclipse embedded nrepl server (advanced usages)"
             id="ccw.ui.repl.connectToEclipseNREPL"
-            name="New REPL on Eclipse internal nrepl server (advanced usages)">
+            name="New REPL client for Eclipse embedded nrepl server (advanced usages)">
       </command>
       
    </extension>
@@ -616,9 +616,8 @@
       </key>
       <key
             commandId="ccw.ui.repl.connectToEclipseNREPL"
-            contextId="org.eclipse.ui.contexts.window"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="M1+M3+E R">
+            sequence="M1+M3+Q E">
       </key>
 			
             
