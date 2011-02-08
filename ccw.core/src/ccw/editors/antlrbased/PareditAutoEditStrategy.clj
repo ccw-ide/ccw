@@ -29,6 +29,7 @@
    "\"" [:paredit-doublequote true]
    "\t" [:paredit-indent-line true]
    "\n" [:paredit-newline true]
+   "\r\n" [:paredit-newline true]
    })
 
 (def *strict-commands*
