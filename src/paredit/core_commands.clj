@@ -586,12 +586,14 @@
                  "(a\n|" "(a\n  |"
                  "(a\n|]" "(a\n  |]"
                  " #(a\n|]" " #(a\n    |]"
+                 "(ab\n|cd|def)" "(ab\n  |cd|def)"
                  }]
       [#"C-j"     :paredit-newline
                 {"(ab|cd)" "(ab\n  |cd)"
                  ;"(ab|ce)\r\n" "(ab\r\n  |ce)\r\n"
                  "(ab|     cd)" "(ab\n  |cd)"
                  "   a|" "   a\n   |"
+                 "(ab|cd|ef)" "(ab\n  |ef)"
                  ;"foo (let [n (frobbotz)] |(display (+ n 1)\nport))\n        bar"
                  ;(str "foo (let [n (frobbotz)]"
                  ;   "\n      |(display (+ n 1)"

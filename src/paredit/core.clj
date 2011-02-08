@@ -489,12 +489,13 @@
   :paredit-newline
   [cmd parsed {:keys [text offset length] :as t}]
   ; no call to with-important-memoized because we almost immediately delegate to :paredit-indent-line
-  (let [r (paredit :paredit-indent-line 
-              (parse (t/str-insert text offset "\n")) ; TODO suppress (or optimize) this call, if possible
-              {:text (t/str-insert text offset "\n") 
+  (let [text (-> text (t/str-remove offset length) (t/str-insert offset "\n"))
+        r (paredit :paredit-indent-line 
+              (parse text) ; TODO suppress (or optimize) this call, if possible
+              {:text text 
                :offset (inc offset) 
-               :length length 
-               :modifs [{:text *newline* :offset offset :length 0}]})]
+               :length 0 
+               :modifs [{:text *newline* :offset offset :length length}]})]
       (if (-?> r :modifs count (= 2))
         (let [m1 (get-in r [:modifs 0])
               m2 (get-in r [:modifs 1])
