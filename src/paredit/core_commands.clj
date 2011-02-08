@@ -321,7 +321,7 @@
                    ;"#\"fo|o\"" "#\"fo\\\"|o\"",
                    ;;;"#\"foo\"" "#\"foo\""
 
-                  ;; "#|" "#\"|\"" ; specific to clojure regexs
+                   "#|" "#\"|\"" ; specific to clojure regexs
 
                    }]
     ]
@@ -589,6 +589,7 @@
                  }]
       [#"C-j"     :paredit-newline
                 {"(ab|cd)" "(ab\n  |cd)"
+                 ;"(ab|ce)\r\n" "(ab\r\n  |ce)\r\n"
                  "(ab|     cd)" "(ab\n  |cd)"
                  "   a|" "   a\n   |"
                  ;"foo (let [n (frobbotz)] |(display (+ n 1)\nport))\n        bar"

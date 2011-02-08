@@ -203,7 +203,7 @@
         ;(parse-stopped-in-code? parsed)
         (in-code? offset-loc)
           (insert-balanced [\" \"] t ; todo voir si on utilise open balanced ? (mais quid echappement?)
-            (conj (into *real-spaces* *open-brackets*) \#)
+            (conj (into *real-spaces* *open-brackets*) "#")
             (into *extended-spaces* *close-brackets*))
         (not= :string (loc-tag offset-loc))
           (-> t (t/insert (str \")))
