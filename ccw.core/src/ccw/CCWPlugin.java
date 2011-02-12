@@ -123,10 +123,9 @@ public class CCWPlugin extends AbstractUIPlugin {
         startClojureCode(context);
         startREPLServer();
         initializeParenRainbowColors();
-        createColorRegistry();
     }
     
-    private void createColorRegistry() {
+    private synchronized void createColorRegistry() {
     	if (colorRegistry == null) {
     		DisplayUtil.syncExec(new Runnable() {
 				public void run() {
@@ -137,6 +136,9 @@ public class CCWPlugin extends AbstractUIPlugin {
     }
     
     public ColorRegistry getColorRegistry() {
+    	if (colorRegistry == null) {
+    		createColorRegistry();
+    	}
     	return colorRegistry;
     }
     
