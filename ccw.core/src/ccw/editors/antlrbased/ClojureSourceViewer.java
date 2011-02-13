@@ -370,7 +370,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     	DisplayUtil.asyncExec(new Runnable() {
 			public void run() {
 				getTextWidget().setBackground(
-						structuralEditionPossible ? null : Display.getCurrent().getSystemColor(SWT.COLOR_GRAY));
+						structuralEditionPossible ? fBackgroundColor : Display.getCurrent().getSystemColor(SWT.COLOR_GRAY));
 				getTextWidget().setToolTipText(structuralEditionPossible ? null : "Unparseable source code. Structural Edition temporarily disabled.");
 			}
 		});
