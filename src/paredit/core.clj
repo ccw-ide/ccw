@@ -453,7 +453,7 @@
                   (update-in [:modifs] conj {:text o :offset offset :length length}))]
     (if-let [rloc (-?> parsed (parsed-root-loc true))]
       (let [left-leave (some (fn [l] (when (not= :whitespace (loc-tag l)) l)) (next-leaves (leave-for-offset rloc offset)))
-            right-leave (some (fn [l] (when (not= :whitespace (loc-tag l)) l)) (previous-leaves (leave-for-offset rloc (+ offset length))))
+            right-leave (leave-for-offset rloc (+ offset (dec length))) ; may be a whitespace
             right-leave (if (or (nil? right-leave) (<= (start-offset right-leave) (start-offset left-leave))) left-leave right-leave)]
         (if (or
               (not (in-code? (loc-containing-offset rloc offset)))
