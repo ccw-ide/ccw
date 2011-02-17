@@ -48,3 +48,4 @@ Export-Package: ccw,
  ccw.utils.editors.antlrbased,
  ccw.wizards
 Bundle-ActivationPolicy: lazy
+

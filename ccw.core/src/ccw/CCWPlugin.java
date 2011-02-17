@@ -77,7 +77,8 @@ public class CCWPlugin extends AbstractUIPlugin {
 	 *         dispose the color themselves)
 	 */
 	public static Color getCCWColor(int index) {
-		return CCWPlugin.getDefault().allColors[index];
+		CCWPlugin defaultPlugin = getDefault();
+		return defaultPlugin.getAllColors()[index];
 	}
 	
     /** The shared instance */
@@ -88,13 +89,23 @@ public class CCWPlugin extends AbstractUIPlugin {
     // clear as mud to me at the moment
     public Color[] allColors;
     
+    /**
+     * Must be called from the UI thread
+     */
+    public Color[] getAllColors() {
+    	if (allColors == null) {
+    		initializeParenRainbowColors();
+    	}
+    	return allColors;
+    }
+    
     private ColorRegistry colorRegistry;
     
     private FontRegistry fontRegistry;
     
     private ServerSocket ackREPLServer;
     
-    private synchronized void startREPLServer() throws CoreException {
+    public synchronized void startREPLServer() throws CoreException {
     	if (ackREPLServer == null) {
 	        try {
 	            ackREPLServer = (ServerSocket)((List)Var.find(Symbol.intern("clojure.tools.nrepl/start-server")).invoke()).get(0);
@@ -114,27 +125,27 @@ public class CCWPlugin extends AbstractUIPlugin {
     }
 
     public CCWPlugin() {
+    	System.out.println("CCWPlugin instanciated");
     }
     
     public void start(BundleContext context) throws Exception {
+    	System.out.println("CCWPlugin start() starts");
         super.start(context);
-        
         plugin = this;
         startClojureCode(context);
-        startREPLServer();
-        initializeParenRainbowColors();
+    	System.out.println("CCWPlugin start() ends");
     }
     
     private synchronized void createColorRegistry() {
     	if (colorRegistry == null) {
-    		DisplayUtil.syncExec(new Runnable() {
-				public void run() {
-		    		colorRegistry = new ColorRegistry(getWorkbench().getDisplay());
-		    		colorRegistry.put("ccw.repl.expressionBackground", new RGB(0xf0, 0xf0, 0xf0));
-				}});
+    		colorRegistry = new ColorRegistry(getWorkbench().getDisplay());
+    		colorRegistry.put("ccw.repl.expressionBackground", new RGB(0xf0, 0xf0, 0xf0));
     	}
     }
     
+    /**
+     * Must be called from the UI thread only
+     */
     public ColorRegistry getColorRegistry() {
     	if (colorRegistry == null) {
     		createColorRegistry();
@@ -221,15 +232,17 @@ public class CCWPlugin extends AbstractUIPlugin {
     	}
     }
     
-    private void initializeParenRainbowColors() {
-        allColors = new Color[] {
-                new Color(Display.getDefault(), 0x00, 0xCC, 0x00),
-                new Color(Display.getDefault(), 0x00, 0x88, 0xAA),
-                new Color(Display.getDefault(), 0x66, 0x00, 0xAA),
-                new Color(Display.getDefault(), 0x00, 0x77, 0x00),
-                new Color(Display.getDefault(), 0x77, 0xEE, 0x00),
-                new Color(Display.getDefault(), 0xFF, 0x88, 0x00)
-            };
+    private synchronized void initializeParenRainbowColors() {
+    	if (allColors == null) {
+	        allColors = new Color[] {
+	                new Color(Display.getDefault(), 0x00, 0xCC, 0x00),
+	                new Color(Display.getDefault(), 0x00, 0x88, 0xAA),
+	                new Color(Display.getDefault(), 0x66, 0x00, 0xAA),
+	                new Color(Display.getDefault(), 0x00, 0x77, 0x00),
+	                new Color(Display.getDefault(), 0x77, 0xEE, 0x00),
+	                new Color(Display.getDefault(), 0xFF, 0x88, 0x00)
+	        };
+    	}
     }
     
     private void disposeParenRainbowColors() {
