@@ -606,11 +606,25 @@
             commandId="ccw.view.repl.commands.printErrorDetail"
             contextId="ccw.ui.clojureEditorScope"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="M1+J">
+            sequence="M3+E">
+      </key>
+      <key
+            commandId="ccw.view.repl.commands.printErrorDetail"
+            contextId="ccw.ui.clojureEditorScope"
+            platform="carbon"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+E">
       </key>
       <key
             commandId="ccw.view.repl.commands.clearLog"
             contextId="ccw.ui.clojureEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M3+K">
+      </key>
+      <key
+            commandId="ccw.view.repl.commands.clearLog"
+            contextId="ccw.ui.clojureEditorScope"
+            platform="carbon"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+K">
       </key>
