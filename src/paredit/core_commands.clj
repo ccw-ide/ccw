@@ -540,6 +540,7 @@
                  "foo ([b|a|r])" "foo ([|bar|])"
                  "foo ([|bar|])" "foo (|[bar]|)"
                  "foo (|[bar]|)" "foo |([bar])|"
+                 "(^foo |baz|)" "(|^foo baz|)"
                  ;with :chimera
                  "(foo |bar]" "|(foo bar]|"
                  "(foo |{bar)]" "|(foo {bar)]|"
