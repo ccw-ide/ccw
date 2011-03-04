@@ -76,11 +76,11 @@
 
 (defn eval-expression
   [repl-view log-component {:keys [send]} requests-atom expr]
-  (let [response-fn (send expr :ns (.getCurrentNamespace repl-view))
+  (let [response-fn (send expr :ns (.getCurrentNamespace repl-view) :timeout Long/MAX_VALUE)
         key [(System/currentTimeMillis) expr]]
     (swap! requests-atom assoc key response-fn)
     (future (try
-              (doseq [{:keys [out err value ns status] :as resp} (repl/response-seq response-fn)]
+              (doseq [{:keys [out err value ns status] :as resp} (repl/response-seq response-fn Long/MAX_VALUE)]
                 (ui-sync
                   (when ns
                     ; TODO: need to make sure that a response from an earlier request doesn't
@@ -92,7 +92,7 @@
                       (log log-component v k)
                       (CCWPlugin/log (str "Cannot handle REPL response: " k (pr-str resp)))))
                   (case status
-                    ("timeout" "interrupted") (log log-component (eval-failure-msg status out) :err)
+                    ("timeout" "interrupted") (log log-component (eval-failure-msg status expr) :err)
                     nil)))
               (catch Throwable t
                 (CCWPlugin/logError (eval-failure-msg nil expr) t)
