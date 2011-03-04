@@ -134,7 +134,6 @@
                         cursor-at-end)))))))
     
     (comp (apply partial eval-expression args)
-      retain-expr-fn
       (fn [expr add-to-log?]
         (reset! retained-input nil)
         (reset! current-step -1)
@@ -144,5 +143,6 @@
                             (if (= expr (last %))
                               %
                               (conj % expr))
-                            (-> % count (- history/max-history) (max 0)))))
+                            (-> % count (- history/max-history) (max 0))))
+          (retain-expr-fn expr))
         expr))))
