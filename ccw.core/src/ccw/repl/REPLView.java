@@ -2,6 +2,7 @@ package ccw.repl;
 
 import java.net.ConnectException;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.debug.core.ILaunch;
@@ -70,6 +71,7 @@ public class REPLView extends ViewPart implements IAdaptable {
     }
     
     private static final Keyword inputExprLogType = Keyword.intern("in-expr");
+    private static final Pattern boostIndent = Pattern.compile("^", Pattern.MULTILINE);
     
     // TODO would like to eliminate separate log view, but:
     // 1. PareditAutoEditStrategy gets all text from a source document, and bails badly if its not well-formed
@@ -97,6 +99,8 @@ public class REPLView extends ViewPart implements IAdaptable {
     public REPLView () {}
     
     private void copyToLog (StyledText s) {
+        // sadly, need to reset text on the ST in order to get formatting/style ranges...
+        s.setText(boostIndent.matcher(s.getText()).replaceAll("   ").replaceFirst("^\\s+", "=> "));
         int start = logPanel.getCharCount();
         try {
             log.invoke(logPanel, s.getText(), inputExprLogType);

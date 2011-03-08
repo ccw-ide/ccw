@@ -1,8 +1,12 @@
 (ns ccw.repl.cmdhistory
   (:use (clojure.contrib def core))
   (:import
+    ccw.CCWPlugin
     org.eclipse.core.runtime.jobs.Job
-    org.eclipse.core.runtime.IProgressMonitor))
+    org.eclipse.core.resources.IResource
+    org.eclipse.core.runtime.IProgressMonitor
+    org.osgi.service.prefs.BackingStoreException
+    org.eclipse.core.runtime.preferences.IEclipsePreferences))
 
 (defvar- queued-commands (ref {})
   "Map between project names and vectors of REPL expressions that have yet to
@@ -16,12 +20,13 @@
 (defvar- persist-schedule-ms 30000
   "Queued commands are persisted to project preferences every _ milliseconds.")
 
-(defn- get-pref-node
+(defn- ^IEclipsePreferences get-pref-node
   [project-name]
   (-?> project-name
     ccw.launching.LaunchUtils/getProject
     org.eclipse.core.resources.ProjectScope.
-    (.getNode pref-node-id)))
+    (.getNode pref-node-id)
+    (doto .sync))) 
 
 (defn- queue-expression
   [project-name expr]
@@ -53,31 +58,52 @@
        (partial queue-expression project-name)]
       [[] identity])))
 
-(defn- save-history
-  [project-name history]
-  (doto (get-pref-node project-name)
-    (.put history-key (pr-str history))
-    .flush))
+(defn- save-cmds
+  [^IProgressMonitor pm queued-commands]
+  (loop [[[project-name exprs] & rqs :as queued-commands] (seq queued-commands)
+         retrying? false]
+    (when project-name
+      (let [[history] (get-history project-name)
+            node (get-pref-node project-name)
+            retry? (atom false)]
+        (.subTask pm project-name)
+        (try (doto node
+               (.put history-key (->> (reverse exprs)
+                                   (concat history)
+                                   (take-last max-history)
+                                   ; prevent consecutive duplicate expressions
+                                   (partition-by identity)
+                                   (mapcat (partial take 1))
+                                   vec
+                                   pr-str))
+               .flush)
+          (catch BackingStoreException e
+            (if retrying?
+              (CCWPlugin/logError e)
+              (reset! retry? true))))
+        (if (not @retry?)
+          (recur rqs false)
+          (do
+            ; maybe someone touched our project prefs; refresh
+            (CCWPlugin/log (format "Refreshing settings dir for %s, re-attempting saving REPL command history" project-name))
+            (-?> project-name
+              ccw.launching.LaunchUtils/getProject
+              (.getFolder ".settings")
+              (.refreshLocal IResource/DEPTH_INFINITE nil))
+            (recur queued-commands true)))))))
 
 (defvar- save-cmds-job
   (doto (proxy [Job] ["ccw REPL command history persistence"]
-          (run [^IProgressMonitor pm]
-            (.beginTask pm "Persisting REPL histories" IProgressMonitor/UNKNOWN)
-            (doseq [[project-name exprs] (dosync (let [queued @queued-commands]
-                                                  (ref-set queued-commands {})
-                                                  queued))
-                    :let [[history] (get-history project-name)]]
-              (.subTask pm project-name)
-              (save-history project-name (->> (reverse exprs)
-                                           (concat history)
-                                           (take-last max-history)
-                                           ; prevent consecutive duplicate expressions
-                                           (partition-by identity)
-                                           (mapcat (partial take 1))
-                                           vec)))
-            (.done pm)
-            (.schedule this persist-schedule-ms)
-            org.eclipse.core.runtime.Status/OK_STATUS))
+          (run [pm]
+            (try
+              (.beginTask pm "Persisting REPL histories" IProgressMonitor/UNKNOWN)
+              (save-cmds pm (dosync (let [queued (ensure queued-commands)]
+                                      (ref-set queued-commands {})
+                                      queued)))
+              (.done pm)
+              org.eclipse.core.runtime.Status/OK_STATUS
+              (finally
+                (.schedule this persist-schedule-ms)))))
     (.setSystem true)))
 
 (defn- schedule-job

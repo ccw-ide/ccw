@@ -100,6 +100,7 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
 		for (IFolder outputPath: getSrcFolders(getProject()).values()) {
 			folders.add(outputPath.getFullPath());
 		}
+        folders.add(getProject().getFolder(".settings").getFullPath());
 		
 		delta_loop: for (IResourceDelta d: getDelta(getProject()).getAffectedChildren()) {
 			for (IPath folder: folders) {

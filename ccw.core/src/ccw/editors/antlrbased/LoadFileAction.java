@@ -58,17 +58,18 @@ public class LoadFileAction extends Action {
         if (proj != null) {
             for (IFolder f : proj.sourceFolders()) {
                 if (f.getProjectRelativePath().isPrefixOf(editorFile.getProjectRelativePath())) {
-                    sourcePath = f.getLocation().toOSString();
+                    sourcePath = editorFile.getProjectRelativePath().makeRelativeTo(f.getProjectRelativePath()).toOSString();
                     break;
                 }
             }
         }
+        if (sourcePath == null) sourcePath = filePath;
 
         REPLView repl = REPLView.activeREPL.get();
         if (repl != null && !repl.isDisposed()) {
             EvaluateTextUtil.evaluateText(repl, ";; Loading file " + editorFile.getProjectRelativePath().toOSString(), true);
             try {
-                EvaluateTextUtil.evaluateText(repl, (String)loadFileCommand.invoke(editor.getDocument().get(), filePath, sourcePath), false);
+                EvaluateTextUtil.evaluateText(repl, (String)loadFileCommand.invoke(editor.getDocument().get(), sourcePath, editorFile.getName()), false);
                 Actions.ShowActiveREPL.execute(false);
             } catch (Exception e) {
                 CCWPlugin.logError("Could not load file " + filePath, e);
