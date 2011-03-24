@@ -523,6 +523,12 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             platform="carbon"/>
       <key
+            commandId="ccw.ui.edit.text.clojure.evaluate.toplevel.s.expression"
+            contextId="ccw.ui.clojureEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+Enter">
+      </key>
+      <key
             sequence="M2+M3+X C"
             contextId="ccw.ui.clojureEditorScope"
             commandId="ccw.ui.edit.text.clojure.launch.repl"
@@ -632,12 +638,6 @@
             commandId="ccw.ui.repl.connectToEclipseNREPL"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+M3+Q E">
-      </key>
-      <key
-            commandId="ccw.ui.edit.text.clojure.evaluate.toplevel.s.expression"
-            contextId="ccw.ui.clojureEditorScope"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="M1+Enter">
       </key>
 			
             

@@ -4,6 +4,9 @@ import java.net.ConnectException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -34,6 +37,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.contexts.IContextService;
+import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.internal.editors.text.EditorsPlugin;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
@@ -42,6 +46,7 @@ import ccw.CCWPlugin;
 import ccw.editors.antlrbased.ClojureSourceViewer;
 import ccw.editors.antlrbased.ClojureSourceViewerConfiguration;
 import ccw.editors.antlrbased.IClojureEditor;
+import ccw.editors.antlrbased.IClojureEditorActionDefinitionIds;
 import ccw.editors.antlrbased.EditorSupport;
 import ccw.editors.rulesbased.ClojureDocumentProvider;
 import ccw.outline.NamespaceBrowser;
@@ -324,6 +329,14 @@ public class REPLView extends ViewPart implements IAdaptable {
            }
         });
         
+        IHandlerService handlerService = (IHandlerService) getViewSite().getService(IHandlerService.class);
+        handlerService.activateHandler(IClojureEditorActionDefinitionIds.EVALUATE_TOP_LEVEL_S_EXPRESSION, new AbstractHandler() {
+			public Object execute(ExecutionEvent event) throws ExecutionException {
+				evalExpression();
+				return null;
+			}
+		});
+        
         /*
          * Need to hook up here to force a re-evaluation of the preferences
          * for the syntax coloring, after the token scanner has been
@@ -399,14 +412,12 @@ public class REPLView extends ViewPart implements IAdaptable {
 
     private class REPLInputVerifier implements VerifyKeyListener {
         private boolean isEvalEvent (KeyEvent e) {
-            if (e.stateMask == SWT.SHIFT) return false;
-            
             if (e.keyCode == '\n' || e.keyCode == '\r') {
-                return e.stateMask == SWT.CONTROL ||
+                return e.stateMask != SWT.SHIFT && 
                     viewerWidget.getSelection().x == viewerWidget.getCharCount();
+            } else {
+            	return false;
             }
-            
-            return false;
         }
 
         public void verifyKey(VerifyEvent e) {
