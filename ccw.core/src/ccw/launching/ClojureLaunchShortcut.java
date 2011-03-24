@@ -42,13 +42,12 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.part.FileEditorInput;
 
-import ccw.CCWPlugin;
 import ccw.ClojureCore;
 
 public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfigurationConstants {
-    private final HashMap<String, Integer> tempLaunchCounters = new HashMap();
+    private static final HashMap<String, Integer> tempLaunchCounters = new HashMap();
     
-    private int incTempLaunchCount (String projectName) {
+    private static int incTempLaunchCount (String projectName) {
         synchronized (tempLaunchCounters) {
             Integer cnt = tempLaunchCounters.get(projectName);
             cnt = cnt == null ? 1 : cnt + 1;
@@ -56,11 +55,13 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
             return cnt;
         }
     }
+
     
     public void launch(IEditorPart editor, String mode) {
     	launchEditorPart(editor, mode, null);
     }
-    public ILaunch launchEditorPart(IEditorPart editor, String mode, Boolean activateAutoReload) {
+    
+    private ILaunch launchEditorPart(IEditorPart editor, String mode, Boolean activateAutoReload) {
         IEditorInput input = editor.getEditorInput();
         if (input instanceof FileEditorInput) {
             FileEditorInput fei = (FileEditorInput) input;

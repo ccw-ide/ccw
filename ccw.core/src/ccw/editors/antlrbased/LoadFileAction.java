@@ -13,11 +13,14 @@ package ccw.editors.antlrbased;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.viewers.StructuredSelection;
 
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.ClojureProject;
+import ccw.launching.ClojureLaunchShortcut;
 import ccw.repl.Actions;
 import ccw.repl.REPLView;
 import clojure.lang.Symbol;
@@ -50,7 +53,10 @@ public class LoadFileAction extends Action {
 
 	public void run() {
         IFile editorFile = (IFile) editor.getEditorInput().getAdapter(IFile.class);
-        if (editorFile == null) return;
+        if (editorFile == null) {
+        	editor.setStatusLineErrorMessage("Unable to create a Clojure Application for this editor's content");
+        	return;
+        }
         
         ClojureProject proj = ClojureCore.getClojureProject(editor.getProject());
         String sourcePath = null;
@@ -74,6 +80,9 @@ public class LoadFileAction extends Action {
             } catch (Exception e) {
                 CCWPlugin.logError("Could not load file " + filePath, e);
             }
+        } else {
+    		// Start a new one
+          	new ClojureLaunchShortcut().launch(new StructuredSelection(editorFile), ILaunchManager.RUN_MODE);
         }
 	}
 }
