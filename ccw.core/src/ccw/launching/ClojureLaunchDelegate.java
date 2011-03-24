@@ -122,7 +122,14 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 		            	}
 		                private void connectRepl() {
 		                    try {
-		                        REPLView.connect("localhost", port, lastConsoleOpened, launch);
+		                        REPLView replView = REPLView.connect("localhost", port, lastConsoleOpened, launch);
+		                        String startingNamespace = REPLViewLaunchMonitor.this.launch.getLaunchConfiguration().getAttribute(LaunchUtils.ATTR_NS_TO_START_IN, "user");
+		                        try {
+		                        	replView.setCurrentNamespace(startingNamespace);
+		                        } catch (Exception e) {
+		                        	CCWPlugin.logError("Could not start REPL in namespace " + startingNamespace, e);
+		                        }
+		                        
 		                    } catch (Exception e) {
 		                        CCWPlugin.logError("Could not connect REPL to local launch", e);
 		                    }

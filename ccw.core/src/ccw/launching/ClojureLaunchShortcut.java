@@ -42,6 +42,9 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.part.FileEditorInput;
 
+import ccw.CCWPlugin;
+import ccw.ClojureCore;
+
 public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfigurationConstants {
     private final HashMap<String, Integer> tempLaunchCounters = new HashMap();
     
@@ -121,6 +124,9 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
             	    config.copy(config.getName() + " #" + incTempLaunchCount(project.getName()));;
             	try {
 	            	runnableConfiguration.setAttribute(LaunchUtils.ATTR_IS_AUTO_RELOAD_ENABLED, activateAutoReload);
+	            	if (files.length > 0) {
+	            		runnableConfiguration.setAttribute(LaunchUtils.ATTR_NS_TO_START_IN, ClojureCore.findMaybeLibNamespace(files[0]));
+	            	}
 	            	ILaunch launch = runnableConfiguration.launch(mode, null);
 	            	return launch;
             	} finally {

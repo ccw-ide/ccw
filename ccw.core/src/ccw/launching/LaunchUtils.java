@@ -10,13 +10,8 @@
  *******************************************************************************/
 package ccw.launching;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.WeakHashMap;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -35,7 +30,6 @@ import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
-import ccw.util.IOUtils;
 import ccw.util.StringUtils;
 
 public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
@@ -54,6 +48,8 @@ public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
 	public static final String ATTR_CLOJURE_START_REPL = "ccw.repl.startOnLaunch";
 
 	public static final String ATTR_IS_AUTO_RELOAD_ENABLED = "CCW_ATTR_IS_AUTO_RELOAD_ENABLED";
+	public static final String ATTR_NS_TO_START_IN = "CCW_ATTR_NS_TO_START_IN";
+	
 
     public static final String SYSPROP_LAUNCH_ID = "ccw.repl.launchid";
 
