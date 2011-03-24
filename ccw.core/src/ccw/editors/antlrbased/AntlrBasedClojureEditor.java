@@ -10,6 +10,8 @@
  *******************************************************************************/
 package ccw.editors.antlrbased;
 
+import java.util.jar.JarEntry;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -505,10 +507,12 @@ public class AntlrBasedClojureEditor extends TextEditor implements IClojureEdito
 	
 	public REPLView getCorrespondingREPL () {
 		IFile file = (IFile) getEditorInput().getAdapter(IFile.class);
-		if (file != null)
+		if (file != null) {
 			return CCWPlugin.getDefault().getProjectREPL(file.getProject());
-		else
-			return null;
+		} else {
+			// Last resort : we return the current active REPL, if any
+			return REPLView.activeREPL.get();
+		}
 	}
 
 	/*
