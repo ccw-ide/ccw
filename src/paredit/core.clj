@@ -269,31 +269,43 @@
                (-> t (t/delete offset 1) (t/shift-offset -1))))
          (-> t (t/delete offset 1) (t/shift-offset -1))))))
 
+(def lisp-forms (into #{} (map str '(let fn binding proxy reify extend extend-protocol extend-type bound-fn 
+                            if if-not if-let when when-not when-let when-first condp case loop dotimes
+                            for while do doto try catch locking dosync doseq dorun doall
+                            -> -?> ->> future ns clojure.core/ns gen-class gen-interface))))
+(defn ^{:doc "Returns logical true if the String probably names a special form or macro var"}
+  lisp-form? [s]
+  (or
+    (.startsWith s "def")
+    (.startsWith s "with")
+    (lisp-forms s)))
+
 (defn indent-column 
   "pre-condition: line-offset is already the starting offset of a line"
   [root-loc line-offset]
   (let [loc (loc-for-offset root-loc (dec line-offset))]
-    (if-let [loc (z/left loc)]
-      (loop [loc loc seen-loc nil indent 0]
-        (cond
-          (nil? loc)
-            indent
-          (punct-loc? loc)
-            ; we reached the start of the parent form, indent depending on the form's type
-            (+ (loc-col loc)
-              (loc-count loc)    
-              (if (#{"(" "#("} (loc-text loc)) 1 0))
-          (= :whitespace (loc-tag loc))
-            ; we see a space
-            (if (.contains ^String (loc-text loc) "\n")
-              (if seen-loc
-                (+ indent (dec (-> ^String (loc-text loc) (.substring (.lastIndexOf ^String (loc-text loc) "\n")) .length)))
-                (recur (z/left loc) nil 0))
-              (recur (z/left loc) nil (+ indent (-> ^String (loc-text loc) .length))))
-          :else
-            (recur (z/left loc) loc 0)))
-      ; we are at the start of the file !
-      0)))
+    (loop [loc (z/left loc) seen-loc nil indent 0]
+      (cond
+        (nil? loc)
+          indent
+        (punct-loc? loc)
+          ; we reached the start of the parent form, indent depending on the form's type
+          (if (#{"(" "#("} (loc-text loc))
+            (cond
+              (nil? seen-loc) (+ (loc-col loc) (loc-count loc) 1)
+              (lisp-form? (loc-text (first seen-loc))) (+ (loc-col loc) (loc-count loc) 1)
+              (second seen-loc) (loc-col (second seen-loc))
+              :else (+ (loc-col loc) (loc-count loc) 1))
+            (+ (loc-col loc) (loc-count loc)))
+        (= :whitespace (loc-tag loc))
+          ; we see a space
+          (if (.contains ^String (loc-text loc) "\n")
+            (if seen-loc
+              (+ indent (dec (-> ^String (loc-text loc) (.substring (.lastIndexOf ^String (loc-text loc) "\n")) .length)))
+              (recur (z/left loc) nil 0))
+            (recur (z/left loc) seen-loc (+ indent (-> ^String (loc-text loc) .length))))
+        :else
+          (recur (z/left loc) (conj seen-loc loc) 0)))))
 
 (defn text-selection
   "returns a vector [offset length] from a normalized-selection"

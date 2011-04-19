@@ -552,7 +552,7 @@
                  "([a1\n|b])"  "([a1\n  |b])"
                  "([a1b\n  |b])" "([a1b\n  |b])"
                  "(a\n |)" "(a\n  |)"
-                 "(a b c\nd| e)" "(a b c\n  d| e)"
+                 "(a b c\nd| e)" "(a b c\n   d| e)"
                  "|(toto)" "|(toto)"
                  "(a\n  ;sdfdf\n  |b)" "(a\n  ;sdfdf\n  |b)"
                  "[a\n \"b\n |\"]" "[a\n \"b\n |\"]"
@@ -591,6 +591,12 @@
                  "(a\n|]" "(a\n  |]"
                  " #(a\n|]" " #(a\n    |]"
                  "(ab\n|cd|def)" "(ab\n  |cd|def)"
+                 "|" "|"
+                 "|  " "|"
+                 "  |  " "|"
+                 "   |" "|"
+                 "(if toto\n|titi)" "(if toto\n  |titi)"
+                 "(my-fn toto\n|titi)" "(my-fn toto\n       |titi)"
                  }]
       [#"C-j"     :paredit-newline
                 {"(ab|cd)" "(ab\n  |cd)"
