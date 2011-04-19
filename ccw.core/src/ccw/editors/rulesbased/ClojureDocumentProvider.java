@@ -14,18 +14,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.ui.IStorageEditorInput;
-import org.eclipse.ui.editors.text.FileDocumentProvider;
+import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 
 import ccw.StorageMarkerAnnotationModel;
-import ccw.editors.antlrbased.ClojureSourceViewer;
 
-public class ClojureDocumentProvider extends FileDocumentProvider {
+public class ClojureDocumentProvider extends TextFileDocumentProvider {
     
     /**
      * Configures the given document to be useful for Clojure content.
@@ -43,15 +41,19 @@ public class ClojureDocumentProvider extends FileDocumentProvider {
         
         return document;
     }
+
+    @Override
+    public void connect(Object element) throws CoreException {
+    	super.connect(element);
+    	configure(getDocument(element));
+    }
     
     @Override
-    protected IDocument createDocument(Object element) throws CoreException {
-        IDocument document = super.createDocument(element);
-        if (document != null) document = configure(document);
-        
-        return document;
+    public void disconnect(Object element) {
+    	TextUtilities.removeDocumentPartitioners(getDocument(element));
+    	super.disconnect(element);
     }
-
+    
     @Override
     public IAnnotationModel getAnnotationModel(Object element) {
     	IAnnotationModel annotationModel = super.getAnnotationModel(element);
