@@ -106,15 +106,15 @@
                 [open-set :expr* #{")" "]" eof}]
                 (unspaced open-string #"(?:\\.|[^\\\"])++(?!\")" :? eof)
                 (unspaced open-regex #"(?:\\.|[^\\\"])++(?!\")" :? eof)
-                [open-quote eof]
-                [open-meta :expr :? eof]
-                [open-deprecated-meta :expr :? eof]
-                [open-deref eof]
-                [open-syntax-quote eof]
-                [open-var eof]
-                [open-discard eof]
-                [open-unquote-splicing eof]
-                [open-unquote eof]
+                [open-quote #{"]" "}" ")" eof}]
+                [open-meta :expr :? #{"]" "}" ")" eof}]
+                [open-deprecated-meta :expr :? #{"]" "}" ")" eof}]
+                [open-deref #{"]" "}" ")" eof}]
+                [open-syntax-quote #{"]" "}" ")" eof}]
+                [open-var #{"]" "}" ")" eof}]
+                [open-discard #{"]" "}" ")" eof}]
+                [open-unquote-splicing #{"]" "}" ")" eof}]
+                [open-unquote #{"]" "}" ")" eof}]
                 (unspaced open-char eof)
                 }
     :vector [open-vector :expr* "]"]
