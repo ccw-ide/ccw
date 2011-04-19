@@ -136,16 +136,9 @@
       <shortcut
             class="ccw.launching.ClojureLaunchShortcut"
             icon="icons/clojure16x16.png"
-            id="ccw.launching.clojureShortcut"
+            id="ccw.launching.clojureShortcut.preload"
             label="Clojure Application (preload file)"
             modes="run, debug">
-         <perspective id="org.eclipse.jdt.ui.JavaPerspective"/>
-         <perspective id="org.eclipse.jdt.ui.JavaHierarchyPerspective"/>
-         <perspective id="org.eclipse.jdt.ui.JavaBrowsingPerspective"/>
-         <perspective id="org.eclipse.debug.ui.DebugPerspective"/>
-         <perspective
-               id="org.eclipse.pde.ui.PDEPerspective">
-         </perspective>
          <contextualLaunch>
             <enablement>
                <with
@@ -165,6 +158,13 @@
                </with>
             </enablement>
          </contextualLaunch>
+         <perspective id="org.eclipse.jdt.ui.JavaPerspective"/>
+         <perspective id="org.eclipse.jdt.ui.JavaHierarchyPerspective"/>
+         <perspective id="org.eclipse.jdt.ui.JavaBrowsingPerspective"/>
+         <perspective id="org.eclipse.debug.ui.DebugPerspective"/>
+         <perspective
+               id="org.eclipse.pde.ui.PDEPerspective">
+         </perspective>
       </shortcut>
    </extension>
    <extension
@@ -348,12 +348,6 @@
       </command>
 	  
       <command
-            name="%command.clojureShortcut.run.name"
-            description="%command.clojureShortcut.run.description"
-            categoryId="org.eclipse.debug.ui.category.run"
-            id="ccw.debug.ui.clojureShortcut.run">
-      </command>
-      <command
             categoryId="org.eclipse.debug.ui.category.run"
             defaultHandler="ccw.repl.Actions$Connect"
             description="%command.connectToREPL.description"
@@ -529,16 +523,27 @@
             sequence="M1+Enter">
       </key>
       <key
-            sequence="M2+M3+X C"
-            contextId="ccw.ui.clojureEditorScope"
             commandId="ccw.ui.edit.text.clojure.launch.repl"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+            contextId="ccw.ui.clojureEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M2+M3+X C"/>
+      <key
+            commandId="ccw.ui.edit.text.clojure.launch.repl"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M2+M3+X C">
+      </key>
       <key
             sequence="M1+M3+X C"
             contextId="ccw.ui.clojureEditorScope"
             commandId="ccw.ui.edit.text.clojure.launch.repl"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             platform="carbon"/>
+      <key
+            commandId="ccw.ui.edit.text.clojure.launch.repl"
+            platform="carbon"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+M3+X C">
+      </key>
       <key
             sequence="M1+M3+L"
             contextId="ccw.ui.clojureEditorScope"
