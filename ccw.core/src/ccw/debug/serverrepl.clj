@@ -21,19 +21,19 @@
          v []]
     (if-not e
       v
-      (let [stack-traces (.getStackTrace e)
-            first-stack (aget stack-traces 0)
-            file-name (.getFileName first-stack)
-            line-number (.getLineNumber first-stack)
-            message (.getMessage e)]
+      (let [stack-traces (.getStackTrace e)]
         (recur (.getCause e)
-          (conj v (if (> (.length stack-traces) 0)
-                    {"file-name" file-name
-                     "line-number" line-number
-                     "message" message}
-                    {"file-name" "<none>"
-                     "line-number" 0
-                     "message" "<none>"})))))))
+               (conj v (if (> (alength stack-traces) 0)
+                         (let [first-stack (aget stack-traces 0)
+                               file-name (.getFileName first-stack)
+                               line-number (.getLineNumber first-stack)
+                               message (.getMessage e)]
+                           {"file-name" file-name
+                            "line-number" line-number
+                            "message" message})
+                         {"file-name" "<none>"
+                          "line-number" 0
+                          "message" "<none>"})))))))
 
 (defmacro with-exception-serialization
   [& body]
