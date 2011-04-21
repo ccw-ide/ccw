@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="ccw.feature_replui"
+      id="ccw.feature"
       label="%featureName"
-      version="0.2.0.RC09"
+      version="0.2.0.STABLE001"
       provider-name="%providerName"
       plugin="ccw.branding">
 
@@ -19,7 +19,7 @@
    </license>
 
    <url>
-      <update label="Counterclockwise Update Site" url="http://updatesite.counterclockwise.googlecode.com/hg/"/>
+      <update label="Counterclockwise Update Site" url="http://ccw.cgrand.net/updatesite/"/>
    </url>
 
    <requires>
