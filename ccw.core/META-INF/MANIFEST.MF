@@ -28,7 +28,7 @@ Require-Bundle: org.eclipse.ui,
  ccw.clojure;bundle-version="1.2.0",
  ccw.clojurecontrib;bundle-version="1.2.0",
  clojure.osgi;bundle-version="1.2.10",
- org.clojure.tools.nrepl;bundle-version="0.0.4"
+ org.clojure.tools.nrepl;bundle-version="0.0.5"
 Bundle-ClassPath: .,
  classes/
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
