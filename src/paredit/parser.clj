@@ -153,3 +153,34 @@
 (defn parse-tree
   [state]
   state)
+
+(comment 
+(require '[net.cgrand.parsley.lrplus :as l])
+(require '[net.cgrand.parsley.fold :as f])
+(require '[paredit.loc-utils :as lu])
+(defn dser-ser-inc 
+  "Demonstration of parsley's incremental features"
+  [d]
+  (println "----------------------------------------")
+  (let [steps (do (println "steps computing") (time (first (reduce (fn [[steps l] r] 
+                               (let [step (sexp l r)] 
+                                 [(conj steps step) step])) 
+                             [[] l/zero]
+                             (concat d [nil])))))
+        stitch (do (println "reducing steps") (time (reduce f/stitch steps)))]
+    (f/make-node :root (nth stitch 2)))))
+
+(comment
+  ;; {:v {:count}, :l, :r}
+(defprotocol BST
+  (bst-node ([this]) ([this l r v])))
+
+(defrecord Leaf [v]
+  BST
+  (bst-node [this] this))
+(defn node-val [l r]
+  {:count (+ (-> l bst-node :v :count) (-> r bst-node :v :count))})
+(defrecord Node [l r v]
+  BST
+  (bst-node ([this] this)
+            ([this l r] (Node. l r (node-val l r))))))

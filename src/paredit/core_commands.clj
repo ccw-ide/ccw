@@ -597,6 +597,7 @@
                  "   |" "|"
                  "(if toto\n|titi)" "(if toto\n  |titi)"
                  "(my-fn toto\n|titi)" "(my-fn toto\n       |titi)"
+                 ;; future auto reindent children "(my-fn foo\n | baz\n  | baz)" "(my-fn foo\n       |baz\n       baz)"
                  }]
       [#"C-j"     :paredit-newline
                 {"(ab|cd)" "(ab\n  |cd)"

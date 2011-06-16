@@ -519,6 +519,8 @@
 (defmethod paredit
   :paredit-indent-line
   [cmd parsed {:keys [^String text offset length] :as t}]
+  ;;(println "paredit-indent-line")
+  
   (with-important-memoized 
     (if-let [rloc (-?> parsed (parsed-root-loc true))]
       (let [line-start (t/line-start text offset)
