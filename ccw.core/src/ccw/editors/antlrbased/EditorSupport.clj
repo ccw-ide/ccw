@@ -9,12 +9,22 @@
 ;*    Laurent PETIT - initial API and implementation
 ;*******************************************************************************/
 
-(ns ccw.editors.antlrbased.EditorSupport 
+(ns
+  ^{:doc 
+    "Helper functions for the Clojure Editor.
+
+     Related to parse tree and text buffer:
+       - the state holds a ref, which is a map containing keys
+         :text                    the full text corresponding to the incremental text buffer
+         :incremental-text-buffer the incrementally editable text buffer
+         :parse-tree              a delay holding the construction of the parse-tree related to the :text-buffer
+   "}
+  ccw.editors.antlrbased.EditorSupport 
   (:require [paredit.parser :as p])
   (:import [org.eclipse.jdt.ui PreferenceConstants])
   (:gen-class
-    :methods [^{:static true} [updateParseRef [String Object] Object]
-              ^{:static true} [getParser [String Object] Object]
+    :methods [^{:static true} [updateTextBuffer [Object Object String Object] Object]
+              ^{:static true} [getParseTree [String Object] Object]
               ^{:static true} [startWatchParseRef [Object Object] Object]
               ^{:static true} [disposeSourceViewerDecorationSupport [Object] org.eclipse.ui.texteditor.SourceViewerDecorationSupport]
               ^{:static true} [configureSourceViewerDecorationSupport [Object Object] Object]]))
@@ -33,27 +43,32 @@
         (isCancelled [_] (future-cancelled? f))
         (cancel [_] (future-cancel f)))))
 
-(defn -updateParseRef [text r]
+(defn- update-ref-val [])
+
+(defn -updateTextBuffer [offset len text r]
   (let [r (if (nil? r) (ref nil) r)] 
     (dosync
-      (if-let [rv @r] (cancel (:parser rv)))
-      (ref-set r {:text text :parser (timed-delay 800 #(try (p/parse text) (catch Exception _ nil)))}))
+      (if-let [rv @r] (cancel (:parse-tree rv)))
+      (ref-set r {:text text :parse-tree (timed-delay 800 #(try #_(update-ref-val ) (p/parse text) (catch Exception _ nil)))}))
     r))
 
 (defn -startWatchParseRef [r editor]
   (add-watch r :track-state (fn [_ _ _ new-state] 
                               (.setStructuralEditionPossible editor 
-                                (let [possible? (not (nil? @(:parser new-state)))
+                                (let [possible? (not (nil? @(:parse-tree new-state)))
                                       possible? (or possible? (.isEmpty (:text new-state)))]
                                   possible?)))))
 
-(defn -getParser [text r]
+(defn -getParseTree 
+  "text is passed to check if the contents of r is still up to date or not.
+   If not, text will also be used to recompute r on-the-fly."
+  [text r]
   (let [rv @r] 
     (if (= text (:text rv))
-      @(:parser rv)
+      @(:parse-tree rv)
       (do
-        (println "cached parser miss !")
-        (-updateParseRef text r)
+        (println "cached parse-tree miss !")
+        (-updateTextBuffer 0 -1 text r)
         (recur text r)))))
 
 (defn -disposeSourceViewerDecorationSupport [s]

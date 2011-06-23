@@ -74,7 +74,7 @@ public interface IClojureEditor extends IAdaptable {
      */
     IJavaProject getAssociatedProject ();
 
-    Object getParsed ();
+    Object getParseTree ();
     
     /**
      * Can be null...

@@ -586,8 +586,8 @@ public class AntlrBasedClojureEditor extends TextEditor implements IClojureEdito
     	
     }
     
-    public Object getParsed() {
-    	return sourceViewer().getParsed();
+    public Object getParseTree() {
+    	return sourceViewer().getParseTree();
     }
 
 	public void gotoMatchingBracket() {

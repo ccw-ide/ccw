@@ -146,7 +146,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
             public void inputDocumentChanged(IDocument oldInput, IDocument newInput) {
                 if (newInput != null) {
                     newInput.addDocumentListener(parseTreeConstructorDocumentListener);
-                    updateParseRef(newInput.get());
+                    updateTextBuffer(newInput.get());
                 }
             }
             
@@ -339,23 +339,23 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     private IDocumentListener parseTreeConstructorDocumentListener = new IDocumentListener() {
         public void documentAboutToBeChanged(DocumentEvent event) { }
         public void documentChanged(DocumentEvent event) {
-            updateParseRef(event.getDocument().get());
+            updateTextBuffer(event.getDocument().get());
         }
     };
     
-    private void updateParseRef (String text) {
+    private void updateTextBuffer (String text) {
     	boolean firstTime = (parseRef == null);
-        parseRef = EditorSupport.updateParseRef(text, parseRef);
+        parseRef = EditorSupport.updateTextBuffer(0L, -1L, text, parseRef);
         if (firstTime) {
         	EditorSupport.startWatchParseRef(parseRef, this);
         }
     }
     
-    public Object getParsed () {
+    public Object getParseTree () {
         if (parseRef == null) {
-            updateParseRef(getDocument().get());
+            updateTextBuffer(getDocument().get());
         }
-        return EditorSupport.getParser(getDocument().get(), parseRef);
+        return EditorSupport.getParseTree(getDocument().get(), parseRef);
     }
     
     private boolean structuralEditionPossible = true;
@@ -413,7 +413,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     }
     
     public String findDeclaringNamespace() {
-        return ClojureCore.findDeclaringNamespace((Map) getParsed());
+        return ClojureCore.findDeclaringNamespace((Map) getParseTree());
     }
 
     public IJavaProject getAssociatedProject() {
@@ -434,7 +434,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     		int modelRangeLength) {
     	super.setDocument(document, annotationModel, modelRangeOffset, modelRangeLength);
     	if (document != null) {
-    		updateParseRef(document.get());
+    		updateTextBuffer(document.get());
     	}
     }
     
