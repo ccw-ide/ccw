@@ -4,7 +4,7 @@
   (:use paredit.regex-utils)
 	(:require [clojure.zip :as zip])
   (:require [clojure.contrib.zip-filter :as zf])
-  (:use net.cgrand.parsley)
+  (:require [net.cgrand.parsley :as p])
   (:require [net.cgrand.parsley.lrplus :as lr+])
   (:require [net.cgrand.regex :as r]))
 
@@ -77,9 +77,9 @@
     open-unquote open-anon-arg open-keyword open-discard whitespace open-comment
     open-char})
 (def sexp
-  (parser {:root-tag :root
+  (p/parser {:root-tag :root
            :main :expr*
-           :space (unspaced gspaces :*)}
+           :space (p/unspaced gspaces :*)}
     :expr- #{
              :list
              :vector
@@ -111,8 +111,8 @@
                 [open-map :expr* #{")" "]" eof}]
                 [open-fn :expr* #{"]" "}" eof}]
                 [open-set :expr* #{")" "]" eof}]
-                (unspaced open-string #"(?:\\.|[^\\\"])++(?!\")" :? eof)
-                (unspaced open-regex #"(?:\\.|[^\\\"])++(?!\")" :? eof)
+                (p/unspaced open-string #"(?:\\.|[^\\\"])++(?!\")" :? eof)
+                (p/unspaced open-regex #"(?:\\.|[^\\\"])++(?!\")" :? eof)
                 [open-quote #{"]" "}" ")" eof}]
                 [open-meta :expr :? #{"]" "}" ")" eof}]
                 [open-deprecated-meta :expr :? #{"]" "}" ")" eof}]
@@ -122,7 +122,7 @@
                 [open-discard #{"]" "}" ")" eof}]
                 [open-unquote-splicing #{"]" "}" ")" eof}]
                 [open-unquote #{"]" "}" ")" eof}]
-                (unspaced open-char eof)
+                (p/unspaced open-char eof)
                 }
     :vector [open-vector :expr* "]"]
     :map [open-map :expr* "}"]
@@ -136,26 +136,35 @@
     :deprecated-meta [open-deprecated-meta :expr :expr]
     :unquote-splicing [open-unquote-splicing :expr]
     :unquote [open-unquote :expr]
-    :string (unspaced open-string #"(?:\\.|[^\\\"])++(?=\")" :? \")
-    :regex  (unspaced open-regex #"(?:\\.|[^\\\"])++(?=\")" :? \")
+    :string (p/unspaced open-string #"(?:\\.|[^\\\"])++(?=\")" :? \")
+    :regex  (p/unspaced open-regex #"(?:\\.|[^\\\"])++(?=\")" :? \")
     :symbol
       #"(?:[\-\+](?![0-9])[^\^\(\[\#\{\\\"\~\%\:\,\s\;\'\@\`\)\]\}]*)|(?:[^\^\(\[\#\{\\\"\~\%\:\,\s\;\'\@\`\)\]\}\-\+;0-9][^\^\(\[\#\{\\\"\~\%\:\,\s\;\'\@\`\)\]\}]*|#(?![\{\(\'\^\"\_\!])[^\^\(\[\#\{\\\"\~\%\:\,\s\;\'\@\`\)\]\}]*)#?"
-    :keyword (unspaced open-keyword #"[^\(\[\{\'\^\@\`\~\"\\\,\s\;\)\]\}]*"); factorize with symbol
+    :keyword (p/unspaced open-keyword #"[^\(\[\{\'\^\@\`\~\"\\\,\s\;\)\]\}]*"); factorize with symbol
     :int #"(?:[-+]?(?:0(?!\.)|[1-9][0-9]*+(?!\.)|0[xX][0-9A-Fa-f]+(?!\.)|0[0-7]+(?!\.)|[1-9][0-9]?[rR][0-9A-Za-z]+(?!\.)|0[0-9]+(?!\.))(?!/))"
     :ratio #"[-+]?[0-9]+/[0-9]*"
     :float #"[-+]?[0-9]+\.[0-9]*+(?:[eE][-+]?+[0-9]+)?+M?"
-    :anon-arg (unspaced open-anon-arg #"(?:[0-9|\&])?+")
-    :char (unspaced open-char #"(?:newline|space|tab|backspace|formfeed|return|u[0-9|a-f|A-F]{4}|o[0-3]?+[0-7]{1,2}|.)")
+    :anon-arg (p/unspaced open-anon-arg #"(?:[0-9|\&])?+")
+    :char (p/unspaced open-char #"(?:newline|space|tab|backspace|formfeed|return|u[0-9|a-f|A-F]{4}|o[0-3]?+[0-7]{1,2}|.)")
     :whitespace whitespace
-    :comment (unspaced open-comment #"[^\n]*")
+    :comment (p/unspaced open-comment #"[^\n]*")
     :discard [open-discard :expr]
     ))
 
+(defn edit-buffer [buffer offset len text]
+  (let [text (or text "")]
+    (if (= [0 -1] [offset len])
+      (p/edit (p/incremental-buffer sexp) 0 0 text)
+      (p/edit (or buffer (p/incremental-buffer sexp)) offset len text))))
+
+(defn buffer-parse-tree [buffer]
+  (p/parse-tree buffer))
+
 (defn parse
   ([^String text]
-    (sexp text))
+    (p/parse-tree (edit-buffer nil 0 -1 text)))
   ([^String text offset]
-    (sexp text)))
+    (throw (RuntimeException. "deprecated arity")) #_(sexp text)))
 
 (defn parse-tree
   [state]
@@ -165,29 +174,30 @@
 (require '[net.cgrand.parsley.lrplus :as l])
 (require '[net.cgrand.parsley.fold :as f])
 (require '[paredit.loc-utils :as lu])
-(defn dser-ser-inc 
-  "Demonstration of parsley's incremental features"
-  [d]
-  (println "----------------------------------------")
-  (let [steps (do (println "steps computing") (time (first (reduce (fn [[steps l] r] 
-                               (let [step (sexp l r)] 
-                                 [(conj steps step) step])) 
-                             [[] l/zero]
-                             (concat d [nil])))))
-        stitch (do (println "reducing steps") (time (reduce f/stitch steps)))]
-    (f/make-node :root (nth stitch 2)))))
+(let [c (slurp "C:\\Users\\Laurent\\Downloads\\1.3.0-alpha6\\src\\clj\\clojure\\core.clj")]
 
-(comment
-  ;; {:v {:count}, :l, :r}
-(defprotocol BST
-  (bst-node ([this]) ([this l r v])))
+  (println "Executing full parser:")
+  (dotimes [_ 10] (time (sexp c)))
 
-(defrecord Leaf [v]
-  BST
-  (bst-node [this] this))
-(defn node-val [l r]
-  {:count (+ (-> l bst-node :v :count) (-> r bst-node :v :count))})
-(defrecord Node [l r v]
-  BST
-  (bst-node ([this] this)
-            ([this l r] (Node. l r (node-val l r))))))
+  (println "Executing parser incrementally:")
+  (dotimes [_ 10] (time (-> sexp p/incremental-buffer (p/edit 0 0 c) parse-tree)  ))
+  (println "Test edit incremental")
+
+  (dotimes [_ 10]
+    (let [b (let [_ (println "initial incremental buffer")
+                  b (time (-> sexp p/incremental-buffer (p/edit 0 0 c)))
+                  _ (println "initial parse-tree")
+                  _ (time (p/parse-tree b))]
+              b)
+          b (let [_ (println "edit in the top comment")
+                  b (time (-> b (p/edit 1 0 "coucou")))
+                  _ (println "parse-tree after edit in the top comment")
+                  _ (time (p/parse-tree b))]
+              b)
+          b (let [_ (println "add '(\\n' before the top comment")
+                  b (time (-> b (p/edit 0 0 "(\n"))) 
+                  _ (println "parse-tree after add '(\\n' before the top comment")
+                  _ (time (p/parse-tree b))]
+              b)]
+      b))
+  (= c (lu/node-text (-> sexp p/incremental-buffer (p/edit 0 0 c) p/parse-tree)) (lu/node-text (sexp c)))))
