@@ -42,6 +42,13 @@
     e
     (recur (nth (code-children e) 2))))
 
+
+(defn root-node-tag?
+  "Temporary hack until parsley correctly generates root node tags from incremental buffer"
+  [t]
+  (= :root 
+     (when t (-> t name keyword))))
+
 (def open-list "(")
 (def open-vector "[")
 (def open-map "{")

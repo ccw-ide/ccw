@@ -65,7 +65,7 @@
   (let [left-leave (parse-leave (leave-for-offset rloc offset))
         right-leave (parse-leave (leave-for-offset rloc (+ offset length)))
         right-leave (cond 
-                      (= :root (loc-tag right-leave)) 
+                      (root-node-tag? (loc-tag right-leave))
                         (parse-leave (leave-for-offset rloc (dec (+ offset length)))) 
                       (not= (+ offset length) (start-offset right-leave))
                         (parse-node right-leave) 
