@@ -20,36 +20,33 @@
          :parse-tree              a delay holding the construction of the parse-tree related to the :text-buffer
    "}
   ccw.editors.antlrbased.EditorSupport 
-  (:require [paredit.parser :as p])
+  (:require [paredit.parser :as p]
+            [paredit.loc-utils :as lu])
   (:import [org.eclipse.jdt.ui PreferenceConstants])
   (:gen-class
-    :methods [^{:static true} [updateTextBuffer [Object Object String Object] Object]
+    :methods [^{:static true} [updateTextBuffer [Object String Object Object String] Object]
               ^{:static true} [getParseTree [String Object] Object]
               ^{:static true} [startWatchParseRef [Object Object] Object]
               ^{:static true} [disposeSourceViewerDecorationSupport [Object] org.eclipse.ui.texteditor.SourceViewerDecorationSupport]
               ^{:static true} [configureSourceViewerDecorationSupport [Object Object] Object]]))
 
-; TODO move in a utility namespace, or remove
-(defprotocol Cancellable (isCancelled [this]) (cancel [this]))
-
-; TODO move in a utility namespace, or remove
-(defn timed-delay [pause fun]
-  (let [d (delay (fun))
-        f (future (Thread/sleep pause) @d)]
-    (reify
-      clojure.lang.IDeref 
-        (deref [_] @d) 
-      Cancellable
-        (isCancelled [_] (future-cancelled? f))
-        (cancel [_] (future-cancel f)))))
-
-(defn- update-ref-val [])
-
-(defn -updateTextBuffer [offset len text r]
-  (let [r (if (nil? r) (ref nil) r)] 
+(defn -updateTextBuffer [r final-text offset len text]
+  (let [r (if (nil? r) (ref nil) r) text (or text "")] 
     (dosync
-      (if-let [rv @r] (cancel (:parse-tree rv)))
-      (ref-set r {:text text :parse-tree (timed-delay 800 #(try #_(update-ref-val ) (p/parse text) (catch Exception _ nil)))}))
+      (let [buffer (p/edit-buffer (:incremental-text-buffer @r) offset len text)
+            parse-tree (delay (p/buffer-parse-tree buffer))]
+        (if-not (= final-text (lu/node-text @parse-tree))
+          (do
+            (println "Doh! the incremental update did not work well. "
+                     \newline
+                     "offset:" offset ", " "len:" len ", " (str "text:'" text "'")
+                     \newline
+                     "What happened ? Will throw away the current buffer and start with a fresh one...")
+            (let [buffer (p/edit-buffer nil 0 -1 final-text)
+                  parse-tree (delay (p/buffer-parse-tree buffer))]
+              (ref-set r {:text final-text, :incremental-text-buffer buffer :parse-tree parse-tree})))
+          (ref-set r {:text final-text, :incremental-text-buffer buffer, :parse-tree parse-tree}))
+        ))
     r))
 
 (defn -startWatchParseRef [r editor]
@@ -68,7 +65,7 @@
       @(:parse-tree rv)
       (do
         (println "cached parse-tree miss !")
-        (-updateTextBuffer 0 -1 text r)
+        (-updateTextBuffer r text 0 -1 text)
         (recur text r)))))
 
 (defn -disposeSourceViewerDecorationSupport [s]

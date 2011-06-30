@@ -11,6 +11,10 @@
 
 package ccw.editors.antlrbased;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.core.IJavaProject;
@@ -25,10 +29,13 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextInputListener;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextViewerExtension5;
+import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextSelection;
+import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.DefaultCharacterPairMatcher;
 import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.IAnnotationModelExtension;
 import org.eclipse.jface.text.source.ICharacterPairMatcher;
 import org.eclipse.jface.text.source.IOverviewRuler;
 import org.eclipse.jface.text.source.IVerticalRuler;
@@ -146,7 +153,8 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
             public void inputDocumentChanged(IDocument oldInput, IDocument newInput) {
                 if (newInput != null) {
                     newInput.addDocumentListener(parseTreeConstructorDocumentListener);
-                    updateTextBuffer(newInput.get());
+                    String text = newInput.get();
+                    updateTextBuffer(text, 0, -1, text);
                 }
             }
             
@@ -339,13 +347,13 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     private IDocumentListener parseTreeConstructorDocumentListener = new IDocumentListener() {
         public void documentAboutToBeChanged(DocumentEvent event) { }
         public void documentChanged(DocumentEvent event) {
-            updateTextBuffer(event.getDocument().get());
+            updateTextBuffer(event.getDocument().get(), event.getOffset(), event.getLength(), event.getText());
         }
     };
     
-    private void updateTextBuffer (String text) {
+    private void updateTextBuffer (String finalText, long offset, long length, String text) {
     	boolean firstTime = (parseRef == null);
-        parseRef = EditorSupport.updateTextBuffer(0L, -1L, text, parseRef);
+        parseRef = EditorSupport.updateTextBuffer(parseRef, finalText, offset, length, text);
         if (firstTime) {
         	EditorSupport.startWatchParseRef(parseRef, this);
         }
@@ -353,7 +361,8 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     
     public Object getParseTree () {
         if (parseRef == null) {
-            updateTextBuffer(getDocument().get());
+        	String text = getDocument().get();
+            updateTextBuffer(text, 0, -1, text);
         }
         return EditorSupport.getParseTree(getDocument().get(), parseRef);
     }
@@ -434,7 +443,8 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     		int modelRangeLength) {
     	super.setDocument(document, annotationModel, modelRangeOffset, modelRangeLength);
     	if (document != null) {
-    		updateTextBuffer(document.get());
+    		String text = document.get();
+    		updateTextBuffer(text, 0, -1, text);
     	}
     }
     

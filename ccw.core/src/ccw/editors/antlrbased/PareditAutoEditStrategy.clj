@@ -81,7 +81,7 @@
       true))
 
 (defn -customizeDocumentCommand 
-  [#^ccw.editors.antlrbased.PareditAutoEditStrategy this, #^IDocument document, #^DocumentCommand command]
+  [this, #^IDocument document, #^DocumentCommand command]
   (let [^IClojureEditor editor (-> this .state deref :editor)]
     (when (and (.doit command) 
                (not (.isInEscapeSequence editor)) 
