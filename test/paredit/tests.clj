@@ -184,7 +184,7 @@
              "(foo #!)"
              "(foo \\)"
              ]]
-    (is (= s (parsetree-to-string (sexp s)))))
+    (is (= s (parsetree-to-string (parse s)))))
   (doseq [r ["paredit/compile.clj" 
              "paredit/core_commands.clj"
              "paredit/core.clj"
@@ -192,7 +192,7 @@
              "clojure/core.clj"
              ]]
     (let [s (slurp (.getResourceAsStream (clojure.lang.RT/baseLoader) r))]
-      (is (= s (parsetree-to-string (sexp s)))))))
+      (is (= s (parsetree-to-string (parse s)))))))
 
 (defn pts []
   #_(normalized-selection-tests)

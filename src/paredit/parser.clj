@@ -76,10 +76,34 @@
     open-fn open-var open-deprecated-meta open-string open-regex open-unquote-splicing
     open-unquote open-anon-arg open-keyword open-discard whitespace open-comment
     open-char})
+
+(defn- children-info [children]
+  (let [red (reduce
+              (fn [acc child]
+                (let [child-count (if (string? child) (count child) (:count child 0))]
+                  (conj acc (+ (peek acc) child-count))))
+              [0] 
+              children)]
+    [(pop red) (peek red)]))
+
+(defn- make-node [t children]
+  (let [[combined count] (children-info children)]
+    {:tag t 
+     :content children
+     :count count
+     :content-cumulative-count combined}))
+
+(defn- make-unexpected [l]
+  (make-node ::unexpected [l]))
+
 (def sexp
   (p/parser {:root-tag :root
            :main :expr*
-           :space (p/unspaced gspaces :*)}
+           :space (p/unspaced gspaces :*)
+           :make-node make-node
+           :make-leaf nil
+           :make-unexpected make-unexpected
+           }
     :expr- #{
              :list
              :vector
@@ -158,6 +182,8 @@
       (p/edit (or buffer (p/incremental-buffer sexp)) offset len text))))
 
 (defn buffer-parse-tree [buffer]
+  (let [abstract-node (p/parse-tree buffer)]
+    #_(abstract-node net.cgrand.parsley.fold/view))
   (p/parse-tree buffer))
 
 (defn parse
@@ -166,6 +192,7 @@
   ([^String text offset]
     (throw (RuntimeException. "deprecated arity")) #_(sexp text)))
 
+;; TODO rendre deprecated ...
 (defn parse-tree
   [state]
   state)
@@ -180,24 +207,69 @@
   (dotimes [_ 10] (time (sexp c)))
 
   (println "Executing parser incrementally:")
-  (dotimes [_ 10] (time (-> sexp p/incremental-buffer (p/edit 0 0 c) parse-tree)  ))
+  (dotimes [_ 10] (time (-> (edit-buffer nil 0 0 c) buffer-parse-tree)))
   (println "Test edit incremental")
 
   (dotimes [_ 10]
     (let [b (let [_ (println "initial incremental buffer")
-                  b (time (-> sexp p/incremental-buffer (p/edit 0 0 c)))
+                  b (time (edit-buffer nil 0 0 c))
                   _ (println "initial parse-tree")
-                  _ (time (p/parse-tree b))]
+                  _ (time (buffer-parse-tree b))]
               b)
           b (let [_ (println "edit in the top comment")
-                  b (time (-> b (p/edit 1 0 "coucou")))
+                  b (time (-> b (edit-buffer 1 0 "")))
                   _ (println "parse-tree after edit in the top comment")
-                  _ (time (p/parse-tree b))]
+                  _ (time (buffer-parse-tree b))]
+              b)
+          b (let [_ (println "edit in the top comment")
+                  b (time (-> b (edit-buffer 1 0 "")))
+                  _ (println "parse-tree after edit in the top comment")
+                  _ (time (buffer-parse-tree b))]
+              b)
+          b (let [_ (println "edit in the top comment")
+                  b (time (-> b (edit-buffer 1 0 "")))
+                  _ (println "parse-tree after edit in the top comment")
+                  _ (time (buffer-parse-tree b))]
+              b)
+          b (let [_ (println "edit in the top comment")
+                  b (time (-> b (edit-buffer 1 0 "")))
+                  _ (println "parse-tree after edit in the top comment")
+                  _ (time (buffer-parse-tree b))]
+              b)
+          b (let [_ (println "edit in the top comment")
+                  b (time (-> b (edit-buffer 1 0 "")))
+                  _ (println "parse-tree after edit in the top comment")
+                  _ (time (buffer-parse-tree b))]
+              b)
+          b (let [_ (println "edit in the top comment")
+                  b (time (-> b (edit-buffer 1 0 "")))
+                  _ (println "parse-tree after edit in the top comment")
+                  _ (time (buffer-parse-tree b))]
+              b)
+          b (let [_ (println "edit in the top comment")
+                  b (time (-> b (edit-buffer 1 0 "")))
+                  _ (println "parse-tree after edit in the top comment")
+                  _ (time (buffer-parse-tree b))]
+              b)
+          b (let [_ (println "edit in the top comment")
+                  b (time (-> b (edit-buffer 1 0 "")))
+                  _ (println "parse-tree after edit in the top comment")
+                  _ (time (buffer-parse-tree b))]
+              b)
+          b (let [_ (println "edit in the top comment")
+                  b (time (-> b (edit-buffer 1 0 "")))
+                  _ (println "parse-tree after edit in the top comment")
+                  _ (time (buffer-parse-tree b))]
+              b)
+          b (let [_ (println "edit in the top comment")
+                  b (time (-> b (edit-buffer 1 0 "")))
+                  _ (println "parse-tree after edit in the top comment")
+                  _ (time (buffer-parse-tree b))]
               b)
           b (let [_ (println "add '(\\n' before the top comment")
-                  b (time (-> b (p/edit 0 0 "(\n"))) 
+                  b (time (-> b (edit-buffer 0 0 "(\n"))) 
                   _ (println "parse-tree after add '(\\n' before the top comment")
-                  _ (time (p/parse-tree b))]
+                  _ (time (buffer-parse-tree b))]
               b)]
       b))
-  (= c (lu/node-text (-> sexp p/incremental-buffer (p/edit 0 0 c) p/parse-tree)) (lu/node-text (sexp c)))))
+  (= c (lu/node-text (-> (edit-buffer nil 0 0 c) buffer-parse-tree)) (lu/node-text (parse c)))))
