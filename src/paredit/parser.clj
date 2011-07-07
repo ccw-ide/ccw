@@ -23,7 +23,7 @@
 #_(def *atoms* (conj *atom* :whitespace))
 
 (defn eof [s eof?]
-  (when (and (= 0 (.length s)) eof?) [0 eof]))
+  (when (and (= 0 (.length ^String s)) eof?) [0 eof]))
 
 (defn bracket-end [s eof?]
   (lr+/match #{")" "]" "}" eof} s eof?))
