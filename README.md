@@ -8,17 +8,17 @@ paredit in clojure, tailored for clojure
         <dependency>
                 <groupId>org.lpetit</groupId>
                 <artifactId>paredit.clj</artifactId>
-                <version>0.12.1.STABLE02</version>
+                <version>0.13.0.STABLE001</version>
         </dependency>
 
 ##lein/cake:
-        [org.lpetit/paredit.clj "0.12.1.STABLE02"]
+        [org.lpetit/paredit.clj "0.13.0.STABLE001"]
 
 # Dependencies
 
 * Clojure 1.2
 * Clojure contrib 1.2
-* 0.0.6.STABLE02 of Laurent's fork of Christophe Grand's parsley 
+* 0.0.9.STABLE001 of Laurent's fork of Christophe Grand's parsley 
 
 # Design notes
 ##A central multimethod paredit.core/paredit, whose signature is:
