@@ -4,9 +4,9 @@
 
  <extension point="org.eclipse.ui.console.consolePatternMatchListeners">
     <consolePatternMatchListener
-       id="ccw.editors.antlrbased.StacktraceHyperlink"
+       id="ccw.editors.clojure.StacktraceHyperlink"
        regex="at .*[\w]+\.clj:[0-9]+"
-       class="ccw.editors.antlrbased.StacktraceHyperlink">
+       class="ccw.editors.clojure.StacktraceHyperlink">
 		<enablement>
    		  <or>
 		    <test property="org.eclipse.ui.console.consoleTypeTest" value="javaStackTraceConsole"/>
@@ -170,12 +170,12 @@
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            class="ccw.editors.antlrbased.AntlrBasedClojureEditor"
+            class="ccw.editors.clojure.ClojureEditor"
             default="true"
             extensions="clj"
-            contributorClass="ccw.editors.antlrbased.BasicClojureEditorActionContributor"
+            contributorClass="ccw.editors.clojure.BasicClojureEditorActionContributor"
             icon="icons/clojure16x16.png"
-            id="ccw.antlrbasededitor"
+            id="ccw.clojureeditor"
             name="Clojure Editor">
       </editor>
    </extension>
@@ -747,7 +747,7 @@
                <with
                      variable="activePartId">
                   <equals
-                        value="ccw.antlrbasededitor">
+                        value="ccw.clojureeditor">
                   </equals>
                </with>
             </visibleWhen>
@@ -861,7 +861,7 @@
                <with
                      variable="activePartId">
                   <equals
-                        value="ccw.antlrbasededitor">
+                        value="ccw.clojureeditor">
                   </equals>
                </with>
             </visibleWhen>
@@ -1037,7 +1037,7 @@
        point="org.eclipse.ui.views">
     <view
           category="ccw.category.views"
-          class="ccw.outline.NamespaceBrowser"
+          class="ccw.repl.NamespaceBrowser"
           icon="icons/clojure16x16.png"
           id="ccw.view.namespacebrowser"
           name="Namespace Browser"
@@ -1181,7 +1181,7 @@
        point="org.eclipse.ui.workbench.texteditor.hyperlinkDetectors">
     <hyperlinkDetector
           activate="true"
-          class="ccw.editors.antlrbased.ClojureHyperlinkDetector"
+          class="ccw.editors.clojure.ClojureHyperlinkDetector"
           id="ccw.texteditor.hyperlinkDetector"
           name="%clojureHyperlinkDetector"
           targetId="ccw.ui.clojureCode">
@@ -1193,7 +1193,7 @@
           id="ccw.ui.clojureCode"
           name="Clojure Editor">
        <context
-             type="ccw.editors.antlrbased.IClojureEditor">
+             type="ccw.editors.clojure.IClojureEditor">
        </context>
     </target>
     
@@ -1201,7 +1201,7 @@
   <extension
         point="org.eclipse.ui.handlers">
      <handler
-           class="ccw.editors.antlrbased.GotoMatchingBracketHandler"
+           class="ccw.editors.clojure.GotoMatchingBracketHandler"
            commandId="ccw.ui.edit.text.clojure.goto.matching.bracket">
         <enabledWhen>
            <with
@@ -1281,7 +1281,7 @@
         </enabledWhen>
      </handler>
      <handler
-           class="ccw.util.ClojureHandlerFactory:ccw.editors.antlrbased.handlers/raise"
+           class="ccw.util.ClojureHandlerFactory:ccw.editors.clojure.handlers/raise"
            commandId="ccw.ui.edit.text.clojure.select.raise">
         <enabledWhen>
            <with
@@ -1297,7 +1297,7 @@
         </enabledWhen>
      </handler>
      <handler
-           class="ccw.util.ClojureHandlerFactory:ccw.editors.antlrbased.handlers/split"
+           class="ccw.util.ClojureHandlerFactory:ccw.editors.clojure.handlers/split"
            commandId="ccw.ui.edit.text.clojure.split.sexpr">
         <enabledWhen>
            <with
@@ -1313,7 +1313,7 @@
         </enabledWhen>
      </handler>
      <handler
-           class="ccw.util.ClojureHandlerFactory:ccw.editors.antlrbased.handlers/join"
+           class="ccw.util.ClojureHandlerFactory:ccw.editors.clojure.handlers/join"
            commandId="ccw.ui.edit.text.clojure.join.sexpr">
         <enabledWhen>
            <with
@@ -1329,7 +1329,7 @@
         </enabledWhen>
      </handler>
      <handler
-           class="ccw.util.ClojureHandlerFactory:ccw.editors.antlrbased.handlers/expand-right"
+           class="ccw.util.ClojureHandlerFactory:ccw.editors.clojure.handlers/expand-right"
            commandId="ccw.ui.edit.text.clojure.expand.selection.right">
         <enabledWhen>
            <with
@@ -1345,7 +1345,7 @@
         </enabledWhen>
      </handler>
      <handler
-           class="ccw.util.ClojureHandlerFactory:ccw.editors.antlrbased.handlers/expand-left"
+           class="ccw.util.ClojureHandlerFactory:ccw.editors.clojure.handlers/expand-left"
            commandId="ccw.ui.edit.text.clojure.expand.selection.left">
         <enabledWhen>
            <with
@@ -1361,7 +1361,7 @@
         </enabledWhen>
      </handler>
      <handler
-           class="ccw.util.ClojureHandlerFactory:ccw.editors.antlrbased.handlers/expand-up"
+           class="ccw.util.ClojureHandlerFactory:ccw.editors.clojure.handlers/expand-up"
            commandId="ccw.ui.edit.text.clojure.expand.selection.up">
         <enabledWhen>
            <with
@@ -1377,7 +1377,7 @@
         </enabledWhen>
      </handler>
      <handler
-           class="ccw.util.ClojureHandlerFactory:ccw.editors.antlrbased.handlers/select-last"
+           class="ccw.util.ClojureHandlerFactory:ccw.editors.clojure.handlers/select-last"
            commandId="ccw.ui.edit.text.clojure.select.last">
         <enabledWhen>
            <with
@@ -1393,7 +1393,7 @@
         </enabledWhen>
      </handler>
      <handler
-           class="ccw.util.ClojureHandlerFactory:ccw.editors.antlrbased.handlers/open-declaration"
+           class="ccw.util.ClojureHandlerFactory:ccw.editors.clojure.handlers/open-declaration"
            commandId="ccw.ui.edit.text.clojure.open.declaration">
         <enabledWhen>
            <with
@@ -1409,7 +1409,7 @@
         </enabledWhen>
      </handler>
      <handler
-           class="ccw.util.ClojureHandlerFactory:ccw.editors.antlrbased.handlers/indent-selection"
+           class="ccw.util.ClojureHandlerFactory:ccw.editors.clojure.handlers/indent-selection"
            commandId="ccw.ui.edit.text.clojure.indent.selection">
         <enabledWhen>
            <with
@@ -1425,7 +1425,7 @@
         </enabledWhen>
      </handler>
      <handler
-           class="ccw.util.ClojureHandlerFactory:ccw.editors.antlrbased.handlers/content-assist"
+           class="ccw.util.ClojureHandlerFactory:ccw.editors.clojure.handlers/content-assist"
            commandId="org.eclipse.ui.edit.text.contentAssist.proposals">
         <enabledWhen>
            <with
@@ -1441,7 +1441,7 @@
         </enabledWhen>
      </handler>
      <handler
-           class="ccw.util.ClojureHandlerFactory:ccw.editors.antlrbased.handlers/toggle-structural-edition-mode"
+           class="ccw.util.ClojureHandlerFactory:ccw.editors.clojure.handlers/toggle-structural-edition-mode"
            commandId="ccw.ui.edit.text.clojure.switch.structuraledition.mode">
         <enabledWhen>
            <with
@@ -1456,5 +1456,19 @@
            </with>
         </enabledWhen>
      </handler>
+  </extension>
+  <extension
+        point="org.eclipse.core.contenttype.contentTypes">
+     <content-type
+           default-charset="UTF-8"
+           file-extensions="clj"
+           id="ccw.core.clj"
+           name="Clojure files"
+           priority="high">
+     </content-type>
+     <file-association
+           content-type="ccw.core.clj"
+           file-extensions="clj">
+     </file-association>
   </extension>
 </plugin>

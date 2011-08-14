@@ -137,13 +137,14 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
         if (repl == null) {
         	// Another chance, to fight with a hack, temporarily at least, the race condition
         	try {
-    			Thread.sleep(200);
+    			Thread.sleep(500);
     		} catch (InterruptedException e) {
     			e.printStackTrace();
     		}
     		repl = CCWPlugin.getDefault().getProjectREPL(project);
         }
         if (repl == null || repl.isDisposed() || !ClojureLaunchDelegate.isAutoReloadEnabled(repl.getLaunch())) {
+        	System.out.println("REPL not found, or disposed, or autoReloadEnabled not found on launch configuration");
         	return;
         }
         

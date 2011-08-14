@@ -67,11 +67,11 @@ import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.osgi.service.prefs.BackingStoreException;
 
 import ccw.CCWPlugin;
-import ccw.editors.antlrbased.ClojureSourceViewer;
-import ccw.editors.antlrbased.ClojureSourceViewerConfiguration;
-import ccw.editors.rulesbased.ClojureColorManager;
-import ccw.editors.rulesbased.ClojurePartitionScanner;
-import ccw.editors.rulesbased.ClojurePartitioner;
+import ccw.editors.clojure.ClojureColorManager;
+import ccw.editors.clojure.ClojurePartitionScanner;
+import ccw.editors.clojure.ClojurePartitioner;
+import ccw.editors.clojure.ClojureSourceViewer;
+import ccw.editors.clojure.ClojureSourceViewerConfiguration;
 
 /**
  * Configures Clojure Editor syntax coloring preferences.

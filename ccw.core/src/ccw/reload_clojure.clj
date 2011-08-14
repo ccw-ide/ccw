@@ -21,7 +21,7 @@
 (defn reload-rest []
   (require :reload '[ccw
                       [ClojureProjectNature]])
-  (require :reload '[ccw.editors.antlrbased
+  (require :reload '[ccw.editors.clojure
                       [ClojureFormat]
                       [StacktraceHyperlink]
                       [PareditAutoEditStrategy]

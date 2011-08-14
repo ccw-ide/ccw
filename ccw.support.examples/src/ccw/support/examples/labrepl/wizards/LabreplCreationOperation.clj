@@ -36,7 +36,7 @@
      [ccw.debug ClojureClient]
      [ccw.support.examples.labrepl Activator]
      [ccw.launching ClojureLaunchShortcut LaunchUtils]
-     [ccw.editors.antlrbased EvaluateTextUtil]
+     [ccw.editors.clojure EvaluateTextUtil]
      [org.eclipse.ui.wizards.datatransfer ImportOperation
                                           ZipFileStructureProvider]
      [org.eclipse.ui.browser IWorkbenchBrowserSupport]

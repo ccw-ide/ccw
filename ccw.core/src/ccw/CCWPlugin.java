@@ -41,14 +41,14 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.osgi.framework.BundleContext;
 
-import ccw.editors.antlrbased.AntlrBasedClojureEditor;
+import ccw.editors.clojure.ClojureEditor;
+import ccw.editors.clojure.IScanContext;
 import ccw.launching.LaunchUtils;
-import ccw.lexers.ClojureLexer;
 import ccw.preferences.PreferenceConstants;
 import ccw.preferences.SyntaxColoringPreferencePage;
 import ccw.repl.REPLView;
 import ccw.util.DisplayUtil;
-import ccw.utils.editors.antlrbased.IScanContext;
+import clojure.lang.Keyword;
 import clojure.lang.Symbol;
 import clojure.lang.Var;
 import clojure.osgi.ClojureOSGi;
@@ -199,13 +199,13 @@ public class CCWPlugin extends AbstractUIPlugin {
 
     private void startClojureCode(BundleContext bundleContext) throws Exception {
     	ClojureOSGi.loadAOTClass(bundleContext, "ccw.ClojureProjectNature");
-    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.PareditAutoEditStrategy");
-    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.ClojureFormat");
-    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.StacktraceHyperlink");
-    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.EditorSupport");
-    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.ClojureHyperlinkDetector");
-    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.antlrbased.ClojureHyperlink");
-
+    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.clojure.PareditAutoEditStrategy");
+    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.clojure.ClojureFormat");
+    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.clojure.StacktraceHyperlink");
+    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.clojure.EditorSupport");
+    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.clojure.ClojureHyperlinkDetector");
+    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.clojure.ClojureTopLevelFormsDamager");
+    	
     	ClojureOSGi.require(bundleContext, "ccw.debug.clientrepl");
     	ClojureOSGi.require(bundleContext, "ccw.debug.serverrepl"); // <= to enable REPLView 
     	                                                            //    server-side tooling
@@ -378,43 +378,29 @@ public class CCWPlugin extends AbstractUIPlugin {
         final RGB metadataTypehintColor = getElementColor(store, PreferenceConstants.EDITOR_METADATA_TYPEHINT_COLOR, foregroundColor);
         final RGB macroColor = getElementColor(store, PreferenceConstants.EDITOR_MACRO_COLOR, foregroundColor);
         
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.STRING, literalColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.REGEX_LITERAL, literalColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.NUMBER, literalColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.CHARACTER, literalColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.NIL, literalColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.BOOLEAN, literalColor); //$NON-NLS-1$
+        colorRegistry.put(ClojureEditor.ID + "_" + Keyword.intern("string"), literalColor); //$NON-NLS-1$
+        colorRegistry.put(ClojureEditor.ID + "_" + Keyword.intern("regex"), literalColor); //$NON-NLS-1$
+        colorRegistry.put(ClojureEditor.ID + "_" + Keyword.intern("int"), literalColor); //$NON-NLS-1$
+        colorRegistry.put(ClojureEditor.ID + "_" + Keyword.intern("float"), literalColor); //$NON-NLS-1$
+        colorRegistry.put(ClojureEditor.ID + "_" + Keyword.intern("char"), literalColor); //$NON-NLS-1$
+        colorRegistry.put(ClojureEditor.ID + "_" + Keyword.intern("literalSymbol"), literalColor); //$NON-NLS-1$
 
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.OPEN_PAREN, foregroundColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.CLOSE_PAREN, foregroundColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.SPECIAL_FORM, specialFormColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.SYMBOL, foregroundColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + IScanContext.SymbolType.FUNCTION, functionColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + IScanContext.SymbolType.GLOBAL_VAR, globalVarColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + IScanContext.SymbolType.MACRO, macroColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + IScanContext.SymbolType.SPECIAL_FORM, specialFormColor); //$NON-NLS-1$
+        colorRegistry.put(ClojureEditor.ID + "_" + Keyword.intern("symbol"), foregroundColor); //$NON-NLS-1$
+        colorRegistry.put(ClojureEditor.ID + "_" + IScanContext.SymbolType.FUNCTION, functionColor); //$NON-NLS-1$
+        colorRegistry.put(ClojureEditor.ID + "_" + IScanContext.SymbolType.GLOBAL_VAR, globalVarColor); //$NON-NLS-1$
+        colorRegistry.put(ClojureEditor.ID + "_" + IScanContext.SymbolType.MACRO, macroColor); //$NON-NLS-1$
+        colorRegistry.put(ClojureEditor.ID + "_" + IScanContext.SymbolType.SPECIAL_FORM, specialFormColor); //$NON-NLS-1$
         
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + IScanContext.SymbolType.JAVA_CLASS, foregroundColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + IScanContext.SymbolType.JAVA_STATIC_METHOD, foregroundColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + IScanContext.SymbolType.JAVA_INSTANCE_METHOD, foregroundColor); //$NON-NLS-1$
+        colorRegistry.put(ClojureEditor.ID + "_" + IScanContext.SymbolType.JAVA_CLASS, foregroundColor); //$NON-NLS-1$
+        colorRegistry.put(ClojureEditor.ID + "_" + IScanContext.SymbolType.JAVA_STATIC_METHOD, foregroundColor); //$NON-NLS-1$
+        colorRegistry.put(ClojureEditor.ID + "_" + IScanContext.SymbolType.JAVA_INSTANCE_METHOD, foregroundColor); //$NON-NLS-1$
         
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.KEYWORD, keywordColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.SYNTAX_QUOTE, foregroundColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.UNQUOTE_SPLICING, foregroundColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.UNQUOTE, foregroundColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.COMMENT, commentColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.SPACE, foregroundColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.LAMBDA_ARG, foregroundColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.METADATA_TYPEHINT, metadataTypehintColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.AMPERSAND, foregroundColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.LEFT_SQUARE_BRACKET, foregroundColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.RIGHT_SQUARE_BRACKET, foregroundColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.LEFT_CURLY_BRACKET, foregroundColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.RIGHT_CURLY_BRACKET, foregroundColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.BACKSLASH, foregroundColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.CIRCUMFLEX, foregroundColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.COMMERCIAL_AT, foregroundColor); //$NON-NLS-1$
-        colorRegistry.put(AntlrBasedClojureEditor.ID + "_" + ClojureLexer.NUMBER_SIGN, foregroundColor); //$NON-NLS-1$
+        colorRegistry.put(ClojureEditor.ID + "_" + IScanContext.SymbolType.RAW_SYMBOL, foregroundColor); //$NON-NLS-1$
+
+        colorRegistry.put(ClojureEditor.ID + "_" + Keyword.intern("keyword"), keywordColor); //$NON-NLS-1$
+        colorRegistry.put(ClojureEditor.ID + "_" + Keyword.intern("comment"), commentColor); //$NON-NLS-1$
+        colorRegistry.put(ClojureEditor.ID + "_" + Keyword.intern("whitespace"), foregroundColor); //$NON-NLS-1$
+        colorRegistry.put(ClojureEditor.ID + "_" + Keyword.intern("meta"), metadataTypehintColor); //$NON-NLS-1$
     }
     
 	public static IWorkbenchPage getActivePage() {

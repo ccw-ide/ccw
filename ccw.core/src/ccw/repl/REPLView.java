@@ -43,13 +43,12 @@ import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 
 import ccw.CCWPlugin;
-import ccw.editors.antlrbased.ClojureSourceViewer;
-import ccw.editors.antlrbased.ClojureSourceViewerConfiguration;
-import ccw.editors.antlrbased.IClojureEditor;
-import ccw.editors.antlrbased.IClojureEditorActionDefinitionIds;
-import ccw.editors.antlrbased.EditorSupport;
-import ccw.editors.rulesbased.ClojureDocumentProvider;
-import ccw.outline.NamespaceBrowser;
+import ccw.editors.clojure.ClojureDocumentProvider;
+import ccw.editors.clojure.EditorSupport;
+import ccw.editors.clojure.ClojureSourceViewer;
+import ccw.editors.clojure.ClojureSourceViewerConfiguration;
+import ccw.editors.clojure.IClojureEditor;
+import ccw.editors.clojure.IClojureEditorActionDefinitionIds;
 import clojure.lang.Atom;
 import clojure.lang.IFn;
 import clojure.lang.Keyword;
@@ -342,7 +341,7 @@ public class REPLView extends ViewPart implements IAdaptable {
          * for the syntax coloring, after the token scanner has been
          * initialized. Otherwise the very first Clojure editor will not
          * have any tokens colored.
-         * TODO this is repeated in AntlrBasedClojureEditor...surely we can make the source viewer self-sufficient here 
+         * TODO this is repeated in ClojureEditor...surely we can make the source viewer self-sufficient here 
          */
         viewer.propertyChange(null);
         
@@ -368,7 +367,7 @@ public class REPLView extends ViewPart implements IAdaptable {
 	 * @param viewer the viewer for which to return a decoration support
 	 * @return the source viewer decoration support
 	 */
-    // From AntlrBasedClojureEditor + AbstractDecoratedTextEditor ...
+    // From ClojureEditor + AbstractDecoratedTextEditor ...
 	protected SourceViewerDecorationSupport getSourceViewerDecorationSupport(ISourceViewer viewer) {
 		if (fSourceViewerDecorationSupport == null) {
 			fSourceViewerDecorationSupport= new SourceViewerDecorationSupport(

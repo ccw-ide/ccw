@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import ccw.debug.ClojureClient;
-import ccw.utils.editors.antlrbased.IScanContext;
+import ccw.editors.clojure.IScanContext;
 
 public class StaticScanContext implements IScanContext {
 	private Map<String,SymbolType> clojureSymbolTypesCache = new HashMap<String, SymbolType>();
@@ -74,8 +74,8 @@ public class StaticScanContext implements IScanContext {
 			Object symbolType = ClojureClient.loadString("(ccw.debug.clientrepl/core-symbol-type \"" + symbol + "\")");	
 	
 			if (symbolType == null) {
-				clojureSymbolTypesCache.put(symbol, null);
-				return null;
+				clojureSymbolTypesCache.put(symbol, SymbolType.RAW_SYMBOL);
+				return SymbolType.RAW_SYMBOL;
 			} else {
 				try {
 					SymbolType st = SymbolType.valueOf(symbolType.toString());

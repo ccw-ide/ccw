@@ -1,0 +1,48 @@
+= Coloration syntaxique =
+
+DONE Le scanner pourrait être encore plus piloté par les données, y compris par rapport aux parenthèses (notion d'events : "inc nested level", "dec nested level") => couplé au fait que l'on sait toujours partir de zéro
+DONE   => ca ne resoud pas le pb general, though
+On pourrait generaliser l'histoire des parentheses a la notion de "commandes"
+On pourrait embarquer encore plus la gestion du "contexte" dans la commande (inscrire "4" au lieu de "+1") 
+Voir s'il n'y aurait pas du churn (quand je garde la lettre d appuyée, ca pause, parfois ...
+DONE Regression du texte "#()" où la parenthese fermante est vue comme ne fermant pas "#(" ! ? !
+DONE Bug avec la damager/repairer par offset: decalage d'offsets de la coloration syntaxique - J'AVAIS UN DOUBLE BUG DANS ClojureTopLevelForms et ClojureTokenScanner (stopOffset au lieu de length, et reinitialisation malencontreuse de currentOffset)
+DONE Le bug semble etre corrige, mais on a a nouveau regresse en perf ..., regarder pourquoi ... - C'EST AU TOKEN SCANNER DE RENVOYER EOF LORSQUE LA RANGE DEFINIE VIA startRange EST FINIE (dingue!)
+
+DONE Gérer la regression sur "nil" et sur "true" / "false"
+Gérer la regression sur "nil" et "true" / "false" au niveau de la grammaire
+
+paredit : ameliorer la performance de paredit-auto-indent car pour l'instant ca force un reparse total, et c'est la loose au niveau des perfs.
+
+Garde-t-on les méta-données en vert, ou faisons-nous comme avant (ie on ne fait pas d'affichage spécial), ou faisons-nous un mix des 2 (demandera de faire evoluer l'architecture pour avoir des tokens "mixtes": avec un melange de non contextuel et de contextuel)
+=> FAIRE BOSSER CHRISTOPHE SUR LE FAIT QUE parsley/parse-tree ne memoise pas le root cree ...
+
+DONE Avoir un damager plus selectif sur la region endommagee (rester coarse-grained: fusionner les top level forms qui sont endommagees sera suffisant).
+WONTFIX Avoir un repairer plus selectif : se borner a remettre a jour la zone qui se chevauche avec le viewport courant (attention, necessitera aussi, donc, de reagir aux changements de viewports pour verifier s'il y a des zones endommagees encore non reparees => le jeu n'en vaut peut-être pas la chandelle, pour des fichiers < 10 000 lignes => si ce n'est, peut-être, pour ouvrir l'editeur plus rapidement ...)
+WONTFIX NON NECESSAIRE, LES PERFS SONT PLUS QUE CORRECTES EN L'ETAT ACTUEL DE LA GRAMMAIRE CLOJURE (beaucoup de petites top level forms)
+          
+
+Question : damager / repairer = l'implementation courante qui se veut plus "smart" que tout reconstruire, se base sur une "vue"
+    => cette vue pour l'instant parcourt linéairement tous les fils d'un noeud pour connaître ceux qui sont nouveaux
+      => ca fonctionne bien pour le cas général (s'il y a eu un nombre d'edits aleatoires)
+      => ca devrait etre theoriquement suffisant pour notre cas ( au max fichier de 10 000 lignes => 1000 à 2000 items à parcourir )
+      => mais neanmoins pour notre cas particulier (damager/repairer), c'est presque non necessaire
+        - d'avoir une telle vue supplementaire
+DONE         - il suffirait d'avoir une fonction qui, prenant le noeud racine, l'edit effectue (offset, longueur)
+DONE           - s'appuyant sur le fait qu'ayant le noeud, on dispose automatiquement d'un vecteur avec les offsets de tous les noeuds fils
+DONE           - il est alors facile de trouver le premier noeud fils touche, le dernier
+DONE             - d'en deduire la zone endommagee (offset depart premier, offset fin dernier noeud) (=> pour le damager)
+DONE             - d'en deduire quelle seq de tokens reconstruire (concat (subvec fils-noeud-racine offset-premier-noeud-fils-touche) (=> pour le repairer)
+
+DONE Question = comment gerer alors correctement le reaffichage des couleurs des parentheses ? - ON REECRIT LES TOP LEVEL FORMS ENDOMMAGEES, DONC LES COULEURS REPARTENT TOUJOURS DE ZERO ET SONT SOIT BONNES, SOIT RECALCULEES
+
+gerer correctement la resynchronisation auto avec un changement de couleurs dans les preferences
+
+DONE gerer la migration des preferences de couleurs entre la version 0.3.0 et la future version qui n'a plus antlr - RIEN A FAIRE (il y a un niveau d'indirection salvateur)
+
+DONE Virer le nom "AntlrBased" de partout partout ... (noms de classes, methodes, variables, packages, namespaces)
+
+
+DONE => FAIRE (ou trouver dans la nature) une fonction de recherche binaire (utilisant la fonction get, mais on pourrait la rendre parametrable)
+DONE      qui ne cherche pas une valeur, mais s'appuie sur une fonction qui, recevant la valeur courante, renverrait <0, 0 ou >0 pour indiquer
+DONE      si la recherche est finie, doit continuer plus bas, ou plus haut

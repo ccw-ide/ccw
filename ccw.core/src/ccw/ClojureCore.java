@@ -60,7 +60,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import ccw.editors.antlrbased.AntlrBasedClojureEditor;
+import ccw.editors.clojure.ClojureEditor;
 import ccw.repl.REPLView;
 import clojure.lang.RT;
 import clojure.lang.Var;
@@ -268,7 +268,7 @@ public final class ClojureCore {
 						if (maybeSourceFile.exists()) {
 							LocalFileStorageEditorInput editorInput = new LocalFileStorageEditorInput(
 									new LocalFileStorage(maybeSourceFile));
-							IEditorPart editor = IDE.openEditor(CCWPlugin.getActivePage(), editorInput, AntlrBasedClojureEditor.ID);
+							IEditorPart editor = IDE.openEditor(CCWPlugin.getActivePage(), editorInput, ClojureEditor.ID);
 							gotoEditorLine(editor, line);
 							return true;
 						} else {
@@ -281,7 +281,7 @@ public final class ClojureCore {
 							if (zipEntry != null) {
 								ZipEntryStorageEditorInput editorInput = new ZipEntryStorageEditorInput(
 										new ZipEntryStorage(zipFile, zipEntry));
-								IEditorPart editor = IDE.openEditor(CCWPlugin.getActivePage(), editorInput, AntlrBasedClojureEditor.ID);
+								IEditorPart editor = IDE.openEditor(CCWPlugin.getActivePage(), editorInput, ClojureEditor.ID);
 								gotoEditorLine(editor, line);
 								return true;
 							} else {

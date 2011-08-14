@@ -18,10 +18,10 @@
        'ccw.ClojureProjectNature
        'ccw.debug.clientrepl
        'ccw.debug.serverrepl
-       'ccw.editors.antlrbased.PareditAutoEditStrategy
-       'ccw.editors.antlrbased.ClojureFormat
-       'ccw.editors.antlrbased.StacktraceHyperlink
-       'ccw.editors.antlrbased.EditorSupport
-       'ccw.editors.antlrbased.ClojureHyperlinkDetector
-       'ccw.editors.antlrbased.ClojureHyperlink])))
+       'ccw.editors.clojure.PareditAutoEditStrategy
+       'ccw.editors.clojure.ClojureFormat
+       'ccw.editors.clojure.StacktraceHyperlink
+       'ccw.editors.clojure.EditorSupport
+       'ccw.editors.clojure.ClojureHyperlinkDetector
+       'ccw.editors.clojure.ClojureHyperlink])))
 

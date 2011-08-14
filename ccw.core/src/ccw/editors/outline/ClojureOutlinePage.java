@@ -49,7 +49,7 @@ import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
-import ccw.editors.antlrbased.AntlrBasedClojureEditor;
+import ccw.editors.clojure.ClojureEditor;
 import clojure.lang.IMapEntry;
 import clojure.lang.Keyword;
 import clojure.lang.LineNumberingPushbackReader;
@@ -144,7 +144,7 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 	private final String NOT_AVAILABLE = "N/A"; //$NON-NLS-1$
 	private final Object REFRESH_OUTLINE_JOB_FAMILY = new Object();
 	private final IDocumentProvider documentProvider;
-	private final AntlrBasedClojureEditor editor;
+	private final ClojureEditor editor;
 	private List<Object> input = new ArrayList<Object>(0);
 
 	private IDocument document;
@@ -155,7 +155,7 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 	private TreeViewer treeViewer;
 
 	public ClojureOutlinePage(IDocumentProvider documentProvider,
-			AntlrBasedClojureEditor editor) {
+			ClojureEditor editor) {
 		this.documentProvider = documentProvider;
 		this.editor = editor;
 
