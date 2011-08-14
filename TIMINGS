@@ -1,0 +1,66 @@
+Every timings, unless stated otherwise, have count, cumulative count, and tokens.
+
+a) without views
+================
+
+==== Executing full parser:
+"Elapsed time: 153.142947 msecs"
+full parser's  tokens first and second walks:
+"Elapsed time: 76.132462 msecs"
+"Elapsed time: 8.579688 msecs"
+==== Executing parser incrementally:
+"Elapsed time: 285.073983 msecs"
+incremental full parser's  tokens first and second walks:
+"Elapsed time: 78.428949 msecs"
+"Elapsed time: 9.518916 msecs"
+==== initial incremental buffer
+"Elapsed time: 23.664681 msecs"
+initial parse-tree
+"Elapsed time: 257.943785 msecs"
+parse-tree via the function, again (should be instantaneous)
+"Elapsed time: 1.020832 msecs"
+tokens first walk:
+"Elapsed time: 82.010332 msecs"
+tokens second walk:
+"Elapsed time: 10.575161 msecs"
+==== add '(\n' before the top comment
+"Elapsed time: 0.220564 msecs"
+parse-tree after add '(\n' before the top comment
+"Elapsed time: 116.526167 msecs"
+parse-tree via the function, again (should be instantaneous)
+"Elapsed time: 0.831447 msecs"
+"Elapsed time: 71.758896 msecs"
+tokens second walk:
+"Elapsed time: 8.715568 msecs"
+
+b) with view machinery, still count, tokens, cumulative count with single pass
+=============
+==== Executing full parser:
+"Elapsed time: 268.080511 msecs"
+full parser's  tokens first and second walks:
+"Elapsed time: 76.782607 msecs"
+"Elapsed time: 8.70633 msecs"
+==== Executing parser incrementally:
+"Elapsed time: 267.433445 msecs"
+incremental full parser's  tokens first and second walks:
+"Elapsed time: 78.53442 msecs"
+"Elapsed time: 9.65287 msecs"
+==== initial incremental buffer
+"Elapsed time: 23.175435 msecs"
+initial parse-tree
+"Elapsed time: 279.681895 msecs"
+parse-tree via the function, again (should be instantaneous)
+"Elapsed time: 1.155943 msecs"
+tokens first walk:
+"Elapsed time: 80.119559 msecs"
+tokens second walk:
+"Elapsed time: 10.075523 msecs"
+==== add '(\n' before the top comment
+"Elapsed time: 0.288312 msecs"
+parse-tree after add '(\n' before the top comment
+"Elapsed time: 109.810692 msecs"
+parse-tree via the function, again (should be instantaneous)
+"Elapsed time: 1.505074 msecs"
+"Elapsed time: 68.057801 msecs"
+tokens second walk:
+"Elapsed time: 8.487689 msecs"

@@ -4,7 +4,6 @@
   (:require [clojure.contrib.zip-filter :as zf]))
 
 #_(set! *warn-on-reflection* true)
-
 (defn xml-vzip
   "Returns a zipper for xml elements (as from xml/parse),
   given a root element"
@@ -204,16 +203,6 @@
         (= offset (start-offset l)) (recur (zip/up l))
         :else l))
     (root-loc loc)))
-
-#_(defn loc-containing-offset
-  ([loc offset]
-    (if (= 0 offset)
-      (root-loc loc)
-      (let [match (some #(contains-offset? % offset) (take-while (complement zip/end?) (iterate zip/next (zip/next (root-loc loc)))))]
-        (cond
-          (nil? match) (root-loc loc)
-          (= offset (start-offset match)) (zip/up match)
-          :else match)))))
 
 (defn start-punct?
   "true if the loc is a punct starting a form"

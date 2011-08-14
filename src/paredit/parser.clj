@@ -15,13 +15,6 @@
 (def *tag-opening-brackets* {:list "(", :map "{", :vector "[", :string "\"", :regex "#\"", :set "#{", :fn "#("})
 (def *atom* #{:symbol :keyword :int :float :ratio :anon-arg})
 
-#_(def ^{:private true} *brackets* {"(" ")", "{" "}", "[" "]", "\"" "\"", "#\"" "\"", "#{" "}", "#(" ")"})
-#_(def ^{:private true} *opening-bracket-tags* {"(" :list, "{" :map, "[" :vector, "\"" :string, "#\"" :regex, "#{" :set, "#(" :fn})
-#_(def ^{:private true} *opening-brackets* (set (keys *brackets*)))
-#_(def ^{:private true} *closing-brackets* (set (vals *brackets*)))
-#_(def ^{:private true} *spaces* #{(str \space) (str \tab) (str \newline) (str \return) (str \,)})
-#_(def *atoms* (conj *atom* :whitespace))
-
 (defn eof [s eof?]
   (when (and (= 0 (.length ^String s)) eof?) [0 eof]))
 
@@ -41,6 +34,25 @@
   (if-not (#{:meta} (:tag e))
     e
     (recur (nth (code-children e) 2))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; MAKE-NODE, VIEWS, ETC.
+
+(defmacro memoized-fn [name args & body]
+  `(let [a# (atom {})]
+     (fn ~name ~args
+       (let [m# @a#
+             args# ~args]
+         (if-let [[_# v#] (find m# args#)]
+           v#
+           (let [v# (do ~@body)]
+             (swap! a# assoc args# v#)
+             v#))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 (defn root-node-tag?
@@ -77,31 +89,173 @@
     open-unquote open-anon-arg open-keyword open-discard whitespace open-comment
     open-char})
 
-(defn- children-info [children]
+(def *brackets-tags* #{:list :map :vector :string :set :fn :regex})
+
+(defn view-children-seq [view abstract-children]
+  (map #(% view) abstract-children))
+
+(defn view-children-vec [view abstract-children]
+  (persistent! (reduce 
+                 #(conj! %1 (%2 view))
+                 (transient [])
+                 abstract-children)))
+
+(defn- children-info [parse-tree-children]
   (let [red (reduce
               (fn [acc child]
                 (let [child-count (if (string? child) (count child) (:count child 0))]
                   (conj acc (+ (peek acc) child-count))))
               [0] 
-              children)]
+              parse-tree-children)]
     [(pop red) (peek red)]))
 
-(defn- make-node [t children]
-  (let [[combined count] (children-info children)]
-    {:tag t 
-     :content children
-     :count count
-     :content-cumulative-count combined}))
+(def *build-id*)
 
-(defn- make-unexpected [l]
-  (make-node ::unexpected [l]))
+(defn parse-tree-view 
+  ([abstract-leaf s] s) 
+  ([abstract-node t abstract-children]
+    (let [parse-tree-children  (view-children-vec parse-tree-view abstract-children)]
+      (let [[combined count] (children-info parse-tree-children)]
+        {:tag t
+         :content parse-tree-children
+         :build-id *build-id*
+         :count count
+         :content-cumulative-count combined
+         :abstract-node abstract-node
+         ;:tokens (tokens t parse-tree-children count)
+         }))))
+
+(defn node-count [abstract-node]
+  (let [ptv (abstract-node parse-tree-view)]
+    (if (string? ptv)
+      (.length ^String ptv)
+      (:count ptv))))
+
+(def ^{:private true} nesting-tags #{:list, :fn, :chimera}) ;; TODO :chimera is imprecise, one should also see if it's "#(" or "("
+
+(defn- token-length [x]
+  (cond (string? x) (.length ^String x)
+        (map? x) (:token-length x)
+        (number? x) x
+        :else (throw (RuntimeException. (str "invalid token for token-length:" "'" x "'")))))
+
+(defn- token
+  ([token-type] (token token-type ""))
+  ([token-type text] (list {:token-type token-type :token-length (token-length text)})))
+
+(declare tokens-view)
+
+(defn- balanced [token-open token-close abstract-children]
+  (concat (token token-open (node-count (get abstract-children 0))) 
+          (mapcat identity (view-children-seq tokens-view (next (pop abstract-children))))
+          (token token-close (node-count (peek abstract-children)))))
+
+(defn- unbalanced [token-open abstract-children]
+  (concat (token token-open (node-count (get abstract-children 0)))
+          (mapcat identity (view-children-seq tokens-view (next abstract-children)))))
+
+(defn- tokens [t abstract-children count] 
+  ;(println "type: " (type abstract-children))
+  ;(println "abstract-children:" abstract-children)
+  (cond
+    (= :whitespace t) (token :whitespace count)
+    (= :space t) (token :whitespace count) ; TODO one of this and the above is irrelevant. Which one ?
+    (= :list t) (concat (token :nest 0) (balanced :open-list :close-list abstract-children) (token :unnest 0))
+    (= :vector t) (balanced :open :close-vector abstract-children)
+    (= :map t) (balanced :open :close-map abstract-children)
+    (= :set t) (balanced :open :close-set abstract-children)
+    (= :quote t) (unbalanced :open abstract-children)
+    ;(= :meta t) (unbalanced :open abstract-children)
+    (= :meta t) (let [meta-target (peek abstract-children)]
+                  (concat (token :meta (- count (node-count meta-target)))
+                          (meta-target tokens-view)
+                          ;(mapcat identity (view-children-seq tokens-view (pop abstract-children)))
+                          )) 
+    #_(let [abstract-children (mapcat identity abstract-children)]
+                  ;(print "(tokens) (:meta) abstract-children:") (prn abstract-children)
+                  ;(print "(get abstract-children 0):") (prn (first abstract-children))
+                  ;(print "(get abstract-children 1):") (prn (second abstract-children))
+                  (concat (token :meta (+ (token-length (first abstract-children))
+                                          (token-length (second abstract-children)))) 
+                          (next (next abstract-children))))
+    (= :deref t) (unbalanced :open abstract-children)
+    (= :syntax-quote t) (unbalanced :open abstract-children) 
+    (= :var t) (unbalanced :open abstract-children)
+    (= :fn t) (concat (token :nest 0) (balanced :open-fn :close-fn abstract-children) (token :unnest 0))
+    (= :deprecated-meta t) (unbalanced :open abstract-children)
+    (= :unquote-splicing t) (unbalanced :open abstract-children)
+    (= :unquote t) (unbalanced :open abstract-children)
+    (= :string t) (token :string count)
+    (= :regex t) (token :regex count)
+    (= :symbol t) (token :symbol count)
+    (= :keyword t) (token :keyword count)
+    (= :int t) (token :int count)
+    (= :float t) (token :float count)
+    (= :ratio t) (token :ratio count)
+    (= :anon-arg t) (token :anon-arg count)
+    (= :char t) (token :char count)
+    (= :chimera t) (concat (token :nest 0) (balanced :open-chimera :close-chimera abstract-children) (token :unnest 0))
+    (= :comment t) (token :comment count)
+    (= :discard t) (token :comment count)
+    (= :net.cgrand.parsley/root t) (concat (mapcat identity (view-children-seq tokens-view abstract-children)) (token :eof))
+    :else (token :unexpected count)
+    ))
+
+(defn tokens-view
+  ([abstract-leaf s] (do ;(print "(tokens-view) abstract-leaf:") (prn (list s)) 
+                       (throw (RuntimeException. (str "argh: s='" s "'"))) (token :unexpected (.length ^String s))))
+  ([abstract-node t abstract-children]
+    ;(print "(tokens-view) abstract-children:") (prn abstract-children)
+    (tokens t abstract-children (node-count abstract-node))))
+
+#_(defn nesting-level-view
+  [abstract-node t abstract-children]
+  (fn [context] 
+    (if (get nesting-tags t)
+      (inc context)
+      context)))
+
+#_(defn enhanced-tokens-view
+  [abstract-node t abstract-children]
+  (fn [context]
+    (let [new-context ((abstract-node nesting-level-view) context)
+          context-change (not= context new-context)]
+      (concat (command :nest-level new-context)
+              ((chilren-views abstract-children enhanced-tokens-view) new-context)
+              (command :nest-level context)))
+    (tokens t parse-tree-children)))
+
+#_(defn coarse-damage-view
+  [abstract-node t abstract-children]
+  (let [parse-tree-node (abstract-node parse-tree-view)
+        _               (do (println "parse-tree-node: ") parse-tree-node)
+        node-build-id (:build-id parse-tree-node)
+        offsets (mapcat (fn [child offset]
+                          (when (= node-build-id (:build-id child))
+                            [offset (+ offset (:count child))]))
+                        (:content parse-tree-node)
+                        (:content-cumulative-count parse-tree-node))]
+    (when (seq offsets) [(first offsets) (last offsets)])))
+
+(defn make-leaf [s]
+  (memoized-fn abstract-leaf
+    [view]
+      (view abstract-leaf s)))
+
+(defn make-node [t abstract-children]
+  (memoized-fn abstract-node
+    [view]
+    (view abstract-node t abstract-children)))
+
+(defn- make-unexpected [s]
+  (make-node ::unexpected [(make-leaf s)]))
 
 (def sexp
   (p/parser {:root-tag :root
            :main :expr*
            :space (p/unspaced gspaces :*)
            :make-node make-node
-           :make-leaf nil
+           :make-leaf make-leaf
            :make-unexpected make-unexpected
            }
     :expr- #{
@@ -130,22 +284,23 @@
              :chimera
              }
     :list [open-list :expr* ")"]
-    :chimera #{ [open-list  :expr* #{"]" "}" eof}] 
-                [open-vector  :expr* #{")" "}" eof}]
-                [open-map :expr* #{")" "]" eof}]
-                [open-fn :expr* #{"]" "}" eof}]
-                [open-set :expr* #{")" "]" eof}]
+    :chimera 
+             #{ [open-list  :expr* eof] 
+                [open-vector  :expr* eof]
+                [open-map :expr* eof]
+                [open-fn :expr* eof]
+                [open-set :expr* eof]
                 (p/unspaced open-string #"(?:\\.|[^\\\"])++(?!\")" :? eof)
                 (p/unspaced open-regex #"(?:\\.|[^\\\"])++(?!\")" :? eof)
-                [open-quote #{"]" "}" ")" eof}]
-                [open-meta :expr :? #{"]" "}" ")" eof}]
-                [open-deprecated-meta :expr :? #{"]" "}" ")" eof}]
-                [open-deref #{"]" "}" ")" eof}]
-                [open-syntax-quote #{"]" "}" ")" eof}]
-                [open-var #{"]" "}" ")" eof}]
-                [open-discard #{"]" "}" ")" eof}]
-                [open-unquote-splicing #{"]" "}" ")" eof}]
-                [open-unquote #{"]" "}" ")" eof}]
+                [open-quote eof]
+                [open-meta :expr :? eof]
+                [open-deprecated-meta :expr :? eof]
+                [open-deref eof]
+                [open-syntax-quote eof]
+                [open-var eof]
+                [open-discard eof]
+                [open-unquote-splicing eof]
+                [open-unquote eof]
                 (p/unspaced open-char eof)
                 }
     :vector [open-vector :expr* "]"]
@@ -181,14 +336,13 @@
       (p/edit (p/incremental-buffer sexp) 0 0 text)
       (p/edit (or buffer (p/incremental-buffer sexp)) offset len text))))
 
-(defn buffer-parse-tree [buffer]
-  (let [abstract-node (p/parse-tree buffer)]
-    #_(abstract-node net.cgrand.parsley.fold/view))
-  (p/parse-tree buffer))
+(defn buffer-parse-tree [buffer build-id]
+  (binding [*build-id* build-id]
+    ((p/parse-tree buffer) parse-tree-view)))
 
 (defn parse
   ([^String text]
-    (p/parse-tree (edit-buffer nil 0 -1 text)))
+    (buffer-parse-tree (edit-buffer nil 0 -1 text) 0))
   ([^String text offset]
     (throw (RuntimeException. "deprecated arity")) #_(sexp text)))
 
@@ -203,73 +357,40 @@
 (require '[paredit.loc-utils :as lu])
 (let [c (slurp "C:\\Users\\Laurent\\Downloads\\1.3.0-alpha6\\src\\clj\\clojure\\core.clj")]
 
-  (println "Executing full parser:")
-  (dotimes [_ 10] (time (sexp c)))
-
-  (println "Executing parser incrementally:")
-  (dotimes [_ 10] (time (-> (edit-buffer nil 0 0 c) buffer-parse-tree)))
+  (dotimes [_ 10] (do
+                    (println "==== Executing full parser:")
+                    (let [parse-tree (time (parse c))] 
+                      (println "full parser's  tokens first and second walks:")
+                      (dotimes [_ 2] (time (dorun ((:abstract-node parse-tree) tokens-view)))))))
+  (println "==========================")
+  (dotimes [_ 10] (do
+                    (println "==== Executing parser incrementally:")
+                    (let [parse-tree (time (-> (edit-buffer nil 0 0 c) (buffer-parse-tree 0)))] 
+                      (println "incremental full parser's  tokens first and second walks:")
+                      (dotimes [_ 2] (time (dorun ((:abstract-node parse-tree) tokens-view)))))))
+  (println "==========================")
   (println "Test edit incremental")
-
   (dotimes [_ 10]
-    (let [b (let [_ (println "initial incremental buffer")
+    (let [b (let [_ (println "==== initial incremental buffer")
                   b (time (edit-buffer nil 0 0 c))
                   _ (println "initial parse-tree")
-                  _ (time (buffer-parse-tree b))]
+                  _ (time (buffer-parse-tree b 0))
+                  _ (println "parse-tree via the function, again (should be instantaneous)")
+                  pt (time (buffer-parse-tree b 0))
+                  _ (println "tokens first walk:")
+                  _ (time (dorun ((:abstract-node pt) tokens-view)))
+                  _ (println "tokens second walk:")
+                  _ (time (dorun ((:abstract-node pt) tokens-view)))]
               b)
-          b (let [_ (println "edit in the top comment")
-                  b (time (-> b (edit-buffer 1 0 "")))
-                  _ (println "parse-tree after edit in the top comment")
-                  _ (time (buffer-parse-tree b))]
-              b)
-          b (let [_ (println "edit in the top comment")
-                  b (time (-> b (edit-buffer 1 0 "")))
-                  _ (println "parse-tree after edit in the top comment")
-                  _ (time (buffer-parse-tree b))]
-              b)
-          b (let [_ (println "edit in the top comment")
-                  b (time (-> b (edit-buffer 1 0 "")))
-                  _ (println "parse-tree after edit in the top comment")
-                  _ (time (buffer-parse-tree b))]
-              b)
-          b (let [_ (println "edit in the top comment")
-                  b (time (-> b (edit-buffer 1 0 "")))
-                  _ (println "parse-tree after edit in the top comment")
-                  _ (time (buffer-parse-tree b))]
-              b)
-          b (let [_ (println "edit in the top comment")
-                  b (time (-> b (edit-buffer 1 0 "")))
-                  _ (println "parse-tree after edit in the top comment")
-                  _ (time (buffer-parse-tree b))]
-              b)
-          b (let [_ (println "edit in the top comment")
-                  b (time (-> b (edit-buffer 1 0 "")))
-                  _ (println "parse-tree after edit in the top comment")
-                  _ (time (buffer-parse-tree b))]
-              b)
-          b (let [_ (println "edit in the top comment")
-                  b (time (-> b (edit-buffer 1 0 "")))
-                  _ (println "parse-tree after edit in the top comment")
-                  _ (time (buffer-parse-tree b))]
-              b)
-          b (let [_ (println "edit in the top comment")
-                  b (time (-> b (edit-buffer 1 0 "")))
-                  _ (println "parse-tree after edit in the top comment")
-                  _ (time (buffer-parse-tree b))]
-              b)
-          b (let [_ (println "edit in the top comment")
-                  b (time (-> b (edit-buffer 1 0 "")))
-                  _ (println "parse-tree after edit in the top comment")
-                  _ (time (buffer-parse-tree b))]
-              b)
-          b (let [_ (println "edit in the top comment")
-                  b (time (-> b (edit-buffer 1 0 "")))
-                  _ (println "parse-tree after edit in the top comment")
-                  _ (time (buffer-parse-tree b))]
-              b)
-          b (let [_ (println "add '(\\n' before the top comment")
+          b (let [_ (println "==== add '(\\n' before the top comment")
                   b (time (-> b (edit-buffer 0 0 "(\n"))) 
                   _ (println "parse-tree after add '(\\n' before the top comment")
-                  _ (time (buffer-parse-tree b))]
+                  _ (time (buffer-parse-tree b 0))
+                  _ (println "parse-tree via the function, again (should be instantaneous)")
+                  pt (time (buffer-parse-tree b 0))
+                  _ (time (dorun ((:abstract-node pt) tokens-view)))
+                  _ (println "tokens second walk:")
+                  _ (time (dorun ((:abstract-node pt) tokens-view)))]
               b)]
       b))
-  (= c (lu/node-text (-> (edit-buffer nil 0 0 c) buffer-parse-tree)) (lu/node-text (parse c)))))
+  (= c (lu/node-text (-> (edit-buffer nil 0 0 c) (buffer-parse-tree 0))) (lu/node-text (parse c)))))

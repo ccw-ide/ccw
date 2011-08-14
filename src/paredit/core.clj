@@ -22,7 +22,6 @@
   (:use paredit.loc-utils)) ; TODO avoir un require :as l
 
 #_(set! *warn-on-reflection* true)
-
 ;;; adaptable paredit configuration
 (def ^String *newline* "\n")
 ;;; adaptable paredit configuration
@@ -224,7 +223,7 @@
          (let [offset-loc (-> parsed parsed-root-loc (loc-for-offset offset))
                handled-forms *brackets-tags*
                in-handled-form (handled-forms (loc-tag offset-loc))
-               open-punct-length (.length (first (:content (z/node offset-loc))))]
+               open-punct-length (.length ^String (first (:content (z/node offset-loc))))]
            (cond 
              (and in-handled-form (= offset (start-offset offset-loc)))
                (t/shift-offset t open-punct-length)
@@ -274,7 +273,7 @@
                             for while do doto try catch locking dosync doseq dorun doall
                             -> -?> ->> future ns clojure.core/ns gen-class gen-interface))))
 (defn ^{:doc "Returns logical true if the String probably names a special form or macro var"}
-  lisp-form? [s]
+  lisp-form? [^String s]
   (or
     (.startsWith s "def")
     (.startsWith s "with")
