@@ -182,7 +182,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
             unconfigure();
             initializeViewerColors();
             tmp.initTokenScanner();
-            configure(tmp);
+            configure(tmp); // TODO this causes setRange() to be called twice (does the reinitialization of things
         }
     }
 
