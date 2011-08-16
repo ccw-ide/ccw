@@ -374,6 +374,14 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
         return EditorSupport.getParseTree(getDocument().get(), parseRef);
     }
     
+    public Object getPreviousParseTree () {
+        if (parseRef == null) {
+        	return null;
+        } else {
+        	return EditorSupport.getPreviousParseTree(parseRef);
+        }
+    }
+    
     private boolean structuralEditionPossible = true;
     public void setStructuralEditionPossible(final boolean state) {
     	structuralEditionPossible = state;

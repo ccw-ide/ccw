@@ -588,6 +588,10 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
     public Object getParseTree() {
     	return sourceViewer().getParseTree();
     }
+    
+    public Object getPreviousParseTree() {
+    	return sourceViewer().getPreviousParseTree();
+    }
 
 	public void gotoMatchingBracket() {
 		sourceViewer().gotoMatchingBracket();

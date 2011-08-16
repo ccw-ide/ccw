@@ -16,6 +16,7 @@
        - the state holds a ref, which is a map containing keys
          :text                    the full text corresponding to the incremental text buffer
          :incremental-text-buffer the incrementally editable text buffer
+         :previous-parse-tree     the previous parse-tree, or nil if no previous parse-tree
          :parse-tree              the parse-tree related to the :text-buffer
          :build-id                the build id, identifying a \"version\" of the parse-tree
                                     (used for determining deltas between 2 updates)
@@ -27,6 +28,7 @@
   (:gen-class
     :methods [^{:static true} [updateTextBuffer [Object String Object Object String] Object]
               ^{:static true} [getParseTree [String Object] Object]
+              ^{:static true} [getPreviousParseTree [Object] Object]
               ^{:static true} [startWatchParseRef [Object Object] Object]
               ^{:static true} [disposeSourceViewerDecorationSupport [Object] org.eclipse.ui.texteditor.SourceViewerDecorationSupport]
               ^{:static true} [configureSourceViewerDecorationSupport [Object Object] Object]]))
@@ -51,8 +53,8 @@
                          "What happened ? Will throw away the current buffer and start with a fresh one..."))
               (let [buffer (p/edit-buffer nil 0 -1 final-text)
                     parse-tree (p/buffer-parse-tree buffer build-id)]
-                (ref-set r {:text final-text, :incremental-text-buffer buffer :parse-tree parse-tree :build-id build-id})))
-            (ref-set r {:text final-text, :incremental-text-buffer buffer, :parse-tree parse-tree :build-id build-id}))
+                (ref-set r {:text final-text, :incremental-text-buffer buffer, :previous-parse-tree (:parse-tree @r), :parse-tree parse-tree, :build-id build-id})))
+            (ref-set r {:text final-text, :incremental-text-buffer buffer, :previous-parse-tree (:parse-tree @r), :parse-tree parse-tree :build-id build-id}))
           )))
     r))
 
@@ -74,6 +76,12 @@
         (println (str "cached parse-tree miss: expected text='" (:text rv) "'" ", text received: '" text "'"))
         (-updateTextBuffer r text 0 -1 text)
         (recur text r)))))
+
+;; Now, I don't like the fact that getting the current and the previous parse tree may lead to incorrect code
+;; since they both are dereferencing a ref instead of decomposing a consistent snapshot of a ref
+(defn -getPreviousParseTree 
+  [r]
+  (:previous-parse-tree @r))
 
 (defn -disposeSourceViewerDecorationSupport [s]
   (when s
