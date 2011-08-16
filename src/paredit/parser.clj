@@ -194,7 +194,11 @@
     (= :ratio t) (token :ratio count)
     (= :anon-arg t) (token :anon-arg count)
     (= :char t) (token :char count)
-    (= :chimera t) (concat (token :nest 0) (balanced :open-chimera :close-chimera abstract-children) (token :unnest 0))
+    (= :chimera t) (cond
+                     (= "\"" ((get abstract-children 0) parse-tree-view))
+                       (token :string count)
+                     :else
+                       (concat (token :nest 0) (balanced :open-chimera :close-chimera abstract-children) (token :unnest 0)))
     (= :comment t) (token :comment count)
     (= :discard t) (token :comment count)
     (= :net.cgrand.parsley/root t) (concat (mapcat identity (view-children-seq tokens-view abstract-children)) (token :eof))
