@@ -197,6 +197,8 @@
     (= :chimera t) (cond
                      (= "\"" ((get abstract-children 0) parse-tree-view))
                        (token :string count)
+                     (= "#\"" ((get abstract-children 0) parse-tree-view))
+                       (token :regex count)
                      :else
                        (concat (token :nest 0) (balanced :open-chimera :close-chimera abstract-children) (token :unnest 0)))
     (= :comment t) (token :comment count)
