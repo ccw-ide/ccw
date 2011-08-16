@@ -245,8 +245,8 @@
 	                 "  \"Hello,| world!" "  \"Hello,)| world!"
 	                 "foo \\|" "foo \\)|"
                   ; tests with the new :chimera
-                   "({foo |bar])" "({foo bar])|"
-                   "({[foo |bar)})" "({[foo bar)|})"
+                   "({foo |bar])" "({foo )|bar])"
+                   "({[foo |bar)})" "({[foo )|bar)})"
                   }]
 	    #_["M-)"       :paredit-close-round-and-newline
 	                {"(defun f (x|  ))"
@@ -275,8 +275,6 @@
                    "  \"Hello,| world!" "  \"Hello,]| world!"
                    "foo \\|" "foo \\]|"
                    ; tests with the new :chimera
-                   "({foo |bar])" "({foo bar]|)"
-                   "({(foo |bar]))" "({(foo bar]|))"
                    "({[foo |bar)})" "({[foo ]|bar)})"
                    "[foo (bar [baz {bleh |blah}))]" "[foo (bar [baz {bleh blah}))]|"
                    }]
@@ -303,7 +301,7 @@
                    "  \"Hello,| world!\" foo" "  \"Hello,}| world!\" foo"
                    "  \"Hello,| world!" "  \"Hello,}| world!"
                    "foo \\|" "foo \\}|"
-                   "({(foo |bar}))" "({(foo bar}|))"
+                   "({(foo |bar}))}" "({(foo bar}))}|"
                    }]
       ["\""        :paredit-doublequote
                   { "(frob grovel |full lexical)" "(frob grovel \"|\" full lexical)",
@@ -444,7 +442,8 @@
                  "(foo bar|)" "(foo bar|)"
                  "(foo |bar)" "|bar"
                  "(foo |(bar))" "|(bar)"
-                 "(foo |(bar]|)" "|(bar]"
+                 "(foo |(bar]|)" "(foo |(bar]|)"
+                 "(foo |(bar])|" "|(bar])"
                  }]
      ]
     
@@ -477,7 +476,7 @@
                  "fooz foo| (bar)| baz" "fooz |foo (bar)| baz"
                  ;with :chimera
                  "(foo bar|]" "(foo |bar|]"
-                 "(foo {bar)|]" "(foo |{bar)|]"
+                 "(foo {bar)|]" "(foo {bar|)|]"
                  }]
      ["Shift+Alt+Right" :paredit-expand-right
                 {
@@ -506,7 +505,7 @@
                  "foo |(bar [baz (b|am)])" "foo |(bar [baz (bam)])|"
                  ;with :chimera
                  "(foo |bar]" "(foo |bar|]"
-                 "(foo |{bar)]" "(foo |{bar)|]"
+                 "(foo |{bar)]" "(foo |{bar)]|"
                  }]
      ["Shift+Alt+Up" :paredit-expand-up
                 {
