@@ -332,7 +332,7 @@
     :anon-arg (p/unspaced open-anon-arg #"(?:[0-9|\&])?+")
     :char (p/unspaced open-char #"(?:newline|space|tab|backspace|formfeed|return|u[0-9|a-f|A-F]{4}|o[0-3]?+[0-7]{1,2}|.)")
     :whitespace whitespace
-    :comment (p/unspaced open-comment #"[^\n]*")
+    :comment #{(p/unspaced open-comment #"[^\n]*\n?")} 
     :discard [open-discard :expr]
     ))
 
