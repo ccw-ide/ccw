@@ -339,21 +339,54 @@
              (assoc-in [:length] (if (nil? r) 0 (- (end-offset r) (start-offset l))))))
       t)))
 
+(defn default-behaviour-sel [parent l r]
+  [(start-offset parent) (end-offset parent)])
+(defn children-then-punct-sel [parent l r]
+  (let [pl (-> parent z/down z/right)
+        pr (-> pl z/rightmost z/left)
+        ;_ (println (z/node pl))
+        ;_ (println (z/node pr))
+        ]
+    (cond
+      (or
+        (<= (count (z/children parent)) 2) ; TODO if we had :punct nodes, we could just check
+                                           ; if only :punct nodes are present ...
+        (and (= l pl) (= r pr)))
+        (do 
+          ;(println "already has children, lets expand to parent")
+          [(start-offset parent) (end-offset parent)])
+      :else
+        (do 
+          ;(println "not all children selected, lets expand to all children but punct")
+          [(start-offset pl) (end-offset pr)])
+      
+      ))
+  )
+(def *selection-strategy* {:list children-then-punct-sel
+                           :vector children-then-punct-sel
+                           :map children-then-punct-sel
+                           :set children-then-punct-sel
+                           :fn children-then-punct-sel
+                           ;; :string children-then-punct-sel NOT WORKING WITH STRINGS CURRENTLY (SHOULD IT ?) 
+                           ;; :regex children-then-punct-sel  NOT WOKING WITH REGEXES CURRENTLY (SHOULD IT ?)
+                           })
 (defmethod paredit
   :paredit-expand-up
   [cmd parsed {:keys [^String text offset length] :as t}]
   (with-important-memoized (if-let [rloc (-?> parsed (parsed-root-loc true))]
     (let [[l r] (normalized-selection rloc offset length)]
       (if-not (sel-match-normalized? offset length [l r])
-        (-> t (assoc-in [:offset] (start-offset l))
-          (assoc-in [:length] (if (nil? r) 0 (- (end-offset r) (start-offset l)))))
-        (let [l (if-let [nl (z/up (if (= offset (start-offset (parse-node l)))
-                                    (parse-node l) 
-                                    (parse-leave l)))]
-                  nl 
-                  l)]
-          (-> t (assoc-in [:offset] (start-offset l))
-            (assoc-in [:length] (- (end-offset l) (start-offset l)))))))
+        (assoc t :offset (start-offset l) 
+                 :length (if (nil? r) 0 (- (end-offset r) (start-offset l))))
+        (let [parent (if-let [nl (z/up (if (= offset (start-offset (parse-node l)))
+                                         (parse-node l) 
+                                         (parse-leave l)))]
+                       nl 
+                       l)
+              selection-strategy (*selection-strategy* (loc-tag parent) default-behaviour-sel)
+              [start-offset end-offset] (selection-strategy parent l r)]
+          (assoc t :offset start-offset
+                   :length (- end-offset start-offset)))))
     t)))
 
 (defmethod paredit
