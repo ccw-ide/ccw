@@ -31,7 +31,7 @@
 (def *open-brackets* (conj #{"(" "[" "{"} nil)) ; we add nil to the list to also match beginning of text 
 (def *close-brackets* (conj #{")" "]" "}"} nil)) ; we add nil to the list to also match end of text
 (def *form-macro-chars* #{(str \#) (str \~) "~@" (str \') (str \`) (str \@) "^" "#'" "#_" "#!"})
-(def *not-in-code* #{:string "\"\\" :comment :char :regex})
+(def *not-in-code* #{:string :string-body "\"\\" :comment :char :regex})
 
 (defmacro with-memoized [func-names & body]
   `(binding [~@(mapcat 
@@ -204,7 +204,7 @@
           (insert-balanced [\" \"] t ; todo voir si on utilise open balanced ? (mais quid echappement?)
             (conj (into *real-spaces* *open-brackets*) "#")
             (into *extended-spaces* *close-brackets*))
-        (not= :string (loc-tag offset-loc))
+        (not (#{:string, :string-body} (loc-tag offset-loc)))
           (-> t (t/insert (str \")))
         (and (= "\\" (t/previous-char-str t)) (not= "\\" (t/previous-char-str t 2)))
           (-> t (t/insert (str \")))
@@ -558,7 +558,7 @@
       (let [line-start (t/line-start text offset)
             line-stop (t/line-stop text offset)
             loc (loc-for-offset rloc line-start)]
-        (if (and (= :string (loc-tag loc)) (< (start-offset loc) line-start))
+        (if (and (#{:string, :string-body} (loc-tag loc)) (< (start-offset loc) line-start))
           t
           (let [indent (indent-column rloc line-start)
                 cur-indent-col (- 

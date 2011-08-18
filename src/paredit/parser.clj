@@ -291,8 +291,8 @@
              }
     :list [open-list :expr* ")"]
     :chimera 
-             #{ [open-list  :expr* eof] 
-                [open-vector  :expr* eof]
+             #{ [open-list :expr* eof] 
+                [open-vector :expr* eof]
                 [open-map :expr* eof]
                 [open-fn :expr* eof]
                 [open-set :expr* eof]
@@ -321,7 +321,8 @@
     :deprecated-meta [open-deprecated-meta :expr :expr]
     :unquote-splicing [open-unquote-splicing :expr]
     :unquote [open-unquote :expr]
-    :string (p/unspaced open-string #"(?:\\.|[^\\\"])++(?=\")" :? \")
+    :string-body #"(?:\\.|[^\\\"])++(?=\")"
+    :string (p/unspaced open-string :string-body :? \")
     :regex  (p/unspaced open-regex #"(?:\\.|[^\\\"])++(?=\")" :? \")
     :symbol
       #"(?:[\-\+](?![0-9])[^\^\(\[\#\{\\\"\~\%\:\,\s\;\'\@\`\)\]\}]*)|(?:[^\^\(\[\#\{\\\"\~\%\:\,\s\;\'\@\`\)\]\}\-\+;0-9][^\^\(\[\#\{\\\"\~\%\:\,\s\;\'\@\`\)\]\}]*|#(?![\{\(\'\^\"\_\!])[^\^\(\[\#\{\\\"\~\%\:\,\s\;\'\@\`\)\]\}]*)#?"
