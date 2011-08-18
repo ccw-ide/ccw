@@ -323,7 +323,8 @@
     :unquote [open-unquote :expr]
     :string-body #"(?:\\.|[^\\\"])++(?=\")"
     :string (p/unspaced open-string :string-body :? \")
-    :regex  (p/unspaced open-regex #"(?:\\.|[^\\\"])++(?=\")" :? \")
+    :regex-body #"(?:\\.|[^\\\"])++(?=\")"
+    :regex (p/unspaced open-regex :regex-body :? \")
     :symbol
       #"(?:[\-\+](?![0-9])[^\^\(\[\#\{\\\"\~\%\:\,\s\;\'\@\`\)\]\}]*)|(?:[^\^\(\[\#\{\\\"\~\%\:\,\s\;\'\@\`\)\]\}\-\+;0-9][^\^\(\[\#\{\\\"\~\%\:\,\s\;\'\@\`\)\]\}]*|#(?![\{\(\'\^\"\_\!])[^\^\(\[\#\{\\\"\~\%\:\,\s\;\'\@\`\)\]\}]*)#?"
     :keyword (p/unspaced open-keyword #"[^\(\[\{\'\^\@\`\~\"\\\,\s\;\)\]\}]*"); factorize with symbol
