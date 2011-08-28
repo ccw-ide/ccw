@@ -275,6 +275,7 @@
 (defn ^{:doc "Returns logical true if the String probably names a special form or macro var"}
   lisp-form? [^String s]
   (or
+    (.startsWith s ".")
     (.startsWith s "def")
     (.startsWith s "with")
     (lisp-forms s)))

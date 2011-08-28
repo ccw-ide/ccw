@@ -590,6 +590,7 @@
                  ")|s" ")|s"
                  ")\n|s" ")\n|s"
                  "#(a\n|)" "#(a\n   |)"
+                 "(.foo bar\nb|az)" "(.foo bar\n  b|az)"
                  ; with chimera
                  "(a\n|(])" "(a\n  |(])"
                  "(a\n|" "(a\n  |"
