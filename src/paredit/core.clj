@@ -292,10 +292,14 @@
           ; we reached the start of the parent form, indent depending on the form's type
           (if (#{"(" "#("} (loc-text loc))
             (cond
-              (nil? seen-loc) (+ (loc-col loc) (loc-count loc) 1)
-              (lisp-form? (loc-text (first seen-loc))) (+ (loc-col loc) (loc-count loc) 1)
-              (second seen-loc) (loc-col (second seen-loc))
-              :else (+ (loc-col loc) (loc-count loc) 1))
+              (nil? seen-loc) 
+                (+ (loc-col loc) (loc-count loc) 1)
+              (lisp-form? (loc-text (first seen-loc)))
+                (+ (loc-col loc) (loc-count loc) 1)
+              (second seen-loc)
+                (loc-col (second seen-loc))
+              :else 
+                (+ (loc-col loc) (loc-count loc) 1))
             (+ (loc-col loc) (loc-count loc)))
         (= :whitespace (loc-tag loc))
           ; we see a space
@@ -314,8 +318,6 @@
         offset (start-offset l)
         length (if (nil? r) 0 (- (end-offset r) offset))]
     [offset length]))
-
- 
 
 (defn sel-match-normalized? 
   "Does the selection denoted by offset and length match l (left) and r (right) locs ?"
