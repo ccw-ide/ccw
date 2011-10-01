@@ -339,6 +339,7 @@
     ))
 
 (defn edit-buffer [buffer offset len text]
+  ;(println (str "------- edit buffer:" " offset=" offset ", len=" len ", text='" text "'"))
   (let [text (or text "")]
     (if (= [0 -1] [offset len])
       (p/edit (p/incremental-buffer sexp) 0 0 text)
