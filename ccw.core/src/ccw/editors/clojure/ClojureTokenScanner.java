@@ -190,7 +190,17 @@ abstract public class ClojureTokenScanner implements ITokenScanner {
 	private long getTokenLengthDuration;
 	private long nextTokenDuration;
 	private long advanceTokenDuration;
+	
+	private void printSetRange(String name, IDocument document, int offset, int length) {
+		System.out.println("setRange() called on " + name);
+		System.out.println("offset:" + offset);
+		System.out.println("length:" + length);
+		System.out.println("document:" + document);
+		System.out.println("---------------------------");
+	};
+
     public final void setRange(IDocument document, int offset, int length) {
+		//printSetRange("ClojureTokenScanner", document, offset, length);
     	long start = System.currentTimeMillis();
     	getTokenLengthDuration = 0;
     	nextTokenDuration = 0;
@@ -204,7 +214,7 @@ abstract public class ClojureTokenScanner implements ITokenScanner {
         currentParenLevel = -1; // STRONG HYPOTHESIS HERE (related to the Damager used: offset always corresponds to the start of a top level form
         currentOffset = offset;
         currentToken = null;
-        System.out.println("setRange(offset:" + offset + ", length:" + length + ")");
+        //System.out.println("setRange(offset:" + offset + ", length:" + length + ")");
         duration += System.currentTimeMillis() - start;
     }
 

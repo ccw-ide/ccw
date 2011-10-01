@@ -35,11 +35,20 @@
 
 #_(set! *warn-on-reflection* true)
 
+(defn- safe-edit-buffer [buffer offset len text final-text]
+  (try
+    (p/edit-buffer buffer offset len text)
+    (catch Exception e
+      (println (str "--------------------------------------------------------------------------------" \newline
+                    "Error while editing parsley buffer. offset:" offset ", len:" len ", text:'" text "'" \newline
+                    "buffer text:'" (-> buffer (p/buffer-parse-tree 0) lu/node-text) "'"))
+      (p/edit-buffer nil 0 0 final-text))))
+
 (defn -updateTextBuffer [r final-text offset len text]
   (let [r (if (nil? r) (ref nil) r), text (or text ""), build-id (if-let [old (:build-id @r)] (inc old) 0)] 
     (dosync
       (when-not (= final-text (:text @r))
-        (let [buffer (p/edit-buffer (:incremental-text-buffer @r) offset len text)
+        (let [buffer (safe-edit-buffer (:incremental-text-buffer @r) offset len text final-text)
               parse-tree (p/buffer-parse-tree buffer build-id)]
           (if-not true #_(= final-text (lu/node-text parse-tree)) ;;;;;;;;; TODO remove this potentially huge perf sucker!
             (do

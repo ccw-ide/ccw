@@ -15,8 +15,7 @@
       "}
      ccw.editors.clojure.ClojureTopLevelFormsDamager
   (:use [paredit.utils :as utils])
-  (:import [org.eclipse.jface.text IRegion ITypedRegion DocumentEvent Region]
-           )
+  (:import [org.eclipse.jface.text IRegion ITypedRegion DocumentEvent Region])
   (:gen-class
     :implements [org.eclipse.jface.text.presentation.IPresentationDamager]
     :constructors {[Object] []}
