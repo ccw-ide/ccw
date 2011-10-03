@@ -10,8 +10,6 @@
  *******************************************************************************/
 package ccw.editors.clojure;
 
-import java.util.jar.JarEntry;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -41,7 +39,6 @@ import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import ccw.CCWPlugin;
-import ccw.editors.clojure.EditorSupport;
 import ccw.editors.outline.ClojureOutlinePage;
 import ccw.launching.ClojureLaunchShortcut;
 import ccw.repl.REPLView;
@@ -585,8 +582,8 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
     	
     }
     
-    public Object getParseTree() {
-    	return sourceViewer().getParseTree();
+    public Object getParseState() {
+    	return sourceViewer().getParseState();
     }
     
     public Object getPreviousParseTree() {

@@ -27,7 +27,8 @@
   (:import [org.eclipse.jdt.ui PreferenceConstants])
   (:gen-class
     :methods [^{:static true} [updateTextBuffer [Object String Object Object String] Object]
-              ^{:static true} [getParseTree [String Object] Object]
+              ^{:static true} [getParseState [String Object] Object]
+              ^{:static true} [getParseTree [Object] Object]
               ^{:static true} [getPreviousParseTree [Object] Object]
               ^{:static true} [startWatchParseRef [Object Object] Object]
               ^{:static true} [disposeSourceViewerDecorationSupport [Object] org.eclipse.ui.texteditor.SourceViewerDecorationSupport]
@@ -74,13 +75,15 @@
                                       possible? (or possible? (.isEmpty (:text new-state)))]
                                   possible?)))))
 
-(defn -getParseTree 
+(defn -getParseTree [parse-state] (:parse-tree parse-state))
+
+(defn -getParseState 
   "text is passed to check if the contents of r is still up to date or not.
    If not, text will also be used to recompute r on-the-fly."
   [text r]
   (let [rv @r] 
     (if (= text (:text rv))
-      (:parse-tree rv)
+      {:parse-tree (:parse-tree rv), :buffer (:incremental-text-buffer rv)}
       (do
         (println (str "cached parse-tree miss: expected text='" (:text rv) "'" ", text received: '" text "'"))
         (-updateTextBuffer r text 0 -1 text)

@@ -11,10 +11,6 @@
 
 package ccw.editors.clojure;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.core.IJavaProject;
@@ -29,13 +25,10 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextInputListener;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextViewerExtension5;
-import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextSelection;
-import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.DefaultCharacterPairMatcher;
 import org.eclipse.jface.text.source.IAnnotationModel;
-import org.eclipse.jface.text.source.IAnnotationModelExtension;
 import org.eclipse.jface.text.source.ICharacterPairMatcher;
 import org.eclipse.jface.text.source.IOverviewRuler;
 import org.eclipse.jface.text.source.IVerticalRuler;
@@ -58,9 +51,9 @@ import org.eclipse.ui.texteditor.StatusLineContributionItem;
 
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
-import ccw.editors.clojure.EditorSupport;
 import ccw.repl.REPLView;
 import ccw.util.DisplayUtil;
+import clojure.lang.Keyword;
 
 public abstract class ClojureSourceViewer extends ProjectionViewer implements
         IClojureEditor, IPropertyChangeListener {
@@ -342,7 +335,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
      * It's a ref, holding a map {:text "the raw text file" :parser parser}
      * where state is a future holding the parser's state
      */
-    private Object parseRef; 
+    private Object parseState; 
 
     private IDocumentListener parseTreeConstructorDocumentListener = new IDocumentListener() {
         public void documentAboutToBeChanged(DocumentEvent event) {
@@ -359,26 +352,27 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     }
     
     private void updateTextBuffer (String finalText, long offset, long length, String text) {
-    	boolean firstTime = (parseRef == null);
-        parseRef = EditorSupport.updateTextBuffer(parseRef, finalText, offset, length, text);
+    	boolean firstTime = (parseState == null);
+        parseState = EditorSupport.updateTextBuffer(parseState, finalText, offset, length, text);
         if (firstTime) {
-        	EditorSupport.startWatchParseRef(parseRef, this);
+        	EditorSupport.startWatchParseRef(parseState, this);
         }
     }
     
-    public Object getParseTree () {
-        if (parseRef == null) {
+    // TODO rename getParseInfo or get.. ?
+    public Object getParseState () {
+        if (parseState == null) {
         	String text = getDocument().get();
             updateTextBuffer(text, 0, -1, text);
         }
-        return EditorSupport.getParseTree(getDocument().get(), parseRef);
+        return EditorSupport.getParseState(getDocument().get(), parseState);
     }
     
     public Object getPreviousParseTree () {
-        if (parseRef == null) {
+        if (parseState == null) {
         	return null;
         } else {
-        	return EditorSupport.getPreviousParseTree(parseRef);
+        	return EditorSupport.getPreviousParseTree(parseState);
         }
     }
     
@@ -437,7 +431,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     }
     
     public String findDeclaringNamespace() {
-        return ClojureCore.findDeclaringNamespace((Map) getParseTree());
+		return ClojureCore.findDeclaringNamespace((Map) EditorSupport.getParseTree(getParseState()));
     }
 
     public IJavaProject getAssociatedProject() {

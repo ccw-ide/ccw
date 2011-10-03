@@ -101,7 +101,7 @@
             result (and 
                      par-command 
                      (do-command? editor par-command)
-                     (paredit par-command (.getParseTree editor) par-text))
+                     (paredit par-command (.getParseState editor) par-text))
             ;_ (println "result:" result)
             ]
         (when (and result (not= :ko (-> result :parser-state)))

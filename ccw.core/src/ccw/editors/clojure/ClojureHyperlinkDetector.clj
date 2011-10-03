@@ -13,11 +13,12 @@
                                       IHyperlink
                                       IHyperlinkDetector]
     [ccw.editors.clojure IClojureEditor
-                            ClojureEditorMessages
-                            IHyperlinkConstants
-                            ClojureHyperlink]
-    [ccw.debug              ClojureClient]
-    [ccw                    ClojureCore])
+                         ClojureEditorMessages
+                         IHyperlinkConstants
+                         ClojureHyperlink
+                         EditorSupport]
+    [ccw.debug           ClojureClient]
+    [ccw                 ClojureCore])
   (:gen-class
     :extends ccw.editors.clojure.AbstractHyperlinkDetector
     :implements [org.eclipse.jface.text.hyperlink.IHyperlinkDetector]
@@ -53,7 +54,7 @@
 
 (defn detect-hyperlinks
   [offset editor]
-  (let [rloc (-> editor .getParseTree lu/parsed-root-loc)
+  (let [rloc (-> editor .getParseState (EditorSupport/getParseTree) lu/parsed-root-loc)
         l (lu/loc-for-offset rloc offset)]
     (when-let [{:strs #{ns file line}} (and (= :symbol (-> l z/node :tag)) ; TODO transform :strs -> :keys
                                          (find-decl (lu/loc-text l) editor))]

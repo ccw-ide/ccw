@@ -30,7 +30,8 @@
 (defn- apply-paredit-selection-command [editor command-key]
   (let [{:keys #{length offset}} (bean (.getUnSignedSelection editor))
         text  (.get (.getDocument editor))
-        {new-length :length new-offset :offset} (pc/paredit command-key (.getParseTree editor) {:text text :offset offset :length length})]
+        {new-length :length, new-offset :offset} 
+          (pc/paredit command-key (.getParseState editor) {:text text :offset offset :length length})]
     (-> editor .getSelectionHistory (.remember (SourceRange. offset length)))
     (ignoring-selection-changes editor 
       #(.selectAndReveal editor new-offset new-length))))
@@ -38,7 +39,7 @@
 (defn- apply-paredit-command [editor command-key]
   (let [{:keys #{length offset}} (bean (.getUnSignedSelection editor))
         text  (.get (.getDocument editor))
-        result (pc/paredit command-key (.getParseTree editor) {:text text :offset offset :length length})]
+        result (pc/paredit command-key (.getParseState editor) {:text text :offset offset :length length})]
     (when-let [modif (-?> result :modifs first)]
       (let [{:keys #{length offset text}} modif
             document (-> editor .getDocument)]

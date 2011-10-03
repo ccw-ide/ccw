@@ -15,7 +15,8 @@
       "}
      ccw.editors.clojure.ClojureTopLevelFormsDamager
   (:use [paredit.utils :as utils])
-  (:import [org.eclipse.jface.text IRegion ITypedRegion DocumentEvent Region])
+  (:import [org.eclipse.jface.text IRegion ITypedRegion DocumentEvent Region]
+           [ccw.editors.clojure EditorSupport])
   (:gen-class
     :implements [org.eclipse.jface.text.presentation.IPresentationDamager]
     :constructors {[Object] []}
@@ -71,7 +72,7 @@
                 ", length: " 
                 (.length (.getText event)) "]"))
   (let [previous-parse-tree (-> this state-val :editor .getPreviousParseTree)
-        parse-tree (-> this state-val :editor .getParseTree)
+        parse-tree (-> this state-val :editor .getParseState (EditorSupport/getParseTree))
         [start-offset 
          stop-offset] (if previous-parse-tree
                         (do

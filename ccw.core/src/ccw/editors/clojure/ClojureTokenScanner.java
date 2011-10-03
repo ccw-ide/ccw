@@ -210,7 +210,7 @@ abstract public class ClojureTokenScanner implements ITokenScanner {
     	advanceTokenDuration = 0;
     	getSymbolTypeDuration = 0;
     	text = document.get();
-        tokenSeq = ClojureTopLevelFormsDamager.getTokensSeq(clojureEditor.getParseTree(), offset, length);
+        tokenSeq = ClojureTopLevelFormsDamager.getTokensSeq(EditorSupport.getParseTree(clojureEditor.getParseState()), offset, length);
         currentParenLevel = -1; // STRONG HYPOTHESIS HERE (related to the Damager used: offset always corresponds to the start of a top level form
         currentOffset = offset;
         currentToken = null;
