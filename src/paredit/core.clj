@@ -155,51 +155,51 @@
 
 (defmethod paredit 
   :paredit-open-round
-  [cmd parsed {:keys [text offset length] :as t}]
+  [cmd {:keys #{parse-tree buffer}} {:keys [text offset length] :as t}]
   (with-important-memoized 
-    (open-balanced parsed ["(" ")"] t 
+    (open-balanced parse-tree ["(" ")"] t 
       (union (conj (into *real-spaces* *open-brackets*) "#") *form-macro-chars*)
       (into *extended-spaces* *close-brackets*))))
     
 (defmethod paredit 
   :paredit-open-square
-  [cmd parsed {:keys [text offset length] :as t}]
-  (with-important-memoized (open-balanced parsed ["[" "]"] t
+  [cmd {:keys #{parse-tree buffer}} {:keys [text offset length] :as t}]
+  (with-important-memoized (open-balanced parse-tree ["[" "]"] t
     (union (into *real-spaces* *open-brackets*) *form-macro-chars*)
     (into *extended-spaces* *close-brackets*))))
     
 (defmethod paredit 
   :paredit-open-curly
-  [cmd parsed {:keys [text offset length] :as t}]
-  (with-important-memoized (open-balanced parsed ["{" "}"] t
+  [cmd {:keys #{parse-tree buffer}} {:keys [text offset length] :as t}]
+  (with-important-memoized (open-balanced parse-tree ["{" "}"] t
     (union (conj (into *real-spaces* *open-brackets*) "#") *form-macro-chars*)
     (into *extended-spaces* *close-brackets*))))
     
 (defmethod paredit 
   :paredit-close-round
-  [cmd parsed {:keys [text offset length] :as t}]
-  (with-important-memoized (close-balanced parsed ["(" ")"] t
+  [cmd {:keys #{parse-tree buffer}} {:keys [text offset length] :as t}]
+  (with-important-memoized (close-balanced parse-tree ["(" ")"] t
     nil nil)))
 
 (defmethod paredit 
   :paredit-close-square
-  [cmd parsed {:keys [text offset length] :as t}]
-  (with-important-memoized (close-balanced parsed ["[" "]"] t
+  [cmd {:keys #{parse-tree buffer}} {:keys [text offset length] :as t}]
+  (with-important-memoized (close-balanced parse-tree ["[" "]"] t
     nil nil)))
 
 (defmethod paredit 
   :paredit-close-curly
-  [cmd parsed {:keys [text offset length] :as t}]
-  (with-important-memoized (close-balanced parsed ["{" "}"] t
+  [cmd {:keys #{parse-tree buffer}} {:keys [text offset length] :as t}]
+  (with-important-memoized (close-balanced parse-tree ["{" "}"] t
     nil nil)))
 
 (defmethod paredit
   :paredit-doublequote
-  [cmd parsed {:keys [text offset length] :as t}]
+  [cmd {:keys #{parse-tree buffer}} {:keys [text offset length] :as t}]
   (with-important-memoized 
-    (let [offset-loc (-> parsed parsed-root-loc (loc-for-offset offset))] 
+    (let [offset-loc (-> parse-tree parsed-root-loc (loc-for-offset offset))] 
       (cond
-        ;(parse-stopped-in-code? parsed)
+        ;(parse-stopped-in-code? parse-tree)
         (in-code? offset-loc)
           (insert-balanced [\" \"] t ; todo voir si on utilise open balanced ? (mais quid echappement?)
             (conj (into *real-spaces* *open-brackets*) "#")
@@ -215,12 +215,12 @@
 
 (defmethod paredit 
   :paredit-forward-delete
-  [cmd parsed {:keys [^String text offset length] :as t}]
+  [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
    (if (zero? (count text))
      t
      (with-important-memoized 
-       (if parsed
-         (let [offset-loc (-> parsed parsed-root-loc (loc-for-offset offset))
+       (if parse-tree
+         (let [offset-loc (-> parse-tree parsed-root-loc (loc-for-offset offset))
                handled-forms *brackets-tags*
                in-handled-form (handled-forms (loc-tag offset-loc))
                open-punct-length (.length ^String (first (:content (z/node offset-loc))))]
@@ -239,13 +239,13 @@
 
 (defmethod paredit 
    :paredit-backward-delete
-   [cmd parsed {:keys [^String text offset length] :as t}]
+   [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
    (if (zero? (count text))
      t
      (with-important-memoized 
-       (if parsed
+       (if parse-tree
          (let [offset (dec offset)
-               offset-loc (-> parsed parsed-root-loc (loc-for-offset offset))
+               offset-loc (-> parse-tree parsed-root-loc (loc-for-offset offset))
                ;_ (println "offset-loc:" (z/node offset-loc))
                handled-forms *brackets-tags*
                in-handled-form (handled-forms (loc-tag offset-loc))
@@ -328,8 +328,8 @@
 
 (defmethod paredit
   :paredit-expand-left
-  [cmd parsed {:keys [^String text offset length] :as t}]
-  (with-important-memoized (if-let [rloc (-?> parsed (parsed-root-loc true))]
+  [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
+  (with-important-memoized (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
     (let [[l r] (normalized-selection rloc offset length)
           l (if (sel-match-normalized? offset length [l r])
               (if-let [nl (z/left l)] nl (if (punct-loc? l) (z/left (z/up l)) (z/up l)))
@@ -344,6 +344,7 @@
 
 (defn default-behaviour-sel [parent l r]
   [(start-offset parent) (end-offset parent)])
+
 (defn children-then-punct-sel [parent l r]
   (let [pl (-> parent z/down z/right)
         pr (-> pl z/rightmost z/left)
@@ -375,8 +376,8 @@
                            })
 (defmethod paredit
   :paredit-expand-up
-  [cmd parsed {:keys [^String text offset length] :as t}]
-  (with-important-memoized (if-let [rloc (-?> parsed (parsed-root-loc true))]
+  [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
+  (with-important-memoized (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
     (let [[l r] (normalized-selection rloc offset length)]
       (if-not (sel-match-normalized? offset length [l r])
         (assoc t :offset (start-offset l) 
@@ -394,8 +395,8 @@
 
 (defmethod paredit
   :paredit-expand-right
-  [cmd parsed {:keys [^String text offset length] :as t}]
-  (with-important-memoized (if-let [rloc (-?> parsed (parsed-root-loc true))]
+  [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
+  (with-important-memoized (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
     (let [[l r] (normalized-selection rloc offset length)]
       (if-not (sel-match-normalized? offset length [l r])
         (-> t (assoc-in [:offset] (start-offset l))
@@ -412,8 +413,8 @@
 
 (defmethod paredit
   :paredit-raise-sexp
-  [cmd parsed {:keys [^String text offset length] :as t}]
-  (with-important-memoized (if-let [rloc (-?> parsed (parsed-root-loc true))]
+  [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
+  (with-important-memoized (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
     (let [[l r] (normalized-selection rloc offset length)]
       (if-not (and
                 (sel-match-normalized? offset length [l r]) 
@@ -434,10 +435,10 @@
 
 (defmethod paredit
   :paredit-split-sexp
-  [cmd parsed {:keys [^String text offset length] :as t}]
+  [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
   (with-important-memoized (if (not= 0 length)
     t
-    (if-let [rloc (-?> parsed (parsed-root-loc true))]
+    (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
       (let [[l r] (normalized-selection rloc offset length)
             parent (cond
                      (= :string (loc-tag l)) l ; stay at the same level, and let the code take the correct open/close puncts, e.g. \" \"
@@ -467,11 +468,11 @@
 
 (defmethod paredit
   :paredit-join-sexps
-  [cmd parsed {:keys [^String text offset length] :as t}]
+  [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
   (with-important-memoized 
     (if (not= 0 length)
       t
-      (if-let [rloc (-?> parsed (parsed-root-loc true))]
+      (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
           (let [[l _] (normalized-selection rloc offset length)
                 lf (first (remove #(= :whitespace (loc-tag %)) (previous-leaves l)))
                 rf (first (remove #(= :whitespace (loc-tag %)) (cons l (next-leaves l))))]
@@ -519,45 +520,47 @@
 
 (defmethod paredit
   :paredit-wrap-square
-  [cmd parsed t]
-  (with-important-memoized (wrap-with-balanced parsed ["[" "]"] t)))
+  [cmd {:keys #{parse-tree buffer}} t]
+  (with-important-memoized (wrap-with-balanced parse-tree ["[" "]"] t)))
 
 (defmethod paredit
   :paredit-wrap-curly
-  [cmd parsed t]
-  (with-important-memoized (wrap-with-balanced parsed ["{" "}"] t)))
+  [cmd {:keys #{parse-tree buffer}} t]
+  (with-important-memoized (wrap-with-balanced parse-tree ["{" "}"] t)))
 
 (defmethod paredit
   :paredit-wrap-round
-  [cmd parsed t]
-  (with-important-memoized (wrap-with-balanced parsed ["(" ")"] t)))
+  [cmd {:keys #{parse-tree buffer}} t]
+  (with-important-memoized (wrap-with-balanced parse-tree ["(" ")"] t)))
 
 (defmethod paredit
   :paredit-newline
-  [cmd parsed {:keys [text offset length] :as t}]
+  [cmd {:keys #{parse-tree buffer}} {:keys [text offset length] :as t}]
   ; no call to with-important-memoized because we almost immediately delegate to :paredit-indent-line
   (let [text (-> text (t/str-remove offset length) (t/str-insert offset "\n"))
         r (paredit :paredit-indent-line 
-              (parse text) ; TODO suppress (or optimize) this call, if possible
-              {:text text 
-               :offset (inc offset) 
-               :length 0 
-               :modifs [{:text *newline* :offset offset :length length}]})]
-      (if (-?> r :modifs count (= 2))
-        (let [m1 (get-in r [:modifs 0])
-              m2 (get-in r [:modifs 1])
-              r  (assoc-in r [:modifs] [{:text (str (:text m1) (:text m2)) :offset offset :length (+ (:length m1) (:length m2))}])
-              r  (assoc-in r [:offset] (+ (.length ^String (get-in r [:modifs 0 :text])) offset))]
-          r)
-        r)))
+                   (let [buffer (edit-buffer buffer offset length "\n")
+                         parse-tree (buffer-parse-tree buffer :intermediate-id)] 
+                     {:parse-tree parse-tree, :buffer buffer})
+                   {:text text 
+                    :offset (inc offset) 
+                    :length 0 
+                    :modifs [{:text *newline* :offset offset :length length}]})]
+    (if (-?> r :modifs count (= 2))
+      (let [m1 (get-in r [:modifs 0])
+            m2 (get-in r [:modifs 1])
+            r  (assoc-in r [:modifs] [{:text (str (:text m1) (:text m2)) :offset offset :length (+ (:length m1) (:length m2))}])
+            r  (assoc-in r [:offset] (+ (.length ^String (get-in r [:modifs 0 :text])) offset))]
+        r)
+      r)))
 
 (defmethod paredit
   :paredit-indent-line
-  [cmd parsed {:keys [^String text offset length] :as t}]
+  [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
   ;;(println "paredit-indent-line")
   
   (with-important-memoized 
-    (if-let [rloc (-?> parsed (parsed-root-loc true))]
+    (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
       (let [line-start (t/line-start text offset)
             line-stop (t/line-stop text offset)
             loc (loc-for-offset rloc line-start)]

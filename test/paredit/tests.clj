@@ -72,8 +72,14 @@
     (doseq [[input expected] (get command 2)]
       (spy "++++++++++++++++++++")
       (spy (text-spec-to-text input))
-      (let [{text :text :as t} (text-spec-to-text input)]
-        (is (= expected (text-to-text-spec (paredit (second command) (parse text) t))))))))
+      (let [{text :text :as t} (text-spec-to-text input)
+            buffer (edit-buffer nil 0 -1 text)
+            parse-tree (buffer-parse-tree buffer :for-test)]
+        (is (= expected
+               (text-to-text-spec (paredit (second command) 
+                                           {:parse-tree parse-tree, 
+                                            :buffer buffer} 
+                                           t))))))))
 
 (deftest paredit-tests
   (doseq [group *paredit-commands*]
