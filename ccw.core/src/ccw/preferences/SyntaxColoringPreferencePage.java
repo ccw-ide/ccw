@@ -692,7 +692,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
 			}
         };
         
-        ClojureSourceViewerConfiguration configuration= new ClojureSourceViewerConfiguration(store, null);
+        ClojureSourceViewerConfiguration configuration= new ClojureSourceViewerConfiguration(store, fPreviewViewer);
         fPreviewViewer.configure(configuration);
         fPreviewViewer.initializeViewerColors();
         
