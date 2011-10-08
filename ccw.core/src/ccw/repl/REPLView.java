@@ -291,7 +291,6 @@ public class REPLView extends ViewPart implements IAdaptable {
         viewerWidget = viewer.getTextWidget();
         
         viewerWidget.setFont(JFaceResources.getFont(JFaceResources.TEXT_FONT));
-        viewerWidget.addVerifyKeyListener(new REPLInputVerifier());
         
 		// ensure decoration support has been created and configured.
 		getSourceViewerDecorationSupport(viewer).install(prefs);
@@ -409,24 +408,6 @@ public class REPLView extends ViewPart implements IAdaptable {
         public void focusLost(FocusEvent e) {}
     }
 
-    private class REPLInputVerifier implements VerifyKeyListener {
-        private boolean isEvalEvent (KeyEvent e) {
-            if (e.keyCode == '\n' || e.keyCode == '\r') {
-                return e.stateMask != SWT.SHIFT && 
-                    viewerWidget.getSelection().x == viewerWidget.getCharCount();
-            } else {
-            	return false;
-            }
-        }
-
-        public void verifyKey(VerifyEvent e) {
-            if (isEvalEvent(e)) {
-                evalExpression();
-                e.doit = false;
-            }
-        }
-    }
-    
     @Override
     public Object getAdapter(Class adapter) {
     	if (adapter == IClojureEditor.class) {
