@@ -20,7 +20,8 @@
 ; TODO move this into paredit itself ...
 ;  each command : trigger-str  [:paredit-command-name only-one-char-command?]
 (def *commands* 
-  {"(" [:paredit-open-round true]
+  {"'" [:paredit-wrap-quote true]
+   "(" [:paredit-open-round true]
    "[" [:paredit-open-square true]
    "{" [:paredit-open-curly true]
    ")" [:paredit-close-round true]
