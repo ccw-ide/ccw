@@ -425,6 +425,16 @@
        "foo |bar baz|\n" "foo (|bar baz|)\n"
        "foo |bar baz\n|" "foo (|bar baz\n|)"
        }]
+     [""       :paredit-wrap-quote
+      {"(foo |bar baz)" "(foo '|bar baz)",
+       ";hel|lo" ";hel'|lo",
+       "a |\"hi\"" "a '|\"hi\"",
+       "a |\"hi\"|" "a '|\"hi\"|",
+       "foo |bar| foo" "foo '|bar| foo",
+       "foo |bar baz| foo" "foo '|bar baz| foo",
+       "foo '|bar| baz foo" "foo ''|bar| baz foo"
+       ; this one fails "foo '|bar baz| foo" "foo ''|bar baz| foo"
+       }]
      ;["M-s"       :paredit-splice-sexp
      ;           {"(foo (bar| baz) quux)"
      ;            "(foo bar| baz quux)"}]

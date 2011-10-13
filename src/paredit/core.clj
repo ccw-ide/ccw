@@ -519,6 +519,11 @@
       (bypass))))
 
 (defmethod paredit
+  :paredit-wrap-quote
+  [cmd {:keys #{parse-tree buffer}} t]
+  (with-important-memoized (wrap-with-balanced parse-tree ["'" ""] t)))
+
+(defmethod paredit
   :paredit-wrap-square
   [cmd {:keys #{parse-tree buffer}} t]
   (with-important-memoized (wrap-with-balanced parse-tree ["[" "]"] t)))
