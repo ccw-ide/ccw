@@ -202,6 +202,12 @@
             parentId="org.eclipse.ui.textEditorScope"
             id="ccw.ui.clojureEditorScope">
       </context>
+      <context
+            description="%ccw.ui.context.repl.description"
+            id="ccw.ui.context.repl"
+            name="%ccw.ui.context.repl.name"
+            parentId="ccw.ui.clojureEditorScope">
+      </context>
    </extension>
 
    <extension
@@ -591,13 +597,13 @@
             
       <key
             sequence="M2+M3+X R"
-            contextId="ccw.ui.clojureEditorScope"
+            contextId="ccw.ui.context.repl"
             commandId="ccw.ui.edit.text.clojure.reload"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
 
       <key
             sequence="M1+M3+X R"
-            contextId="ccw.ui.clojureEditorScope"
+            contextId="ccw.ui.context.repl"
             commandId="ccw.ui.edit.text.clojure.reload"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             platform="carbon"/>
@@ -615,32 +621,33 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             commandId="ccw.view.repl.commands.printErrorDetail"
-            contextId="ccw.ui.clojureEditorScope"
+            contextId="ccw.ui.context.repl"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M3+E">
       </key>
       <key
             commandId="ccw.view.repl.commands.printErrorDetail"
-            contextId="ccw.ui.clojureEditorScope"
+            contextId="ccw.ui.context.repl"
             platform="carbon"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+E">
       </key>
       <key
             commandId="ccw.view.repl.commands.clearLog"
-            contextId="ccw.ui.clojureEditorScope"
+            contextId="ccw.ui.context.repl"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M3+K">
       </key>
       <key
             commandId="ccw.view.repl.commands.clearLog"
-            contextId="ccw.ui.clojureEditorScope"
+            contextId="ccw.ui.context.repl"
             platform="carbon"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+K">
       </key>
       <key
             commandId="ccw.ui.repl.connectToEclipseNREPL"
+            contextId="ccw.ui.context.repl"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+M3+Q E">
       </key>
@@ -1226,7 +1233,7 @@
                     ifEmpty="false"
                     operator="or">
                  <equals
-                       value="ccw.ui.clojureEditorScope">
+                       value="ccw.ui.context.repl">
                  </equals>
               </iterate>
            </with>
@@ -1242,7 +1249,7 @@
                     ifEmpty="false"
                     operator="or">
                  <equals
-                       value="ccw.ui.clojureEditorScope">
+                       value="ccw.ui.context.repl">
                  </equals>
               </iterate>
            </with>
@@ -1258,7 +1265,7 @@
                     ifEmpty="false"
                     operator="or">
                  <equals
-                       value="ccw.ui.clojureEditorScope">
+                       value="ccw.ui.context.repl">
                  </equals>
               </iterate>
            </with>
@@ -1274,7 +1281,7 @@
                     ifEmpty="false"
                     operator="or">
                  <equals
-                       value="ccw.ui.clojureEditorScope">
+                       value="ccw.ui.context.repl">
                  </equals>
               </iterate>
            </with>

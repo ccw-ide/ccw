@@ -59,6 +59,10 @@ import clojure.osgi.ClojureOSGi;
 import clojure.tools.nrepl.Connection;
 
 public class REPLView extends ViewPart implements IAdaptable {
+	
+	/* Keep this in sync with the context defined in plugin.xml */
+	public static final String CCW_UI_CONTEXT_REPL = "ccw.ui.context.repl";
+	
     public static final String VIEW_ID = "ccw.view.repl";
     public static final AtomicReference<REPLView> activeREPL = new AtomicReference();
 
@@ -353,7 +357,7 @@ public class REPLView extends ViewPart implements IAdaptable {
             }
         });
         
-        ((IContextService) getSite().getService(IContextService.class)).activateContext(IClojureEditor.KEY_BINDING_SCOPE); 
+        ((IContextService) getSite().getService(IContextService.class)).activateContext(CCW_UI_CONTEXT_REPL); 
         
         split.setWeights(new int[] {100, 75});
         
