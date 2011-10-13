@@ -398,6 +398,18 @@
             id="ccw.ui.repl.connectToEclipseNREPL"
             name="New REPL client for Eclipse embedded nrepl server (advanced usages)">
       </command>
+      <command
+            categoryId="org.eclipse.ui.category.edit"
+            description="%ccw.ui.repl.history.previous.description"
+            id="ccw.ui.repl.history.previous"
+            name="%ccw.ui.repl.history.previous.name">
+      </command>
+      <command
+            categoryId="org.eclipse.ui.category.edit"
+            description="%ccw.ui.repl.history.next.description"
+            id="ccw.ui.repl.history.next"
+            name="%ccw.ui.repl.history.next.name">
+      </command>
       
    </extension>
    
@@ -650,6 +662,18 @@
             contextId="ccw.ui.context.repl"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+M3+Q E">
+      </key>
+      <key
+            commandId="ccw.ui.repl.history.previous"
+            contextId="ccw.ui.context.repl"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+ARROW_UP">
+      </key>
+      <key
+            commandId="ccw.ui.repl.history.next"
+            contextId="ccw.ui.context.repl"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+ARROW_DOWN">
       </key>
 			
             
@@ -1458,6 +1482,38 @@
                     operator="or">
                  <equals
                        value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </enabledWhen>
+     </handler>
+     <handler
+           class="ccw.util.ClojureHandlerFactory:ccw.repl.view-helpers/history-previous"
+           commandId="ccw.ui.repl.history.previous">
+        <enabledWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.context.repl">
+                 </equals>
+              </iterate>
+           </with>
+        </enabledWhen>
+     </handler>
+     <handler
+           class="ccw.util.ClojureHandlerFactory:ccw.repl.view-helpers/history-next"
+           commandId="ccw.ui.repl.history.next">
+        <enabledWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.context.repl">
                  </equals>
               </iterate>
            </with>

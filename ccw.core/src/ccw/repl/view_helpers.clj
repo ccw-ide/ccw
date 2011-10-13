@@ -5,7 +5,9 @@
   (:import ccw.CCWPlugin
     org.eclipse.ui.PlatformUI
     org.eclipse.swt.SWT
-    (org.eclipse.swt.custom StyledText StyleRange)))
+    (org.eclipse.swt.custom StyledText StyleRange))
+  (:import
+    [org.eclipse.ui.handlers HandlerUtil]))
 
 (defmacro ui-async
   [& body]
@@ -109,14 +111,9 @@
         ; a bunch of atoms are just fine, since access to them is already serialized via the SWT event thread
         history (atom history)
         current-step (atom -1)
-        retained-input (atom nil)]
-    ;; TODO need to make this a customizable action or something
-    (.addKeyListener (.viewerWidget repl-view)
-      (proxy [org.eclipse.swt.events.KeyAdapter] []
-        (keyPressed [^org.eclipse.swt.events.KeyEvent e]
-          (when-let [history-shift (get {[SWT/CTRL SWT/ARROW_UP] inc
-                                         [SWT/CTRL SWT/ARROW_DOWN] dec}
-                                     [(.stateMask e) (.keyCode e)])]
+        retained-input (atom nil)
+        history-action-fn 
+          (fn [history-shift]
             (swap! current-step history-shift)
             (cond
               (>= @current-step (count @history)) (do (swap! current-step dec) (beep))
@@ -131,8 +128,8 @@
                         (reset! retained-input (.getText input-widget)))
                       (doto input-widget
                         (.setText (@history (dec (- (count @history) @current-step))))
-                        cursor-at-end)))))))
-    
+                        cursor-at-end))))]
+    (.setHistoryActionFn repl-view history-action-fn)
     (comp (apply partial eval-expression args)
       (fn [expr add-to-log?]
         (reset! retained-input nil)
@@ -146,3 +143,10 @@
                             (-> % count (- history/max-history) (max 0))))
           (retain-expr-fn expr))
         expr))))
+
+(defn- load-history [event history-shift]
+  (let [repl-view (HandlerUtil/getActivePartChecked event)]
+    ((.getHistoryActionFn repl-view) history-shift)))
+
+(defn history-previous [_ event] (load-history event inc))
+(defn history-next [_ event] (load-history event dec))

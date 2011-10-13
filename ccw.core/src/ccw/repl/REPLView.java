@@ -102,6 +102,16 @@ public class REPLView extends ViewPart implements IAdaptable {
     private final Atom requests = new Atom(PersistentTreeMap.EMPTY);
     private IFn evalExpression;
     
+    /* function implementing load previous/next command from history into input area */
+    private IFn historyActionFn;
+    
+    public void setHistoryActionFn(IFn historyActionFn) {
+    	this.historyActionFn = historyActionFn;
+    }
+    public IFn getHistoryActionFn() {
+    	return this.historyActionFn;
+    }
+    
     private SourceViewerDecorationSupport fSourceViewerDecorationSupport;
     
     public REPLView () {}
