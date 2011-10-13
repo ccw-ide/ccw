@@ -2,7 +2,8 @@
   (:require [clojure.zip :as z]
             [paredit.loc-utils :as lu]
             [clojure.tools.nrepl :as repl]
-            [ccw.editors.clojure.ClojureHyperlink])
+            [ccw.editors.clojure.ClojureHyperlink]
+            [ccw.editors.clojure.EditorSupport :as editor])
   (:use clojure.contrib.core)
   (:import 
     [org.eclipse.jface.text BadLocationException
@@ -15,8 +16,7 @@
     [ccw.editors.clojure IClojureEditor
                          ClojureEditorMessages
                          IHyperlinkConstants
-                         ClojureHyperlink
-                         EditorSupport]
+                         ClojureHyperlink]
     [ccw.debug           ClojureClient]
     [ccw                 ClojureCore])
   (:gen-class
@@ -54,7 +54,7 @@
 
 (defn detect-hyperlinks
   [offset editor]
-  (let [rloc (-> editor .getParseState (EditorSupport/getParseTree) lu/parsed-root-loc)
+  (let [rloc (-> editor .getParseState (editor/-getParseTree) lu/parsed-root-loc)
         l (lu/loc-for-offset rloc offset)]
     (when-let [{:strs #{ns file line}} (and (= :symbol (-> l z/node :tag)) ; TODO transform :strs -> :keys
                                          (find-decl (lu/loc-text l) editor))]
