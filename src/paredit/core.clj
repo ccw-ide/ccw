@@ -562,8 +562,6 @@
 (defmethod paredit
   :paredit-indent-line
   [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
-  ;;(println "paredit-indent-line")
-  
   (with-important-memoized 
     (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
       (let [line-start (t/line-start text offset)
@@ -597,3 +595,56 @@
                         (update-in t [:offset] + (max to-add (- line-start 
                                                                offset)))))))))
       t)))
+
+(defn update-lines
+  "line-updater-factory-fn is a f which takes the lines to transform as its input"
+  [{:keys [^String text offset length] :as t}
+   lines-updater]
+  (let [start offset
+        stop (+ start length)
+        lines-start (t/line-start text start)
+        lines-stop (if (and (pos? length) 
+                            (= stop (t/line-start text stop))) 
+                     stop
+                     (t/line-stop text stop)) ; do not select the last line 
+                                              ; if nothing selected in it
+        lines-text (.substring text lines-start lines-stop)
+        lines (t/full-lines lines-text)
+        new-lines (lines-updater lines)
+        new-lines-text (apply str new-lines)
+        new-text (t/str-replace text lines-start (.length lines-text) new-lines-text)
+        shifts (map #(- (count %1) (count %2)) new-lines lines)
+        [offset-shift length-shift]
+          (if (zero? length)
+            [(if (= lines-start start) (max 0 (first shifts)) (first shifts)), 0]
+            (if (= lines-start start)
+              [0 (apply + shifts)]
+              [(first shifts) (apply + (rest shifts))]))]
+    {:text new-text
+     :offset (+ offset offset-shift)
+     :length (+ length length-shift)
+     :modifs [{:text new-lines-text :offset lines-start :length (.length lines-text)}]}))
+
+(def inc-lines-comments (partial map (partial str ";")))
+(def dec-lines-comments (partial map #(.substring % 1)))
+(defn line-start-comment? [s] (.startsWith s ";"))
+
+(defmethod paredit
+  :paredit-inc-line-comment
+  [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
+  (update-lines t inc-lines-comments))
+
+(defmethod paredit
+  :paredit-dec-line-comment
+  [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
+  (update-lines t dec-lines-comments))
+
+(defmethod paredit
+  :paredit-toggle-line-comment
+  [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
+  (update-lines t 
+    (fn [lines]
+      (condp every? lines
+        line-start-comment? (dec-lines-comments lines)
+        (complement line-start-comment?) (inc-lines-comments lines)
+        lines))))

@@ -650,5 +650,81 @@
                  "({:foo :bar} {|:baz :fooz})" "({:foo :bar} {|:baz :fooz})"
                  "({:baz :fooz|} {:foo :bar})" "({:baz :fooz|} {:foo :bar})"
                  }]
+      [""    :paredit-inc-line-comment
+                {
+                 "|"            ";|",
+                 "|\n"          ";|\n",
+                 "|\r\n"        ";|\r\n",
+                 "\n|"          "\n;|",
+                 "\r\n|"        "\r\n;|",
+                 "|\n|"         "|;\n|",
+                 "|\r\n|"       "|;\r\n|",
+                 "|\n\n|"       "|;\n;\n|",
+                 "|\r\n\r\n|"   "|;\r\n;\r\n|",
+                 "|\n\r\n|"     "|;\n;\r\n|",
+                 "|a"           ";|a",
+                 "a\n|b\nc|\nd" "a\n|;b\n;c|\nd",
+                 "a\nb\nc|d"    "a\nb\n;c|d",
+                 "hel|lo"       ";hel|lo",
+                 "h|el|lo"      ";h|el|lo"
+                 }]
+      [""    :paredit-dec-line-comment
+                {
+                 ";hel|lo"         "hel|lo",
+                 ";h|el|lo"        "h|el|lo",       
+                 ";a|b"             "a|b",
+                 ";|\n"           "|\n",
+                 ";|\r\n"         "|\r\n",
+                 "\n;|"           "\n|",
+                 "\r\n;|"         "\r\n|",
+                 ";|\n;|"         "|\n|",
+                 ";|\r\n;|"       "|\r\n|",
+                 ";|\n;\n;|"      "|\n\n|",
+                 ";|\r\n;\r\n;|"  "|\r\n\r\n|",
+                 ";|\n;\r\n;|"    "|\n\r\n|",
+                 ";|a"            "|a",
+                 "a\n;|b\n;c|\nd" "a\n|b\nc|\nd",
+                 "a\n;|b"         "a\n|b"
+                 "a\n|;b"         "a\n|b"
+                 }]
+      [""    :paredit-toggle-line-comment
+                {
+                 ; same as inc-line in non ambiguous cases
+                 "|"            ";|",
+                 "|\n"          ";|\n",
+                 "|\r\n"        ";|\r\n",
+                 "\n|"          "\n;|",
+                 "\r\n|"        "\r\n;|",
+                 "|\n|"         "|;\n|",
+                 "|\r\n|"       "|;\r\n|",
+                 "|\n\n|"       "|;\n;\n|",
+                 "|\r\n\r\n|"   "|;\r\n;\r\n|",
+                 "|\n\r\n|"     "|;\n;\r\n|",
+                 "|a"           ";|a",
+                 "a\n|b\nc|\nd" "a\n|;b\n;c|\nd",
+                 "a\nb\nc|d"    "a\nb\n;c|d",
+                 "hel|lo"       ";hel|lo",
+                 "h|el|lo"      ";h|el|lo"
+                 ; same as dec-line in non ambiguous cases                 
+                 ";hel|lo"         "hel|lo",
+                 ";h|el|lo"        "h|el|lo",       
+                 ";a|b"             "a|b",
+                 ";|\n"           "|\n",
+                 ";|\r\n"         "|\r\n",
+                 "\n;|"           "\n|",
+                 "\r\n;|"         "\r\n|",
+                 ";|\n;|"         "|\n|",
+                 ";|\r\n;|"       "|\r\n|",
+                 ";|\n;\n;|"      "|\n\n|",
+                 ";|\r\n;\r\n;|"  "|\r\n\r\n|",
+                 ";|\n;\r\n;|"    "|\n\r\n|",
+                 ";|a"            "|a",
+                 "a\n;|b\n;c|\nd" "a\n|b\nc|\nd",
+                 "a\n;|b"         "a\n|b"
+                 "a\n|;b"         "a\n|b"
+                 ; ambiguous cases
+                 ";|a\nb|"        ";|a\nb|"
+                 }]
+      
     ]
   ])

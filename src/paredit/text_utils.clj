@@ -1,11 +1,21 @@
 (ns paredit.text-utils
-  (:use clojure.test))
+  (:use clojure.test)
+  (:use clojure.contrib.core))
 
 #_(set! *warn-on-reflection* true)
 
-(defn str-insert [^String s i c] (str (.substring s 0 i) c (.substring s i)))
-(defn str-remove [^String s i n] (str (.substring s 0 i) (.substring s (+ i n))))
-(defn str-replace [^String s offset length text] (str (.substring s 0 offset) text (.substring s (+ offset length))))
+(defn str-insert [^String s i c] 
+  {:pre  [s, (<= 0 i (.length s)), c]
+   :post [%]}
+  (str (.substring s 0 i) c (.substring s i)))
+(defn str-remove [^String s i n] 
+  {:pre  [s, (<= 0 i (.length s)), (<= (+ i n) (.length s))]
+   :post [%]}
+  (str (.substring s 0 i) (.substring s (+ i n))))
+(defn str-replace [^String s offset length text]
+  {:pre  [s, (<= 0 offset (.length s)), text, (<= (+ offset length) (.length s))]
+   :post [%]}
+  (str (.substring s 0 offset) text (.substring s (+ offset length))))
 
 (defn insert
   "insert what at offset. offset shifted by what's length, selection length unchanged"
@@ -60,16 +70,29 @@
       :else (recur (dec offset)))))
 
 (defn line-stop
-  "returns the offset corresponding to the end of the line of offset offset in s (excluding carridge return, newline "
+  "returns the offset corresponding to the end of the line of offset offset in s (excluding carridge return, newline) "
   [^String s offset]
-  (loop [offset offset]
-    (cond
-      (>= offset (.length s)) (.length s)
-      (and 
-        (> offset 0) 
-        (#{\return \newline} (.charAt s offset)))
-        offset
-      :else (recur (inc offset)))))
+  (let [l (.length s)]
+    (loop [offset offset]
+      (cond
+        (>= offset l) l
+        (#{\return \newline} (.charAt s offset)) offset
+        :else (recur (inc offset))))))
+
+(defn index-of 
+  "Like String.indexOf, but returns nil instead of -1 if not found"
+  [^String s c] 
+  (let [i (.indexOf s c)] (when-not (neg? i) i)))
+
+(defn full-lines
+  "returns a seq of the lines, keeping their end of line chars (as opposed
+   to clojure.string/split-lines)"
+  [s]
+  (lazy-seq
+    (when s
+      (if-let [i (-?> (index-of s "\n") inc)]
+        (cons (.substring s 0 i) (if (= i (.length s)) nil (full-lines (.substring s i))))
+        (cons s nil)))))
 
 (deftest line-stop-tests
   (are [expected s o] (= expected (line-stop s o))
@@ -77,4 +100,9 @@
     1 " " 0
     5 "   a\n" 5
     5 "(\n , \n)" 5
-    5 "[a\nb]" 3))
+    5 "[a\nb]" 3
+    0 "\r\n" 0
+    0 "\n" 0
+    1 "a\n" 0
+    1 "a\n" 1
+    ))

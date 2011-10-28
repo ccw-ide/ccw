@@ -202,7 +202,7 @@
 
 (defn pts []
   #_(normalized-selection-tests)
-  #_(t/line-stop-tests)
+  (t/line-stop-tests)
   #_(spec-text-tests)
   (paredit-tests)
   (parser-tests)
