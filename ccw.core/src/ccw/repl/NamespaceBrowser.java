@@ -489,7 +489,7 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 	}
 	
 	private static void inUIThreadSetREPLConnection (Connection repl) {
-		IViewPart[] views = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getViews();			
+		IViewPart[] views = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getViews(); // TODO fix potential NPE here			
 		NamespaceBrowser co = null;
 		for (IViewPart v: views) {
 			if (NamespaceBrowser.class.isInstance(v)) {
