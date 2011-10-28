@@ -120,7 +120,5 @@
               (set! (.doit command) false)))
           (set! (.shiftsCaret command) false)
           (set! (.caretOffset command) (:offset result))
-          (when-not (zero? (:length result)) 
-            ;(println (str "result:" result))
-          (.selectAndReveal editor (:offset result) (:length result))))
-        #_(.setStructuralEditingPossible editor (true? (and result (not= :ko (-> result :parser-state)))))))))
+          (when-not (zero? (:length result)) ;;; WHY when-not zero? 
+            (.selectAndReveal editor (:offset result) (:length result))))))))

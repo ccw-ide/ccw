@@ -36,15 +36,16 @@
     (ignoring-selection-changes editor 
       #(.selectAndReveal editor new-offset new-length))))
 
+;; TODO remove duplication with PareditAutoEditStrategy (or not)
 (defn- apply-paredit-command [editor command-key]
   (let [{:keys #{length offset}} (bean (.getUnSignedSelection editor))
         text  (.get (.getDocument editor))
         result (pc/paredit command-key (.getParseState editor) {:text text :offset offset :length length})]
-    (when-let [modif (-?> result :modifs first)]
+    (when-let [modif (-?> result :modifs first)] ;; TODO what if more than one modif in :modifs ?
       (let [{:keys #{length offset text}} modif
             document (-> editor .getDocument)]
         (.replace document offset length text)
-        (.selectAndReveal editor offset (.length text))))))
+        (.selectAndReveal editor (:offset result) (:length result))))))
 
 
 (defn raise [_ event] (apply-paredit-command (editor event) :paredit-raise-sexp))
@@ -55,6 +56,7 @@
 (defn expand-up [_ event] (apply-paredit-selection-command (editor event) :paredit-expand-up))
 (defn indent-selection [_ event] (apply-paredit-selection-command (editor event) :paredit-indent-line))
 (defn toggle-structural-edition-mode [_ event] (.toggleStructuralEditionMode (editor event)))
+(defn toggle-line-comment [_ event] (apply-paredit-command (editor event) :paredit-toggle-line-comment))
 
 ;; TODO won't work if the ClojureSourceViewer is reused many times via configure/unconfigure (since after a re-configure,
 ;; a fresh SelectionHistory instance will be created)

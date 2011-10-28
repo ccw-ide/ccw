@@ -410,6 +410,12 @@
             id="ccw.ui.repl.history.next"
             name="%ccw.ui.repl.history.next.name">
       </command>
+      <command
+            categoryId="org.eclipse.ui.category.edit"
+            description="%ccw.ui.edit.text.clojure.comment.toggle.description"
+            id="ccw.ui.edit.text.clojure.comment.toggle"
+            name="%ccw.ui.edit.text.clojure.comment.toggle.name">
+      </command>
       
    </extension>
    
@@ -674,6 +680,12 @@
             contextId="ccw.ui.context.repl"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+ARROW_DOWN">
+      </key>
+      <key
+            commandId="ccw.ui.edit.text.clojure.comment.toggle"
+            contextId="ccw.ui.clojureEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+/">
       </key>
 			
             
@@ -1514,6 +1526,22 @@
                     operator="or">
                  <equals
                        value="ccw.ui.context.repl">
+                 </equals>
+              </iterate>
+           </with>
+        </enabledWhen>
+     </handler>
+     <handler
+           class="ccw.util.ClojureHandlerFactory:ccw.editors.clojure.handlers/toggle-line-comment"
+           commandId="ccw.ui.edit.text.clojure.comment.toggle">
+        <enabledWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
                  </equals>
               </iterate>
            </with>
