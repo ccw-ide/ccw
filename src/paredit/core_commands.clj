@@ -434,6 +434,10 @@
        "foo |bar baz| foo" "foo '|bar baz| foo",
        "foo '|bar| baz foo" "foo ''|bar| baz foo"
        ; this one fails "foo '|bar baz| foo" "foo ''|bar baz| foo"
+       "(defn foo [] |)" "(defn foo [] '|)"
+       "|" "'|"
+       "(|" "('|"
+       "((|))" "(('|))"
        }]
      ;["M-s"       :paredit-splice-sexp
      ;           {"(foo (bar| baz) quux)"
