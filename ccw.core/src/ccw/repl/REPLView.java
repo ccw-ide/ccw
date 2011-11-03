@@ -367,7 +367,19 @@ public class REPLView extends ViewPart implements IAdaptable {
             }
         });
         
-        ((IContextService) getSite().getService(IContextService.class)).activateContext(CCW_UI_CONTEXT_REPL); 
+        /*
+         * TODO find a way for the following code line to really work. That is add
+         * the necessary additional code for enabling "handlers" (in fact, my fear
+         * is that those really are not handlers but "actions" that will need to be
+         * manually enabled as I did above for EVALUATE_TOP_LEVEL_S_EXPRESSION :-( )
+         */
+        ((IContextService) getSite().getService(IContextService.class)).activateContext("org.eclipse.ui.textEditorScope");
+
+        /* Thought just activating CCW_UI_CONTEXT_REPL would also activate its parent contexts
+         * but apparently not, so here we activate explicitly all the contexts we want (FIXME?)
+         */ 
+        ((IContextService) getSite().getService(IContextService.class)).activateContext(IClojureEditor.KEY_BINDING_SCOPE); 
+        ((IContextService) getSite().getService(IContextService.class)).activateContext(CCW_UI_CONTEXT_REPL);
         
         split.setWeights(new int[] {100, 75});
         
