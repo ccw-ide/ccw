@@ -172,7 +172,7 @@
       <editor
             class="ccw.editors.clojure.ClojureEditor"
             default="true"
-            extensions="clj"
+            extensions="clj, cljs"
             contributorClass="ccw.editors.clojure.BasicClojureEditorActionContributor"
             icon="icons/clojure16x16.png"
             id="ccw.clojureeditor"
