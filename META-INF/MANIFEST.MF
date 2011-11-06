@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Paredit.clj
 Bundle-SymbolicName: paredit.clj;singleton:=true
-Bundle-Version: 0.15.0.I002
+Bundle-Version: 0.15.0.STABLE001
 Bundle-ClassPath: .,
  classes/
 Bundle-ActivationPolicy: lazy
@@ -47,6 +47,6 @@ Import-Package: clojure;version="1.2.0",
  clojure.repl.proxy$java.io;version="1.2.0",
  clojure.test;version="1.2.0",
  clojure.xml.proxy$java.lang;version="1.2.0"
-Require-Bundle: net.cgrand.parsley;bundle-version="0.0.10";visibility:=reexport,
+Require-Bundle: net.cgrand.parsley;bundle-version="0.0.11";visibility:=reexport,
  net.cgrand.regex;bundle-version="0.0.3";visibility:=reexport
 
