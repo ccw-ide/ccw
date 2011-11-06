@@ -676,10 +676,24 @@
             sequence="M1+ARROW_UP">
       </key>
       <key
+            commandId="ccw.ui.repl.history.previous"
+            contextId="ccw.ui.context.repl"
+            platform="carbon"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M4+ARROW_UP">
+      </key>
+      <key
             commandId="ccw.ui.repl.history.next"
             contextId="ccw.ui.context.repl"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+ARROW_DOWN">
+      </key>
+      <key
+            commandId="ccw.ui.repl.history.next"
+            contextId="ccw.ui.context.repl"
+            platform="carbon"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M4+ARROW_DOWN">
       </key>
       <key
             commandId="ccw.ui.edit.text.clojure.comment.toggle"
