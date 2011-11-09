@@ -52,12 +52,18 @@ import org.eclipse.ui.texteditor.StatusLineContributionItem;
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.repl.REPLView;
+import ccw.util.ClojureUtils;
 import ccw.util.DisplayUtil;
-import clojure.lang.Keyword;
+import clojure.osgi.internal.ClojureOSGi;
 
 public abstract class ClojureSourceViewer extends ProjectionViewer implements
         IClojureEditor, IPropertyChangeListener {
     public static final String STATUS_CATEGORY_STRUCTURAL_EDITION = "CCW.STATUS_CATEGORY_STRUCTURAL_EDITING_POSSIBLE";
+    
+    private static final String EDITOR_SUPPORT_NS = "ccw.editors.clojure.EditorSupport";
+    static {
+    	ClojureOSGi.require(CCWPlugin.getDefault().getBundle(), EDITOR_SUPPORT_NS);
+    }
 
     /**
      * The preference store.
@@ -353,9 +359,11 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     
     private void updateTextBuffer (String finalText, long offset, long length, String text) {
     	boolean firstTime = (parseState == null);
-        parseState = EditorSupport.updateTextBuffer(parseState, finalText, offset, length, text);
+    	parseState = ClojureUtils.invoke(EDITOR_SUPPORT_NS, "-updateTextBuffer",parseState, finalText, offset, length, text);
+//        parseState = EditorSupport.updateTextBuffer(parseState, finalText, offset, length, text);
         if (firstTime) {
-        	EditorSupport.startWatchParseRef(parseState, this);
+        	ClojureUtils.invoke(EDITOR_SUPPORT_NS, "-startWatchParseRef", parseState, this);
+//        	EditorSupport.startWatchParseRef(parseState, this);
         }
     }
     
@@ -365,14 +373,16 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
         	String text = getDocument().get();
             updateTextBuffer(text, 0, -1, text);
         }
-        return EditorSupport.getParseState(getDocument().get(), parseState);
+        return ClojureUtils.invoke(EDITOR_SUPPORT_NS, "-getParseState", getDocument().get(), parseState);
+//        return EditorSupport.getParseState(getDocument().get(), parseState);
     }
     
     public Object getPreviousParseTree () {
         if (parseState == null) {
         	return null;
         } else {
-        	return EditorSupport.getPreviousParseTree(parseState);
+        	return ClojureUtils.invoke(EDITOR_SUPPORT_NS, "-getPreviousParseTree", parseState);
+//        	return EditorSupport.getPreviousParseTree(parseState);
         }
     }
     
@@ -431,7 +441,8 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     }
     
     public String findDeclaringNamespace() {
-		return ClojureCore.findDeclaringNamespace((Map) EditorSupport.getParseTree(getParseState()));
+		return ClojureCore.findDeclaringNamespace((Map) ClojureUtils.invoke(EDITOR_SUPPORT_NS, "-getParseTree", getParseState()));
+//		return ClojureCore.findDeclaringNamespace((Map) EditorSupport.getParseTree(getParseState()));
     }
 
     public IJavaProject getAssociatedProject() {

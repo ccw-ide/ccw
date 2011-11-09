@@ -1,4 +1,4 @@
-(ns ccw.editors.clojure.PareditAutoEditStrategy
+(ns ccw.editors.clojure.PareditAutoEditStrategyImpl
   (:use [paredit [core :only [paredit]]])
   (:use [clojure.contrib.core :only [-?>]])  
   (:import

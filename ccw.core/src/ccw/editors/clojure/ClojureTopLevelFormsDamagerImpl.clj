@@ -13,7 +13,7 @@
 
        TODO: code needs more refactoring (could be more DRY)
       "}
-     ccw.editors.clojure.ClojureTopLevelFormsDamager
+     ccw.editors.clojure.ClojureTopLevelFormsDamagerImpl
   (:use [paredit.utils :as utils])
   (:import [org.eclipse.jface.text IRegion ITypedRegion DocumentEvent Region]
            [ccw.editors.clojure EditorSupport])

@@ -38,13 +38,21 @@ import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
+import clojure.osgi.internal.ClojureOSGi;
+
 import ccw.CCWPlugin;
 import ccw.editors.outline.ClojureOutlinePage;
 import ccw.launching.ClojureLaunchShortcut;
 import ccw.repl.REPLView;
+import ccw.util.ClojureUtils;
 
 public class ClojureEditor extends TextEditor implements IClojureEditor {
-	public static final String EDITOR_REFERENCE_HELP_CONTEXT_ID = "ccw.branding.editor_context_help";
+    private static final String EDITOR_SUPPORT_NS = "ccw.editors.clojure.EditorSupport";
+    static {
+    	ClojureOSGi.require(CCWPlugin.getDefault().getBundle(), EDITOR_SUPPORT_NS);
+    }
+
+    public static final String EDITOR_REFERENCE_HELP_CONTEXT_ID = "ccw.branding.editor_context_help";
 	
     public static final String ID = "ccw.clojureeditor"; //$NON-NLS-1$
 	/** Preference key for matching brackets */
@@ -76,7 +84,8 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 								// there's a NPE thrown due to initialization ordering issue
 	@Override
 	protected void configureSourceViewerDecorationSupport(SourceViewerDecorationSupport support) {
-		EditorSupport.configureSourceViewerDecorationSupport(support, viewer);
+		ClojureUtils.invoke(EDITOR_SUPPORT_NS, "-configureSourceViewerDecorationSupport", support, viewer);
+//		EditorSupport.configureSourceViewerDecorationSupport(support, viewer);
 		super.configureSourceViewerDecorationSupport(support);
 	}
 

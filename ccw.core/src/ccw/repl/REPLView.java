@@ -20,13 +20,10 @@ import org.eclipse.swt.custom.ST;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.custom.VerifyKeyListener;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
@@ -44,21 +41,25 @@ import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 
 import ccw.CCWPlugin;
 import ccw.editors.clojure.ClojureDocumentProvider;
-import ccw.editors.clojure.EditorSupport;
 import ccw.editors.clojure.ClojureSourceViewer;
 import ccw.editors.clojure.ClojureSourceViewerConfiguration;
 import ccw.editors.clojure.IClojureEditor;
 import ccw.editors.clojure.IClojureEditorActionDefinitionIds;
+import ccw.util.ClojureUtils;
 import clojure.lang.Atom;
 import clojure.lang.IFn;
 import clojure.lang.Keyword;
 import clojure.lang.PersistentTreeMap;
 import clojure.lang.Symbol;
 import clojure.lang.Var;
-import clojure.osgi.ClojureOSGi;
+import clojure.osgi.internal.ClojureOSGi;
 import clojure.tools.nrepl.Connection;
 
 public class REPLView extends ViewPart implements IAdaptable {
+    private static final String EDITOR_SUPPORT_NS = "ccw.editors.clojure.EditorSupport";
+    static {
+    	ClojureOSGi.require(CCWPlugin.getDefault().getBundle(), EDITOR_SUPPORT_NS);
+    }
 	
 	/* Keep this in sync with the context defined in plugin.xml */
 	public static final String CCW_UI_CONTEXT_REPL = "ccw.ui.context.repl";
@@ -70,7 +71,7 @@ public class REPLView extends ViewPart implements IAdaptable {
     private static Var configureREPLView;
     static {
         try {
-            ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), "ccw.repl.view-helpers");
+            ClojureOSGi.require(CCWPlugin.getDefault().getBundle(), "ccw.repl.view-helpers");
             log = Var.find(Symbol.intern("ccw.repl.view-helpers/log"));
             configureREPLView = Var.find(Symbol.intern("ccw.repl.view-helpers/configure-repl-view"));
         } catch (Exception e) {
@@ -401,7 +402,9 @@ public class REPLView extends ViewPart implements IAdaptable {
 					null/*getAnnotationAccess()*/, 
 					EditorsPlugin.getDefault().getSharedTextColors()/*getSharedColors()*/
 					);
-			EditorSupport.configureSourceViewerDecorationSupport(fSourceViewerDecorationSupport, viewer);
+			ClojureUtils.invoke(EDITOR_SUPPORT_NS, "-configureSourceViewerDecorationSupport",
+					fSourceViewerDecorationSupport, viewer);
+//			EditorSupport.configureSourceViewerDecorationSupport(fSourceViewerDecorationSupport, viewer);
 		}
 		return fSourceViewerDecorationSupport;
 	}
@@ -409,7 +412,9 @@ public class REPLView extends ViewPart implements IAdaptable {
     @Override
     public void dispose() {
         super.dispose();
-        fSourceViewerDecorationSupport = EditorSupport.disposeSourceViewerDecorationSupport(fSourceViewerDecorationSupport);
+        fSourceViewerDecorationSupport = (SourceViewerDecorationSupport) ClojureUtils.invoke(EDITOR_SUPPORT_NS, "-disposeSourceViewerDecorationSupport",
+        		fSourceViewerDecorationSupport);
+//        fSourceViewerDecorationSupport = EditorSupport.disposeSourceViewerDecorationSupport(fSourceViewerDecorationSupport);
         interactive.close();
         toolConnection.close();
     }

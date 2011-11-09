@@ -28,10 +28,20 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 
+import ccw.CCWPlugin;
+import ccw.util.ClojureUtils;
 import clojure.lang.ISeq;
 import clojure.lang.Keyword;
+import clojure.osgi.internal.ClojureOSGi;
 
 abstract public class ClojureTokenScanner implements ITokenScanner {
+    private static final String EDITOR_SUPPORT_NS = "ccw.editors.clojure.EditorSupport";
+    private static final String ClojureTopLevelFormsDamager_NS = "ccw.editors.clojure.ClojureTopLevelFormsDamagerImpl";
+    static {
+    	ClojureOSGi.require(CCWPlugin.getDefault().getBundle(), EDITOR_SUPPORT_NS);
+    	ClojureOSGi.require(CCWPlugin.getDefault().getBundle(), ClojureTopLevelFormsDamager_NS);
+    }
+
     private int currentOffset;
     private final Map<Object, IToken> tokenTypeToJFaceToken;
     private String text;
@@ -210,7 +220,14 @@ abstract public class ClojureTokenScanner implements ITokenScanner {
     	advanceTokenDuration = 0;
     	getSymbolTypeDuration = 0;
     	text = document.get();
-        tokenSeq = ClojureTopLevelFormsDamager.getTokensSeq(EditorSupport.getParseTree(clojureEditor.getParseState()), offset, length);
+        tokenSeq = (ISeq) ClojureUtils.invoke(ClojureTopLevelFormsDamager_NS, "getTokensSeq",
+        		ClojureUtils.invoke(EDITOR_SUPPORT_NS, "-getParseTree", clojureEditor.getParseState())
+//        		EditorSupport.getParseTree(clojureEditor.getParseState())
+        		, offset, length);
+//        tokenSeq = ClojureTopLevelFormsDamager.getTokensSeq(
+//        		ClojureUtils.invoke(EDITOR_SUPPORT_NS, "-getParseTree", clojureEditor.getParseState())
+////        		EditorSupport.getParseTree(clojureEditor.getParseState())
+//        		, offset, length);
         currentParenLevel = -1; // STRONG HYPOTHESIS HERE (related to the Damager used: offset always corresponds to the start of a top level form
         currentOffset = offset;
         currentToken = null;

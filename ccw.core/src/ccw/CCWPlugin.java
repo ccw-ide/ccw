@@ -199,12 +199,12 @@ public class CCWPlugin extends AbstractUIPlugin {
 
     private void startClojureCode(BundleContext bundleContext) throws Exception {
     	ClojureOSGi.loadAOTClass(bundleContext, "ccw.ClojureProjectNature");
-    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.clojure.PareditAutoEditStrategy");
+    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.clojure.PareditAutoEditStrategyImpl");
     	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.clojure.ClojureFormat");
     	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.clojure.StacktraceHyperlink");
     	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.clojure.EditorSupport");
     	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.clojure.ClojureHyperlinkDetector");
-    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.clojure.ClojureTopLevelFormsDamager");
+    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.clojure.ClojureTopLevelFormsDamagerImpl");
     	
     	ClojureOSGi.require(bundleContext, "ccw.debug.clientrepl");
     	ClojureOSGi.require(bundleContext, "ccw.debug.serverrepl"); // <= to enable REPLView 

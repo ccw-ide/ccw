@@ -24,7 +24,7 @@
   (require :reload '[ccw.editors.clojure
                       [ClojureFormat]
                       [StacktraceHyperlink]
-                      [PareditAutoEditStrategy]
+                      [PareditAutoEditStrategyImpl]
                       [EditorSupport]
                       [ClojureHyperlinkDetector]
                       [ClojureHyperlink]]))

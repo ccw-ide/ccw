@@ -18,7 +18,7 @@
        'ccw.ClojureProjectNature
        'ccw.debug.clientrepl
        'ccw.debug.serverrepl
-       'ccw.editors.clojure.PareditAutoEditStrategy
+       'ccw.editors.clojure.PareditAutoEditStrategyImpl
        'ccw.editors.clojure.ClojureFormat
        'ccw.editors.clojure.StacktraceHyperlink
        'ccw.editors.clojure.EditorSupport
