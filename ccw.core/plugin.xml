@@ -5,8 +5,13 @@
  <extension point="org.eclipse.ui.console.consolePatternMatchListeners">
     <consolePatternMatchListener
        id="ccw.editors.clojure.StacktraceHyperlink"
-       regex="at .*[\w]+\.clj:[0-9]+"
-       class="ccw.editors.clojure.StacktraceHyperlink">
+       regex="at .*[\w]+\.clj:[0-9]+">
+        <class class="ccw.util.GenericExecutableExtension">
+           <parameter
+                 name="factory"
+                 value="ccw.editors.clojure.stacktrace-hyperlink/factory">
+           </parameter>
+        </class>
 		<enablement>
    		  <or>
 		    <test property="org.eclipse.ui.console.consoleTypeTest" value="javaStackTraceConsole"/>
@@ -51,13 +56,18 @@
    	id="ccw.nature" 
    	name="Clojure Nature" 
    	point="org.eclipse.core.resources.natures"> 
-      <runtime> 
-         <run class="ccw.ClojureProjectNature"/> 
-      </runtime> 
       <builder id="ccw.builder"/>
       <requires-nature
             id="org.eclipse.jdt.core.javanature">
-      </requires-nature> 
+      </requires-nature>
+      <runtime>
+         <run class="ccw.util.GenericExecutableExtension">
+            <parameter
+                  name="factory"
+                  value="ccw.clojure-project-nature/factory">
+            </parameter>
+         </run>
+      </runtime> 
    </extension> 
    <extension 
    	id="ccw.builder" 
@@ -1238,10 +1248,12 @@
        point="org.eclipse.ui.workbench.texteditor.hyperlinkDetectors">
     <hyperlinkDetector
           activate="true"
-          class="ccw.editors.clojure.ClojureHyperlinkDetector"
           id="ccw.texteditor.hyperlinkDetector"
           name="%clojureHyperlinkDetector"
           targetId="ccw.ui.clojureCode">
+      <class class="ccw.util.GenericExecutableExtension">
+         <parameter name="factory" value="ccw.editors.clojure.clojure-hyperlink-detector/factory"/>
+      </class>
     </hyperlinkDetector>
  </extension>
  <extension
@@ -1338,8 +1350,18 @@
         </enabledWhen>
      </handler>
      <handler
-           class="ccw.util.ClojureHandlerFactory:ccw.editors.clojure.handlers/raise"
            commandId="ccw.ui.edit.text.clojure.select.raise">
+        <class
+              class="ccw.util.GenericExecutableExtension">
+           <parameter
+                 name="factory"
+                 value="ccw.util.handler-factory/factory">
+           </parameter>
+           <parameter
+                 name="handler"
+                 value="ccw.editors.clojure.handlers/raise">
+           </parameter>
+        </class>
         <enabledWhen>
            <with
                  variable="activeContexts">
@@ -1354,8 +1376,18 @@
         </enabledWhen>
      </handler>
      <handler
-           class="ccw.util.ClojureHandlerFactory:ccw.editors.clojure.handlers/split"
            commandId="ccw.ui.edit.text.clojure.split.sexpr">
+        <class
+              class="ccw.util.GenericExecutableExtension">
+           <parameter
+                 name="factory"
+                 value="ccw.util.handler-factory/factory">
+           </parameter>
+           <parameter
+                 name="handler"
+                 value="ccw.editors.clojure.handlers/split">
+           </parameter>
+        </class>
         <enabledWhen>
            <with
                  variable="activeContexts">
@@ -1370,8 +1402,18 @@
         </enabledWhen>
      </handler>
      <handler
-           class="ccw.util.ClojureHandlerFactory:ccw.editors.clojure.handlers/join"
            commandId="ccw.ui.edit.text.clojure.join.sexpr">
+        <class
+              class="ccw.util.GenericExecutableExtension">
+           <parameter
+                 name="factory"
+                 value="ccw.util.handler-factory/factory">
+           </parameter>
+           <parameter
+                 name="handler"
+                 value="ccw.editors.clojure.handlers/join">
+           </parameter>
+        </class>
         <enabledWhen>
            <with
                  variable="activeContexts">
@@ -1386,8 +1428,18 @@
         </enabledWhen>
      </handler>
      <handler
-           class="ccw.util.ClojureHandlerFactory:ccw.editors.clojure.handlers/expand-right"
            commandId="ccw.ui.edit.text.clojure.expand.selection.right">
+        <class
+              class="ccw.util.GenericExecutableExtension">
+           <parameter
+                 name="factory"
+                 value="ccw.util.handler-factory/factory">
+           </parameter>
+           <parameter
+                 name="handler"
+                 value="ccw.editors.clojure.handlers/expand-right">
+           </parameter>
+        </class>
         <enabledWhen>
            <with
                  variable="activeContexts">
@@ -1402,8 +1454,18 @@
         </enabledWhen>
      </handler>
      <handler
-           class="ccw.util.ClojureHandlerFactory:ccw.editors.clojure.handlers/expand-left"
            commandId="ccw.ui.edit.text.clojure.expand.selection.left">
+        <class
+              class="ccw.util.GenericExecutableExtension">
+           <parameter
+                 name="factory"
+                 value="ccw.util.handler-factory/factory">
+           </parameter>
+           <parameter
+                 name="handler"
+                 value="ccw.editors.clojure.handlers/expand-left">
+           </parameter>
+        </class>
         <enabledWhen>
            <with
                  variable="activeContexts">
@@ -1418,8 +1480,18 @@
         </enabledWhen>
      </handler>
      <handler
-           class="ccw.util.ClojureHandlerFactory:ccw.editors.clojure.handlers/expand-up"
            commandId="ccw.ui.edit.text.clojure.expand.selection.up">
+        <class
+              class="ccw.util.GenericExecutableExtension">
+           <parameter
+                 name="factory"
+                 value="ccw.util.handler-factory/factory">
+           </parameter>
+           <parameter
+                 name="handler"
+                 value="ccw.editors.clojure.handlers/expand-up">
+           </parameter>
+        </class>
         <enabledWhen>
            <with
                  variable="activeContexts">
@@ -1434,8 +1506,18 @@
         </enabledWhen>
      </handler>
      <handler
-           class="ccw.util.ClojureHandlerFactory:ccw.editors.clojure.handlers/select-last"
            commandId="ccw.ui.edit.text.clojure.select.last">
+        <class
+              class="ccw.util.GenericExecutableExtension">
+           <parameter
+                 name="factory"
+                 value="ccw.util.handler-factory/factory">
+           </parameter>
+           <parameter
+                 name="handler"
+                 value="ccw.editors.clojure.handlers/select-last">
+           </parameter>
+        </class>
         <enabledWhen>
            <with
                  variable="activeContexts">
@@ -1450,8 +1532,18 @@
         </enabledWhen>
      </handler>
      <handler
-           class="ccw.util.ClojureHandlerFactory:ccw.editors.clojure.handlers/open-declaration"
            commandId="ccw.ui.edit.text.clojure.open.declaration">
+        <class
+              class="ccw.util.GenericExecutableExtension">
+           <parameter
+                 name="factory"
+                 value="ccw.util.handler-factory/factory">
+           </parameter>
+           <parameter
+                 name="handler"
+                 value="ccw.editors.clojure.handlers/open-declaration">
+           </parameter>
+        </class>
         <enabledWhen>
            <with
                  variable="activeContexts">
@@ -1466,8 +1558,18 @@
         </enabledWhen>
      </handler>
      <handler
-           class="ccw.util.ClojureHandlerFactory:ccw.editors.clojure.handlers/indent-selection"
            commandId="ccw.ui.edit.text.clojure.indent.selection">
+        <class
+              class="ccw.util.GenericExecutableExtension">
+           <parameter
+                 name="factory"
+                 value="ccw.util.handler-factory/factory">
+           </parameter>
+           <parameter
+                 name="handler"
+                 value="ccw.editors.clojure.handlers/indent-selection">
+           </parameter>
+        </class>
         <enabledWhen>
            <with
                  variable="activeContexts">
@@ -1482,8 +1584,18 @@
         </enabledWhen>
      </handler>
      <handler
-           class="ccw.util.ClojureHandlerFactory:ccw.editors.clojure.handlers/content-assist"
            commandId="org.eclipse.ui.edit.text.contentAssist.proposals">
+        <class
+              class="ccw.util.GenericExecutableExtension">
+           <parameter
+                 name="factory"
+                 value="ccw.util.handler-factory/factory">
+           </parameter>
+           <parameter
+                 name="handler"
+                 value="ccw.editors.clojure.handlers/content-assist">
+           </parameter>
+        </class>
         <enabledWhen>
            <with
                  variable="activeContexts">
@@ -1498,8 +1610,18 @@
         </enabledWhen>
      </handler>
      <handler
-           class="ccw.util.ClojureHandlerFactory:ccw.editors.clojure.handlers/toggle-structural-edition-mode"
            commandId="ccw.ui.edit.text.clojure.switch.structuraledition.mode">
+        <class
+              class="ccw.util.GenericExecutableExtension">
+           <parameter
+                 name="factory"
+                 value="ccw.util.handler-factory/factory">
+           </parameter>
+           <parameter
+                 name="handler"
+                 value="ccw.editors.clojure.handlers/toggle-structural-edition-mode">
+           </parameter>
+        </class>
         <enabledWhen>
            <with
                  variable="activeContexts">
@@ -1514,8 +1636,18 @@
         </enabledWhen>
      </handler>
      <handler
-           class="ccw.util.ClojureHandlerFactory:ccw.repl.view-helpers/history-previous"
            commandId="ccw.ui.repl.history.previous">
+        <class
+              class="ccw.util.GenericExecutableExtension">
+           <parameter
+                 name="factory"
+                 value="ccw.util.handler-factory/factory">
+           </parameter>
+           <parameter
+                 name="handler"
+                 value="ccw.repl.view-helpers/history-previous">
+           </parameter>
+        </class>
         <enabledWhen>
            <with
                  variable="activeContexts">
@@ -1530,8 +1662,18 @@
         </enabledWhen>
      </handler>
      <handler
-           class="ccw.util.ClojureHandlerFactory:ccw.repl.view-helpers/history-next"
            commandId="ccw.ui.repl.history.next">
+        <class
+              class="ccw.util.GenericExecutableExtension">
+           <parameter
+                 name="factory"
+                 value="ccw.util.handler-factory/factory">
+           </parameter>
+           <parameter
+                 name="handler"
+                 value="ccw.repl.view-helpers/history-next">
+           </parameter>
+        </class>
         <enabledWhen>
            <with
                  variable="activeContexts">
@@ -1546,8 +1688,18 @@
         </enabledWhen>
      </handler>
      <handler
-           class="ccw.util.ClojureHandlerFactory:ccw.editors.clojure.handlers/toggle-line-comment"
            commandId="ccw.ui.edit.text.clojure.comment.toggle">
+        <class
+              class="ccw.util.GenericExecutableExtension">
+           <parameter
+                 name="factory"
+                 value="ccw.util.handler-factory/factory">
+           </parameter>
+           <parameter
+                 name="handler"
+                 value="ccw.editors.clojure.handlers/toggle-line-comment">
+           </parameter>
+        </class>
         <enabledWhen>
            <with
                  variable="activeContexts">

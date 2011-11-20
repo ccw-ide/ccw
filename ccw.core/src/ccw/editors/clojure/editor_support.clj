@@ -21,11 +21,11 @@
          :build-id                the build id, identifying a \"version\" of the parse-tree
                                     (used for determining deltas between 2 updates)
    "}
-  ccw.editors.clojure.EditorSupport 
+  ccw.editors.clojure.editor-support 
   (:require [paredit.parser :as p]
             [paredit.loc-utils :as lu])
   (:import [org.eclipse.jdt.ui PreferenceConstants])
-  (:gen-class
+  #_(:gen-class
     :methods [^{:static true} [updateTextBuffer [Object String Object Object String] Object]
               ^{:static true} [getParseState [String Object] Object]
               ^{:static true} [getParseTree [Object] Object]
@@ -45,7 +45,7 @@
                     "buffer text:'" (-> buffer (p/buffer-parse-tree 0) lu/node-text) "'"))
       (p/edit-buffer nil 0 0 final-text))))
 
-(defn -updateTextBuffer [r final-text offset len text]
+(defn updateTextBuffer [r final-text offset len text]
   (let [r (if (nil? r) (ref nil) r), text (or text ""), build-id (if-let [old (:build-id @r)] (inc old) 0)] 
     (dosync
       (when-not (= final-text (:text @r))
@@ -68,16 +68,16 @@
           )))
     r))
 
-(defn -startWatchParseRef [r editor]
+(defn startWatchParseRef [r editor]
   (add-watch r :track-state (fn [_ _ _ new-state] 
                               (.setStructuralEditionPossible editor 
                                 (let [possible? (not (nil? (:parse-tree new-state)))
                                       possible? (or possible? (.isEmpty (:text new-state)))]
                                   possible?)))))
 
-(defn -getParseTree [parse-state] (:parse-tree parse-state))
+(defn getParseTree [parse-state] (:parse-tree parse-state))
 
-(defn -getParseState 
+(defn getParseState 
   "text is passed to check if the contents of r is still up to date or not.
    If not, text will also be used to recompute r on-the-fly."
   [text r]
@@ -86,21 +86,21 @@
       {:parse-tree (:parse-tree rv), :buffer (:incremental-text-buffer rv)}
       (do
         (println (str "cached parse-tree miss: expected text='" (:text rv) "'" ", text received: '" text "'"))
-        (-updateTextBuffer r text 0 -1 text)
+        (updateTextBuffer r text 0 -1 text)
         (recur text r)))))
 
 ;; Now, I don't like the fact that getting the current and the previous parse tree may lead to incorrect code
 ;; since they both are dereferencing a ref instead of decomposing a consistent snapshot of a ref
-(defn -getPreviousParseTree 
+(defn getPreviousParseTree 
   [r]
   (:previous-parse-tree @r))
 
-(defn -disposeSourceViewerDecorationSupport [s]
+(defn disposeSourceViewerDecorationSupport [s]
   (when s
     (doto s .uninstall .dispose)
     nil))
 
-(defn -configureSourceViewerDecorationSupport [support viewer]
+(defn configureSourceViewerDecorationSupport [support viewer]
 		;; TODO more to pick in configureSourceViewerDecorationSupport of AbstractDecoratedTextEditor, if you want ...
   (doto support
 		(.setCharacterPairMatcher (.getPairsMatcher viewer))

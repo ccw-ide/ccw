@@ -52,13 +52,17 @@ import clojure.lang.Keyword;
 import clojure.lang.PersistentTreeMap;
 import clojure.lang.Symbol;
 import clojure.lang.Var;
-import clojure.osgi.internal.ClojureOSGi;
+import clojure.osgi.ClojureOSGi;
 import clojure.tools.nrepl.Connection;
 
 public class REPLView extends ViewPart implements IAdaptable {
-    private static final String EDITOR_SUPPORT_NS = "ccw.editors.clojure.EditorSupport";
+    private static final String EDITOR_SUPPORT_NS = "ccw.editors.clojure.editor-support";
     static {
-    	ClojureOSGi.require(CCWPlugin.getDefault().getBundle(), EDITOR_SUPPORT_NS);
+    	try {
+			ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), EDITOR_SUPPORT_NS);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
     }
 	
 	/* Keep this in sync with the context defined in plugin.xml */
@@ -71,7 +75,7 @@ public class REPLView extends ViewPart implements IAdaptable {
     private static Var configureREPLView;
     static {
         try {
-            ClojureOSGi.require(CCWPlugin.getDefault().getBundle(), "ccw.repl.view-helpers");
+            ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), "ccw.repl.view-helpers");
             log = Var.find(Symbol.intern("ccw.repl.view-helpers/log"));
             configureREPLView = Var.find(Symbol.intern("ccw.repl.view-helpers/configure-repl-view"));
         } catch (Exception e) {
@@ -402,9 +406,8 @@ public class REPLView extends ViewPart implements IAdaptable {
 					null/*getAnnotationAccess()*/, 
 					EditorsPlugin.getDefault().getSharedTextColors()/*getSharedColors()*/
 					);
-			ClojureUtils.invoke(EDITOR_SUPPORT_NS, "-configureSourceViewerDecorationSupport",
+			ClojureUtils.invoke(EDITOR_SUPPORT_NS, "configureSourceViewerDecorationSupport",
 					fSourceViewerDecorationSupport, viewer);
-//			EditorSupport.configureSourceViewerDecorationSupport(fSourceViewerDecorationSupport, viewer);
 		}
 		return fSourceViewerDecorationSupport;
 	}
@@ -412,9 +415,8 @@ public class REPLView extends ViewPart implements IAdaptable {
     @Override
     public void dispose() {
         super.dispose();
-        fSourceViewerDecorationSupport = (SourceViewerDecorationSupport) ClojureUtils.invoke(EDITOR_SUPPORT_NS, "-disposeSourceViewerDecorationSupport",
+        fSourceViewerDecorationSupport = (SourceViewerDecorationSupport) ClojureUtils.invoke(EDITOR_SUPPORT_NS, "disposeSourceViewerDecorationSupport",
         		fSourceViewerDecorationSupport);
-//        fSourceViewerDecorationSupport = EditorSupport.disposeSourceViewerDecorationSupport(fSourceViewerDecorationSupport);
         interactive.close();
         toolConnection.close();
     }

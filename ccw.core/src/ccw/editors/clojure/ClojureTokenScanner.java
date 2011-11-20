@@ -32,14 +32,18 @@ import ccw.CCWPlugin;
 import ccw.util.ClojureUtils;
 import clojure.lang.ISeq;
 import clojure.lang.Keyword;
-import clojure.osgi.internal.ClojureOSGi;
+import clojure.osgi.ClojureOSGi;
 
 abstract public class ClojureTokenScanner implements ITokenScanner {
-    private static final String EDITOR_SUPPORT_NS = "ccw.editors.clojure.EditorSupport";
+    private static final String EDITOR_SUPPORT_NS = "ccw.editors.clojure.editor-support";
     private static final String ClojureTopLevelFormsDamager_NS = "ccw.editors.clojure.ClojureTopLevelFormsDamagerImpl";
     static {
-    	ClojureOSGi.require(CCWPlugin.getDefault().getBundle(), EDITOR_SUPPORT_NS);
-    	ClojureOSGi.require(CCWPlugin.getDefault().getBundle(), ClojureTopLevelFormsDamager_NS);
+    	try {
+			ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), EDITOR_SUPPORT_NS);
+			ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), ClojureTopLevelFormsDamager_NS);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
     }
 
     private int currentOffset;
@@ -221,13 +225,8 @@ abstract public class ClojureTokenScanner implements ITokenScanner {
     	getSymbolTypeDuration = 0;
     	text = document.get();
         tokenSeq = (ISeq) ClojureUtils.invoke(ClojureTopLevelFormsDamager_NS, "getTokensSeq",
-        		ClojureUtils.invoke(EDITOR_SUPPORT_NS, "-getParseTree", clojureEditor.getParseState())
-//        		EditorSupport.getParseTree(clojureEditor.getParseState())
+        		ClojureUtils.invoke(EDITOR_SUPPORT_NS, "getParseTree", clojureEditor.getParseState())
         		, offset, length);
-//        tokenSeq = ClojureTopLevelFormsDamager.getTokensSeq(
-//        		ClojureUtils.invoke(EDITOR_SUPPORT_NS, "-getParseTree", clojureEditor.getParseState())
-////        		EditorSupport.getParseTree(clojureEditor.getParseState())
-//        		, offset, length);
         currentParenLevel = -1; // STRONG HYPOTHESIS HERE (related to the Damager used: offset always corresponds to the start of a top level form
         currentOffset = offset;
         currentToken = null;

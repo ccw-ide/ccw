@@ -18,7 +18,8 @@ public final class ClojureUtils {
 			if (v == null) {
 				throw new RuntimeException("Not possible to find var " + varName);
 			} else {
-				return cachedVars.putIfAbsent(varName, v);
+				cachedVars.putIfAbsent(varName, v);
+				return v;
 			}
 		}
 	}

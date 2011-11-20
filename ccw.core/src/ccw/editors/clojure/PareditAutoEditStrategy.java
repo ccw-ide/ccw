@@ -8,23 +8,27 @@ import org.eclipse.jface.text.IDocument;
 import ccw.CCWPlugin;
 import ccw.util.ClojureUtils;
 import clojure.lang.Ref;
-import clojure.osgi.internal.ClojureOSGi;
+import clojure.osgi.ClojureOSGi;
 
 public class PareditAutoEditStrategy implements IAutoEditStrategy {
 	private static final String PareditAutoEditStrategyImpl_NS = "ccw.editors.clojure.PareditAutoEditStrategyImpl";
 	public final Ref state;
 	
 	static {
-		ClojureOSGi.require(CCWPlugin.getDefault().getBundle(), PareditAutoEditStrategyImpl_NS);
+		try {
+			ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), PareditAutoEditStrategyImpl_NS);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	public PareditAutoEditStrategy(IClojureEditor editor, IPreferenceStore prefs) {
-		state = (Ref) ClojureUtils.invoke(PareditAutoEditStrategyImpl_NS, "-init", editor, prefs);
+		state = (Ref) ClojureUtils.invoke(PareditAutoEditStrategyImpl_NS, "init", editor, prefs);
 	}
 	
 	public void customizeDocumentCommand(IDocument document,
 			DocumentCommand command) {
-		ClojureUtils.invoke(PareditAutoEditStrategyImpl_NS, "-customizeDocumentCommand", 
+		ClojureUtils.invoke(PareditAutoEditStrategyImpl_NS, "customizeDocumentCommand", 
 				this, document, command);
 	}
 }

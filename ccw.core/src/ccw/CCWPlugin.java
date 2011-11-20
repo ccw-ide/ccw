@@ -198,14 +198,15 @@ public class CCWPlugin extends AbstractUIPlugin {
     }
 
     private void startClojureCode(BundleContext bundleContext) throws Exception {
-    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.ClojureProjectNature");
-    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.clojure.PareditAutoEditStrategyImpl");
-    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.clojure.ClojureFormat");
-    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.clojure.StacktraceHyperlink");
-    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.clojure.EditorSupport");
-    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.clojure.ClojureHyperlinkDetector");
-    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.clojure.ClojureTopLevelFormsDamagerImpl");
+//    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.clojure.ClojureFormat");
     	
+    	ClojureOSGi.require(bundleContext, "ccw.editors.clojure.hyperlink");
+    	
+    	ClojureOSGi.require(bundleContext, "ccw.editors.clojure.editor-support");
+
+    	ClojureOSGi.require(bundleContext, "ccw.editors.clojure.ClojureTopLevelFormsDamagerImpl");
+    	ClojureOSGi.require(bundleContext, "ccw.editors.clojure.PareditAutoEditStrategyImpl");
+
     	ClojureOSGi.require(bundleContext, "ccw.debug.clientrepl");
     	ClojureOSGi.require(bundleContext, "ccw.debug.serverrepl"); // <= to enable REPLView 
     	                                                            //    server-side tooling
@@ -279,6 +280,10 @@ public class CCWPlugin extends AbstractUIPlugin {
     	return new Status(IStatus.ERROR, PLUGIN_ID, message, e);
     }
 
+    public static IStatus createErrorStatus(String message) {
+    	return new Status(IStatus.ERROR, PLUGIN_ID, message);
+    }
+    
     public static void logWarning(String msg) {
         plugin.getLog().log(new Status(IStatus.WARNING, PLUGIN_ID, msg));
     }

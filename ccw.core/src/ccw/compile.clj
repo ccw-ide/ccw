@@ -15,13 +15,11 @@
     (map
       compile
       ['ccw.reload-clojure
-       'ccw.ClojureProjectNature
        'ccw.debug.clientrepl
        'ccw.debug.serverrepl
        'ccw.editors.clojure.PareditAutoEditStrategyImpl
-       'ccw.editors.clojure.ClojureFormat
-       'ccw.editors.clojure.StacktraceHyperlink
-       'ccw.editors.clojure.EditorSupport
-       'ccw.editors.clojure.ClojureHyperlinkDetector
-       'ccw.editors.clojure.ClojureHyperlink])))
+;       'ccw.editors.clojure.ClojureFormat
+       'ccw.editors.clojure.editor-support
+       'ccw.editors.clojure.hyperlink
+       ])))
 
