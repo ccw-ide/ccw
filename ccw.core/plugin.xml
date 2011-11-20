@@ -39,13 +39,13 @@
       </wizard>
       <wizard
             category="ccw.category.new"
-            class="ccw.wizards.NewClojureFileWizard"
+            class="ccw.wizards.NewClojureNamespaceWizard"
             icon="icons/clojure16x16.png"
             id="ccw.newClojureFileWizard"
-            name="Clojure File"
+            name="Clojure Namespace"
             project="false">
          <description>
-            Create a Clojure file
+            Create a new Clojure namespace
          </description>
          <selection
                class="java.lang.Object">
