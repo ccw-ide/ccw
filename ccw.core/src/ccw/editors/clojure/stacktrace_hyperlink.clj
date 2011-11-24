@@ -10,7 +10,7 @@
 ; *******************************************************************************/
 
 (ns ccw.editors.clojure.stacktrace-hyperlink
-  (:require [clojure.contrib.str-utils2 :as s])
+  (:require [ccw.util.string :as s])
   (:use [clojure.test]))
 
 (defn- find-datas [s]

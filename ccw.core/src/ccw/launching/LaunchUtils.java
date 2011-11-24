@@ -38,7 +38,6 @@ public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
     static public final String LAUNCH_CONFIG_ID = "ccw.launching.clojure";
     
     static public final String CLOJURE_MAIN = "clojure.main";
-    static public final String CLOJURE_CONTRIB_REPL_LN = "clojure.contrib.repl_ln";
     
 	/** Launch attribute that will be of type String, the files will be listed separated by newlines */
     static public final String ATTR_FILES_LAUNCHED_AT_STARTUP = "CCW_ATTR_FILES_LAUNCHED_AT_STARTUP";

@@ -1,6 +1,6 @@
 (ns ccw.editors.clojure.PareditAutoEditStrategyImpl
   (:use [paredit [core :only [paredit]]])
-  (:use [clojure.contrib.core :only [-?>]])  
+  (:use [clojure.core.incubator :only [-?>]])  
   (:import
     [org.eclipse.jface.text IAutoEditStrategy
                             IDocument

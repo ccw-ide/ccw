@@ -16,13 +16,17 @@
     [org.eclipse.core.runtime CoreException Platform Path Status IPath IProgressMonitor FileLocator]
     [org.eclipse.core.resources WorkspaceJob IResource ResourcesPlugin]
     [org.eclipse.jdt.core JavaCore])
-  (:require [clojure.contrib [duck-streams :as cc.stream]]))
+  (:require [clojure.java.io :as io]))
 
-;; adding a definition to clojure.contrib.duck-streams
-(defmethod cc.stream/copy [IPath IPath] [#^IPath input #^IPath output]
-  (println "input:" input ", output:" output)
-  (cc.stream/copy (.toFile input) (.toFile output)))
-   
+;; FIXME : see in Clojure 1.3 if it is possible to extend copy's behaviour ...
+(defn copy [^IPath input ^IPath output & opts]
+  (apply io/copy (.toFile input) (.toFile output) opts))
+
+;; adding a method to clojure.java.io
+;(defmethod clojure.java.io/do-copy [IPath IPath] 
+;  [^IPath input ^IPath output opts]
+;  (clojure.java.io/do-copy (.toFile input) (.toFile output) opts))
+
 (defn- get-project-description
   "returns the project description or null if the project
    is null, closed, or an error occured while getting description
@@ -138,8 +142,8 @@
 		      	        										(.addFileExtension (.getFileExtension libSrc-path)))
 		      	        									(make-dest-path libSrc-path)))]
       	    (when copy?
-      	    	(cc.stream/copy lib-path in-project-lib)
-      	    	(when in-project-libSrc (cc.stream/copy libSrc-path in-project-libSrc)))
+      	    	(copy lib-path in-project-lib)
+      	    	(when in-project-libSrc (copy libSrc-path in-project-libSrc)))
       	    (let 
              [entries-new 
                (into-array 

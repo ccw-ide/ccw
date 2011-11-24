@@ -4,7 +4,7 @@
             [clojure.tools.nrepl :as repl]
             [ccw.editors.clojure.editor-support :as editor]
             [ccw.editors.clojure.hyperlink :as hyperlink])
-  (:use clojure.contrib.core)
+  (:use [clojure.core.incubator :only [-?>]])
   (:import 
     [org.eclipse.jface.text BadLocationException
                             IRegion

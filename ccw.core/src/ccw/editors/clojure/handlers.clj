@@ -12,7 +12,7 @@
 (ns ccw.editors.clojure.handlers
   (:require [paredit.core :as pc]
             [ccw.editors.clojure.clojure-hyperlink-detector :as hlu]) ; hlu as HyperLinkUtil
-  (:use [clojure.contrib.core :only [-?>]])  
+  (:use [clojure.core.incubator :only [-?>]])  
   (:import
     [org.eclipse.ui.handlers HandlerUtil]
     [ccw.util PlatformUtil]
