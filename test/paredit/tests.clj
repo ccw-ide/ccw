@@ -3,10 +3,9 @@
   (:use paredit.core)
   (:use [paredit.parser :exclude [pts]])
   (:require [paredit.text-utils :as t])
-  (:use clojure.contrib.def)
   (:use clojure.test)
-  (:require [clojure.contrib.str-utils2 :as str2])
-  (:use clojure.contrib.core)
+  (:require [clojure.string :as str])
+  (:use [clojure.core.incubator :only [-?>]])
   (:require [clojure.zip :as zip])
   (:use paredit.loc-utils))
 
@@ -30,7 +29,7 @@
   [^String text-spec]
   (let [offset (.indexOf text-spec "|")
         second-pipe (dec (.indexOf text-spec "|" (inc offset)))]  
-    {:text (str2/replace text-spec "|" "")
+    {:text (str/replace text-spec "|" "")
      :offset offset
      :length (if (> second-pipe 0) (- second-pipe offset) 0)}))
 
@@ -211,6 +210,7 @@
   #_(leave-for-offset-tests)
   #_(loc-containing-offset-tests))
 
-(defvar *text* (atom {:text "" :offset 0 :length 0})
-  "defines a text, with :offset being the cursor position,
-   and :length being a possible selection (may be negative)")
+(def ^{:doc 
+          "defines a text, with :offset being the cursor position,
+           and :length being a possible selection (may be negative)"} 
+      *text* (atom {:text "" :offset 0 :length 0}))

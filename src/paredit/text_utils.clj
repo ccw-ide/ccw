@@ -1,6 +1,6 @@
 (ns paredit.text-utils
   (:use clojure.test)
-  (:use clojure.contrib.core))
+  (:use [clojure.core.incubator :only [-?>]]))
 
 #_(set! *warn-on-reflection* true)
 

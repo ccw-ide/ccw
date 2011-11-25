@@ -1,5 +1,4 @@
-(ns paredit.core-commands
-  (:use clojure.contrib.def))
+(ns paredit.core-commands)
 
 #_(set! *warn-on-reflection* true)
 
@@ -179,14 +178,11 @@
 
 ;;; This assumes Unix-style LF line endings.
 
-(defmacro defconst [& body] `(clojure.contrib.def/defvar ~@body))
+(def paredit-version 21)
+(def paredit-beta-p nil)
 
-(defconst paredit-version 21)
-(defconst paredit-beta-p nil)
-
-(defvar  
-  paredit-mode-map {} 
-  "Keymap for the paredit minor mode.")
+(def ^{:doc "Keymap for the paredit minor mode."}  
+  paredit-mode-map {})
 
 (defn check-parens "TODO LAP: implement it !" [text] true)
 (defn can-enable-paredit? [text] (check-parens text))
@@ -207,7 +203,7 @@
     text-spec := a string, with the caret position indicated by a pipe character |, 
                  and if there is a selected portion of the text, the end of the text
                  selection is marked with another pipe character |"}
-  *paredit-commands*
+  ^:dynamic *paredit-commands*
   [
     ["Basic Insertion Commands"
 	    ["("         :paredit-open-round
@@ -458,6 +454,7 @@
                  "(foo |(bar))" "|(bar)"
                  "(foo |(bar]|)" "(foo |(bar]|)"
                  "(foo |(bar])|" "|(bar])"
+                 ; (|foo|) => |foo|
                  }]
      ]
     

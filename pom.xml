@@ -72,11 +72,6 @@
                         <version>1.2.0</version>
                 </dependency>
                 <dependency>
-                        <groupId>org.clojure</groupId>
-                        <artifactId>clojure-contrib</artifactId>
-                        <version>1.2.0</version>
-                </dependency>
-                <dependency>
                         <groupId>org.lpetit</groupId>
                         <artifactId>net.cgrand.parsley</artifactId>
                         <version>0.0.9.STABLE001</version>

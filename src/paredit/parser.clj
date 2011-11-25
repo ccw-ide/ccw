@@ -1,19 +1,19 @@
 (ns paredit.parser
+  (:refer-clojure :exclude [partition])
   (:use clojure.test)
-  (:use clojure.contrib.core)
+  (:use [clojure.core.incubator :only [-?>]])
   (:use paredit.regex-utils)
 	(:require [clojure.zip :as zip])
-  (:require [clojure.contrib.zip-filter :as zf])
   (:require [net.cgrand.parsley :as p])
   (:require [net.cgrand.parsley.lrplus :as lr+])
   (:require [net.cgrand.regex :as r]))
 
 #_(set! *warn-on-reflection* true)
 
-(def *brackets-tags* #{:list :map :vector :string :set :fn :regex})
-(def *tag-closing-brackets* {:list ")", :map "}", :vector "]", :string "\"", :regex "\"", :set "}", :fn ")"})
-(def *tag-opening-brackets* {:list "(", :map "{", :vector "[", :string "\"", :regex "#\"", :set "#{", :fn "#("})
-(def *atom* #{:symbol :keyword :int :float :ratio :anon-arg})
+(def ^:dynamic *brackets-tags* #{:list :map :vector :string :set :fn :regex})
+(def ^:dynamic *tag-closing-brackets* {:list ")", :map "}", :vector "]", :string "\"", :regex "\"", :set "}", :fn ")"})
+(def ^:dynamic *tag-opening-brackets* {:list "(", :map "{", :vector "[", :string "\"", :regex "#\"", :set "#{", :fn "#("})
+(def ^:dynamic *atom* #{:symbol :keyword :int :float :ratio :anon-arg})
 
 (defn eof [s eof?]
   (when (and (= 0 (.length ^String s)) eof?) [0 eof]))
@@ -109,7 +109,7 @@
               parse-tree-children)]
     [(pop red) (peek red)]))
 
-(def *build-id*)
+(def ^:dynamic *build-id*)
 
 (defn parse-tree-view 
   ([abstract-leaf s] s) 

@@ -11,27 +11,25 @@
 ; ... and all the other paredit stuff ...
 
 (ns paredit.core
-  (:use clojure.contrib.def)
   (:use [paredit.parser :exclude [pts]])
   (:use clojure.set)
-  (:use clojure.contrib.core)
-  (:require clojure.contrib.pprint)
-  (:require [clojure.contrib.str-utils2 :as str2])
+  (:use [clojure.core.incubator :only [-?>]])
+  (:require [paredit.string :as str])
   (:require [paredit.text-utils :as t])
   (:require [clojure.zip :as z])
   (:use paredit.loc-utils)) ; TODO avoir un require :as l
 
 #_(set! *warn-on-reflection* true)
 ;;; adaptable paredit configuration
-(def ^String *newline* "\n")
+(def ^String ^:dynamic *newline* "\n")
 ;;; adaptable paredit configuration
 
-(def *real-spaces* #{(str \newline) (str \tab) (str \space)})
-(def *extended-spaces* (conj *real-spaces* (str \,)))
-(def *open-brackets* (conj #{"(" "[" "{"} nil)) ; we add nil to the list to also match beginning of text 
-(def *close-brackets* (conj #{")" "]" "}"} nil)) ; we add nil to the list to also match end of text
-(def *form-macro-chars* #{(str \#) (str \~) "~@" (str \') (str \`) (str \@) "^" "#'" "#_" "#!"})
-(def *not-in-code* #{:string :string-body "\"\\" :comment :char :regex})
+(def ^:dynamic *real-spaces* #{(str \newline) (str \tab) (str \space)})
+(def ^:dynamic *extended-spaces* (conj *real-spaces* (str \,)))
+(def ^:dynamic *open-brackets* (conj #{"(" "[" "{"} nil)) ; we add nil to the list to also match beginning of text 
+(def ^:dynamic *close-brackets* (conj #{")" "]" "}"} nil)) ; we add nil to the list to also match end of text
+(def ^:dynamic *form-macro-chars* #{(str \#) (str \~) "~@" (str \') (str \`) (str \@) "^" "#'" "#_" "#!"})
+(def ^:dynamic *not-in-code* #{:string :string-body "\"\\" :comment :char :regex})
 
 (defmacro with-memoized [func-names & body]
   `(binding [~@(mapcat 
@@ -39,6 +37,7 @@
                  func-names)]
      ~@body))
 
+(declare ^:dynamic normalized-selection)
 (defmacro with-important-memoized [& body]
   `(with-memoized 
      [start-offset
@@ -53,7 +52,7 @@
       node-text]
      ~@body))
 
-(defn normalized-selection
+(defn ^:dynamic normalized-selection
   "makes a syntaxically correct selection, that is the returned nodes are siblings.
    returns a vector of 2 locs.
    If the selection is empty, the first loc will give the start (get it via a call to 'loc-start on it)
@@ -366,7 +365,7 @@
       
       ))
   )
-(def *selection-strategy* {:list children-then-punct-sel
+(def ^:dynamic *selection-strategy* {:list children-then-punct-sel
                            :vector children-then-punct-sel
                            :map children-then-punct-sel
                            :set children-then-punct-sel
@@ -584,8 +583,8 @@
                 to-add (- indent cur-indent-col)]
             (cond
             (zero? to-add) t
-            :else (let [t (update-in t [:modifs] conj {:text (str2/repeat " " indent) :offset line-start :length cur-indent-col})
-                        t (update-in t [:text] t/str-replace line-start cur-indent-col (str2/repeat " " indent))]
+            :else (let [t (update-in t [:modifs] conj {:text (str/repeat " " indent) :offset line-start :length cur-indent-col})
+                        t (update-in t [:text] t/str-replace line-start cur-indent-col (str/repeat " " indent))]
                     (cond 
                       (>= offset (+ line-start cur-indent-col)) 
                         (update-in t [:offset] + to-add)

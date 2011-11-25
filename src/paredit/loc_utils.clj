@@ -1,7 +1,6 @@
 (ns paredit.loc-utils
   (:use paredit.parser)
-  (:require [clojure.zip :as zip])
-  (:require [clojure.contrib.zip-filter :as zf]))
+  (:require [clojure.zip :as zip]))
 
 #_(set! *warn-on-reflection* true)
 (defn xml-vzip
@@ -33,12 +32,12 @@
                          :ppath path 
                          :r r}] (meta loc))))))
 
-(defn node-text [n]
+(defn ^:dynamic node-text [n]
   (if (string? n)
     n
     (apply str (map #'node-text (:content n)))))
 
-(defn loc-text [loc]
+(defn ^:dynamic loc-text [loc]
   (node-text (zip/node loc)))
 
 (defn loc-count [loc]
@@ -99,7 +98,7 @@
 
 ;; TODO we should be able to locate the offset by first looking at the loc index, 
 ;; and then get the :content-cumulative-count, etc.
-(defn start-offset [loc]
+(defn ^:dynamic start-offset [loc]
   (loop [loc loc offset 0] 
     (cond
       (nil? loc) offset
@@ -108,10 +107,10 @@
           (recur l (+ offset (loc-count l)))
           (recur (zip/up loc) offset)))))
 
-(defn end-offset [loc]
+(defn ^:dynamic end-offset [loc]
   (+ (start-offset loc) (loc-count loc)))
 
-(defn loc-col [loc]
+(defn ^:dynamic loc-col [loc]
   (loop [loc (zip/prev loc) col 0]
     (cond
       (nil? loc) 
@@ -149,7 +148,7 @@
     ;(let [valid? (= 1 (-> parsed :accumulated-state count))]
     (xml-vzip parsed)))
 
-(defn contains-offset?
+(defn ^:dynamic contains-offset?
   "returns the loc itself if it contains the offset, else nil"
   [loc offset]
    (let [start (start-offset loc)
@@ -182,19 +181,19 @@
                       (recur (inc n) end)))))]
       (if (zero? offset) cloc (recur cloc offset)))))
 
-(defn leave-for-offset
+(defn ^:dynamic leave-for-offset
   [loc offset]
   (if-let [l (leave-loc-for-offset-common loc offset)]
     l
     (root-loc loc)))
 
-(defn loc-for-offset 
+(defn ^:dynamic loc-for-offset 
   "returns a zipper location or nil if does not contain the offset"
   [loc offset] 
     (when-let [l (leave-loc-for-offset-common loc offset)]
       (parse-node l)))
 
-(defn loc-containing-offset
+(defn ^:dynamic loc-containing-offset
   [loc offset]
   (if-let [l (leave-loc-for-offset-common loc offset)]
     (loop [l l]
