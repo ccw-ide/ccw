@@ -45,14 +45,14 @@ import org.eclipse.ui.part.FileEditorInput;
 import ccw.ClojureCore;
 
 public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfigurationConstants {
-    private static final HashMap<String, Integer> tempLaunchCounters = new HashMap();
+    private static final HashMap<String, Long> tempLaunchCounters = new HashMap();
     
     private static int incTempLaunchCount (String projectName) {
         synchronized (tempLaunchCounters) {
-            Integer cnt = tempLaunchCounters.get(projectName);
+            Long cnt = tempLaunchCounters.get(projectName);
             cnt = cnt == null ? 1 : cnt + 1;
             tempLaunchCounters.put(projectName, cnt);
-            return cnt;
+            return cnt.intValue();
         }
     }
 

@@ -52,7 +52,7 @@ import clojure.tools.nrepl.SafeFn;
 
 public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 
-    private static Var currentLaunch = Var.create();
+    private static Var currentLaunch = Var.create().setDynamic(true);
     private static IConsole lastConsoleOpened;
     
     static {
@@ -80,9 +80,9 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 					final int STEPS_BEFORE_GIVING_UP = 600;
 					final int MILLIS_BETWEEN_STEPS = 50;
 					monitor.beginTask("Waiting for new REPL process ack", STEPS_BEFORE_GIVING_UP);
-					Integer maybePort = null;
+					Long maybePort = null;
 					for (int i = 0; i < STEPS_BEFORE_GIVING_UP; i++) {
-						maybePort = (Integer)SafeFn.find("clojure.tools.nrepl", "wait-for-ack").sInvoke(MILLIS_BETWEEN_STEPS);
+						maybePort = (Long)SafeFn.find("clojure.tools.nrepl", "wait-for-ack").sInvoke(MILLIS_BETWEEN_STEPS);
 						monitor.worked(1);
 						if (maybePort != null) {
 							break;
@@ -93,7 +93,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 		                CCWPlugin.logError("Waiting for new REPL process ack timed out");
 		                return new Status(IStatus.ERROR, CCWPlugin.PLUGIN_ID, "Waiting for new REPL process ack timed out");
 		            }
-		            final Integer port = maybePort;
+		            final Long port = maybePort;
 		            DisplayUtil.asyncExec(new Runnable() {
 		                public void run() {
 	                    	if (isAutoReloadEnabled(launch) && getProject() != null) {
@@ -122,7 +122,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 		            	}
 		                private void connectRepl() {
 		                    try {
-		                        REPLView replView = REPLView.connect("localhost", port, lastConsoleOpened, launch);
+		                        REPLView replView = REPLView.connect("localhost", port.intValue(), lastConsoleOpened, launch);
 		                        String startingNamespace = REPLViewLaunchMonitor.this.launch.getLaunchConfiguration().getAttribute(LaunchUtils.ATTR_NS_TO_START_IN, "user");
 		                        try {
 		                        	replView.setCurrentNamespace(startingNamespace);

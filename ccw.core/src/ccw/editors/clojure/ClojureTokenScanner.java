@@ -115,11 +115,11 @@ abstract public class ClojureTokenScanner implements ITokenScanner {
 
     public final int getTokenLength() {
     	long start = System.currentTimeMillis();
-    	Integer tokenLength = (Integer) currentToken.get(tokenLengthKeyword);
+    	Long tokenLength = (Long) currentToken.get(tokenLengthKeyword);
         long localDuration = System.currentTimeMillis() - start;
         getTokenLengthDuration += localDuration;
 		duration += localDuration;
-		return tokenLength;
+		return tokenLength.intValue();
     }
 
     public final int getTokenOffset() {
@@ -135,7 +135,7 @@ abstract public class ClojureTokenScanner implements ITokenScanner {
     		firstToken = false;
     	}
         if (!firstToken) {
-        	int count = (Integer) currentToken.get(tokenLengthKeyword);
+        	long count = (Long) currentToken.get(tokenLengthKeyword);
         	currentOffset += count;
         	tokenSeq = tokenSeq.next();
         }
@@ -239,7 +239,7 @@ abstract public class ClojureTokenScanner implements ITokenScanner {
     	long start = System.currentTimeMillis();
 		Object type = currentToken.get(tokenTypeKeyword);
 		if (type.equals(symbolKeyword)) {
-            type = guessEclipseTokenTypeForSymbol(text.substring(currentOffset, currentOffset + ((Integer) currentToken.get(tokenLengthKeyword))));
+            type = guessEclipseTokenTypeForSymbol(text.substring(currentOffset, currentOffset + ((Long) currentToken.get(tokenLengthKeyword)).intValue()));
         }
 		IToken retToken = tokenTypeToJFaceToken.get(type);
         if (retToken == null) {
