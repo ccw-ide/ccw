@@ -8,19 +8,33 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
 import clojure.lang.RT;
+import clojure.lang.Symbol;
 import clojure.lang.Var;
 import clojure.osgi.ClojureOSGi;
 
 public final class BundleUtils {
-
+	private static final Var findNs = RT.var("clojure.core", "find-ns");
+	
 	private BundleUtils() {
 		// Not intended to be instanciated
 	}
 	
+	/**
+	 * Returns the var corresponding to <code>varName</code>, requiring its
+	 * namespace first if not already present in memory.
+	 * 
+	 * @param bundleSymbolicName the symbolic name of the bundle from which the
+	 *        namespace would be loaded, if so needed
+	 * @param varName fully qualified var name
+	 * @return the var
+	 * @throws CoreException
+	 */
 	public static Var requireAndGetVar(String bundleSymbolicName, String varName) throws CoreException {
 		final String[] nsFn = varName.split("/");
 		try {
-			ClojureOSGi.require(loadAndGetBundle(bundleSymbolicName).getBundleContext(), nsFn[0]);
+			if (findNs.invoke(Symbol.intern(nsFn[0])) == null) {
+				ClojureOSGi.require(loadAndGetBundle(bundleSymbolicName).getBundleContext(), nsFn[0]);
+			}
 			return RT.var(nsFn[0], nsFn[1]);
 		} catch (Exception e) {
 			IStatus status = new Status(IStatus.ERROR, bundleSymbolicName, 

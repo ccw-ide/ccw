@@ -200,6 +200,7 @@ public class CCWPlugin extends AbstractUIPlugin {
     private void startClojureCode(BundleContext bundleContext) throws Exception {
 //    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.clojure.ClojureFormat");
     	
+    	ClojureOSGi.require(bundleContext, "ccw.util.bundle-utils");
     	ClojureOSGi.require(bundleContext, "ccw.editors.clojure.hyperlink");
     	
     	ClojureOSGi.require(bundleContext, "ccw.editors.clojure.editor-support");

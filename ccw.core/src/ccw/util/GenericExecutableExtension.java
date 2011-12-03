@@ -20,13 +20,11 @@ public class GenericExecutableExtension implements IExecutableExtensionFactory, 
 	
 	public Object create() throws CoreException {
 		try {
-			final Object[] ret = new Object[1];
-			ClojureOSGi.withBundle(BundleUtils.loadAndGetBundle(bundleName), new RunnableWithException() {
-				public void run() throws Exception {
-					ret[0] = factory.invoke(factoryParams);
+			return ClojureOSGi.withBundle(BundleUtils.loadAndGetBundle(bundleName), new RunnableWithException() {
+				public Object run() throws Exception {
+					return factory.invoke(factoryParams);
 				}
 			});
-			return ret[0];
 		} catch (CoreException e) {
 			throw e;
 		} catch (Exception e) {
