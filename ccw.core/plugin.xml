@@ -675,7 +675,7 @@
       </key>
       <key
             commandId="ccw.ui.repl.connectToEclipseNREPL"
-            contextId="ccw.ui.context.repl"
+            contextId="org.eclipse.ui.contexts.window"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+M3+Q E">
       </key>

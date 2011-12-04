@@ -47,6 +47,7 @@ import ccw.launching.LaunchUtils;
 import ccw.preferences.PreferenceConstants;
 import ccw.preferences.SyntaxColoringPreferencePage;
 import ccw.repl.REPLView;
+import ccw.util.BundleUtils;
 import ccw.util.DisplayUtil;
 import clojure.lang.Keyword;
 import clojure.lang.Symbol;
@@ -108,7 +109,8 @@ public class CCWPlugin extends AbstractUIPlugin {
     public synchronized void startREPLServer() throws CoreException {
     	if (ackREPLServer == null) {
 	        try {
-	            ackREPLServer = (ServerSocket)((List)Var.find(Symbol.intern("clojure.tools.nrepl/start-server")).invoke()).get(0);
+	        	Var startServer = BundleUtils.requireAndGetVar(this.getBundle().getSymbolicName(), "clojure.tools.nrepl/start-server");
+	            ackREPLServer = (ServerSocket)((List)startServer.invoke()).get(0);
 	            CCWPlugin.log("Started ccw nREPL server on port " + ackREPLServer.getLocalPort());
 	        } catch (Exception e) {
 	            CCWPlugin.logError("Could not start plugin-hosted REPL server", e);
