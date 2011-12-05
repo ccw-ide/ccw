@@ -45,6 +45,7 @@ import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.ClojureProject;
 import ccw.repl.REPLView;
+import ccw.util.BundleUtils;
 import ccw.util.DisplayUtil;
 import clojure.lang.RT;
 import clojure.lang.Var;
@@ -149,7 +150,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
     public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor) throws CoreException {
         launch.setAttribute(LaunchUtils.ATTR_PROJECT_NAME, configuration.getAttribute(LaunchUtils.ATTR_PROJECT_NAME, (String) null));
         launch.setAttribute(LaunchUtils.ATTR_IS_AUTO_RELOAD_ENABLED, Boolean.toString(configuration.getAttribute(LaunchUtils.ATTR_IS_AUTO_RELOAD_ENABLED, false)));
-        SafeFn.find("clojure.tools.nrepl", "reset-ack-port!").sInvoke();
+        BundleUtils.requireAndGetVar(CCWPlugin.getDefault().getBundle().getSymbolicName(), "clojure.tools.nrepl/reset-ack-port!").invoke();
         try {
             Var.pushThreadBindings(RT.map(currentLaunch, launch));
             super.launch(configuration, mode, launch, (monitor == null || !isLaunchREPL(configuration)) ?
