@@ -8,7 +8,6 @@ import org.eclipse.jface.text.IDocument;
 import ccw.CCWPlugin;
 import ccw.util.ClojureUtils;
 import clojure.lang.Ref;
-import clojure.osgi.ClojureOSGi;
 
 public class PareditAutoEditStrategy implements IAutoEditStrategy {
 	private static final String PareditAutoEditStrategyImpl_NS = "ccw.editors.clojure.PareditAutoEditStrategyImpl";
@@ -16,7 +15,7 @@ public class PareditAutoEditStrategy implements IAutoEditStrategy {
 	
 	static {
 		try {
-			ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), PareditAutoEditStrategyImpl_NS);
+			CCWPlugin.getClojureOSGi().require(CCWPlugin.getDefault().getBundle(), PareditAutoEditStrategyImpl_NS);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

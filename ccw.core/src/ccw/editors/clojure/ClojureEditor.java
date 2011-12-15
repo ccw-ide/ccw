@@ -38,7 +38,6 @@ import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
-import clojure.osgi.ClojureOSGi;
 
 import ccw.CCWPlugin;
 import ccw.editors.outline.ClojureOutlinePage;
@@ -50,7 +49,7 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
     private static final String EDITOR_SUPPORT_NS = "ccw.editors.clojure.editor-support";
     static {
     	try {
-			ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), EDITOR_SUPPORT_NS);
+			CCWPlugin.getClojureOSGi().require(CCWPlugin.getDefault().getBundle(), EDITOR_SUPPORT_NS);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

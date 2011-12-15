@@ -7,10 +7,10 @@ import org.eclipse.core.runtime.Status;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
+import ccw.CCWPlugin;
 import clojure.lang.RT;
 import clojure.lang.Symbol;
 import clojure.lang.Var;
-import clojure.osgi.ClojureOSGi;
 
 public final class BundleUtils {
 	private static final Var findNs = RT.var("clojure.core", "find-ns");
@@ -33,7 +33,7 @@ public final class BundleUtils {
 		final String[] nsFn = varName.split("/");
 		try {
 			if (findNs.invoke(Symbol.intern(nsFn[0])) == null) {
-				ClojureOSGi.require(loadAndGetBundle(bundleSymbolicName).getBundleContext(), nsFn[0]);
+				CCWPlugin.getClojureOSGi().require(loadAndGetBundle(bundleSymbolicName), nsFn[0]);
 			}
 			return RT.var(nsFn[0], nsFn[1]);
 		} catch (Exception e) {

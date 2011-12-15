@@ -54,7 +54,6 @@ import ccw.ClojureCore;
 import ccw.repl.REPLView;
 import ccw.util.ClojureUtils;
 import ccw.util.DisplayUtil;
-import clojure.osgi.ClojureOSGi;
 
 public abstract class ClojureSourceViewer extends ProjectionViewer implements
         IClojureEditor, IPropertyChangeListener {
@@ -63,7 +62,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     private static final String EDITOR_SUPPORT_NS = "ccw.editors.clojure.editor-support";
     static {
     	try {
-			ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), EDITOR_SUPPORT_NS);
+			CCWPlugin.getClojureOSGi().require(CCWPlugin.getDefault().getBundle(), EDITOR_SUPPORT_NS);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

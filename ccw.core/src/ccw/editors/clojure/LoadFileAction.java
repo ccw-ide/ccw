@@ -25,7 +25,6 @@ import ccw.repl.Actions;
 import ccw.repl.REPLView;
 import clojure.lang.Symbol;
 import clojure.lang.Var;
-import clojure.osgi.ClojureOSGi;
 
 public class LoadFileAction extends Action {
 
@@ -34,7 +33,7 @@ public class LoadFileAction extends Action {
     private static Var loadFileCommand;
     static {
         try {
-            ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), "clojure.tools.nrepl.helpers");
+            CCWPlugin.getClojureOSGi().require(CCWPlugin.getDefault().getBundle(), "clojure.tools.nrepl.helpers");
             loadFileCommand = Var.find(Symbol.intern("clojure.tools.nrepl.helpers/load-file-command"));
         } catch (Exception e) {
             CCWPlugin.logError("Could not initialize code loading helpers.", e);

@@ -52,14 +52,13 @@ import clojure.lang.Keyword;
 import clojure.lang.PersistentTreeMap;
 import clojure.lang.Symbol;
 import clojure.lang.Var;
-import clojure.osgi.ClojureOSGi;
 import clojure.tools.nrepl.Connection;
 
 public class REPLView extends ViewPart implements IAdaptable {
     private static final String EDITOR_SUPPORT_NS = "ccw.editors.clojure.editor-support";
     static {
     	try {
-			ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), EDITOR_SUPPORT_NS);
+			CCWPlugin.getClojureOSGi().require(CCWPlugin.getDefault().getBundle(), EDITOR_SUPPORT_NS);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -75,7 +74,7 @@ public class REPLView extends ViewPart implements IAdaptable {
     private static Var configureREPLView;
     static {
         try {
-            ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), "ccw.repl.view-helpers");
+            CCWPlugin.getClojureOSGi().require(CCWPlugin.getDefault().getBundle(), "ccw.repl.view-helpers");
             log = Var.find(Symbol.intern("ccw.repl.view-helpers/log"));
             configureREPLView = Var.find(Symbol.intern("ccw.repl.view-helpers/configure-repl-view"));
         } catch (Exception e) {
