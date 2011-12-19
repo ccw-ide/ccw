@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Stephan Muehlstrasser - Initial implementation
  *******************************************************************************/
 package ccw.preferences;
@@ -24,7 +24,7 @@ public class EditorPreferencePage extends FieldEditorPreferencePage implements
     public EditorPreferencePage() {
         super(GRID);
         setPreferenceStore(CCWPlugin.getDefault().getPreferenceStore());
-        setDescription(Messages.ClojurePreferencePage_Description); 
+        setDescription(Messages.ClojurePreferencePage_Description);
     }
 
     /**
@@ -42,7 +42,7 @@ public class EditorPreferencePage extends FieldEditorPreferencePage implements
 
         addField(
             new IntegerFieldEditor(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH, Messages.ClojurePreferencePage_displayed_tab_width, getFieldEditorParent()));
-        
+
         addField(
     		new BooleanFieldEditor(ccw.preferences.PreferenceConstants.SWITCH_TO_NS_ON_REPL_STARTUP, Messages.ClojurePreferencePage_switch_to_ns_on_repl_startup, getFieldEditorParent()));
 

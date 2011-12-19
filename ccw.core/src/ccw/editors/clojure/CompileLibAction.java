@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Laurent PETIT - initial API and implementation
  *******************************************************************************/
 package ccw.editors.clojure;
@@ -35,25 +35,25 @@ public class CompileLibAction extends Action {
 		String message = "The editor has pending changes. Clicking OK will save the changes and compile+load the file.";
 		if (!EvaluateTextUtil.canProceed(editor, title, message))
 			return;
-		
+
 		compileLoadFile();
 	}
-	
+
 	protected final void compileLoadFile() {
 		IFile editorFile = (IFile) editor.getEditorInput().getAdapter(IFile.class);
 		if (editorFile == null)
 			return;
-		
+
 		String lib = editor.findDeclaringNamespace();
-		
+
 		if (lib == null || lib.trim().equals("")) {
 			String title = "Compilation impossible";
 			String message = "The file " + editorFile.getName() + " cannot be compiled because it does not declare a namespace.";
 			MessageDialog.openError(editor.getSite().getShell(), title, message);
 			return;
 		}
-		
-		
+
+
 		EvaluateTextUtil.evaluateText(editor.getCorrespondingREPL(), compileLibCommand(lib), true);
 		// TODO: send the compile via the server to synchronize with the compilation end before refreshing the project
 		try {
@@ -62,7 +62,7 @@ public class CompileLibAction extends Action {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public static String compileLibCommand (String libName) {
 		return "(ccw.debug.serverrepl/with-exception-serialization (clojure.core/binding [clojure.core/*compile-path* \"classes\"] (clojure.core/compile '" + libName + ")))";
 	}

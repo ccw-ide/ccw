@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Laurent PETIT - initial API and implementation
  *******************************************************************************/
 
@@ -23,19 +23,19 @@ public final class ClojureDocUtils {
 	private ClojureDocUtils() {
 		// Not intended to be subclassed
 	}
-	
+
 	public static final Keyword KEYWORD_ARGLISTS = Keyword.intern(null, "arglists");
 	public static final Keyword KEYWORD_DOC = Keyword.intern(null, "doc");
-	
+
 	public static String getVarDocInfo(Object varObject) {
 		Map<?,?> element = (Map<?,?>) varObject;
-		
+
 		StringBuilder result = new StringBuilder();
 
 		String args = (String) ((Map<?,?>) element).get(KEYWORD_ARGLISTS);
 		if (args != null && !args.trim().equals("")) {
 			result.append("Arguments List(s):\n");
-			
+
 			String[] argsLines = args.split("\n");
 			boolean firstLine = true;
 			for (String line: argsLines) {
@@ -66,15 +66,15 @@ public final class ClojureDocUtils {
 			return "no documentation information";
 		}
 	}
-	
+
 	public static String getHtmlVarDocInfo(Object varObject) {
 		Map<?,?> element = (Map<?,?>) varObject;
-		
+
 		StringBuilder result = new StringBuilder();
 		String args = (String) (((Map<?,?>) element).get(ClojureDocUtils.KEYWORD_ARGLISTS));
 		if (args != null && !args.trim().equals("")) {
 			result.append("<p><b>Arguments List(s):</b><br/>");
-			
+
 			String[] argsLines = args.split("\n");
 			boolean firstLine = true;
 			for (String line: argsLines) {
@@ -94,7 +94,7 @@ public final class ClojureDocUtils {
 		String docString = (String) (((Map<?,?>) element).get(ClojureDocUtils.KEYWORD_DOC));
 		if (docString != null && !docString.trim().equals(""))
 			result.append("<p><b>Documentation:</b><br/>").append(rawDocStringToHtml(docString)).append("</p>");
-		
+
 		return result.toString();
 	}
 	/** Formats correctly a raw docstring by adding real line breaks between

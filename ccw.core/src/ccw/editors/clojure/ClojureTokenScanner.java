@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Laurent PETIT - initial API and implementation
  *    Thomas Ettinger
  *******************************************************************************/
@@ -60,7 +60,7 @@ abstract public class ClojureTokenScanner implements ITokenScanner {
 	private static Keyword closeListKeyword = Keyword.intern("close-list");
 	private static Keyword closeFnKeyword = Keyword.intern("close-fn");
 	private static Keyword closeChimeraKeyword = Keyword.intern("close-chimera");
-	
+
     public ClojureTokenScanner(IScanContext context, IClojureEditor clojureEditor) {
         if (clojureEditor == null) {
         	throw new IllegalArgumentException("clojureEditor cannot be null");
@@ -131,9 +131,9 @@ abstract public class ClojureTokenScanner implements ITokenScanner {
     }
     public final IToken nextToken() {
     	long start = System.currentTimeMillis();
-    	advanceToken();   	
+    	advanceToken();
     	IToken result;
-    	
+
 		if (currentToken.get(tokenTypeKeyword).equals(nestKeyword)) {
             currentParenLevel += 1;
             long localDuration = System.currentTimeMillis() - start;
@@ -148,7 +148,7 @@ abstract public class ClojureTokenScanner implements ITokenScanner {
             nextTokenDuration += localDuration;
             return nextToken();
         }
-        
+
         if (    currentToken.get(tokenTypeKeyword).equals(openListKeyword)
         		||
         		currentToken.get(tokenTypeKeyword).equals(openFnKeyword)
@@ -190,7 +190,7 @@ abstract public class ClojureTokenScanner implements ITokenScanner {
 	private long getTokenLengthDuration;
 	private long nextTokenDuration;
 	private long advanceTokenDuration;
-	
+
 	private void printSetRange(String name, IDocument document, int offset, int length) {
 		System.out.println("setRange() called on " + name);
 		System.out.println("offset:" + offset);
@@ -229,7 +229,7 @@ abstract public class ClojureTokenScanner implements ITokenScanner {
         if (retToken == null) {
             retToken = Token.UNDEFINED;
         }
-        toJFaceTokenDuration += System.currentTimeMillis() - start; 
+        toJFaceTokenDuration += System.currentTimeMillis() - start;
         return retToken;
 //    	return Token.UNDEFINED;
     }

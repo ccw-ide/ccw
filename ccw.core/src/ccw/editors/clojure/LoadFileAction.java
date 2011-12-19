@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Laurent PETIT - initial API and implementation
  *******************************************************************************/
 package ccw.editors.clojure;
@@ -30,7 +30,7 @@ import clojure.osgi.ClojureOSGi;
 public class LoadFileAction extends Action {
 
 	public final static String ID = "LoadFileAction"; //$NON-NLS-1$
-	
+
     private static Var loadFileCommand;
     static {
         try {
@@ -57,7 +57,7 @@ public class LoadFileAction extends Action {
         	editor.setStatusLineErrorMessage("Unable to create a Clojure Application for this editor's content");
         	return;
         }
-        
+
         ClojureProject proj = ClojureCore.getClojureProject(editor.getProject());
         String sourcePath = null;
         String filePath = editorFile.getLocation().toOSString();

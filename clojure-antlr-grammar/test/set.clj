@@ -38,11 +38,11 @@
 (defn rename-keys
   "Returns the map with the keys in kmap renamed to the vals in kmap"
   [map kmap]
-    (reduce 
+    (reduce
      (fn [m [old new]]
        (if (not= old new)
          (-> m (assoc new (m old)) (dissoc old))
-         m)) 
+         m))
      map kmap))
 
 (defn rename
@@ -59,7 +59,7 @@
        (let [ik (select-keys x ks)]
          (assoc m ik (conj (get m ik #{}) x))))
      {} xrel))
-   
+
 (defn map-invert
   "Returns the map with the vals mapped to the keys."
   [m] (reduce (fn [m [k v]] (assoc m v k)) {} m))

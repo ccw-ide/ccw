@@ -5,13 +5,13 @@
 ;* which accompanies this distribution, and is available at
 ;* http://www.eclipse.org/legal/epl-v10.html
 ;*
-;* Contributors: 
+;* Contributors:
 ;*    Stephan Muehlstrasser - initial API and implementation
 ;*******************************************************************************/
 (ns ccw.support.examples.labrepl.compile)
 
 (defn all []
-  (dorun   
+  (dorun
     (map
       compile
       [

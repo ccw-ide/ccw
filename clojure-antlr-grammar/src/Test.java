@@ -6,19 +6,19 @@ public class Test {
 //        ANTLRInputStream input = new ANTLRInputStream(fileIO);
 //        // Create an ExprLexer that feeds from that stream
 //        ClojurePartitionLexer lexer = new ClojurePartitionLexer(input);
-//        
+//
 //        CommonTokenStream tokens = new CommonTokenStream(lexer);
 //
 //        List<CommonToken> toks = tokens.getTokens();
 //        for (CommonToken t: toks) {
-//        	System.out.println("line [" + t.getLine() + "], col [" 
+//        	System.out.println("line [" + t.getLine() + "], col ["
 //        			+ t.getCharPositionInLine() + "], type [" + t.getType() + "] :'" + t.getText() + "'");
 //        }
 //		ClojureLexer lex = new ClojureLexer(new ANTLRStringStream(text));
 //       	CommonTokenStream tokens = new CommonTokenStream(lex);
 //
 //       	ClojureParser parser = new ClojureParser(tokens);
-//		
+//
 //        try {
 //        	System.out.println("begin parse");
 //            parser.file();
@@ -26,7 +26,7 @@ public class Test {
 //        } catch (RecognitionException e)  {
 //            e.printStackTrace();
 //        }
-		
-    
+
+
     }
 }

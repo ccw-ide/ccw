@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Laurent PETIT - initial API and implementation
  *    Stephan Muehlstrasser - moved into preferences package
  *    Stephan Muehlstrasser - preference support for syntax coloring
@@ -26,7 +26,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
         String preferenceConstant;
         RGB defaultColor;
         boolean defaultEnabled;
-        
+
         SyntaxColoringDefault(String preferenceConstant, RGB defaultColor, boolean defaultEnabled) {
             this.preferenceConstant = preferenceConstant;
             this.defaultColor = defaultColor;
@@ -45,7 +45,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
             return defaultEnabled;
         }
     }
-    
+
     private SyntaxColoringDefault[] coloringDefaults = new SyntaxColoringDefault[] {
         new SyntaxColoringDefault(PreferenceConstants.EDITOR_FUNCTION_COLOR, new RGB(218, 112, 214), true),
         new SyntaxColoringDefault(PreferenceConstants.EDITOR_LITERAL_COLOR, new RGB(188, 143, 143), true),
@@ -56,18 +56,18 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
         new SyntaxColoringDefault(PreferenceConstants.EDITOR_METADATA_TYPEHINT_COLOR, new RGB(34, 139, 34), true),
         new SyntaxColoringDefault(PreferenceConstants.EDITOR_MACRO_COLOR, new RGB(9, 107, 243), true),
     };
-    
+
 	@Override
 	public void initializeDefaultPreferences() {
 	    IPreferenceStore store = CCWPlugin.getDefault().getPreferenceStore();
 	    store.setDefault(org.eclipse.jdt.ui.PreferenceConstants.EDITOR_MATCHING_BRACKETS, true);
-	    store.setDefault(org.eclipse.jdt.ui.PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR, 
+	    store.setDefault(org.eclipse.jdt.ui.PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR,
                 StringConverter.asString(new RGB(150, 150, 150)));
 	    store.setDefault(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH, 2);
 	    store.setDefault(ccw.preferences.PreferenceConstants.SWITCH_TO_NS_ON_REPL_STARTUP, true);
 	    store.setDefault(ccw.preferences.PreferenceConstants.USE_STRICT_STRUCTURAL_EDITING_MODE_BY_DEFAULT, false);
 	    store.setDefault(ccw.preferences.PreferenceConstants.USE_TAB_FOR_REINDENTING_LINE, true);
-	    
+
 	    for (SyntaxColoringDefault d: coloringDefaults) {
 	        store.setDefault(d.getPreferenceConstant(),
 	                StringConverter.asString(d.getDefaultColor()));

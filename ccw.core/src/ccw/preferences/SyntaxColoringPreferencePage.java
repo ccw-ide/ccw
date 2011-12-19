@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Stephan Muehlstrasser - initial implementation, derived from
  * org.eclipse.jdt.internal.ui.preferences.JavaEditorColoringConfigurationBlock
  *    Stephan Muehlstrasser - support for enabling/disabling syntax coloring on
@@ -122,49 +122,49 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
             fUnderlineKey= underlineKey;*/
             fEnableKey = enableKey;
         }
-        
+
 /*        *//**
          * @return the bold preference key
          *//*
         public String getBoldKey() {
             return fBoldKey;
         }
-        
+
         *//**
          * @return the bold preference key
          *//*
         public String getItalicKey() {
             return fItalicKey;
         }
-        
+
         *//**
          * @return the strikethrough preference key
          *//*
         public String getStrikethroughKey() {
             return fStrikethroughKey;
         }
-        
+
         *//**
          * @return the underline preference key
          *//*
         public String getUnderlineKey() {
             return fUnderlineKey;
         }
-*/        
+*/
         /**
          * @return the color preference key
          */
         public String getColorKey() {
             return fColorKey;
         }
-        
+
         /**
          * @return the display name
          */
         public String getDisplayName() {
             return fDisplayName;
         }
-        
+
         /**
          * @return the enablement preference key
          */
@@ -191,7 +191,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
      * Color list content provider.
      */
     private class ColorListContentProvider implements IStructuredContentProvider {
-    
+
          /* @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
          */
         @SuppressWarnings("unchecked")
@@ -211,7 +211,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
     }
 
     /* private static final String COMPILER_TASK_TAGS= JavaCore.COMPILER_TASK_TAGS; */
-    
+
     /**
      * The keys of the overlay store.
      */
@@ -225,19 +225,19 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         { Messages.SyntaxColoringPreferencePage_metadataTypehint, PreferenceConstants.EDITOR_METADATA_TYPEHINT_COLOR },
         { Messages.SyntaxColoringPreferencePage_macro, PreferenceConstants.EDITOR_MACRO_COLOR },
     };
-    
+
     OverlayPreferenceStore fOverlayStore;
-    
+
     private ColorSelector fSyntaxForegroundColorEditor;
     private Label fColorEditorLabel;
-    
+
     private Button fEnableCheckbox;
-    
+
     /* TODO enable bold, italic, strikethrough, underline elements once
      * text attributes are used
      */
     // private Button fBoldCheckBox;
-    
+
     /**
      * Check box for italic preference.
      */
@@ -254,7 +254,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
      * Highlighting color list
      */
     private final List<HighlightingColorListItem> fListModel= new ArrayList<HighlightingColorListItem>();
-    
+
     /**
      * Highlighting color list viewer
      */
@@ -274,11 +274,11 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
 
     public SyntaxColoringPreferencePage() {
         setPreferenceStore(CCWPlugin.getDefault().getPreferenceStore());
-        
+
         fOverlayStore = new OverlayPreferenceStore(getPreferenceStore(), createOverlayStoreKeys());
 
         fColorManager= new ClojureColorManager(false);
-        
+
         for (String[] modelItem: fSyntaxColorListModel)
             fListModel.add(new HighlightingColorListItem(
                     modelItem[0],
@@ -291,9 +291,9 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
     }
 
 /*    private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
-        
+
         ArrayList overlayKeys= new ArrayList();
-        
+
         for (int i= 0, n= fListModel.size(); i < n; i++) {
             HighlightingColorListItem item= (HighlightingColorListItem) fListModel.get(i);
             overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, item.getColorKey()));
@@ -301,19 +301,19 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
             overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, item.getItalicKey()));
             overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, item.getStrikethroughKey()));
             overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, item.getUnderlineKey()));
-            
+
             if (item instanceof SemanticHighlightingColorListItem)
                 overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ((SemanticHighlightingColorListItem) item).getEnableKey()));
         }
-        
+
         OverlayPreferenceStore.OverlayKey[] keys= new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];
         overlayKeys.toArray(keys);
         return keys;
     }*/
 
     /**
-     * 
-     * 
+     *
+     *
      * @param parent the parent composite
      * @return the control for the preference page
      */
@@ -323,13 +323,13 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         ScrolledPageContent scrolled= new ScrolledPageContent(parent, SWT.H_SCROLL | SWT.V_SCROLL);
         scrolled.setExpandHorizontal(true);
         scrolled.setExpandVertical(true);
-        
+
         Control control= createSyntaxPage(scrolled);
-        
+
         scrolled.setContent(control);
         final Point size= control.computeSize(SWT.DEFAULT, SWT.DEFAULT);
         scrolled.setMinSize(size.x, size.y);
-        
+
         return scrolled;
     }
 
@@ -343,7 +343,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
      * <p>
      * Clients may call this framework method, but should not override it.
      * </p>
-     * 
+     *
      * @param chars
      *            the number of characters
      * @return the number of pixels
@@ -365,7 +365,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
      * <p>
      * Clients may call this framework method, but should not override it.
      * </p>
-     * 
+     *
      * @param chars
      *            the number of characters
      * @return the number of pixels
@@ -376,27 +376,27 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
             return 0;
         return Dialog.convertHeightInCharsToPixels(fFontMetrics, chars);
     }
-    
+
 /*    public void initialize() {
         super.initialize();
-        
+
         fTreeViewer.setInput(fListModel);
         fTreeViewer.setSelection(new StructuredSelection(fJavaCategory));
     }*/
 
     public void performDefaults() {
         super.performDefaults();
-        
+
         handleSyntaxColorListSelection();
 
         fOverlayStore.loadDefaults();
-        
+
         fPreviewViewer.invalidateTextPresentation();
     }
 
     public boolean performOk() {
         fOverlayStore.propagate();
-        
+
         boolean result = true;
         try {
 			Platform.getPreferencesService().getRootNode().node(InstanceScope.SCOPE).node(CCWPlugin.PLUGIN_ID).flush();
@@ -404,7 +404,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
 			CCWPlugin.logError("Saving Preferences failed", e);
 			result = false;
 		}
-		
+
         return result;
     }
 
@@ -413,12 +413,12 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
      */
     public void dispose() {
         fColorManager.dispose();
-        
+
         if (fOverlayStore != null) {
             fOverlayStore.stop();
             fOverlayStore= null;
         }
-        
+
         super.dispose();
     }
 
@@ -443,7 +443,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         fStrikethroughCheckBox.setSelection(fOverlayStore.getBoolean(item.getStrikethroughKey()));
         fUnderlineCheckBox.setSelection(fOverlayStore.getBoolean(item.getUnderlineKey()));
         */
-        
+
         fEnableCheckbox.setEnabled(true);
         boolean enable= fOverlayStore.getBoolean(item.getEnableKey());
         fEnableCheckbox.setSelection(enable);
@@ -456,11 +456,11 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         fUnderlineCheckBox.setEnabled(enable);
         */
     }
-    
+
     private Control createSyntaxPage(final Composite parent) {
         fOverlayStore.load();
         fOverlayStore.start();
-        
+
         Composite colorComposite= new Composite(parent, SWT.NONE);
         GridLayout layout= new GridLayout();
         layout.marginHeight= 0;
@@ -477,7 +477,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         // TODO replace by link-specific tooltips when
         // bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=88866 gets fixed
 //      link.setToolTipText(Messages.JavaEditorColoringConfigurationBlock_link_tooltip);
-        
+
         GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
         gridData.widthHint= 150; // only expand further if anyone else requires it
         gridData.horizontalSpan= 2;
@@ -487,7 +487,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         label= new Label(colorComposite, SWT.LEFT);
         label.setText(Messages.SyntaxColoringPreferencePage_coloring_element);
         label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-    
+
         Composite editorComposite= new Composite(colorComposite, SWT.NONE);
         layout= new GridLayout();
         layout.numColumns= 2;
@@ -496,7 +496,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         editorComposite.setLayout(layout);
         GridData gd= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
         editorComposite.setLayoutData(gd);
-    
+
         fListViewer= new ListViewer(editorComposite, SWT.SINGLE | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
         fListViewer.setLabelProvider(new ColorListLabelProvider());
         fListViewer.setContentProvider(new ColorListContentProvider());
@@ -513,9 +513,9 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         if (vBar != null)
             maxWidth += vBar.getSize().x * 3; // scrollbars and tree indentation guess
         gd.widthHint= maxWidth;
-        
+
         fListViewer.getControl().setLayoutData(gd);
-                        
+
         Composite stylesComposite= new Composite(editorComposite, SWT.NONE);
         layout= new GridLayout();
         layout.marginHeight= 0;
@@ -523,25 +523,25 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         layout.numColumns= 2;
         stylesComposite.setLayout(layout);
         stylesComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
-        
+
         fEnableCheckbox= new Button(stylesComposite, SWT.CHECK);
         fEnableCheckbox.setText(Messages.SyntaxColoringPreferencePage_enable);
         gd= new GridData(GridData.FILL_HORIZONTAL);
         gd.horizontalAlignment= GridData.BEGINNING;
         gd.horizontalSpan= 2;
         fEnableCheckbox.setLayoutData(gd);
-        
+
         fColorEditorLabel= new Label(stylesComposite, SWT.LEFT);
         fColorEditorLabel.setText(Messages.SyntaxColoringPreferencePage_color);
         gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
         gd.horizontalIndent= 20;
         fColorEditorLabel.setLayoutData(gd);
-    
+
         fSyntaxForegroundColorEditor= new ColorSelector(stylesComposite);
         Button foregroundColorButton= fSyntaxForegroundColorEditor.getButton();
         gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
         foregroundColorButton.setLayoutData(gd);
-        
+
         /* TODO enable once text attributes are used
         fBoldCheckBox= new Button(stylesComposite, SWT.CHECK);
         fBoldCheckBox.setText(Messages.SyntaxColoringPreferencePage_bold);
@@ -549,21 +549,21 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         gd.horizontalIndent= 20;
         gd.horizontalSpan= 2;
         fBoldCheckBox.setLayoutData(gd);
-        
+
         fItalicCheckBox= new Button(stylesComposite, SWT.CHECK);
         fItalicCheckBox.setText(Messages.SyntaxColoringPreferencePage_italic);
         gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
         gd.horizontalIndent= 20;
         gd.horizontalSpan= 2;
         fItalicCheckBox.setLayoutData(gd);
-        
+
         fStrikethroughCheckBox= new Button(stylesComposite, SWT.CHECK);
         fStrikethroughCheckBox.setText(Messages.SyntaxColoringPreferencePage_strikethrough);
         gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
         gd.horizontalIndent= 20;
         gd.horizontalSpan= 2;
         fStrikethroughCheckBox.setLayoutData(gd);
-        
+
         fUnderlineCheckBox= new Button(stylesComposite, SWT.CHECK);
         fUnderlineCheckBox.setText(Messages.SyntaxColoringPreferencePage_underline);
         gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
@@ -571,23 +571,23 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         gd.horizontalSpan= 2;
         fUnderlineCheckBox.setLayoutData(gd);
         */
-        
+
         label= new Label(colorComposite, SWT.LEFT);
         label.setText(Messages.SyntaxColoringPreferencePage_preview);
         label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        
+
         Control previewer= createPreviewer(colorComposite);
         gd= new GridData(GridData.FILL_BOTH);
         gd.widthHint= convertWidthInCharsToPixels(20);
         gd.heightHint= convertHeightInCharsToPixels(5);
         previewer.setLayoutData(gd);
-        
+
         fListViewer.addSelectionChangedListener(new ISelectionChangedListener() {
             public void selectionChanged(SelectionChangedEvent event) {
                 handleSyntaxColorListSelection();
             }
         });
-        
+
         foregroundColorButton.addSelectionListener(new SelectionListener() {
             public void widgetDefaultSelected(SelectionEvent e) {
                 // do nothing
@@ -598,7 +598,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
                 PreferenceConverter.setValue(fOverlayStore, item.getColorKey(), fSyntaxForegroundColorEditor.getColorValue());
             }
         });
-    
+
 /*        fBoldCheckBox.addSelectionListener(new SelectionListener() {
             public void widgetDefaultSelected(SelectionEvent e) {
                 // do nothing
@@ -608,7 +608,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
                 fOverlayStore.setValue(item.getBoldKey(), fBoldCheckBox.getSelection());
             }
         });
-                
+
         fItalicCheckBox.addSelectionListener(new SelectionListener() {
             public void widgetDefaultSelected(SelectionEvent e) {
                 // do nothing
@@ -627,7 +627,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
                 fOverlayStore.setValue(item.getStrikethroughKey(), fStrikethroughCheckBox.getSelection());
             }
         });
-        
+
         fUnderlineCheckBox.addSelectionListener(new SelectionListener() {
             public void widgetDefaultSelected(SelectionEvent e) {
                 // do nothing
@@ -638,7 +638,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
             }
         });
         */
-                
+
         fEnableCheckbox.addSelectionListener(new SelectionListener() {
             public void widgetDefaultSelected(SelectionEvent e) {
                 // do nothing
@@ -658,9 +658,9 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
                 */
             }
         });
-        
+
         colorComposite.layout(false);
-                
+
         fListViewer.setSelection(new StructuredSelection(fListModel.get(0)));
 
         return colorComposite;
@@ -685,37 +685,37 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
     private Control createPreviewer(Composite parent) {
         IPreferenceStore generalTextStore= EditorsUI.getPreferenceStore();
         IPreferenceStore store= new ChainedPreferenceStore(new IPreferenceStore[] { fOverlayStore, generalTextStore });
-        
+
         fPreviewViewer= new ClojureSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER, store) {
 			public void setStatusLineErrorMessage(String you_need_a_running_repl) {
 				// Do nothing
 			}
         };
-        
+
         ClojureSourceViewerConfiguration configuration= new ClojureSourceViewerConfiguration(store, fPreviewViewer);
         fPreviewViewer.configure(configuration);
         fPreviewViewer.initializeViewerColors();
-        
+
         Font font= JFaceResources.getFont(org.eclipse.jdt.ui.PreferenceConstants.EDITOR_TEXT_FONT);
         fPreviewViewer.getTextWidget().setFont(font);
         fPreviewViewer.setEditable(false);
-        
+
         IDocument document= new Document(PREVIEW_SOURCE);
-        IDocumentPartitioner partitioner = new ClojurePartitioner(new ClojurePartitionScanner(), 
+        IDocumentPartitioner partitioner = new ClojurePartitioner(new ClojurePartitionScanner(),
                 ClojurePartitionScanner.CLOJURE_CONTENT_TYPES);
 
         Map<String, IDocumentPartitioner> m = new HashMap<String, IDocumentPartitioner>();
         m.put(ClojurePartitionScanner.CLOJURE_PARTITIONING, partitioner);
-        
+
         TextUtilities.addDocumentPartitioners(document, m);
         fPreviewViewer.setDocument(document);
-        
+
         return fPreviewViewer.getControl();
     }
 
     /**
      * Returns the current highlighting color list item.
-     * 
+     *
      * @return the current highlighting color list item
      */
     private HighlightingColorListItem getHighlightingColorListItem() {
@@ -725,7 +725,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
             return null;
         return (HighlightingColorListItem) element;
     }
-    
+
     /**
      * Initializes the computation of horizontal and vertical dialog units based
      * on the size of current font.
@@ -733,7 +733,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
      * This method must be called before any of the dialog unit based conversion
      * methods are called.
      * </p>
-     * 
+     *
      * @param testControl
      *            a control from which to obtain the current font
      */
@@ -747,19 +747,19 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
 
     public void init(IWorkbench workbench) {
     }
-    
-    private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {  
+
+    private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
         ArrayList<OverlayPreferenceStore.OverlayKey> overlayKeys= new ArrayList<OverlayPreferenceStore.OverlayKey>();
 
         for (String[] s: fSyntaxColorListModel) {
             overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, s[1]));
             overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, getEnabledPreferenceKey(s[1])));
         }
-        
+
         OverlayPreferenceStore.OverlayKey[] keys= new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];
         return overlayKeys.toArray(keys);
     }
-    
+
 /* TODO adapt these once text attributes are used   */
     /**
      * A named preference that controls if the given semantic highlighting has the text attribute bold.

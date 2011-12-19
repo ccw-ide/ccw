@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Laurent PETIT - initial API and implementation
  *******************************************************************************/
 package ccw.launching;
@@ -34,12 +34,12 @@ import ccw.util.StringUtils;
 
 public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
     private LaunchUtils(){}
-    
+
     static public final String LAUNCH_CONFIG_ID = "ccw.launching.clojure";
-    
+
     static public final String CLOJURE_MAIN = "clojure.main";
     static public final String CLOJURE_CONTRIB_REPL_LN = "clojure.contrib.repl_ln";
-    
+
 	/** Launch attribute that will be of type String, the files will be listed separated by newlines */
     static public final String ATTR_FILES_LAUNCHED_AT_STARTUP = "CCW_ATTR_FILES_LAUNCHED_AT_STARTUP";
 
@@ -49,7 +49,7 @@ public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
 
 	public static final String ATTR_IS_AUTO_RELOAD_ENABLED = "CCW_ATTR_IS_AUTO_RELOAD_ENABLED";
 	public static final String ATTR_NS_TO_START_IN = "CCW_ATTR_NS_TO_START_IN";
-	
+
 
     public static final String SYSPROP_LAUNCH_ID = "ccw.repl.launchid";
 
@@ -61,9 +61,9 @@ public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
 	 */
     static public String getProgramArguments(IProject project, IFile[] files, boolean lastFileAsScript) {
         StringBuilder args = new StringBuilder();
-        
+
         int lastIndex = lastFileAsScript ? files.length - 1 : files.length;
-        
+
         for (int i = 0; i < lastIndex; i++) {
         	String fileArg = fileArg(project, files[i]);
         	if (!StringUtils.isEmpty(fileArg)) {
@@ -75,16 +75,16 @@ public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
         }
         return args.toString();
     }
-    
+
     public static IProject getProject(ILaunchConfiguration configuration) throws CoreException {
         return getProject(configuration.getAttribute(LaunchUtils.ATTR_PROJECT_NAME, (String) null));
     }
-    
+
     // TODO total duplication of above; begs to be in Clojure
     public static IProject getProject (ILaunch launch) throws CoreException {
         return getProject(getProjectName(launch));
     }
-    
+
     public static String getProjectName (ILaunch launch) {
         return launch.getAttribute(LaunchUtils.ATTR_PROJECT_NAME);
     }
@@ -93,13 +93,13 @@ public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
         // here fundamentally to simplify things for repl cmd history
         return projectName == null ? null : ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
     }
-    
+
     private static String fileArg(IProject project, IFile file) {
     	String FILE_ARG_ERROR_PREFIX = 	"When trying to create clojure.main "
-    			+ "file arg to launch, was " + "unable to "; 
-		    	
+    			+ "file arg to launch, was " + "unable to ";
+
     	IPath filePath = file.getLocation();
-    	
+
     	IJavaProject javaProject = ClojureCore.getJavaProject(project);
     	try {
     		IPackageFragmentRoot filePFR = findPackageFragmentRoot(javaProject, filePath);
@@ -107,25 +107,25 @@ public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
 	    		IPath pfrPath = filePFR.getResource().getLocation();
 	    		// TODO we can use .makeRelativeTo again when we decide not to support Eclipse 3.4 anymore
 //    			String classpathRelativeArg = filePath.makeRelativeTo(pfrPath).toString();
-	    		String classpathRelativeArg = filePath.toString().substring(pfrPath.toString().length()); 
+	    		String classpathRelativeArg = filePath.toString().substring(pfrPath.toString().length());
 	    		if (classpathRelativeArg.startsWith("/")) {
 	    			classpathRelativeArg = classpathRelativeArg.substring(1);
 	    		}
             	return " \"@/" + classpathRelativeArg + "\"";
 	    	} else {
-	    		CCWPlugin.logError(FILE_ARG_ERROR_PREFIX + 
-	    				" find package fragment root for file " 
+	    		CCWPlugin.logError(FILE_ARG_ERROR_PREFIX +
+	    				" find package fragment root for file "
 	    				+ file + " in project " + project);
 	    		return "";
 	    	}
     	} catch (JavaModelException jme) {
-    		CCWPlugin.logError(FILE_ARG_ERROR_PREFIX + 
-    				" complete due to a JavaModelException finding package fragment root for file " 
+    		CCWPlugin.logError(FILE_ARG_ERROR_PREFIX +
+    				" complete due to a JavaModelException finding package fragment root for file "
     				+ file + " in project " + project, jme);
     		return "";
     	}
     }
-    
+
     private static IPackageFragmentRoot findPackageFragmentRoot(IJavaProject javaProject, IPath filePath) throws JavaModelException {
     	if (filePath.isEmpty() || filePath.isRoot()) {
     		return null;
@@ -142,12 +142,12 @@ public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
         	}
     	}
     }
-    
-    
+
+
     static public String getProgramArguments(IProject project, List<IFile> files, boolean lastFileAsScript) {
         return getProgramArguments(project, files.toArray(new IFile[]{}), lastFileAsScript);
     }
-    
+
     static public List<IFile> getFilesToLaunchList(ILaunchConfiguration config) throws CoreException {
         List<IFile> selectedFiles = new ArrayList<IFile>();
         for (String path : config.getAttribute(LaunchUtils.ATTR_FILES_LAUNCHED_AT_STARTUP, "").split("\n")) {
@@ -158,13 +158,13 @@ public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
         }
         return selectedFiles;
     }
-    
+
     static public String getFilesToLaunchAsCommandLineList(ILaunchConfiguration config, boolean lastFileAsScript) throws CoreException {
     	List<IFile> filesToLaunch = LaunchUtils.getFilesToLaunchList(config);
     	return LaunchUtils.getProgramArguments(getProject(config), filesToLaunch, lastFileAsScript);
 
     }
-    
+
     static public void setFilesToLaunchString(ILaunchConfigurationWorkingCopy config, List<IFile> selectedFiles) {
         StringBuilder filesAsString = new StringBuilder();
         if (selectedFiles != null) {
@@ -176,5 +176,5 @@ public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
         	}
         }
         config.setAttribute(LaunchUtils.ATTR_FILES_LAUNCHED_AT_STARTUP, filesAsString.toString());
-    }    
+    }
 }

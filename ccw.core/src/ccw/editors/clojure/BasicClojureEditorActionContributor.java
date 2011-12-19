@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Laurent PETIT - initial API and implementation
  *******************************************************************************/
 package ccw.editors.clojure;
@@ -36,7 +36,7 @@ public class BasicClojureEditorActionContributor extends BasicTextEditorActionCo
 
 	private RetargetTextEditorAction gotoPreviousMember;
 	private RetargetTextEditorAction gotoNextMember;
-	
+
 	public BasicClojureEditorActionContributor() {
 		super();
 
@@ -59,7 +59,7 @@ public class BasicClojureEditorActionContributor extends BasicTextEditorActionCo
 
 		super.init(bars, page);
 	}
-	
+
 	public void contributeToMenu(IMenuManager menu) {
 
 		super.contributeToMenu(menu);
@@ -70,7 +70,7 @@ public class BasicClojureEditorActionContributor extends BasicTextEditorActionCo
 //			gotoMenu.appendToGroup("additions2", gotoMatchingBracket); //$NON-NLS-1$
 //		}
 	}
-	
+
 	public void setActiveEditor(IEditorPart part) {
 
 		super.setActiveEditor(part);
@@ -83,7 +83,7 @@ public class BasicClojureEditorActionContributor extends BasicTextEditorActionCo
 		IStatusLineManager manager= actionBars.getStatusLineManager();
 		manager.setMessage(null);
 		manager.setErrorMessage(null);
-		
+
 		/** The global actions to be connected with editor actions */
 		IAction action= getAction(textEditor, ITextEditorActionConstants.NEXT);
 		actionBars.setGlobalActionHandler(ITextEditorActionDefinitionIds.GOTO_NEXT_ANNOTATION, action);

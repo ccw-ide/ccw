@@ -17,10 +17,10 @@
   (not (instance? clojure.lang.IPersistentCollection x)))
 
 (defn collection-tag [x]
-  (cond 
+  (cond
    (instance? java.util.Map$Entry x) :entry
-   (instance? clojure.lang.IPersistentMap x) :map 
-   (instance? java.util.Map x) :map 
+   (instance? clojure.lang.IPersistentMap x) :map
+   (instance? java.util.Map x) :map
    (instance? clojure.lang.Sequential x) :seq
    :else :atom))
 
@@ -81,8 +81,8 @@
 	(nth (vals (nth data rowIndex)) columnIndex))
       (isCellEditable [rowIndex columnIndex] false)
       (removeTableModelListener [tableModelListener]))))
-      
-(defn inspect-tree 
+
+(defn inspect-tree
   "creates a graphical (Swing) inspector on the supplied hierarchical data"
   [data]
   (doto (new JFrame "Clojure Inspector")
@@ -90,7 +90,7 @@
     (setSize 400 600)
     (setVisible true)))
 
-(defn inspect-table 
+(defn inspect-table
   "creates a graphical (Swing) inspector on the supplied regular
   data, which must be a sequential data structure of data structures
   of equal length"

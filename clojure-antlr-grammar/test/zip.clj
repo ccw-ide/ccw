@@ -13,7 +13,7 @@
 (clojure/refer 'clojure :exclude '(replace))
 
 (defn zipper
-  "Creates a new zipper structure. 
+  "Creates a new zipper structure.
 
   branch? is a fn that, given a node, returns true if can have
   children, even if it currently doesn't.
@@ -23,9 +23,9 @@
 
   make-node is a fn that, given an existing node and a seq of
   children, returns a new branch node with the supplied children.
-  root is the root node."  
+  root is the root node."
   [branch? children make-node root]
-    #^{:zip/branch? branch? :zip/children children :zip/make-node make-node} 
+    #^{:zip/branch? branch? :zip/children children :zip/make-node make-node}
     [root nil])
 
 (defn seq-zip
@@ -42,7 +42,7 @@
   "Returns a zipper for xml elements (as from xml/parse),
   given a root element"
   [root]
-    (zipper (complement string?) 
+    (zipper (complement string?)
             (comp seq :content)
             (fn [node children]
               (assoc node :content (and children (apply vector children))))
@@ -91,9 +91,9 @@
     (let [[node path] loc
           [c & crest :as cs] (children loc)]
       (when cs
-        (with-meta [c {:l [] 
-                       :pnodes (if path (conj (:pnodes path) node) [node]) 
-                       :ppath path 
+        (with-meta [c {:l []
+                       :pnodes (if path (conj (:pnodes path) node) [node])
+                       :ppath path
                        :r crest}] ^loc))))
 
 (defn up
@@ -104,7 +104,7 @@
       (when path
         (let [pnode (peek pnodes)]
           (with-meta (if changed?
-                       [(make-node loc pnode (concat l (cons node r))) 
+                       [(make-node loc pnode (concat l (cons node r)))
                         (and ppath (assoc ppath :changed? true))]
                        [pnode ppath])
                      ^loc)))))
@@ -182,7 +182,7 @@
   [loc]
     (if (= :end (loc 1))
       loc
-      (or 
+      (or
        (and (branch? loc) (down loc))
        (right loc)
        (loop [p loc]
@@ -202,12 +202,12 @@
     (let [[node {l :l, ppath :ppath, pnodes :pnodes, rs :r, :as path}] loc]
       (if (nil? path)
         (throw (new Exception "Remove at top"))
-        (if (pos? (count l)) 
+        (if (pos? (count l))
           (with-meta [(peek l) (assoc path :l (pop l) :changed? true)] ^loc)
-          (with-meta [(make-node loc (peek pnodes) rs) 
+          (with-meta [(make-node loc (peek pnodes) rs)
                       (and ppath (assoc ppath :changed? true))]
                      ^loc)))))
-  
+
 (comment
 
 (load-file "/Users/rich/dev/clojure/src/zip.clj")
@@ -235,14 +235,14 @@
 (loop [loc dz]
   (if (end? loc)
     (root loc)
-    (recur (next (if (= '* (node loc)) 
+    (recur (next (if (= '* (node loc))
                    (replace loc '/)
                    loc)))))
 
 (loop [loc dz]
   (if (end? loc)
     (root loc)
-    (recur (next (if (= '* (node loc)) 
+    (recur (next (if (= '* (node loc))
                    (remove loc)
                    loc)))))
 )

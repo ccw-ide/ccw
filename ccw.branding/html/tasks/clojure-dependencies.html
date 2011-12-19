@@ -6,7 +6,7 @@ are made available under the terms of the Eclipse Public License v1.0
 which accompanies this distribution, and is available at
 http://www.eclipse.org/legal/epl-v10.html
 
-Contributors: 
+Contributors:
     Laurent Petit - initial documentation in Counterclockwise Wiki
     Stephan Muehlstrasser - transformed Wiki pages into Eclipse help pages
 -->
@@ -21,10 +21,10 @@ Contributors:
    <body>
       <h1>Setting Up Dependencies to Clojure</h1>
       <p>Creating a Clojure project or adding Clojure support to an existing
-      Java project will automatically add a dependency to the Clojure Plugin's 
+      Java project will automatically add a dependency to the Clojure Plugin's
       own embedded versions of Clojure and clojure-contrib, if the Clojure JAR
       file is not found in the classpath.</p>
-      <p>Clojure itself must always be a dependency of the project, but this is 
+      <p>Clojure itself must always be a dependency of the project, but this is
       highly customizable. It can come in as many flavors as Eclipse allows:</p>
       <ul>
         <li>Clojure source code directly embedded in the project (not recommended)</li>
@@ -32,10 +32,10 @@ Contributors:
         project a dependency of your own project (recommended if you want to stay in
         sync with Clojure's development):
             <ul>
-                <li>First create a classic java project for the source code of 
+                <li>First create a classic java project for the source code of
                 Clojure. You will have to change the default Java source folder:
                 You must have two of them, one will be src/jvm, the other will be src/clj.</li>
-                <li>In a second project where you enabled Clojure support, do 
+                <li>In a second project where you enabled Clojure support, do
                 <strong>Project &gt; Properties &gt; Java Build Path &gt; Projects &gt; Add</strong> and add the Clojure project.</li>
             </ul>
         <li>As a JAR file. Use the classical Java mechanism offered by

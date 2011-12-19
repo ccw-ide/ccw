@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Stephan Muehlstrasser - Derived from
  * org.eclipse.wst.xml.ui.internal.preferences.EmptyFilePreferencePage
  *******************************************************************************/
@@ -25,7 +25,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 
 /**
  * An empty preference page.
- *   
+ *
  * @author stm
  */
 public class EmptyPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
@@ -53,7 +53,7 @@ public class EmptyPreferencePage extends PreferencePage implements IWorkbenchPre
     protected Control createContents(Composite parent) {
         Composite composite = createScrolledComposite(parent);
 
-        String description = Messages.ClojurePreferencePage_description; 
+        String description = Messages.ClojurePreferencePage_description;
         Text text = new Text(composite, SWT.READ_ONLY);
         // some themes on GTK have different background colors for Text and Labels
         text.setBackground(composite.getBackground());

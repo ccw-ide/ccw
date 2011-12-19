@@ -21,7 +21,7 @@
     :implements [org.eclipse.jface.text.presentation.IPresentationDamager]
     :constructors {[Object] []}
     :methods [^{:static true} [getTokensSeq [Object Object Object] clojure.lang.ISeq]]
-    :init init 
+    :init init
     :state state))
 
 #_(set! *warn-on-reflection* true)
@@ -29,7 +29,7 @@
 (defn state-val [this] (-> this .state deref))
 
 (defn -init
-  [editor] [[] (ref {:editor editor 
+  [editor] [[] (ref {:editor editor
                      :document nil})])
 
 (defn -setDocument [this document]
@@ -48,36 +48,36 @@
   #_(println (str "parse-tree-content-range [text-offset text-length]:" [text-offset text-length]))
   #_(println "parse-tree:" parse-tree)
   (let [start-idx (bin-search [parse-tree-get parse-tree-count]
-                              parse-tree 
+                              parse-tree
                               (partial range-contains-in-ex
                                        text-offset))
         stop-idx  (bin-search [parse-tree-get parse-tree-count]
-                              parse-tree 
-                              (partial range-contains-ex-in 
-                                       (+ text-offset 
+                              parse-tree
+                              (partial range-contains-ex-in
+                                       (+ text-offset
                                           text-length)))]
     [start-idx stop-idx]))
 
-(defn -getDamageRegion 
+(defn -getDamageRegion
   "Creates a damaged region by merging the regions of the top level forms (tlfs)
    (so children of the parse tree root node) which contain the event changes"
   [this
    ^ITypedRegion partition
    ^DocumentEvent event
    documentPartitioningChanged]
-  #_(println (str "getDamageRegion[offset: " 
+  #_(println (str "getDamageRegion[offset: "
                 (.getOffset event)
                 ", replace-length:"
                 (.getLength event)
-                ", length: " 
+                ", length: "
                 (.length (.getText event)) "]"))
   (let [previous-parse-tree (-> this state-val :editor .getPreviousParseTree)
         parse-tree (-> this state-val :editor .getParseState (EditorSupport/getParseTree))
-        [start-offset 
+        [start-offset
          stop-offset] (if previous-parse-tree
                         (do
                           #_(println "using previous-parse-tree")
-                          (let  [[start-index stop-index] (parse-tree-content-range 
+                          (let  [[start-index stop-index] (parse-tree-content-range
                                                             previous-parse-tree
                                                             (.getOffset event)   ; "#_(a)" et suppression de #
                                                             ; "#_((a)(b))" et suppression de #_(
@@ -93,8 +93,8 @@
                         (do #_(println "using default values")
                           [0 0]))
         #__            #_(println (str "[start-offset stop-offset]:" [start-offset stop-offset]))]
-    (let [[start-index 
-           stop-index] (parse-tree-content-range 
+    (let [[start-index
+           stop-index] (parse-tree-content-range
                          parse-tree
                          start-offset   ; "#_(a)" et suppression de #
                          ; "#_((a)(b))" et suppression de #_(
@@ -107,9 +107,9 @@
           (Region. start-offset stop-offset)) ; TODO suboptimal, we could go to content-cumulative count of ...
         (do
           #_(println "damaged region: 0, 0")
-          (Region. 0 0)))))) 
+          (Region. 0 0))))))
 
-(defn -getTokensSeq 
+(defn -getTokensSeq
   "Given a damaged region created by getDamageRegion, finds back the start index in the
    parse-tree's root children, and creates a tokens seq starting from that"
   [parse-tree offset length]
@@ -118,7 +118,7 @@
                        parse-tree
                        offset
                        length)]
-    (let [s (concat (mapcat #((:abstract-node %) paredit.parser/tokens-view) (subvec (:content parse-tree) start-index (inc stop-index))) 
+    (let [s (concat (mapcat #((:abstract-node %) paredit.parser/tokens-view) (subvec (:content parse-tree) start-index (inc stop-index)))
                     (list {:token-type :eof :token-length 0}) ;; from paredit.parser/token
                     )]
       s)))

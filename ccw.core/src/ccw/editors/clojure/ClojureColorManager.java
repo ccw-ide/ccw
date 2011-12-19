@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Stephan Muehlstrasser - derived from
  *          org.eclipse.jdt.internal.ui.text.JavaColorManager
  *******************************************************************************/

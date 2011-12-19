@@ -5,9 +5,9 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Laurent PETIT - initial API and implementation
- *    Some code (e.g. contextInformation wiring) from Scala plugin & original 
+ *    Some code (e.g. contextInformation wiring) from Scala plugin & original
  *      clojure rule based editor
  *******************************************************************************/
 package ccw.editors.clojure;
@@ -75,10 +75,10 @@ public class ClojureSourceViewerConfiguration extends
 
 	private void addDamagerRepairerForContentType(
 			PresentationReconciler reconciler, String contentType) {
-		
-		IPresentationDamager d = new ClojureTopLevelFormsDamager(editor); 
+
+		IPresentationDamager d = new ClojureTopLevelFormsDamager(editor);
 		reconciler.setDamager(d, contentType);
-		
+
 		IPresentationRepairer r = new DefaultDamagerRepairer(tokenScanner);
 		reconciler.setRepairer(r, contentType);
 
@@ -150,11 +150,11 @@ public class ClojureSourceViewerConfiguration extends
 	@Override
 	public IAutoEditStrategy[] getAutoEditStrategies(
 			ISourceViewer sourceViewer, final String contentType) {
-		
-		return new IAutoEditStrategy[] { 
+
+		return new IAutoEditStrategy[] {
 				new PareditAutoEditStrategy(editor, fPreferenceStore) };
 	}
-	
+
 	@Override
 	protected Map getHyperlinkDetectorTargets(ISourceViewer sourceViewer) {
 		Map<String, IAdaptable> map = (Map<String, IAdaptable>) super.getHyperlinkDetectorTargets(sourceViewer);
@@ -162,5 +162,5 @@ public class ClojureSourceViewerConfiguration extends
 		    map.put(IHyperlinkConstants.ClojureHyperlinkDetector_TARGET_ID, (IAdaptable)editor);
 		return map;
 	}
-	
+
 }

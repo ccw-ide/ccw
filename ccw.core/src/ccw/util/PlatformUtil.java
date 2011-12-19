@@ -5,13 +5,13 @@ import org.eclipse.core.runtime.Platform;
 
 public final class PlatformUtil {
 	private PlatformUtil() {}
-	
+
 	/**
-	 * First checks if <code>adaptable</code> is a direct instance of 
-	 * <code>adapterType</code>, then if it's an instance of 
+	 * First checks if <code>adaptable</code> is a direct instance of
+	 * <code>adapterType</code>, then if it's an instance of
 	 * <code>IAdaptable</code> and if this suffices to get the desired
 	 * adaptation to <code>adapterType</code>, or else leverages the
-	 * PlatformManager's discovery of adatapers 
+	 * PlatformManager's discovery of adatapers
 	 * @param adaptable
 	 * @param adapterType
 	 * @return

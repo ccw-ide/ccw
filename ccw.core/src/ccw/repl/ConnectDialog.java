@@ -18,7 +18,7 @@ public class ConnectDialog extends Dialog {
     private Text port;
     private String host;
     private int portNumber;
-    
+
     public ConnectDialog(Shell parentShell) {
         super(parentShell);
         setBlockOnOpen(true);
@@ -32,36 +32,36 @@ public class ConnectDialog extends Dialog {
 
     @Override
     protected Control createDialogArea(Composite parent) {
-        
+
         Composite composite = (Composite) super.createDialogArea(parent);
-        
+
         parent = new Composite(composite, 0);
         parent.setLayout(new GridLayout(2, false));
         new Label(parent, 0).setText("Hostname");
-        
+
         hosts = new Combo(parent, SWT.BORDER);
         hosts.setText("127.0.0.1"); // don't know much about swt layouts yet :-(
         hosts.setSelection(new Point(0, hosts.getText().length()));
-        
+
         new Label(parent, 0).setText("Port");
-        
+
         port = new Text(parent, SWT.BORDER);
         port.addKeyListener(new KeyListener() {
             public void keyReleased(KeyEvent e) {
             }
-            
+
             public void keyPressed(KeyEvent e) {
                 e.doit = Character.isDigit(e.character);
             }
         });
-        
+
         port.setFocus();
         return composite;
     }
 
     protected void okPressed () {
         host = hosts.getText();
-        
+
         try {
             portNumber = Integer.parseInt(port.getText());
         } catch (NumberFormatException e) {
@@ -74,7 +74,7 @@ public class ConnectDialog extends Dialog {
     public String getHost () {
         return host;
     }
-    
+
     public int getPort () {
         return portNumber;
     }

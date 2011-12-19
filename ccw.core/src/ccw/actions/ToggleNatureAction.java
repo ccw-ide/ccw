@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Casey Marshal - initial API and implementation
  *******************************************************************************/
 package ccw.actions;
@@ -36,7 +36,7 @@ public class ToggleNatureAction implements IObjectActionDelegate {
 
 		private ISelection selection;
 		private IWorkbenchPart targetPart;
-		
+
 
 		public void selectionChanged(IAction action, ISelection selection) {
 			this.selection = selection;
@@ -45,7 +45,7 @@ public class ToggleNatureAction implements IObjectActionDelegate {
 		public void setActivePart(IAction action, IWorkbenchPart targetPart) {
 			this.targetPart = targetPart;
 		}
-		
+
 		public void run(IAction action) {
 			if (selection instanceof IStructuredSelection) {
 				for (Iterator<?> it = ((IStructuredSelection) selection). iterator(); it
@@ -82,7 +82,7 @@ public class ToggleNatureAction implements IObjectActionDelegate {
 			}
 			MessageDialog.openInformation(targetPart.getSite().getShell(), title, message);
 		}
-		
+
 		/**
 		 * Toggles clojure nature on a project.
 		 * @return true if nature added, false if nature removed
@@ -91,7 +91,7 @@ public class ToggleNatureAction implements IObjectActionDelegate {
 			IProjectDescription description = project.getDescription();
 			String[] natures = description.getNatureIds();
 			List<String> newNatures = new ArrayList<String>(natures.length + 1);
-			
+
 			boolean natureFound = false;
 			for (String nature: natures) {
 				if (nature.equals(ClojureCore.NATURE_ID)) {
@@ -101,7 +101,7 @@ public class ToggleNatureAction implements IObjectActionDelegate {
 					newNatures.add(nature);
 				}
 			}
-			
+
 			if (!natureFound) {
 				// Nature not found, so add it
 				newNatures.add(ClojureCore.NATURE_ID);
@@ -109,7 +109,7 @@ public class ToggleNatureAction implements IObjectActionDelegate {
 
 			description.setNatureIds(newNatures.toArray(new String[0]));
 			project.setDescription(description, null);
-			
+
 			return !natureFound;
 		}
 

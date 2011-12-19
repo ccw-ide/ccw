@@ -26,7 +26,7 @@
     ccw.launching.LaunchUtils/getProject
     org.eclipse.core.resources.ProjectScope.
     (.getNode pref-node-id)
-    (doto .sync))) 
+    (doto .sync)))
 
 (defn- queue-expression
   [project-name expr]

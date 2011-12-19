@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Casey Marshall - initial API and implementation
  *******************************************************************************/
 package ccw.launching;
@@ -54,7 +54,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 
     private static Var currentLaunch = Var.create();
     private static IConsole lastConsoleOpened;
-    
+
     static {
         ConsolePlugin.getDefault().getConsoleManager().addConsoleListener(new IConsoleListener() {
             public void consolesRemoved(IConsole[] consoles) {}
@@ -63,10 +63,10 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
             }
         });
     }
-    
+
     private class REPLViewLaunchMonitor extends ProgressMonitorWrapper {
         private ILaunch launch;
-        
+
         private REPLViewLaunchMonitor (IProgressMonitor m, ILaunch launch) {
             super(m);
             this.launch = launch;
@@ -88,7 +88,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 							break;
 						}
 					}
-					
+
 		            if (maybePort == null) {
 		                CCWPlugin.logError("Waiting for new REPL process ack timed out");
 		                return new Status(IStatus.ERROR, CCWPlugin.PLUGIN_ID, "Waiting for new REPL process ack timed out");
@@ -129,7 +129,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 		                        } catch (Exception e) {
 		                        	CCWPlugin.logError("Could not start REPL in namespace " + startingNamespace, e);
 		                        }
-		                        
+
 		                    } catch (Exception e) {
 		                        CCWPlugin.logError("Could not connect REPL to local launch", e);
 		                    }
@@ -143,8 +143,8 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
             ackJob.schedule();
         }
     }
-    
-    
+
+
     @Override
     public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor) throws CoreException {
         launch.setAttribute(LaunchUtils.ATTR_PROJECT_NAME, configuration.getAttribute(LaunchUtils.ATTR_PROJECT_NAME, (String) null));
@@ -158,7 +158,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
             Var.popThreadBindings();
         }
     }
-	
+
 	@Override
 	public String getVMArguments(ILaunchConfiguration configuration) throws CoreException {
 	    String launchId = UUID.randomUUID().toString();
@@ -167,14 +167,14 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 	            launchId,
 	            super.getVMArguments(configuration));
 	}
-	
+
 	@Override
 	public String getProgramArguments(ILaunchConfiguration configuration) throws CoreException {
 		String userProgramArguments = super.getProgramArguments(configuration);
 
 		if (isLaunchREPL(configuration)) {
 			String filesToLaunchArguments = LaunchUtils.getFilesToLaunchAsCommandLineList(configuration, false);
-			
+
 			// TODO why don't we just add the ccw stuff to the classpath as we do for nrepl?
 			String toolingFile = null;
 			try {
@@ -183,24 +183,24 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 			} catch (IOException e) {
 				throw new WorkbenchException("Could not find ccw.debug.serverrepl source file", e);
 			}
-			
-			String nREPLInit = "(require 'clojure.tools.nrepl)" + 
+
+			String nREPLInit = "(require 'clojure.tools.nrepl)" +
 			    // don't want start-server return value printed
 			    String.format("(do (clojure.tools.nrepl/start-server 0 %s) nil)", CCWPlugin.getDefault().getREPLServerPort());
-			
+
 			return String.format("-i \"%s\" -e \"%s\" %s %s", toolingFile, nREPLInit,
 			        filesToLaunchArguments, userProgramArguments);
 		} else {
 			String filesToLaunchArguments = LaunchUtils.getFilesToLaunchAsCommandLineList(configuration, true);
-			
+
 	    	return filesToLaunchArguments + " " + userProgramArguments;
 		}
 	}
-	
+
 	private static boolean isLaunchREPL(ILaunchConfiguration configuration) throws CoreException {
         return configuration.getAttribute(LaunchUtils.ATTR_CLOJURE_START_REPL, true);
     }
-	
+
 	public static boolean isAutoReloadEnabled (ILaunch launch) {
 	    return Boolean.valueOf(launch.getAttribute(LaunchUtils.ATTR_IS_AUTO_RELOAD_ENABLED));
 	}
@@ -208,29 +208,29 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
     @Override
 	public String getMainTypeName(ILaunchConfiguration configuration)
 			throws CoreException {
-	    String main = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, (String)null); 
+	    String main = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, (String)null);
 	    return main == null ? clojure.main.class.getName() : main;
 	}
-	
+
     @Override
     public String[] getClasspath(ILaunchConfiguration configuration)
             throws CoreException {
-       
+
         List<String> classpath = new ArrayList<String>(Arrays.asList(super.getClasspath(configuration)));
-       
+
         ClojureProject clojureProject = ClojureCore.getClojureProject(LaunchUtils.getProject(configuration));
         for (IFolder f: clojureProject.sourceFolders()) {
             String sourcePath = f.getLocation().toOSString();
-           
+
             while (classpath.contains(sourcePath)) {
                 // The sourcePath already exists, remove it first
                 classpath.remove(sourcePath);
             }
-           
+
             classpath.add(0, sourcePath);
         }
-        
-        
+
+
         if (clojureProject.getJavaProject().findElement(new Path("clojure/tools/nrepl")) == null) {
             try {
                 File repllib = FileLocator.getBundleFile(Platform.getBundle("org.clojure.tools.nrepl"));
@@ -239,7 +239,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
                 throw new WorkbenchException("Failed to find nrepl library", e);
             }
         }
-        
+
         return classpath.toArray(new String[classpath.size()]);
     }
 }

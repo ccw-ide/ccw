@@ -19,7 +19,7 @@ import ccw.CCWPlugin;
 
 public class Actions {
     private Actions () {}
-    
+
     public static class Connect extends AbstractHandler {
         public Object execute (ExecutionEvent event) throws ExecutionException {
             try {
@@ -29,7 +29,7 @@ public class Actions {
             }
         }
     }
-    
+
     public static class ConnecToEclipseNREPL extends AbstractHandler {
 		public Object execute(ExecutionEvent event) throws ExecutionException {
             try {
@@ -39,7 +39,7 @@ public class Actions {
             }
 		}
     }
-    
+
     public static class ShowActiveREPL extends AbstractHandler {
         public static boolean execute (boolean activate) {
             REPLView active = REPLView.activeREPL.get();
@@ -61,17 +61,17 @@ public class Actions {
             }
             return false;
         }
-        
+
         public Object execute (ExecutionEvent event) throws ExecutionException {
             if (execute(true)) return null;
-            
+
             MessageDialog.openError(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
                     "No Active REPL",
                     "No REPL is active. Click in an existing REPL to make it the active target, or open a new REPL.");
             return null;
         }
     }
-    
+
     public static class ShowConsoleHandler extends AbstractREPLViewHandler {
     	public void doExecute(ExecutionEvent event, REPLView repl) throws ExecutionException {
             ConsolePlugin.getDefault().getConsoleManager().showConsoleView(repl.getConsole());
@@ -89,18 +89,18 @@ public class Actions {
         }
     }
 
-    public static class ClearLogHandler extends AbstractREPLViewHandler {        
+    public static class ClearLogHandler extends AbstractREPLViewHandler {
     	public void doExecute(ExecutionEvent event, REPLView repl) throws ExecutionException {
             repl.logPanel.setText("");
         }
     }
-    
+
     public static class ReconnectHandler extends AbstractREPLViewHandler {
     	public void doExecute(ExecutionEvent event, REPLView repl) throws ExecutionException {
             try {
                 repl.reconnect();
             } catch (Exception e) {
-            	final String MSG = "Unexpected exception occured while trying to reconnect REPL view to clojure server"; 
+            	final String MSG = "Unexpected exception occured while trying to reconnect REPL view to clojure server";
             	ErrorDialog.openError(
             			HandlerUtil.getActiveShell(event),
             			"Reconnection Error",
@@ -109,13 +109,13 @@ public class Actions {
             }
         }
     }
-    
+
     public static class PrintErrorHandler extends AbstractREPLViewHandler {
 		public void doExecute(ExecutionEvent event, REPLView repl) throws ExecutionException {
 			repl.printErrorDetail();
 		}
     }
-    
+
     private static abstract class AbstractREPLViewHandler extends AbstractHandler {
 		public final Object execute(ExecutionEvent event) throws ExecutionException {
 			IWorkbenchPart part = HandlerUtil.getActivePart(event);
@@ -127,5 +127,5 @@ public class Actions {
 		}
 		protected abstract void doExecute(ExecutionEvent event, REPLView part) throws ExecutionException;
     }
-    
+
 }

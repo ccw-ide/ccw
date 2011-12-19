@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Tuomas KARKKAINEN - initial API and implementation
  *******************************************************************************/
 package ccw.editors.clojure;
@@ -78,7 +78,7 @@ public class RunTestsAction extends Action {
     }
 
     private void setReplBackgroundColor(Color background) {
-        // TODO push this over to REPLView? Changing background colors seems harsh -- how does the bgcolor get reverted?  
+        // TODO push this over to REPLView? Changing background colors seems harsh -- how does the bgcolor get reverted?
     }
 
     private void refreshCompilationResults() {

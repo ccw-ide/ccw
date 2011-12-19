@@ -42,13 +42,13 @@ import ccw.repl.REPLView;
  * Note that this code is just a prototype and there is still lots of problems to fix. Among then :
  * Incremental build : I only implement full build.
  *  Synchronization with JDT build : as clojure and java files could depend on each others, the two builders
- *  need to be launch several time to resolve all the dependencies. 
+ *  need to be launch several time to resolve all the dependencies.
  */
 public class ClojureBuilder extends IncrementalProjectBuilder {
 	public static final String CLOJURE_COMPILER_PROBLEM_MARKER_TYPE = "ccw.markers.problemmarkers.compilation";
-    
+
     static public final String BUILDER_ID = "ccw.builder";
-    
+
     @SuppressWarnings("unchecked")
     @Override
     protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
@@ -57,7 +57,7 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
     	if (getProject()==null) {
     		return null;
     	}
-    	
+
     	if (kind == AUTO_BUILD || kind == INCREMENTAL_BUILD) {
 	    	if (onlyClassesOrOutputFolderRelatedDelta() && !onlyProjectTouched() ) {
 	    		System.out.println("nothing to build (onlyClassesOrOutputFolderRelatedDelta()=" + onlyClassesOrOutputFolderRelatedDelta()
@@ -65,10 +65,10 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
 	    		return null;
 	    	}
     	}
-    	
+
     	fullBuild(getProject(), monitor);
 
-    	
+
         // Commented out to not break svn
 //        if(kind == FULL_BUILD){
 //            fullBuild(monitor);
@@ -83,25 +83,25 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
 //        }
         return null;
     }
-    
+
     /** Only project touch is treated similarly to a full build request */
     private boolean onlyProjectTouched() {
         IResourceDelta delta = getDelta(getProject());
         return delta.getResource().equals(getProject()) && delta.getAffectedChildren().length == 0;
     }
-    
+
     private boolean onlyClassesOrOutputFolderRelatedDelta() throws CoreException {
     	if (getDelta(getProject()) == null) {
     		return false;
     	}
-    	
+
     	List<IPath> folders = new ArrayList<IPath>();
     	folders.add(getClassesFolder(getProject()).getFullPath());
 		for (IFolder outputPath: getSrcFolders(getProject()).values()) {
 			folders.add(outputPath.getFullPath());
 		}
         folders.add(getProject().getFolder(".settings").getFullPath());
-		
+
 		delta_loop: for (IResourceDelta d: getDelta(getProject()).getAffectedChildren()) {
 			for (IPath folder: folders) {
 				if (folder.isPrefixOf(d.getFullPath())) {
@@ -113,25 +113,25 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
 		}
 		return true;
 	}
-	
+
 
     protected void incrementalBuild(IResourceDelta delta, IProgressMonitor monitor) {
         // TODO Auto-generated method stub
-        
+
     }
 
     public static void fullBuild(IProject project, IProgressMonitor monitor) throws CoreException{
-        
+
         if(monitor == null){
             monitor = new NullProgressMonitor();
         }
-        
+
         // Issue #203 is probably related to the following way of getting a REPLView.
         // A race condition between the builder and the Eclipse machinery creating the views, etc.
         // We will probably have to refactor stuff to separate things a little bit more, but for the time
         // being, as an experiment and hopefully a temporary patch for the problem, I'll just add a little bit
         // delay in the build:
-        
+
         // TODO see if we can do something more clever than having to use the UI thread and get a View object ...
         REPLView repl = CCWPlugin.getDefault().getProjectREPL(project);
         if (repl == null) {
@@ -147,22 +147,22 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
         	System.out.println("REPL not found, or disposed, or autoReloadEnabled not found on launch configuration");
         	return;
         }
-        
+
         deleteMarkers(project);
 
         ClojureVisitor visitor = new ClojureVisitor(repl.getToolingConnection());
         visitor.visit(getSrcFolders(project));
-        
+
         getClassesFolder(project).refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 0));
     }
-    
+
     private static IFolder getClassesFolder(IProject project) {
     	return project.getFolder("classes");
     }
 
     private static Map<IFolder, IFolder> getSrcFolders(IProject project) throws CoreException {
         Map<IFolder, IFolder> srcFolders = new HashMap<IFolder, IFolder>();
-        
+
         IJavaProject jProject = JavaCore.create(project);
         IClasspathEntry[] entries = jProject.getResolvedClasspath(true);
         IPath defaultOutputFolder = jProject.getOutputLocation();
@@ -188,13 +188,13 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
         }
         return srcFolders;
     }
-    
+
     @Override
     protected void clean(IProgressMonitor monitor) throws CoreException {
     	if (monitor==null) {
     		monitor = new NullProgressMonitor();
     	}
-    	
+
     	try {
     		getClassesFolder(getProject()).delete(true, monitor);
 	    	if (!getClassesFolder(getProject()).exists()) {
@@ -208,11 +208,11 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
 
         deleteMarkers(getProject());
     }
-    
+
     private static void deleteMarkers(IProject project) throws CoreException {
         for (IFolder srcFolder: getSrcFolders(project).keySet()) {
         	srcFolder.deleteMarkers(CLOJURE_COMPILER_PROBLEM_MARKER_TYPE, true, IFile.DEPTH_INFINITE);
         }
     }
-    
+
 }

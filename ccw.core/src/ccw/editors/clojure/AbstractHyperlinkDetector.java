@@ -7,5 +7,5 @@ abstract public class AbstractHyperlinkDetector extends
 	public Object getClassAdapter(Class clazz) {
 		return super.getAdapter(clazz);
 	}
-	
+
 }

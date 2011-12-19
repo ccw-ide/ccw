@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Tuomas KARKKAINEN - initial API and implementation
  *******************************************************************************/
 package ccw.editors.clojure;
@@ -22,7 +22,7 @@ import org.eclipse.swt.graphics.RGB;
 public class SameWordHighlightingCaretListener implements CaretListener {
 	private static final String COLOR_KEY = "ccw.editors.SameWordHighlightingCaretListener.COLOR_KEY";
 	private static final String OTHER_MATCHES_COLOR_KEY = "ccw.editors.SameWordHighlightingCaretListener.OTHER_MATCHES_COLOR_KEY";
-	
+
     private final ClojureEditor editor;
     private final ColorRegistry colorRegistry;
 
@@ -31,7 +31,7 @@ public class SameWordHighlightingCaretListener implements CaretListener {
         this.colorRegistry = colorRegistry;
         initColorRegistry();
     }
-    
+
     private void initColorRegistry() {
     	if (!colorRegistry.hasValueFor(COLOR_KEY)) {
     		colorRegistry.put(COLOR_KEY, new RGB(225, 225, 225));

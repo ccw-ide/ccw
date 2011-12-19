@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Casey Marshall - initial API and implementation
  *    Laurent Petit - maintenance and evolution
  *******************************************************************************/
@@ -25,13 +25,13 @@ public class ClojureTabGroup extends AbstractLaunchConfigurationTabGroup {
     public void createTabs(ILaunchConfigurationDialog dialog, String mode) {
         ILaunchConfigurationTab[] tabs = new ILaunchConfigurationTab[] {
 //                 new JavaMainTab(),
-                new ClojureMainTab(), 
-                new JavaArgumentsTab(), 
+                new ClojureMainTab(),
+                new JavaArgumentsTab(),
                 new JavaJRETab(),
                 new JavaClasspathTab(),
                 // new SourceLookupTab(),
-                new EnvironmentTab(), 
-                new CommonTab() 
+                new EnvironmentTab(),
+                new CommonTab()
         };
         setTabs(tabs);
     }

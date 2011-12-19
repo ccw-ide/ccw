@@ -5,29 +5,29 @@
 ;* which accompanies this distribution, and is available at
 ;* http://www.eclipse.org/legal/epl-v10.html
 ;*
-;* Contributors: 
+;* Contributors:
 ;*    Stephan Muehlstrasser - initial API and implementation
 ;*******************************************************************************/
 (ns compile)
 
 (defn all []
-  (dorun   
+  (dorun
     (map
       compile
       [
        'lancet
        'leiningen.clean
-       'leiningen.core  
-       'leiningen.help     
-       'leiningen.jar  
-       'leiningen.pom   
-       'leiningen.uberjar  
+       'leiningen.core
+       'leiningen.help
+       'leiningen.jar
+       'leiningen.pom
+       'leiningen.uberjar
        'leiningen.version
-       'leiningen.compile  
-       'leiningen.deps  
-       'leiningen.install  
-       'leiningen.new  
-       'leiningen.test  
+       'leiningen.compile
+       'leiningen.deps
+       'leiningen.install
+       'leiningen.new
+       'leiningen.test
        'leiningen.upgrade
        ])))
 

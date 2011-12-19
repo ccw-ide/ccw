@@ -15,7 +15,7 @@
     (.setArtifactId (name excl))))
 
 (defn make-dependency [[dep version & exclusions]]
-  (let [es (map make-exclusion (when (= (first exclusions) :exclusions) 
+  (let [es (map make-exclusion (when (= (first exclusions) :exclusions)
                                  (second exclusions)))]
     (doto (Dependency.)
             (.setGroupId (or (namespace dep) (name dep)))

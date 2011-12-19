@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Laurent PETIT - initial API and implementation
  *******************************************************************************/
 package ccw.editors.clojure;
@@ -24,18 +24,18 @@ public class TokenScannerUtils {
 		this.scanner = scanner;
 		this.colorProvider = colorProvider;
 	}
-	
+
 	public void addTokenType(Object tokenIndex, String colorKey) {
 		scanner.addTokenType(tokenIndex, new TextAttribute(colorProvider.get(colorKey)));
 	}
 	public void addTokenType(Object tokenIndex) {
 		scanner.addTokenType(tokenIndex, new TextAttribute(colorProvider.get(ClojureEditor.ID + "_" +  tokenIndex)));
 	}
-	
+
 	public void addTokenType(Object tokenIndex, IToken token) {
 		scanner.addTokenType(tokenIndex, token);
 	}
-	
+
 	public void addBoldToken(Object tokenIndex, String colorKey) {
 		scanner.addTokenType(tokenIndex, new TextAttribute(colorProvider.get(colorKey), null, SWT.BOLD));
 	}
@@ -43,7 +43,7 @@ public class TokenScannerUtils {
 		scanner.addTokenType(tokenIndex, new TextAttribute(
 				colorProvider.get(ClojureEditor.ID + "_" +  tokenIndex), null, SWT.BOLD));
 	}
-	
+
 	public void addItalicToken(Object tokenIndex, String colorKey) {
 		scanner.addTokenType(tokenIndex, new TextAttribute(colorProvider.get(colorKey), null, SWT.ITALIC));
 	}

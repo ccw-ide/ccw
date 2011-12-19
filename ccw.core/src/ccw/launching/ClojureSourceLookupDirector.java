@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Laurent PETIT - initial API and implementation
  *******************************************************************************/
 package ccw.launching;
@@ -34,7 +34,7 @@ public class ClojureSourceLookupDirector extends AbstractSourceLookupDirector
 		implements IPersistableSourceLocator {
 
 	private static Set fFilteredTypes;
-	
+
 	static {
 		fFilteredTypes = new HashSet();
 		fFilteredTypes.add(ProjectSourceContainer.TYPE_ID);
@@ -42,7 +42,7 @@ public class ClojureSourceLookupDirector extends AbstractSourceLookupDirector
 		// can't reference UI constant
 		fFilteredTypes.add("org.eclipse.debug.ui.containerType.workingSet"); //$NON-NLS-1$
 	}
-	
+
 	public void initializeParticipants() {
 		addParticipants(new ISourceLookupParticipant[] {new ClojureSourceLookupParticipant(), new JavaSourceLookupParticipant()});
 	}

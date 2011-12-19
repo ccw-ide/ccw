@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Laurent PETIT - initial API and implementation
  *******************************************************************************/
 
@@ -19,10 +19,10 @@ import ccw.editors.clojure.IScanContext;
 
 public class StaticScanContext implements IScanContext {
 	private Map<String,SymbolType> clojureSymbolTypesCache = new HashMap<String, SymbolType>();
-	
+
 	private boolean isJavaIdentifier(String s) {
 		assert s != null && s.length() > 0;
-		
+
 		if (!Character.isJavaIdentifierStart(s.charAt(0))) {
 			return false;
 		}
@@ -33,23 +33,23 @@ public class StaticScanContext implements IScanContext {
 		}
 		return true;
 	}
-	
+
 	public SymbolType getSymbolType(String symbol) {
 		assert symbol != null && symbol.length() > 0;
-		
+
 		if (symbol.startsWith("*") && symbol.endsWith("*")) {
 			// Even if it is not true that it is a global var,
 			// force a global var look and feel to warn the user that
 			// something is wrong (convention not respected)
 			return SymbolType.GLOBAL_VAR;
 		}
-		
+
 		if (symbol.startsWith(".")  &&  symbol.length() > 1) {
 			if (isJavaIdentifier(symbol.substring(1))) {
 				return SymbolType.JAVA_INSTANCE_METHOD;
 			}
 		}
-		
+
 		// This code must appear after the test for JAVA_INSTANCE_METHOD, or a bug in it would mask
 		// any attempt to guess a java instance method
 		int from;
@@ -67,12 +67,12 @@ public class StaticScanContext implements IScanContext {
 				from = letterAfterPointIndex;
 			}
 		} while ((from < symbol.length()) && (foundIndex = symbol.indexOf('.', from)) > 0);
-		
+
 		if (clojureSymbolTypesCache.containsKey(symbol)) {
 			return clojureSymbolTypesCache.get(symbol);
 		} else {
-			Object symbolType = ClojureClient.loadString("(ccw.debug.clientrepl/core-symbol-type \"" + symbol + "\")");	
-	
+			Object symbolType = ClojureClient.loadString("(ccw.debug.clientrepl/core-symbol-type \"" + symbol + "\")");
+
 			if (symbolType == null) {
 				clojureSymbolTypesCache.put(symbol, SymbolType.RAW_SYMBOL);
 				return SymbolType.RAW_SYMBOL;
@@ -88,5 +88,5 @@ public class StaticScanContext implements IScanContext {
 			}
 		}
 	}
-			
+
 }

@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Laurent PETIT - initial API and implementation
  *******************************************************************************/
 package ccw.editors.clojure;
@@ -19,21 +19,21 @@ public interface IClojureEditorActionDefinitionIds extends ITextEditorActionDefi
     /**
      * Action definition ID of the edit -> go to matching bracket action (value
      * <code>"ccw.ui.edit.text.clojure.goto.matching.bracket"</code>).
-     * 
+     *
      * @since 2.1
      */
-    public static final String GOTO_MATCHING_BRACKET = "ccw.ui.edit.text.clojure.goto.matching.bracket"; //$NON-NLS-1$    
+    public static final String GOTO_MATCHING_BRACKET = "ccw.ui.edit.text.clojure.goto.matching.bracket"; //$NON-NLS-1$
     /**
      * Action definition ID of the edit -> go to next member action (value
      * <code>"ccw.ui.edit.text.clojure.goto.matching.bracket"</code>).
-     * 
+     *
      * @since 2.1
      */
     public static final String GOTO_NEXT_MEMBER = "ccw.ui.edit.text.clojure.goto.next.member"; //$NON-NLS-1$
     /**
      * Action definition ID of the edit -> go to previous member action (value
      * <code>"ccw.ui.edit.text.clojure.goto.previous.member"</code>).
-     * 
+     *
      * @since 2.1
      */
     public static final String GOTO_PREVIOUS_MEMBER = "ccw.ui.edit.text.clojure.goto.previous.member"; //$NON-NLS-1$
@@ -48,31 +48,31 @@ public interface IClojureEditorActionDefinitionIds extends ITextEditorActionDefi
      * expression action
      */
     public static final String SELECT_LAST = "ccw.ui.edit.text.clojure.select.last";
-    
+
     /**
      * Action definition ID of the Clojure -> raise selection
      * expression action
      */
     public static final String RAISE_SELECTION = "ccw.ui.edit.text.clojure.select.raise";
-    
+
     /**
      * Action definition ID of the Clojure -> indent selection
      * expression action
      */
     public static final String INDENT_SELECTION = "ccw.ui.edit.text.clojure.indent.selection";
-    
+
     /**
      * Action definition ID of the Clojure -> split sexpr
      * expression action
      */
     public static final String SPLIT_SEXPR = "ccw.ui.edit.text.clojure.split.sexpr";
-    
+
     /**
      * Action definition ID of the Clojure -> join sexpr
      * expression action
      */
     public static final String JOIN_SEXPR = "ccw.ui.edit.text.clojure.join.sexpr";
-    
+
     /**
      * Action definition ID of the Clojure -> Switch structural edition mode
      * expression action

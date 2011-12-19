@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Casey Marshall - initial API and implementation
  *    Laurent Petit  - evolution and maintenance
  *******************************************************************************/
@@ -31,28 +31,28 @@ public class ClojurePartitionScanner extends RuleBasedPartitionScanner {
 	public final static String CLOJURE_STRING = "__clojure_string"; //$NON-NLS-1$
 	public final static String CLOJURE_CHAR = "__clojure_char"; //$NON-NLS-1$
 
-	public final static String[] CLOJURE_CONTENT_TYPES= 
+	public final static String[] CLOJURE_CONTENT_TYPES=
 		new String[] { CLOJURE_COMMENT, CLOJURE_STRING, CLOJURE_CHAR };
 
     public ClojurePartitionScanner() {
         IToken comment = new Token(CLOJURE_COMMENT);
-    
+
         IToken string = new Token(CLOJURE_STRING);
-        
+
         IToken cljChar = new Token(CLOJURE_CHAR);
-        
+
         List<IPredicateRule> rules = new ArrayList<IPredicateRule>();
         rules.add(new EndOfLineRule(";", comment));
         rules.add(new MultiLineRule("\"", "\"", string, '\\'));
-        rules.add(new ClojureCharRule(cljChar)); 
-         
+        rules.add(new ClojureCharRule(cljChar));
+
         setPredicateRules(rules.toArray(new IPredicateRule[rules.size()]));
     }
-    
+
     public static class ClojureCharRule implements IPredicateRule {
     	private final IToken tokenToReturn;
     	public ClojureCharRule(IToken tokenToReturn) {
-    		this.tokenToReturn = tokenToReturn; 
+    		this.tokenToReturn = tokenToReturn;
     	}
 
 		public IToken evaluate(ICharacterScanner scanner, boolean resume) {
@@ -84,7 +84,7 @@ public class ClojurePartitionScanner extends RuleBasedPartitionScanner {
 //						scanner.unread();
 //						return getSuccessToken();
 //					} else {
-//						
+//
 //					}
 //				}
 //				if ((char)next == 's') {
@@ -93,7 +93,7 @@ public class ClojurePartitionScanner extends RuleBasedPartitionScanner {
 //						scanner.unread();
 //						return getSuccessToken();
 //					} else {
-//						
+//
 //					}
 //				}
 //				if ((char)next == 't') {
@@ -102,13 +102,13 @@ public class ClojurePartitionScanner extends RuleBasedPartitionScanner {
 //						scanner.unread();
 //						return getSuccessToken();
 //					} else {
-//						
+//
 //					}
 //				}
 				return getSuccessToken();
 			}
 		}
-    	
+
     }
-    
+
 }

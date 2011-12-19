@@ -5,7 +5,7 @@
 ; * which accompanies this distribution, and is available at
 ; * http://www.eclipse.org/legal/epl-v10.html
 ; *
-; * Contributors: 
+; * Contributors:
 ; *    Laurent PETIT - initial API and implementation
 ; *    Tuomas KARKKAINEN - find-symbol
 ; *******************************************************************************/
@@ -44,7 +44,7 @@
         "response" (serialize-exception e#)})))
 
 ; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; support code  
+; support code
 
 (defn- meta-info [v]
   (reduce (fn [m e] (merge m {(first e) (str (second e))})) {} (meta v)))
@@ -117,7 +117,7 @@
   (when-let [found-type (ffirst (filter #(= type-name (str (first %)))
                                   (ns-imports (find-ns (symbol ns-name)))))]
     (str found-type)))
-; (remove-ns 'ccw.debug.serverrepl)   
+; (remove-ns 'ccw.debug.serverrepl)
 
 (defn find-symbol [s current-ns qualified-ns]
   (let [a ((ns-aliases (symbol current-ns)) (symbol qualified-ns))]

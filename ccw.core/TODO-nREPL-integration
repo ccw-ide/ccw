@@ -1,10 +1,10 @@
   * Have a proper StatusLineManager for the REPL View (for reporting errors, being able to switch default/strict structural edition mode)
   * [DONE] code completion
   * [DONE] Have the input area highlight matching brackets as in the editor
-  
+
   * [TODO] extract the contents from Chas' email thread
   * [TODO] extract the contents from cgrand's email thread(s)
-  * Fixing namespace browser: 
+  * Fixing namespace browser:
     * Not always correctly updated
     * How will it react if several REPLViews are shown side by side ? If no REPLView is currently selected ?
   * [TODO] Classify content: what to do to preserve iso-functionality, consider several use cases (inexperimented user "a la Lee's students", power user), consider updating the documentation before releasing, etc.
