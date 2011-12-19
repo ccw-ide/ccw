@@ -5,11 +5,11 @@
             [ccw.editors.clojure.ClojureHyperlink]
             [ccw.editors.clojure.EditorSupport :as editor])
   (:use clojure.contrib.core)
-  (:import 
+  (:import
     [org.eclipse.jface.text BadLocationException
                             IRegion
                             Region
-                            ITextViewer] 
+                            ITextViewer]
     [org.eclipse.jface.text.hyperlink AbstractHyperlinkDetector
                                       IHyperlink
                                       IHyperlinkDetector]
@@ -26,15 +26,15 @@
     ;:init init
     :state state))
 
-(def *ID* (IHyperlinkConstants/ClojureHyperlinkDetector_ID)) 
-(def *TARGET_ID* (IHyperlinkConstants/ClojureHyperlinkDetector_TARGET_ID))  
+(def *ID* (IHyperlinkConstants/ClojureHyperlinkDetector_ID))
+(def *TARGET_ID* (IHyperlinkConstants/ClojureHyperlinkDetector_TARGET_ID))
 
 (defn editor [this] (.getClassAdapter this IClojureEditor))
 
 (defn find-decl [sym editor]
   (let [split (.split sym "/")
         n (when (= 2 (count split)) (aget split 0))
-        s (aget split (if (= 2 (count split)) 1 0))  
+        s (aget split (if (= 2 (count split)) 1 0))
         declaring-ns (.findDeclaringNamespace editor)
         command (String/format "(ccw.debug.serverrepl/find-symbol \"%s\" \"%s\" \"%s\")"
                   (into-array Object [s declaring-ns n]))
@@ -63,9 +63,9 @@
 
 (defn -detectHyperlinks
   [this textViewer region canShowMultipleHyperlinks?]
-    (when-let [hyperlinks (detect-hyperlinks (.getOffset region) (editor this))] 
-      (into-array IHyperlink (map (fn [{:keys #{offset length open}}] 
-                                    (ClojureHyperlink. 
-                                      (Region. offset length) 
+    (when-let [hyperlinks (detect-hyperlinks (.getOffset region) (editor this))]
+      (into-array IHyperlink (map (fn [{:keys #{offset length open}}]
+                                    (ClojureHyperlink.
+                                      (Region. offset length)
                                       open))
                                hyperlinks))))

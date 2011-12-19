@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Christophe Grand  - initial API and implementation
  *******************************************************************************/
 package ccw.debug;
@@ -41,7 +41,7 @@ public class ClojureLineBreakpointAdapter implements IToggleBreakpointsTarget {
 		}
 		return false;
 	}
-	
+
 	public boolean canToggleMethodBreakpoints(IWorkbenchPart part,
 			ISelection selection) {
 		return false;
@@ -63,7 +63,7 @@ public class ClojureLineBreakpointAdapter implements IToggleBreakpointsTarget {
 			IEditorPart editor = (IEditorPart) part;
 			IResource resource = (IResource) editor.getEditorInput()
 					.getAdapter(IResource.class);
-			
+
 			if (resource != null) {
 				for (int i = 0; i < breakpoints.length; i++) {
 					IBreakpoint breakpoint = breakpoints[i];
@@ -80,7 +80,7 @@ public class ClojureLineBreakpointAdapter implements IToggleBreakpointsTarget {
 				// ... quick analysis seems to indicate it's done this way by the JDT "itself" !
 				IStorageEditorInput input = (IStorageEditorInput) editor.getEditorInput();
 				IStorage storage = input.getStorage();
-				
+
 				for (int i = 0; i < breakpoints.length; i++) {
 					IBreakpoint breakpoint = breakpoints[i];
 					if (breakpoint instanceof IJavaStratumLineBreakpoint) {
@@ -95,8 +95,8 @@ public class ClojureLineBreakpointAdapter implements IToggleBreakpointsTarget {
 				}
 				Map attributes = new HashMap();
 				StorageMarkerAnnotationModel.addAttribute(attributes, storage);
-				JDIDebugModel.createStratumBreakpoint(ResourcesPlugin.getWorkspace().getRoot(), 
-						"Clojure", storage.getName(), storage.getFullPath().toPortableString(), 
+				JDIDebugModel.createStratumBreakpoint(ResourcesPlugin.getWorkspace().getRoot(),
+						"Clojure", storage.getName(), storage.getFullPath().toPortableString(),
 						null, lineNumber + 1, -1, -1, 0, true, attributes);
 			}
 		}
@@ -109,14 +109,14 @@ public class ClojureLineBreakpointAdapter implements IToggleBreakpointsTarget {
 	public void toggleWatchpoints(IWorkbenchPart part, ISelection selection)
 			throws CoreException {
 	}
-	
+
 	public static boolean isCljFile(IEditorPart editorPart) {
 		IResource resource = (IResource) editorPart.getEditorInput()
 				.getAdapter(IResource.class);
 		if (resource != null && "clj".equals(resource.getFileExtension())) {
 			return true;
 		}
-		
+
 		if (editorPart.getEditorInput() instanceof IStorageEditorInput) {
 			try {
 				IStorageEditorInput input = (IStorageEditorInput) editorPart.getEditorInput();
@@ -127,7 +127,7 @@ public class ClojureLineBreakpointAdapter implements IToggleBreakpointsTarget {
 				// Nothing more to do :-(
 			}
 		}
-		
+
 		return false;
 	}
 

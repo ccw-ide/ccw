@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Laurent PETIT - initial API and implementation
  *******************************************************************************/
 package ccw.editors.clojure;
@@ -24,7 +24,7 @@ public final class ClojureEditorMessages extends NLS {
 
     /**
      * Returns the message bundle which contains constructed keys.
-     * 
+     *
      * @return the message bundle
      */
     public static ResourceBundle getBundleForConstructedKeys() {
@@ -66,10 +66,10 @@ public final class ClojureEditorMessages extends NLS {
     public static String SwitchStructuralEditionModeAction_description;
     public static String OpenDeclarationAction_label;
     public static String OpenDeclarationAction_description;
-    
+
     public static String Cannot_find_declaration;
     public static String You_need_a_running_repl;
-    
+
     public static String Compilation_failed;
     public static String Tests_failed;
     public static String Tests_passed;

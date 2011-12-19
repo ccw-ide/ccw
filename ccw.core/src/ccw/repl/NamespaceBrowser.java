@@ -183,7 +183,7 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 					return recursiveElemMatches(element);
 				}
 			}
-			
+
 			/** Tests element node, and its children if necessary, recursively */
 			private boolean recursiveElemMatches(Object element) {
 				if (elemMatches(element)) {
@@ -202,7 +202,7 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 					}
 				}
 			}
-			
+
 			/** Test just element node, not its children */
 			private boolean elemMatches(Object element) {
 				Map elem = (Map) element;
@@ -423,7 +423,7 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 
 	/**
 	 * Fires a selection changed event.
-	 * 
+	 *
 	 * @param selection
 	 *            the new selection
 	 */
@@ -487,9 +487,9 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 	                inUIThreadSetREPLConnection(repl);
 	            }});
 	}
-	
+
 	private static void inUIThreadSetREPLConnection (Connection repl) {
-		IViewPart[] views = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getViews(); // TODO fix potential NPE here			
+		IViewPart[] views = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getViews(); // TODO fix potential NPE here
 		NamespaceBrowser co = null;
 		for (IViewPart v: views) {
 			if (NamespaceBrowser.class.isInstance(v)) {
@@ -505,7 +505,7 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 	}
 
     private static void ensureNSUtilsIntalled (Connection repl) {
-        
+
         // from the ConsolePageParticipant
         // TODO this *looks* like a no-op, but the comments seem to imply that a "full load" of the project's clojure
         // files should happen in conjunction with initializing the namespace browser; seems like a very unfriendly notion?
@@ -523,5 +523,5 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
                     + "because the project cannot be retrieved!", e);
         }*/
     }
-	
+
 }

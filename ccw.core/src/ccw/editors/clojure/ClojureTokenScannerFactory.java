@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Laurent PETIT - initial API and implementation
  *******************************************************************************/
 package ccw.editors.clojure;
@@ -25,7 +25,7 @@ public final class ClojureTokenScannerFactory {
 			@Override
 			protected void initClojureTokenTypeToJFaceTokenMap() {
 				TokenScannerUtils u = new TokenScannerUtils(this, colorProvider);
-				
+
 				u.addTokenType(Keyword.intern("string"));
 				u.addTokenType(Keyword.intern("regex"));
 				u.addTokenType(Keyword.intern("int"));
@@ -38,18 +38,18 @@ public final class ClojureTokenScannerFactory {
 				u.addTokenType(IScanContext.SymbolType.GLOBAL_VAR);
 				u.addTokenType(IScanContext.SymbolType.MACRO);
 				u.addTokenType(IScanContext.SymbolType.SPECIAL_FORM);
-				
+
 				u.addItalicToken(IScanContext.SymbolType.JAVA_CLASS);
 				u.addItalicToken(IScanContext.SymbolType.JAVA_INSTANCE_METHOD);
 				u.addItalicToken(IScanContext.SymbolType.JAVA_STATIC_METHOD);
-				
+
 				u.addTokenType(SymbolType.RAW_SYMBOL);
 
 				u.addTokenType(Keyword.intern("meta"));
 				u.addTokenType(Keyword.intern("keyword"));
 				u.addTokenType(Keyword.intern("comment"));
 				u.addTokenType(Keyword.intern("whitespace"));
-				
+
 				u.addTokenType(Keyword.intern("eof"), Token.EOF);
 				u.addTokenType(Keyword.intern("whitespace"), Token.WHITESPACE);
 			}

@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Christophe Grand - initial API and implementation
  *******************************************************************************/
 package ccw;
@@ -55,11 +55,11 @@ public class StorageMarkerAnnotationModel extends AbstractMarkerAnnotationModel 
 	protected void update(IMarkerDelta[] markerDeltas) {
 		Set<IMarker> removed = new HashSet<IMarker>();
 		Set<IMarker> modified = new HashSet<IMarker>();
-		
+
 		for (IMarkerDelta markerDelta : markerDeltas) {
 			IMarker marker = markerDelta.getMarker();
 			if (marker.exists() && !isAcceptable(marker)) continue;
-			
+
 			switch (markerDelta.getKind()) {
 			case IResourceDelta.ADDED:
 				addMarkerAnnotation(marker);

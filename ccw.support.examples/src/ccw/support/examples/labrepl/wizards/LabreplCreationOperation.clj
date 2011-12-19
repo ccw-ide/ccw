@@ -5,7 +5,7 @@
 ;* which accompanies this distribution, and is available at
 ;* http://www.eclipse.org/legal/epl-v10.html
 ;*
-;* Contributors: 
+;* Contributors:
 ;*    Stephan Muehlstrasser - initial API and implementation
 ;*******************************************************************************/
 (ns ccw.support.examples.labrepl.wizards.LabreplCreationOperation
@@ -41,11 +41,11 @@
                                           ZipFileStructureProvider]
      [org.eclipse.ui.browser IWorkbenchBrowserSupport]
      [org.eclipse.ui.progress WorkbenchJob])
-  
+
   (:use
     [leiningen.core :only [read-project defproject]]
     [leiningen.deps :only [deps]])
-  
+
   (:gen-class
    :implements [org.eclipse.jface.operation.IRunnableWithProgress]
    :constructors {[ccw.support.examples.labrepl.wizards.LabreplCreateProjectPage org.eclipse.ui.dialogs.IOverwriteQuery] []}
@@ -115,11 +115,11 @@
 returns nil, waits for step milliseconds, and repeats. Returns nil if resource-fn
 never returned a non-nil value before the timeout occurred."
   [resource-fn desc timeout step monitor]
-  (let [sub-monitor (SubMonitor/convert monitor 10)] 
+  (let [sub-monitor (SubMonitor/convert monitor 10)]
     (loop
 	    [self-timeout timeout]
-	    (if (and 
-	          (> self-timeout 0) 
+	    (if (and
+	          (> self-timeout 0)
 	          (not (Thread/interrupted))
 	          (not (.isCanceled monitor)))
 	      (let [resource (resource-fn)]
@@ -150,17 +150,17 @@ never returned a non-nil value before the timeout occurred."
 	   (let
 		  [browser-support (.getBrowserSupport (PlatformUI/getWorkbench))
 		   browser
-		   (.createBrowser 
-		      browser-support 
-		      (reduce bit-or 
+		   (.createBrowser
+		      browser-support
+		      (reduce bit-or
 		        [IWorkbenchBrowserSupport/LOCATION_BAR
 		          IWorkbenchBrowserSupport/NAVIGATION_BAR
-		          IWorkbenchBrowserSupport/AS_EDITOR]) 
+		          IWorkbenchBrowserSupport/AS_EDITOR])
 		      nil "Labrepl" "Labrepl Instructions")]
 		   (.openURL browser (URL. (str "http://localhost:" *port*)))
 	     Status/OK_STATUS)
 	     Status/CANCEL_STATUS))
- 
+
 (defn- fix-libraries
   "Enter all the JAR files in the lib directory to the Java build path of the project"
   [project]
@@ -171,7 +171,7 @@ never returned a non-nil value before the timeout occurred."
      lib-members (.members lib-folder)
      old-lib-entries (vec (.getRawClasspath java-project))
      new-lib-entries
-       (into-array 
+       (into-array
          (concat old-lib-entries (map #(JavaCore/newLibraryEntry (.getFullPath %) nil nil) lib-members)))]
     (doto java-project
       (.setRawClasspath new-lib-entries nil)
@@ -209,15 +209,15 @@ never returned a non-nil value before the timeout occurred."
               (.subTask progress "Running  \"lein deps\"")
 			        (deps labrepl-leiningen-project)
               (.worked progress 1)
-              
+
               (.subTask progress "Fixing classpath")
 			        (fix-libraries project)
               (.worked progress 1)
-              
+
 			        (if run-repl
 			         (let
                 [startup-file-selection (StructuredSelection. (.getFile (.getFolder project "src") "labrepl.clj"))
-                  repl-browser-job 
+                  repl-browser-job
                     (proxy [WorkbenchJob] ["Setup of Labrepl Project"]
 		                  (runInUIThread [monitor]
 		                    (let
@@ -225,7 +225,7 @@ never returned a non-nil value before the timeout occurred."
 	                        (.subTask job-progress "Launching REPL")
 						              (.launch (ClojureLaunchShortcut.) startup-file-selection ILaunchManager/RUN_MODE)
 			                    (.worked job-progress 1)
-			                    
+
 													(let [console (wait-for-resource #(ClojureClient/findActiveReplConsole) "Console" *timeout* *step* (.newChild job-progress 30))]
 			                      (if console
 			                        (do

@@ -1,6 +1,6 @@
 (ns ccw.editors.clojure.PareditAutoEditStrategy
   (:use [paredit [core :only [paredit]]])
-  (:use [clojure.contrib.core :only [-?>]])  
+  (:use [clojure.contrib.core :only [-?>]])
   (:import
     [org.eclipse.jface.text IAutoEditStrategy
                             IDocument
@@ -11,15 +11,15 @@
    :constructors {[ccw.editors.clojure.IClojureEditor org.eclipse.jface.preference.IPreferenceStore] []}
    :init init
    :state state))
-   
+
 #_(set! *warn-on-reflection* true)
 
 (defn- -init
-  [editor preference-store] [[] (ref {:editor editor :prefs-store preference-store})])   
+  [editor preference-store] [[] (ref {:editor editor :prefs-store preference-store})])
 
 ; TODO move this into paredit itself ...
 ;  each command : trigger-str  [:paredit-command-name only-one-char-command?]
-(def *commands* 
+(def *commands*
   {"'" [:paredit-wrap-quote true]
    "(" [:paredit-open-round true]
    "[" [:paredit-open-square true]
@@ -34,13 +34,13 @@
    })
 
 (def *strict-commands*
-  #{:paredit-close-round, :paredit-close-square, :paredit-close-curly, 
+  #{:paredit-close-round, :paredit-close-square, :paredit-close-curly,
     :paredit-forward-delete, :paredit-backward-delete,
     :paredit-open-round, :paredit-open-square, :paredit-open-curly,
     :paredit-doublequote})
 
-(def 
-  #^{:doc "{:command configuration-key ...}"} 
+(def
+  #^{:doc "{:command configuration-key ...}"}
   *configuration-based-commands*
   {:paredit-indent-line ccw.preferences.PreferenceConstants/USE_TAB_FOR_REINDENTING_LINE})
 
@@ -52,7 +52,7 @@
   (cond
     (and (zero? (-> command #^String (:text) .length))
          (= 1 (:length command)))
-      (let [paredit-command (if (= (:offset command) (:caret-offset document-text)) 
+      (let [paredit-command (if (= (:offset command) (:caret-offset document-text))
                               :paredit-forward-delete :paredit-backward-delete)]
         [paredit-command
                  {:text (:text document-text)
@@ -61,8 +61,8 @@
     (and (par-command? command)
          (one-char-par-command? command)) ; TODO enhance to also handle the replace of a bunch of text
       [(par-command command)
-               {:text (:text document-text) 
-                :offset (:offset command) 
+               {:text (:text document-text)
+                :offset (:offset command)
                 :length (:length command)}]))
 
 (defn- ccw-prefs
@@ -78,20 +78,20 @@
       (.isStructuralEditingEnabled editor)
     (*configuration-based-commands* par-command) ; works because I know no value can be nil in *configuration-based-commands*
       (.getBoolean (ccw-prefs) (*configuration-based-commands* par-command))
-    :else 
+    :else
       true))
 
-(defn -customizeDocumentCommand 
+(defn -customizeDocumentCommand
   [this, #^IDocument document, #^DocumentCommand command]
   (let [^IClojureEditor editor (-> this .state deref :editor)]
-    (when (and (.doit command) 
-               (not (.isInEscapeSequence editor)) 
+    (when (and (.doit command)
+               (not (.isInEscapeSequence editor))
                (.isStructuralEditionPossible editor))
       ;(println "yo!")
       (let [signed-selection (bean (.getSignedSelection editor))
             ;_ (println (str "signed-selection:" signed-selection))
-            document-text {:text (.get document) 
-                           :caret-offset (+ (:offset signed-selection) (:length signed-selection)) 
+            document-text {:text (.get document)
+                           :caret-offset (+ (:offset signed-selection) (:length signed-selection))
                            :selection-length (:length signed-selection)}
             ;_ (println "document-text:" document-text)
             par-command {:text (.text command) :offset (.offset command) :length (.length command)}
@@ -99,8 +99,8 @@
             [par-command par-text] (paredit-args par-command document-text)
             ;_ (println "here is the par-command:" par-command)
             ;_ (println "do-command?" (do-command? editor par-command))
-            result (and 
-                     par-command 
+            result (and
+                     par-command
                      (do-command? editor par-command)
                      (paredit par-command (.getParseState editor) par-text))
             ;_ (println "result:" result)
@@ -120,5 +120,5 @@
               (set! (.doit command) false)))
           (set! (.shiftsCaret command) false)
           (set! (.caretOffset command) (:offset result))
-          (when-not (zero? (:length result)) ;;; WHY when-not zero? 
+          (when-not (zero? (:length result)) ;;; WHY when-not zero?
             (.selectAndReveal editor (:offset result) (:length result))))))))

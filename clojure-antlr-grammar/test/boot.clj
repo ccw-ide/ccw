@@ -49,7 +49,7 @@
 (def
  #^{:arglists '([coll])
     :doc "Returns a seq of the items after the first. Calls seq on its
-  argument.  If there are no more items, returns nil."}  
+  argument.  If there are no more items, returns nil."}
  rest (fn rest [x] (. clojure.lang.RT (rest x))))
 
 (def
@@ -153,7 +153,7 @@
  with-meta (fn with-meta [#^clojure.lang.IObj x m]
              (. x (withMeta m))))
 
-(def 
+(def
  #^{:arglists '([coll])
     :doc "Return the last item in coll, in linear time"}
  last (fn last [s]
@@ -161,7 +161,7 @@
           (recur (rest s))
           (first s))))
 
-(def 
+(def
  #^{:arglists '([coll])
     :doc "Return a sequence of all but the last item in coll, in linear time"}
  butlast (fn butlast [s]
@@ -170,7 +170,7 @@
                (recur (conj ret (first s)) (rest s))
                (seq ret)))))
 
-(def 
+(def
 
  #^{:doc "Same as (def name (fn [params* ] exprs*)) or (def
     name (fn ([params* ] exprs*)+)) with any doc-string or attrs added
@@ -207,9 +207,9 @@
 
 (defn cast
   "Throws a ClassCastException if x is not a c, else returns x."
-  [#^Class c x] 
+  [#^Class c x]
   (. c (cast x)))
- 
+
 (defn vector
   "Creates a new vector containing the args."
   ([] [])
@@ -246,7 +246,7 @@
   Returns a new sorted map with supplied mappings, using the supplied comparator."
   ([comparator & keyvals]
    (. clojure.lang.PersistentTreeMap (create comparator keyvals))))
- 
+
 ;;;;;;;;;;;;;;;;;;;;
 (def
 
@@ -299,7 +299,7 @@
   numbers in a type-independent manner.  Clojure's immutable data
   structures define equals() (and thus =) as a value, not an identity,
   comparison."
-  {:tag Boolean} 
+  {:tag Boolean}
   [x y] (. clojure.lang.Util (equal x y)))
 
 (defn not=
@@ -371,7 +371,7 @@
 
 (defmacro delay
   {:private true}
-  [& body] 
+  [& body]
     (list 'new 'clojure.lang.Delay (list* `fn [] body)))
 
 (defn fnseq
@@ -394,7 +394,7 @@
   (list 'new 'clojure.lang.LazySeq (list `fn [] first-expr) (list* `fn [] rest-expr)))
 
 
-  
+
 (defn concat
   "Returns a lazy seq representing the concatenation of	the elements in x + xs."
   ([] nil)
@@ -459,7 +459,7 @@
   "Returns a seq of the items in coll in reverse order. Not lazy."
   [coll]
     (reduce conj nil coll))
-  
+
 ;;math stuff
 (defn +
   "Returns the sum of nums. (+) returns 0."
@@ -595,43 +595,43 @@
   [x] (. clojure.lang.Numbers (dec x)))
 
 (defn unchecked-inc
-  "Returns a number one greater than x, an int or long. 
+  "Returns a number one greater than x, an int or long.
   Note - uses a primitive operator subject to overflow."
   {:inline (fn [x] `(. clojure.lang.Numbers (unchecked_inc ~x)))}
   [x] (. clojure.lang.Numbers (unchecked_inc x)))
 
 (defn unchecked-dec
-  "Returns a number one less than x, an int or long. 
+  "Returns a number one less than x, an int or long.
   Note - uses a primitive operator subject to overflow."
   {:inline (fn [x] `(. clojure.lang.Numbers (unchecked_dec ~x)))}
   [x] (. clojure.lang.Numbers (unchecked_dec x)))
 
 (defn unchecked-negate
-  "Returns the negation of x, an int or long. 
+  "Returns the negation of x, an int or long.
   Note - uses a primitive operator subject to overflow."
   {:inline (fn [x] `(. clojure.lang.Numbers (unchecked_negate ~x)))}
   [x] (. clojure.lang.Numbers (unchecked_negate x)))
 
 (defn unchecked-add
-  "Returns the sum of x and y, both int or long. 
+  "Returns the sum of x and y, both int or long.
   Note - uses a primitive operator subject to overflow."
   {:inline (fn [x y] `(. clojure.lang.Numbers (unchecked_add ~x ~y)))}
   [x y] (. clojure.lang.Numbers (unchecked_add x y)))
 
 (defn unchecked-subtract
-  "Returns the difference of x and y, both int or long. 
+  "Returns the difference of x and y, both int or long.
   Note - uses a primitive operator subject to overflow."
   {:inline (fn [x y] `(. clojure.lang.Numbers (unchecked_subtract ~x ~y)))}
   [x y] (. clojure.lang.Numbers (unchecked_subtract x y)))
 
 (defn unchecked-multiply
-  "Returns the product of x and y, both int or long. 
+  "Returns the product of x and y, both int or long.
   Note - uses a primitive operator subject to overflow."
   {:inline (fn [x y] `(. clojure.lang.Numbers (unchecked_multiply ~x ~y)))}
   [x y] (. clojure.lang.Numbers (unchecked_multiply x y)))
 
 (defn unchecked-divide
-  "Returns the division of x by y, both int or long. 
+  "Returns the division of x by y, both int or long.
   Note - uses a primitive operator subject to truncation."
   {:inline (fn [x y] `(. clojure.lang.Numbers (unchecked_divide ~x ~y)))}
   [x y] (. clojure.lang.Numbers (unchecked_divide x y)))
@@ -722,7 +722,7 @@
 
 (defn complement
   "Takes a fn f and returns a fn that takes the same arguments as f,
-  has the same effects, if any, and returns the opposite truth value."  
+  has the same effects, if any, and returns the opposite truth value."
   [f] (fn [& args]
         (not (apply f args))))
 
@@ -902,24 +902,24 @@
   "Creates and installs a new method of multimethod associated with dispatch-value. "
   [multifn dispatch-val & fn-tail]
   `(let [pvar# (var ~multifn)]
-     (. pvar# (commuteRoot (fn [#^clojure.lang.MultiFn mf#] 
+     (. pvar# (commuteRoot (fn [#^clojure.lang.MultiFn mf#]
                              (. mf# (assoc ~dispatch-val (fn ~@fn-tail))))))))
 
 (defmacro remove-method
   "Removes the method of multimethod associated	with dispatch-value."
  [multifn dispatch-val]
   `(let [pvar# (var ~multifn)]
-      (. pvar# (commuteRoot (fn [#^clojure.lang.MultiFn mf#] 
+      (. pvar# (commuteRoot (fn [#^clojure.lang.MultiFn mf#]
                               (. mf# (dissoc ~dispatch-val)))))))
 
-;;;;;;;;; var stuff      
+;;;;;;;;; var stuff
 
 (defmacro binding
-  "binding => var-symbol init-expr 
+  "binding => var-symbol init-expr
 
   Creates new bindings for the (already-existing) vars, with the
   supplied initial values, executes the exprs in an implicit do, then
-  re-establishes the bindings that existed before."  
+  re-establishes the bindings that existed before."
   [bindings & body]
     (let [var-ize (fn [var-vals]
                     (loop [ret [] vvs (seq var-vals)]
@@ -966,12 +966,12 @@
 
 (defn agent-errors
   "Returns a sequence of the exceptions thrown during asynchronous
-  actions of the agent."  
+  actions of the agent."
   [#^clojure.lang.Agent a] (. a (getErrors)))
 
 (defn clear-agent-errors
   "Clears any exceptions thrown during asynchronous actions of the
-  agent, allowing subsequent actions to occur."  
+  agent, allowing subsequent actions to occur."
   [#^clojure.lang.Agent a] (. a (clearErrors)))
 
 (defn ref
@@ -998,7 +998,7 @@
 
   Thus fun should be commutative, or, failing that, you must accept
   last-one-in-wins behavior.  commute allows for more concurrency than
-  ref-set."  
+  ref-set."
 
   [#^clojure.lang.Ref ref fun & args]
     (. ref (commute fun args)))
@@ -1013,7 +1013,7 @@
 
 (defn ref-set
   "Must be called in a transaction. Sets the value of ref.
-  Returns val."  
+  Returns val."
   [#^clojure.lang.Ref ref val]
     (. ref (set val)))
 
@@ -1069,10 +1069,10 @@
    (fn [& args] (apply f arg1 arg2 arg3 (concat more args)))))
 
 ;;;;;;;;;;;;;;;;;;; sequence fns  ;;;;;;;;;;;;;;;;;;;;;;;
-  
+
 (defn every?
   "Returns true if (pred x) is logical true for every x in coll, else
-  false."  
+  false."
   {:tag Boolean}
   [pred coll]
     (if (seq coll)
@@ -1094,11 +1094,11 @@ not-every? (comp not every?))
     (when (seq coll)
       (or (pred (first coll)) (recur pred (rest coll)))))
 
-(def 
+(def
  #^{:tag Boolean
     :doc "Returns false if (pred x) is logical true for any x in coll,
   else true."
-    :arglists '([pred coll])}  
+    :arglists '([pred coll])}
  not-any? (comp not some))
 
 (defn map
@@ -1132,7 +1132,7 @@ not-every? (comp not every?))
 
 (defn take
   "Returns a lazy seq of the first n items in coll, or all items if
-  there are fewer than n."  
+  there are fewer than n."
   [n coll]
     (when (and (pos? n) (seq coll))
       (lazy-cons (first coll) (take (dec n) (rest coll)))))
@@ -1161,7 +1161,7 @@ not-every? (comp not every?))
 
 (defn cycle
   "Returns a lazy (infinite!) seq of repetitions of the items in
-  coll."  
+  coll."
   [coll]
     (when (seq coll)
       (let [rep (fn thisfn [xs]
@@ -1187,7 +1187,7 @@ not-every? (comp not every?))
 (defn replicate
   "Returns a lazy seq of n xs."
   [n x] (take n (repeat x)))
-  
+
 (defn iterate
   "Returns a lazy seq of x, (f x), (f (f x)) etc."
   [f x] (lazy-cons x (iterate f (f x))))
@@ -1250,9 +1250,9 @@ not-every? (comp not every?))
 (defn comparator
   "Returns an implementation of java.util.Comparator based upon pred."
   [pred]
-    (fn [x y] 
+    (fn [x y]
       (cond (pred x y) -1 (pred y x) 1 :else 0)))
-  
+
 (defn sort
   "Returns a sorted sequence of the items in coll. If no comparator is
   supplied, the items must implement Comparable. comparator must
@@ -1354,7 +1354,7 @@ not-every? (comp not every?))
       (doseq agent agents
         (send agent count-down))
       (. latch (await  timeout-ms (. java.util.concurrent.TimeUnit MILLISECONDS)))))
-  
+
 (defmacro dotimes
   "Repeatedly executes body (presumably for side-effects) with name
   bound to integers from 0 through n-1."
@@ -1369,7 +1369,7 @@ not-every? (comp not every?))
   "import-list => (package-symbol class-name-symbols*)
 
   For each name in class-name-symbols, adds a mapping from name to the
-  class named by package.name to the current namespace."  
+  class named by package.name to the current namespace."
   [& import-lists]
     (when import-lists
       (let [#^clojure.lang.Namespace ns *ns*
@@ -1413,16 +1413,16 @@ not-every? (comp not every?))
    (. *out* (append \space))
    (apply pr more)))
 
-(defn newline 
+(defn newline
   "Writes a newline to the output stream that is the current value of
-  *out*" 
+  *out*"
   []
     (. *out* (append \newline))
     nil)
 
-(defn flush 
+(defn flush
   "Flushes the output stream that is the current value of
-  *out*" 
+  *out*"
   []
     (. *out* (flush))
     nil)
@@ -1498,7 +1498,7 @@ not-every? (comp not every?))
 
 (defmacro time
   "Evaluates expr and prints the time it took.  Returns the value of
- expr."  
+ expr."
   [expr]
   `(let [start# (. System (nanoTime))
          ret# ~expr]
@@ -1552,12 +1552,12 @@ not-every? (comp not every?))
 
 (defn boolean
   "Coerce to boolean"
-  {:tag Boolean} 
+  {:tag Boolean}
   [x] (if x true false))
 
-(defn bigint 
+(defn bigint
   "Coerce to BigInteger"
-  {:tag BigInteger} 
+  {:tag BigInteger}
   [x] (. BigInteger valueOf x))
 
 (defn bigdec
@@ -1739,7 +1739,7 @@ not-every? (comp not every?))
   "Same as (def name (create-struct keys...))"
   [name & keys]
   `(def ~name (create-struct ~@keys)))
-  
+
 (defn struct-map
   "Returns a new structmap instance with the keys of the
   structure-basis. keyvals may contain all, some or none of the basis
@@ -1777,12 +1777,12 @@ not-every? (comp not every?))
 
 (defn load
   "Sequentially read and evaluate the set of forms contained in the
-  stream/file" 
+  stream/file"
   [rdr] (. clojure.lang.Compiler (load rdr)))
 
 (defn resultset-seq
   "Creates and returns a lazy sequence of structmaps corresponding to
-  the rows in the java.sql.ResultSet rs" 
+  the rows in the java.sql.ResultSet rs"
   [#^java.sql.ResultSet rs]
     (let [rsmeta (. rs (getMetaData))
           idxs (range 1 (inc (. rsmeta (getColumnCount))))
@@ -1795,7 +1795,7 @@ not-every? (comp not every?))
 		     (lazy-cons (apply struct row-struct (row-values)) (thisfn))))]
       (rows)))
 
-(defn set 
+(defn set
   "Returns a set of the distinct elements of coll."
   [coll] (apply hash-set coll))
 
@@ -1920,7 +1920,7 @@ not-every? (comp not every?))
 
 (defn var-set
   "Sets the value in the var object to val. The var must be
- thread-locally bound."  
+ thread-locally bound."
   [#^clojure.lang.Var x val] (. x (set val)))
 
 (defmacro with-local-vars
@@ -2049,7 +2049,7 @@ not-every? (comp not every?))
           `(loop* ~(apply vector (interleave gs vs))
               (let ~(apply vector (interleave ds gs))
                 ~@body))))))
-  
+
 (defmacro when-first
   "Same as (when (seq xs) (let [x (first xs)] body))"
   [x xs & body]
@@ -2068,7 +2068,7 @@ not-every? (comp not every?))
 		      (lazy-cons (first coll#) (iter# (rest coll#)))
 		      (lazy-cat ~@colls)))]
       (iter# ~coll))))
-      
+
 ;redefine fn with destructuring
 (defmacro fn
   "(fn name? [params* ] exprs*)
@@ -2095,7 +2095,7 @@ not-every? (comp not every?))
                          (if (symbol? (first params))
                            (recur (rest params) (conj new-params (first params)) lets)
                            (let [gparam (gensym "p__")]
-                             (recur (rest params) (conj new-params gparam) 
+                             (recur (rest params) (conj new-params gparam)
                                     (-> lets (conj (first params)) (conj gparam)))))
                          `(~new-params
                            (let ~lets
@@ -2121,7 +2121,7 @@ not-every? (comp not every?))
                 (loop [ret []
                        [b e & [w f & wr :as r] :as xs] (seq xs)]
                   (if xs
-                    (cond 
+                    (cond
                      (= w :when) (recur (conj ret {:b b :e e :f f :w :when}) wr)
                      (= w :while) (recur (conj ret {:b b :e e :f f :w :while}) wr)
                      :else (recur (conj ret {:b b :e e :f true :w :while}) r))
@@ -2198,13 +2198,13 @@ not-every? (comp not every?))
 
 (defn re-pattern
   "Returns an instance of java.util.regex.Pattern, for use, e.g. in
-  re-matcher."  
+  re-matcher."
   {:tag java.util.regex.Pattern}
   [s] (. java.util.regex.Pattern (compile s)))
-  
+
 (defn re-matcher
   "Returns an instance of java.util.regex.Matcher, for use, e.g. in
-  re-find."  
+  re-find."
   {:tag java.util.regex.Matcher}
   [#^java.util.regex.Pattern re s]
     (. re (matcher s)))
@@ -2282,7 +2282,7 @@ not-every? (comp not every?))
  contains a match for re-string"
   [re-string]
     (let [re  (re-pattern re-string)]
-      (dorun (for [ns (all-ns) 
+      (dorun (for [ns (all-ns)
                    v (sort-by (comp :name meta) (vals (ns-interns ns)))
                    :when (and (:doc ^v)
                           (or (re-find (re-matcher re (:doc ^v)))
@@ -2300,7 +2300,7 @@ not-every? (comp not every?))
   that can have children (but may not).  children must be a fn of one
   arg that returns a sequence of the children. Will only be called on
   nodes for which branch? returns true. Root is the root node of the
-  tree, must be a branch."  
+  tree, must be a branch."
   [branch? children root]
     (let [walk (fn walk [nodes]
                    (when-first node nodes
@@ -2349,7 +2349,7 @@ not-every? (comp not every?))
       (loop [c (. r (read))]
         (if (neg? c)
           (str sb)
-          (do 
+          (do
             (. sb (append (char c)))
             (recur (. r (read)))))))))
 
@@ -2375,25 +2375,25 @@ not-every? (comp not every?))
 
 (defn distinct
   "Returns a lazy sequence of the elements of coll with duplicates removed"
-  [coll] 
+  [coll]
     (let [step (fn step [[f & r :as xs] seen]
                    (when xs
                      (if (seen f) (recur r seen)
                          (lazy-cons f (step r (conj seen f))))))]
       (step (seq coll) #{})))
 
-(defmacro if-let 
+(defmacro if-let
   "if test is true, evaluates then with binding-form bound to the value of test, if not, yields else"
   ([binding-form test then]
    `(if-let ~binding-form ~test ~then nil))
   ([binding-form test then else]
    `(let [temp# ~test]
-      (if temp# 
+      (if temp#
         (let [~binding-form temp#]
           ~then)
         ~else))))
 
-(defmacro when-let 
+(defmacro when-let
   "when test is true, evaluates body with binding-form bound to the value of test"
   [binding-form test & body]
   `(let [temp# ~test]
@@ -2404,7 +2404,7 @@ not-every? (comp not every?))
 (defn replace
   "Given a map of replacement pairs and a vector/collection, returns a
   vector/seq with any elements = a key in smap replaced with the
-  corresponding val in smap" 
+  corresponding val in smap"
   [smap coll]
     (if (vector? coll)
       (reduce (fn [v i]
@@ -2414,7 +2414,7 @@ not-every? (comp not every?))
               coll (range (count coll)))
       (map #(if-let e (find smap %) (val e) %) coll)))
 
-(defmacro dosync 
+(defmacro dosync
   "Runs the exprs (in an implicit do) in a transaction that encompasses
   exprs and any nested calls.  Starts a transaction if none is already
   running on this thread. Any uncaught exception will abort the
@@ -2428,7 +2428,7 @@ not-every? (comp not every?))
 
   Usage: (with-precision 10 (/ 1M 3))
   or:    (with-precision 10 :rounding HALF_DOWN (/ 1M 3))
-  
+
   The rounding mode is one of CEILING, FLOOR, HALF_UP, HALF_DOWN,
   HALF_EVEN, UP, DOWN and UNNECESSARY; it defaults to HALF_UP."
   [precision & exprs]
@@ -2437,24 +2437,24 @@ not-every? (comp not every?))
                        `((. java.math.RoundingMode ~(second exprs)))]
                       [exprs nil])]
       `(binding [*math-context* (java.math.MathContext. ~precision ~@rm)]
-         ~@body))) 
+         ~@body)))
 
 (defn bound-fn
   {:private true}
   [#^clojure.lang.Sorted sc test key]
   (fn [e]
     (test (.. sc comparator (compare (. sc entryKey e) key)) 0)))
-  
+
 (defn subseq
   "sc must be a sorted collection, test(s) one of <, <=, > or
   >=. Returns a seq of those entries with keys ek for
-  which (test (.. sc comparator (compare ek key)) 0) is true"  
+  which (test (.. sc comparator (compare ek key)) 0) is true"
   ([#^clojure.lang.Sorted sc test key]
    (let [include (bound-fn sc test key)]
      (if (#{> >=} test)
        (when-let [e :as s] (. sc seqFrom key true)
          (if (include e) s (rest s)))
-       (take-while include (. sc seq true)))))     
+       (take-while include (. sc seq true)))))
   ([#^clojure.lang.Sorted sc start-test start-key end-test end-key]
    (when-let [e :as s] (. sc seqFrom start-key true)
      (take-while (bound-fn sc end-test end-key)
@@ -2469,13 +2469,13 @@ not-every? (comp not every?))
      (if (#{< <=} test)
        (when-let [e :as s] (. sc seqFrom key false)
          (if (include e) s (rest s)))
-       (take-while include (. sc seq false)))))     
+       (take-while include (. sc seq false)))))
   ([#^clojure.lang.Sorted sc start-test start-key end-test end-key]
    (when-let [e :as s] (. sc seqFrom end-key false)
      (take-while (bound-fn sc start-test start-key)
                  (if ((bound-fn sc end-test end-key) e) s (rest s))))))
 
-(defn repeatedly 
+(defn repeatedly
   "Takes a function of no args, presumably with side effects, and returns an infinite
   lazy sequence of calls to it"
   [f] (lazy-cons (f) (repeatedly f)))
@@ -2509,10 +2509,10 @@ not-every? (comp not every?))
        (when (= n (count p))
          (lazy-cons  p (partition n step (drop step coll))))))))
 
-(defmacro definline 
+(defmacro definline
   "Experimental - like defmacro, except defines a named function whose
   body is the expansion, calls to which may be expanded inline as if
-  it were a macro" 
+  it were a macro"
   [name & decl]
   (let [[args expr] (drop-while (comp not vector?) decl)
         inline (eval (list 'fn args expr))]
@@ -2521,7 +2521,7 @@ not-every? (comp not every?))
        (let [v# (var ~name)]
          (.setMeta v# (assoc ^v# :inline ~inline))))))
 
-(defn empty 
+(defn empty
   "Returns an empty collection of the same category as coll, or nil"
   [#^clojure.lang.IPersistentCollection coll]
   (.empty coll))
@@ -2535,44 +2535,44 @@ not-every? (comp not every?))
          ~ret (aclone a#)]
      (loop  [~idx (int 0)]
        (if (< ~idx  (alength a#))
-         (do 
+         (do
            (aset ~ret ~idx ~expr)
            (recur (unchecked-inc ~idx)))
          ~ret))))
 
-(defmacro areduce 
+(defmacro areduce
   "Reduces an expression across an array a, using an index named idx,
   and return value named ret, initialized to init, setting ret to the evaluation of expr at
   each step, returning ret."
   [a idx ret init expr]
   `(let [a# ~a]
      (loop  [~idx (int 0) ~ret ~init]
-       (if (< ~idx  (alength a#)) 
+       (if (< ~idx  (alength a#))
          (recur (unchecked-inc ~idx) ~expr)
          ~ret))))
 
-(defn float-array 
+(defn float-array
   "Creates an array of floats"
   {:inline (fn [& args] `(. clojure.lang.Numbers float_array ~@args))
    :inline-arities #{1 2}}
   ([size-or-seq] (. clojure.lang.Numbers float_array size-or-seq))
   ([size init-val-or-seq] (. clojure.lang.Numbers float_array size init-val-or-seq)))
 
-(defn double-array 
+(defn double-array
   "Creates an array of doubles"
   {:inline (fn [& args] `(. clojure.lang.Numbers double_array ~@args))
    :inline-arities #{1 2}}
   ([size-or-seq] (. clojure.lang.Numbers double_array size-or-seq))
   ([size init-val-or-seq] (. clojure.lang.Numbers double_array size init-val-or-seq)))
 
-(defn int-array 
+(defn int-array
   "Creates an array of ints"
   {:inline (fn [& args] `(. clojure.lang.Numbers int_array ~@args))
    :inline-arities #{1 2}}
   ([size-or-seq] (. clojure.lang.Numbers int_array size-or-seq))
   ([size init-val-or-seq] (. clojure.lang.Numbers int_array size init-val-or-seq)))
 
-(defn long-array 
+(defn long-array
   "Creates an array of ints"
   {:inline (fn [& args] `(. clojure.lang.Numbers long_array ~@args))
    :inline-arities #{1 2}}

@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Stephan Muehlstrasser - Initial implementation
  *******************************************************************************/
 package ccw.preferences;
@@ -22,11 +22,11 @@ public class Messages extends NLS {
     public static String ClojurePreferencePage_displayed_tab_width;
 
     public static String ClojurePreferencePage_highlight_matching_brackets;
-    
+
     public static String ClojurePreferencePage_switch_to_ns_on_repl_startup;
 
     public static String ClojurePreferencePage_use_strict_structural_editing_mode_by_default;
-    
+
     public static String ClojurePreferencePage_use_tab_for_reindenting_line;
 
     public static String SyntaxColoringPreferencePage_function;
@@ -59,7 +59,7 @@ public class Messages extends NLS {
     public static String SyntaxColoringPreferencePage_keyword;
 
     public static String SyntaxColoringPreferencePage_metadataTypehint;
-    
+
     public static String SyntaxColoringPreferencePage_macro;
 
     public static String SyntaxColoringPreferencePage_preview;

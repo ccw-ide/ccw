@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Stephan Muehlstrasser - initial implementation
  *******************************************************************************/
 package ccw.preferences;
@@ -20,20 +20,20 @@ public class ScrolledPageContent extends SharedScrolledComposite {
     public ScrolledPageContent(Composite parent) {
         this(parent, SWT.V_SCROLL | SWT.H_SCROLL);
     }
-    
+
     public ScrolledPageContent(Composite parent, int style) {
         super(parent, style);
-        
+
         setFont(parent.getFont());
-        
+
         setExpandHorizontal(true);
         setExpandVertical(true);
-        
+
         Composite body= new Composite(this, SWT.NONE);
         body.setFont(parent.getFont());
         setContent(body);
     }
-    
+
     public Composite getBody() {
         return (Composite) getContent();
     }

@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Laurent PETIT - initial API and implementation
  *******************************************************************************/
 package ccw.launching;
@@ -41,18 +41,18 @@ public class SourcePathComputerDelegate extends JavaSourcePathComputer {
 	public ISourceContainer[] computeSourceContainers(
 			ILaunchConfiguration configuration, IProgressMonitor monitor)
 			throws CoreException {
-		
+
 		ISourceContainer[] superResult = super.computeSourceContainers(configuration, monitor);
-		
+
 		List<ISourceContainer> result = new ArrayList<ISourceContainer>(superResult.length * 2);
 		result.addAll(getSrcFoldersAsISourceContainers(configuration));
-		
+
 		for (ISourceContainer sourceContainer: superResult) {
 			if (sourceContainer instanceof PackageFragmentRootSourceContainer) {
 				PackageFragmentRootSourceContainer sc = (PackageFragmentRootSourceContainer) sourceContainer;
 
 				IPath maybeSourcePath =	sc.getPackageFragmentRoot().getSourceAttachmentPath();
-				
+
 				if (maybeSourcePath != null) {
 					maybeSourcePath = ClojureCore.toOSAbsoluteIPath(maybeSourcePath);
 					if (maybeSourcePath.toFile().isFile()) {
@@ -94,7 +94,7 @@ public class SourcePathComputerDelegate extends JavaSourcePathComputer {
 							FolderSourceContainer
 							ProjectSourceContainer
 							WorkingSetSourceContainer
-							WorkspaceSourceContainer				 
+							WorkspaceSourceContainer
 				 */
 				// nothing intelligent to do yet :)
 			}
@@ -108,18 +108,18 @@ public class SourcePathComputerDelegate extends JavaSourcePathComputer {
 	 */
 	private List<ISourceContainer> getSrcFoldersAsISourceContainers(ILaunchConfiguration configuration) throws CoreException {
 		String projectName = configuration.getAttribute(LaunchUtils.ATTR_PROJECT_NAME, (String) null);
-		
+
 		if (projectName == null) {
 			throw new CoreException(new Status(IStatus.ERROR, CCWPlugin.PLUGIN_ID, "Clojure SourcePathComputerDelegate unable to correctly set the clojure sources in the class because the considered launch configuration does not have an associated project"));
 		} else {
 			// TODO be smarter here : currently only works if src/ is the name of the dir :(
 			//                        and only if one source directory is defined in the project :(
 			return Arrays.asList(new ISourceContainer[] {
-					new FolderSourceContainer(			
+					new FolderSourceContainer(
 							ResourcesPlugin.getWorkspace().getRoot().getProject(projectName).getFolder("src")
 							, true)
 			});
 		}
 	}
-	
+
 }

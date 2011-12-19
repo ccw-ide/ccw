@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Manuel Woelker - initial prototype implementation
  *******************************************************************************/
 package ccw.editors.outline;
@@ -208,7 +208,7 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 				.addPostSelectionChangedListener(editorSelectionChangedListener);
 		ISelection selection = selectionProvider.getSelection();
 		selectInOutline(selection);
-		
+
 		registerToolbarActions();
 	}
 
@@ -257,7 +257,7 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 
 	/**
 	 * Find closest matching element to line
-	 * 
+	 *
 	 * @param toFind
 	 *            line to find
 	 * @return

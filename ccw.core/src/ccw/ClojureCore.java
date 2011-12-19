@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Casey Marshall - initial API and implementation
  *******************************************************************************/
 /*
@@ -67,10 +67,10 @@ import clojure.lang.Var;
 
 /**
  * This class acts as a Facade for all SDT core functionality.
- * 
+ *
  */
 public final class ClojureCore {
-	
+
 	static public final String NATURE_ID = "ccw.nature";
     /**
      * Clojure file extension
@@ -90,7 +90,7 @@ public final class ClojureCore {
 
     /**
      * Gets the SDT core preferences
-     * 
+     *
      * @return the preferences root node
      */
     public Preferences getPreferences() {
@@ -123,7 +123,7 @@ public final class ClojureCore {
 
     /**
      * Adds tha Scala nature to the given project
-     * 
+     *
      * @param project
      *            the project
      * @return <code>true</code> if the nature was correctly added,
@@ -135,7 +135,7 @@ public final class ClojureCore {
 
     /**
      * Adds tha Java nature to the given project
-     * 
+     *
      * @param project
      *            the project
      * @return <code>true</code> if the nature was correctly added,
@@ -151,7 +151,7 @@ public final class ClojureCore {
 
     /**
      * Gets the Java project associated to the given project
-     * 
+     *
      * @param project
      *            the Eclipse project
      * @return the associated Java project
@@ -178,7 +178,7 @@ public final class ClojureCore {
 
     /**
      * Gets the Clojure project associated to the given project
-     * 
+     *
      * @param project
      *            the Eclipse project
      * @return the associated Scala project
@@ -202,16 +202,16 @@ public final class ClojureCore {
 
     /**
      * Gets all the Clojure projects in the workspace
-     * 
+     *
      * @return an array containing all the Scala projects
      */
     public static ClojureProject[] getClojureProjects() {
         return clojureProjects.values().toArray(new ClojureProject[] {});
     }
-    
+
 	/*
      *  TODO Still 1 more case to handle:
-     *  - when a LIBRARY does not have source file in its classpath, then search attached source files folder/archive 
+     *  - when a LIBRARY does not have source file in its classpath, then search attached source files folder/archive
      */
     public static void openInEditor(String searchedNS, String searchedFileName, int line) {
 		try {
@@ -224,7 +224,7 @@ public final class ClojureCore {
 			CCWPlugin.logError("error while trying to obtain project's name from configuration, while trying to show source file of a symbol", e);
 		}
 	}
-    
+
     private static boolean openInEditor(String searchedNS, final String initialSearchedFileName, int line, String projectName, boolean onlyExportedEntries) throws PartInitException {
     	if (initialSearchedFileName==null) {
     		return false;
@@ -246,8 +246,8 @@ public final class ClojureCore {
 		try {
 			classpathEntries = javaProject.getResolvedClasspath(true);
 		} catch (JavaModelException e) {
-			CCWPlugin.logError("error getting classpathEntries of javaProject " + javaProject.getPath() 
-					+ " while trying to localize for editor opening : " 
+			CCWPlugin.logError("error getting classpathEntries of javaProject " + javaProject.getPath()
+					+ " while trying to localize for editor opening : "
 					+ searchedNS + " " + searchedFileName, e);
 			return false;
 		}
@@ -304,8 +304,8 @@ public final class ClojureCore {
 									return true;
 								}
 							} catch (JavaModelException e) {
-								CCWPlugin.logError("error with packageFragment " + pfr.getPath() 
-										+ " while trying to localize for editor opening : " 
+								CCWPlugin.logError("error with packageFragment " + pfr.getPath()
+										+ " while trying to localize for editor opening : "
 										+ searchedNS + " " + searchedFileName, e);
 							}
 						}
@@ -320,14 +320,14 @@ public final class ClojureCore {
 									return true;
 								}
 							} catch (JavaModelException e) {
-								CCWPlugin.logError("error with packageFragment " + packageFragment.getPath() 
-										+ " while trying to localize for editor opening : " 
+								CCWPlugin.logError("error with packageFragment " + packageFragment.getPath()
+										+ " while trying to localize for editor opening : "
 										+ searchedNS + " " + searchedFileName, e);
 							}
 						}
 					} catch (JavaModelException e) {
-						CCWPlugin.logError("error with packageFragmentRoot " + pfr.getPath() 
-								+ " while trying to localize for editor opening : " 
+						CCWPlugin.logError("error with packageFragmentRoot " + pfr.getPath()
+								+ " while trying to localize for editor opening : "
 								+ searchedNS + " " + searchedFileName, e);
 					}
 				}
@@ -343,7 +343,7 @@ public final class ClojureCore {
 		}
 		return false;
 	}
-    
+
     public static IPath toOSAbsoluteIPath(IPath path) {
 		if (ClojureCore.isWorkspaceRelativeIPath(path)) {
 			boolean isFolder = path.getFileExtension() == null;
@@ -355,7 +355,7 @@ public final class ClojureCore {
 		}
 		return path;
     }
-    
+
     public static boolean isWorkspaceRelativeIPath(IPath path) {
     	return ResourcesPlugin.getWorkspace().getRoot().exists(path);
 	}
@@ -367,9 +367,9 @@ public final class ClojureCore {
 	public static String getNamespaceNameFromPackageName(String packageName) {
 		return packageName.toString().replace('/', '.').replace('_', '-');
 	}
-	
+
 	private final static Pattern SEARCH_DECLARING_NAMESPACE_PATTERN
-		= Pattern.compile("\\(\\s*(?:in-)?ns\\s+([^\\s\\)#\\[\\'\\{]+)"); 
+		= Pattern.compile("\\(\\s*(?:in-)?ns\\s+([^\\s\\)#\\[\\'\\{]+)");
 
 	public static String findDeclaringNamespace(String sourceText) {
 		Var sexp = RT.var("paredit.parser", "sexp");
@@ -387,14 +387,14 @@ public final class ClojureCore {
 			return null;
 		}
 	}
-	
+
 	private final static Pattern HAS_NS_CALL_PATTERN = Pattern.compile("^\\s*\\(ns(\\s.*|$)", Pattern.MULTILINE);
 	/**
 	 * @return true if a ns call is detected by a regex-based heuristic
 	 */
 	private static boolean hasNsCall(String sourceCode) {
 		Matcher matcher = HAS_NS_CALL_PATTERN.matcher(sourceCode);
-		return matcher.find(); 
+		return matcher.find();
 	}
 
 	/**
@@ -409,7 +409,7 @@ public final class ClojureCore {
 	 * If check is ko, returns nil, the file does not correspond to a 'lib'
 	 * <br/>
 	 * If check is ok, deduce the 'lib' name from the file path, e.g. a file
-	 * path such as <code>/projectName/src/foo/bar_baz/core.clj</code> will 
+	 * path such as <code>/projectName/src/foo/bar_baz/core.clj</code> will
 	 * return "foo.bar-baz.core".
 	 * </p>
 	 * <p>
@@ -459,7 +459,7 @@ public final class ClojureCore {
 			}
 		}
     }
-    
+
     private static String getFileText(IFile file) {
     	try {
 			return (String) RT.var("clojure.core", "slurp").invoke(file.getLocation().toOSString());
@@ -468,7 +468,7 @@ public final class ClojureCore {
 			return null;
 		}
     }
-    
+
     private static boolean tryNonJavaResources(Object[] nonJavaResources, String searchedFileName, int line) throws PartInitException {
 		for (Object nonJavaResource: nonJavaResources) {
 			String nonJavaResourceName = null;

@@ -17,19 +17,19 @@ import ccw.repl.REPLView;
  * but {@link ClojureSourceViewer} is needed for useful REPL presentation).
  */
 public interface IClojureEditor extends IAdaptable {
-	
+
 	String KEY_BINDING_SCOPE = "ccw.ui.clojureEditorScope";   //$NON-NLS-1$
-	
+
     /**
      * Corresponds to {@link AbstractTextEditor#selectAndReveal(int, int)}
      */
     void selectAndReveal (int start, int length);
-    
+
     /**
      * Returns true if paredit-style strict structural editing is enabled.
      */
     boolean isStructuralEditingEnabled ();
-    
+
     /**
      * Returns true only if the editor is in an "escape sequence", temporarily
      * disabling structural editing mode (if enabled).
@@ -47,7 +47,7 @@ public interface IClojureEditor extends IAdaptable {
      * @return a region denoting the current unsigned selection
      */
     IRegion getUnSignedSelection ();
-    
+
     /**
      * Returns the signed current selection.
      * The length will be negative if the resulting selection
@@ -59,7 +59,7 @@ public interface IClojureEditor extends IAdaptable {
      * @return a region denoting the current signed selection, for a resulting RtoL selections length is < 0
      */
     IRegion getSignedSelection ();
-    
+
 	SelectionHistory getSelectionHistory();
 
     ISelectionProvider getSelectionProvider();
@@ -76,12 +76,12 @@ public interface IClojureEditor extends IAdaptable {
 
     Object getParseState ();
     Object getPreviousParseTree ();
-    
+
     /**
      * Can be null...
      */
     REPLView getCorrespondingREPL ();
-    
+
     void updateTabsToSpacesConverter ();
 
 	IDocument getDocument();
@@ -89,7 +89,7 @@ public interface IClojureEditor extends IAdaptable {
 	void setStatusLineErrorMessage(String msg);
 
 	void gotoMatchingBracket();
-	
+
 	DefaultCharacterPairMatcher getPairsMatcher();
 
 	boolean isStructuralEditionPossible();

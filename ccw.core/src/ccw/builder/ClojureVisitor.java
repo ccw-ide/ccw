@@ -37,16 +37,16 @@ import clojure.tools.nrepl.Connection.Response;
 
 public class ClojureVisitor implements IResourceVisitor {
 	private Map.Entry<IFolder, IFolder> currentSrcFolder;
-	
+
 	private Map<IFolder, IFolder> srcFolders;
-	
+
 	private final List<String> clojureLibs = new ArrayList<String>();
 	private final Connection repl;
-	
+
 	public ClojureVisitor() {
 		repl = null;
 	}
-	
+
 	public ClojureVisitor (Connection repl) {
 		this.repl = repl;
 	}
@@ -105,14 +105,14 @@ public class ClojureVisitor implements IResourceVisitor {
 		    }
 		}
 	}
-	
+
 	//"java.lang.Exception: Unable to resolve symbol: pairs in this context (sudoku_solver.clj:130)"
 	private static final Pattern ERROR_MESSAGE_PATTERN = Pattern.compile("^(java.lang.Exception: )?(.*)\\((.+):(\\d+)\\)$");
 	private static final int MESSAGE_GROUP = 2;
 	private static final int FILENAME_GROUP = 3;
 	private static final int LINE_GROUP = 4;
 	private static final String NO_SOURCE_FILE = "NO_SOURCE_FILE";
-	
+
 	public boolean visit(IResource resource) throws CoreException {
 		if (resource instanceof IFile) {
 			String maybeLibName = ClojureCore.findMaybeLibNamespace(
@@ -126,7 +126,7 @@ public class ClojureVisitor implements IResourceVisitor {
 		}
 		return true;
 	}
-	
+
 	private void createMarker(final String filename, final int line, final String message) {
 		try {
 			System.out.println("(trying to) create a marker for " + filename);
@@ -141,7 +141,7 @@ public class ClojureVisitor implements IResourceVisitor {
 								MarkerUtilities.setMessage(attrs, message);
 								attrs.put(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
 								MarkerUtilities.createMarker(resource, attrs, ClojureBuilder.CLOJURE_COMPILER_PROBLEM_MARKER_TYPE);
-								
+
 								System.out.println("created marker !");
 							}
 						}
@@ -150,11 +150,11 @@ public class ClojureVisitor implements IResourceVisitor {
 				});
 			}
 		} catch (CoreException e) {
-			CCWPlugin.logError("error while creating marker for file : " + filename + " at line " + line 
+			CCWPlugin.logError("error while creating marker for file : " + filename + " at line " + line
 					+ " with message :'" + message + "'", e);
 		}
 	}
-	
+
 	public String[] getClojureLibs() {
 		return clojureLibs.toArray(new String[clojureLibs.size()]);
 	}

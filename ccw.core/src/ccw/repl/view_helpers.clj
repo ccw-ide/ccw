@@ -112,7 +112,7 @@
         history (atom history)
         current-step (atom -1)
         retained-input (atom nil)
-        history-action-fn 
+        history-action-fn
           (fn [history-shift]
             (swap! current-step history-shift)
             (cond

@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Laurent PETIT - initial API and implementation
  *******************************************************************************/
 package ccw.debug;
@@ -32,7 +32,7 @@ public class ClojureClient {
 //  private static final Var localLoadRead;
     private static final Var starPort;
     private int port;
-    
+
     static {
         remoteLoad = RT.var("ccw.debug.clientrepl", "remote-load");
         remoteLoadRead = RT.var("ccw.debug.clientrepl", "remote-load-read");
@@ -40,7 +40,7 @@ public class ClojureClient {
 //      localLoadRead = RT.var("clojure.core", "local-load-read");
         starPort = RT.var("ccw.debug.clientrepl", "*default-repl-port*");
     }
-    
+
     private static Object invokeLocalClojureVarWith(Var varToInvoke, String code) {
         try {
             return varToInvoke.invoke(code);
@@ -49,32 +49,32 @@ public class ClojureClient {
             return null;
         }
     }
-    
+
     public static Object loadString(String localCode) {
         return invokeLocalClojureVarWith(loadString, localCode);
     }
-    
+
     /*
-    
+
     public ClojureClient(int port) {
         this.port = port;
     }
-    
+
     public int getPort() { return port; }
 
     public String remoteLoad(String remoteCode) {
         Object result = invokeClojureVarWith(remoteLoad, remoteCode);
         return (result == null) ? null : result.toString();
     }
-    
+
     public Object remoteLoadRead(String remoteCode) {
         return invokeClojureVarWith(remoteLoadRead, remoteCode);
     }
-    
+
 //  public Object localLoadRead(String localCode) {
 //      return invokeClojureVarWith(localLoadRead, localCode);
 //  }
-    
+
     private Object invokeClojureVarWith(Var varToInvoke, String code) {
         try {
             Var.pushThreadBindings(RT.map(starPort, port));
@@ -86,10 +86,10 @@ public class ClojureClient {
             Var.popThreadBindings();
         }
     }
-    
-    
-    
-    
+
+
+
+
     /**
      * Invoke <code>${ns}/${name}</code> clojure callable, requiring the namespace
      * first.
@@ -97,7 +97,7 @@ public class ClojureClient {
     /*
     public static Object invoke(String ns, String name, Object... args) throws Exception {
         loadString("(clojure.core/require '" + ns + ")");
-        
+
         Var var = RT.var(ns, name);
         switch (args.length) {
         case 0:
@@ -142,7 +142,7 @@ public class ClojureClient {
         cv.display(console);
     }
 
-    
+
     public static IOConsole findActiveReplConsole() {
         IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
         if (window != null) {

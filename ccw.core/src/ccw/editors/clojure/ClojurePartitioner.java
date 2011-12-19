@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Casey Marshall - initial API and implementation
  *******************************************************************************/
 package ccw.editors.clojure;
@@ -19,7 +19,7 @@ public class ClojurePartitioner extends FastPartitioner {
     public ClojurePartitioner(IPartitionTokenScanner scanner, String[] legalContentTypes) {
     	super(scanner, legalContentTypes);
     }
-    
+
     @Override
     public void connect(IDocument document, boolean delayInitialization) {
         super.connect(document, delayInitialization);
@@ -34,13 +34,13 @@ public class ClojurePartitioner extends FastPartitioner {
 //        {
 //            try
 //            {
-//                buffer.append("Partition type: " 
-//                  + partitions[i].getType() 
+//                buffer.append("Partition type: "
+//                  + partitions[i].getType()
 //                  + ", offset: " + partitions[i].getOffset()
 //                  + ", length: " + partitions[i].getLength());
 //                buffer.append("\n");
 //                buffer.append("Text:\n");
-//                buffer.append(document.get(partitions[i].getOffset(), 
+//                buffer.append(document.get(partitions[i].getOffset(),
 //                 partitions[i].getLength()));
 //                buffer.append("\n---------------------------\n\n\n");
 //            }

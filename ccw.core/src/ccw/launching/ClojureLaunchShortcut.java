@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Casey Marshall - initial API and implementation
  *******************************************************************************/
 package ccw.launching;
@@ -46,7 +46,7 @@ import ccw.ClojureCore;
 
 public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfigurationConstants {
     private static final HashMap<String, Integer> tempLaunchCounters = new HashMap();
-    
+
     private static int incTempLaunchCount (String projectName) {
         synchronized (tempLaunchCounters) {
             Integer cnt = tempLaunchCounters.get(projectName);
@@ -56,11 +56,11 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
         }
     }
 
-    
+
     public void launch(IEditorPart editor, String mode) {
     	launchEditorPart(editor, mode, null);
     }
-    
+
     private ILaunch launchEditorPart(IEditorPart editor, String mode, Boolean activateAutoReload) {
         IEditorInput input = editor.getEditorInput();
         if (input instanceof FileEditorInput) {
@@ -75,9 +75,9 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     public void launch(ISelection selection, String mode) {
     	launchSelection(selection, mode, null);
     }
-    
+
     /**
-     * 
+     *
      * @param selection
      * @param mode
      * @param activateAutoReload if null, then will be automatically detected
@@ -112,7 +112,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     	StructuredSelection sel = new StructuredSelection(project);
     	return launchSelection(sel, mode, activateAutoReload);
     }
-    
+
     protected ILaunch launchProject(IProject project, IFile[] files, String mode, Boolean activateAutoReload) {
     	activateAutoReload = activateAutoReload==null ? files.length==0 : activateAutoReload;
         try {
@@ -145,9 +145,9 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
         ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
         ILaunchConfigurationType type =
             lm.getLaunchConfigurationType(LaunchUtils.LAUNCH_CONFIG_ID);
-        
+
         List candidateConfigs = Collections.EMPTY_LIST;
-        
+
         try {
             ILaunchConfiguration[] configs = DebugPlugin.getDefault().getLaunchManager().getLaunchConfigurations(type);
             candidateConfigs = new ArrayList(configs.length);
@@ -177,26 +177,26 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
             ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
             ILaunchConfigurationType type =
                 lm.getLaunchConfigurationType(LaunchUtils.LAUNCH_CONFIG_ID);
-            
+
             String basename = project.getName() + " REPL";
             if (files.length == 1) {
-                basename += " [" + files[0].getName() + "]"; 
+                basename += " [" + files[0].getName() + "]";
             }
-            
+
             ILaunchConfigurationWorkingCopy wc = type.newInstance(
                     null, DebugPlugin.getDefault().getLaunchManager().
                         generateUniqueLaunchConfigurationNameFrom(basename));
-            
+
             LaunchUtils.setFilesToLaunchString(wc, Arrays.asList(files));
-            
+
             wc.setAttribute(ATTR_PROGRAM_ARGUMENTS, "");
-            
+
             wc.setAttribute(ATTR_MAIN_TYPE_NAME, LaunchUtils.CLOJURE_MAIN);
-            
+
             wc.setAttribute(ATTR_PROJECT_NAME, project.getName());
-            
+
             wc.setMappedResources(new IResource[] {project});
-            
+
             config = wc.doSave();
         }
         catch (CoreException ce) {
@@ -204,14 +204,14 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
         }
         return config;
     }
-    
+
     protected ILaunchConfiguration chooseConfiguration(List configList) {
         IDebugModelPresentation labelProvider = null;
     	try {
     		labelProvider = DebugUITools.newDebugModelPresentation();
 	        ElementListSelectionDialog dialog= new ElementListSelectionDialog(JDIDebugUIPlugin.getActiveWorkbenchShell(), labelProvider);
 	        dialog.setElements(configList.toArray());
-	        dialog.setTitle("Choose a Clojure launch configuration");  
+	        dialog.setTitle("Choose a Clojure launch configuration");
 	        dialog.setMessage(LauncherMessages.JavaLaunchShortcut_2);
 	        dialog.setMultipleSelection(false);
 	        int result = dialog.open();
@@ -225,5 +225,5 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     		}
     	}
     }
-    
+
 }

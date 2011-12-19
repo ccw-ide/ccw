@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Laurent PETIT - initial API and implementation
  *******************************************************************************/
 package ccw.editors.clojure;
@@ -21,17 +21,17 @@ final public class EvaluateTextUtil {
 	private EvaluateTextUtil() {
 		// Not intended to be subclassed
 	}
-	
+
 	public static final void evaluateText(final String text, boolean userInput) {
 		evaluateText(REPLView.activeREPL.get(), text, userInput);
 	}
-	
+
 	public static final void evaluateText(REPLView console, final String text, boolean userInput) {
 	    if (console == null || console.isDisposed()) {
             DisplayUtil.syncExec(new Runnable() {
                 public void run() {
-                    MessageDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), 
-                            "Expression evaluation", 
+                    MessageDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+                            "Expression evaluation",
                             "Please activate a running REPL session before attempting to evaluate code.");
                 }
             });
@@ -39,7 +39,7 @@ final public class EvaluateTextUtil {
             console.evalExpression(text, userInput, userInput);
         }
 	}
-	
+
 	/**
 	 * Verifies if all is OK. Currently, that just means that if the file is not
 	 * saved, we ask the user for the permission to save the file and continue

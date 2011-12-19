@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Casey Marshal - initial API and implementation
  *    Laurent PETIT - evolution and maintenance
  *******************************************************************************/
@@ -48,26 +48,26 @@ import ccw.CCWPlugin;
 
 /**
  * Heavily adapted from JDT's java launcher tabs.
- * 
+ *
  * @author cmarshal, laurent.petit
- * 
+ *
  */
-/* 
+/*
  * TODO incoming additions: Repl settings:
  *  * auto-attribute server port. user set server port becomes an option
  *  * repl variants: clojure.lang.Repl , clojure.main , clojure.contrib.repl_ln
  *  * warn-on-reflection
- *  * (NOT DONE HERE, though): auto-completion as with the editor 
+ *  * (NOT DONE HERE, though): auto-completion as with the editor
  */
 @SuppressWarnings("restriction")
 public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchConfigurationConstants {
-	
+
     protected boolean useREPL = true;
 
     protected TableViewer sourceFilesViewer;
-    
+
     private Button installREPLChoice;
-    
+
     public String getName() {
         return "Clojure";
     }
@@ -87,17 +87,17 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
     private void createFileEditor(final Composite parent, String string) {
         Group section = SWTFactory.createGroup(parent, "Evaluate Clojure source file(s)",
                 2, 1, GridData.FILL_BOTH);
-        
+
         sourceFilesViewer = new TableViewer(section);
         sourceFilesViewer.setLabelProvider(new DecoratingLabelProvider(
         		new WorkbenchLabelProvider(),CCWPlugin.getDefault().getWorkbench()
         						.getDecoratorManager().getLabelDecorator()));
         sourceFilesViewer.setContentProvider(new ArrayContentProvider());
         sourceFilesViewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
-        
+
         Composite buttonSection = SWTFactory.createComposite(section, parent.getFont(),
                 1, 1, GridData.FILL_BOTH);
-        
+
         Button chooseButton = new Button(buttonSection, SWT.PUSH);
         chooseButton.setText("Choose...");
         chooseButton.addSelectionListener(new SelectionAdapter(){
@@ -109,18 +109,18 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
                 if (proj == null) {
                     return;
                 }
-                
+
                 CheckedTreeSelectionDialog dialog = new CheckedTreeSelectionDialog(parent.getShell(), new WorkbenchLabelProvider(), new BaseWorkbenchContentProvider());
                 dialog.setInput(proj.getWorkspace().getRoot());
                 dialog.addFilter(new ClojureElementViewerFilter(proj));
-                
+
                 if (sourceFilesViewer.getInput() != null) {
                     dialog.setInitialSelections(
                             ((List<?>)sourceFilesViewer.getInput()).toArray());
                 }
                 dialog.setTitle("Evaluate Clojure source file(s)");
                 dialog.open();
-                
+
                 List<IFile> selectedFiles = new ArrayList<IFile>();
                 Object[] dialogResult = dialog.getResult();
                 if (dialogResult != null) {
@@ -133,14 +133,14 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
                 sourceFilesViewer.setInput(selectedFiles);
                 updateLaunchConfigurationDialog();
             }
-            
+
         });
     }
 
     private void createReplServerControl(final Composite parent) {
         Group section = SWTFactory.createGroup(parent, "Repl settings",
                 2, 1, 0);
-        
+
         installREPLChoice = SWTFactory.createCheckButton(
         		section, "Run with REPL (see tooltip for detail)", null, true, 2);
         installREPLChoice.setToolTipText("If checked, all files listed will be loaded with the -i option, " +
@@ -155,7 +155,7 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
 			}
 		});
     }
-    
+
     public void setDefaults(ILaunchConfigurationWorkingCopy config) {
         IJavaElement javaElement = getContext();
         if (javaElement != null) {
@@ -163,13 +163,13 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
         } else {
             config.setAttribute(ATTR_PROJECT_NAME, EMPTY_STRING);
         }
-        
+
         try {
         	if (config.getAttribute(ATTR_MAIN_TYPE_NAME, (String) null) == null) {
         		config.setAttribute(ATTR_MAIN_TYPE_NAME, LaunchUtils.CLOJURE_MAIN); // Overriden at launch time, set here just to make JavaMainTab happy
         	}
         	config.setAttribute(LaunchUtils.ATTR_CLOJURE_START_REPL, true);
-            
+
             config.doSave();
         }
         catch (CoreException e) {
@@ -186,14 +186,14 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
         if (proj == null) {
             return;
         }
-        
+
         try {
         	installREPLChoice.setSelection(config.getAttribute(LaunchUtils.ATTR_CLOJURE_START_REPL, true));
         } catch (CoreException e) {
         	CCWPlugin.logError("error while initializing serverPort", e);
         	installREPLChoice.setSelection(true);
         }
-        try {    
+        try {
         	sourceFilesViewer.setInput(LaunchUtils.getFilesToLaunchList(config));
         } catch (CoreException e) {
         	CCWPlugin.logError("error while initializing file list", e);
@@ -203,7 +203,7 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
 
     @SuppressWarnings("unchecked")
     public void performApply(ILaunchConfigurationWorkingCopy config) {
-    	
+
         config.setAttribute(ATTR_PROJECT_NAME, fProjText.getText().trim());
 
         LaunchUtils.setFilesToLaunchString(config, (List<IFile>) sourceFilesViewer.getInput());
@@ -211,7 +211,7 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
     	config.setAttribute(ATTR_MAIN_TYPE_NAME, LaunchUtils.CLOJURE_MAIN); // Overriden at launch time, set here just to make JavaMainTab happy
 
         config.setAttribute(LaunchUtils.ATTR_CLOJURE_START_REPL, installREPLChoice.getSelection());
-        
+
         mapResources(config);
     }
 }

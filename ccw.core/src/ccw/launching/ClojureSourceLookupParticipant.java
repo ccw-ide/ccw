@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Laurent PETIT - initial API and implementation
  *******************************************************************************/
 package ccw.launching;
@@ -22,11 +22,11 @@ import org.eclipse.jdt.launching.sourcelookup.containers.JavaSourceLookupPartici
 
 /**
  * Clojure code source lookup participant.
- * 
+ *
  * Some JDT utility classes are not accessible.
  * So this class presumes that it is used with a sibling
- * JavaSourceLookupParticipant in a same SourceLookupDirector 
- * 
+ * JavaSourceLookupParticipant in a same SourceLookupDirector
+ *
  * @note some code borrowed from the JDT
  * @author lpetit
  *
@@ -34,13 +34,13 @@ import org.eclipse.jdt.launching.sourcelookup.containers.JavaSourceLookupPartici
 public class ClojureSourceLookupParticipant extends
 		AbstractSourceLookupParticipant implements ISourceLookupParticipant {
 
-	/** 
-	 * Cache of sibling java lookup participant with performance considerations in mind. 
+	/**
+	 * Cache of sibling java lookup participant with performance considerations in mind.
 	 * This object is necessary so that we can access certain hidden utility methods indirectly
 	 * (e.g. have cachedSiblingJavaParticipant.getSourceName() do the job for us)
 	 * */
 	JavaSourceLookupParticipant cachedSiblingJavaParticipant;
-	
+
 	/**
 	 * Map of delegate source containers.
 	 * Everything possible is converted to plain FolderSourceContainer or ArchiveSourceContainer
@@ -48,7 +48,7 @@ public class ClojureSourceLookupParticipant extends
 	 * @note borrowed from the JDT (JavaSourceLookupParticipant)
 	 */
 	private Map<ISourceContainer, ISourceContainer> delegateContainers;
-	
+
 
 	public String getSourceName(Object object) throws CoreException {
 		JavaSourceLookupParticipant javaParticipant = findSiblingJavaParticipant();
@@ -58,7 +58,7 @@ public class ClojureSourceLookupParticipant extends
 			return javaParticipant.getSourceName(object);
 		}
 	}
-	
+
 	private JavaSourceLookupParticipant findSiblingJavaParticipant() throws CoreException {
 		if (cachedSiblingJavaParticipant == null) {
 			for (ISourceLookupParticipant p: getDirector().getParticipants()) {
@@ -80,8 +80,8 @@ public class ClojureSourceLookupParticipant extends
 		ISourceContainer delegate = delegateContainers.get(container);
 		if (delegate == null) {
 			return container;
-		} 
-		return delegate; 
+		}
+		return delegate;
 	}
 
 
@@ -127,17 +127,17 @@ public class ClojureSourceLookupParticipant extends
 //			}
 		}
 	}
-	
+
 	@Override
 	public void dispose() {
 		this.cachedSiblingJavaParticipant = null;
-		
+
 		disposeAndClearDelegateContainers(delegateContainers);
 		delegateContainers = null;
-		
+
 		super.dispose();
 	}
-	
+
 	private void disposeAndClearDelegateContainers(Map<ISourceContainer, ISourceContainer> delegateContainers) {
 		if (delegateContainers != null) {
 			for (ISourceContainer sc: delegateContainers.values()) {

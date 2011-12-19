@@ -5,7 +5,7 @@
 ;* which accompanies this distribution, and is available at
 ;* http://www.eclipse.org/legal/epl-v10.html
 ;*
-;* Contributors: 
+;* Contributors:
 ;*    Laurent PETIT - initial API and implementation
 ;*******************************************************************************/
 (ns ccw.ClojureProjectNature
@@ -26,7 +26,7 @@
 (defmethod cc.stream/copy [IPath IPath] [#^IPath input #^IPath output]
   (println "input:" input ", output:" output)
   (cc.stream/copy (.toFile input) (.toFile output)))
-   
+
 (defn- -init
   [] [[] (ref {:project nil :errors []})])
 
@@ -36,7 +36,7 @@
   "
   [proj]
   (cond
-    (nil? proj) 
+    (nil? proj)
       (do
 	      (CCWPlugin/logError "Could not add or remove clojure nature: project is null")
 	      nil)
@@ -54,7 +54,7 @@
 (defn- builder-present?
   [builders builder-name]
   (some #(= builder-name (.getBuilderName %)) builders))
-    
+
 (defn- get-jar-inside-plugin
   [plugin-name jar-name]
   (try
@@ -75,23 +75,23 @@
       (do
         (CCWPlugin/logError (str "Unable to find " plugin-name " plugin. This is probably a regression."))
         nil))))
-          
+
 (defn- has-classes-folder?
   [java-project]
-  (not (nil? (.findPackageFragmentRoot java-project (-> java-project .getProject (.getFolder "classes") .getLocation)))))     
+  (not (nil? (.findPackageFragmentRoot java-project (-> java-project .getProject (.getFolder "classes") .getLocation)))))
 
-(defn has-path-on-classpath? 
+(defn has-path-on-classpath?
   [java-project searched-path]
   (let [p (if (instance? Path searched-path) searched-path (Path. searched-path))]
     (not (nil? (.findElement java-project p)))))
-    
+
 (defn has-clojure-contrib-on-classpath?
   [java-project]
   (has-path-on-classpath? java-project "clojure/contrib"))
 
 (defn has-clojure-on-classpath?
   [java-project]
-  (has-path-on-classpath? java-project "clojure/lang"))  
+  (has-path-on-classpath? java-project "clojure/lang"))
 
 (defn- has-classpath-entry?
   [java-project lib-path]
@@ -136,10 +136,10 @@
       	        in-project-lib    (make-dest-path lib-path)
       	        in-project-libSrc (when libSrc-path
       	        										(if copy?
-		      	        									(-> in-project-lib 
-		      	        										(.removeLastSegments 1) 
-		      	        										(.append (-> in-project-lib 
-		      	        																.removeFileExtension 
+		      	        									(-> in-project-lib
+		      	        										(.removeLastSegments 1)
+		      	        										(.append (-> in-project-lib
+		      	        																.removeFileExtension
 		      	        																.lastSegment
 		      	        																(str "-src")))
 		      	        										(.addFileExtension (.getFileExtension libSrc-path)))
@@ -147,10 +147,10 @@
       	    (when copy?
       	    	(cc.stream/copy lib-path in-project-lib)
       	    	(when in-project-libSrc (cc.stream/copy libSrc-path in-project-libSrc)))
-      	    (let 
-             [entries-new 
-               (into-array 
-                 (conj entries-old 
+      	    (let
+             [entries-new
+               (into-array
+                 (conj entries-old
                    (JavaCore/newLibraryEntry (make-ws-path in-project-lib) (make-ws-path in-project-libSrc) nil)))]
       	      (doto java-project
       	        (.setRawClasspath entries-new nil)
@@ -166,15 +166,15 @@
     java-project
     (file-to-path (get-jar-inside-plugin "ccw.clojure", "clojure"))
     (file-to-path (get-jar-inside-plugin "ccw.clojure", "src"))
-    true))      	    
-      
+    true))
+
 (defn- add-clojure-contrib-lib-on-classpath!
   [java-project]
   (add-lib-on-classpath!
     java-project
     (file-to-path (get-jar-inside-plugin "ccw.clojurecontrib", "clojure-contrib"))
     (file-to-path (get-jar-inside-plugin "ccw.clojurecontrib", "src"))
-    true))      	    
+    true))
 
 (defn- add-classes-directory!
   [java-project]
@@ -206,7 +206,7 @@
 		  (.setBuilderName clojure-command (ClojureBuilder/BUILDER_ID))
 		  (.setBuildSpec desc (into-array (cons clojure-command spec)))
 		  (.setDescription proj desc (IResource/FORCE), nil))))
-		             
+
 (defn- -configure
   [this]
   (let [proj (:project @(.state this))]
@@ -215,7 +215,7 @@
 		    (when (not (builder-present? spec (ClojureBuilder/BUILDER_ID)))
 		      (insert-clojure-builder! proj spec desc)
 		      (setup-clojure-project-classpath! proj))))))
-  
+
 (defn- -deconfigure
   [this]
   (when-let [desc (get-project-description (.getProject this))]
@@ -226,10 +226,10 @@
           (try
             (.setDescription (.getProject this) desc nil)
             (catch CoreException e
-              (CCWPlugin/logError "Could not set project description" e)))))))) 
-  
+              (CCWPlugin/logError "Could not set project description" e))))))))
+
 (defn -getProject
   [this] (:project @(.state this)))
 
 (defn -setProject
-  [this proj] (dosync (alter (.state this) assoc :project proj)))      
+  [this proj] (dosync (alter (.state this) assoc :project proj)))

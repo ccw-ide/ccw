@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Laurent PETIT - initial API and implementation
  *******************************************************************************/
 package ccw.launching;
@@ -22,13 +22,13 @@ import org.eclipse.debug.core.sourcelookup.ISourceLookupDirector;
  */
 public class ClojureSourceContainer implements
 		ISourceContainer {
-	
+
 	private final ISourceContainer delegatee;
 
 	public ClojureSourceContainer(ISourceContainer delegatee) {
 		this.delegatee = delegatee;
 	}
-	
+
 	public void dispose() {
 		// Nothing yet
 	}

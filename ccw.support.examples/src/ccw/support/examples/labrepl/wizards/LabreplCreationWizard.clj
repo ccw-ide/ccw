@@ -5,7 +5,7 @@
 ;* which accompanies this distribution, and is available at
 ;* http://www.eclipse.org/legal/epl-v10.html
 ;*
-;* Contributors: 
+;* Contributors:
 ;*    Stephan Muehlstrasser - initial API and implementation
 ;*******************************************************************************/
 
@@ -57,7 +57,7 @@
   (let
     [shell (.getShell this)
      display (.getDisplay shell)
-     
+
      open-dialog
       (fn [file]
         (let
@@ -73,7 +73,7 @@
               (fn [] (reset! result (.open dialog)))]
           (.syncExec display run-dialog)
           (deref result)))
-      
+
      import-overwrite-query
        (proxy [IOverwriteQuery] []
          (queryOverwrite [file]
@@ -84,7 +84,7 @@
              (if (< return-value 0)
                IOverwriteQuery/CANCEL
                (return-codes return-value)))))
-       
+
      runnable (LabreplCreationOperation. (:main-page @(.state this)) import-overwrite-query)
      op (WorkspaceModifyDelegatingOperation. runnable)]
   (.run (.getContainer this) false true op)

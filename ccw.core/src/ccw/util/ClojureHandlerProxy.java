@@ -26,7 +26,7 @@ public class ClojureHandlerProxy extends AbstractHandler {
 			throw new CoreException(status);
 		}
 	}
-	
+
 	private Bundle getBundle(String bundleSymbolicName) throws CoreException {
 		// TODO: not good??, maybe we will not catch the right bundle (the same the OSGi framework would use ...)
 		try {

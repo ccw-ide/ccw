@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Stephan Muehlstrasser - initial implementation
  *******************************************************************************/
 
@@ -63,22 +63,22 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
      * The preference store.
      */
     private IPreferenceStore fPreferenceStore;
-    
+
 	/**
 	 * This viewer's foreground color.
 	 */
 	private Color fForegroundColor;
-	
+
 	/**
 	 * The viewer's background color.
 	 */
 	private Color fBackgroundColor;
-	
+
 	/**
 	 * This viewer's selection foreground color.
 	 */
 	private Color fSelectionForegroundColor;
-	
+
 	/**
 	 * The viewer's selection background color.
 	 */
@@ -89,14 +89,14 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
      * for reconfiguring.
      */
     private ClojureSourceViewerConfiguration fConfiguration;
-    
+
     /**
      * Is this source viewer configured?
      */
     private boolean fIsConfigured;
 
     private boolean inEscapeSequence;
-    
+
 	/**
 	 * Set to true if the editor is in "Strict" Structural editing mode
 	 */
@@ -105,9 +105,9 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     /** History for structure select action
 	 * STOLEN FROM THE JDT */
 	private SelectionHistory fSelectionHistory;
-	
+
 	private StatusLineContributionItem structuralEditionStatusField;
-	
+
 	/** The error message shown in the status line in case of failed information look up. */
 	protected final String fErrorLabel = "An unexpected error occured";
 
@@ -115,8 +115,8 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 	public SelectionHistory getSelectionHistory() {
 		return fSelectionHistory;
 	}
-    
-	/** 
+
+	/**
 	 * Set to false if structural editing is not possible, because the document
 	 * is not parseable.
 	 */
@@ -125,7 +125,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     public ClojureSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles, IPreferenceStore store) {
         super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles);
         setPreferenceStore(store);
-        
+
         getTextWidget().addKeyListener(new KeyListener() {
             public void keyPressed(KeyEvent e) {
                 if (e.character == SWT.ESC) {
@@ -141,7 +141,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
                 }
             }
         });
-        
+
         addTextInputListener(new ITextInputListener() {
             public void inputDocumentChanged(IDocument oldInput, IDocument newInput) {
                 if (newInput != null) {
@@ -150,17 +150,17 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
                     updateTextBuffer(text, 0, -1, text);
                 }
             }
-            
+
             public void inputDocumentAboutToBeChanged(IDocument oldInput,
                     IDocument newInput) {
                 if (oldInput != null)
                     oldInput.removeDocumentListener(parseTreeConstructorDocumentListener);
             }
         });
-        
+
 		useStrictStructuralEditing = store.getBoolean(ccw.preferences.PreferenceConstants.USE_STRICT_STRUCTURAL_EDITING_MODE_BY_DEFAULT);
 
-		structuralEditionStatusField = 
+		structuralEditionStatusField =
 			new StatusLineContributionItem(ClojureSourceViewer.STATUS_CATEGORY_STRUCTURAL_EDITION, true, 33);
 		structuralEditionStatusField.setActionHandler(new Action() {
 			public void run() {
@@ -205,7 +205,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
             fPreferenceStore.addPropertyChangeListener(this);
             initializeViewerColors();
         }
-        
+
         if (configuration instanceof ClojureSourceViewerConfiguration)
             fConfiguration = (ClojureSourceViewerConfiguration) configuration;
 
@@ -213,8 +213,8 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 
         fIsConfigured= true;
     }
-    
-    
+
+
     /**
      * Creates a color from the information stored in the given preference store.
      * Returns <code>null</code> if there is no such information available.
@@ -240,7 +240,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 
         return null;
     }
-    
+
 	public void initializeViewerColors() {
 		if (fPreferenceStore != null) {
 			StyledText styledText= getTextWidget();
@@ -288,7 +288,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 				fSelectionBackgroundColor.dispose();
 
 			fSelectionBackgroundColor= color;
-			
+
             CCWPlugin.registerEditorColors(fPreferenceStore, styledText.getForeground().getRGB());
 		}
     }
@@ -302,22 +302,22 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 			fForegroundColor.dispose();
 			fForegroundColor= null;
 		}
-		
+
 		if (fBackgroundColor != null) {
 			fBackgroundColor.dispose();
 			fBackgroundColor= null;
 		}
-		
+
 		if (fSelectionForegroundColor != null) {
 			fSelectionForegroundColor.dispose();
 			fSelectionForegroundColor= null;
 		}
-		
+
 		if (fSelectionBackgroundColor != null) {
 			fSelectionBackgroundColor.dispose();
 			fSelectionBackgroundColor= null;
 		}
-		
+
         if (fPreferenceStore != null)
             fPreferenceStore.removePropertyChangeListener(this);
 
@@ -335,7 +335,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
      * It's a ref, holding a map {:text "the raw text file" :parser parser}
      * where state is a future holding the parser's state
      */
-    private Object parseState; 
+    private Object parseState;
 
     private IDocumentListener parseTreeConstructorDocumentListener = new IDocumentListener() {
         public void documentAboutToBeChanged(DocumentEvent event) {
@@ -346,11 +346,11 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
         public void documentChanged(DocumentEvent event) {
         }
     };
-    
+
     private String replace(String doc, int offset, int length, String text) {
     	return doc.substring(0, offset) + text + doc.substring(offset + length);
     }
-    
+
     private void updateTextBuffer (String finalText, long offset, long length, String text) {
     	boolean firstTime = (parseState == null);
         parseState = EditorSupport.updateTextBuffer(parseState, finalText, offset, length, text);
@@ -358,7 +358,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
         	EditorSupport.startWatchParseRef(parseState, this);
         }
     }
-    
+
     // TODO rename getParseInfo or get.. ?
     public Object getParseState () {
         if (parseState == null) {
@@ -367,7 +367,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
         }
         return EditorSupport.getParseState(getDocument().get(), parseState);
     }
-    
+
     public Object getPreviousParseTree () {
         if (parseState == null) {
         	return null;
@@ -375,7 +375,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
         	return EditorSupport.getPreviousParseTree(parseState);
         }
     }
-    
+
     private boolean structuralEditionPossible = true;
     public void setStructuralEditionPossible(final boolean state) {
     	structuralEditionPossible = state;
@@ -393,7 +393,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 			}
 		});
     }
-    
+
     public IRegion getSignedSelection () {
         StyledText text = getTextWidget();
         Point selection = text.getSelectionRange();
@@ -407,7 +407,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 
         return new Region(selection.x, selection.y);
     }
-    
+
     public IRegion getUnSignedSelection () {
         StyledText text = getTextWidget();
         Point selection = text.getSelectionRange();
@@ -421,7 +421,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
         setSelection(new TextSelection(start, length), true);
     }
 
-    // TODO rename because it's really "should we be in strict mode or not?" 
+    // TODO rename because it's really "should we be in strict mode or not?"
     public boolean isStructuralEditingEnabled() {
         return useStrictStructuralEditing;
     }
@@ -429,7 +429,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     public boolean isInEscapeSequence () {
         return inEscapeSequence;
     }
-    
+
     public String findDeclaringNamespace() {
 		return ClojureCore.findDeclaringNamespace((Map) EditorSupport.getParseTree(getParseState()));
     }
@@ -437,14 +437,14 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     public IJavaProject getAssociatedProject() {
         return null;
     }
-    
+
     public REPLView getCorrespondingREPL () {
         // this gets overridden in REPLView as appropriate so that the toolConnection there gets returned
         return null;
     }
-    
+
     public void updateTabsToSpacesConverter () {}
-    
+
     // TODO get rid of this way of handling document initialization
     @Override
     public void setDocument(IDocument document,
@@ -456,12 +456,12 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     		updateTextBuffer(text, 0, -1, text);
     	}
     }
-    
+
     /** Preference key for matching brackets color */
 	//PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR;
 
 	public final static char[] PAIRS= { '{', '}', '(', ')', '[', ']' };
-	
+
 	private DefaultCharacterPairMatcher pairsMatcher = new DefaultCharacterPairMatcher(PAIRS, ClojurePartitionScanner.CLOJURE_PARTITIONING) {
 		/* tries to match a pair be the cursor after or before a pair start/end element */
 		@Override
@@ -540,31 +540,31 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 	public DefaultCharacterPairMatcher getPairsMatcher() {
 		return pairsMatcher;
 	}
-	
+
 	public void setStructuralEditingPossible(boolean state) {
 		if (state != this.structuralEditingPossible) {
 			this.structuralEditingPossible = state;
 			updateStatusField();
 		}
 	}
-	
+
     public void toggleStructuralEditionMode() {
        useStrictStructuralEditing = !useStrictStructuralEditing;
        updateStatusField();
     }
-    
+
 	private void updateStatusField() {
 		if (structuralEditionStatusField != null) {
 			/*
 			 * Disabled, because currently structuralEditingPossible is not reliable (some paredit commands stop after having parsed all the text)
 			 * TODO reactivate when paredit has been ported to parsley
-			String text= "Structural Edition: " 
+			String text= "Structural Edition: "
 				+ (structuralEditingPossible ? "enabled" : "disabled");
 				*/
 			String text = "Structural Edition: " + (isStructuralEditingEnabled() ? "Strict mode" : "Default mode");
 			structuralEditionStatusField.setText(text == null ? fErrorLabel : text);
 			structuralEditionStatusField.setToolTipText(
-					(isStructuralEditingEnabled() 
+					(isStructuralEditingEnabled()
 							? "Strict mode: editor does its best to prevent you from breaking the structure of the code (requires you to know shortcut commands well). Click to switch to Default Mode."
 						   : "Default mode: helps you with edition, but does not get in your way Click to switch to Strict Mode."));
 		}

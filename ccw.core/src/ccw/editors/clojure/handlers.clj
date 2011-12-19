@@ -5,20 +5,20 @@
 ;* which accompanies this distribution, and is available at
 ;* http://www.eclipse.org/legal/epl-v10.html
 ;*
-;* Contributors: 
+;* Contributors:
 ;*    Laurent PETIT - initial API and implementation
 ;*******************************************************************************/
 
 (ns ccw.editors.clojure.handlers
   (:require [paredit.core :as pc]
             [ccw.editors.clojure.ClojureHyperlinkDetector :as hlu]) ; hlu as HyperLinkUtil
-  (:use [clojure.contrib.core :only [-?>]])  
+  (:use [clojure.contrib.core :only [-?>]])
   (:import
     [org.eclipse.ui.handlers HandlerUtil]
     [ccw.util PlatformUtil]
     [ccw.editors.clojure IClojureEditor
                             SourceRange]))
-   
+
 (defn- editor [event] (PlatformUtil/getAdapter (HandlerUtil/getActivePart event) IClojureEditor))
 
 (defn ignoring-selection-changes [editor f]
@@ -30,10 +30,10 @@
 (defn- apply-paredit-selection-command [editor command-key]
   (let [{:keys #{length offset}} (bean (.getUnSignedSelection editor))
         text  (.get (.getDocument editor))
-        {new-length :length, new-offset :offset} 
+        {new-length :length, new-offset :offset}
           (pc/paredit command-key (.getParseState editor) {:text text :offset offset :length length})]
     (-> editor .getSelectionHistory (.remember (SourceRange. offset length)))
-    (ignoring-selection-changes editor 
+    (ignoring-selection-changes editor
       #(.selectAndReveal editor new-offset new-length))))
 
 ;; TODO remove duplication with PareditAutoEditStrategy (or not)
@@ -61,10 +61,10 @@
 ;; TODO won't work if the ClojureSourceViewer is reused many times via configure/unconfigure (since after a re-configure,
 ;; a fresh SelectionHistory instance will be created)
 ;; Inspired directly by JDT
-(defn select-last [_ event] 
+(defn select-last [_ event]
   (let [editor (editor event)]
     (when-let [old (-> editor .getSelectionHistory .getLast)]
-      (ignoring-selection-changes editor 
+      (ignoring-selection-changes editor
         #(.selectAndReveal editor (.getOffset old) (.getLength old))))))
 
 (defn open-declaration [_ event]
@@ -78,6 +78,6 @@
     ; TODO validateEditorInputState () : if editor read-only ...
     (org.eclipse.swt.custom.BusyIndicator/showWhile
       (.getDisplay (HandlerUtil/getActiveShell event))
-      #(-> editor 
-         (.getAdapter org.eclipse.jface.text.ITextOperationTarget) 
+      #(-> editor
+         (.getAdapter org.eclipse.jface.text.ITextOperationTarget)
          (.doOperation org.eclipse.jface.text.source.ISourceViewer/CONTENTASSIST_PROPOSALS)))))

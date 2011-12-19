@@ -4,7 +4,7 @@
   (:gen-class
     :implements [org.eclipse.jface.text.hyperlink.IHyperlink]
     :constructors {[org.eclipse.jface.text.IRegion Object] []}
-    :init init 
+    :init init
     :state state))
 
 (defn state-val [this] (-> this .state deref))

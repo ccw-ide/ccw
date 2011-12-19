@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Casey Marshall - initial API and implementation
  *******************************************************************************/
 package ccw.wizards;
@@ -67,11 +67,11 @@ public class NewClojureProjectWizard extends BasicNewProjectResourceWizard {
         	return false;
         }
     }
-    
+
     private void setupJavaProjectClassPath(IJavaProject javaProject) throws CoreException {
         IClasspathEntry[] entriesOld = javaProject.getRawClasspath();
         IClasspathEntry[] entriesNew = new IClasspathEntry[entriesOld.length + 1];
-        
+
         System.arraycopy(entriesOld, 0, entriesNew, 0, entriesOld.length);
 
         // Ensure a proper "src" directory is used for sources (and not the project)

@@ -36,11 +36,11 @@
              (let [attrs (fn [ret i]
                            (if (neg? i)
                              ret
-                             (recur (assoc ret 
+                             (recur (assoc ret
                                            (. clojure.lang.Keyword (intern (symbol (. atts (getQName i)))))
                                            (. atts (getValue i)))
                                     (dec i))))
-                   e (struct element 
+                   e (struct element
                              (. clojure.lang.Keyword (intern (symbol q-name)))
                              (when (pos? (. atts (getLength)))
                                (attrs {} (dec (. atts (getLength))))))]
@@ -89,7 +89,7 @@
               *state* :between
               *sb* nil]
       (startparse s content-handler)
-      ((:content *current*) 0)))) 
+      ((:content *current*) 0))))
 
 (defn emit-element [e]
   (if (instance? String e)

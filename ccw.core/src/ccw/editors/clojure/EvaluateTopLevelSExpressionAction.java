@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Laurent PETIT - initial API and implementation
  *******************************************************************************/
 package ccw.editors.clojure;
@@ -31,7 +31,7 @@ public class EvaluateTopLevelSExpressionAction extends Action {
 
 	public void run() {
 		String selectedText = editor.getSelectedText();
-		
+
 		if (selectedText==null || selectedText.trim().equals("")) {
 			selectedText = editor.getCurrentOrNextTopLevelSExpression();
 		}
@@ -44,7 +44,7 @@ public class EvaluateTopLevelSExpressionAction extends Action {
 			if (editorNamespace != null && !editorNamespace.equals(replNamespace)) {
 				textToEvaluate = "(clojure.core/in-ns '" + editorNamespace + ")\n" + textToEvaluate + "\n(clojure.core/in-ns '" + replNamespace + ")";
 			}
-			
+
 			EvaluateTextUtil.evaluateText(repl, textToEvaluate, false);
 			Actions.ShowActiveREPL.execute(false);
 		}

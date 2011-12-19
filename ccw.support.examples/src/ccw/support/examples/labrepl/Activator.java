@@ -5,9 +5,9 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Stephan Muehlstrasser - initial API and implementation
- *    Laurent Petit         - adaptation to clojure.osgi 
+ *    Laurent Petit         - adaptation to clojure.osgi
  *******************************************************************************/
 
 package ccw.support.examples.labrepl;
@@ -27,7 +27,7 @@ public class Activator extends AbstractUIPlugin {
 
 	// The shared instance
 	private static Activator plugin;
-	
+
 	/**
 	 * The constructor
 	 */
@@ -61,7 +61,7 @@ public class Activator extends AbstractUIPlugin {
 	public static Activator getDefault() {
 		return plugin;
 	}
-	
+
 	private void startClojureCode(BundleContext bundleContext) throws Exception {
 		ClojureOSGi.loadAOTClass(bundleContext, "ccw.support.examples.labrepl.wizards.LabreplAntLogger");
 		ClojureOSGi.loadAOTClass(bundleContext, "ccw.support.examples.labrepl.wizards.LabreplCreateProjectPage");

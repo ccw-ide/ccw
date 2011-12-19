@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Casey Marshall - initial API and implementation
  *******************************************************************************/
 package ccw.wizards;
@@ -94,7 +94,7 @@ public class NewClojureFileWizard extends BasicNewResourceWizard implements INew
                     mainPage.setErrorMessage(JAVA_SOURCE_ERROR);
                     fail = true;
                 }
-                
+
                 if (dest != null) {
                     setDescription("Create new Clojure " + kind(true)
                             + " in \"" + dest.getFullPath().toString()
@@ -242,14 +242,14 @@ public class NewClojureFileWizard extends BasicNewResourceWizard implements INew
         else {
             return false;
         }
-        
+
         if (file.exists()) {
             mainPage.setErrorMessage("File with same name already exists.");
             return false;
         }
 
         try {
-        	String namespace = ((StringUtils.isEmpty(mainPage.packageName) ? "" 
+        	String namespace = ((StringUtils.isEmpty(mainPage.packageName) ? ""
         			: mainPage.packageName + ".") + name).replaceAll("_", "-");
         	String contents = "(ns " + namespace + ")\n\n";
             file.create(new StringBufferInputStream(contents), true, null);

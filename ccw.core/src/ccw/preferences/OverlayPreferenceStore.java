@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Stephan Muehlstrasser - Initial implementation based on
  *                            org.eclipse.jdt.internal.ui.preferences.OverlayPreferenceStore
  *******************************************************************************/

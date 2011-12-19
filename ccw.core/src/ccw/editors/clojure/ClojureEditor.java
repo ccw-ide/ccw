@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Laurent PETIT - initial API and implementation
  *******************************************************************************/
 package ccw.editors.clojure;
@@ -45,7 +45,7 @@ import ccw.repl.REPLView;
 
 public class ClojureEditor extends TextEditor implements IClojureEditor {
 	public static final String EDITOR_REFERENCE_HELP_CONTEXT_ID = "ccw.branding.editor_context_help";
-	
+
     public static final String ID = "ccw.clojureeditor"; //$NON-NLS-1$
 	/** Preference key for matching brackets */
 	//PreferenceConstants.EDITOR_MATCHING_BRACKETS;
@@ -58,20 +58,20 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 	private ProjectionSupport fProjectionSupport;
 
 	private ClojureOutlinePage outlinePage;
-	
+
 	public ClojureEditor() {
         setPreferenceStore(CCWPlugin.getDefault().getCombinedPreferenceStore());
 		setSourceViewerConfiguration(new ClojureSourceViewerConfiguration(getPreferenceStore(), this));
-        setDocumentProvider(new ClojureDocumentProvider()); 
+        setDocumentProvider(new ClojureDocumentProvider());
         setHelpContextId(EDITOR_REFERENCE_HELP_CONTEXT_ID);
 	}
-	
+
 	@Override
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
 		super.init(site, input);
 	}
-	
-	ClojureSourceViewer viewer; // TODO try a way of removing this horrible hack 
+
+	ClojureSourceViewer viewer; // TODO try a way of removing this horrible hack
 								// (currently if I replace viewer in configureSourceViewerDecorationSupport(),
 								// there's a NPE thrown due to initialization ordering issue
 	@Override
@@ -84,7 +84,7 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 	protected ISourceViewer createSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
 		fAnnotationAccess= createAnnotationAccess();
 		fOverviewRuler= createOverviewRuler(getSharedColors());
-		
+
 		// ISourceViewer viewer= new ProjectionViewer(parent, ruler, getOverviewRuler(), isOverviewRulerVisible(), styles);
 		ClojureSourceViewer viewer= new ClojureSourceViewer(parent, ruler, getOverviewRuler(), isOverviewRulerVisible(), styles, getPreferenceStore()) {
 			public void setStatusLineErrorMessage(String message) {
@@ -103,37 +103,37 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
 		ClojureSourceViewer viewer= (ClojureSourceViewer) getSourceViewer();
-		
+
 		/*
 		 * Need to hook up here to force a re-evaluation of the preferences
 		 * for the syntax coloring, after the token scanner has been
 		 * initialized. Otherwise the very first Clojure editor will not
 		 * have any tokens colored.
-		 * 
+		 *
          * TODO this is repeated in REPLView...surely we can make the source viewer self-sufficient here
 		 */
 	    viewer.propertyChange(null);
-	    
+
 		fProjectionSupport= new ProjectionSupport(viewer, getAnnotationAccess(), getSharedColors());
-		
+
 		// TODO remove the 2 following lines ?
 		fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.error"); //$NON-NLS-1$
 		fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.warning"); //$NON-NLS-1$
-		
+
 		fProjectionSupport.install();
 		viewer.doOperation(ClojureSourceViewer.TOGGLE);
-		
+
 		sourceViewer().contributeToStatusLine(getStatusLineManager());
 	}
-	
+
 	public boolean isInEscapeSequence () {
 	    return ((ClojureSourceViewer)getSourceViewer()).isInEscapeSequence();
 	}
-	
+
 	public void toggleStructuralEditionMode() {
 		sourceViewer().toggleStructuralEditionMode();
 	}
-	
+
     public DefaultCharacterPairMatcher getPairsMatcher() {
         return ((ClojureSourceViewer) getSourceViewer())==null ? null :
         	((ClojureSourceViewer) getSourceViewer())
@@ -148,10 +148,10 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 	@Override
 	protected void createActions() {
 		super.createActions();
-		
+
 		// @todo push many (if not most) of these into ClojureSourceViewer (somehow, that's SWT and actions are eclipse-land :-/)
 		Action action;
-		
+
 		action = new GotoNextMemberAction(this);
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.GOTO_NEXT_MEMBER);
 		setAction(GotoNextMemberAction.ID, action);
@@ -188,7 +188,7 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.FORMAT_CODE);
 		setAction(FormatAction.ID, action);
 	    */
-		
+
 		action = new Action() {
 			@Override
 			public void run() {
@@ -201,8 +201,8 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 //		TODO: same for content-assist handler ? markAsStateDependentAction(CONTENT_ASSIST_PROPOSAL, true);
 
 }
-	
-	
+
+
 
 	/**
 	 * Move to beginning of current or preceding defun (beginning-of-defun).
@@ -215,16 +215,16 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 	 *   of the file)
 	 *   update currentChar position with the position of the paren
 	 *   if open paren
-	 *     increment currentLevel. 
+	 *     increment currentLevel.
 	 *      if currentLevel > highest level
 	 *        highest level <- currentLevel
 	 *        highest level open paren <- currentChar position
 	 *     else if close paren
-	 *       decrement currentLevel      
+	 *       decrement currentLevel
 	 * if beginning of file
 	 *   if highest level still 0 : no solution
 	 *   else return highest level open paren
-	 *   
+	 *
 	 * Note: the found paren must be in the correct partition (code, not string or comment)
 	 */
 	public void gotoPreviousMember() {
@@ -232,17 +232,17 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 			return;
 
 		int sourceCaretOffset= getSourceCaretOffset();
-		
+
 		int previousMemberOffset = getBeginningOfCurrentOrPrecedingTopLevelSExpressionFor(sourceCaretOffset);
 
-		if (previousMemberOffset >= 0) 
+		if (previousMemberOffset >= 0)
 			selectAndReveal(previousMemberOffset, 0);
 	}
-	
+
 	private boolean checkSelectionAndWarnUserIfProblem(String errorMessageIfProblem) {
 		if (getDocument() == null)
 			return false;
-		
+
 		IRegion selection= getSignedSelection();
 
 		int selectionLength= Math.abs(selection.getLength());
@@ -251,15 +251,15 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 			getSourceViewer().getTextWidget().getDisplay().beep();
 			return false;
 		}
-		
+
 		return true;
 	}
-	
+
 	public IDocument getDocument() {
 		ISourceViewer sourceViewer= getSourceViewer();
 		return sourceViewer.getDocument();
 	}
-	
+
 	/**
 	 * Asserts document != null.
 	 * @return
@@ -268,7 +268,7 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 		IRegion selection= getSignedSelection();
 		return selection.getOffset() + selection.getLength();
 	}
-	
+
 	private int getBeginningOfCurrentOrPrecedingTopLevelSExpressionFor(final int sourceCaretOffset) {
 		IDocument document= getDocument();
 
@@ -276,11 +276,11 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 		int highestLevel = 0;
 		int highestLevelCaretOffset = -1;
 		int nextParenOffset = sourceCaretOffset - 1;
-		
+
 		try {
 			while (nextParenOffset >= 0) {
-				nextParenOffset = nextCharInContentTypeMatching(nextParenOffset, 
-						IDocument.DEFAULT_CONTENT_TYPE, 
+				nextParenOffset = nextCharInContentTypeMatching(nextParenOffset,
+						IDocument.DEFAULT_CONTENT_TYPE,
 						new char[] {'(',')'}, false);
 				if (nextParenOffset == -1) break;
 				if (document.getChar(nextParenOffset) == '(')
@@ -294,28 +294,28 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 				} else if (currentLevel == 0 && highestLevelCaretOffset == -1) {
 					highestLevelCaretOffset = nextParenOffset;
 				}
-				
+
 				nextParenOffset--;
 			}
-			
+
 		} catch (BadLocationException e) {
 		}
 		return highestLevelCaretOffset;
 	}
-	
+
 	public void selectTopLevelSExpression() {
 		IRegion r = getTopLevelSExpression();
-		
+
 		if (r != null)
 			selectAndReveal(r.getOffset(), r.getLength());
 	}
-	
+
 	private IRegion getTopLevelSExpression() {
 		if (!checkSelectionAndWarnUserIfProblem(ClojureEditorMessages.GotoMatchingBracketAction_error_invalidSelection))
 			return null;
 
 		int sourceCaretOffset = getSourceCaretOffset();
-		
+
 		int endOffset = getEndOfCurrentOrNextTopLevelSExpressionFor(sourceCaretOffset);
 		int beginningOffset = getBeginningOfCurrentOrPrecedingTopLevelSExpressionFor(endOffset);
 
@@ -328,10 +328,10 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 			return null;
 		}
 	}
-	
+
 	public String getCurrentOrNextTopLevelSExpression() {
 		IRegion r = getTopLevelSExpression();
-		
+
 		if (r != null) {
 			try {
 				return getDocument().get(r.getOffset(), r.getLength());
@@ -342,7 +342,7 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Move to end of current or following defun (end-of-defun).
 	 */
@@ -356,9 +356,9 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 		if (endOfMemberOffset >= 0)
 			selectAndReveal(endOfMemberOffset, 0);
 	}
-	
+
 	private int getEndOfCurrentOrNextTopLevelSExpressionFor(int sourceCaretOffset) {
-		
+
 		ISourceViewer sourceViewer= getSourceViewer();
 		IDocument document= sourceViewer.getDocument();
 
@@ -369,21 +369,21 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 
 		try {
 			while (nextParenOffset < document.getLength()) {
-				nextParenOffset = nextCharInContentTypeMatching(nextParenOffset, 
-						IDocument.DEFAULT_CONTENT_TYPE, 
+				nextParenOffset = nextCharInContentTypeMatching(nextParenOffset,
+						IDocument.DEFAULT_CONTENT_TYPE,
 						new char[] {'(',')'}, true);
 				if (nextParenOffset == -1) break;
 				if (document.getChar(nextParenOffset) == '(')
 					currentLevel -= 1;
 				else if (document.getChar(nextParenOffset) == ')')
 					currentLevel += 1;
-		
+
 				if (currentLevel > highestLevel) {
 					highestLevel = currentLevel;
 					highestLevelCaretOffset = nextParenOffset;
 				} else if (currentLevel == 0 && highestLevelCaretOffset == -1)
 					highestLevelCaretOffset = nextParenOffset;
-				
+
 				nextParenOffset++;
 			}
 			if (highestLevelCaretOffset >= 0)
@@ -391,16 +391,16 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 					highestLevelCaretOffset++;
 		} catch (BadLocationException e) {
 		}
-		return highestLevelCaretOffset; 
+		return highestLevelCaretOffset;
 	}
 
 	private int nextCharInContentTypeMatching(int currentOffset, String contentType, char[] charsToMatch, boolean searchForward) throws BadLocationException {
 		ISourceViewer sourceViewer= getSourceViewer();
 		IDocument document= sourceViewer.getDocument();
-		
+
 		int offset = currentOffset;
-		while ( !( TextUtilities.getContentType(document, 
-						ClojurePartitionScanner.CLOJURE_PARTITIONING, offset, false).equals(contentType) 
+		while ( !( TextUtilities.getContentType(document,
+						ClojurePartitionScanner.CLOJURE_PARTITIONING, offset, false).equals(contentType)
 				   && matchChar(document.getChar(offset), charsToMatch) ) ) {
 			if (searchForward) {
 				offset++;
@@ -414,7 +414,7 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 		}
 		return offset;
 	}
-	
+
 	private boolean matchChar(char c, char[] charsToMatch) {
 		for (char ctm: charsToMatch)
 			if (c == ctm)
@@ -425,11 +425,11 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 	public IRegion getUnSignedSelection () {
 	    return ((ClojureSourceViewer)getSourceViewer()).getUnSignedSelection();
 	}
-	
+
 	public IRegion getSignedSelection () {
 	    return ((ClojureSourceViewer)getSourceViewer()).getSignedSelection();
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#initializeKeyBindingScopes()
 	 */
@@ -445,14 +445,14 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 		super.dispose();
 	}
 
-	/** The <code>JavaEditor</code> implementation of this 
+	/** The <code>JavaEditor</code> implementation of this
 	 * <code>AbstractTextEditor</code> method performs gets
-	 * the java content outline page if request is for a an 
+	 * the java content outline page if request is for a an
 	 * outline page.
-	 * 
+	 *
 	 * @param required the required type
 	 * @return an adapter for the required type or <code>null</code>
-	 */ 
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public Object getAdapter(Class required) {
@@ -464,24 +464,24 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 			}
 			return outlinePage;
 		}
-		
+
 		if (fProjectionSupport != null) {
 			Object adapter= fProjectionSupport.getAdapter(getSourceViewer(), required);
 			if (adapter != null)
 				return adapter;
 		}
-		
+
 		if (ITextOperationTarget.class == required) {
 			return sourceViewer();
 		}
 
-		
+
 		return super.getAdapter(required);
 	}
 
 	public String getSelectedText() {
 		IRegion r = getUnSignedSelection();
-		
+
 		if (r != null) {
 			try {
 				return getDocument().get(r.getOffset(), r.getLength());
@@ -496,11 +496,11 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 	public IJavaProject getAssociatedProject () {
 	    return JavaCore.create(((IFile)getEditorInput().getAdapter(IFile.class)).getProject());
 	}
-	
+
 	public String findDeclaringNamespace () {
 		return ((ClojureSourceViewer)getSourceViewer()).findDeclaringNamespace();
 	}
-	
+
 	public REPLView getCorrespondingREPL () {
 		IFile file = (IFile) getEditorInput().getAdapter(IFile.class);
 		if (file != null) {
@@ -549,7 +549,7 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 			super.handlePreferenceStoreChanged(event);
 		}
 	}
-    
+
     public void updateTabsToSpacesConverter() {
 		if (isTabsToSpacesConversionEnabled()) {
 			installTabsToSpacesConverter();
@@ -557,7 +557,7 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 			uninstallTabsToSpacesConverter();
 		}
     }
-    
+
     @Override
     protected boolean isTabsToSpacesConversionEnabled() {
     	if (getPreferenceStore().getBoolean(ccw.preferences.PreferenceConstants.USE_TAB_FOR_REINDENTING_LINE)
@@ -567,9 +567,9 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
     		return super.isTabsToSpacesConversionEnabled();
     	}
     }
-    
+
     /**
-     * @return the project, or null if unknown 
+     * @return the project, or null if unknown
      * (case when clojure file open from a Jar via a JarEditorInput, etc.)
      */
     public IProject getProject() {
@@ -579,13 +579,13 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
     	} else {
     		return null;
     	}
-    	
+
     }
-    
+
     public Object getParseState() {
     	return sourceViewer().getParseState();
     }
-    
+
     public Object getPreviousParseTree() {
     	return sourceViewer().getPreviousParseTree();
     }
@@ -597,7 +597,7 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 	public boolean isStructuralEditionPossible() {
 		return sourceViewer().isStructuralEditionPossible();
 	}
-	
+
     public boolean isStructuralEditingEnabled() {
         return sourceViewer().isStructuralEditingEnabled();
     }
