@@ -111,7 +111,7 @@ public class CCWPlugin extends AbstractUIPlugin {
 	        try {
 	        	Var startServer = BundleUtils.requireAndGetVar(this.getBundle().getSymbolicName(), "clojure.tools.nrepl/start-server");
 	            ackREPLServer = (ServerSocket)((List)startServer.invoke()).get(0);
-	            CCWPlugin.log("Started ccw nREPL server on port " + ackREPLServer.getLocalPort());
+	            CCWPlugin.log("Started ccw nREPL server: nrepl://localhost:" + ackREPLServer.getLocalPort());
 	        } catch (Exception e) {
 	            CCWPlugin.logError("Could not start plugin-hosted REPL server", e);
 	            throw new CoreException(createErrorStatus("Could not start plugin-hosted REPL server", e));
