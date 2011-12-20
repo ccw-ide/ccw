@@ -30,7 +30,7 @@
     (reify org.eclipse.ui.console.IPatternMatchListenerDelegate
       (connect [this console]
         (dosync (reset! state console)))
-      (disconnect [this])
+      (disconnect [this] (reset! state nil))
       (matchFound [this event]
                   (let [console @state
                         offset (.getOffset event)
