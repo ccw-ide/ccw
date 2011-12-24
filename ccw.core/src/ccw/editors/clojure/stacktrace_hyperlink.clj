@@ -9,21 +9,9 @@
 ; *    Tuomas KARKKAINEN - initial API and implementation
 ; *******************************************************************************/
 
-(ns ccw.editors.clojure.StacktraceHyperlink
-  (:require [clojure.contrib.str-utils2 :as s])
-  (:use [clojure.test])
-  (:gen-class
-    :init init
-    :state state
-    :implements [org.eclipse.ui.console.IPatternMatchListenerDelegate]))
-
-(defn -init []
-  [[] (ref nil)])
-
-(defn -connect [this console]
-  (dosync (ref-set (.state this) console)))
-
-(defn -disconnect [this])
+(ns ccw.editors.clojure.stacktrace-hyperlink
+  (:require [ccw.util.string :as s])
+  (:use [clojure.test]))
 
 (defn- find-datas [s]
   {:line (Integer/valueOf (second (re-find #":([0-9]+)" s)))
@@ -37,16 +25,24 @@
 (defn- offset-and-length [s]
   (map + [1 0] (map count (s/split s #"\("))))
 
-(defn -matchFound [this event]
-  (let [console @(.state this)
-        offset (.getOffset event)
-        s (.get (.getDocument console) offset (.getLength event))
-        [o l] (offset-and-length s)
-        hyperlink (proxy [org.eclipse.ui.console.IHyperlink] []
-                    (linkActivated [] (open-file s))
-                    (linkExited [])
-                    (linkEntered []))]
-    (.addHyperlink console hyperlink (+ offset o) l)))
+(defn make []
+  (let [state (atom nil)]
+    (reify org.eclipse.ui.console.IPatternMatchListenerDelegate
+      (connect [this console]
+        (dosync (reset! state console)))
+      (disconnect [this])
+      (matchFound [this event]
+                  (let [console @state
+                        offset (.getOffset event)
+                        s (.get (.getDocument console) offset (.getLength event))
+                        [o l] (offset-and-length s)
+                        hyperlink (reify org.eclipse.ui.console.IHyperlink
+                                    (linkActivated [this] (open-file s))
+                                    (linkExited [this])
+                                    (linkEntered [this]))]
+                    (.addHyperlink console hyperlink (+ offset o) l))))))
+
+(defn factory "plugin.xml hook" [ _ ] (make))
 
 (def sample-string "at clojure.contrib.repl_ln$_main__7172.doInvoke(repl_ln.clj:140")
 
@@ -61,7 +57,3 @@
   (is (= "clojure.contrib.repl-ln" (:ns test-data)))
   (is (= "clojure/contrib/repl_ln.clj" (:file test-data)))
   (is (= 140 (:line test-data))))
-
-; (println "actual:" test-data)
-; (run-tests)
-

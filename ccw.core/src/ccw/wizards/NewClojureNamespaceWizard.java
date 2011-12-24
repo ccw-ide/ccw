@@ -41,9 +41,9 @@ import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 import ccw.CCWPlugin;
 import ccw.util.StringUtils;
 
-public class NewClojureFileWizard extends BasicNewResourceWizard implements INewWizard {
+public class NewClojureNamespaceWizard extends BasicNewResourceWizard implements INewWizard {
 
-    public String kind() { return "File"; }
+    public String kind() { return "Namespace"; }
 
     public String adjective() {
         return "";
@@ -89,7 +89,7 @@ public class NewClojureFileWizard extends BasicNewResourceWizard implements INew
                     packageName = ((IPackageFragment)sel).getElementName();
                 }
                 else {
-                	final String JAVA_SOURCE_ERROR = "Cannot create Clojure file outside a java source folder";
+                	final String JAVA_SOURCE_ERROR = "Cannot create Clojure namespace outside a java source folder";
                     CCWPlugin.logError("Wrong selection type: " + sel.getClass() + ". " + JAVA_SOURCE_ERROR);
                     mainPage.setErrorMessage(JAVA_SOURCE_ERROR);
                     fail = true;
@@ -164,7 +164,7 @@ public class NewClojureFileWizard extends BasicNewResourceWizard implements INew
         control.setFont(group.getFont());
     }
 
-    public NewClojureFileWizard() {
+    public NewClojureNamespaceWizard() {
         super();
     }
 
@@ -190,7 +190,7 @@ public class NewClojureFileWizard extends BasicNewResourceWizard implements INew
     }
 
     protected String name() {
-        String name = mainPage.text.getText().trim();
+        String name = mainPage.text.getText().trim().replaceAll("-", "_"); // FIXME should call clojure.core/munge
         if (name.endsWith(".clj"))
             name = name.substring(0, name.length() - (".clj").length());
         return name;
@@ -215,19 +215,19 @@ public class NewClojureFileWizard extends BasicNewResourceWizard implements INew
             return false;
         }
         if (!Character.isJavaIdentifierStart(name.charAt(0))) {
-            mainPage.setErrorMessage("Invalid Clojure resource character \'"
-                    + name.charAt(0) + "\' at index " + 0 + " in " + name);
+            mainPage.setErrorMessage("Invalid character \'" + name.charAt(0) + "\' at index " + 0
+            		+ " for Clojure namespace file \'" + name + "'");
             return false;
         }
         for (int i = 1; i < name.length(); i++)
             if (!Character.isJavaIdentifierPart(name.charAt(i))) {
                 mainPage
-                        .setErrorMessage("Invalid Clojure resource character \'"
+                        .setErrorMessage("Invalid character \'"
                                 + name.charAt(i)
                                 + "\' at index "
                                 + i
-                                + " in "
-                                + name);
+                                + " for Clojure namespace file \'"
+                                + name + "'");
                 return false;
             }
 

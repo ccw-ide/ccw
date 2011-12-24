@@ -55,7 +55,7 @@ public class RunTestsAction extends Action {
             Connection repl = replView.getToolingConnection();
             Response compilationResult = repl.send(CompileLibAction.compileLibCommand(lib));
             refreshCompilationResults();
-            if (new Integer(0).equals(((Map)compilationResult.values().get(0)).get("response-type"))) {
+            if (new Long(0).equals(((Map)compilationResult.values().get(0)).get("response-type"))) {
                 runTests(lib, repl);
             } else {
                 editor.setStatusLineErrorMessage(ClojureEditorMessages.Compilation_failed);

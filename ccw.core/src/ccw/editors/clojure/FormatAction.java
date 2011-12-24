@@ -12,12 +12,8 @@ package ccw.editors.clojure;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.source.ISourceViewer;
-
-import ccw.editors.clojure.ClojureFormat;
 
 public class FormatAction extends Action {
     public final static String ID = "FormatAction"; //$NON-NLS-1$
@@ -32,13 +28,13 @@ public class FormatAction extends Action {
 
     @Override
     public void run() {
-        IDocument original = editor.getDocument();
-        ISourceViewer sourceViewer = editor.sourceViewer();
-        String originalContents = original.get();
-        String formatted = new ClojureFormat().formatCode(originalContents);
-        if (!formatted.equals(originalContents)) {
-            replaceOriginalWithFormatted(original, sourceViewer, formatted);
-        }
+//        IDocument original = editor.getDocument();
+//        ISourceViewer sourceViewer = editor.sourceViewer();
+//        String originalContents = original.get();
+//        String formatted = new ClojureFormat().formatCode(originalContents);
+//        if (!formatted.equals(originalContents)) {
+//            replaceOriginalWithFormatted(original, sourceViewer, formatted);
+//        }
     }
 
     private void replaceOriginalWithFormatted(IDocument original, ISourceViewer sourceViewer, String formatted) {

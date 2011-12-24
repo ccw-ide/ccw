@@ -1,21 +1,16 @@
-(ns ccw.editors.clojure.PareditAutoEditStrategy
+(ns ccw.editors.clojure.PareditAutoEditStrategyImpl
   (:use [paredit [core :only [paredit]]])
-  (:use [clojure.contrib.core :only [-?>]])  
+  (:use [clojure.core.incubator :only [-?>]])  
   (:import
     [org.eclipse.jface.text IAutoEditStrategy
                             IDocument
                             DocumentCommand]
-    [ccw.editors.clojure IClojureEditor])
-  (:gen-class
-   :implements [org.eclipse.jface.text.IAutoEditStrategy]
-   :constructors {[ccw.editors.clojure.IClojureEditor org.eclipse.jface.preference.IPreferenceStore] []}
-   :init init
-   :state state))
+    [ccw.editors.clojure IClojureEditor]))
    
 #_(set! *warn-on-reflection* true)
 
-(defn- -init
-  [editor preference-store] [[] (ref {:editor editor :prefs-store preference-store})])   
+(defn init
+  [editor preference-store] (ref {:editor editor :prefs-store preference-store}))   
 
 ; TODO move this into paredit itself ...
 ;  each command : trigger-str  [:paredit-command-name only-one-char-command?]
@@ -81,7 +76,7 @@
     :else 
       true))
 
-(defn -customizeDocumentCommand 
+(defn customizeDocumentCommand 
   [this, #^IDocument document, #^DocumentCommand command]
   (let [^IClojureEditor editor (-> this .state deref :editor)]
     (when (and (.doit command) 

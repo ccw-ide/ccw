@@ -8,27 +8,24 @@
 ;* Contributors: 
 ;*    Laurent PETIT - initial API and implementation
 ;*******************************************************************************/
-(ns ccw.ClojureProjectNature
+(ns ccw.clojure-project-nature
   (:import
     [ccw CCWPlugin ClojureCore]
     [java.io IOException File]
-    [ccw.builder ClojureBuilder]
+    [ccw.builder ClojureBuilder] 
     [org.eclipse.core.runtime CoreException Platform Path Status IPath IProgressMonitor FileLocator]
     [org.eclipse.core.resources WorkspaceJob IResource ResourcesPlugin]
     [org.eclipse.jdt.core JavaCore])
-  (:require [clojure.contrib [duck-streams :as cc.stream]])
-  (:gen-class
-   :implements [org.eclipse.core.resources.IProjectNature]
-   :init init
-   :state state))
+  (:require [clojure.java.io :as io]))
 
-;; adding a definition to clojure.contrib.duck-streams
-(defmethod cc.stream/copy [IPath IPath] [#^IPath input #^IPath output]
-  (println "input:" input ", output:" output)
-  (cc.stream/copy (.toFile input) (.toFile output)))
-   
-(defn- -init
-  [] [[] (ref {:project nil :errors []})])
+;; FIXME : see in Clojure 1.3 if it is possible to extend copy's behaviour ...
+(defn copy [^IPath input ^IPath output & opts]
+  (apply io/copy (.toFile input) (.toFile output) opts))
+
+;; adding a method to clojure.java.io
+;(defmethod clojure.java.io/do-copy [IPath IPath] 
+;  [^IPath input ^IPath output opts]
+;  (clojure.java.io/do-copy (.toFile input) (.toFile output) opts))
 
 (defn- get-project-description
   "returns the project description or null if the project
@@ -145,8 +142,8 @@
 		      	        										(.addFileExtension (.getFileExtension libSrc-path)))
 		      	        									(make-dest-path libSrc-path)))]
       	    (when copy?
-      	    	(cc.stream/copy lib-path in-project-lib)
-      	    	(when in-project-libSrc (cc.stream/copy libSrc-path in-project-libSrc)))
+      	    	(copy lib-path in-project-lib)
+      	    	(when in-project-libSrc (copy libSrc-path in-project-libSrc)))
       	    (let 
              [entries-new 
                (into-array 
@@ -207,29 +204,32 @@
 		  (.setBuildSpec desc (into-array (cons clojure-command spec)))
 		  (.setDescription proj desc (IResource/FORCE), nil))))
 		             
-(defn- -configure
-  [this]
-  (let [proj (:project @(.state this))]
-	  (when-let [desc (get-project-description proj)]
-	    (let [spec (.getBuildSpec desc)]
-		    (when (not (builder-present? spec (ClojureBuilder/BUILDER_ID)))
-		      (insert-clojure-builder! proj spec desc)
-		      (setup-clojure-project-classpath! proj))))))
-  
-(defn- -deconfigure
-  [this]
-  (when-let [desc (get-project-description (.getProject this))]
-    (let [spec (.getBuildSpec desc)]
-      (when (builder-present? spec (ClojureBuilder/BUILDER_ID))
-        (let [newSpec (remove #(= (ClojureBuilder/BUILDER_ID) (.getBuilderName %)) spec)]
-          (.setBuildSpec desc (into-array newSpec))
-          (try
-            (.setDescription (.getProject this) desc nil)
-            (catch CoreException e
-              (CCWPlugin/logError "Could not set project description" e)))))))) 
-  
-(defn -getProject
-  [this] (:project @(.state this)))
 
-(defn -setProject
-  [this proj] (dosync (alter (.state this) assoc :project proj)))      
+(defn make []
+  (let [state (ref {:project nil :errors []})]
+    (reify org.eclipse.core.resources.IProjectNature
+    (configure
+      [this]
+      (let [proj (:project @state)]
+        (when-let [desc (get-project-description proj)]
+          (let [spec (.getBuildSpec desc)]
+            (when (not (builder-present? spec (ClojureBuilder/BUILDER_ID)))
+              (insert-clojure-builder! proj spec desc)
+              (setup-clojure-project-classpath! proj))))))
+    (deconfigure
+      [this]
+      (when-let [desc (get-project-description (.getProject this))]
+        (let [spec (.getBuildSpec desc)]
+          (when (builder-present? spec (ClojureBuilder/BUILDER_ID))
+            (let [newSpec (remove #(= (ClojureBuilder/BUILDER_ID) (.getBuilderName %)) spec)]
+              (.setBuildSpec desc (into-array newSpec))
+              (try
+                (.setDescription (.getProject this) desc nil)
+                (catch CoreException e
+                  (CCWPlugin/logError "Could not set project description" e))))))))
+    (getProject
+      [this] (:project @state))
+    (setProject
+      [this proj] (dosync (alter state assoc :project proj))))))
+
+(defn factory [ _ ] (make))

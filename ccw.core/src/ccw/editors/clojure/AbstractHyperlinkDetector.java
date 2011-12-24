@@ -1,11 +1,11 @@
 package ccw.editors.clojure;
 
 
-abstract public class AbstractHyperlinkDetector extends
+public abstract class AbstractHyperlinkDetector extends
 		org.eclipse.jface.text.hyperlink.AbstractHyperlinkDetector {
 
-	public Object getClassAdapter(Class clazz) {
+	public Object getClassAdapter(@SuppressWarnings("rawtypes") Class clazz) {
 		return super.getAdapter(clazz);
 	}
-	
+
 }

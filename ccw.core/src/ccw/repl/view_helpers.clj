@@ -1,7 +1,7 @@
 (ns ccw.repl.view-helpers
   (:require [clojure.tools.nrepl :as repl]
     [ccw.repl.cmdhistory :as history])
-  (:use (clojure.contrib def core))
+  (:use [clojure.core.incubator :only [-?>]])
   (:import ccw.CCWPlugin
     org.eclipse.ui.PlatformUI
     org.eclipse.swt.SWT
@@ -34,9 +34,9 @@
     (set! (.length style) length)
     style))
 
-(defvar- default-log-style (partial set-style-range #(StyleRange.)))
+(def ^{:private true} default-log-style (partial set-style-range #(StyleRange.)))
 
-(defvar- log-styles
+(def ^{:private true} log-styles
   (let [colored-style #(let [s (StyleRange.)]
                          (set! (.foreground s) (CCWPlugin/getSystemColor %))
                          s)]

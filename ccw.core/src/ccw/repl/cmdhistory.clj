@@ -1,5 +1,5 @@
 (ns ccw.repl.cmdhistory
-  (:use (clojure.contrib def core))
+  (:use [clojure.core.incubator :only [-?>]])
   (:import
     ccw.CCWPlugin
     org.eclipse.core.runtime.jobs.Job
@@ -8,17 +8,23 @@
     org.osgi.service.prefs.BackingStoreException
     org.eclipse.core.runtime.preferences.IEclipsePreferences))
 
-(defvar- queued-commands (ref {})
-  "Map between project names and vectors of REPL expressions that have yet to
+(def ^{:private true
+       :doc "Map between project names and vectors of REPL expressions that have yet to
    be persisted to the respective projects' preferences.  This is cleared
-   periodically.")
+   periodically."}
+      queued-commands (ref {}))
 
-(defvar- pref-node-id "ccw.repl.cmdhistory")
-(defvar- history-key "cmdhistory")
-(defvar max-history 1000
-  "Maximum number of retained history entries.")
-(defvar- persist-schedule-ms 30000
-  "Queued commands are persisted to project preferences every _ milliseconds.")
+(def ^{:private true}
+      pref-node-id "ccw.repl.cmdhistory")
+
+(def ^{:private true}
+      history-key "cmdhistory")
+(def ^{:doc "Maximum number of retained history entries."}
+      max-history 1000)
+
+(def ^{:private true
+       :doc "Queued commands are persisted to project preferences every _ milliseconds."}
+      persist-schedule-ms 30000)
 
 (defn- ^IEclipsePreferences get-pref-node
   [project-name]
@@ -92,7 +98,7 @@
               (.refreshLocal IResource/DEPTH_INFINITE nil))
             (recur queued-commands true)))))))
 
-(defvar- save-cmds-job
+(def ^{:private true} save-cmds-job
   (doto (proxy [Job] ["ccw REPL command history persistence"]
           (run [pm]
             (try

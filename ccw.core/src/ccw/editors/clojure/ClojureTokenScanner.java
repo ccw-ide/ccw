@@ -28,10 +28,23 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 
+import ccw.CCWPlugin;
+import ccw.util.ClojureUtils;
 import clojure.lang.ISeq;
 import clojure.lang.Keyword;
 
 abstract public class ClojureTokenScanner implements ITokenScanner {
+    private static final String EDITOR_SUPPORT_NS = "ccw.editors.clojure.editor-support";
+    private static final String ClojureTopLevelFormsDamager_NS = "ccw.editors.clojure.ClojureTopLevelFormsDamagerImpl";
+    static {
+    	try {
+			CCWPlugin.getClojureOSGi().require(CCWPlugin.getDefault().getBundle(), EDITOR_SUPPORT_NS);
+			CCWPlugin.getClojureOSGi().require(CCWPlugin.getDefault().getBundle(), ClojureTopLevelFormsDamager_NS);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+    }
+
     private int currentOffset;
     private final Map<Object, IToken> tokenTypeToJFaceToken;
     private String text;
@@ -101,11 +114,11 @@ abstract public class ClojureTokenScanner implements ITokenScanner {
 
     public final int getTokenLength() {
     	long start = System.currentTimeMillis();
-    	Integer tokenLength = (Integer) currentToken.get(tokenLengthKeyword);
+    	Long tokenLength = (Long) currentToken.get(tokenLengthKeyword);
         long localDuration = System.currentTimeMillis() - start;
         getTokenLengthDuration += localDuration;
 		duration += localDuration;
-		return tokenLength;
+		return tokenLength.intValue();
     }
 
     public final int getTokenOffset() {
@@ -121,7 +134,7 @@ abstract public class ClojureTokenScanner implements ITokenScanner {
     		firstToken = false;
     	}
         if (!firstToken) {
-        	int count = (Integer) currentToken.get(tokenLengthKeyword);
+        	long count = (Long) currentToken.get(tokenLengthKeyword);
         	currentOffset += count;
         	tokenSeq = tokenSeq.next();
         }
@@ -210,7 +223,9 @@ abstract public class ClojureTokenScanner implements ITokenScanner {
     	advanceTokenDuration = 0;
     	getSymbolTypeDuration = 0;
     	text = document.get();
-        tokenSeq = ClojureTopLevelFormsDamager.getTokensSeq(EditorSupport.getParseTree(clojureEditor.getParseState()), offset, length);
+        tokenSeq = (ISeq) ClojureUtils.invoke(ClojureTopLevelFormsDamager_NS, "getTokensSeq",
+        		ClojureUtils.invoke(EDITOR_SUPPORT_NS, "getParseTree", clojureEditor.getParseState())
+        		, offset, length);
         currentParenLevel = -1; // STRONG HYPOTHESIS HERE (related to the Damager used: offset always corresponds to the start of a top level form
         currentOffset = offset;
         currentToken = null;
@@ -223,7 +238,7 @@ abstract public class ClojureTokenScanner implements ITokenScanner {
     	long start = System.currentTimeMillis();
 		Object type = currentToken.get(tokenTypeKeyword);
 		if (type.equals(symbolKeyword)) {
-            type = guessEclipseTokenTypeForSymbol(text.substring(currentOffset, currentOffset + ((Integer) currentToken.get(tokenLengthKeyword))));
+            type = guessEclipseTokenTypeForSymbol(text.substring(currentOffset, currentOffset + ((Long) currentToken.get(tokenLengthKeyword)).intValue()));
         }
 		IToken retToken = tokenTypeToJFaceToken.get(type);
         if (retToken == null) {

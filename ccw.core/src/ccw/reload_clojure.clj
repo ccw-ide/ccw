@@ -19,15 +19,11 @@
 (defn -init [])
 
 (defn reload-rest []
-  (require :reload '[ccw
-                      [ClojureProjectNature]])
   (require :reload '[ccw.editors.clojure
-                      [ClojureFormat]
-                      [StacktraceHyperlink]
-                      [PareditAutoEditStrategy]
-                      [EditorSupport]
-                      [ClojureHyperlinkDetector]
-                      [ClojureHyperlink]]))
+;                      [ClojureFormat]
+                      [PareditAutoEditStrategyImpl]
+                      [editor-support]
+                      [hyperlink]]))
 
 (defn -run [this]
   (require :reload 'ccw.reload-clojure)

@@ -13,26 +13,20 @@
 
        TODO: code needs more refactoring (could be more DRY)
       "}
-     ccw.editors.clojure.ClojureTopLevelFormsDamager
+     ccw.editors.clojure.ClojureTopLevelFormsDamagerImpl
   (:use [paredit.utils :as utils])
-  (:import [org.eclipse.jface.text IRegion ITypedRegion DocumentEvent Region]
-           [ccw.editors.clojure EditorSupport])
-  (:gen-class
-    :implements [org.eclipse.jface.text.presentation.IPresentationDamager]
-    :constructors {[Object] []}
-    :methods [^{:static true} [getTokensSeq [Object Object Object] clojure.lang.ISeq]]
-    :init init 
-    :state state))
+  (:import [org.eclipse.jface.text IRegion ITypedRegion DocumentEvent Region])
+  (:require [ccw.editors.clojure.editor-support :as editor]))
 
 #_(set! *warn-on-reflection* true)
 
 (defn state-val [this] (-> this .state deref))
 
-(defn -init
-  [editor] [[] (ref {:editor editor 
-                     :document nil})])
+(defn init
+  [editor] (ref {:editor editor 
+                 :document nil}))
 
-(defn -setDocument [this document]
+(defn setDocument [this document]
   (dosync (alter (.state this) assoc :document document)))
 
 (defn parse-tree-get [parse-tree idx]
@@ -58,7 +52,7 @@
                                           text-length)))]
     [start-idx stop-idx]))
 
-(defn -getDamageRegion 
+(defn getDamageRegion 
   "Creates a damaged region by merging the regions of the top level forms (tlfs)
    (so children of the parse tree root node) which contain the event changes"
   [this
@@ -72,7 +66,7 @@
                 ", length: " 
                 (.length (.getText event)) "]"))
   (let [previous-parse-tree (-> this state-val :editor .getPreviousParseTree)
-        parse-tree (-> this state-val :editor .getParseState (EditorSupport/getParseTree))
+        parse-tree (-> this state-val :editor .getParseState (editor/getParseTree))
         [start-offset 
          stop-offset] (if previous-parse-tree
                         (do
@@ -109,7 +103,7 @@
           #_(println "damaged region: 0, 0")
           (Region. 0 0)))))) 
 
-(defn -getTokensSeq 
+(defn getTokensSeq 
   "Given a damaged region created by getDamageRegion, finds back the start index in the
    parse-tree's root children, and creates a tokens seq starting from that"
   [parse-tree offset length]
