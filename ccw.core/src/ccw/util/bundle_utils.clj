@@ -5,7 +5,8 @@
            org.eclipse.core.runtime.Status
            org.osgi.framework.Bundle
            org.osgi.framework.BundleException
-           clojure.osgi.ClojureOSGi))
+           clojure.osgi.BundleClassLoader
+           ))
 
 ;(defn require-and-get-var)
 ;	public static Var requireAndGetVar(String bundleSymbolicName, String varName) throws CoreException {
@@ -67,12 +68,7 @@
 ;      (bundle-class-loader bundle) function)
 ; )   
 ;)
-
-(defn with-bundle* [bundle f]
-  (clojure.osgi.ClojureOSGi/withBundle 
-    bundle
-    (reify clojure.osgi.RunnableWithException
-      (run [this] (f)))))
+;
 
 ;; http://www.ibm.com/developerworks/opensource/library/os-ecl-dynext/
 (defn add-contribution [s bundle]
