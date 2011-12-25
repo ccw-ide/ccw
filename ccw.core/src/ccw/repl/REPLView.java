@@ -20,10 +20,12 @@ import org.eclipse.swt.custom.ST;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.custom.VerifyKeyListener;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
+import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
@@ -46,6 +48,7 @@ import ccw.editors.clojure.ClojureSourceViewerConfiguration;
 import ccw.editors.clojure.IClojureEditor;
 import ccw.editors.clojure.IClojureEditorActionDefinitionIds;
 import ccw.util.ClojureUtils;
+import ccw.util.DisplayUtil;
 import clojure.lang.Atom;
 import clojure.lang.IFn;
 import clojure.lang.Keyword;
@@ -57,9 +60,11 @@ import clojure.tools.nrepl.Connection;
 
 public class REPLView extends ViewPart implements IAdaptable {
     private static final String EDITOR_SUPPORT_NS = "ccw.editors.clojure.editor-support";
+    private static final String CLOJURE_STRING_NS = "clojure.string";
     static {
     	try {
 			ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), EDITOR_SUPPORT_NS);
+			ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), CLOJURE_STRING_NS);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -137,7 +142,14 @@ public class REPLView extends ViewPart implements IAdaptable {
         }
     }
     
+    private String removeTrailingSpaces(String s) {
+    	return (String) ClojureUtils.invoke(CLOJURE_STRING_NS, "trimr", s);
+    }
     private void evalExpression () {
+    	// We remove trailing spaces so that we do not embark extra spaces,
+    	// newlines, etc. for example when evaluating after having hit the
+    	// Enter key (which automatically adds a new line
+    	viewerWidget.setText(removeTrailingSpaces(viewerWidget.getText()));
         evalExpression(viewerWidget.getText(), true, false);
         copyToLog(viewerWidget);
         viewerWidget.setText("");
@@ -346,13 +358,9 @@ public class REPLView extends ViewPart implements IAdaptable {
            }
         });
         
-        IHandlerService handlerService = (IHandlerService) getViewSite().getService(IHandlerService.class);
-        handlerService.activateHandler(IClojureEditorActionDefinitionIds.EVALUATE_TOP_LEVEL_S_EXPRESSION, new AbstractHandler() {
-			public Object execute(ExecutionEvent event) throws ExecutionException {
-				evalExpression();
-				return null;
-			}
-		});
+        installAutoEvalExpressionOnEnter();
+
+        installEvalTopLevelSExpressionCommand();
         
         /*
          * Need to hook up here to force a re-evaluation of the preferences
@@ -389,6 +397,49 @@ public class REPLView extends ViewPart implements IAdaptable {
         split.setWeights(new int[] {100, 75});
         
         viewer.contributeToStatusLine(getViewSite().getActionBars().getStatusLineManager());
+    }
+    
+    private void installAutoEvalExpressionOnEnter() {
+        viewerWidget.addVerifyKeyListener(new VerifyKeyListener() {
+        	private boolean enterAlonePressed(VerifyEvent e) {
+        		return (e.keyCode == SWT.LF || e.keyCode == SWT.CR)
+						&& e.stateMask == SWT.NONE;
+        	}
+        	private boolean noSelection() {
+        		return viewerWidget.getSelectionCount() == 0;
+        	}
+        	private String textAfterCaret() {
+        		return viewerWidget.getText().substring(
+        				viewerWidget.getSelection().x);
+        	}
+			public void verifyKey(VerifyEvent e) {
+				if (enterAlonePressed(e) 
+						&& noSelection() 
+						&& textAfterCaret().trim().isEmpty()
+						&& !viewer.isParseTreeBroken()) {
+					// Executing evalExpression() via SWT's asyncExec mechanism,
+					// we ensure all the normal behaviour is done by the Eclipse
+					// framework on the Enter key, before sending the code.
+					// For example, we are then able to get rid of a bug with
+					// the content assistant which ensures the text is completed
+					// with the selection before being sent for evaluation.
+					DisplayUtil.asyncExec(new Runnable() {
+						public void run() {
+							evalExpression();
+						}});
+				} 
+			}
+        });
+    }
+    
+    private void installEvalTopLevelSExpressionCommand() {
+        IHandlerService handlerService = (IHandlerService) getViewSite().getService(IHandlerService.class);
+        handlerService.activateHandler(IClojureEditorActionDefinitionIds.EVALUATE_TOP_LEVEL_S_EXPRESSION, new AbstractHandler() {
+    		public Object execute(ExecutionEvent event) throws ExecutionException {
+    			evalExpression();
+    			return null;
+    		}
+    	});
     }
     
 	/**

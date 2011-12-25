@@ -378,6 +378,10 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
         return ClojureUtils.invoke(EDITOR_SUPPORT_NS, "getParseState", getDocument().get(), parseState);
     }
     
+    public boolean isParseTreeBroken() {
+    	return (Boolean) ClojureUtils.invoke(EDITOR_SUPPORT_NS, "brokenParseTree?", getParseState());
+    }
+    
     public Object getPreviousParseTree () {
         if (parseState == null) {
         	return null;

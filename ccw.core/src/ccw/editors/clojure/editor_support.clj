@@ -77,6 +77,11 @@
 
 (defn getParseTree [parse-state] (:parse-tree parse-state))
 
+(defn brokenParseTree? [parse-state]
+  (if-let [parse-tree (getParseTree parse-state)]
+    (boolean (:broken? parse-tree))
+    true))
+                        
 (defn getParseState 
   "text is passed to check if the contents of r is still up to date or not.
    If not, text will also be used to recompute r on-the-fly."
