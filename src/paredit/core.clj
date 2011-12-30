@@ -520,7 +520,10 @@
 (defmethod paredit
   :paredit-wrap-quote
   [cmd {:keys #{parse-tree buffer}} t]
-  (with-important-memoized (wrap-with-balanced parse-tree ["'" ""] t)))
+  (-> t 
+    (update-in [:text] t/str-insert (:offset t) \')
+    (update-in [:offset] inc)
+    (update-in [:modifs] conj {:text "'", :offset (:offset t), :length 0})))
 
 (defmethod paredit
   :paredit-wrap-square

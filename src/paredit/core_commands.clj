@@ -434,6 +434,7 @@
        "|" "'|"
        "(|" "('|"
        "((|))" "(('|))"
+       "|   \nfoo" "'|   \nfoo"
        }]
      ;["M-s"       :paredit-splice-sexp
      ;           {"(foo (bar| baz) quux)"
