@@ -122,6 +122,9 @@
          :count count
          :content-cumulative-count combined
          :abstract-node abstract-node
+         :broken? (or (#{::unexpected :chimera} t)
+                      (some #{::unexpected :chimera} (cons t (map :tag parse-tree-children)))
+                      false)
          ;:tokens (tokens t parse-tree-children count)
          }))))
 
