@@ -68,19 +68,6 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
     	
     	fullBuild(getProject(), monitor);
 
-    	
-        // Commented out to not break svn
-//        if(kind == FULL_BUILD){
-//            fullBuild(monitor);
-//        } else {
-//            IResourceDelta delta = getDelta(getProject());
-//            if(delta == null){
-//                fullBuild(monitor);
-//            } else {
-//                fullBuild(monitor);
-//                //incrementalBuild(delta, monitor);
-//            }
-//        }
         return null;
     }
     
