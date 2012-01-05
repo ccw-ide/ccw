@@ -164,14 +164,6 @@
     (file-to-path (get-jar-inside-plugin "ccw.clojure", "clojure"))
     (file-to-path (get-jar-inside-plugin "ccw.clojure", "src"))
     true))      	    
-      
-(defn- add-clojure-contrib-lib-on-classpath!
-  [java-project]
-  (add-lib-on-classpath!
-    java-project
-    (file-to-path (get-jar-inside-plugin "ccw.clojurecontrib", "clojure-contrib"))
-    (file-to-path (get-jar-inside-plugin "ccw.clojurecontrib", "src"))
-    true))      	    
 
 (defn- add-classes-directory!
   [java-project]
@@ -192,7 +184,6 @@
   (io!
 	  (let [java-project (.getJavaProject (ClojureCore/getClojureProject proj))]
 	    (doseq [[pred add-fn] {has-clojure-on-classpath? add-clojure-lib-on-classpath!
-	                           has-clojure-contrib-on-classpath? add-clojure-contrib-lib-on-classpath!
 	                           has-classes-folder? add-classes-directory!}]
 	      (when (not (pred java-project)) (add-fn java-project))))))
 
