@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Counterclockwise Clojure Plug-in
 Bundle-SymbolicName: ccw.core;singleton:=true
-Bundle-Version: 0.6.0.BETA003
+Bundle-Version: 0.6.0.qualifier
 Bundle-Localization: plugin
 Bundle-Activator: ccw.CCWPlugin
 Require-Bundle: org.eclipse.ui,
@@ -22,10 +22,9 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.forms,
  paredit.clj,
  org.eclipse.help,
- ccw.branding;bundle-version="0.2.0",
+ ccw.branding,
  org.eclipse.ui.workbench.texteditor,
  ccw.clojure;bundle-version="1.3.0",
- ccw.clojurecontrib;bundle-version="1.2.0",
  clojure.osgi;bundle-version="1.3.0",
  org.clojure.tools.nrepl;bundle-version="0.0.5",
  ccw.org.clojure.core.incubator;bundle-version="0.1.0"

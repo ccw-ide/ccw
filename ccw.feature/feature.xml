@@ -2,7 +2,7 @@
 <feature
       id="ccw.feature"
       label="%featureName"
-      version="0.6.0.BETA003"
+      version="0.6.0.qualifier"
       provider-name="%providerName"
       plugin="ccw.branding">
 
@@ -100,16 +100,16 @@
          version="0.0.0"/>
 
    <plugin
-         id="ccw.clojurecontrib"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
          id="ccw.org.clojure.core.incubator"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+
+   <plugin
+         id="ccw.clojurecontrib"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
 
 </feature>
