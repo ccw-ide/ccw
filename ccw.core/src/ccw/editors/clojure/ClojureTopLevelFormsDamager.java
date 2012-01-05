@@ -9,7 +9,6 @@ import org.eclipse.jface.text.presentation.IPresentationDamager;
 import ccw.CCWPlugin;
 import ccw.util.ClojureUtils;
 import clojure.lang.Ref;
-import clojure.osgi.ClojureOSGi;
 
 public class ClojureTopLevelFormsDamager implements IPresentationDamager {
 	private static final String ClojureTopLevelFormsDamagerImpl_NS = "ccw.editors.clojure.ClojureTopLevelFormsDamagerImpl";
@@ -17,7 +16,7 @@ public class ClojureTopLevelFormsDamager implements IPresentationDamager {
 	
 	static {
 		try {
-			ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), ClojureTopLevelFormsDamagerImpl_NS);
+			CCWPlugin.getClojureOSGi().require(CCWPlugin.getDefault().getBundle(), ClojureTopLevelFormsDamagerImpl_NS);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

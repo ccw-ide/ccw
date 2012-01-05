@@ -40,6 +40,7 @@ import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 import ccw.editors.clojure.ClojureEditor;
 import ccw.editors.clojure.IScanContext;
@@ -52,7 +53,7 @@ import ccw.util.DisplayUtil;
 import clojure.lang.Keyword;
 import clojure.lang.Symbol;
 import clojure.lang.Var;
-import clojure.osgi.ClojureOSGi;
+import clojure.osgi.IClojureOSGi;
 import clojure.tools.nrepl.Connection;
 
 /**
@@ -62,6 +63,17 @@ public class CCWPlugin extends AbstractUIPlugin {
 
     /** The plug-in ID */
     public static final String PLUGIN_ID = "ccw";
+    
+    
+    
+    private ServiceReference clojureOSGiReference;
+
+	private static IClojureOSGi clojureOSGi;
+    
+    public static IClojureOSGi getClojureOSGi() {
+		return clojureOSGi;
+	}
+    
 
     /** 
      * @param swtKey a key from SWT.COLOR_xxx
@@ -134,6 +146,13 @@ public class CCWPlugin extends AbstractUIPlugin {
     	System.out.println("CCWPlugin start() starts");
         super.start(context);
         plugin = this;
+        
+        clojureOSGiReference = context.getServiceReference(IClojureOSGi.class.getName());
+        if(clojureOSGiReference == null)
+        	throw new IllegalStateException();
+        
+        clojureOSGi = (IClojureOSGi) context.getService(clojureOSGiReference);
+        
         startClojureCode(context);
         if (System.getProperty("ccw.autostartnrepl") != null) {
         	startREPLServer();
@@ -205,18 +224,18 @@ public class CCWPlugin extends AbstractUIPlugin {
     private void startClojureCode(BundleContext bundleContext) throws Exception {
 //    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.clojure.ClojureFormat");
     	
-    	ClojureOSGi.require(bundleContext, "ccw.util.bundle-utils");
-    	ClojureOSGi.require(bundleContext, "ccw.editors.clojure.hyperlink");
+    	clojureOSGi.require(bundleContext.getBundle(), "ccw.util.bundle-utils");
+    	clojureOSGi.require(bundleContext.getBundle(), "ccw.editors.clojure.hyperlink");
     	
-    	ClojureOSGi.require(bundleContext, "ccw.editors.clojure.editor-support");
+    	clojureOSGi.require(bundleContext.getBundle(), "ccw.editors.clojure.editor-support");
 
-    	ClojureOSGi.require(bundleContext, "ccw.editors.clojure.ClojureTopLevelFormsDamagerImpl");
-    	ClojureOSGi.require(bundleContext, "ccw.editors.clojure.PareditAutoEditStrategyImpl");
+    	clojureOSGi.require(bundleContext.getBundle(), "ccw.editors.clojure.ClojureTopLevelFormsDamagerImpl");
+    	clojureOSGi.require(bundleContext.getBundle(), "ccw.editors.clojure.PareditAutoEditStrategyImpl");
 
-    	ClojureOSGi.require(bundleContext, "ccw.debug.clientrepl");
-    	ClojureOSGi.require(bundleContext, "ccw.debug.serverrepl"); // <= to enable REPLView 
+    	clojureOSGi.require(bundleContext.getBundle(), "ccw.debug.clientrepl");
+    	clojureOSGi.require(bundleContext.getBundle(), "ccw.debug.serverrepl"); // <= to enable REPLView 
     	                                                            //    server-side tooling
-    	ClojureOSGi.require(bundleContext, "ccw.static-analysis");
+    	clojureOSGi.require(bundleContext.getBundle(), "ccw.static-analysis");
     }
     
     public void stop(BundleContext context) throws Exception {
@@ -225,6 +244,10 @@ public class CCWPlugin extends AbstractUIPlugin {
     	// corresponding method on the ColorRegistry instance!
     	// We also don't remove fonts when deregistered
     	stopREPLServer();
+    	
+    	 if(clojureOSGiReference != null)
+         	context.ungetService(clojureOSGiReference);
+       
         plugin = null;
         super.stop(context);
     }

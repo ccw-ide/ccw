@@ -10,7 +10,6 @@ import org.eclipse.core.runtime.IExecutableExtensionFactory;
 
 import ccw.CCWPlugin;
 import clojure.lang.Var;
-import clojure.osgi.ClojureOSGi;
 import clojure.osgi.RunnableWithException;
 
 public class GenericExecutableExtension implements IExecutableExtensionFactory, IExecutableExtension {
@@ -20,7 +19,7 @@ public class GenericExecutableExtension implements IExecutableExtensionFactory, 
 	
 	public Object create() throws CoreException {
 		try {
-			return ClojureOSGi.withBundle(BundleUtils.loadAndGetBundle(bundleName), new RunnableWithException() {
+			return CCWPlugin.getClojureOSGi().withBundle(BundleUtils.loadAndGetBundle(bundleName), new RunnableWithException() {
 				public Object run() throws Exception {
 					return factory.invoke(factoryParams);
 				}

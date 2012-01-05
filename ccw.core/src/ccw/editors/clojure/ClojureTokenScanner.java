@@ -32,15 +32,14 @@ import ccw.CCWPlugin;
 import ccw.util.ClojureUtils;
 import clojure.lang.ISeq;
 import clojure.lang.Keyword;
-import clojure.osgi.ClojureOSGi;
 
 abstract public class ClojureTokenScanner implements ITokenScanner {
     private static final String EDITOR_SUPPORT_NS = "ccw.editors.clojure.editor-support";
     private static final String ClojureTopLevelFormsDamager_NS = "ccw.editors.clojure.ClojureTopLevelFormsDamagerImpl";
     static {
     	try {
-			ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), EDITOR_SUPPORT_NS);
-			ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), ClojureTopLevelFormsDamager_NS);
+			CCWPlugin.getClojureOSGi().require(CCWPlugin.getDefault().getBundle(), EDITOR_SUPPORT_NS);
+			CCWPlugin.getClojureOSGi().require(CCWPlugin.getDefault().getBundle(), ClojureTopLevelFormsDamager_NS);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
