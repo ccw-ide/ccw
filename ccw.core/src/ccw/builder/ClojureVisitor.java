@@ -68,7 +68,6 @@ public class ClojureVisitor implements IResourceVisitor {
 //						System.out.println(("oops, weird error when compiling '" + maybeLibName + "'"));
 					} else {
 	    				Object result = res.values().get(0);
-	                    //response-type" -1, "response" "[{\"file-name\" \"Compiler.java\", \"line-number\" 4186, \"message\
 //	    				System.out.println("ClojureVisitor: " + result);
 	                    if (result instanceof Map) {
 	                    	Map resultMap = (Map) result;
