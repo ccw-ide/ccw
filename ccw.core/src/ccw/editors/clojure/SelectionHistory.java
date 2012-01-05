@@ -34,7 +34,7 @@ public class SelectionHistory {
 	}
 
 	public void remember(ISourceRange range) {
-		System.out.println("asked to remember range:" + range);
+//		System.out.println("asked to remember range:" + range);
 		fHistory.add(range);
 //		fHistoryAction.update(); TODO correctement
 	}
