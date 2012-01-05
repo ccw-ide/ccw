@@ -315,7 +315,7 @@ public class ClojureProject extends PlatformObject {
             IFolder fldr = ResourcesPlugin.getWorkspace().getRoot().getFolder(
                     path);
             if (!fldr.exists()) {
-                System.err.println("CREATE: " + fldr);
+//                System.err.println("CREATE: " + fldr);
                 fldr.create(true, true, null);
             }
             return fldr.getLocation().toOSString();

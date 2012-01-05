@@ -451,10 +451,10 @@ public final class ClojureCore {
 		} else {
 			String sourceCode = getFileText(file);
 			if (hasNsCall(sourceCode)) {
-				System.out.println("path.toPortableString()" + path.toPortableString());
+//				System.out.println("path.toPortableString()" + path.toPortableString());
 				return getNamespaceNameFromPackageName(path.toPortableString());
 			} else {
-				System.out.println("did not find a ns call in source code of " + file);
+//				System.out.println("did not find a ns call in source code of " + file);
 				return null;
 			}
 		}

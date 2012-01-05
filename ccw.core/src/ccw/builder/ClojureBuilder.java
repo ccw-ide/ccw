@@ -53,15 +53,15 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
     @Override
     protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
             throws CoreException {
-    	System.out.println("clojure build required");
+//    	System.out.println("clojure build required");
     	if (getProject()==null) {
     		return null;
     	}
     	
     	if (kind == AUTO_BUILD || kind == INCREMENTAL_BUILD) {
 	    	if (onlyClassesOrOutputFolderRelatedDelta() && !onlyProjectTouched() ) {
-	    		System.out.println("nothing to build (onlyClassesOrOutputFolderRelatedDelta()=" + onlyClassesOrOutputFolderRelatedDelta()
-	    				+ ", !onlyProjectTouched()=" + !onlyProjectTouched());
+//	    		System.out.println("nothing to build (onlyClassesOrOutputFolderRelatedDelta()=" + onlyClassesOrOutputFolderRelatedDelta()
+//	    				+ ", !onlyProjectTouched()=" + !onlyProjectTouched());
 	    		return null;
 	    	}
     	}
@@ -108,7 +108,7 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
 					continue delta_loop;
 				}
 			}
-			System.out.println("affected children for build:" + d.getFullPath());
+//			System.out.println("affected children for build:" + d.getFullPath());
 			return false;
 		}
 		return true;
@@ -144,7 +144,7 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
     		repl = CCWPlugin.getDefault().getProjectREPL(project);
         }
         if (repl == null || repl.isDisposed() || !ClojureLaunchDelegate.isAutoReloadEnabled(repl.getLaunch())) {
-        	System.out.println("REPL not found, or disposed, or autoReloadEnabled not found on launch configuration");
+//        	System.out.println("REPL not found, or disposed, or autoReloadEnabled not found on launch configuration");
         	return;
         }
         

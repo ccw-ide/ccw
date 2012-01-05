@@ -112,7 +112,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 		prefixOffset++;
 		if (prefixOffset < 0) return null;
 		prefix = doc.get(prefixOffset, offset - prefixOffset);
-		System.out.println("found wordPrefix:'" + prefix + "'");
+//		System.out.println("found wordPrefix:'" + prefix + "'");
 		return new PrefixInfo(editor, prefix, prefixOffset); 
 	}
 	
@@ -287,7 +287,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 		}
 
 		final String methodPrefix = prefixInfo.prefix.substring(1);
-		System.out.println("method prefix:" + methodPrefix );
+//		System.out.println("method prefix:" + methodPrefix );
 		boolean isPattern = (methodPrefix.contains("*") || methodPrefix.contains("?"));
 		boolean autoAddEndWildcard = isPattern && !methodPrefix.endsWith("*");
 		SearchPattern pattern = SearchPattern.createPattern(
@@ -307,14 +307,14 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 					@Override
 					public void beginReporting() {
 						super.beginReporting();
-						System.out.println("begin reporting");
+//						System.out.println("begin reporting");
 						counter = 0;
 					}
 					@Override
 					public void acceptSearchMatch(SearchMatch match) throws CoreException {
 						counter++;
 						if (counter >= MAX_JAVA_SEARCH_RESULT_NUMBER) {
-							System.out.println("too much results (>" + MAX_JAVA_SEARCH_RESULT_NUMBER + "), throwing exception");
+//							System.out.println("too much results (>" + MAX_JAVA_SEARCH_RESULT_NUMBER + "), throwing exception");
 							throw new CoreException(Status.OK_STATUS);
 						}
 						proposals.add(new MethodLazyCompletionProposal(
@@ -326,7 +326,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 					@Override
 					public void endReporting() {
 						super.endReporting();
-						System.out.println("end reporting : count=" + counter);
+//						System.out.println("end reporting : count=" + counter);
 					}
 					
 				};

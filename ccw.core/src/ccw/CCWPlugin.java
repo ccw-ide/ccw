@@ -127,18 +127,18 @@ public class CCWPlugin extends AbstractUIPlugin {
     }
 
     public CCWPlugin() {
-    	System.out.println("CCWPlugin instanciated");
+//    	System.out.println("CCWPlugin instanciated");
     }
     
     public void start(BundleContext context) throws Exception {
-    	System.out.println("CCWPlugin start() starts");
+//    	System.out.println("CCWPlugin start() starts");
         super.start(context);
         plugin = this;
         startClojureCode(context);
         if (System.getProperty("ccw.autostartnrepl") != null) {
         	startREPLServer();
         }
-    	System.out.println("CCWPlugin start() ends");
+//    	System.out.println("CCWPlugin start() ends");
     }
     
     private synchronized void createColorRegistry() {

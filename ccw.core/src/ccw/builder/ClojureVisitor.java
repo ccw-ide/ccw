@@ -59,17 +59,17 @@ public class ClojureVisitor implements IResourceVisitor {
 		if (repl != null) {
 		    try {
     			for (String maybeLibName: clojureLibs) {
-    				System.out.println("compiling:'" + maybeLibName + "'");
+//    				System.out.println("compiling:'" + maybeLibName + "'");
     				String compileLibCommand = CompileLibAction.compileLibCommand(maybeLibName);
-    				System.out.println("Sending command: '" + compileLibCommand + "'");
+//    				System.out.println("Sending command: '" + compileLibCommand + "'");
 					Response res = repl.send(compileLibCommand);
-					System.out.println("compilation response: '" + res + "'");
+//					System.out.println("compilation response: '" + res + "'");
 					if (res.values().isEmpty()) {
-						System.out.println(("oops, weird error when compiling '" + maybeLibName + "'"));
+//						System.out.println(("oops, weird error when compiling '" + maybeLibName + "'"));
 					} else {
 	    				Object result = res.values().get(0);
-	    				System.out.println("ClojureVisitor: " + result);
 	                    //response-type" -1, "response" "[{\"file-name\" \"Compiler.java\", \"line-number\" 4186, \"message\
+//	    				System.out.println("ClojureVisitor: " + result);
 	                    if (result instanceof Map) {
 	                    	Map resultMap = (Map) result;
 	                        Collection<Map> response = (Collection<Map>)resultMap.get("response");
@@ -78,21 +78,21 @@ public class ClojureVisitor implements IResourceVisitor {
 	                            if (errorMap != null) {
 	                                String message = (String) errorMap.get("message");
 	                                if (message != null) {
-	                                    System.out.println("error message:" + message);
+//	                                    System.out.println("error message:" + message);
 	                                    Matcher matcher = ERROR_MESSAGE_PATTERN.matcher(message);
 	                                    if (matcher.matches()) {
-	                                        System.out.println("match found for message:'" + message + "'");
+//	                                        System.out.println("match found for message:'" + message + "'");
 	                                        String messageBody = matcher.group(MESSAGE_GROUP);
 	                                        String filename = matcher.group(FILENAME_GROUP);
 	                                        String lineStr = matcher.group(LINE_GROUP);
-	                                        System.out.println("message:" + messageBody);
-	                                        System.out.println("file:" + filename);
-	                                        System.out.println("line:" + lineStr);
+//	                                        System.out.println("message:" + messageBody);
+//	                                        System.out.println("file:" + filename);
+//	                                        System.out.println("line:" + lineStr);
 	                                        if (!NO_SOURCE_FILE.equals(filename)) {
 	                                            createMarker(filename, Integer.parseInt(lineStr), messageBody);
 	                                        }
 	                                    } else {
-	                                        System.out.println("no match found for message:'" + message + "'");
+//	                                        System.out.println("no match found for message:'" + message + "'");
 	                                    }
 	                                }
 	                            }
@@ -119,9 +119,9 @@ public class ClojureVisitor implements IResourceVisitor {
 					(IFile) resource, currentSrcFolder.getKey().getFullPath());
 			if (maybeLibName != null) {
 				clojureLibs.add(maybeLibName);
-				System.out.println("maybe lib: " + resource.getLocation() + " recognized as a lib");
+//				System.out.println("maybe lib: " + resource.getLocation() + " recognized as a lib");
 			} else {
-				System.out.println("maybe lib: " + resource.getLocation() + " NOT recognized as a lib");
+//				System.out.println("maybe lib: " + resource.getLocation() + " NOT recognized as a lib");
 			}
 		}
 		return true;
@@ -129,12 +129,12 @@ public class ClojureVisitor implements IResourceVisitor {
 	
 	private void createMarker(final String filename, final int line, final String message) {
 		try {
-			System.out.println("(trying to) create a marker for " + filename);
+//			System.out.println("(trying to) create a marker for " + filename);
 			for (IFolder srcFolder: srcFolders.keySet()) {
 				srcFolder.accept(new IResourceVisitor() {
 					public boolean visit(IResource resource) throws CoreException {
 						if (resource.getType() == IResource.FILE) {
-							System.out.println("    file found: " + resource.getName());
+//							System.out.println("    file found: " + resource.getName());
 							if (resource.getName().equals(filename)) {
 								Map attrs = new HashMap();
 								MarkerUtilities.setLineNumber(attrs, line);
@@ -142,7 +142,7 @@ public class ClojureVisitor implements IResourceVisitor {
 								attrs.put(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
 								MarkerUtilities.createMarker(resource, attrs, ClojureBuilder.CLOJURE_COMPILER_PROBLEM_MARKER_TYPE);
 								
-								System.out.println("created marker !");
+//								System.out.println("created marker !");
 							}
 						}
 						return true;

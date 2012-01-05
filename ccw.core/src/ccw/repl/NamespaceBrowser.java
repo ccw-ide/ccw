@@ -387,9 +387,9 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 					final Display display = PlatformUI.getWorkbench().getDisplay();
 					display.asyncExec(new Runnable() {
 						public void run() {
-							System.out.println("delayed refresh start");
+//							System.out.println("delayed refresh start");
 							treeViewer.refresh(updateLabels);
-							System.out.println("delayed refresh stop");
+//							System.out.println("delayed refresh stop");
 						}
 					});
 				} else {
