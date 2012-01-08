@@ -17,6 +17,7 @@
   (:require [paredit.string :as str])
   (:require [paredit.text-utils :as t])
   (:require [clojure.zip :as z])
+  (:require [clojure.string :as s])
   (:use paredit.loc-utils)) ; TODO avoir un require :as l
 
 #_(set! *warn-on-reflection* true)
@@ -650,3 +651,38 @@
         line-start-comment? (dec-lines-comments lines)
         (complement line-start-comment?) (inc-lines-comments lines)
         lines))))
+
+(defn escape-string-content
+  "Meant to escape text to be pasted into a String literal.
+   Escapes content of s: adds backslashes before each found double quote or 
+   backslash."
+  [s]
+  (when s 
+    (s/escape s {\" "\\\"", \\ "\\\\"})))
+
+(defn inside-string-literal? 
+  "In the source code parse-tree is the representation of, is offset positioned
+   inside a String literal (that is within a String literal double quotes)?"
+  [parse-tree offset]
+  (let [offset-loc (-> parse-tree parsed-root-loc (loc-containing-offset offset))] 
+      (#{:string, :string-body} (loc-tag offset-loc))))
+
+(defn smart-paste 
+  "Takes a parse-tree, an editor state, a text to paste.
+   If the cursor is inside a String literal, then double-quotes and backslashes
+   found inside to-paste are escaped with a backslash, so that the resulting
+   text to paste is properly escaped for being inserted inside a String literal.
+   If be-smart? is false, will copy to-paste as is, not doing any smart thing."
+  [{:keys #{parse-tree buffer}}
+   {:keys [^String text offset length] :as t}
+   to-paste
+   be-smart?]
+  (let [to-paste (if (and be-smart? (inside-string-literal? parse-tree offset))
+                   (escape-string-content to-paste)
+                   to-paste) 
+        new-text (t/str-replace text offset length to-paste)
+        new-offset (+ offset (.length to-paste))]
+    {:text new-text
+     :offset new-offset
+     :length 0
+     :modifs [{:offset offset :length length :text to-paste}]}))

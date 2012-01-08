@@ -65,6 +65,17 @@
     "foo (bar baz)" 12 1 4 9 
     ))
 
+(deftest unescape-string-content-tests
+  (are [unescaped expected-escaped]
+    (= expected-escaped (escape-string-content unescaped))
+    ""                                      ""
+    "abcd"                                  "abcd"
+    "/"                                     "/"
+    "\""                                    "\\\""
+    "\\\""                                  "\\\\\\\""
+    "<name attr=\"value\">\"text\"</name>" "<name attr=\\\"value\\\">\\\"text\\\"</name>"
+    "\\d"                                  "\\\\d"))
+
 
 (defn test-command [title-prefix command]
   (testing (str title-prefix " " (second command) " (\"" (first command) "\")")
@@ -206,6 +217,7 @@
   (paredit-tests)
   (parser-tests)
   (parsetree-tests)
+  (unescape-string-content-tests)
   ;;;;;;;#_(loc-for-offset-tests)
   #_(leave-for-offset-tests)
   #_(loc-containing-offset-tests))
