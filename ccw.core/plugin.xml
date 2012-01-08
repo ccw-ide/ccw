@@ -442,6 +442,12 @@
             id="ccw.ui.edit.text.clojure.comment.toggle"
             name="%ccw.ui.edit.text.clojure.comment.toggle.name">
       </command>
+      <command
+            categoryId="org.eclipse.ui.category.edit"
+            description="%ccw.ui.edit.text.clojure.pastewithescaping.description"
+            id="ccw.ui.edit.text.clojure.pastewithescaping"
+            name="%ccw.ui.edit.text.clojure.pastewithescaping.name">
+      </command>
       
    </extension>
    
@@ -727,8 +733,6 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+/">
       </key>
-			
-            
 	</extension>
    <extension
          point="org.eclipse.ui.menus">
@@ -1737,6 +1741,70 @@
               </iterate>
            </with>
         </enabledWhen>
+     </handler>
+     <handler
+           commandId="ccw.ui.edit.text.clojure.pastewithescaping">
+        <class
+              class="ccw.util.GenericExecutableExtension">
+           <parameter
+                 name="factory"
+                 value="ccw.util.handler-factory/factory">
+           </parameter>
+           <parameter
+                 name="handler"
+                 value="ccw.editors.clojure.handlers/smart-paste">
+           </parameter>
+        </class>
+        <enabledWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </enabledWhen>
+     </handler>
+     <handler
+           commandId="org.eclipse.ui.edit.paste">
+        <class
+              class="ccw.util.GenericExecutableExtension">
+           <parameter
+                 name="factory"
+                 value="ccw.util.handler-factory/factory">
+           </parameter>
+           <parameter
+                 name="handler"
+                 value="ccw.editors.clojure.handlers/smart-paste">
+           </parameter>
+        </class>
+        <enabledWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </enabledWhen>
+        <activeWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </activeWhen>
      </handler>
   </extension>
   <extension

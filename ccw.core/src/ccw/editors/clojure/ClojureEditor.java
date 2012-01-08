@@ -446,7 +446,7 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#initializeKeyBindingScopes()
 	 */
 	protected void initializeKeyBindingScopes() {
-		setKeyBindingScopes(new String[] { IClojureEditor.KEY_BINDING_SCOPE });
+		setKeyBindingScopes(new String[] { "org.eclipse.ui.textEditorScope", IClojureEditor.KEY_BINDING_SCOPE });  //$NON-NLS-1$
 	}
 
 	@Override

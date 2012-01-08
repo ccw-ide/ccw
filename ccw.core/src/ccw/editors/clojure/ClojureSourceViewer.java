@@ -27,6 +27,7 @@ import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextViewerExtension5;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextSelection;
+import org.eclipse.jface.text.TextViewer;
 import org.eclipse.jface.text.source.DefaultCharacterPairMatcher;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ICharacterPairMatcher;
@@ -61,9 +62,11 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     public static final String STATUS_CATEGORY_STRUCTURAL_EDITION = "CCW.STATUS_CATEGORY_STRUCTURAL_EDITING_POSSIBLE";
     
     private static final String EDITOR_SUPPORT_NS = "ccw.editors.clojure.editor-support";
+    private static final String HANDLERS_NS = "ccw.editors.clojure.handlers";
     static {
     	try {
 			ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), EDITOR_SUPPORT_NS);
+			ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), HANDLERS_NS);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -587,6 +590,32 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 	public void contributeToStatusLine(IStatusLineManager statusLineManager) {
 		statusLineManager.add(structuralEditionStatusField);
 		updateStatusField();
+	}
+	
+	/*
+	 * Eclipse TextEditor framework uses old "Action" framework. So it is impossible
+	 * to use handlers declaratively, one must plug the new behaviour via code,
+	 * some way or the other.
+	 * It was decided here to plug new behaviour by overriding directly the 
+	 * doOperation(operation) call, at the most central point, that is.
+	 * 
+	 * (non-Javadoc)
+	 * @see org.eclipse.jface.text.source.projection.ProjectionViewer#doOperation(int)
+	 */
+	@Override
+	public void doOperation(int operation) {
+		if (operation == TextViewer.PASTE) {
+			if (!getTextWidget().getBlockSelection()) {
+				ClojureUtils.invoke(HANDLERS_NS, "smart-paste", this);
+				return;
+			} else {
+				// We're not trying (at least yet) to handle paste inside
+				// block selections
+				super.doOperation(operation);
+			}
+		} else {
+			super.doOperation(operation);
+		}
 	}
 
 	public Object getAdapter(Class adapter) {
