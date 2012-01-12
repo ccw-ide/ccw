@@ -36,15 +36,15 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
+import org.eclipse.ui.texteditor.StatusLineContributionItem;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
-
-import clojure.osgi.ClojureOSGi;
 
 import ccw.CCWPlugin;
 import ccw.editors.outline.ClojureOutlinePage;
 import ccw.launching.ClojureLaunchShortcut;
 import ccw.repl.REPLView;
 import ccw.util.ClojureUtils;
+import clojure.osgi.ClojureOSGi;
 
 public class ClojureEditor extends TextEditor implements IClojureEditor {
     private static final String EDITOR_SUPPORT_NS = "ccw.editors.clojure.editor-support";
@@ -57,7 +57,7 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
     }
 
     public static final String EDITOR_REFERENCE_HELP_CONTEXT_ID = "ccw.branding.editor_context_help";
-	
+
     public static final String ID = "ccw.clojureeditor"; //$NON-NLS-1$
 	/** Preference key for matching brackets */
 	//PreferenceConstants.EDITOR_MATCHING_BRACKETS;
@@ -98,7 +98,12 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 		fOverviewRuler= createOverviewRuler(getSharedColors());
 		
 		// ISourceViewer viewer= new ProjectionViewer(parent, ruler, getOverviewRuler(), isOverviewRulerVisible(), styles);
-		ClojureSourceViewer viewer= new ClojureSourceViewer(parent, ruler, getOverviewRuler(), isOverviewRulerVisible(), styles, getPreferenceStore()) {
+		ClojureSourceViewer viewer= new ClojureSourceViewer(parent, ruler, getOverviewRuler(), isOverviewRulerVisible(), styles, getPreferenceStore(),
+				new ClojureSourceViewer.IStatusLineHandler() {
+					public StatusLineContributionItem getEditingModeStatusContributionItem() {
+						return (StatusLineContributionItem) ClojureEditor.this.getStatusField(ClojureSourceViewer.STATUS_CATEGORY_STRUCTURAL_EDITION);
+					}
+				}) {
 			public void setStatusLineErrorMessage(String message) {
 				ClojureEditor.this.setStatusLineErrorMessage(message);
 			}
@@ -134,9 +139,22 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 		
 		fProjectionSupport.install();
 		viewer.doOperation(ClojureSourceViewer.TOGGLE);
-		
-		sourceViewer().contributeToStatusLine(getStatusLineManager());
 	}
+
+	/**
+	 * Updates the status fields for the given category.
+	 *
+	 * @param category the category
+	 * @since 2.0
+	 */
+	protected void updateStatusField(String category) {
+		if (ClojureSourceViewer.STATUS_CATEGORY_STRUCTURAL_EDITION.equals(category)) {
+			viewer.updateStructuralEditingModeStatusField();
+		} else {
+			super.updateStatusField(category);
+		}
+	}
+
 	
 	public boolean isInEscapeSequence () {
 	    return ((ClojureSourceViewer)getSourceViewer()).isInEscapeSequence();
@@ -211,7 +229,16 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 		setAction("ClojureLaunchAction", action);
 
 //		TODO: same for content-assist handler ? markAsStateDependentAction(CONTENT_ASSIST_PROPOSAL, true);
-
+		
+		action = new Action() {
+			@Override
+			public void run() {
+				viewer.updateStructuralEditingModeStatusField();
+			};
+		};
+		action.setActionDefinitionId(ClojureSourceViewer.STATUS_CATEGORY_STRUCTURAL_EDITION);
+		setAction(ClojureSourceViewer.STATUS_CATEGORY_STRUCTURAL_EDITION, action);
+		
 }
 	
 	

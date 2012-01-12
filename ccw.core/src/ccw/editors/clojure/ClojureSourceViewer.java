@@ -14,8 +14,6 @@ package ccw.editors.clojure;
 import java.util.Map;
 
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.text.DocumentEvent;
@@ -59,7 +57,6 @@ import clojure.osgi.ClojureOSGi;
 
 public abstract class ClojureSourceViewer extends ProjectionViewer implements
         IClojureEditor, IPropertyChangeListener {
-    public static final String STATUS_CATEGORY_STRUCTURAL_EDITION = "CCW.STATUS_CATEGORY_STRUCTURAL_EDITING_POSSIBLE";
     
     private static final String EDITOR_SUPPORT_NS = "ccw.editors.clojure.editor-support";
     private static final String HANDLERS_NS = "ccw.editors.clojure.handlers";
@@ -70,6 +67,26 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+    }
+
+    /** 
+     * Status category used e.g. with TextEditors embedding a ClojureSourceViewer
+     * reporting the status of the structural edition mode (Strict/Default).
+     *  */
+    public static final String STATUS_CATEGORY_STRUCTURAL_EDITION = "CCW.STATUS_CATEGORY_STRUCTURAL_EDITING_POSSIBLE";
+    
+    /**
+     * Due to Eclipse idiosyncracies, it is not possible for the viewer to 
+     * directly manage lifecycle of StatusLineContributionItems.
+     * 
+     *  But it is still required, to stay DRY, to centralise as much as possible
+     *  of the state reporting of the ClojureSourceViewer.
+     *  
+     *  This interface must be implemented by "components" (Editors, Viewers, whatever)
+     *  which are capable of reporting status to status line managers
+     */
+    public static interface IStatusLineHandler {
+    	StatusLineContributionItem getEditingModeStatusContributionItem();
     }
 
     /**
@@ -119,7 +136,8 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 	 * STOLEN FROM THE JDT */
 	private SelectionHistory fSelectionHistory;
 	
-	private StatusLineContributionItem structuralEditionStatusField;
+	/** can be null */
+	private IStatusLineHandler statusLineHandler;
 	
 	/** The error message shown in the status line in case of failed information look up. */
 	protected final String fErrorLabel = "An unexpected error occured";
@@ -135,7 +153,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 	 */
 	private boolean structuralEditingPossible;
 
-    public ClojureSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles, IPreferenceStore store) {
+    public ClojureSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles, IPreferenceStore store, IStatusLineHandler statusLineHandler) {
         super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles);
         setPreferenceStore(store);
         
@@ -173,14 +191,15 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
         
 		useStrictStructuralEditing = store.getBoolean(ccw.preferences.PreferenceConstants.USE_STRICT_STRUCTURAL_EDITING_MODE_BY_DEFAULT);
 
-		structuralEditionStatusField = 
-			new StatusLineContributionItem(ClojureSourceViewer.STATUS_CATEGORY_STRUCTURAL_EDITION, true, 33);
-		structuralEditionStatusField.setActionHandler(new Action() {
-			public void run() {
-				toggleStructuralEditionMode();
-			}
-		});
+		this.statusLineHandler = statusLineHandler;
 	}
+    
+    public static StatusLineContributionItem createStructuralEditionModeStatusContributionItem() {
+		return new StatusLineContributionItem(
+				ClojureSourceViewer.STATUS_CATEGORY_STRUCTURAL_EDITION, 
+				true, 
+				STATUS_STRUCTURAL_EDITION_CHARS_WIDTH);
+    }
 
     public void propertyChange(PropertyChangeEvent event) {
         if (fConfiguration != null) {
@@ -478,6 +497,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 	//PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR;
 
 	public final static char[] PAIRS= { '{', '}', '(', ')', '[', ']' };
+	public static final int STATUS_STRUCTURAL_EDITION_CHARS_WIDTH = 33;
 	
 	private DefaultCharacterPairMatcher pairsMatcher = new DefaultCharacterPairMatcher(PAIRS, ClojurePartitionScanner.CLOJURE_PARTITIONING) {
 		/* tries to match a pair be the cursor after or before a pair start/end element */
@@ -561,37 +581,31 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 	public void setStructuralEditingPossible(boolean state) {
 		if (state != this.structuralEditingPossible) {
 			this.structuralEditingPossible = state;
-			updateStatusField();
+			updateStructuralEditingModeStatusField();
 		}
 	}
 	
     public void toggleStructuralEditionMode() {
        useStrictStructuralEditing = !useStrictStructuralEditing;
-       updateStatusField();
+       updateStructuralEditingModeStatusField();
     }
     
-	private void updateStatusField() {
-		if (structuralEditionStatusField != null) {
-			/*
-			 * Disabled, because currently structuralEditingPossible is not reliable (some paredit commands stop after having parsed all the text)
-			 * TODO reactivate when paredit has been ported to parsley
-			String text= "Structural Edition: " 
-				+ (structuralEditingPossible ? "enabled" : "disabled");
-				*/
+	public void updateStructuralEditingModeStatusField() {
+		if (this.statusLineHandler == null) {
+			return;
+		}
+			
+		StatusLineContributionItem field = this.statusLineHandler.getEditingModeStatusContributionItem();
+		if (field != null) {
 			String text = "Structural Edition: " + (isStructuralEditingEnabled() ? "Strict mode" : "Default mode");
-			structuralEditionStatusField.setText(text == null ? fErrorLabel : text);
-			structuralEditionStatusField.setToolTipText(
+			field.setText(text == null ? fErrorLabel : text);
+			field.setToolTipText(
 					(isStructuralEditingEnabled() 
 							? "Strict mode: editor does its best to prevent you from breaking the structure of the code (requires you to know shortcut commands well). Click to switch to Default Mode."
-						   : "Default mode: helps you with edition, but does not get in your way Click to switch to Strict Mode."));
+						    : "Default mode: helps you with edition, but does not get in your way Click to switch to Strict Mode."));
 		}
 	}
 
-	public void contributeToStatusLine(IStatusLineManager statusLineManager) {
-		statusLineManager.add(structuralEditionStatusField);
-		updateStatusField();
-	}
-	
 	/*
 	 * Eclipse TextEditor framework uses old "Action" framework. So it is impossible
 	 * to use handlers declaratively, one must plug the new behaviour via code,

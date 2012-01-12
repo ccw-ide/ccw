@@ -9,6 +9,7 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.debug.core.ILaunch;
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -40,6 +41,7 @@ import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.internal.editors.text.EditorsPlugin;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
+import org.eclipse.ui.texteditor.StatusLineContributionItem;
 
 import ccw.CCWPlugin;
 import ccw.editors.clojure.ClojureDocumentProvider;
@@ -69,7 +71,7 @@ public class REPLView extends ViewPart implements IAdaptable {
 			throw new RuntimeException(e);
 		}
     }
-	
+    
 	/* Keep this in sync with the context defined in plugin.xml */
 	public static final String CCW_UI_CONTEXT_REPL = "ccw.ui.context.repl";
 	
@@ -123,6 +125,7 @@ public class REPLView extends ViewPart implements IAdaptable {
     }
     
     private SourceViewerDecorationSupport fSourceViewerDecorationSupport;
+	private StatusLineContributionItem structuralEditionModeStatusContributionItem;
     
     public REPLView () {}
     
@@ -290,10 +293,16 @@ public class REPLView extends ViewPart implements IAdaptable {
         logPanel.setEditable(false);
         logPanel.setFont(JFaceResources.getFont(JFaceResources.TEXT_FONT));
         
-        viewer = new ClojureSourceViewer(split, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL, prefs) {
+        structuralEditionModeStatusContributionItem = ClojureSourceViewer.createStructuralEditionModeStatusContributionItem();
+        viewer = new ClojureSourceViewer(split, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL, prefs,
+        		new ClojureSourceViewer.IStatusLineHandler() {
+					public StatusLineContributionItem getEditingModeStatusContributionItem() {
+						return structuralEditionModeStatusContributionItem;
+					}
+				}) {
         	public REPLView getCorrespondingREPL() { return REPLView.this; };
-            public Connection getCorrespondingREPLConnection () {
-                // we'll be connected by the time this is called
+            private Connection getCorrespondingREPLConnection () {
+                // we'lÎñl be connected by the time this is called
                 return toolConnection;
             }
             public void setStatusLineErrorMessage(String msg) {
@@ -396,7 +405,14 @@ public class REPLView extends ViewPart implements IAdaptable {
         
         split.setWeights(new int[] {100, 75});
         
-        viewer.contributeToStatusLine(getViewSite().getActionBars().getStatusLineManager());
+        getViewSite().getActionBars().getStatusLineManager().add(this.structuralEditionModeStatusContributionItem);
+        viewer.updateStructuralEditingModeStatusField();
+        structuralEditionModeStatusContributionItem.setActionHandler(new Action() {
+    		public void run() {
+				viewer.toggleStructuralEditionMode();
+			}
+    	});
+        
     }
     
     private void installAutoEvalExpressionOnEnter() {
