@@ -29,6 +29,7 @@ Require-Bundle: org.eclipse.ui,
  org.clojure.tools.nrepl;bundle-version="0.0.5",
  ccw.org.clojure.core.incubator;bundle-version="0.1.0"
 Bundle-ClassPath: .,
+ src/clj/,
  classes/
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-Vendor: Counterclockwise team
