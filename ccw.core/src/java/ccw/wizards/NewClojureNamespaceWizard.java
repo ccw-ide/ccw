@@ -257,7 +257,8 @@ public class NewClojureNamespaceWizard extends BasicNewResourceWizard implements
             if (dw != null) {
                 IWorkbenchPage page = dw.getActivePage();
                 if (page != null) {
-                    IDE.openEditor(page, file, true);
+                    TextEditor editor = (TextEditor) IDE.openEditor(page, file, true);
+                    editor.selectAndReveal(contents.length(), 0);
                 }
             }
         }
