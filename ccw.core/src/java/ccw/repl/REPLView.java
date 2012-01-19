@@ -484,8 +484,12 @@ public class REPLView extends ViewPart implements IAdaptable {
         super.dispose();
         fSourceViewerDecorationSupport = (SourceViewerDecorationSupport) ClojureUtils.invoke(EDITOR_SUPPORT_NS, "disposeSourceViewerDecorationSupport",
         		fSourceViewerDecorationSupport);
-        interactive.close();
-        toolConnection.close();
+        if (interactive != null) {
+        	interactive.close();
+        }
+        if (toolConnection != null) {
+        	toolConnection.close();
+        }
     }
 
     public boolean isDisposed () {
