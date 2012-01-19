@@ -1233,6 +1233,12 @@
           class="ccw.preferences.SyntaxColoringPreferencePage"
           id="ccw.preferences.SyntaxColoringPreferencePage">
     </page>
+    <page
+          category="ccw.preferences.EmptyPreferencePage"
+          class="ccw.preferences.REPLViewPreferencePage"
+          id="ccw.preferences.REPLViewPreferencePage"
+          name="%preferencePage.repl.name">
+    </page>
  </extension>
  <extension
        point="org.eclipse.debug.core.sourcePathComputers">

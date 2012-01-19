@@ -12,6 +12,8 @@
  *******************************************************************************/
 package ccw.preferences;
 
+import static ccw.preferences.PreferenceConstants.USE_STRICT_STRUCTURAL_EDITING_MODE_BY_DEFAULT;
+
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.StringConverter;
@@ -64,9 +66,11 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	    store.setDefault(org.eclipse.jdt.ui.PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR, 
                 StringConverter.asString(new RGB(150, 150, 150)));
 	    store.setDefault(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH, 2);
-	    store.setDefault(ccw.preferences.PreferenceConstants.SWITCH_TO_NS_ON_REPL_STARTUP, true);
-	    store.setDefault(ccw.preferences.PreferenceConstants.USE_STRICT_STRUCTURAL_EDITING_MODE_BY_DEFAULT, false);
-	    store.setDefault(ccw.preferences.PreferenceConstants.USE_TAB_FOR_REINDENTING_LINE, true);
+	    store.setDefault(PreferenceConstants.SWITCH_TO_NS_ON_REPL_STARTUP, true);
+	    store.setDefault(USE_STRICT_STRUCTURAL_EDITING_MODE_BY_DEFAULT, false);
+	    store.setDefault(PreferenceConstants.USE_TAB_FOR_REINDENTING_LINE, true);
+	    
+	    store.setDefault(PreferenceConstants.REPL_VIEW_AUTO_EVAL_ON_ENTER_ACTIVE, true);
 	    
 	    for (SyntaxColoringDefault d: coloringDefaults) {
 	        store.setDefault(d.getPreferenceConstant(),

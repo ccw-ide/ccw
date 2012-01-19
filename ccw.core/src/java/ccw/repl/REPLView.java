@@ -49,6 +49,7 @@ import ccw.editors.clojure.ClojureSourceViewer;
 import ccw.editors.clojure.ClojureSourceViewerConfiguration;
 import ccw.editors.clojure.IClojureEditor;
 import ccw.editors.clojure.IClojureEditorActionDefinitionIds;
+import ccw.preferences.PreferenceConstants;
 import ccw.util.ClojureUtils;
 import ccw.util.DisplayUtil;
 import clojure.lang.Atom;
@@ -281,10 +282,14 @@ public class REPLView extends ViewPart implements IAdaptable {
     public ILaunch getLaunch() {
         return launch;
     }
+    
+    private IPreferenceStore getPreferences() {
+    	return  CCWPlugin.getDefault().getCombinedPreferenceStore();
+    }
 
     @Override
     public void createPartControl(Composite parent) {
-        IPreferenceStore prefs = CCWPlugin.getDefault().getCombinedPreferenceStore();
+        IPreferenceStore prefs = getPreferences();
         
         SashForm split = new SashForm(parent, SWT.VERTICAL);
         
@@ -428,8 +433,12 @@ public class REPLView extends ViewPart implements IAdaptable {
         		return viewerWidget.getText().substring(
         				viewerWidget.getSelection().x);
         	}
+        	private boolean isAutoEvalOnEnterAllowed() {
+        		return getPreferences().getBoolean(PreferenceConstants.REPL_VIEW_AUTO_EVAL_ON_ENTER_ACTIVE);
+        	}
 			public void verifyKey(VerifyEvent e) {
-				if (enterAlonePressed(e) 
+				if (    isAutoEvalOnEnterAllowed()
+						&& enterAlonePressed(e) 
 						&& noSelection() 
 						&& textAfterCaret().trim().isEmpty()
 						&& !viewer.isParseTreeBroken()) {
