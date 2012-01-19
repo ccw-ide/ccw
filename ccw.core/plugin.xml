@@ -1276,13 +1276,39 @@
       </class>
     </hyperlinkDetector>
     <hyperlinkDetector
-          activate="true"
-          id="ccw.nrepl.hyperlinkDetector"
-          name="%nreplHyperlinkDetector"
-          targetId="ccw.ui.clojureCode">
+          activate="false"
+          id="ccw.nrepl.hyperlinkDetectorInJavaEditor"
+          name="%nreplHyperlinkDetectorInJavaEditor"
+          targetId="org.eclipse.jdt.ui.javaCode">
       <class class="ccw.util.GenericExecutableExtension">
          <parameter name="factory" value="ccw.editors.clojure.nrepl-hyperlink-detector/factory"/>
       </class>
+    </hyperlinkDetector>
+    <hyperlinkDetector
+          activate="true"
+          id="ccw.nrepl.hyperlinkDetectorInClojureEditor"
+          name="%nreplHyperlinkDetectorInClojureEditor"
+          targetId="ccw.ui.clojureCode">
+       <class
+             class="ccw.util.GenericExecutableExtension">
+          <parameter
+                name="factory"
+                value="ccw.editors.clojure.nrepl-hyperlink-detector/factory">
+          </parameter>
+       </class>
+    </hyperlinkDetector>
+    <hyperlinkDetector
+          activate="false"
+          id="ccw.nrepl.hyperlinkDetectorInTextEditor"
+          name="%nreplHyperlinkDetectorInTextEditor"
+          targetId="org.eclipse.ui.DefaultTextEditor">
+       <class
+             class="ccw.util.GenericExecutableExtension">
+          <parameter
+                name="factory"
+                value="ccw.editors.clojure.nrepl-hyperlink-detector/factory">
+          </parameter>
+       </class>
     </hyperlinkDetector>
  </extension>
  <extension

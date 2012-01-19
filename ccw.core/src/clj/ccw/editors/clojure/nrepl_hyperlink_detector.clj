@@ -24,45 +24,38 @@
 
 (defn editor [this] (.getClassAdapter this IClojureEditor))
 
-(defn find-decl [sym editor]
-  (let [split (.split sym "/")
-        n (when (= 2 (count split)) (aget split 0))
-        s (aget split (if (= 2 (count split)) 1 0))  
-        declaring-ns (.findDeclaringNamespace editor)
-        command (String/format "(ccw.debug.serverrepl/find-symbol \"%s\" \"%s\" \"%s\")"
-                  (into-array Object [s declaring-ns n]))
-        {:keys [send]} (-?> editor .getCorrespondingREPL .getToolingConnection .conn)]
-    (if-not send
-      (do
-        (.setStatusLineErrorMessage editor ClojureEditorMessages/You_need_a_running_repl)
-        nil)
-      (let [[ [file line _ ns] ] (repl/response-values (send command))]
-        (if (and file line ns)
-          {"file" file
-           "line" (Integer/valueOf line)
-           "ns" ns}
-          (do
-            (.setStatusLineErrorMessage editor ClojureEditorMessages/Cannot_find_declaration)
-            nil))))))
-
-;; TODO share it with console hyperlink
+;; FIXME share it with console hyperlink
 (def ^:private pattern #"nrepl://([^':',' ']+):(\d+)")
 
+;; FIXME rewrite this to use lower level stuff (java matchers) rather than
+;;       reinvent them with more object allocations and more lines of code
+;; FIXME add unit tests!
+(defn find-match-for-offset [pattern string offset] 
+  (loop [matches (re-seq pattern string)]
+    (when-let [[m _ _ :as match] (first matches)]
+      (let [m-off (.indexOf string m)
+            match? (<= m-off offset (dec (+ m-off (.length m))))]
+        (if match? 
+          [m-off (.length m) match]
+          (recur (rest matches)))))))
+
 (defn detect-hyperlinks
-  [offset editor]
-  (let [rloc (-> editor .getParseState (editor/getParseTree) lu/parsed-root-loc)
-        l (lu/loc-for-offset rloc offset)]
-    (when-let [r (re-seq )])
-    (when-let [{:strs #{ns file line}} (and (= :symbol (-> l z/node :tag)) ; TODO transform :strs -> :keys
-                                         (find-decl (lu/loc-text l) editor))]
-      [{:offset (lu/start-offset l) :length (-> l z/node :count)
-        :open #(ccw.ClojureCore/openInEditor ns file line)}])))
+  [offset document]
+  ;(println "nrepl hyperlink")
+  (let [region (.getLineInformationOfOffset document offset)
+        [line-offset line-length] [(.getOffset region) (.getLength region)]
+        line (.get document line-offset line-length)]
+    ;(println "line:" line)
+    (when-let [[offset length [_ host port]] (find-match-for-offset pattern line (- offset line-offset))]
+      ;(println "nrepl hyperlink:" :offset (+ line-offset offset) :length length)
+      [{:offset (+ line-offset offset) :length length
+        :open #(ccw.repl.REPLView/connect host (Integer/parseInt port))}])))
 
 (defn factory [ _ ]
   (proxy [AbstractHyperlinkDetector]
          []
     (detectHyperlinks [textViewer region canShowMultipleHyperlinks?]
-      (when-let [hyperlinks (detect-hyperlinks (.getOffset region) (editor this))] 
+      (when-let [hyperlinks (detect-hyperlinks (.getOffset region) (.getDocument textViewer))] 
         (into-array IHyperlink (map (fn [{:keys #{offset length open}}] 
                                       (hyperlink/make 
                                         (Region. offset length) 
