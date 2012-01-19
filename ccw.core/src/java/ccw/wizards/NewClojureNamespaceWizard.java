@@ -31,10 +31,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 
@@ -193,7 +195,20 @@ public class NewClojureNamespaceWizard extends BasicNewResourceWizard implements
         String name = mainPage.text.getText().trim().replaceAll("-", "_"); // FIXME should call clojure.core/munge
         if (name.endsWith(".clj"))
             name = name.substring(0, name.length() - (".clj").length());
+        else if (name.endsWith(".cljs")) {
+        	name = name.substring(0, name.length() - (".cljs").length());
+        }
         return name;
+    }
+
+    protected String suffix() {
+        String name = mainPage.text.getText().trim().replaceAll("-", "_"); // FIXME should call clojure.core/munge
+        int index = name.lastIndexOf(".");
+        if (index >= 0) {
+        	return name.substring(index);
+        } else {
+        	return ".clj";
+        }
     }
 
     protected IContainer dest() {
@@ -210,6 +225,7 @@ public class NewClojureNamespaceWizard extends BasicNewResourceWizard implements
             return false;
         }
         String name = name();
+        String suffix = suffix();
         if (name.length() == 0) {
             mainPage.setErrorMessage("Empty file name.");
             return false;
@@ -234,17 +250,17 @@ public class NewClojureNamespaceWizard extends BasicNewResourceWizard implements
         // check if file already exists.
         IFile file;
         if (mainPage.dest instanceof IProject) {
-            file = ((IProject)mainPage.dest).getFile(name + ".clj");
+            file = ((IProject)mainPage.dest).getFile(name + suffix);
         }
         else if (mainPage.dest instanceof IFolder) {
-            file = ((IFolder)mainPage.dest).getFile(name + ".clj");
+            file = ((IFolder)mainPage.dest).getFile(name + suffix);
         }
         else {
             return false;
         }
         
         if (file.exists()) {
-            mainPage.setErrorMessage("File with same name already exists.");
+            mainPage.setErrorMessage("File " + file.getName() + " already exists.");
             return false;
         }
 
