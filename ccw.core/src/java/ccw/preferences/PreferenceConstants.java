@@ -37,6 +37,7 @@ public class PreferenceConstants {
     public static final String EDITOR_MACRO_COLOR = CCW_PREFERENCE_PREFIX + "." + EDITOR_COLORING_PREFIX + ".macro"; //$NON-NLS-1$ //$NON-NLS-2$
 
     public static final String REPL_VIEW_AUTO_EVAL_ON_ENTER_ACTIVE = CCW_PREFERENCE_PREFIX + ".repl_view_autoeval_on_enter_active";
+    public static final String REPL_VIEW_DISPLAY_HINTS = CCW_PREFERENCE_PREFIX + ".repl_view_display_hints";
     
     /* TODO enable these once text attributes are used in the editor
     public static final String EDITOR_BOLD_SUFFIX = ".bold"; //$NON-NLS-1$
@@ -46,4 +47,5 @@ public class PreferenceConstants {
     */
     
     public static final String EDITOR_COLORING_ENABLED_SUFFIX = ".enabled"; //$NON-NLS-1$
+
 }

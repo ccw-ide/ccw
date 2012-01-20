@@ -67,6 +67,8 @@ public class Messages extends NLS {
 
     public static String REPLViewPreferencePage_activate_autoEval_on_Enter;
 
+    public static String REPLViewPreferencePage_displayHint;
+
     static {
         // initialize resource bundle
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);

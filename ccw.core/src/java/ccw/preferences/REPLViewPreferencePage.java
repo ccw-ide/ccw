@@ -34,8 +34,15 @@ public class REPLViewPreferencePage extends FieldEditorPreferencePage implements
      */
     public void createFieldEditors() {
 
-    	addField(
-    		new BooleanFieldEditor(ccw.preferences.PreferenceConstants.REPL_VIEW_AUTO_EVAL_ON_ENTER_ACTIVE, Messages.REPLViewPreferencePage_activate_autoEval_on_Enter, getFieldEditorParent()));
+    	addField(new BooleanFieldEditor(
+    			ccw.preferences.PreferenceConstants.REPL_VIEW_AUTO_EVAL_ON_ENTER_ACTIVE, 
+    			Messages.REPLViewPreferencePage_activate_autoEval_on_Enter, 
+    			getFieldEditorParent()));
+
+    	addField(new BooleanFieldEditor(
+    			ccw.preferences.PreferenceConstants.REPL_VIEW_DISPLAY_HINTS, 
+    			Messages.REPLViewPreferencePage_displayHint, 
+    			getFieldEditorParent()));
 
     }
 

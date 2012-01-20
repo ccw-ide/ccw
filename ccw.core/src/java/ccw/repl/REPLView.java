@@ -464,6 +464,9 @@ public class REPLView extends ViewPart implements IAdaptable {
     }
     
     private String getEvaluationHint() {
+    	if (!getPreferences().getBoolean(PreferenceConstants.REPL_VIEW_DISPLAY_HINTS))
+    		return null;
+    	
     	if (getPreferences().getBoolean(PreferenceConstants.REPL_VIEW_AUTO_EVAL_ON_ENTER_ACTIVE)) {
     		return Messages.REPLView_autoEval_on_Enter_active;
     	} else {

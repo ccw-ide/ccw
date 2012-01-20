@@ -71,6 +71,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	    store.setDefault(PreferenceConstants.USE_TAB_FOR_REINDENTING_LINE, true);
 	    
 	    store.setDefault(PreferenceConstants.REPL_VIEW_AUTO_EVAL_ON_ENTER_ACTIVE, true);
+	    store.setDefault(PreferenceConstants.REPL_VIEW_DISPLAY_HINTS, true);
 	    
 	    for (SyntaxColoringDefault d: coloringDefaults) {
 	        store.setDefault(d.getPreferenceConstant(),
