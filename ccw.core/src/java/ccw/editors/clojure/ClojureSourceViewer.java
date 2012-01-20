@@ -597,15 +597,16 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 			
 		StatusLineContributionItem field = this.statusLineHandler.getEditingModeStatusContributionItem();
 		if (field != null) {
-			String text = "Structural Edition: " + (isStructuralEditingEnabled() ? "Strict mode" : "Default mode");
+			String text = "Edit mode: " + (isStructuralEditingEnabled() ? "strict/paredit" : "unrestricted");
 			field.setText(text == null ? fErrorLabel : text);
 			field.setToolTipText(
 					(isStructuralEditingEnabled() 
-							? "Strict mode: editor does its best to prevent you from breaking the structure of the code (requires you to know shortcut commands well). Click to switch to Default Mode."
-						    : "Default mode: helps you with edition, but does not get in your way Click to switch to Strict Mode."));
+							? "strict/paredit: editor does its best to prevent you from breaking the structure of the code (requires you to know shortcut commands well). Click to switch to unrestricted Mode."
+						    : "unrestricted: helps you with edition, but does not get in your way. Click to switch to strict/paredit Mode."));
 		}
 	}
 
+	
 	/*
 	 * Eclipse TextEditor framework uses old "Action" framework. So it is impossible
 	 * to use handlers declaratively, one must plug the new behaviour via code,
