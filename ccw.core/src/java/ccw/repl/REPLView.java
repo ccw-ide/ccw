@@ -8,6 +8,7 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -27,6 +28,8 @@ import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
@@ -372,6 +375,12 @@ public class REPLView extends ViewPart implements IAdaptable {
            }
         });
         
+        installMessageDisplayer(viewerWidget, new MessageProvider() {
+			public String getMessageText() {
+				return getEvaluationHint();
+			}
+		});
+        
         installAutoEvalExpressionOnEnter();
 
         installEvalTopLevelSExpressionCommand();
@@ -386,6 +395,7 @@ public class REPLView extends ViewPart implements IAdaptable {
         viewer.propertyChange(null);
         
         viewerWidget.addFocusListener(new NamespaceRefreshFocusListener());
+        
         logPanel.addFocusListener(new NamespaceRefreshFocusListener());
         
         parent.addDisposeListener(new DisposeListener () {
@@ -418,6 +428,50 @@ public class REPLView extends ViewPart implements IAdaptable {
 			}
     	});
         
+    }
+    
+    private interface MessageProvider {
+    	String getMessageText();
+    }
+    private void installMessageDisplayer(final StyledText textViewer, final MessageProvider hintProvider) {
+		textViewer.addListener(SWT.Paint, new Listener() {
+			public void handleEvent(Event event) {
+				String message = hintProvider.getMessageText();
+				if (message == null) 
+					return;
+				
+				Point topRightPoint = topRightPoint(textViewer.getClientArea());
+				int sWidth = textWidthPixels(message, event);
+				int x = Math.max(topRightPoint.x - sWidth, 0);
+				int y = topRightPoint.y;
+				event.gc.setForeground(Display.getCurrent().getSystemColor(
+						SWT.COLOR_GRAY));
+				event.gc.drawText(message, x, y, true);
+			}
+
+			private Point topRightPoint(Rectangle clipping) {
+				return new Point(clipping.x + clipping.width, clipping.y);
+			}
+
+			private int textWidthPixels(String text, Event evt) {
+				int width = 0;
+				for (int i = 0; i < text.length(); i++) {
+					width += evt.gc.getAdvanceWidth(text.charAt(i));
+				}
+				return width;
+			}
+		});
+    }
+    
+    private String getEvaluationHint() {
+    	if (getPreferences().getBoolean(PreferenceConstants.REPL_VIEW_AUTO_EVAL_ON_ENTER_ACTIVE)) {
+    		return Messages.REPLView_autoEval_on_Enter_active;
+    	} else {
+    		return Messages.format(Messages.REPLView_autoEval_on_Enter_inactive,
+    				Platform.getOS().equals(Platform.OS_MACOSX)
+    					? "Cmd"
+    				    : "Ctrl");
+    	}
     }
     
     private void installAutoEvalExpressionOnEnter() {
