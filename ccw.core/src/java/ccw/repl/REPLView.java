@@ -325,7 +325,7 @@ public class REPLView extends ViewPart implements IAdaptable {
 				}) {
         	public REPLView getCorrespondingREPL() { return REPLView.this; };
             private Connection getCorrespondingREPLConnection () {
-                // we'l��l be connected by the time this is called
+                // we'll be connected by the time this is called
                 return toolConnection;
             }
             public void setStatusLineErrorMessage(String msg) {
@@ -457,7 +457,10 @@ public class REPLView extends ViewPart implements IAdaptable {
 				String message = hintProvider.getMessageText();
 				if (message == null) 
 					return;
-				
+
+                // keep the 'tooltip' using the default font 
+                event.gc.setFont(JFaceResources.getFont(JFaceResources.DEFAULT_FONT));
+
 				Point topRightPoint = topRightPoint(textViewer.getClientArea());
 				int sWidth = textWidthPixels(message, event);
 				int x = Math.max(topRightPoint.x - sWidth, 0);
