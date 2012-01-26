@@ -22,6 +22,7 @@ public class PreferenceConstants {
 	public static final String SWITCH_TO_NS_ON_REPL_STARTUP = CCW_PREFERENCE_PREFIX + ".switch_to_ns_on_repl_startup"; //$NON-NLS-1$
 
 	public static final String USE_STRICT_STRUCTURAL_EDITING_MODE_BY_DEFAULT = CCW_PREFERENCE_PREFIX + ".use_strict_structural_editing_mode_by_default"; //$NON-NLS-1$
+	public static final String SHOW_RAINBOW_PARENS_BY_DEFAULT = CCW_PREFERENCE_PREFIX + ".show_rainbow_parens_by_default"; //$NON-NLS-1$
 
 	public static final String USE_TAB_FOR_REINDENTING_LINE = CCW_PREFERENCE_PREFIX + ".use_tab_for_reindenting_line";
 	
@@ -47,5 +48,6 @@ public class PreferenceConstants {
     */
     
     public static final String EDITOR_COLORING_ENABLED_SUFFIX = ".enabled"; //$NON-NLS-1$
+
 
 }

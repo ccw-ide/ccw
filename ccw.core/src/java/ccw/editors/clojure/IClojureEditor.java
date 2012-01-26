@@ -95,4 +95,15 @@ public interface IClojureEditor extends IAdaptable {
 	boolean isStructuralEditionPossible();
 
 	void toggleStructuralEditionMode();
+
+	boolean isShowRainbowParens();
+	
+	void toggleShowRainbowParens();
+
+    /**
+     * Force the viewer to consider the whole document as damaged, even if its
+     * text has not changed.
+     * e.g., useful to have syntax coloring adapt to new preference settings.
+     */
+	void markDamagedAndRedraw();
 }

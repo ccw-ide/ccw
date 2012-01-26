@@ -78,6 +78,10 @@
                                    :paredit-indent-line))
 (defn toggle-structural-edition-mode [_ event]
   (.toggleStructuralEditionMode (editor event)))
+
+(defn toggle-show-rainbow-parens [_ event]
+  (.toggleShowRainbowParens (editor event)))
+
 (defn toggle-line-comment [_ event]
   (apply-paredit-command (editor event)
                          (paredit-fn :paredit-toggle-line-comment)))

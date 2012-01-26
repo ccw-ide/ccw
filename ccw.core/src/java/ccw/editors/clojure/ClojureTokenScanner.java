@@ -52,6 +52,7 @@ abstract public class ClojureTokenScanner implements ITokenScanner {
     private boolean initialized = false;
     private final IScanContext context;
     private final IToken[] parenLevelTokens = new IToken[] { newParenTokenWith(getSystemColor(SWT.COLOR_RED)), newParenTokenWith(getCCWColor(0)), newParenTokenWith(getSystemColor(SWT.COLOR_GRAY)), newParenTokenWith(getSystemColor(SWT.COLOR_MAGENTA)), newParenTokenWith(getCCWColor(1)), newParenTokenWith(getCCWColor(2)), newParenTokenWith(getCCWColor(3)), newParenTokenWith(getSystemColor(SWT.COLOR_DARK_GRAY)), newParenTokenWith(getCCWColor(4)), newParenTokenWith(getSystemColor(SWT.COLOR_DARK_BLUE)), newParenTokenWith(getCCWColor(5)), newParenTokenWith(getSystemColor(SWT.COLOR_DARK_CYAN)) };
+    private final IToken noRainbowParenToken = newParenTokenWith(getSystemColor(SWT.COLOR_DARK_GRAY));
 
     private IClojureEditor clojureEditor;
 
@@ -177,7 +178,11 @@ abstract public class ClojureTokenScanner implements ITokenScanner {
         	if (currentParenLevel < 0) {
         		result = errorToken;
         	} else {
-        		result = parenLevelTokens[currentParenLevel % parenLevelTokens.length];
+        		if (this.clojureEditor.isShowRainbowParens()) {
+        			result = parenLevelTokens[currentParenLevel % parenLevelTokens.length];
+        		} else {
+        			result = noRainbowParenToken;
+        		}
         	}
         } else {
             result = toJFaceToken();

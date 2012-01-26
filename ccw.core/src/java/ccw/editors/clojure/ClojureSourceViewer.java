@@ -131,6 +131,18 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 	 * Set to true if the editor is in "Strict" Structural editing mode
 	 */
 	private boolean useStrictStructuralEditing;
+	
+	/**
+	 * Set to true to have the viewer show rainbow parens
+	 */
+	private boolean isShowRainbowParens;
+
+    /**
+     * Set to true to indicate a Damager to consider that the whole document
+     * must be considered damaged, e.g. to force syntax coloring & al.
+     * to refresh.
+     */
+    private boolean isForceRepair;
 
     /** History for structure select action
 	 * STOLEN FROM THE JDT */
@@ -190,7 +202,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
         });
         
 		useStrictStructuralEditing = store.getBoolean(ccw.preferences.PreferenceConstants.USE_STRICT_STRUCTURAL_EDITING_MODE_BY_DEFAULT);
-
+		isShowRainbowParens = store.getBoolean(ccw.preferences.PreferenceConstants.SHOW_RAINBOW_PARENS_BY_DEFAULT);
 		this.statusLineHandler = statusLineHandler;
 	}
     
@@ -461,6 +473,10 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     public boolean isStructuralEditingEnabled() {
         return useStrictStructuralEditing;
     }
+    
+    public boolean isShowRainbowParens() {
+    	return isShowRainbowParens;
+    }
 
     public boolean isInEscapeSequence () {
         return inEscapeSequence;
@@ -588,6 +604,30 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     public void toggleStructuralEditionMode() {
        useStrictStructuralEditing = !useStrictStructuralEditing;
        updateStructuralEditingModeStatusField();
+    }
+	
+    public void toggleShowRainbowParens() {
+       isShowRainbowParens = !isShowRainbowParens;
+       markDamagedAndRedraw();
+    }
+    
+
+	public void markDamagedAndRedraw() {
+        try {
+     	   isForceRepair = true;
+            this.invalidateTextPresentation();
+        } finally {
+     	   isForceRepair = false;
+        }
+    }
+    
+    /**
+     * @return true to indicate a Damager to consider that the whole document
+     *         must be considered damaged, e.g. to force syntax coloring & al.
+     *         to refresh.
+     */
+    public boolean isForceRepair() {
+    	return isForceRepair;
     }
     
 	public void updateStructuralEditingModeStatusField() {

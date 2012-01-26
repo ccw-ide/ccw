@@ -65,7 +65,9 @@
                 (.getLength event)
                 ", length: " 
                 (.length (.getText event)) "]"))
-  (let [previous-parse-tree (-> this state-val :editor .getPreviousParseTree)
+  (if  (-> this state-val :editor .isForceRepair)
+    (Region. 0 (-> this state-val :editor .getDocument .get .length))
+    (let [previous-parse-tree (-> this state-val :editor .getPreviousParseTree)
         parse-tree (-> this state-val :editor .getParseState (editor/getParseTree))
         [start-offset 
          stop-offset] (if previous-parse-tree
@@ -101,7 +103,7 @@
           (Region. start-offset stop-offset)) ; TODO suboptimal, we could go to content-cumulative count of ...
         (do
           #_(println "damaged region: 0, 0")
-          (Region. 0 0)))))) 
+          (Region. 0 0))))))) 
 
 (defn getTokensSeq 
   "Given a damaged region created by getDamageRegion, finds back the start index in the

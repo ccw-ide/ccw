@@ -157,7 +157,7 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 
 	
 	public boolean isInEscapeSequence () {
-	    return ((ClojureSourceViewer)getSourceViewer()).isInEscapeSequence();
+	    return ((IClojureEditor)getSourceViewer()).isInEscapeSequence();
 	}
 	
 	public void toggleStructuralEditionMode() {
@@ -165,8 +165,8 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 	}
 	
     public DefaultCharacterPairMatcher getPairsMatcher() {
-        return ((ClojureSourceViewer) getSourceViewer())==null ? null :
-        	((ClojureSourceViewer) getSourceViewer())
+        return ((IClojureEditor) getSourceViewer())==null ? null :
+        	((IClojureEditor) getSourceViewer())
         	.getPairsMatcher();
     }
 
@@ -462,11 +462,11 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 	}
 
 	public IRegion getUnSignedSelection () {
-	    return ((ClojureSourceViewer)getSourceViewer()).getUnSignedSelection();
+	    return ((IClojureEditor)getSourceViewer()).getUnSignedSelection();
 	}
 	
 	public IRegion getSignedSelection () {
-	    return ((ClojureSourceViewer)getSourceViewer()).getSignedSelection();
+	    return ((IClojureEditor)getSourceViewer()).getSignedSelection();
 	}
 	
 	/*
@@ -537,7 +537,7 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 	}
 	
 	public String findDeclaringNamespace () {
-		return ((ClojureSourceViewer)getSourceViewer()).findDeclaringNamespace();
+		return ((IClojureEditor)getSourceViewer()).findDeclaringNamespace();
 	}
 	
 	public REPLView getCorrespondingREPL () {
@@ -640,4 +640,26 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
     public boolean isStructuralEditingEnabled() {
         return sourceViewer().isStructuralEditingEnabled();
     }
+
+    /**
+     * @return true to indicate a Damager to consider that the whole document
+     *         must be considered damaged, e.g. to force syntax coloring & al.
+     *         to refresh.
+     */
+	public boolean isForceRepair() {
+		return sourceViewer().isForceRepair();
+	}
+    
+    
+    public boolean isShowRainbowParens() {
+    	return sourceViewer().isShowRainbowParens();
+    }
+    
+    public void toggleShowRainbowParens() {
+    	sourceViewer().toggleShowRainbowParens();
+    }
+
+	public void markDamagedAndRedraw() {
+		sourceViewer().markDamagedAndRedraw();
+	}
 }

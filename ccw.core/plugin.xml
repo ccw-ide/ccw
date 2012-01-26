@@ -448,6 +448,12 @@
             id="ccw.ui.edit.text.clojure.pastewithescaping"
             name="%ccw.ui.edit.text.clojure.pastewithescaping.name">
       </command>
+      <command
+            categoryId="org.eclipse.ui.category.edit"
+            description="%command.switchRainbowParens.description"
+            id="ccw.ui.edit.text.clojure.switch.rainbow.parens"
+            name="%command.switchRainbowParens.name">
+      </command>
       
    </extension>
    
@@ -732,6 +738,12 @@
             contextId="ccw.ui.clojureEditorScope"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+/">
+      </key>
+      <key
+            commandId="ccw.ui.edit.text.clojure.switch.rainbow.parens"
+            contextId="ccw.ui.clojureEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+(">
       </key>
 	</extension>
    <extension
@@ -1837,6 +1849,32 @@
               </iterate>
            </with>
         </activeWhen>
+     </handler>
+     <handler
+           commandId="ccw.ui.edit.text.clojure.switch.rainbow.parens">
+        <class
+              class="ccw.util.GenericExecutableExtension">
+           <parameter
+                 name="factory"
+                 value="ccw.util.handler-factory/factory">
+           </parameter>
+           <parameter
+                 name="handler"
+                 value="ccw.editors.clojure.handlers/toggle-show-rainbow-parens">
+           </parameter>
+        </class>
+        <enabledWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </enabledWhen>
      </handler>
   </extension>
   <extension

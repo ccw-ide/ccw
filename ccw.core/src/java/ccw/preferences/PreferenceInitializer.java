@@ -68,6 +68,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	    store.setDefault(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH, 2);
 	    store.setDefault(PreferenceConstants.SWITCH_TO_NS_ON_REPL_STARTUP, true);
 	    store.setDefault(USE_STRICT_STRUCTURAL_EDITING_MODE_BY_DEFAULT, false);
+	    store.setDefault(PreferenceConstants.SHOW_RAINBOW_PARENS_BY_DEFAULT, true);
 	    store.setDefault(PreferenceConstants.USE_TAB_FOR_REINDENTING_LINE, true);
 	    
 	    store.setDefault(PreferenceConstants.REPL_VIEW_AUTO_EVAL_ON_ENTER_ACTIVE, true);
