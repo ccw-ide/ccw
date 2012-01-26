@@ -349,12 +349,15 @@
             id="ccw.ui.edit.text.clojure.launch.repl">
       </command>
       
+      <!-- remove 'run tests' no-op -->
+      <!--
       <command
             name="%command.runTests.name"
             description="%command.runTests.description"
             categoryId="org.eclipse.ui.category.navigate"
             id="ccw.ui.edit.text.clojure.run.tests">
       </command>
+      -->
      
      <!-- not considered stable enough -->
       <!--command
@@ -633,11 +636,12 @@
             contextId="ccw.ui.clojureEditorScope"
             commandId="ccw.ui.edit.text.clojure.compile.lib"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-      <key
+      <!-- remove 'run tests' no-op -->
+      <!--<key
             sequence="M1+T"
             contextId="ccw.ui.clojureEditorScope"
             commandId="ccw.ui.edit.text.clojure.run.tests"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>-->
       <!-- not considered stable enough -->
       <!--key
             sequence="M1+M2+F"
@@ -813,11 +817,12 @@
                   label="Compile file in REPL"
                   style="push">
             </command>
-            <command
+            <!-- remove 'run tests' no-op -->
+            <!--<command
                   commandId="ccw.ui.edit.text.clojure.run.tests"
                   label="Run tests in REPL"
                   style="push">
-            </command>
+            </command>-->
             <!--command
                   commandId="ccw.ui.edit.text.clojure.format.code"
                   label="Format clojure code"
@@ -926,11 +931,13 @@
                   label="Compile file in REPL"
                   style="push">
             </command>
+            <!-- remove 'run tests' no-op -->
+            <!--
             <command
                   commandId="ccw.ui.edit.text.clojure.run.tests"
                   label="Run tests in REPL"
                   style="push">
-            </command>
+            </command>-->
             <!--command
                   commandId="ccw.ui.edit.text.clojure.format.code"
                   label="Format clojure code"
