@@ -465,8 +465,8 @@ public class REPLView extends ViewPart implements IAdaptable {
 				int sWidth = textWidthPixels(message, event);
 				int x = Math.max(topRightPoint.x - sWidth, 0);
 				int y = topRightPoint.y;
-				event.gc.setForeground(Display.getCurrent().getSystemColor(
-						SWT.COLOR_GRAY));
+				
+				event.gc.setAlpha(200);
 				event.gc.drawText(message, x, y, true);
 			}
 
