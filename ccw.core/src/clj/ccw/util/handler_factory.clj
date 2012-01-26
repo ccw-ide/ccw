@@ -6,5 +6,5 @@
     (let [handler (find-var handler)]
       (proxy [org.eclipse.core.commands.AbstractHandler]
              []
-        (execute [event] (handler this event))))))
+        (execute [event] (when handler (handler this event)))))))
 
