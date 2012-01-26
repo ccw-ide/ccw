@@ -108,7 +108,7 @@
          %2
          (clipboard-text (org.eclipse.swt.widgets.Display/getCurrent))
          (and
-           (.isStructuralEditingEnabled editor)
+           (.isEscapeInStringLiteralsEnabled editor)
            (not (.isInEscapeSequence editor)))))))
 
 

@@ -662,4 +662,8 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 	public void markDamagedAndRedraw() {
 		sourceViewer().markDamagedAndRedraw();
 	}
+
+	public boolean isEscapeInStringLiteralsEnabled() {
+		return sourceViewer().isEscapeInStringLiteralsEnabled();
+	}
 }

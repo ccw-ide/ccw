@@ -36,6 +36,7 @@ public class PreferenceConstants {
     public static final String EDITOR_KEYWORD_COLOR = CCW_PREFERENCE_PREFIX + "." + EDITOR_COLORING_PREFIX + ".keyword"; //$NON-NLS-1$ //$NON-NLS-2$
     public static final String EDITOR_METADATA_TYPEHINT_COLOR = CCW_PREFERENCE_PREFIX + "." + EDITOR_COLORING_PREFIX + ".metadata_typehint"; //$NON-NLS-1$ //$NON-NLS-2$
     public static final String EDITOR_MACRO_COLOR = CCW_PREFERENCE_PREFIX + "." + EDITOR_COLORING_PREFIX + ".macro"; //$NON-NLS-1$ //$NON-NLS-2$
+    public static final String EDITOR_ESCAPE_ON_PASTE = CCW_PREFERENCE_PREFIX + ".escape_on_paste"; //$NON-NLS-1$
 
     public static final String REPL_VIEW_AUTO_EVAL_ON_ENTER_ACTIVE = CCW_PREFERENCE_PREFIX + ".repl_view_autoeval_on_enter_active";
     public static final String REPL_VIEW_DISPLAY_HINTS = CCW_PREFERENCE_PREFIX + ".repl_view_display_hints";

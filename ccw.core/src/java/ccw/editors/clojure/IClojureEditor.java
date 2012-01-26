@@ -31,6 +31,11 @@ public interface IClojureEditor extends IAdaptable {
     boolean isStructuralEditingEnabled ();
     
     /**
+     * Returns true if the user enabled the escaping of clipboard's content
+     * when pasting inside String literals. 
+     */
+    boolean isEscapeInStringLiteralsEnabled();
+    
      * Returns true only if the editor is in an "escape sequence", temporarily
      * disabling structural editing mode (if enabled).
      */

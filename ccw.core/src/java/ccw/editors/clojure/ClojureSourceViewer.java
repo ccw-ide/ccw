@@ -50,6 +50,7 @@ import org.eclipse.ui.texteditor.StatusLineContributionItem;
 
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
+import ccw.preferences.PreferenceConstants;
 import ccw.repl.REPLView;
 import ccw.util.ClojureUtils;
 import ccw.util.DisplayUtil;
@@ -681,5 +682,9 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 			return this;
 		}
 		return null;
+	}
+	
+	public boolean isEscapeInStringLiteralsEnabled() {
+		return fPreferenceStore.getBoolean(PreferenceConstants.EDITOR_ESCAPE_ON_PASTE);
 	}
 }
