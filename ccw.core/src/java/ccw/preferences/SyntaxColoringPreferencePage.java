@@ -698,7 +698,6 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         
         Font font= JFaceResources.getFont(org.eclipse.jdt.ui.PreferenceConstants.EDITOR_TEXT_FONT);
         fPreviewViewer.getTextWidget().setFont(font);
-        fPreviewViewer.setEditable(false);
         
         IDocument document= new Document(PREVIEW_SOURCE);
         IDocumentPartitioner partitioner = new ClojurePartitioner(new ClojurePartitionScanner(), 
