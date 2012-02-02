@@ -36,6 +36,7 @@ public interface IClojureEditor extends IAdaptable {
      */
     boolean isEscapeInStringLiteralsEnabled();
     
+    /**
      * Returns true only if the editor is in an "escape sequence", temporarily
      * disabling structural editing mode (if enabled).
      */
