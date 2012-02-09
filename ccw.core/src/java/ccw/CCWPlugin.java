@@ -27,6 +27,7 @@ import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.resource.FontRegistry;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.jface.resource.StringConverter;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.RGB;
@@ -41,7 +42,6 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.osgi.framework.BundleContext;
 
-import ccw.editors.clojure.ClojureEditor;
 import ccw.editors.clojure.IScanContext;
 import ccw.launching.LaunchUtils;
 import ccw.preferences.PreferenceConstants;
@@ -50,7 +50,6 @@ import ccw.repl.REPLView;
 import ccw.util.BundleUtils;
 import ccw.util.DisplayUtil;
 import clojure.lang.Keyword;
-import clojure.lang.Symbol;
 import clojure.lang.Var;
 import clojure.osgi.ClojureOSGi;
 import clojure.tools.nrepl.Connection;
@@ -72,35 +71,10 @@ public class CCWPlugin extends AbstractUIPlugin {
 		return Display.getDefault().getSystemColor(swtKey); 
 	}
 	
-	/**
-	 * @param index the index in an internal table of CCWPlugin
-	 * @return the color corresponding to the index (callers must no
-	 *         dispose the color themselves)
-	 */
-	public static Color getCCWColor(int index) {
-		CCWPlugin defaultPlugin = getDefault();
-		return defaultPlugin.getAllColors()[index];
-	}
-	
     /** The shared instance */
     private static CCWPlugin plugin;
 
-    /** "Read-only" table, do not alter */
-    // TODO presumably, the color registry is where *all* colors should go, but that API is
-    // clear as mud to me at the moment
-    public Color[] allColors;
-    
-    /**
-     * Must be called from the UI thread
-     */
-    public Color[] getAllColors() {
-    	if (allColors == null) {
-    		initializeParenRainbowColors();
-    	}
-    	return allColors;
-    }
-    
-    private ColorRegistry colorRegistry;
+    private ColorRegistry colorCache;
     
     private FontRegistry fontRegistry;
     
@@ -141,21 +115,21 @@ public class CCWPlugin extends AbstractUIPlugin {
 //    	System.out.println("CCWPlugin start() ends");
     }
     
-    private synchronized void createColorRegistry() {
-    	if (colorRegistry == null) {
-    		colorRegistry = new ColorRegistry(getWorkbench().getDisplay());
-    		colorRegistry.put("ccw.repl.expressionBackground", new RGB(0xf0, 0xf0, 0xf0));
+    private synchronized void createColorCache() {
+    	if (colorCache == null) {
+    		colorCache = new ColorRegistry(getWorkbench().getDisplay());
+    		colorCache.put("ccw.repl.expressionBackground", new RGB(0xf0, 0xf0, 0xf0));
     	}
     }
     
     /**
      * Must be called from the UI thread only
      */
-    public ColorRegistry getColorRegistry() {
-    	if (colorRegistry == null) {
-    		createColorRegistry();
+    public ColorRegistry getColorCache() {
+    	if (colorCache == null) {
+    		createColorCache();
     	}
-    	return colorRegistry;
+    	return colorCache;
     }
     
     private synchronized void createFontRegistry() {
@@ -220,7 +194,6 @@ public class CCWPlugin extends AbstractUIPlugin {
     }
     
     public void stop(BundleContext context) throws Exception {
-    	disposeParenRainbowColors();
     	// We don't remove colors when deregistered, because, well, we don't have a
     	// corresponding method on the ColorRegistry instance!
     	// We also don't remove fonts when deregistered
@@ -239,29 +212,6 @@ public class CCWPlugin extends AbstractUIPlugin {
     	}
     }
     
-    private synchronized void initializeParenRainbowColors() {
-    	if (allColors == null) {
-	        allColors = new Color[] {
-	                new Color(Display.getDefault(), 0x00, 0xCC, 0x00),
-	                new Color(Display.getDefault(), 0x00, 0x88, 0xAA),
-	                new Color(Display.getDefault(), 0x66, 0x00, 0xAA),
-	                new Color(Display.getDefault(), 0x00, 0x77, 0x00),
-	                new Color(Display.getDefault(), 0x77, 0xEE, 0x00),
-	                new Color(Display.getDefault(), 0xFF, 0x88, 0x00)
-	        };
-    	}
-    }
-    
-    private void disposeParenRainbowColors() {
-    	if (allColors != null) {
-        	for(Color c : allColors) {
-        		if (c!=null && !c.isDisposed()) {
-        			c.dispose();
-        		}
-            }
-    	}
-    }
-
     /**
      * @return the shared instance
      */
@@ -370,48 +320,41 @@ public class CCWPlugin extends AbstractUIPlugin {
 		return scanContext;
 	}
 	
-	private static RGB getElementColor(IPreferenceStore store, String preferenceKey, RGB defaultColor) {
+	public static RGB getPreferenceRGB(IPreferenceStore store, String preferenceKey, RGB defaultColor) {
 	    return
     	    store.getBoolean(SyntaxColoringPreferencePage.getEnabledPreferenceKey(preferenceKey))
                 ? PreferenceConverter.getColor(store, preferenceKey)
                 : defaultColor;
 	}
 	
+	/** 
+	 * Not thread safe, but should only be called from the UI Thread, so it's
+	 * not really a problem.
+	 * @param rgb
+	 * @return The <code>Color</code> instance cached for this rgb value, creating
+	 *         it along the way if required.
+	 */
+	public static Color getColor(RGB rgb) {
+		ColorRegistry r = getDefault().getColorCache();
+		String rgbString = StringConverter.asString(rgb);
+		if (!r.hasValueFor(rgbString)) {
+			r.put(rgbString, rgb);
+		}
+		return r.get(rgbString);
+	}
+	
+	public static Color getPreferenceColor(IPreferenceStore store, String preferenceKey, RGB defaultColor) {
+		return getColor(getPreferenceRGB(store, preferenceKey, defaultColor));
+	}
+	
     public static void registerEditorColors(IPreferenceStore store, RGB foregroundColor) {
-        final ColorRegistry colorRegistry = getDefault().getColorRegistry();
+        final ColorRegistry colorCache = getDefault().getColorCache();
         
-        final RGB literalColor = getElementColor(store, PreferenceConstants.EDITOR_LITERAL_COLOR, foregroundColor);
-        final RGB specialFormColor = getElementColor(store, PreferenceConstants.EDITOR_SPECIAL_FORM_COLOR, foregroundColor);
-        final RGB functionColor = getElementColor(store, PreferenceConstants.EDITOR_FUNCTION_COLOR, foregroundColor);
-        final RGB commentColor = getElementColor(store, PreferenceConstants.EDITOR_COMMENT_COLOR, foregroundColor);
-        final RGB globalVarColor = getElementColor(store, PreferenceConstants.EDITOR_GLOBAL_VAR_COLOR, foregroundColor);
-        final RGB keywordColor = getElementColor(store, PreferenceConstants.EDITOR_KEYWORD_COLOR, foregroundColor);
-        final RGB metadataTypehintColor = getElementColor(store, PreferenceConstants.EDITOR_METADATA_TYPEHINT_COLOR, foregroundColor);
-        final RGB macroColor = getElementColor(store, PreferenceConstants.EDITOR_MACRO_COLOR, foregroundColor);
+        for (Keyword token: PreferenceConstants.colorizableTokens) {
+        	PreferenceConstants.ColorizableToken tokenStyle = PreferenceConstants.getColorizableToken(store, token, foregroundColor);
+        	colorCache.put(tokenStyle.rgb.toString(), tokenStyle.rgb);
+        }
         
-        colorRegistry.put(ClojureEditor.ID + "_" + Keyword.intern("string"), literalColor); //$NON-NLS-1$
-        colorRegistry.put(ClojureEditor.ID + "_" + Keyword.intern("regex"), literalColor); //$NON-NLS-1$
-        colorRegistry.put(ClojureEditor.ID + "_" + Keyword.intern("int"), literalColor); //$NON-NLS-1$
-        colorRegistry.put(ClojureEditor.ID + "_" + Keyword.intern("float"), literalColor); //$NON-NLS-1$
-        colorRegistry.put(ClojureEditor.ID + "_" + Keyword.intern("char"), literalColor); //$NON-NLS-1$
-        colorRegistry.put(ClojureEditor.ID + "_" + Keyword.intern("literalSymbol"), literalColor); //$NON-NLS-1$
-
-        colorRegistry.put(ClojureEditor.ID + "_" + Keyword.intern("symbol"), foregroundColor); //$NON-NLS-1$
-        colorRegistry.put(ClojureEditor.ID + "_" + IScanContext.SymbolType.FUNCTION, functionColor); //$NON-NLS-1$
-        colorRegistry.put(ClojureEditor.ID + "_" + IScanContext.SymbolType.GLOBAL_VAR, globalVarColor); //$NON-NLS-1$
-        colorRegistry.put(ClojureEditor.ID + "_" + IScanContext.SymbolType.MACRO, macroColor); //$NON-NLS-1$
-        colorRegistry.put(ClojureEditor.ID + "_" + IScanContext.SymbolType.SPECIAL_FORM, specialFormColor); //$NON-NLS-1$
-        
-        colorRegistry.put(ClojureEditor.ID + "_" + IScanContext.SymbolType.JAVA_CLASS, foregroundColor); //$NON-NLS-1$
-        colorRegistry.put(ClojureEditor.ID + "_" + IScanContext.SymbolType.JAVA_STATIC_METHOD, foregroundColor); //$NON-NLS-1$
-        colorRegistry.put(ClojureEditor.ID + "_" + IScanContext.SymbolType.JAVA_INSTANCE_METHOD, foregroundColor); //$NON-NLS-1$
-        
-        colorRegistry.put(ClojureEditor.ID + "_" + IScanContext.SymbolType.RAW_SYMBOL, foregroundColor); //$NON-NLS-1$
-
-        colorRegistry.put(ClojureEditor.ID + "_" + Keyword.intern("keyword"), keywordColor); //$NON-NLS-1$
-        colorRegistry.put(ClojureEditor.ID + "_" + Keyword.intern("comment"), commentColor); //$NON-NLS-1$
-        colorRegistry.put(ClojureEditor.ID + "_" + Keyword.intern("whitespace"), foregroundColor); //$NON-NLS-1$
-        colorRegistry.put(ClojureEditor.ID + "_" + Keyword.intern("meta"), metadataTypehintColor); //$NON-NLS-1$
     }
     
 	public static IWorkbenchPage getActivePage() {

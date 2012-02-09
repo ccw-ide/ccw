@@ -10,6 +10,7 @@
  *******************************************************************************/
 package ccw.editors.clojure;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -25,27 +26,25 @@ public class Tokens {
     private final ITokenScanner tokenScanner;
     private final IDocument document;
     private int caretOffset;
-    private IClojureEditor clojureEditor;
 
-    public Tokens(IDocument document, IClojureEditor clojureEditor, IRegion selection) {
-        this(document, clojureEditor);
+    public Tokens(IDocument document, IClojureEditor clojureEditor, IPreferenceStore store, IRegion selection) {
+        this(document, clojureEditor, store);
         this.caretOffset = selection.getOffset();
     }
 
-    public Tokens(IDocument document, IClojureEditor clojureEditor) {
-        this.tokenScanner = tokenScanner(clojureEditor);
-        this.clojureEditor = clojureEditor;
+    public Tokens(IDocument document, IClojureEditor clojureEditor, IPreferenceStore store) {
+        this.tokenScanner = tokenScanner(clojureEditor, store);
         tokenScanner.setRange(document, 0, document.getLength());
         this.document = document;
     }
 
-    public Tokens(IDocument document, IClojureEditor clojureEditor, int caretOffset) {
-        this(document, clojureEditor);
+    public Tokens(IDocument document, IClojureEditor clojureEditor, IPreferenceStore store, int caretOffset) {
+        this(document, clojureEditor, store);
         this.caretOffset = caretOffset;
     }
 
-    public static ITokenScanner tokenScanner(IClojureEditor clojureEditor) {
-        return new ClojureTokenScannerFactory().create(CCWPlugin.getDefault().getColorRegistry(), CCWPlugin.getDefault().getDefaultScanContext(), clojureEditor);
+    public static ITokenScanner tokenScanner(IClojureEditor clojureEditor, IPreferenceStore store) {
+        return new ClojureTokenScanner(CCWPlugin.getDefault().getColorCache(), CCWPlugin.getDefault().getDefaultScanContext(), store, clojureEditor);
     }
 
     public int offsetOfTokenUnderCaret() {

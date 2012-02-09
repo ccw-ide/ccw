@@ -76,10 +76,10 @@
 	  (let [s             (symbol (qualify-sym ns-name s-name))
 	        macro?        #((meta (find-var %)) :macro)]
 		  (cond 
-		    (special-symbol? (symbol s-name)) "SPECIAL_FORM"
+		    (special-symbol? (symbol s-name)) :SPECIAL_FORM
 		    (nil? (find-var s)) nil
-		    (macro? s)        "MACRO"
-		    :else             "FUNCTION"))
+		    (macro? s)        :MACRO
+		    :else             :FUNCTION))
     (catch IllegalArgumentException e nil)))
 
 (def clojure-core-namespaces 

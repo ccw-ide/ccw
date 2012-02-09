@@ -130,9 +130,12 @@ public class ClojureSourceViewerConfiguration extends
 	}
 
 	public void initTokenScanner() {
-		tokenScanner = new ClojureTokenScannerFactory().create(CCWPlugin
-				.getDefault().getColorRegistry(), CCWPlugin.getDefault()
-				.getDefaultScanContext(), editor);
+		tokenScanner = new ClojureTokenScanner(
+				CCWPlugin.getDefault().getColorCache(), 
+				CCWPlugin.getDefault()
+				.getDefaultScanContext(), 
+				CCWPlugin.getDefault().getCombinedPreferenceStore(),
+				editor);
 	}
 
 	@Override

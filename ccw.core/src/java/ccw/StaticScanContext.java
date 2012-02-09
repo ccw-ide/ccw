@@ -12,13 +12,21 @@
 package ccw;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+
+import clojure.lang.Keyword;
+import clojure.lang.RT;
+import clojure.lang.Var;
 
 import ccw.debug.ClojureClient;
 import ccw.editors.clojure.IScanContext;
+import ccw.preferences.PreferenceConstants;
 
 public class StaticScanContext implements IScanContext {
-	private Map<String,SymbolType> clojureSymbolTypesCache = new HashMap<String, SymbolType>();
+	private Map<String,Keyword> clojureSymbolTypesCache = new HashMap<String, Keyword>();
+	
+	private static final Var coreSymbolType = RT.var("ccw.debug.clientrepl", "core-symbol-type");
 	
 	private boolean isJavaIdentifier(String s) {
 		assert s != null && s.length() > 0;
@@ -34,19 +42,19 @@ public class StaticScanContext implements IScanContext {
 		return true;
 	}
 	
-	public SymbolType getSymbolType(String symbol) {
+	public Keyword getSymbolType(String symbol, boolean isCallableSymbol) {
 		assert symbol != null && symbol.length() > 0;
 		
 		if (symbol.startsWith("*") && symbol.endsWith("*")) {
 			// Even if it is not true that it is a global var,
 			// force a global var look and feel to warn the user that
 			// something is wrong (convention not respected)
-			return SymbolType.GLOBAL_VAR;
+			return isCallableSymbol ? PreferenceConstants.callableGLOBAL_VAR_Token : PreferenceConstants.GLOBAL_VAR_Token;
 		}
 		
 		if (symbol.startsWith(".")  &&  symbol.length() > 1) {
 			if (isJavaIdentifier(symbol.substring(1))) {
-				return SymbolType.JAVA_INSTANCE_METHOD;
+				return isCallableSymbol ? PreferenceConstants.callableJAVA_INSTANCE_METHOD_Token : PreferenceConstants.JAVA_INSTANCE_METHOD_Token;
 			}
 		}
 		
@@ -59,33 +67,61 @@ public class StaticScanContext implements IScanContext {
 			letterAfterPointIndex = foundIndex + 1;
 			if ( (letterAfterPointIndex < symbol.length()) && Character.isUpperCase(symbol.charAt(letterAfterPointIndex)) ) {
 				if (symbol.substring(letterAfterPointIndex + 1).contains("/")) {
-					return SymbolType.JAVA_STATIC_METHOD;
+					return isCallableSymbol ? PreferenceConstants.callableJAVA_STATIC_METHOD_Token : PreferenceConstants.JAVA_STATIC_METHOD_Token;
 				} else {
-					return SymbolType.JAVA_CLASS;
+					return isCallableSymbol ? PreferenceConstants.callableJAVA_CLASS_Token : PreferenceConstants.JAVA_CLASS_Token;
 				}
 			} else {
 				from = letterAfterPointIndex;
 			}
 		} while ((from < symbol.length()) && (foundIndex = symbol.indexOf('.', from)) > 0);
-		
+		/*
+		 TODO activate this possibility via a preference to get a visible bootstrap gain
+		if (isCallableSymbol) // 2.7 sec.
+			return PreferenceConstants.RAW_SYMBOL_Token;
+		else 
+			return PreferenceConstants.callable_RAW_SYMBOL_Token;
+		*/
 		if (clojureSymbolTypesCache.containsKey(symbol)) {
-			return clojureSymbolTypesCache.get(symbol);
+			return getCallableOrNonCallable(clojureSymbolTypesCache.get(symbol), isCallableSymbol);
 		} else {
-			Object symbolType = ClojureClient.loadString("(ccw.debug.clientrepl/core-symbol-type \"" + symbol + "\")");	
+			Keyword symbolType =  (Keyword) coreSymbolType.invoke(symbol);	
 	
 			if (symbolType == null) {
-				clojureSymbolTypesCache.put(symbol, SymbolType.RAW_SYMBOL);
-				return SymbolType.RAW_SYMBOL;
+				clojureSymbolTypesCache.put(symbol, PreferenceConstants.RAW_SYMBOL_Token);
+				return getCallableOrNonCallable(PreferenceConstants.RAW_SYMBOL_Token, isCallableSymbol);
 			} else {
 				try {
-					SymbolType st = SymbolType.valueOf(symbolType.toString());
-					clojureSymbolTypesCache.put(symbol, st);
-					return st;
+					clojureSymbolTypesCache.put(symbol, symbolType);
+					return getCallableOrNonCallable(symbolType, isCallableSymbol);
 				} catch (IllegalArgumentException e) {
 					CCWPlugin.logError("The clojure code returned an invalid symbolType value:'" + symbolType + "' for enumeration SymbolType", e);
 					return null;
 				}
 			}
+		}
+		
+	}
+	
+	private static final Map<Keyword, Keyword> symbolToCallable = new HashMap<Keyword, Keyword>() {
+		{
+			put(PreferenceConstants.RAW_SYMBOL_Token, PreferenceConstants.callable_RAW_SYMBOL_Token);
+			put(PreferenceConstants.FUNCTION_Token, PreferenceConstants.callableFUNCTION_Token);
+			put(PreferenceConstants.MACRO_Token, PreferenceConstants.callableMACRO_Token);
+			put(PreferenceConstants.SPECIAL_FORM_Token, PreferenceConstants.callableSPECIAL_FORM_Token);
+		}
+	};
+	
+	private Keyword getCallableOrNonCallable(Keyword symbolKeyword, boolean isCallableSymbol) {
+		if (isCallableSymbol) {
+			Keyword callableFlavor = symbolToCallable.get(symbolKeyword);
+			if (callableFlavor != null) {
+				return callableFlavor;
+			} else {
+				return symbolKeyword;
+			}
+		} else {
+			return symbolKeyword;
 		}
 	}
 			

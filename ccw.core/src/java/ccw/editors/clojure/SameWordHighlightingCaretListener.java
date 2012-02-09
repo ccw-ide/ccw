@@ -10,6 +10,7 @@
  *******************************************************************************/
 package ccw.editors.clojure;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.rules.IToken;
@@ -24,26 +25,28 @@ public class SameWordHighlightingCaretListener implements CaretListener {
 	private static final String OTHER_MATCHES_COLOR_KEY = "ccw.editors.SameWordHighlightingCaretListener.OTHER_MATCHES_COLOR_KEY";
 	
     private final ClojureEditor editor;
-    private final ColorRegistry colorRegistry;
+    private final ColorRegistry colorCache;
+    private final IPreferenceStore store;
 
-    public SameWordHighlightingCaretListener(ClojureEditor editor, ColorRegistry colorRegistry) {
+    public SameWordHighlightingCaretListener(ClojureEditor editor, ColorRegistry colorCache, IPreferenceStore store) {
         this.editor = editor;
-        this.colorRegistry = colorRegistry;
+        this.colorCache = colorCache;
+        this.store = store;
         initColorRegistry();
     }
     
     private void initColorRegistry() {
-    	if (!colorRegistry.hasValueFor(COLOR_KEY)) {
-    		colorRegistry.put(COLOR_KEY, new RGB(225, 225, 225));
+    	if (!colorCache.hasValueFor(COLOR_KEY)) {
+    		colorCache.put(COLOR_KEY, new RGB(225, 225, 225));
     	}
-    	if (!colorRegistry.hasValueFor(OTHER_MATCHES_COLOR_KEY)) {
-    		colorRegistry.put(OTHER_MATCHES_COLOR_KEY, new RGB(255, 255, 180));
+    	if (!colorCache.hasValueFor(OTHER_MATCHES_COLOR_KEY)) {
+    		colorCache.put(OTHER_MATCHES_COLOR_KEY, new RGB(255, 255, 180));
     	}
     }
 
     public void caretMoved(CaretEvent event) {
         IDocument document = editor.getDocument();
-        Tokens tokens = new Tokens(document, editor, event.caretOffset);
+        Tokens tokens = new Tokens(document, editor, store, event.caretOffset);
         tokens.putTokenScannerRangeOnCurrentLine();
         IToken tokenAtCaret = tokens.tokenAtCaret();
         boolean wordIsNotFormatted = tokenAtCaret.getData() == null;
@@ -57,7 +60,7 @@ public class SameWordHighlightingCaretListener implements CaretListener {
     }
 
     private StyleRange createRange(Tokens tokens) {
-        return tokens.styleRange(colorRegistry.get(COLOR_KEY));
+        return tokens.styleRange(colorCache.get(COLOR_KEY));
     }
 
     private void colorOtherMatches(IDocument document, Tokens tokens, String original) {
@@ -68,7 +71,7 @@ public class SameWordHighlightingCaretListener implements CaretListener {
             if (token.getData() == null) {
                 String tokenContents = tokens.tokenContents();
                 if (tokenContents.equals(original)) {
-                    StyleRange range = tokens.styleRange(colorRegistry.get(OTHER_MATCHES_COLOR_KEY));
+                    StyleRange range = tokens.styleRange(colorCache.get(OTHER_MATCHES_COLOR_KEY));
                     editor.sourceViewer().getTextWidget().setStyleRange(range);
                 }
             }

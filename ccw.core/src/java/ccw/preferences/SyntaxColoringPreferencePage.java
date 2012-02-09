@@ -89,12 +89,12 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         private String fDisplayName;
         /** Color preference key */
         private String fColorKey;
-        /** Bold preference key *//*
+        /** Bold preference key */
         private String fBoldKey;
-        */
-        /** Italic preference key *//*
+        
+        /** Italic preference key */
         private String fItalicKey;
-        */
+        
         /**
          * Strikethrough preference key.
          *//*
@@ -112,32 +112,32 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
          * @param strikethroughKey the strikethrough preference key
          * @param underlineKey the underline preference key
          */
-        public HighlightingColorListItem(String displayName, String colorKey, /*String boldKey, String italicKey, String strikethroughKey, String underlineKey*/
+        public HighlightingColorListItem(String displayName, String colorKey, String boldKey, String italicKey, /*String strikethroughKey, String underlineKey*/
                 String enableKey) {
             fDisplayName= displayName;
             fColorKey= colorKey;
-            /*fBoldKey= boldKey;
+            fBoldKey= boldKey;
             fItalicKey= italicKey;
-            fStrikethroughKey= strikethroughKey;
+            /*fStrikethroughKey= strikethroughKey;
             fUnderlineKey= underlineKey;*/
             fEnableKey = enableKey;
         }
         
-/*        *//**
+        /**
          * @return the bold preference key
-         *//*
+         */
         public String getBoldKey() {
             return fBoldKey;
         }
         
-        *//**
+        /**
          * @return the bold preference key
-         *//*
+         */
         public String getItalicKey() {
             return fItalicKey;
         }
         
-        *//**
+        /**
          * @return the strikethrough preference key
          *//*
         public String getStrikethroughKey() {
@@ -216,14 +216,51 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
      * The keys of the overlay store.
      */
     private final String[][] fSyntaxColorListModel= new String[][] {
-        { Messages.SyntaxColoringPreferencePage_function, PreferenceConstants.EDITOR_FUNCTION_COLOR },
-        { Messages.SyntaxColoringPreferencePage_literal, PreferenceConstants.EDITOR_LITERAL_COLOR },
-        { Messages.SyntaxColoringPreferencePage_specialForm, PreferenceConstants.EDITOR_SPECIAL_FORM_COLOR },
-        { Messages.SyntaxColoringPreferencePage_comment, PreferenceConstants.EDITOR_COMMENT_COLOR },
-        { Messages.SyntaxColoringPreferencePage_globalVar, PreferenceConstants.EDITOR_GLOBAL_VAR_COLOR },
-        { Messages.SyntaxColoringPreferencePage_keyword, PreferenceConstants.EDITOR_KEYWORD_COLOR },
-        { Messages.SyntaxColoringPreferencePage_metadataTypehint, PreferenceConstants.EDITOR_METADATA_TYPEHINT_COLOR },
-        { Messages.SyntaxColoringPreferencePage_macro, PreferenceConstants.EDITOR_MACRO_COLOR },
+//          { Messages.SyntaxColoringPreferencePage_literal, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.literalSymbolToken)},
+//          { Messages.SyntaxColoringPreferencePage_symbol, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.symbolToken)},
+
+        { Messages.SyntaxColoringPreferencePage_rawSymbol, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.RAW_SYMBOL_Token)},
+        { Messages.SyntaxColoringPreferencePage_callableRawSymbol, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.callable_RAW_SYMBOL_Token)},
+
+        { Messages.SyntaxColoringPreferencePage_specialForm, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.SPECIAL_FORM_Token)},
+        { Messages.SyntaxColoringPreferencePage_callableSpecialForm, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.callableSPECIAL_FORM_Token)},
+
+        { Messages.SyntaxColoringPreferencePage_macro, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.MACRO_Token)},
+        { Messages.SyntaxColoringPreferencePage_callableMacro, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.callableMACRO_Token)},
+
+        { Messages.SyntaxColoringPreferencePage_function, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.FUNCTION_Token)},
+        { Messages.SyntaxColoringPreferencePage_callableFunction, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.callableFUNCTION_Token)},
+        
+
+        { Messages.SyntaxColoringPreferencePage_javaClass, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.JAVA_CLASS_Token)},
+        { Messages.SyntaxColoringPreferencePage_callableJavaClass, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.callableJAVA_CLASS_Token)},
+        { Messages.SyntaxColoringPreferencePage_javaInstanceMethod, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.JAVA_INSTANCE_METHOD_Token)},
+        { Messages.SyntaxColoringPreferencePage_callableJavaInstanceMethod, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.callableJAVA_INSTANCE_METHOD_Token)},
+        { Messages.SyntaxColoringPreferencePage_javaStaticMethod, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.JAVA_STATIC_METHOD_Token)},
+        { Messages.SyntaxColoringPreferencePage_callableJavaStaticMethod, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.callableJAVA_STATIC_METHOD_Token)},
+        
+        { Messages.SyntaxColoringPreferencePage_globalVar, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.GLOBAL_VAR_Token)},
+        { Messages.SyntaxColoringPreferencePage_callableGlobalVar, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.callableGLOBAL_VAR_Token)},
+        
+        { Messages.SyntaxColoringPreferencePage_comment, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.commentToken)},
+        { Messages.SyntaxColoringPreferencePage_string, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.stringToken)},
+        { Messages.SyntaxColoringPreferencePage_metadataTypehint, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.metaToken)},
+        { Messages.SyntaxColoringPreferencePage_keyword, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.keywordToken)},
+        { Messages.SyntaxColoringPreferencePage_regex, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.regexToken)},
+        { Messages.SyntaxColoringPreferencePage_int, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.intToken)},
+        { Messages.SyntaxColoringPreferencePage_float, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.floatToken)},
+        { Messages.SyntaxColoringPreferencePage_char, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.charToken)},
+        
+                
+        { Messages.SyntaxColoringPreferencePage_deactivateRainbowParen, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.deactivatedRainbowParen)},
+        { Messages.SyntaxColoringPreferencePage_rainbowParenLevel1, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.rainbowParenLevel1)},
+        { Messages.SyntaxColoringPreferencePage_rainbowParenLevel2, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.rainbowParenLevel2)},
+        { Messages.SyntaxColoringPreferencePage_rainbowParenLevel3, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.rainbowParenLevel3)},
+        { Messages.SyntaxColoringPreferencePage_rainbowParenLevel4, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.rainbowParenLevel4)},
+        { Messages.SyntaxColoringPreferencePage_rainbowParenLevel5, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.rainbowParenLevel5)},
+        { Messages.SyntaxColoringPreferencePage_rainbowParenLevel6, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.rainbowParenLevel6)},
+        { Messages.SyntaxColoringPreferencePage_rainbowParenLevel7, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.rainbowParenLevel7)},
+        { Messages.SyntaxColoringPreferencePage_rainbowParenLevel8, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.rainbowParenLevel8)},
     };
     
     OverlayPreferenceStore fOverlayStore;
@@ -233,15 +270,12 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
     
     private Button fEnableCheckbox;
     
-    /* TODO enable bold, italic, strikethrough, underline elements once
-     * text attributes are used
-     */
-    // private Button fBoldCheckBox;
+    private Button fBoldCheckBox;
     
     /**
      * Check box for italic preference.
      */
-    // private Button fItalicCheckBox;
+    private Button fItalicCheckBox;
     /**
      * Check box for strikethrough preference.
      */
@@ -282,9 +316,10 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         for (String[] modelItem: fSyntaxColorListModel)
             fListModel.add(new HighlightingColorListItem(
                     modelItem[0],
-                    modelItem[1], /*
-                    getBoldPreferenceKey(model[1]),
-                    getItalicPreferenceKey(model[1]),
+                    modelItem[1], 
+                    getBoldPreferenceKey(modelItem[1]),
+                    getItalicPreferenceKey(modelItem[1]),
+                    /*
                     getStrikethroughPreferenceKey(model[1]),
                     getUnderlinePreferenceKey(model[1]),*/
                     getEnabledPreferenceKey(modelItem[1])));
@@ -428,9 +463,9 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
             fEnableCheckbox.setEnabled(false);
             fSyntaxForegroundColorEditor.getButton().setEnabled(false);
             fColorEditorLabel.setEnabled(false);
-            /* TODO uncomment this once text attributes are used
             fBoldCheckBox.setEnabled(false);
             fItalicCheckBox.setEnabled(false);
+            /* TODO uncomment this once text attributes are used
             fStrikethroughCheckBox.setEnabled(false);
             fUnderlineCheckBox.setEnabled(false);
             */
@@ -438,9 +473,9 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         }
         RGB rgb= PreferenceConverter.getColor(fOverlayStore, item.getColorKey());
         fSyntaxForegroundColorEditor.setColorValue(rgb);
-/*        fBoldCheckBox.setSelection(fOverlayStore.getBoolean(item.getBoldKey()));
+        fBoldCheckBox.setSelection(fOverlayStore.getBoolean(item.getBoldKey()));
         fItalicCheckBox.setSelection(fOverlayStore.getBoolean(item.getItalicKey()));
-        fStrikethroughCheckBox.setSelection(fOverlayStore.getBoolean(item.getStrikethroughKey()));
+/*        fStrikethroughCheckBox.setSelection(fOverlayStore.getBoolean(item.getStrikethroughKey()));
         fUnderlineCheckBox.setSelection(fOverlayStore.getBoolean(item.getUnderlineKey()));
         */
         
@@ -449,9 +484,9 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         fEnableCheckbox.setSelection(enable);
         fSyntaxForegroundColorEditor.getButton().setEnabled(enable);
         fColorEditorLabel.setEnabled(enable);
-        /* TODO depend on enable if text attributes are actually used
         fBoldCheckBox.setEnabled(enable);
         fItalicCheckBox.setEnabled(enable);
+        /* TODO depend on enable if text attributes are actually used
         fStrikethroughCheckBox.setEnabled(enable);
         fUnderlineCheckBox.setEnabled(enable);
         */
@@ -503,7 +538,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         fListViewer.setInput(fListModel);
 
         gd= new GridData(SWT.BEGINNING, SWT.BEGINNING, false, true);
-        gd.heightHint= convertHeightInCharsToPixels(12);
+        gd.heightHint= convertHeightInCharsToPixels(30);
         int maxWidth= 0;
         for (Iterator<HighlightingColorListItem> it= fListModel.iterator(); it.hasNext();) {
             HighlightingColorListItem item=  it.next();
@@ -542,7 +577,6 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
         foregroundColorButton.setLayoutData(gd);
         
-        /* TODO enable once text attributes are used
         fBoldCheckBox= new Button(stylesComposite, SWT.CHECK);
         fBoldCheckBox.setText(Messages.SyntaxColoringPreferencePage_bold);
         gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
@@ -557,6 +591,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         gd.horizontalSpan= 2;
         fItalicCheckBox.setLayoutData(gd);
         
+        /* TODO enable once text attributes are used
         fStrikethroughCheckBox= new Button(stylesComposite, SWT.CHECK);
         fStrikethroughCheckBox.setText(Messages.SyntaxColoringPreferencePage_strikethrough);
         gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
@@ -599,7 +634,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
             }
         });
     
-/*        fBoldCheckBox.addSelectionListener(new SelectionListener() {
+        fBoldCheckBox.addSelectionListener(new SelectionListener() {
             public void widgetDefaultSelected(SelectionEvent e) {
                 // do nothing
             }
@@ -618,6 +653,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
                 fOverlayStore.setValue(item.getItalicKey(), fItalicCheckBox.getSelection());
             }
         });
+        /*        
         fStrikethroughCheckBox.addSelectionListener(new SelectionListener() {
             public void widgetDefaultSelected(SelectionEvent e) {
                 // do nothing
@@ -627,7 +663,6 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
                 fOverlayStore.setValue(item.getStrikethroughKey(), fStrikethroughCheckBox.getSelection());
             }
         });
-        
         fUnderlineCheckBox.addSelectionListener(new SelectionListener() {
             public void widgetDefaultSelected(SelectionEvent e) {
                 // do nothing
@@ -650,9 +685,9 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
                 fEnableCheckbox.setSelection(enable);
                 fSyntaxForegroundColorEditor.getButton().setEnabled(enable);
                 fColorEditorLabel.setEnabled(enable);
-                /* TODO re-enable once text attributes are used
                 fBoldCheckBox.setEnabled(enable);
                 fItalicCheckBox.setEnabled(enable);
+                /* TODO re-enable once text attributes are used
                 fStrikethroughCheckBox.setEnabled(enable);
                 fUnderlineCheckBox.setEnabled(enable);
                 */
@@ -752,6 +787,8 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
 
         for (String[] s: fSyntaxColorListModel) {
             overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, s[1]));
+            overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, getBoldPreferenceKey(s[1])));
+            overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, getItalicPreferenceKey(s[1])));
             overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, getEnabledPreferenceKey(s[1])));
         }
         
@@ -759,28 +796,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         return overlayKeys.toArray(keys);
     }
     
-/* TODO adapt these once text attributes are used   */
     /**
-     * A named preference that controls if the given semantic highlighting has the text attribute bold.
-     *
-     * @param semanticHighlighting the semantic highlighting
-     * @return the bold preference key
-     *//*
-    public static String getBoldPreferenceKey(SemanticHighlighting semanticHighlighting) {
-        return PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + semanticHighlighting.getPreferenceKey() + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_BOLD_SUFFIX;
-    }
-
-    *//**
-     * A named preference that controls if the given semantic highlighting has the text attribute italic.
-     *
-     * @param semanticHighlighting the semantic highlighting
-     * @return the italic preference key
-     *//*
-    public static String getItalicPreferenceKey(SemanticHighlighting semanticHighlighting) {
-        return PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + semanticHighlighting.getPreferenceKey() + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ITALIC_SUFFIX;
-    }
-
-    *//**
      * A named preference that controls if the given semantic highlighting has the text attribute strikethrough.
      *
      * @param semanticHighlighting the semantic highlighting
@@ -807,7 +823,28 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
      * @return the enabled preference key
      */
     public static String getEnabledPreferenceKey(String preferenceKey) {
-        return PreferenceConstants.CCW_PREFERENCE_PREFIX + preferenceKey + PreferenceConstants.EDITOR_COLORING_ENABLED_SUFFIX;
+    	return preferenceKey + PreferenceConstants.EDITOR_COLORING_ENABLED_SUFFIX;
     }
+    
+    /**
+     * A named preference that controls if the given semantic highlighting has the text attribute bold.
+     *
+     * @param semanticHighlighting the semantic highlighting
+     * @return the bold preference key
+     */
+    public static String getBoldPreferenceKey(String keyPrefix) {
+        return keyPrefix + PreferenceConstants.EDITOR_BOLD_SUFFIX;
+    }
+
+    /**
+     * A named preference that controls if the given semantic highlighting has the text attribute italic.
+     *
+     * @param semanticHighlighting the semantic highlighting
+     * @return the italic preference key
+     */
+    public static String getItalicPreferenceKey(String keyPrefix) {
+        return keyPrefix + PreferenceConstants.EDITOR_ITALIC_SUFFIX;
+    }
+
 }
 

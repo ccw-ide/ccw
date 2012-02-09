@@ -66,7 +66,7 @@
         (.setStyleRange (log-style charcnt (- (.getCharCount log) charcnt))))
       (when line-background-color-name
         (.setLineBackground log (dec linecnt) (- (.getLineCount log) linecnt)
-          (-> (CCWPlugin/getDefault) .getColorRegistry (.get line-background-color-name)))))))
+          (-> (CCWPlugin/getDefault) .getColorCache (.get line-background-color-name)))))))
 
 (defn eval-failure-msg
   [status s]

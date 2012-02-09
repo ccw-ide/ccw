@@ -11,23 +11,23 @@
 
 package ccw.editors.clojure;
 
+import clojure.lang.Keyword;
+
 /**
- * @author Laurent Petit <laurent.petit@gmail.com>
  * Interface for providing context (static or dynamic) 
  * to a text scanning operation
+ * 
+ * @author Laurent Petit <laurent.petit@gmail.com>
  */
 public interface IScanContext {
-
-	enum SymbolType {
-		FUNCTION, MACRO, SPECIAL_FORM, GLOBAL_VAR, JAVA_CLASS, JAVA_INSTANCE_METHOD, JAVA_STATIC_METHOD, RAW_SYMBOL
-	};
 	
 	/**
 	 * Tries to guess the type of the symbol passed to String.
+	 * 
 	 * @param symbol
 	 * @return an IScanContext.SymbolType enum instance, or null if it 
 	 * cannot guess or the symbol does not exist
 	 */
-	SymbolType getSymbolType(String symbol);
+	Keyword getSymbolType(String symbol, boolean isCallableSymbol);
 
 }

@@ -210,7 +210,7 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.COMPILE_LIB);
 		setAction(CompileLibAction.ID, action);
 
-		action = new RunTestsAction(this, CCWPlugin.getDefault().getColorRegistry());
+		action = new RunTestsAction(this, CCWPlugin.getDefault().getColorCache());
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.RUN_TESTS);
 		setAction(RunTestsAction.RUN_TESTS_ID, action);
 		/*

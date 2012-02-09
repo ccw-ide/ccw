@@ -15,40 +15,43 @@ import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.swt.SWT;
 
+import clojure.lang.Keyword;
+
 
 public class TokenScannerUtils {
 	private ClojureTokenScanner scanner;
-	private ColorRegistry colorProvider;
+	private ColorRegistry colorCache;
 
 	public TokenScannerUtils(ClojureTokenScanner scanner, ColorRegistry colorProvider) {
 		this.scanner = scanner;
-		this.colorProvider = colorProvider;
+		this.colorCache = colorProvider;
 	}
 	
-	public void addTokenType(Object tokenIndex, String colorKey) {
-		scanner.addTokenType(tokenIndex, new TextAttribute(colorProvider.get(colorKey)));
+	/**
+	 * To use default font rgb, call with null
+	 * To use default font styles, call with null in both isBold & isItalic
+	 * @param tokenIndex
+	 * @param rgb
+	 * @param isBold
+	 * @param isItalic
+	 */
+	public void addTokenType(Keyword tokenIndex, String rgb, Boolean isBold, Boolean isItalic) {
+		TextAttribute textAttribute;
+		
+		if (isBold==null && isItalic==null) {
+			// means let's use the defaults
+			textAttribute = new TextAttribute((rgb==null)? null : colorCache.get(rgb));
+		} else {
+			int style = SWT.NONE;
+			if (isBold) style |= SWT.BOLD;
+			if (isItalic) style |= SWT.ITALIC;
+			textAttribute = new TextAttribute((rgb==null)? null : colorCache.get(rgb), null, style);
+		}
+		scanner.addTokenType(tokenIndex, textAttribute);
 	}
-	public void addTokenType(Object tokenIndex) {
-		scanner.addTokenType(tokenIndex, new TextAttribute(colorProvider.get(ClojureEditor.ID + "_" +  tokenIndex)));
-	}
-	
-	public void addTokenType(Object tokenIndex, IToken token) {
+
+	public void addTokenType(Keyword tokenIndex, IToken token) {
 		scanner.addTokenType(tokenIndex, token);
 	}
 	
-	public void addBoldToken(Object tokenIndex, String colorKey) {
-		scanner.addTokenType(tokenIndex, new TextAttribute(colorProvider.get(colorKey), null, SWT.BOLD));
-	}
-	public void addBoldToken(Object tokenIndex) {
-		scanner.addTokenType(tokenIndex, new TextAttribute(
-				colorProvider.get(ClojureEditor.ID + "_" +  tokenIndex), null, SWT.BOLD));
-	}
-	
-	public void addItalicToken(Object tokenIndex, String colorKey) {
-		scanner.addTokenType(tokenIndex, new TextAttribute(colorProvider.get(colorKey), null, SWT.ITALIC));
-	}
-	public void addItalicToken(Object tokenIndex) {
-		scanner.addTokenType(tokenIndex, new TextAttribute(
-				colorProvider.get(ClojureEditor.ID + "_" +  tokenIndex), null, SWT.ITALIC));
-	}
 }

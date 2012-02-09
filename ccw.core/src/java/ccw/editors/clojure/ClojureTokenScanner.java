@@ -11,14 +11,13 @@
  *******************************************************************************/
 package ccw.editors.clojure;
 
-import static ccw.CCWPlugin.getCCWColor;
-import static ccw.CCWPlugin.getSystemColor;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.rules.IToken;
@@ -29,12 +28,13 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 
 import ccw.CCWPlugin;
+import ccw.preferences.PreferenceConstants;
 import ccw.util.ClojureUtils;
 import clojure.lang.ISeq;
 import clojure.lang.Keyword;
 import clojure.osgi.ClojureOSGi;
 
-abstract public class ClojureTokenScanner implements ITokenScanner {
+public final class ClojureTokenScanner implements ITokenScanner {
     private static final String EDITOR_SUPPORT_NS = "ccw.editors.clojure.editor-support";
     private static final String ClojureTopLevelFormsDamager_NS = "ccw.editors.clojure.ClojureTopLevelFormsDamagerImpl";
     static {
@@ -47,15 +47,28 @@ abstract public class ClojureTokenScanner implements ITokenScanner {
     }
 
     private int currentOffset;
-    private final Map<Object, IToken> tokenTypeToJFaceToken;
+    private final Map<Keyword, IToken> parserTokenKeywordToJFaceToken;
     private String text;
     private boolean initialized = false;
     private final IScanContext context;
-    private final IToken[] parenLevelTokens = new IToken[] { newParenTokenWith(getSystemColor(SWT.COLOR_RED)), newParenTokenWith(getCCWColor(0)), newParenTokenWith(getSystemColor(SWT.COLOR_GRAY)), newParenTokenWith(getSystemColor(SWT.COLOR_MAGENTA)), newParenTokenWith(getCCWColor(1)), newParenTokenWith(getCCWColor(2)), newParenTokenWith(getCCWColor(3)), newParenTokenWith(getSystemColor(SWT.COLOR_DARK_GRAY)), newParenTokenWith(getCCWColor(4)), newParenTokenWith(getSystemColor(SWT.COLOR_DARK_BLUE)), newParenTokenWith(getCCWColor(5)), newParenTokenWith(getSystemColor(SWT.COLOR_DARK_CYAN)) };
-    private final IToken noRainbowParenToken = newParenTokenWith(getSystemColor(SWT.COLOR_DARK_GRAY));
+    
+    private final Keyword[] parenLevelPrefKeywords = new Keyword[] {
+    		PreferenceConstants.rainbowParenLevel1,
+    		PreferenceConstants.rainbowParenLevel2,
+    		PreferenceConstants.rainbowParenLevel3,
+    		PreferenceConstants.rainbowParenLevel4,
+    		PreferenceConstants.rainbowParenLevel5,
+    		PreferenceConstants.rainbowParenLevel6,
+    		PreferenceConstants.rainbowParenLevel7,
+    		PreferenceConstants.rainbowParenLevel8
+    };
+//    private final IToken[] parenLevelTokens = new IToken[] { newParenTokenWith(getSystemColor(SWT.COLOR_RED)), newParenTokenWith(getCCWColor(0)), newParenTokenWith(getSystemColor(SWT.COLOR_GRAY)), newParenTokenWith(getSystemColor(SWT.COLOR_MAGENTA)), newParenTokenWith(getCCWColor(1)), newParenTokenWith(getCCWColor(2)), newParenTokenWith(getCCWColor(3)), newParenTokenWith(getSystemColor(SWT.COLOR_DARK_GRAY)), newParenTokenWith(getCCWColor(4)), newParenTokenWith(getSystemColor(SWT.COLOR_DARK_BLUE)), newParenTokenWith(getCCWColor(5)), newParenTokenWith(getSystemColor(SWT.COLOR_DARK_CYAN)) };
+//    private final IToken noRainbowParenToken = newParenTokenWith(getSystemColor(SWT.COLOR_DARK_GRAY/*COLOR_BLACK*/));
 
+    private ColorRegistry colorCache;
     private IClojureEditor clojureEditor;
-
+    private IPreferenceStore preferenceStore;
+    
     private static IToken newParenTokenWith(Color color) {
         return new org.eclipse.jface.text.rules.Token(new TextAttribute(color));
     }
@@ -76,40 +89,50 @@ abstract public class ClojureTokenScanner implements ITokenScanner {
 	private static Keyword closeFnKeyword = Keyword.intern("close-fn");
 	private static Keyword closeChimeraKeyword = Keyword.intern("close-chimera");
 	
-    public ClojureTokenScanner(IScanContext context, IClojureEditor clojureEditor) {
+    public ClojureTokenScanner(final ColorRegistry colorCache, IScanContext context, IPreferenceStore preferenceStore, IClojureEditor clojureEditor) {
         if (clojureEditor == null) {
         	throw new IllegalArgumentException("clojureEditor cannot be null");
         }
+        this.colorCache = colorCache;
         this.context = context;
+        this.preferenceStore = preferenceStore;
         this.clojureEditor = clojureEditor;
-        tokenTypeToJFaceToken = new HashMap<Object, IToken>();
+        parserTokenKeywordToJFaceToken = new HashMap<Keyword, IToken>();
         initClojureTokenTypeToJFaceTokenMap();
         initialized = true;
     }
 
-    abstract protected void initClojureTokenTypeToJFaceTokenMap();
+	protected void initClojureTokenTypeToJFaceTokenMap() {
+		TokenScannerUtils u = new TokenScannerUtils(this, colorCache);
+		
+		u.addTokenType(Keyword.intern("unexpected"), ClojureTokenScanner.errorToken);
+		u.addTokenType(Keyword.intern("eof"), Token.EOF);
+		u.addTokenType(Keyword.intern("whitespace"), Token.WHITESPACE);
 
-    public final void addTokenType(Object tokenIndex, org.eclipse.jface.text.rules.IToken token) {
+		for (Keyword token: PreferenceConstants.colorizableTokens) {
+			PreferenceConstants.ColorizableToken tokenStyle = PreferenceConstants.getColorizableToken(preferenceStore, token, null);
+			u.addTokenType(
+					token,
+					(tokenStyle.rgb==null) ? null : tokenStyle.rgb.toString(),
+					tokenStyle.isBold,
+					tokenStyle.isItalic);
+		}
+	}
+
+    
+    public final void addTokenType(Keyword tokenIndex, org.eclipse.jface.text.rules.IToken token) {
         if (initialized) {
             throw lifeCycleError();
         }
-        tokenTypeToJFaceToken.put(tokenIndex, token);
+        parserTokenKeywordToJFaceToken.put(tokenIndex, token);
     }
 
-    public final void addTokenType(Object tokenIndex, TextAttribute textAttribute) {
+    public final void addTokenType(Keyword tokenIndex, TextAttribute textAttribute) {
         if (initialized) {
             throw lifeCycleError();
         }
         addTokenType(tokenIndex, new org.eclipse.jface.text.rules.Token(textAttribute));
     }
-
-    public final void addToken(int tokenIndex, String tokenData) {
-        if (initialized) {
-            throw lifeCycleError();
-        }
-        addTokenType(tokenIndex, new org.eclipse.jface.text.rules.Token(tokenData));
-    }
-
     private RuntimeException lifeCycleError() {
         return new RuntimeException("Object Lifecycle error: method called at an inappropriate time");
     }
@@ -144,6 +167,18 @@ abstract public class ClojureTokenScanner implements ITokenScanner {
         currentToken = (Map<?,?>)tokenSeq.first();
         advanceTokenDuration += System.currentTimeMillis() - start;
     }
+    
+    private boolean isCallableSymbol = false;
+    private static final Set<?> nonCallableSymbolErasers = new HashSet()
+    		{
+    	{
+    		add(Keyword.intern("whitespace"));
+    		add(Keyword.intern("meta"));
+    		add(Keyword.intern("open-list"));
+    		//add(Keyword.intern("open-deref"));
+    		//add(Keyword.intern("open-var"));
+    	}
+    		};
     public final IToken nextToken() {
     	long start = System.currentTimeMillis();
     	advanceToken();   	
@@ -154,6 +189,7 @@ abstract public class ClojureTokenScanner implements ITokenScanner {
             long localDuration = System.currentTimeMillis() - start;
             duration += localDuration;
             nextTokenDuration += localDuration;
+            isCallableSymbol = true;
             return nextToken();
         }
         if (currentToken.get(tokenTypeKeyword).equals(unnestKeyword)) {
@@ -161,6 +197,7 @@ abstract public class ClojureTokenScanner implements ITokenScanner {
             long localDuration = System.currentTimeMillis() - start;
             duration += localDuration;
             nextTokenDuration += localDuration;
+            isCallableSymbol = false;
             return nextToken();
         }
         
@@ -179,9 +216,9 @@ abstract public class ClojureTokenScanner implements ITokenScanner {
         		result = errorToken;
         	} else {
         		if (this.clojureEditor.isShowRainbowParens()) {
-        			result = parenLevelTokens[currentParenLevel % parenLevelTokens.length];
+        			result =  parserTokenKeywordToJFaceToken.get(parenLevelPrefKeywords[currentParenLevel % parenLevelPrefKeywords.length]);
         		} else {
-        			result = noRainbowParenToken;
+        			result = parserTokenKeywordToJFaceToken.get(PreferenceConstants.deactivatedRainbowParen);
         		}
         	}
         } else {
@@ -191,18 +228,15 @@ abstract public class ClojureTokenScanner implements ITokenScanner {
             long localDuration = System.currentTimeMillis() - start;
             duration += localDuration;
             nextTokenDuration += localDuration;
-//    		System.out.println("total time spent in the scanner (secs):" + (duration / 1000));
-//    		System.out.println("total time spent in nextToken (secs):" + (nextTokenDuration / 1000));
-//    		System.out.println("total time spent in getTokenLength (secs):" + (getTokenLengthDuration / 1000));
-//    		System.out.println("total time spent in advanceToken (secs):" + (advanceTokenDuration / 1000));
-//    		System.out.println("total time spent in toJFaceToken(secs)" + (toJFaceTokenDuration / 1000));
-//    		System.out.println("total time spent in guessEclipseTokenTypeForSymbol(secs)" + (guessEclipseTokenTypeForSymbolDuration / 1000));
-//    		System.out.println("total time spent in getSymbolTypeDuration(secs):" + (getSymbolTypeDuration / 1000));
+            // setting isCallableSymbol does not matter anymore here
     		return result;
         }
         long localDuration = System.currentTimeMillis() - start;
         nextTokenDuration += localDuration;
         duration += localDuration;
+        if (!nonCallableSymbolErasers.contains(currentToken.get(tokenTypeKeyword))) {
+        	isCallableSymbol = false;
+        }
         return result;
     }
     long duration;
@@ -232,7 +266,11 @@ abstract public class ClojureTokenScanner implements ITokenScanner {
         tokenSeq = (ISeq) ClojureUtils.invoke(ClojureTopLevelFormsDamager_NS, "getTokensSeq",
         		ClojureUtils.invoke(EDITOR_SUPPORT_NS, "getParseTree", clojureEditor.getParseState())
         		, offset, length);
-        currentParenLevel = -1; // STRONG HYPOTHESIS HERE (related to the Damager used: offset always corresponds to the start of a top level form
+        // STRONG HYPOTHESES HERE (related to the Damager used: offset always corresponds to the start of a top level form
+        {
+	        currentParenLevel = -1; 
+	        isCallableSymbol = false;
+        }
         currentOffset = offset;
         currentToken = null;
         //System.out.println("setRange(offset:" + offset + ", length:" + length + ")");
@@ -242,11 +280,11 @@ abstract public class ClojureTokenScanner implements ITokenScanner {
     private long toJFaceTokenDuration;
     private IToken toJFaceToken() {
     	long start = System.currentTimeMillis();
-		Object type = currentToken.get(tokenTypeKeyword);
+		Keyword type = (Keyword) currentToken.get(tokenTypeKeyword);
 		if (type.equals(symbolKeyword)) {
             type = guessEclipseTokenTypeForSymbol(text.substring(currentOffset, currentOffset + ((Long) currentToken.get(tokenLengthKeyword)).intValue()));
         }
-		IToken retToken = tokenTypeToJFaceToken.get(type);
+		IToken retToken = parserTokenKeywordToJFaceToken.get(type);
         if (retToken == null) {
             retToken = Token.UNDEFINED;
         }
@@ -261,14 +299,14 @@ abstract public class ClojureTokenScanner implements ITokenScanner {
 
 	private long guessEclipseTokenTypeForSymbolDuration;
 	private long getSymbolTypeDuration;
-    private Object guessEclipseTokenTypeForSymbol(String symbol) {
+    private Keyword guessEclipseTokenTypeForSymbol(String symbol) {
     	long start = System.currentTimeMillis();
-    	Object res;
+    	Keyword res;
     	if (symbolLiterals.contains(symbol)) {
     		res = Keyword.intern("literalSymbol");
     	} else {
     		long sttart = System.currentTimeMillis();
-    		res = context.getSymbolType(symbol);
+    		res = context.getSymbolType(symbol, isCallableSymbol);
     		getSymbolTypeDuration += System.currentTimeMillis() - sttart;
     	}
     	guessEclipseTokenTypeForSymbolDuration += System.currentTimeMillis() - start;
