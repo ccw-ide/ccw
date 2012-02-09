@@ -9,8 +9,8 @@ Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Laurent Petit
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Export-Package: paredit
-Require-Bundle: net.cgrand.parsley;bundle-version="0.0.11";visibility:=reexport,
- net.cgrand.regex;bundle-version="0.0.3";visibility:=reexport,
+Require-Bundle: net.cgrand.parsley;bundle-version="0.0.12";visibility:=reexport,
+ net.cgrand.regex;bundle-version="0.0.4";visibility:=reexport,
  ccw.clojure;bundle-version="1.3.0",
  ccw.org.clojure.core.incubator;bundle-version="0.1.0"
 
