@@ -30,7 +30,7 @@
 (def ^:dynamic *open-brackets* (conj #{"(" "[" "{"} nil)) ; we add nil to the list to also match beginning of text 
 (def ^:dynamic *close-brackets* (conj #{")" "]" "}"} nil)) ; we add nil to the list to also match end of text
 (def ^:dynamic *form-macro-chars* #{(str \#) (str \~) "~@" (str \') (str \`) (str \@) "^" "#'" "#_" "#!"})
-(def ^:dynamic *not-in-code* #{:string :string-body "\"\\" :comment :char :regex})
+(def ^:dynamic *not-in-code* #{:string :string-body "\"\\" :comment :char :regex :regex-body})
 
 (defmacro with-memoized [func-names & body]
   `(binding [~@(mapcat 
