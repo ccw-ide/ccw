@@ -79,7 +79,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 
         public void done() {
             super.done();
-            Job ackJob = new Job("Waiting for new REPL process to be ready…") {
+            Job ackJob = new Job("Waiting for new REPL process to be ready...") {
                 private IProgressMonitor monitor;
                 private CountDownLatch cancelOrAck = new CountDownLatch(1);
                 public void canceling () {
@@ -101,7 +101,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
                 
 				protected IStatus run(final IProgressMonitor monitor) {
 				    this.monitor = monitor;
-					monitor.beginTask("Waiting for new REPL process to be ready…", IProgressMonitor.UNKNOWN);
+					monitor.beginTask("Waiting for new REPL process to be ready...", IProgressMonitor.UNKNOWN);
 
                     final Number port = (Number)Connection.find("clojure.tools.nrepl.ack", "wait-for-ack").invoke(30000);
                     cancelOrAck.countDown();
