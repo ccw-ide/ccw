@@ -73,7 +73,7 @@ public class LoadFileAction extends Action {
 
         REPLView repl = REPLView.activeREPL.get();
         if (repl != null && !repl.isDisposed()) {
-            //EvaluateTextUtil.evaluateText(repl, ";; Loading file " + editorFile.getProjectRelativePath().toOSString(), true);
+            //EvaluateTextUtil.evaluateText(repl, ";; Loading file " + editorFile.getProjectRelativePath().toOSString(), false);
             try {
                 EvaluateTextUtil.evaluateText(repl, (String)loadFileCommand.invoke(editor.getDocument().get(), sourcePath, editorFile.getName()), false);
                 Actions.ShowActiveREPL.execute(false);

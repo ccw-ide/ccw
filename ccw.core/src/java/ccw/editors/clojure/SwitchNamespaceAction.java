@@ -32,7 +32,7 @@ public class SwitchNamespaceAction extends Action {
             // put error msg in footer instead
             CCWPlugin.logError("Could not switch ns to: " + ns);
         } else {
-            EvaluateTextUtil.evaluateText(repl, String.format(";; Switching to %s namespace", ns), true);
+            //EvaluateTextUtil.evaluateText(repl, String.format(";; Switching to %s namespace", ns), false);
             EvaluateTextUtil.evaluateText(repl, String.format("(clojure.core/in-ns '%s)", ns), false);
             Actions.ShowActiveREPL.execute(true);
         }
