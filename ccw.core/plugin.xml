@@ -410,6 +410,12 @@
       </command>
       <command
             categoryId="org.eclipse.debug.ui.category.run"
+            description="Forcibly interrupt the currently-running evaluation for this session."
+            id="ccw.view.repl.commands.interrupt"
+            name="Interrupt Evaluation">
+      </command>
+      <command
+            categoryId="org.eclipse.debug.ui.category.run"
             description="Clear the REPL&apos;s log"
             id="ccw.view.repl.commands.clearLog"
             name="Clear REPL log">
@@ -422,7 +428,7 @@
       </command>
       <command
             categoryId="org.eclipse.debug.ui.category.run"
-            defaultHandler="ccw.repl.Actions$ConnecToEclipseNREPL"
+            defaultHandler="ccw.repl.Actions$ConnectToEclipseNREPL"
             description="New REPL client for Eclipse embedded nrepl server (advanced usages)"
             id="ccw.ui.repl.connectToEclipseNREPL"
             name="New REPL client for Eclipse embedded nrepl server (advanced usages)">
@@ -684,6 +690,12 @@
             contextId="ccw.ui.context.repl"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M3+E">
+      </key>
+      <key
+            commandId="ccw.view.repl.commands.interrupt"
+            contextId="ccw.ui.context.repl"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+I">
       </key>
       <key
             commandId="ccw.view.repl.commands.printErrorDetail"
@@ -1066,34 +1078,11 @@
                icon="icons/repl/print_last_error.gif"
                style="push">
          </command>
-         <command
-               commandId="ccw.view.repl.commands.reconnect"
-               icon="icons/repl/reconnect.gif"
-               style="push"
-               tooltip="Reconnect to this REPL&apos;s host and port (first disconnecting if necessary)">
-         </command>
-         <command
-               commandId="ccw.view.repl.commands.clearLog"
-               disabledIcon="icons/repl/clear_disabled.gif"
-               icon="icons/repl/clear.gif"
-               style="push"
-               tooltip="Clear the REPL log">
-         </command>
-         <command
-               commandId="ccw.view.repl.commands.showConsole"
-               disabledIcon="icons/repl/showActive_disabled.png"
-               icon="icons/repl/showActive.png"
-               style="push"
-               tooltip="Show the console for the JVM process to which this REPL is connected">
-         </command>
-      </menuContribution>
-      <menuContribution
-            locationURI="menu:ccw.view.repl">
-         <command
-               commandId="ccw.view.repl.commands.printErrorDetail"
-               icon="icons/repl/print_last_error.gif"
-               style="push">
-         </command>
+        <command
+              commandId="ccw.view.repl.commands.interrupt"
+              icon="icons/repl/interrupt.gif"
+              style="push">
+        </command>
          <command
                commandId="ccw.view.repl.commands.reconnect"
                icon="icons/repl/reconnect.gif"
@@ -1385,14 +1374,24 @@
            class="ccw.repl.Actions$ReconnectHandler"
            commandId="ccw.view.repl.commands.reconnect">
         <enabledWhen>
-           <with
-                 variable="activeContexts">
+           <with variable="activeContexts">
               <iterate
                     ifEmpty="false"
                     operator="or">
                  <equals
                        value="ccw.ui.context.repl">
                  </equals>
+              </iterate>
+           </with>
+        </enabledWhen>
+     </handler>
+     <handler
+           class="ccw.repl.Actions$InterruptHandler"
+           commandId="ccw.view.repl.commands.interrupt">
+        <enabledWhen>
+           <with variable="activeContexts">
+              <iterate ifEmpty="false" operator="or">
+                 <equals value="ccw.ui.context.repl"/>
               </iterate>
            </with>
         </enabledWhen>

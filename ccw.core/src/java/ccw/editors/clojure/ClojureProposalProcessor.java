@@ -622,7 +622,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 				String replacementString = null;
 				Connection client = editor.getCorrespondingREPL().getToolingConnection();
 				if (client != null) {
-					Map result = (Map)client.send("(ccw.debug.serverrepl/imported-class \"" + ns + "\" \"" + method.getElementName() + "\")").values().get(0);
+					Map result = (Map)client.send("op", "eval", "code", "(ccw.debug.serverrepl/imported-class \"" + ns + "\" \"" + method.getElementName() + "\")").values().get(0);
 					if (result != null && result.get("response-type").equals(0) && result.get("response") != null) {
 						replacementString = (String) result.get("response");
 					}
@@ -737,7 +737,7 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
 		if (repl == null) return Collections.emptyList();
 		Connection connection = repl.getToolingConnection();
 		
-		Response response = connection.send("(ccw.debug.serverrepl/code-complete \"" + namespace + "\" \"" + prefix + "\" " + (findOnlyPublic ? "true" : "false") + ")");
+		Response response = connection.send("op", "eval", "code", "(ccw.debug.serverrepl/code-complete \"" + namespace + "\" \"" + prefix + "\" " + (findOnlyPublic ? "true" : "false") + ")");
 		return (List<List>) extractSingleValue(response, Collections.emptyList());
 	}
 	private List<List> dynamicNamespaceComplete(String prefix) {
@@ -749,15 +749,15 @@ public class ClojureProposalProcessor implements IContentAssistProcessor {
         if (repl == null) return Collections.emptyList();
 		Connection connection = repl.getToolingConnection();
 		
-		Response response = connection.send("(ccw.debug.serverrepl/code-complete-ns \"" + prefix + "\")");
+		Response response = connection.send("op", "eval", "code", "(ccw.debug.serverrepl/code-complete-ns \"" + prefix + "\")");
 		return (List<List>) extractSingleValue(response, Collections.emptyList());
 	}
 	private static Object extractSingleValue(Response response, Object defaultValueIfNil) {
-		Object r = response.values().get(0);
-		if (r == null) {
+	    List vs = response.values();
+		if (vs.isEmpty() || vs.get(0) == null) {
 			return defaultValueIfNil;
 		} else {
-			return r;
+			return vs.get(0);
 		}
 	}
 	public IContextInformation[] computeContextInformation(ITextViewer viewer, int offset) {

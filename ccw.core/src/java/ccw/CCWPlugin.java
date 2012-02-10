@@ -15,6 +15,8 @@ package ccw;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.List;
+import java.util.Map;
+import clojure.lang.Agent;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -83,8 +85,14 @@ public class CCWPlugin extends AbstractUIPlugin {
     public synchronized void startREPLServer() throws CoreException {
     	if (ackREPLServer == null) {
 	        try {
-	        	Var startServer = BundleUtils.requireAndGetVar(this.getBundle().getSymbolicName(), "clojure.tools.nrepl/start-server");
-	            ackREPLServer = (ServerSocket)((List)startServer.invoke()).get(0);
+	        	Var startServer = BundleUtils.requireAndGetVar(getBundle().getSymbolicName(), "clojure.tools.nrepl.server/start-server");
+	        	Object defaultHandler = BundleUtils.requireAndGetVar(
+	        	        getBundle().getSymbolicName(),
+	        	        "clojure.tools.nrepl.handlers/default-handler").invoke();
+	        	Object handler = BundleUtils.requireAndGetVar(
+	        	        getBundle().getSymbolicName(),
+	        	        "clojure.tools.nrepl.ack/handle-ack").invoke(defaultHandler);
+	            ackREPLServer = (ServerSocket)((Map)((Agent)startServer.invoke(Keyword.intern("handler"), handler)).deref()).get(Keyword.intern("ss"));
 	            CCWPlugin.log("Started ccw nREPL server: nrepl://localhost:" + ackREPLServer.getLocalPort());
 	        } catch (Exception e) {
 	            CCWPlugin.logError("Could not start plugin-hosted REPL server", e);

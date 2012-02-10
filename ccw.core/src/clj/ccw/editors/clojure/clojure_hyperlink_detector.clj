@@ -31,12 +31,12 @@
         declaring-ns (.findDeclaringNamespace editor)
         command (String/format "(ccw.debug.serverrepl/find-symbol \"%s\" \"%s\" \"%s\")"
                   (into-array Object [s declaring-ns n]))
-        {:keys [send]} (-?> editor .getCorrespondingREPL .getToolingConnection .conn)]
-    (if-not send
+        client (-?> editor .getCorrespondingREPL .getToolingConnection .client)]
+    (if-not client
       (do
         (.setStatusLineErrorMessage editor ClojureEditorMessages/You_need_a_running_repl)
         nil)
-      (let [[ [file line _ ns] ] (repl/response-values (send command))]
+      (let [[ [file line _ ns] ] (repl/response-values (client {:op eval :code command}))]
         (if (and file line ns)
           {"file" file
            "line" (Integer/valueOf line)

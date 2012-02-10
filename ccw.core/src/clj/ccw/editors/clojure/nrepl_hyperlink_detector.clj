@@ -1,7 +1,6 @@
 (ns ccw.editors.clojure.nrepl-hyperlink-detector
   (:require [clojure.zip :as z]
             [paredit.loc-utils :as lu]
-            [clojure.tools.nrepl :as repl]
             [ccw.editors.clojure.editor-support :as editor]
             [ccw.editors.clojure.hyperlink :as hyperlink])
   (:use [clojure.core.incubator :only [-?>]])
@@ -49,7 +48,7 @@
     (when-let [[offset length [_ host port]] (find-match-for-offset pattern line (- offset line-offset))]
       ;(println "nrepl hyperlink:" :offset (+ line-offset offset) :length length)
       [{:offset (+ line-offset offset) :length length
-        :open #(ccw.repl.REPLView/connect host (Integer/parseInt port))}])))
+        :open #(ccw.repl.REPLView/connect (format "nrepl://%s:%s") host port)}])))
 
 (defn factory [ _ ]
   (proxy [AbstractHyperlinkDetector]

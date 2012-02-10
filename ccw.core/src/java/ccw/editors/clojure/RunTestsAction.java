@@ -53,7 +53,7 @@ public class RunTestsAction extends Action {
             String lib = editor.findDeclaringNamespace();
             REPLView replView = editor.getCorrespondingREPL();
             Connection repl = replView.getToolingConnection();
-            Response compilationResult = repl.send(CompileLibAction.compileLibCommand(lib));
+            Response compilationResult = repl.send("op", "eval", "code", CompileLibAction.compileLibCommand(lib));
             refreshCompilationResults();
             if (new Long(0).equals(((Map)compilationResult.values().get(0)).get("response-type"))) {
                 runTests(lib, repl);
@@ -67,7 +67,7 @@ public class RunTestsAction extends Action {
     }
 
     private void runTests(String lib, Connection repl) throws Exception {
-        Response results = repl.send(runTestsCommand(lib));
+        Response results = repl.send("op", "eval", "code", runTestsCommand(lib));
         if (((String)results.combinedResponse().get(Keyword.intern("out"))).contains(":fail 0, :error 0")) {
             editor.setStatusLineErrorMessage(ClojureEditorMessages.Tests_passed);
             setReplBackgroundColor(colorRegistry.get(PASSED_TESTS_COLOR_KEY));

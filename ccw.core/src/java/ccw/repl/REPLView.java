@@ -1,6 +1,8 @@
 package ccw.repl;
 
+import java.io.IOException;
 import java.net.ConnectException;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
@@ -12,6 +14,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
@@ -61,6 +64,7 @@ import ccw.util.DisplayUtil;
 import clojure.lang.Atom;
 import clojure.lang.IFn;
 import clojure.lang.Keyword;
+import clojure.lang.PersistentHashMap;
 import clojure.lang.PersistentTreeMap;
 import clojure.lang.Symbol;
 import clojure.lang.Var;
@@ -124,7 +128,6 @@ public class REPLView extends ViewPart implements IAdaptable {
     private ILaunch launch;
     
     private String currentNamespace = "user";
-    private final Atom requests = new Atom(PersistentTreeMap.EMPTY);
     private IFn evalExpression;
     
     /* function implementing load previous/next command from history into input area */
@@ -188,12 +191,27 @@ public class REPLView extends ViewPart implements IAdaptable {
                 evalExpression.invoke(s, userInput);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            CCWPlugin.logError(e);
         }
     }
 
     public void printErrorDetail() {
-        evalExpression("(binding [*out* *err*] (if-not *e (println \"No prior exception bound to *e.\") (clojure.tools.nrepl/*print-error-detail* *e)))", false, false);
+        evalExpression("(binding [*out* *err*] (if-not *e (println \"No prior exception bound to *e.\") (clojure.repl/pst *e)))", false, false);
+    }
+
+    public void sendInterrupt() {
+        log.invoke(logPanel, ";; Interrupting...", inputExprLogType);
+        evalExpression.invoke(PersistentHashMap.create("op", "interrupt"), false);
+    }
+    
+    public void getStdIn () {
+        InputDialog dlg = new InputDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+                "Input requested", String.format("A REPL expression sent to %s requires a line of *in* input:",
+                        interactive.url), "", null);
+        // no conditional here; what else would we do if they canceled the dialog?
+        // Just a recipe for *requiring* an interrupt...?
+        dlg.open();
+        evalExpression.invoke(PersistentHashMap.create("op", "stdin", "stdin", dlg.getValue() + "\n"), false);
     }
     
     public void closeView () throws Exception {
@@ -210,14 +228,14 @@ public class REPLView extends ViewPart implements IAdaptable {
     public void reconnect () throws Exception {
         closeConnections();
         logPanel.append(";; Reconnecting...\n");
-        configure(interactive.host, interactive.port);
+        configure(interactive.url);
     }
     
     public void setCurrentNamespace (String ns) {
         // TODO waaaay better to put a dropdown namespace chooser in the view's toolbar,
         // and this would just change its selection
     	currentNamespace = ns;
-        setPartName(String.format("REPL @ %s:%s (%s)", interactive.host, interactive.port, currentNamespace));
+        setPartName(String.format("REPL @ %s (%s)", interactive.url, currentNamespace));
     }
     
     public String getCurrentNamespace () {
@@ -225,22 +243,23 @@ public class REPLView extends ViewPart implements IAdaptable {
     }
     
     private void prepareView () throws Exception {
-        evalExpression = (IFn)configureREPLView.invoke(this, logPanel, interactive.conn, requests);
+        evalExpression = (IFn)configureREPLView.invoke(this, logPanel, interactive.client);
     }
     
     @SuppressWarnings("unchecked")
-    public boolean configure (String host, int port) throws Exception {
+    public boolean configure (String url) throws Exception {
         try {
-            interactive = new Connection(host, port);
-            toolConnection = new Connection(host, port);
+            // TODO — don't need multiple connections anymore, just separate sessions will do.
+            interactive = new Connection(url);
+            toolConnection = new Connection(url);
             setCurrentNamespace(currentNamespace);
             prepareView();
-            logPanel.append(";; Clojure " + toolConnection.send("(clojure-version)").values().get(0) + "\n");
+            logPanel.append(";; Clojure " + toolConnection.send("op", "eval", "code", "(clojure-version)").values().get(0) + "\n");
             return true;
         } catch (ConnectException e) {
             closeView();
             MessageDialog.openInformation(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
-                    "Could not connect", String.format("Could not connect to REPL @ %s:%s", host, port));
+                    "Could not connect", String.format("Could not connect to REPL @ %s", url));
             return false;
         }
     }
@@ -259,22 +278,24 @@ public class REPLView extends ViewPart implements IAdaptable {
                         "Invalid connection info",
                         "You must provide a useful hostname and port number to connect to a REPL.");
             } else {
-                repl = connect(host, port);
+                repl = connect(String.format("nrepl://%s:%s", host, port));
             }
         }
         
         return repl;
     }
     
-    public static REPLView connect (String host, int port) throws Exception {
-        return connect(host, port, null, null);
+    public static REPLView connect (String url) throws Exception {
+        return connect(url, null, null);
     }
     
-    public static REPLView connect (String host, int port, IConsole console, ILaunch launch) throws Exception {
-        REPLView repl = (REPLView)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(VIEW_ID, host + "@" + port, IWorkbenchPage.VIEW_ACTIVATE);
+    public static REPLView connect (String url, IConsole console, ILaunch launch) throws Exception {
+        REPLView repl = (REPLView)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(VIEW_ID,
+                UUID.randomUUID().toString(),
+                IWorkbenchPage.VIEW_ACTIVATE);
         repl.console = console;
         repl.launch = launch;
-        return repl.configure(host, port) ? repl : null;
+        return repl.configure(url) ? repl : null;
     }
     
     public Connection getConnection () {
@@ -571,11 +592,11 @@ public class REPLView extends ViewPart implements IAdaptable {
         super.dispose();
         fSourceViewerDecorationSupport = (SourceViewerDecorationSupport) ClojureUtils.invoke(EDITOR_SUPPORT_NS, "disposeSourceViewerDecorationSupport",
         		fSourceViewerDecorationSupport);
-        if (interactive != null) {
-        	interactive.close();
-        }
-        if (toolConnection != null) {
-        	toolConnection.close();
+        try {
+            if (interactive != null) interactive.close();
+            if (toolConnection != null) toolConnection.close();
+        } catch (IOException e) {
+            CCWPlugin.logError(e);
         }
         JFaceResources.getFontRegistry().removeListener(fontChangeListener);
     }
@@ -608,4 +629,5 @@ public class REPLView extends ViewPart implements IAdaptable {
     		return super.getAdapter(adapter);
     	}
     }
+    
 }
