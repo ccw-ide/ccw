@@ -30,6 +30,7 @@ import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -451,8 +452,25 @@ public class REPLView extends ViewPart implements IAdaptable {
     private interface MessageProvider {
     	String getMessageText();
     }
+    
     private void installMessageDisplayer(final StyledText textViewer, final MessageProvider hintProvider) {
 		textViewer.addListener(SWT.Paint, new Listener() {
+		    private int getScrollbarAdjustment () {
+		        if (!Platform.getOS().equals(Platform.OS_MACOSX)) return 0;
+		        
+		        // You cannot reliably determine if a scrollbar is visible or not
+                //   (http://stackoverflow.com/questions/5674207)
+                // So, we need to determine if the vertical scrollbar is "needed" based
+                // on the contents in the viewer
+                Rectangle clientArea = textViewer.getClientArea();
+                int textLength = textViewer.getText().length();
+                if (textLength == 0 || textViewer.getTextBounds(0, Math.max(0, textLength - 1)).height < clientArea.height) {
+                    return textViewer.getVerticalBar().getSize().x;
+                } else {
+                    return 0;
+                }
+		    }
+		    
 			public void handleEvent(Event event) {
 				String message = hintProvider.getMessageText();
 				if (message == null) 
@@ -463,9 +481,16 @@ public class REPLView extends ViewPart implements IAdaptable {
 
 				Point topRightPoint = topRightPoint(textViewer.getClientArea());
 				int sWidth = textWidthPixels(message, event);
-				int x = Math.max(topRightPoint.x - sWidth, 0);
+				int x = Math.max(topRightPoint.x - sWidth + getScrollbarAdjustment(), 0);
 				int y = topRightPoint.y;
 				
+				// the text widget doesn't know we're painting the hint, so it won't necessarily
+				// clear old presentations of it; this leads to streaking on Windows if we don't
+				// clear the foreground explicitly
+				Color fg = event.gc.getForeground();
+				event.gc.setForeground(event.gc.getBackground());
+				event.gc.drawRectangle(textViewer.getClientArea());
+				event.gc.setForeground(fg);
 				event.gc.setAlpha(200);
 				event.gc.drawText(message, x, y, true);
 			}
