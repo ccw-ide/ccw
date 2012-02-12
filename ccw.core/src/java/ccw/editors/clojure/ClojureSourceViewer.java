@@ -638,12 +638,12 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 			
 		StatusLineContributionItem field = this.statusLineHandler.getEditingModeStatusContributionItem();
 		if (field != null) {
-			String text = "Edit mode: " + (isStructuralEditingEnabled() ? "strict/paredit" : "unrestricted");
+			String text = (isStructuralEditingEnabled() ? "strict/paredit" : "unrestricted") + " edit mode";
 			field.setText(text == null ? fErrorLabel : text);
 			field.setToolTipText(
 					(isStructuralEditingEnabled() 
-							? "strict/paredit: editor does its best to prevent you from breaking the structure of the code (requires you to know shortcut commands well). Click to switch to unrestricted Mode."
-						    : "unrestricted: helps you with edition, but does not get in your way. Click to switch to strict/paredit Mode."));
+							? "strict/paredit edit mode:\neditor does its best to prevent you from breaking the structure of the code (requires you to know shortcut commands well).\nClick to switch to unrestricted edit mode."
+						    : "unrestricted edit mode:\nhelps you with edition, but does not get in your way.\nClick to switch to strict/paredit edit mode."));
 		}
 	}
 
