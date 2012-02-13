@@ -58,6 +58,7 @@ import clojure.lang.Keyword;
 import clojure.lang.LineNumberingPushbackReader;
 import clojure.lang.LispReader;
 import clojure.lang.Obj;
+import clojure.lang.RT;
 import clojure.lang.LispReader.ReaderException;
 import clojure.lang.Symbol;
 
@@ -70,7 +71,7 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 			// TODO: smarter behavior when this is not a symbol
 			String symbol = NOT_AVAILABLE;
 			if (list.size() > 1) {
-				symbol = safeToString(list.get(1));
+				symbol = safeToString(RT.second(list));
 			}
 			return symbol;
 		}
@@ -79,7 +80,7 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 			// TODO: "smarter" behavior in general
 			String kind = NOT_AVAILABLE;
 			if (list.size() > 0) {
-				kind = safeToString(list.get(0));
+				kind = safeToString(RT.first(list));
 			}
 			return kind;
 		}
@@ -246,8 +247,8 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 	
 	private static boolean isPrivate (List form) {
 	    if (form.size() < 2) return false;
-	    Symbol def = symbol(form.get(0));
-	    Symbol name = symbol(form.get(1));
+	    Symbol def = symbol(RT.first(form));
+	    Symbol name = symbol(RT.second(form));
 	    if (def == null || name == null) return false;
 	    return def.getName().matches("(defn-|defvar-)") ||
 	        (name.meta() != null && name.meta().valAt(Keyword.intern("private"), false).equals(Boolean.TRUE));
@@ -332,8 +333,8 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 	        List<List> sorted = new ArrayList(forms);
             Collections.sort(sorted, new Comparator<List> () {
                 public int compare(List o1, List o2) {
-                    Symbol s1 = symbol(o1.get(0)),
-                    s2 = symbol(o2.get(0));
+                    Symbol s1 = symbol(RT.first(o1)),
+                    s2 = symbol(RT.first(o2));
                     if (s1 == null) return 1;
                     if (s2 == null) return -1;
                     if (s1.getName().equals("ns")) {
@@ -344,8 +345,8 @@ public class ClojureOutlinePage extends ContentOutlinePage {
                     if (isPrivate(o1) != isPrivate(o2)) {
                         return isPrivate(o1) ? -1 : 1;
                     }
-                    s1 = symbol(o1.get(1));
-                    s2 = symbol(o2.get(1));
+                    s1 = symbol(RT.second(o1));
+                    s2 = symbol(RT.second(o2));
                     if (s1 == null) return 1;
                     if (s2 == null) return -1;
                     return s1.getName().compareToIgnoreCase(s2.getName());
