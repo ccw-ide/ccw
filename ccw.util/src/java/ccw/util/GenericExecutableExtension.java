@@ -8,12 +8,13 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IExecutableExtensionFactory;
 
-import ccw.CCWPlugin;
+import ccw.util.internal.Activator;
 import clojure.lang.Var;
 import clojure.osgi.ClojureOSGi;
 import clojure.osgi.RunnableWithException;
 
 public class GenericExecutableExtension implements IExecutableExtensionFactory, IExecutableExtension {
+
 	private String bundleName;
 	private Var factory;
 	private Map<String, String> factoryParams;
@@ -28,7 +29,7 @@ public class GenericExecutableExtension implements IExecutableExtensionFactory, 
 		} catch (CoreException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new CoreException(CCWPlugin.createErrorStatus(
+			throw new CoreException(Activator.createErrorStatus(
 					this.getClass().getName() + " was unable"
 						+ " to instanciate Clojure factory "
 						+ factory.ns.name.getName() + "/" 
@@ -42,6 +43,7 @@ public class GenericExecutableExtension implements IExecutableExtensionFactory, 
 			String propertyName, Object data) throws CoreException {
 		assert data instanceof String;
 		bundleName = config.getDeclaringExtension().getContributor().getName();
+		System.out.println("GenericExecutableExtension instance, bundleName=" + bundleName);
 		if (data instanceof String) {
 			String name = (String) data;
 			initFactory(name);
@@ -53,12 +55,12 @@ public class GenericExecutableExtension implements IExecutableExtensionFactory, 
 				initFactory(name);
 				this.factoryParams = Collections.unmodifiableMap(factoryParams);
 			} else {
-				throw new CoreException(CCWPlugin.createErrorStatus(
+				throw new CoreException(Activator.createErrorStatus(
 						  this.getClass().getName() + " was unable to initialize correctly:"
 						  + " mandatory param \"factory\" is missing."));
 			}
 		} else {
-			throw new CoreException(CCWPlugin.createErrorStatus(
+			throw new CoreException(Activator.createErrorStatus(
 			  this.getClass().getName() + " was unable to initialize correctly:"
 			  + " the parameter data passed to it should be of type String "
 			  + " or Map<String, String> only."));
