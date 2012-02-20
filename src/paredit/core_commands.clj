@@ -314,11 +314,10 @@
                      "\"\\\\\" \"b|ar\"" "\"\\\\\" \"b\\\"|ar\"",
                    "\"\\\\\\\"|a\"" "\"\\\\\\\"\\\"|a\"",
                    "\"fo|o\"" "\"fo\\\"|o\"",
-                   ;"#\"fo|o\"" "#\"fo\\\"|o\"",
-                   ;;;"#\"foo\"" "#\"foo\""
+                   "#\"fo|o\"" "#\"fo\"|o\"",
 
                    "#|" "#\"|\"" ; specific to clojure regexs
-
+                   "foo |bar| baz" "foo \"|bar|\" baz"
                    }]
     ]
     ["Deleting & Killing"
@@ -401,7 +400,7 @@
     
     ["Depth-Changing Commands"
      ["M-("       :paredit-wrap-round
-      {"(foo |bar baz)" "(foo (|bar) baz)",
+      {; not used yet "(foo |bar baz)" "(foo (|bar) baz)",
        ";hel|lo" ";hel(|lo",
        "a |\"hi\"" "a (|\"hi\")",
        "a |\"hi\"|" "a (|\"hi\"|)",
@@ -409,19 +408,22 @@
        "foo |bar baz| foo" "foo (|bar baz|) foo",
        "foo (|bar| baz) foo" "foo ((|bar|) baz) foo"
        "foo (|bar baz|) foo" "foo ((|bar baz|)) foo"
-       ;; not-yet "foo |(bar| baz) foo" "foo |(bar| baz) foo"
-       ;; not-yet "foo (bar| baz)| foo" "foo (bar| baz)| foo"
+       "foo |(bar| baz) foo" "foo |(bar| baz) foo"
+       "foo (bar| baz)| foo" "foo (bar| baz)| foo"
        "foo |(bar baz)| foo" "foo (|(bar baz)|) foo"
        "foo |(bar\n;comment\n baz)| foo" "foo (|(bar\n;comment\n baz)|) foo"
-       ;; not-yet "foo |bar ba|z foo" "foo |bar ba|z foo",
+       "foo |bar ba|z foo" "foo |bar ba|z foo",
        "foo \"|bar ba|z\" foo" "foo \"(|z\" foo",
-       ;; not-yet "foo |\"bar ba|z\" foo" "foo |\"bar ba|z\" foo",
+       "foo |\"bar ba|z\" foo" "foo |\"bar ba|z\" foo",
        "foo |bar|" "foo (|bar|)"
        "foo |(bar)|" "foo (|(bar)|)"
        "bar |`foo| baz" "bar (|`foo|) baz"
        "foo |bar| baz\n" "foo (|bar|) baz\n"
        "foo |bar baz|\n" "foo (|bar baz|)\n"
        "foo |bar baz\n|" "foo (|bar baz\n|)"
+       "|a `b|" "(|a `b|)"
+       "|a 'b|" "(|a 'b|)"
+       
        }]
      [""       :paredit-wrap-quote
       {"(foo |bar baz)" "(foo '|bar baz)",

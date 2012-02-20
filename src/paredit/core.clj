@@ -1,14 +1,6 @@
 ; todo 
 ; done 1. emit text deltas, not plain text replacement (or IDEs will not like it)
 ; done 2. have a story for invalid parsetrees : just do nothing : currently = paredit deactivated if error from start-of-file to area of paredit's work
-; 3. use restartable version of the parser
-; 4. make paredit optional in ccw
-; 5. prepare a new release of ccw
-; 6. write with clojure.zip functions the close-* stuff
-; 7. write the string related stuff
-; ... ?
-; . add support for more clojure-related source code ( #{}, #""... )
-; ... and all the other paredit stuff ...
 
 (ns paredit.core
   (:use [paredit.parser :exclude [pts]])
@@ -199,11 +191,14 @@
   (with-important-memoized 
     (let [offset-loc (-> parse-tree parsed-root-loc (loc-for-offset offset))] 
       (cond
-        ;(parse-stopped-in-code? parse-tree)
         (in-code? offset-loc)
-          (insert-balanced [\" \"] t ; todo voir si on utilise open balanced ? (mais quid echappement?)
-            (conj (into *real-spaces* *open-brackets*) "#")
-            (into *extended-spaces* *close-brackets*))
+          (if (zero? length)
+            (insert-balanced 
+              [\" \"] 
+              t 
+              (conj (into *real-spaces* *open-brackets*) "#")
+              (into *extended-spaces* *close-brackets*))
+            (wrap-with-balanced parse-tree [\" \"] t))
         (not (#{:string, :string-body} (loc-tag offset-loc)))
           (-> t (t/insert (str \")))
         (and (= "\\" (t/previous-char-str t)) (not= "\\" (t/previous-char-str t 2)))
@@ -494,29 +489,25 @@
 
 (defn wrap-with-balanced
   [parsed [^String o c] {:keys [^String text offset length] :as t}]
-  (let [bypass #(-> t 
+  (let [block (constantly t)
+        bypass #(-> t 
                   (update-in [:text] t/str-replace offset length o)
                   (update-in [:offset] + (.length o))
                   (assoc-in [:length] 0)
                   (update-in [:modifs] conj {:text o :offset offset :length length}))]
     (if-let [rloc (-?> parsed (parsed-root-loc true))]
-      (let [left-leave (some (fn [l] (when (not= :whitespace (loc-tag l)) l)) (next-leaves (leave-for-offset rloc offset)))
-            right-leave (leave-for-offset rloc (+ offset (dec length))) ; may be a whitespace
-            right-leave (if (or (nil? right-leave) (<= (start-offset right-leave) (start-offset left-leave))) left-leave right-leave)]
-        (if (or
-              (not (in-code? (loc-containing-offset rloc offset)))
-              (not (in-code? (loc-containing-offset rloc (+ offset length))))
-              (> offset (start-offset left-leave))
-              (and (pos? length) (or (< (+ offset length) (end-offset right-leave))
-                                     (and (not= (z/up (loc-parse-node left-leave)) (z/up (loc-parse-node right-leave)))
-                                          (not (some #{(z/node (loc-parse-node left-leave))} (z/path right-leave)))))))
-          (bypass)
-          (let [text-to-wrap (.substring text (start-offset left-leave) (or (-?> right-leave z/up end-offset) (.length text))) 
+      (let [[left-leave right-leave] (normalized-selection rloc offset length)]
+        (if-not (sel-match-normalized? offset length [left-leave right-leave]) 
+          (if (or (in-code? (loc-containing-offset rloc offset))
+                  (in-code? (loc-containing-offset rloc (+ offset length))))
+            (block)
+            (bypass))
+          (let [text-to-wrap (.substring text (start-offset left-leave) (or (-?> right-leave end-offset) (.length text))) 
                 new-text (str o text-to-wrap c)
                 t (update-in t [:text] t/str-replace (start-offset left-leave) (.length text-to-wrap) new-text)
                 t (assoc-in t [:offset] (inc (start-offset left-leave)))]
             (update-in t [:modifs] conj {:text new-text :offset (start-offset left-leave) :length (.length text-to-wrap)})))) 
-      (bypass))))
+      (block))))
 
 (defmethod paredit
   :paredit-wrap-quote
