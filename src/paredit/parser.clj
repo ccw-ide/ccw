@@ -294,24 +294,25 @@
              }
     :list [open-list :expr* ")"]
     :chimera 
-             #{ [open-list :expr* eof] 
-                [open-vector :expr* eof]
-                [open-map :expr* eof]
-                [open-fn :expr* eof]
-                [open-set :expr* eof]
-                (p/unspaced open-string #"(?:\\.|[^\\\"])++(?!\")" :? eof)
-                (p/unspaced open-regex #"(?:\\.|[^\\\"])++(?!\")" :? eof)
-                [open-quote eof]
-                [open-meta :expr :? eof]
-                [open-deprecated-meta :expr :? eof]
-                [open-deref eof]
-                [open-syntax-quote eof]
-                [open-var eof]
-                [open-discard eof]
-                [open-unquote-splicing eof]
-                [open-unquote eof]
-                (p/unspaced open-char eof)
-                }
+             #{ 
+               [open-list :expr* eof] 
+               [open-vector :expr* eof]
+               [open-map :expr* eof]
+               [open-fn :expr* eof]
+               [open-set :expr* eof]
+               ;(p/unspaced open-string #"(?:\\.|[^\\\"])++(?!\")" :? eof)
+               ;(p/unspaced open-regex #"(?:\\.|[^\\\"])++(?!\")" :? eof)
+               [open-quote eof]
+               [open-meta :expr :? eof]
+               [open-deprecated-meta :expr :? eof]
+               [open-deref eof]
+               [open-syntax-quote eof]
+               [open-var eof]
+               [open-discard eof]
+               [open-unquote-splicing eof]
+               [open-unquote eof]
+               (p/unspaced open-char eof)
+               }
     :vector [open-vector :expr* "]"]
     :map [open-map :expr* "}"]
     :set [open-set :expr* "}"]
