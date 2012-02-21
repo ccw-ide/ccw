@@ -199,7 +199,8 @@
               (conj (into *real-spaces* *open-brackets*) "#")
               (into *extended-spaces* *close-brackets*))
             (wrap-with-balanced parse-tree [\" \"] t))
-        (not (#{:string, :string-body} (loc-tag offset-loc)))
+        (not (#{:string, :string-body
+                :regex :regex-body} (loc-tag offset-loc)))
           (-> t (t/insert (str \")))
         (and (= "\\" (t/previous-char-str t)) (not= "\\" (t/previous-char-str t 2)))
           (-> t (t/insert (str \")))
