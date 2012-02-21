@@ -53,8 +53,7 @@
 (defn log
   [^StyledText log ^String s type]
   (ui-sync
-    (let [s (.replaceAll s "\\s+\\Z" "")
-          charcnt (.getCharCount log)
+    (let [charcnt (.getCharCount log)
           [log-style line-background-color-name] (get log-styles type [default-log-style nil])
           linecnt (.getLineCount log)]
       (.append log s)
