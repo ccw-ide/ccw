@@ -1,0 +1,34 @@
+<mockup version="1.0" skin="sketch" measuredW="705" measuredH="713" mockupW="657" mockupH="670">
+  <controls>
+    <control controlID="9" controlTypeID="com.balsamiq.mockups::Menu" x="48" y="43" w="301" h="-1" measuredW="150" measuredH="628" zOrder="0" locked="false" isInGroup="-1">
+      <controlProperties>
+        <selectedIndex>31</selectedIndex>
+        <text>New%20%3E%0AGo%20Into%0A%3D%0AOpen%20in%20New%20Window%0AOpen%20Type%20Hierarchy%2C%20F4%0AShow%20In%2C%20ALT+CMD+W%20%3E%0A%3D%0ACopy%2C%20CMD+C%0ACopy%20Qualified%20Name%0APaste%2C%20CMD+V%0ADelete%2C%20DEL%0A%3D%0A-Remove%20from%20Context-%0ABuild%20Path%20%3E%0ASource%20%3E%0ARefactor%20%3E%0A%3D%0AImport...%0AExport...%0A%3D%0ARefresh%2C%20F5%0AClose%20Project%0AClose%20Unrelated%20Projects%0AAssign%20Working%20Sets...%0ARun%20As%20%3E%0ADebug%20As%20%3E%0AValidate%0AEnable%20/%20disable%20clojure%20language%20support%0ATeam%20%3E%0ACompare%20With%20%3E%0ARestore%20from%20Local%20History...%0AConfigure%20%3E%0A%3D%0AProperties%2C%20CMD+I</text>
+      </controlProperties>
+    </control>
+    <control controlID="11" controlTypeID="com.balsamiq.mockups::Menu" x="349" y="619" w="202" h="-1" measuredW="150" measuredH="94" zOrder="1" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>Convert%20to%20Plug-in%20Projects...%0AConvert%20to%20Maven%20Project%0AConvert%20to%20Leiningen%20Project%0AConvert%20to%20Clojure%20Project</text>
+      </controlProperties>
+    </control>
+    <control controlID="12" controlTypeID="com.balsamiq.mockups::StickyNote" x="364" y="428" w="341" h="124" measuredW="109" measuredH="123" zOrder="2" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>-%20Remove%20Enable%20/%20disable%20clojure%20language%20support%0A-%20Create%20an%20Entry%20for%20Cloure%20in%20Configure%20menu%0A-%20Create%20an%20Entry%20for%20Leiningen%20in%20Configure%20menu</text>
+      </controlProperties>
+    </control>
+    <control controlID="13" controlTypeID="com.balsamiq.mockups::Arrow" x="212" y="465" w="193" h="78" measuredW="150" measuredH="100" zOrder="3" locked="false" isInGroup="-1">
+      <controlProperties>
+        <direction>bottom</direction>
+        <leftArrow>true</leftArrow>
+        <rightArrow>false</rightArrow>
+        <text/>
+      </controlProperties>
+    </control>
+    <control controlID="14" controlTypeID="com.balsamiq.mockups::Arrow" x="447" y="525" w="27" h="100" measuredW="150" measuredH="100" zOrder="4" locked="false" isInGroup="-1">
+      <controlProperties>
+        <curvature>0</curvature>
+        <leftArrow>false</leftArrow>
+      </controlProperties>
+    </control>
+  </controls>
+</mockup>
