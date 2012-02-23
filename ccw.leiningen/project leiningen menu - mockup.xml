@@ -1,0 +1,28 @@
+<mockup version="1.0" skin="sketch" measuredW="705" measuredH="671" mockupW="657" mockupH="628">
+  <controls>
+    <control controlID="0" controlTypeID="com.balsamiq.mockups::Menu" x="48" y="43" w="301" h="-1" measuredW="150" measuredH="628" zOrder="0" locked="false" isInGroup="-1">
+      <controlProperties>
+        <selectedIndex>30</selectedIndex>
+        <text>New%20%3E%0AGo%20Into%0A%3D%0AOpen%20in%20New%20Window%0AOpen%20Type%20Hierarchy%2C%20F4%0AShow%20In%2C%20ALT+CMD+W%20%3E%0A%3D%0ACopy%2C%20CMD+C%0ACopy%20Qualified%20Name%0APaste%2C%20CMD+V%0ADelete%2C%20DEL%0A%3D%0A-Remove%20from%20Context-%0ABuild%20Path%20%3E%0ASource%20%3E%0ARefactor%20%3E%0A%3D%0AImport...%0AExport...%0A%3D%0ARefresh%2C%20F5%0AClose%20Project%0AClose%20Unrelated%20Projects%0AAssign%20Working%20Sets...%0ARun%20As%20%3E%0ADebug%20As%20%3E%0AValidate%0ATeam%20%3E%0ACompare%20With%20%3E%0ARestore%20from%20Local%20History...%0ALeiningen%20%3E%0AConfigure%20%3E%0A%3D%0AProperties%2C%20CMD+I</text>
+      </controlProperties>
+    </control>
+    <control controlID="1" controlTypeID="com.balsamiq.mockups::Menu" x="349" y="525" w="226" h="-1" measuredW="150" measuredH="141" zOrder="1" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>Download%20JavaDoc%0ADownload%20Sources%0AUpdate%20Dependencies...%0AReset%20Project%20from%20project.clj%0A%3D%0ADisable%20Workspace%20Resolution%0ADisable%20Leiningen%20Nature</text>
+      </controlProperties>
+    </control>
+    <control controlID="2" controlTypeID="com.balsamiq.mockups::StickyNote" x="364" y="244" w="341" h="185" measuredW="109" measuredH="123" zOrder="2" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>Even%20when%20the%20whole%20Leiningen%20Support%20is%20finished%20and%20polished%2C%20should%20we%20provide%20as%20many%20options%20in%20the%20contextual%20menu%3F%0A%20%0AIsn%27t%20it%20too%20scary%20for%20a%20non%20expert%20user%3F%0A%20%0AShouldn%27t%20most%20these%20options%20just%20be%20overridable%20once%20and%20for%20all%20in%20the%20General%20Preferences%3F</text>
+      </controlProperties>
+    </control>
+    <control controlID="3" controlTypeID="com.balsamiq.mockups::Arrow" x="478" y="429" w="41" h="96" measuredW="150" measuredH="100" zOrder="3" locked="false" isInGroup="-1">
+      <controlProperties>
+        <curvature>0</curvature>
+        <direction>bottom</direction>
+        <leftArrow>true</leftArrow>
+        <rightArrow>false</rightArrow>
+      </controlProperties>
+    </control>
+  </controls>
+</mockup>

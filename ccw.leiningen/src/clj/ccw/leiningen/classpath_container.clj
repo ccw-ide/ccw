@@ -149,27 +149,27 @@
          []
     (initialize [container-path, project]
       (println (str "(LeiningenClasspathContainerInitializer.initialize "
-                    container-path ", " project ")"))
+                    container-path ", " (.getName project) ")"))
       (create-and-register container-path project))
     
     (canUpdateClasspathContainer [container-path, project]
       (println (str "(LeiningenClasspathContainerInitializer.canUpdateClasspathContainer "
-                    container-path ", " project ")"))
+                    container-path ", " (.getName project) ")"))
       false)
     
     (requestClasspathContainerUpdate [container-path, project, container-suggestion]
       (println (str "(LeiningenClasspathContainerInitializer.requestClasspathContainerUpdate "
-                    container-path ", " project ", " container-suggestion ")"))
+                    container-path ", " (.getName project) ", " container-suggestion ")"))
       (create-and-register container-path project))
     
     (getDescription [container-path, project]
       (println (str "(LeiningenClasspathContainerInitializer.getDescription "
-                    container-path ", " project ")"))
+                    container-path ", " (.getName project) ")"))
       (proxy-super getDescription container-path, project))
     
     (getFailureContainer [container-path, project]
       (println (str "(LeiningenClasspathContainerInitializer.getFailureContainer "
-                    container-path ", " project ")"))
+                    container-path ", " (.getName project) ")"))
       nil)))
 
 (println "classpath-container namespace loaded")
