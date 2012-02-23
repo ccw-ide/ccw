@@ -62,7 +62,7 @@ import clojure.tools.nrepl.Connection;
 public class CCWPlugin extends AbstractUIPlugin {
 
     /** The plug-in ID */
-    public static final String PLUGIN_ID = "ccw";
+    public static final String PLUGIN_ID = "ccw.core";
 
     /** 
      * @param swtKey a key from SWT.COLOR_xxx
