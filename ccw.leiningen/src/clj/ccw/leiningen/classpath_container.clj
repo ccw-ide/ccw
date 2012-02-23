@@ -48,10 +48,53 @@
 (defprotocol ClasspathContainerValidation
   (isValid [this]))
 
-(defn leiningen-classpath-container 
+;; TODO remove or adapt
+(defn folder-content-classpath-container 
   [path, project]
   (println "leiningen-classpath-container called " path project)
   (let [exts (lower-case-exts-set (.lastSegment path))
+        ; extract the directory string from the PATH and create the directory relative 
+        ; to the project
+        path (-> path (.removeLastSegments 1) (.removeFirstSegments 1))
+        root-proj (-> project .getProject .getLocation .makeAbsolute .toFile)
+        project-dir? (and 
+                       (= (.segmentCount path) 1)
+                       (= (.segment path 0) ROOT-DIR))
+        dir (if project-dir? root-proj (File. root-proj (.toString path)))
+        path (if project-dir? (.removeFirstSegments path 1) path)
+        dir-filter (dir-filter exts)
+        desc (str "/" path " Libraries")]
+    (reify 
+      IClasspathContainer
+      (getClasspathEntries [this]
+        (println "(.getClasspathEntries)" desc)
+        (let [libs (.listFiles dir dir-filter)
+              entry-list (map library-entry libs)]
+          (into-array IClasspathEntry entry-list)))
+      (getDescription [this]
+        (println ".getDescription " desc)
+        desc)
+      (getKind [this] 
+        (println ".getKind " desc)
+        (IClasspathContainer/K_APPLICATION))
+      (getPath [this]
+        (println ".getPath " desc)
+        path)
+      
+      ClasspathContainerValidation
+      (isValid [this]
+        (boolean
+          (and (.exists dir)
+               (.isDirectory dir)))))))
+
+(defn leiningen-classpath-container 
+  [path, project]
+  (println "leiningen-classpath-container called " path project)
+  (let [lein-proj (p/read (-> project .getProject (.getFile "project.clj") .getLocation .makeAbsolute .toFile))
+        
+        
+        
+        exts (lower-case-exts-set (.lastSegment path))
         ; extract the directory string from the PATH and create the directory relative 
         ; to the project
         path (-> path (.removeLastSegments 1) (.removeFirstSegments 1))
