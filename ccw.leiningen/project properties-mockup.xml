@@ -1,0 +1,82 @@
+<mockup version="1.0" skin="sketch" measuredW="770" measuredH="564" mockupW="750" mockupH="547">
+  <controls>
+    <control controlID="0" controlTypeID="__group__" x="20" y="17" w="750" h="547" measuredW="750" measuredH="547" zOrder="0" locked="false" isInGroup="-1">
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="com.balsamiq.mockups::TitleWindow" x="0" y="0" w="750" h="547" measuredW="450" measuredH="400" zOrder="0" locked="false" isInGroup="0">
+          <controlProperties>
+            <bottomheight>50</bottomheight>
+            <close>true</close>
+            <maximizeRestore>true</maximizeRestore>
+            <minimize>true</minimize>
+            <text/>
+            <topheight>29</topheight>
+          </controlProperties>
+        </control>
+        <control controlID="1" controlTypeID="com.balsamiq.mockups::Button" x="530" y="511" w="95" h="27" measuredW="64" measuredH="27" zOrder="1" locked="false" isInGroup="0">
+          <controlProperties>
+            <text>Cancel</text>
+          </controlProperties>
+        </control>
+        <control controlID="2" controlTypeID="com.balsamiq.mockups::Button" x="633" y="512" w="101" h="27" measuredW="43" measuredH="27" zOrder="2" locked="false" isInGroup="0">
+          <controlProperties>
+            <text>OK</text>
+          </controlProperties>
+        </control>
+        <control controlID="3" controlTypeID="com.balsamiq.mockups::VRule" x="165" y="27" w="-1" h="469" measuredW="5" measuredH="100" zOrder="3" locked="false" isInGroup="0"/>
+        <control controlID="4" controlTypeID="com.balsamiq.mockups::Tree" x="9" y="75" w="147" h="372" measuredW="300" measuredH="351" zOrder="4" locked="false" isInGroup="0">
+          <controlProperties>
+            <borderStyle>none</borderStyle>
+            <selectedIndex>7</selectedIndex>
+            <text>%3E%20Resource%0A_%20Builders%0A_%20Java%20Build%20Path%0A%3E%20Java%20Code%20Style%0A%3E%20Java%20Compiler%0A%3E%20Java%20Editor%0A_%20Javadoc%20Location%0A_%20Leiningen%0A_%20Maven%0A_%20Project%20References%0A_%20Run/Debug%20Settings%0A%3E%20Task%20Repository%0A_%20Task%20Tags%0A%3E%20Validation%0A_%20WikiText</text>
+          </controlProperties>
+        </control>
+        <control controlID="5" controlTypeID="com.balsamiq.mockups::SearchBox" x="9" y="35" w="147" h="-1" measuredW="107" measuredH="25" zOrder="5" locked="false" isInGroup="0">
+          <controlProperties>
+            <text>type%20filter%20text</text>
+          </controlProperties>
+        </control>
+        <control controlID="6" controlTypeID="com.balsamiq.mockups::SubTitle" x="179" y="36" w="-1" h="-1" measuredW="61" measuredH="21" zOrder="6" locked="false" isInGroup="0">
+          <controlProperties>
+            <bold>true</bold>
+            <size>13</size>
+            <text>Leiningen</text>
+          </controlProperties>
+        </control>
+        <control controlID="7" controlTypeID="com.balsamiq.mockups::HRule" x="165" y="60" w="585" h="-1" measuredW="100" measuredH="5" zOrder="7" locked="false" isInGroup="0"/>
+        <control controlID="8" controlTypeID="com.balsamiq.mockups::Button" x="504" y="463" w="126" h="27" measuredW="122" measuredH="27" zOrder="8" locked="false" isInGroup="0">
+          <controlProperties>
+            <text>Restore%20Defaults</text>
+          </controlProperties>
+        </control>
+        <control controlID="9" controlTypeID="com.balsamiq.mockups::Button" x="646" y="462" w="94" h="27" measuredW="55" measuredH="27" zOrder="9" locked="false" isInGroup="0">
+          <controlProperties>
+            <text>Apply</text>
+          </controlProperties>
+        </control>
+        <control controlID="10" controlTypeID="com.balsamiq.mockups::CheckBoxGroup" x="185" y="143" w="315" h="24" measuredW="315" measuredH="21" zOrder="10" locked="false" isInGroup="0">
+          <controlProperties>
+            <text>%5Bx%5D%20Resolve%20dependencies%20from%20Workspace%20projects</text>
+          </controlProperties>
+        </control>
+        <control controlID="11" controlTypeID="com.balsamiq.mockups::SubTitle" x="220" y="6" w="206" h="-1" measuredW="151" measuredH="21" zOrder="11" locked="false" isInGroup="0">
+          <controlProperties>
+            <align>center</align>
+            <bold>true</bold>
+            <size>13</size>
+            <text>Properties%20for%20marginalia</text>
+          </controlProperties>
+        </control>
+        <control controlID="12" controlTypeID="com.balsamiq.mockups::Label" x="185" y="85" w="-1" h="-1" measuredW="266" measuredH="21" zOrder="12" locked="false" isInGroup="0">
+          <controlProperties>
+            <text>Active%20Leiningen%20Profiles%20%28comma%20separated%29%3A</text>
+          </controlProperties>
+        </control>
+        <control controlID="13" controlTypeID="com.balsamiq.mockups::TextInput" x="185" y="106" w="485" h="-1" measuredW="79" measuredH="27" zOrder="13" locked="false" isInGroup="0">
+          <controlProperties>
+            <text/>
+          </controlProperties>
+        </control>
+      </groupChildrenDescriptors>
+    </control>
+  </controls>
+</mockup>
