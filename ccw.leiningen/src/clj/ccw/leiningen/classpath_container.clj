@@ -1,4 +1,6 @@
 (ns ccw.leiningen.classpath-container
+  (:require [leiningen.core.project :as p]
+            [leiningen.core.classpath :as cp])
   (:import [org.eclipse.core.runtime CoreException
                                      IPath
                                      Path]
@@ -14,16 +16,17 @@
                      Logger$Severity]
            [java.io File
                     FilenameFilter]))
+
 (println "ccw.leiningen.classpath-container load starts")
 
 (def ROOT-DIR (Path. "ccw.LEININGEN_CONTAINER"))
 
 (def logger (Logger. (Activator/PLUGIN_ID)))
 
-(defn- lower-case-exts-set [ext-string]
+#_(defn- lower-case-exts-set [ext-string]
   (into #{} (map #(.toLowerCase %) (.split ext-string ","))))
 
-(defn- dir-filter [exts]
+#_(defn- dir-filter [exts]
   (reify
   FilenameFilter
   (accept [this dir name]
@@ -36,7 +39,7 @@
         (.contains exts (.toLowerCase (aget name-segs 1))) true
         :else false)))))
 
-(defn- library-entry [lib]
+#_(defn- library-entry2 [lib]
   (let [ext (-> lib .getName (.split "[.]") (aget 1))
         src-arc (File. (-> lib .getAbsolutePath (.replace (str "." ext) (str "-src." ext))))
         src-path (when (.exists src-arc) (Path. (.getAbsolutePath src-arc)))]
@@ -45,11 +48,12 @@
       src-path,
       (Path. "/"))))
 
-(defprotocol ClasspathContainerValidation
+
+#_(defprotocol ClasspathContainerValidation
   (isValid [this]))
 
 ;; TODO remove or adapt
-(defn folder-content-classpath-container 
+#_(defn folder-content-classpath-container 
   [path, project]
   (println "leiningen-classpath-container called " path project)
   (let [exts (lower-case-exts-set (.lastSegment path))
@@ -69,7 +73,7 @@
       (getClasspathEntries [this]
         (println "(.getClasspathEntries)" desc)
         (let [libs (.listFiles dir dir-filter)
-              entry-list (map library-entry libs)]
+              entry-list (map library-entry2 libs)]
           (into-array IClasspathEntry entry-list)))
       (getDescription [this]
         (println ".getDescription " desc)
@@ -87,31 +91,24 @@
           (and (.exists dir)
                (.isDirectory dir)))))))
 
+(defn- library-entry [file]
+  (JavaCore/newLibraryEntry
+      (Path. (.getAbsolutePath file)),
+      nil, ; TODO add src jar when available
+      (Path. "/")))
+
 (defn leiningen-classpath-container 
   [path, project]
   (println "leiningen-classpath-container called " path project)
-  (let [lein-proj (p/read (-> project .getProject (.getFile "project.clj") .getLocation .makeAbsolute .toFile))
-        
-        
-        
-        exts (lower-case-exts-set (.lastSegment path))
-        ; extract the directory string from the PATH and create the directory relative 
-        ; to the project
-        path (-> path (.removeLastSegments 1) (.removeFirstSegments 1))
-        root-proj (-> project .getProject .getLocation .makeAbsolute .toFile)
-        project-dir? (and 
-                       (= (.segmentCount path) 1)
-                       (= (.segment path 0) ROOT-DIR))
-        dir (if project-dir? root-proj (File. root-proj (.toString path)))
-        path (if project-dir? (.removeFirstSegments path 1) path)
-        dir-filter (dir-filter exts)
-        desc (str "/" path " Libraries")]
+  (let [project-clj (-> project .getProject (.getFile "project.clj") .getLocation .toOSString)
+        lein-project (p/read project-clj)
+        dependencies (future (cp/resolve-dependencies lein-project))
+        desc "Leiningen dependencies"]
     (reify 
       IClasspathContainer
       (getClasspathEntries [this]
         (println "(.getClasspathEntries)" desc)
-        (let [libs (.listFiles dir dir-filter)
-              entry-list (map library-entry libs)]
+        (let [entry-list (map library-entry (filter #(-> % .getName (.endsWith ".jar")) @dependencies))]
           (into-array IClasspathEntry entry-list)))
       (getDescription [this]
         (println ".getDescription " desc)
@@ -123,8 +120,8 @@
         (println ".getPath " desc)
         path)
       
-      ClasspathContainerValidation
-      (isValid [this]
+      #_ClasspathContainerValidation
+      #_(isValid [this]
         (boolean
           (and (.exists dir)
                (.isDirectory dir)))))))
@@ -132,18 +129,17 @@
 
 (defn- create-and-register
   [container-path project]
-  (let [container (leiningen-classpath-container container-path project)]
-    (if (.isValid container)
-      (JavaCore/setClasspathContainer
-        container-path
-        (into-array IJavaProject [project])
-        (into-array IClasspathContainer [container])
-        nil)
-      (do
-        (println "Invalid container:" container-path)
-        (.log logger 
-          (Logger$Severity/WARNING)
-          (str (Messages/InvalidContainer) container-path))))))
+  (if-let [container (leiningen-classpath-container container-path project)]
+    (JavaCore/setClasspathContainer
+      container-path
+      (into-array IJavaProject [project])
+      (into-array IClasspathContainer [container])
+      nil)
+    (do
+      (println "Invalid container:" container-path)
+      (.log logger 
+        (Logger$Severity/WARNING)
+        (str (Messages/InvalidContainer) container-path)))))
 
 (defn initializer-factory 
   "Creates a ClasspathContainerInitializer instance for Leiningen projects"
@@ -159,7 +155,7 @@
     (canUpdateClasspathContainer [container-path, project]
       (println (str "(LeiningenClasspathContainerInitializer.canUpdateClasspathContainer "
                     container-path ", " project ")"))
-      true)
+      false)
     
     (requestClasspathContainerUpdate [container-path, project, container-suggestion]
       (println (str "(LeiningenClasspathContainerInitializer.requestClasspathContainerUpdate "
