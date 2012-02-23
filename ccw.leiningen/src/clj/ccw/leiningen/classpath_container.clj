@@ -9,6 +9,12 @@
                                  IJavaProject
                                  IClasspathEntry
                                  JavaCore]
+           [org.eclipse.core.resources IResource
+                                       IProject
+                                       IMarker
+                                       IWorkspaceRunnable
+                                       IWorkspace
+                                       ResourcesPlugin]
            [ccw.leiningen Activator
                           Messages
                           ]
@@ -23,74 +29,6 @@
 
 (def logger (Logger. (Activator/PLUGIN_ID)))
 
-#_(defn- lower-case-exts-set [ext-string]
-  (into #{} (map #(.toLowerCase %) (.split ext-string ","))))
-
-#_(defn- dir-filter [exts]
-  (reify
-  FilenameFilter
-  (accept [this dir name]
-    ;; lets avoid including filenames that end with -src since we will use this
-    ;; as the convention for attaching source
-    (let [name-segs (.split name "[.]")]
-      (cond
-        (not= (count name-segs) 2) false
-        (-> (aget name-segs 0) (.endsWith "-src")) false
-        (.contains exts (.toLowerCase (aget name-segs 1))) true
-        :else false)))))
-
-#_(defn- library-entry2 [lib]
-  (let [ext (-> lib .getName (.split "[.]") (aget 1))
-        src-arc (File. (-> lib .getAbsolutePath (.replace (str "." ext) (str "-src." ext))))
-        src-path (when (.exists src-arc) (Path. (.getAbsolutePath src-arc)))]
-    (JavaCore/newLibraryEntry
-      (Path. (.getAbsolutePath lib)),
-      src-path,
-      (Path. "/"))))
-
-
-#_(defprotocol ClasspathContainerValidation
-  (isValid [this]))
-
-;; TODO remove or adapt
-#_(defn folder-content-classpath-container 
-  [path, project]
-  (println "leiningen-classpath-container called " path project)
-  (let [exts (lower-case-exts-set (.lastSegment path))
-        ; extract the directory string from the PATH and create the directory relative 
-        ; to the project
-        path (-> path (.removeLastSegments 1) (.removeFirstSegments 1))
-        root-proj (-> project .getProject .getLocation .makeAbsolute .toFile)
-        project-dir? (and 
-                       (= (.segmentCount path) 1)
-                       (= (.segment path 0) ROOT-DIR))
-        dir (if project-dir? root-proj (File. root-proj (.toString path)))
-        path (if project-dir? (.removeFirstSegments path 1) path)
-        dir-filter (dir-filter exts)
-        desc (str "/" path " Libraries")]
-    (reify 
-      IClasspathContainer
-      (getClasspathEntries [this]
-        (println "(.getClasspathEntries)" desc)
-        (let [libs (.listFiles dir dir-filter)
-              entry-list (map library-entry2 libs)]
-          (into-array IClasspathEntry entry-list)))
-      (getDescription [this]
-        (println ".getDescription " desc)
-        desc)
-      (getKind [this] 
-        (println ".getKind " desc)
-        (IClasspathContainer/K_APPLICATION))
-      (getPath [this]
-        (println ".getPath " desc)
-        path)
-      
-      ClasspathContainerValidation
-      (isValid [this]
-        (boolean
-          (and (.exists dir)
-               (.isDirectory dir)))))))
-
 (defn- library-entry [file]
   (JavaCore/newLibraryEntry
       (Path. (.getAbsolutePath file)),
@@ -102,44 +40,125 @@
   (println "leiningen-classpath-container called " path project)
   (let [project-clj (-> project .getProject (.getFile "project.clj") .getLocation .toOSString)
         lein-project (p/read project-clj)
-        dependencies (future (cp/resolve-dependencies lein-project))
+        dependencies (cp/resolve-dependencies lein-project)
         desc "Leiningen dependencies"]
+    (println "dependencies::::::::::::::::::::::")
+    (println (map #(.getAbsolutePath %) dependencies))
     (reify 
       IClasspathContainer
       (getClasspathEntries [this]
-        (println "(.getClasspathEntries)" desc)
-        (let [entry-list (map library-entry (filter #(-> % .getName (.endsWith ".jar")) @dependencies))]
-          (into-array IClasspathEntry entry-list)))
+                           (println "(.getClasspathEntries)" desc)
+                           (let [entry-list (map library-entry (filter #(-> % .getName (.endsWith ".jar")) dependencies))]
+                             (into-array IClasspathEntry entry-list)))
       (getDescription [this]
-        (println ".getDescription " desc)
-        desc)
+                      (println ".getDescription " desc)
+                      desc)
       (getKind [this] 
-        (println ".getKind " desc)
-        (IClasspathContainer/K_APPLICATION))
+               (println ".getKind " desc)
+               (IClasspathContainer/K_APPLICATION))
       (getPath [this]
-        (println ".getPath " desc)
-        path)
-      
-      #_ClasspathContainerValidation
-      #_(isValid [this]
-        (boolean
-          (and (.exists dir)
-               (.isDirectory dir)))))))
+               (println ".getPath " desc)
+               path))))
 
+
+
+;; TODO move this stuff in some central place
+(defn- run-in-workspace
+  "runnable is a function which takes an IProgressMonitor as its argument.
+   rule allows to restrain the scope of locked workspace resources.
+   avoid-update? enables grouping of resource modification events.
+   progress-monitor optional monitor for reporting."
+  [runnable rule avoid-update? progress-monitor]
+  (let [avoid-update (if avoid-update? IWorkspace/AVOID_UPDATE 0)]
+    (-> (ResourcesPlugin/getWorkspace)
+      (.run runnable rule avoid-update progress-monitor))))
+
+(defn- workspace-runnable [f]
+  (reify IWorkspaceRunnable (run [this monitor] (f monitor))))
+
+(def LEININGEN_CLASSPATH_CONTAINER_PROBLEM_MARKER_TYPE "ccw.leiningen.problemmarkers.classpathcontainer")
+
+(defprotocol Resource
+  (resource [this] "Return a IResource instance"))
+
+(extend-protocol Resource
+  IResource
+  (resource [this] this)
+  
+  IJavaProject
+  (resource [this] (.getProject this))
+  
+  nil
+  (resource [this] nil))
+
+(defn- delete-container-markers [?project]
+  (.deleteMarkers (resource ?project) 
+    LEININGEN_CLASSPATH_CONTAINER_PROBLEM_MARKER_TYPE,
+    true,
+    IResource/DEPTH_ONE ; DEPTH_ONE so that we also remove markers from project.clj
+    ))
+
+(defn- add-container-marker 
+  "Delete previous container markers, add new one"
+  [?project message]
+  (run-in-workspace
+    (workspace-runnable 
+      (fn [_] 
+        (delete-container-markers ?project)
+        (let [marker (.createMarker (resource ?project) LEININGEN_CLASSPATH_CONTAINER_PROBLEM_MARKER_TYPE)]
+          (.setAttributes marker
+            (let [m (java.util.HashMap.)]
+              (doto m
+                (.put IMarker/MESSAGE message)
+                (.put IMarker/PRIORITY (Integer. IMarker/PRIORITY_HIGH))
+                (.put IMarker/SEVERITY (Integer. IMarker/SEVERITY_ERROR))))))))
+    nil
+    true
+    nil))
+
+(defn- report-container-error [?project message e]
+  (add-container-marker (resource ?project) message)
+  (println message)
+  (.printStackTrace e))
+
+(defn- resource-message
+  "Return [resource message] where resource is the Eclipse IResource to be used
+   as the target of the problem marker, and message is personalized given exc
+   and java-project values"
+  [exc java-project]
+  (cond
+    (.contains (.getMessage exc) "project.clj")
+      (if (.contains (.getMessage exc) "FileNotFoundException")
+        [(resource java-project) "project.clj file is missing"]
+        [(-> java-project resource (.getFile "project.clj")) "problem with project.clj file"])
+    (.contains (.getMessage exc) "DependencyResolutionException")
+      [(resource java-project) "problem when grabbing dependencies from repositories."]
+    :else
+      [(resource java-project) "unknown problem"]))
 
 (defn- create-and-register
-  [container-path project]
-  (if-let [container (leiningen-classpath-container container-path project)]
-    (JavaCore/setClasspathContainer
-      container-path
-      (into-array IJavaProject [project])
-      (into-array IClasspathContainer [container])
-      nil)
-    (do
-      (println "Invalid container:" container-path)
-      (.log logger 
-        (Logger$Severity/WARNING)
-        (str (Messages/InvalidContainer) container-path)))))
+  [container-path java-project]
+  (try
+    (let [container (leiningen-classpath-container container-path java-project)]
+      (JavaCore/setClasspathContainer
+        container-path
+        (into-array IJavaProject [java-project])
+        (into-array IClasspathContainer [container])
+        nil)
+      (delete-container-markers java-project)
+      #_(catch Exception e
+          (println (str (Messages/InvalidContainer) container-path))
+          (.log logger 
+            (Logger$Severity/WARNING)
+            (str (Messages/InvalidContainer) container-path))))
+    (catch Exception e
+      (let [[jresource message] (resource-message e java-project)]
+        (report-container-error 
+          jresource
+          (str "Project '" (-> java-project resource .getName) "', Leiningen classpath container problem: " message)
+          e))
+      ; We expliclty return nil to enable lazy-reloading of classpath container 
+      nil)))
 
 (defn initializer-factory 
   "Creates a ClasspathContainerInitializer instance for Leiningen projects"
@@ -147,29 +166,29 @@
   (println "initializer-factory called")
   (proxy [ClasspathContainerInitializer]
          []
-    (initialize [container-path, project]
+    (initialize [container-path, java-project]
       (println (str "(LeiningenClasspathContainerInitializer.initialize "
-                    container-path ", " (.getName project) ")"))
-      (create-and-register container-path project))
+                    container-path ")"))
+      (create-and-register container-path java-project))
     
-    (canUpdateClasspathContainer [container-path, project]
+    (canUpdateClasspathContainer [container-path, java-project]
       (println (str "(LeiningenClasspathContainerInitializer.canUpdateClasspathContainer "
-                    container-path ", " (.getName project) ")"))
+                    container-path ")"))
       false)
     
-    (requestClasspathContainerUpdate [container-path, project, container-suggestion]
+    (requestClasspathContainerUpdate [container-path, java-project, container-suggestion]
       (println (str "(LeiningenClasspathContainerInitializer.requestClasspathContainerUpdate "
-                    container-path ", " (.getName project) ", " container-suggestion ")"))
-      (create-and-register container-path project))
+                    container-path ", " container-suggestion ")"))
+      (create-and-register container-path java-project))
     
-    (getDescription [container-path, project]
+    (getDescription [container-path, java-project]
       (println (str "(LeiningenClasspathContainerInitializer.getDescription "
-                    container-path ", " (.getName project) ")"))
-      (proxy-super getDescription container-path, project))
+                    container-path ")"))
+      (proxy-super getDescription container-path, java-project))
     
-    (getFailureContainer [container-path, project]
+    (getFailureContainer [container-path, java-project]
       (println (str "(LeiningenClasspathContainerInitializer.getFailureContainer "
-                    container-path ", " (.getName project) ")"))
+                    container-path ")"))
       nil)))
 
 (println "classpath-container namespace loaded")
