@@ -471,10 +471,18 @@
             commandId="ccw.ui.edit.text.clojure.goto.matching.bracket"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
-            sequence="M2+M3+ARROW_UP"
-            contextId="ccw.ui.clojureEditorScope"
             commandId="ccw.ui.edit.text.clojure.expand.selection.up"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+            contextId="ccw.ui.clojureEditorScope"
+            platform="win32"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M2+M3+ARROW_UP">
+      </key>
+      <key
+            commandId="ccw.ui.edit.text.clojure.expand.selection.up"
+            contextId="ccw.ui.clojureEditorScope"
+            platform="gtk"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M2+M3+ARROW_UP"/>
       <key
             sequence="M2+M1+ARROW_UP"
             contextId="ccw.ui.clojureEditorScope"
@@ -484,6 +492,14 @@
       <key
             commandId="ccw.ui.edit.text.clojure.expand.selection.left"
             contextId="ccw.ui.clojureEditorScope"
+            platform="win32"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M2+M3+ARROW_LEFT">
+      </key>
+      <key
+            commandId="ccw.ui.edit.text.clojure.expand.selection.left"
+            contextId="ccw.ui.clojureEditorScope"
+            platform="gtk"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M2+M3+ARROW_LEFT">
       </key>
@@ -497,6 +513,14 @@
       <key
             commandId="ccw.ui.edit.text.clojure.expand.selection.right"
             contextId="ccw.ui.clojureEditorScope"
+            platform="win32"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M2+M3+ARROW_RIGHT">
+      </key>
+      <key
+            commandId="ccw.ui.edit.text.clojure.expand.selection.right"
+            contextId="ccw.ui.clojureEditorScope"
+            platform="gtk"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M2+M3+ARROW_RIGHT">
       </key>
@@ -508,14 +532,16 @@
             platform="carbon">
       </key>
       <key
-            commandId="ccw.ui.edit.text.clojure.indent.selection"
+            commandId="ccw.ui.edit.text.clojure.select.last"
             contextId="ccw.ui.clojureEditorScope"
+            platform="win32"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="M1+I">
+            sequence="M2+M3+ARROW_DOWN">
       </key>
       <key
             commandId="ccw.ui.edit.text.clojure.select.last"
             contextId="ccw.ui.clojureEditorScope"
+            platform="gtk"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M2+M3+ARROW_DOWN">
       </key>
@@ -531,6 +557,12 @@
             contextId="ccw.ui.clojureEditorScope"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M3+R">
+      </key>
+      <key
+            commandId="ccw.ui.edit.text.clojure.indent.selection"
+            contextId="ccw.ui.clojureEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+I">
       </key>
       <key
             commandId="ccw.ui.edit.text.clojure.split.sexpr"
@@ -571,17 +603,6 @@
             commandId="ccw.ui.edit.text.clojure.select.toplevel.s.expression"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
-            sequence="M1+M3+X"
-            contextId="ccw.ui.clojureEditorScope"
-            commandId="ccw.ui.edit.text.clojure.evaluate.toplevel.s.expression"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-      <key
-            sequence="M1+M2+X"
-            contextId="ccw.ui.clojureEditorScope"
-            commandId="ccw.ui.edit.text.clojure.evaluate.toplevel.s.expression"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            platform="carbon"/>
-      <key
             commandId="ccw.ui.edit.text.clojure.evaluate.toplevel.s.expression"
             contextId="ccw.ui.clojureEditorScope"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
@@ -590,19 +611,35 @@
       <key
             commandId="ccw.ui.edit.text.clojure.launch.repl"
             contextId="ccw.ui.clojureEditorScope"
+            platform="win32"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M2+M3+X C"/>
       <key
             commandId="ccw.ui.edit.text.clojure.launch.repl"
+            contextId="ccw.ui.clojureEditorScope"
+            platform="gtk"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M2+M3+X C">
       </key>
       <key
-            sequence="M1+M3+X C"
-            contextId="ccw.ui.clojureEditorScope"
             commandId="ccw.ui.edit.text.clojure.launch.repl"
+            contextId="ccw.ui.clojureEditorScope"
+            platform="carbon"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            platform="carbon"/>
+            sequence="M1+M3+X C">
+      </key>
+      <key
+            commandId="ccw.ui.edit.text.clojure.launch.repl"
+            platform="win32"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M2+M3+X C">
+      </key>
+      <key
+            commandId="ccw.ui.edit.text.clojure.launch.repl"
+            platform="gtk"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M2+M3+X C">
+      </key>
       <key
             commandId="ccw.ui.edit.text.clojure.launch.repl"
             platform="carbon"
@@ -627,10 +664,18 @@
             commandId="ccw.ui.edit.text.clojure.load.file"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
-            sequence="M1+M3+N"
-            contextId="ccw.ui.clojureEditorScope"
             commandId="ccw.ui.edit.text.clojure.switchNamespace"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+            contextId="ccw.ui.clojureEditorScope"
+            platform="win32"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+M3+N"/>
+      <key
+            commandId="ccw.ui.edit.text.clojure.switchNamespace"
+            contextId="ccw.ui.clojureEditorScope"
+            platform="gtk"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+M3+N">
+      </key>
       <key
             sequence="M3+M4+N"
             contextId="ccw.ui.clojureEditorScope"
@@ -656,10 +701,18 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/-->
             
       <key
-            sequence="M2+M3+X R"
-            contextId="ccw.ui.context.repl"
             commandId="ccw.ui.edit.text.clojure.reload"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+            contextId="ccw.ui.context.repl"
+            platform="win32"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M2+M3+X R"/>
+      <key
+            commandId="ccw.ui.edit.text.clojure.reload"
+            contextId="ccw.ui.context.repl"
+            platform="gtk"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M2+M3+X R">
+      </key>
 
       <key
             sequence="M1+M3+X R"
@@ -682,6 +735,14 @@
       <key
             commandId="ccw.view.repl.commands.printErrorDetail"
             contextId="ccw.ui.context.repl"
+            platform="win32"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M3+E">
+      </key>
+      <key
+            commandId="ccw.view.repl.commands.printErrorDetail"
+            contextId="ccw.ui.context.repl"
+            platform="gtk"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M3+E">
       </key>
@@ -695,6 +756,14 @@
       <key
             commandId="ccw.view.repl.commands.clearLog"
             contextId="ccw.ui.context.repl"
+            platform="win32"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M3+K">
+      </key>
+      <key
+            commandId="ccw.view.repl.commands.clearLog"
+            contextId="ccw.ui.context.repl"
+            platform="gtk"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M3+K">
       </key>
@@ -714,6 +783,14 @@
       <key
             commandId="ccw.ui.repl.history.previous"
             contextId="ccw.ui.context.repl"
+            platform="win32"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+ARROW_UP">
+      </key>
+      <key
+            commandId="ccw.ui.repl.history.previous"
+            contextId="ccw.ui.context.repl"
+            platform="gtk"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+ARROW_UP">
       </key>
@@ -727,6 +804,14 @@
       <key
             commandId="ccw.ui.repl.history.next"
             contextId="ccw.ui.context.repl"
+            platform="win32"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+ARROW_DOWN">
+      </key>
+      <key
+            commandId="ccw.ui.repl.history.next"
+            contextId="ccw.ui.context.repl"
+            platform="gtk"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+ARROW_DOWN">
       </key>
