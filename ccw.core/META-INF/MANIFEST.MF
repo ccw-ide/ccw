@@ -41,6 +41,7 @@ Export-Package: ccw,
  ccw.editors.outline,
  ccw.launching,
  ccw.preferences,
+ ccw.repl,
  ccw.util,
  ccw.wizards
 Bundle-ActivationPolicy: lazy
