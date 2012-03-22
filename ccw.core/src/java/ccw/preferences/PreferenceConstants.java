@@ -30,6 +30,7 @@ import clojure.lang.Keyword;
 public class PreferenceConstants {
 	
 	public static Keyword stringToken = Keyword.intern("string");
+	public static Keyword otherLiteralsToken = Keyword.intern("other-literals");
 	public static Keyword regexToken = Keyword.intern("regex");
 	public static Keyword intToken = Keyword.intern("int");
 	public static Keyword floatToken = Keyword.intern("float");
@@ -84,6 +85,7 @@ public class PreferenceConstants {
 				new ArrayList<Keyword>() {
 			{
 				add(stringToken);
+				add(otherLiteralsToken);
 				add(regexToken);
 				add(intToken);
 				add(floatToken);

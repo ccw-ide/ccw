@@ -82,6 +82,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
         new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.MACRO_Token), false, new RGB(0, 0, 0), false, false),
         new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.callableMACRO_Token), true, callableRGB, true, false),
         new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.stringToken), true, stringKeywordLiteralRGB, false, false),
+        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.otherLiteralsToken), true, literalRGB, false, false),
         new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.regexToken), true, stringKeywordLiteralRGB, false, false),
         new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.intToken), false, new RGB(0, 0, 0), false, false),
         new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.floatToken), false, new RGB(0, 0, 0), false, false),

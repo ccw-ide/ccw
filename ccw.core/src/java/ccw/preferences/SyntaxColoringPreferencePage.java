@@ -250,6 +250,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         { Messages.SyntaxColoringPreferencePage_int, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.intToken)},
         { Messages.SyntaxColoringPreferencePage_float, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.floatToken)},
         { Messages.SyntaxColoringPreferencePage_char, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.charToken)},
+        { Messages.SyntaxColoringPreferencePage_otherLiterals, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.otherLiteralsToken)},
         
                 
         { Messages.SyntaxColoringPreferencePage_deactivateRainbowParen, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.deactivatedRainbowParen)},

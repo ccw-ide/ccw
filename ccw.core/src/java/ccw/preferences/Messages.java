@@ -90,6 +90,8 @@ public class Messages extends NLS {
     
     public static String SyntaxColoringPreferencePage_char;
     
+    public static String SyntaxColoringPreferencePage_otherLiterals;    
+
     public static String SyntaxColoringPreferencePage_javaClass;
     
     public static String SyntaxColoringPreferencePage_javaInstanceMethod;
