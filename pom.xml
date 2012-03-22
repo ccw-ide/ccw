@@ -8,7 +8,7 @@
         <groupId>org.lpetit</groupId>
         <artifactId>paredit.clj</artifactId>
         <packaging>eclipse-plugin</packaging>
-        <version>0.16.0.STABLE001</version>
+        <version>0.17.0.STABLE001</version>
         
         <name>Paredit.clj</name>
         <description>paredit in clojure, tailored for clojure</description>

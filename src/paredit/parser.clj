@@ -190,7 +190,10 @@
     (= :unquote t) (unbalanced :open abstract-children)
     (= :string t) (token :string count)
     (= :regex t) (token :regex count)
-    (= :symbol t) (token :symbol count)
+    (= :symbol t) (let [s ((get abstract-children 0) parse-tree-view)] 
+                    (if (#{"nil" "true" "false"} s)
+                      (token :other-literals count)
+                      (token :symbol count)))
     (= :keyword t) (token :keyword count)
     (= :int t) (token :int count)
     (= :float t) (token :float count)
