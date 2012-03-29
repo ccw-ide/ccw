@@ -672,22 +672,8 @@
       <key
             commandId="ccw.ui.edit.text.clojure.switchNamespace"
             contextId="ccw.ui.clojureEditorScope"
-            platform="win32"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+M3+N"/>
-      <key
-            commandId="ccw.ui.edit.text.clojure.switchNamespace"
-            contextId="ccw.ui.clojureEditorScope"
-            platform="gtk"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="M1+M3+N">
-      </key>
-      <key
-            sequence="M3+M4+N"
-            contextId="ccw.ui.clojureEditorScope"
-            commandId="ccw.ui.edit.text.clojure.switchNamespace"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            platform="carbon"/>
       <key
             sequence="M1+M3+K"
             contextId="ccw.ui.clojureEditorScope"
@@ -814,6 +800,13 @@
             sequence="M4+ARROW_UP">
       </key>
       <key
+            commandId="ccw.ui.repl.history.previous"
+            contextId="ccw.ui.context.repl"
+            platform="carbon"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M4+P">
+      </key>
+      <key
             commandId="ccw.ui.repl.history.next"
             contextId="ccw.ui.context.repl"
             platform="win32"
@@ -833,6 +826,13 @@
             platform="carbon"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M4+ARROW_DOWN">
+      </key>
+      <key
+            commandId="ccw.ui.repl.history.next"
+            contextId="ccw.ui.context.repl"
+            platform="carbon"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M4+N">
       </key>
       <key
             commandId="ccw.ui.edit.text.clojure.comment.toggle"
