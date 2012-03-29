@@ -62,7 +62,7 @@ public class ClojureVisitor implements IResourceVisitor {
 //    				System.out.println("compiling:'" + maybeLibName + "'");
     				String compileLibCommand = CompileLibAction.compileLibCommand(maybeLibName);
 //    				System.out.println("Sending command: '" + compileLibCommand + "'");
-					Response res = repl.send(compileLibCommand);
+					Response res = repl.send("op", "eval", "code", compileLibCommand);
 //					System.out.println("compilation response: '" + res + "'");
 					if (res.values().isEmpty()) {
 //						System.out.println(("oops, weird error when compiling '" + maybeLibName + "'"));

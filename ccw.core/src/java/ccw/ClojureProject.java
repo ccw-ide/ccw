@@ -45,63 +45,6 @@ public class ClojureProject extends PlatformObject {
     Character c;
     private IJavaProject javaProject;
 
-    // private final Map<AbstractFile, SemanticTokens.Process.TokenList> tokens
-    // = new HashMap<AbstractFile, SemanticTokens.Process.TokenList>();
-
-    // private ScalaCompilerManager.SemanticCompiler semanticCompiler;
-
-    // public final Set<AbstractFile> cleaned = new HashSet<AbstractFile>();
-
-    // private BuildState buildState = null;
-    //
-    // public void resetBuildState() {
-    // buildState = null;
-    // }
-    //
-    // public BuildState buildState() {
-    // if (buildState != null)
-    // return buildState;
-    // IFile file = stateFile();
-    // if (file.exists()) {
-    // try {
-    // ObjectInputStream input = new ObjectInputStream(file.getContents());
-    // buildState = (BuildState) input.readObject();
-    // input.close();
-    // } catch (IOException e) {
-    // ScalaCorePlugin.logError(e);
-    // } catch (CoreException e) {
-    // ScalaCorePlugin.logError(e);
-    // } catch (ClassNotFoundException e) {
-    // ScalaCorePlugin.logError(e);
-    // }
-    // }
-    // return buildState;
-    // }
-
-    // public void createBuildState() {
-    // if (buildState == null)
-    // buildState = new BuildState();
-    // }
-
-    // private ScalaCompilerManager.ScalaCompiler compiler = null;
-    //
-    // public ScalaCompilerManager.ScalaCompiler compiler() {
-    // if (compiler == null)
-    // compiler = ScalaCompilerManager.getDefault().createCompiler(this);
-    // return compiler;
-    // }
-
-    // public void destroy() {
-    // compiler = null;
-    // semanticCompiler = null;
-    // tokens.clear();
-    // javaProject = null;
-    // cleaned.clear();
-    // }
-    // public void resetCompiler() {
-    // compiler = null;
-    // }
-
     private long classpathUpdate = IResource.NULL_STAMP;
 
     public void checkClasspath() {
@@ -116,63 +59,7 @@ public class ClojureProject extends PlatformObject {
             return;
 
         classpathUpdate = classpath.getModificationStamp();
-        // resetBuildState();
-        // compiler().reset();
-        // semanticCompiler().reset();
     }
-
-    // public ScalaCompilerManager.SemanticCompiler semanticCompiler() {
-    // if (semanticCompiler == null)
-    // semanticCompiler = ScalaCompilerManager.getDefault().new
-    // SemanticCompiler(
-    // this);
-    // return semanticCompiler;
-    // }
-
-    // public boolean hasSemanticCompiler() {
-    // return semanticCompiler != null;
-    // }
-    //
-    // public final Map<AbstractFile, Models.SourceMod> outlines = new
-    // HashMap<AbstractFile, Models.SourceMod>();
-
-    // public Models.SourceMod outline(AbstractFile path, char[] content) {
-    // checkClasspath();
-    // Models.SourceMod outline = outlines.get(path);
-    // if (outline != null)
-    // return outline;
-    // // if (file.isLinked() || file.isDerived()) return null;
-    // outline = semanticCompiler().modelFor(path, content);
-    // if (outline != null)
-    // outlines.put(path, outline);
-    // return outline;
-    // }
-    // public boolean refreshTokens(AbstractFile file) {
-    // return refreshTokens(file, null, false, null);
-    // }
-    //
-    // public boolean refreshTokens(AbstractFile path, char[] content, boolean
-    // force,
-    // IProgressMonitor monitor) {
-    // if (cleaned.contains(path)) {
-    // if (!(path instanceof PlainFile)) return false;
-    // if (!force) return false;
-    // }
-    // // if (file.isLinked() || file.isDerived()) return false;
-    //
-    // // System.err.println("REFRESH: " + path);
-    // // Thread.dumpStack();
-    //
-    // if (content == null) content = path.toCharArray();
-    // tokens.put(path, semanticCompiler().tokensFor(path, content, outlines,
-    // monitor));
-    // cleaned.add(path);
-    // return true;
-    // }
-    //
-    // public SemanticTokens.Process.TokenList tokensFor(AbstractFile path) {
-    // return tokens.get(path);
-    // }
 
     public IFile getFileAny(IPath location) {
         IPath ppath = ResourcesPlugin.getWorkspace().getRoot().getLocation();
@@ -203,7 +90,7 @@ public class ClojureProject extends PlatformObject {
     }
 
     /**
-     * Creates a new Scala project backed by the given Eclipse project
+     * Creates a new Clojure project backed by the given Eclipse project
      * 
      * @param project
      *            the Eclipse project
@@ -217,36 +104,10 @@ public class ClojureProject extends PlatformObject {
 
     public final HashSet<IPath> leftOver = new HashSet<IPath>();
 
-    // public void saveBuildState() {
-    // buildState.normalize();
-    // IFile file = stateFile();
-    // ByteArrayOutputStream output = new ByteArrayOutputStream();
-    // ObjectOutputStream ostream;
-    // try {
-    // ostream = new ObjectOutputStream(output);
-    // ostream.writeObject(buildState);
-    // ostream.close();
-    // if (file.exists())
-    // file.delete(true, null);
-    // file.create(new ByteArrayInputStream(output.toByteArray()), false, null);
-    // file.setDerived(true);
-    // } catch (IOException e) {
-    // ScalaCorePlugin.logError(e);
-    // } catch (CoreException e) {
-    // ScalaCorePlugin.logError(e);
-    // }
-    // }
-
-    /**
-     * @see ClojureProject.epfl.lamp.sdt.core.ScalaProject#getProject()
-     */
     public IProject getProject() {
         return project;
     }
 
-    /**
-     * @see ClojureProject.epfl.lamp.sdt.core.ScalaProject#getJavaProject()
-     */
     public IJavaProject getJavaProject() {
         if (javaProject == null)
             javaProject = ClojureCore.getJavaProject(project);

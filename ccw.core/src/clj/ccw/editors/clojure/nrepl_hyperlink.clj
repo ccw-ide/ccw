@@ -10,10 +10,9 @@
         length (.getLength event)
         document (.getDocument console)
         s (.get document offset length)
-        [[_ host port]] (re-seq pattern s)
-        port (Integer. port)
+        [[url]] (re-seq pattern s)
         hyperlink (reify org.eclipse.ui.console.IHyperlink
-                    (linkActivated [this] (ccw.repl.REPLView/connect host port))
+                    (linkActivated [this] (ccw.repl.REPLView/connect url))
                     (linkExited [this])
                     (linkEntered [this]))]
     (.addHyperlink console hyperlink offset length)))

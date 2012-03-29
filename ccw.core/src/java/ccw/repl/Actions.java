@@ -30,10 +30,10 @@ public class Actions {
         }
     }
     
-    public static class ConnecToEclipseNREPL extends AbstractHandler {
+    public static class ConnectToEclipseNREPL extends AbstractHandler {
 		public Object execute(ExecutionEvent event) throws ExecutionException {
             try {
-                return REPLView.connect("127.0.0.1", CCWPlugin.getDefault().getREPLServerPort());
+                return REPLView.connect("nrepl://localhost:" + CCWPlugin.getDefault().getREPLServerPort());
             } catch (Exception e) {
                 throw new ExecutionException("Could not connect to Eclipse's internal nrepl server", e);
             }
@@ -114,6 +114,12 @@ public class Actions {
 		public void doExecute(ExecutionEvent event, REPLView repl) throws ExecutionException {
 			repl.printErrorDetail();
 		}
+    }
+    
+    public static class InterruptHandler extends AbstractREPLViewHandler {
+        public void doExecute(ExecutionEvent event, REPLView repl) throws ExecutionException {
+            repl.sendInterrupt();
+        }
     }
     
     private static abstract class AbstractREPLViewHandler extends AbstractHandler {

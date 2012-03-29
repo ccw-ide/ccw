@@ -330,7 +330,7 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 	@SuppressWarnings("unchecked")
     private Map<String, List<String>> getRemoteNsTree (Connection repl) {
 		try {
-		    Response res = repl.send("(ccw.debug.serverrepl/namespaces-info)");
+		    Response res = repl.send("op", "eval", "code", "(ccw.debug.serverrepl/namespaces-info)");
             return (Map<String, List<String>>)res.values().get(0);
         } catch (Exception e) {
             System.out.println(e);

@@ -53,8 +53,7 @@
 (defn log
   [^StyledText log ^String s type]
   (ui-sync
-    (let [s (.replaceAll s "\\s+\\Z" "")
-          charcnt (.getCharCount log)
+    (let [charcnt (.getCharCount log)
           [log-style line-background-color-name] (get log-styles type [default-log-style nil])
           linecnt (.getLineCount log)]
       (.append log s)
@@ -74,36 +73,34 @@
     ({"timeout" "timed out", "interrupted" "was interrupted"} status "failed")
     (-> s
       (.substring 0 (min 30 (count s)))
+      (str (when (> (count s) 30) "..."))
       (.replaceAll "\\n|\\r" " "))))
 
 (defn eval-expression
-  [repl-view log-component {:keys [send]} requests-atom expr]
-  (let [response-fn (send expr :ns (.getCurrentNamespace repl-view) :timeout Long/MAX_VALUE)
-        key [(System/currentTimeMillis) expr]]
-    (swap! requests-atom assoc key response-fn)
+  [repl-view log-component client expr]
+  (let [responses (repl/message client (if (map? expr)
+                                         expr
+                                         {:op :eval :code expr :ns (.getCurrentNamespace repl-view)}))]
     (future (try
-              (doseq [{:keys [out err value ns status] :as resp} (repl/response-seq response-fn Long/MAX_VALUE)]
+              (doseq [{:keys [out err value ns status] :as resp} responses]
                 (ui-sync
-                  (when ns
-                    ; TODO: need to make sure that a response from an earlier request doesn't
-                    ; override the current namespace in the view based on a response from a later
-                    ; request...or is that just too much of an edge case?
-                    (.setCurrentNamespace repl-view ns))
-                  (doseq [[k v] (dissoc resp :id :ns :status)]
+                  (when ns (.setCurrentNamespace repl-view ns))
+                  (doseq [[k v] (dissoc resp :id :ns :status :session)]
                     (if (log-styles k)
                       (log log-component v k)
                       (CCWPlugin/log (str "Cannot handle REPL response: " k (pr-str resp)))))
-                  (case status
-                    ("timeout" "interrupted") (log log-component (eval-failure-msg status expr) :err)
-                    nil)))
+                  ;(CCWPlugin/log (str resp))
+                  (doseq [status status]
+                    (case status
+                      "interrupted" (log log-component (eval-failure-msg status expr) :err)
+                      "need-input" (ui-sync (.getStdIn repl-view))
+                      nil))))
               (catch Throwable t
                 (CCWPlugin/logError (eval-failure-msg nil expr) t)
-                (log log-component (eval-failure-msg nil expr) :err))
-              (finally
-                (swap! requests-atom dissoc key))))))
+                (log log-component (eval-failure-msg nil expr) :err))))))
 
 (defn configure-repl-view
-  [& [repl-view :as args]]
+  [repl-view log-panel repl-client]
   (let [[history retain-expr-fn] (history/get-history (-?> repl-view
                                                         .getLaunch
                                                         ccw.launching.LaunchUtils/getProjectName))
@@ -113,24 +110,24 @@
         current-step (atom -1)
         retained-input (atom nil)
         history-action-fn 
-          (fn [history-shift]
-            (swap! current-step history-shift)
-            (cond
-              (>= @current-step (count @history)) (do (swap! current-step dec) (beep))
-              (neg? @current-step) (do (reset! current-step -1)
-                                     (when @retained-input
-                                       (doto input-widget
-                                         (.setText @retained-input)
-                                         cursor-at-end)
-                                       (reset! retained-input nil)))
-              :else (do
-                      (when-not @retained-input
-                        (reset! retained-input (.getText input-widget)))
-                      (doto input-widget
-                        (.setText (@history (dec (- (count @history) @current-step))))
-                        cursor-at-end))))]
+        (fn [history-shift]
+          (swap! current-step history-shift)
+          (cond
+            (>= @current-step (count @history)) (do (swap! current-step dec) (beep))
+            (neg? @current-step) (do (reset! current-step -1)
+                                   (when @retained-input
+                                     (doto input-widget
+                                       (.setText @retained-input)
+                                       cursor-at-end)
+                                     (reset! retained-input nil)))
+            :else (do
+                    (when-not @retained-input
+                      (reset! retained-input (.getText input-widget)))
+                    (doto input-widget
+                      (.setText (@history (dec (- (count @history) @current-step))))
+                      cursor-at-end))))]
     (.setHistoryActionFn repl-view history-action-fn)
-    (comp (apply partial eval-expression args)
+    (comp (partial eval-expression repl-view log-panel (repl/client-session repl-client))
       (fn [expr add-to-log?]
         (reset! retained-input nil)
         (reset! current-step -1)
