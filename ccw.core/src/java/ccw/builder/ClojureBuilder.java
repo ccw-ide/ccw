@@ -67,7 +67,6 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
     	}
     	
     	fullBuild(getProject(), monitor);
-
         return null;
     }
     
@@ -159,7 +158,8 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
                 IFolder folder = project.getWorkspace().getRoot().getFolder(entry.getPath());
                 IFolder outputFolder = project.getWorkspace().getRoot().getFolder(
                 		(entry.getOutputLocation()==null) ? defaultOutputFolder : entry.getOutputLocation());
-                srcFolders.put(folder, outputFolder);
+                if (folder.exists() && outputFolder.exists())
+                	srcFolders.put(folder, outputFolder);
                 break;
             case IClasspathEntry.CPE_LIBRARY:
                 break;
