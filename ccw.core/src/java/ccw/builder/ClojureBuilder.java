@@ -67,7 +67,6 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
     	}
     	
     	fullBuild(getProject(), monitor);
-
         return null;
     }
     

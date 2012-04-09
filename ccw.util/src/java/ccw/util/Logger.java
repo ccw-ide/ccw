@@ -31,8 +31,8 @@ public class Logger {
     /**
      * Prints stack trace to Eclipse error log 
      */
-    public void log(int severity, Throwable e) {
-        Status s = new Status(severity, pluginId, IStatus.OK, e.getMessage(), e);
+    public void log(Severity severity, Throwable e) {
+        Status s = new Status(severity.severityCode, pluginId, IStatus.OK, e.getMessage(), e);
         log.log(s);
     }
     
