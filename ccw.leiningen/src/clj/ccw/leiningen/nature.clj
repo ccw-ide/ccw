@@ -200,8 +200,6 @@
    If overwrite? is true, then the project's build path is replaced.
    If overwrite? is false, the the new entries found are appended to the existing build path" 
   [java-proj overwrite? & [monitor]]
-  (println "monitor: " monitor)
-  (println "get-lein-container: " (cpc/get-lein-container java-proj))
   (let [monitor (or monitor (e/null-progress-monitor))
         lein-entries (lein-entries java-proj)
         existing-entries (if overwrite? () (seq (.getRawClasspath java-proj)))
@@ -211,17 +209,10 @@
       java-proj
       (into-array IClasspathEntry entries)
       (e/null-progress-monitor))
-    (println "Added (enfin j'espere)")
-    (println "project now has container?" (cpc/has-lein-container? java-proj))
-    (println "Before setting the project monitor")
     (.beginTask monitor (str "Project " (-> java-proj e/project .getName) ": Updating Leiningen Dependencies") 1)
-    (println "after having called beginTask")
     (cpc/update-project-dependencies java-proj)
-    (println "after having called update-project-dependencies")
     (.worked monitor 1)
-    (println "after having called worked")
-    (.done monitor)
-    (println "after having called done")))
+    (.done monitor)))
 
 (defn factory [_]
   (let [state (ref {:project nil :errors []})]
@@ -239,7 +230,6 @@
                   java-proj (JavaCore/create proj)]
               (when-not (has-builder? desc LeiningenBuilder/ID)
                 (set-description! proj (add-builder! desc LeiningenBuilder/ID)))
-              (println "done here, setting the description")
               (reset-project-build-path java-proj true progress-monitor)))))
       (deconfigure
         [this]
