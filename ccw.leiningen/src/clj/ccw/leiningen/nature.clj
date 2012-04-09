@@ -199,19 +199,29 @@
    If file project.clj cannot be read, nothing happens.
    If overwrite? is true, then the project's build path is replaced.
    If overwrite? is false, the the new entries found are appended to the existing build path" 
-  [java-proj overwrite? & [progress-monitor]]
+  [java-proj overwrite? & [monitor]]
+  (println "monitor: " monitor)
   (println "get-lein-container: " (cpc/get-lein-container java-proj))
-  (let [lein-entries (lein-entries java-proj)
+  (let [monitor (or monitor (e/null-progress-monitor))
+        lein-entries (lein-entries java-proj)
         existing-entries (if overwrite? () (seq (.getRawClasspath java-proj)))
         new-entries (remove (set existing-entries) lein-entries)
         entries (concat existing-entries new-entries)]
     (.setRawClasspath 
       java-proj
       (into-array IClasspathEntry entries)
-      (or progress-monitor (e/null-progress-monitor)))
+      (e/null-progress-monitor))
     (println "Added (enfin j'espere)")
     (println "project now has container?" (cpc/has-lein-container? java-proj))
-    (cpc/update-project-dependencies java-proj)))
+    (println "Before setting the project monitor")
+    (.beginTask monitor (str "Project " (-> java-proj e/project .getName) ": Updating Leiningen Dependencies") 1)
+    (println "after having called beginTask")
+    (cpc/update-project-dependencies java-proj)
+    (println "after having called update-project-dependencies")
+    (.worked monitor 1)
+    (println "after having called worked")
+    (.done monitor)
+    (println "after having called done")))
 
 (defn factory [_]
   (let [state (ref {:project nil :errors []})]

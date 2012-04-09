@@ -8,7 +8,8 @@
             [clojure.java.io                   :as io])
   (:import [org.eclipse.core.runtime       CoreException
                                            IPath
-                                           Path]
+                                           Path
+                                           IProgressMonitor]
            [org.eclipse.jdt.core           ClasspathContainerInitializer
                                            IClasspathContainer
                                            IJavaProject
