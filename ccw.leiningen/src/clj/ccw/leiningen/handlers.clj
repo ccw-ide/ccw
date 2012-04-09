@@ -78,13 +78,11 @@
   (proxy [PropertyTester]
          []
     (test [receiver, property, args, expectedValue]
-          (println "coucou, on me teste")
       (let [res  (boolean
                    (when-let [project (e/project receiver)]
                      (and
                        (.isOpen project)
                        (.exists (.getFile project "project.clj")))))]
-        (println "resultat: " res)
         res)))) 
 
 (defn add-leiningen-nature
