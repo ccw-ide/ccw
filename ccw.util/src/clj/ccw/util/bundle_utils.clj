@@ -1,9 +1,11 @@
 (ns ccw.util.bundle-utils
+  (:refer-clojure :exclude [< > =])
   (:import org.eclipse.core.runtime.CoreException
            org.eclipse.core.runtime.IStatus
            org.eclipse.core.runtime.Platform
            org.eclipse.core.runtime.Status
            org.osgi.framework.Bundle
+           org.osgi.framework.Version
            org.osgi.framework.BundleException
            clojure.osgi.ClojureOSGi))
 
@@ -26,10 +28,42 @@
 
  (def ^:private start-states #{(Bundle/STARTING) (Bundle/ACTIVE)})
  
+ (defn bundle 
+   "Return the bundle object associated with the bundle-symbolic-name (a String)"
+   [bundle-symbolic-name]
+   (Platform/getBundle bundle-symbolic-name))
+ 
+ (defn version 
+   "Create a version object from a map with keys
+    :major
+    :minor
+    :micro
+    :qualifier
+    "
+   [& {:keys [major minor micro qualifier]}]
+   (Version. major minor micro qualifier))
+ 
+ (defn compareTo [v1 v2] (.compareTo v1 v2))
+ 
+ (defn <
+   "Return truethiness if version1 is < than version2"
+   [v1 v2]
+   (neg? (compareTo v1 v2)))
+ 
+ (defn =
+   "Return truethiness if version1 = version2"
+   [v1 v2]
+   (zero? (compareTo v1 v2)))
+ 
+ (defn >
+   "Return truethiness if version1 is > than version2"
+   [v1 v2]
+   (pos? (compareTo v1 v2)))
+ 
  (defn load-and-get-bundle [bundle-symbolic-name]
    ;; TODO: not good??, maybe we will not catch the right bundle (the same the OSGi framework would use ...)
    (try 
-     (let [b (Platform/getBundle bundle-symbolic-name)]
+     (let [b (bundle bundle-symbolic-name)]
        (when-not (start-states (.getState b))
          (.start b))
        b)

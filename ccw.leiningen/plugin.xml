@@ -4,24 +4,18 @@
    <extension
          point="org.eclipse.jdt.core.classpathContainerInitializer">
    <classpathContainerInitializer
-       id="ccw.LEININGEN_CONTAINER">
-        <class class="ccw.util.GenericExecutableExtension">
-           <parameter
-                 name="factory"
-                 value="ccw.leiningen.classpath-container/initializer-factory">
-           </parameter>
-        </class>
+       id="ccw.LEININGEN_CONTAINER"
+       class="ccw.util.GenericExecutableExtension:ccw.leiningen.classpath-container/initializer-factory">
    </classpathContainerInitializer>
    </extension>
-<!--
-	<extension 
-    point="org.eclipse.jdt.ui.classpathContainerPage">
-   <classpathContainerPage
-       id="ccw.LEININGEN_CONTAINER"
-       name="%ContainerName"
-       class="ccw.leiningen.LeiningenClasspathContainerPage"/>
-</extension>
-   -->
+   <extension
+         point="org.eclipse.jdt.ui.classpathContainerPage">
+  <classpathContainerPage
+   id="ccw.LEININGEN_CONTAINER"
+   name="Leiningen Managed Dependencies"
+   class="ccw.util.GenericExecutableExtension:ccw.leiningen.classpath-container/page-factory">
+  </classpathContainerPage>         
+   </extension>
 <extension
        id="ccw.leiningen.problemmarkers.classpathcontainer"
        name="Leiningen Classpath Container"
@@ -33,5 +27,330 @@
           type="org.eclipse.core.resources.problemmarker">
     </super>
  </extension>
+<extension
+      point="org.eclipse.ui.commands">
+   <category
+         description="Leiningen Commands"
+         id="ccw.leiningen.category"
+         name="Leiningen Commands">
+   </category>
+   <command
+         categoryId="ccw.leiningen.category"
+         description="Update Leiningen dependencies in Classpath Container"
+         id="ccw.leiningen.command.update-dependencies"
+         name="Update dependencies">
+   </command>
+   <command
+         categoryId="ccw.leiningen.category"
+         description="Convert the project to a Leiningen Project"
+         id="ccw.leiningen.command.add-leiningen-nature"
+         name="Convert to Leiningen Project (resets Java Build Path)">
+   </command>
+   <command
+         categoryId="ccw.leiningen.category"
+         description="Reset Project Classpath (aka Java Build Path) from content of file project.clj"
+         id="ccw.leiningen.command.reset-project-classpath"
+         name="Reset Project Classpath from project.clj">
+   </command>
+</extension>
+<extension
+      point="org.eclipse.ui.bindings">
+   <key
+         commandId="ccw.leiningen.command.update-dependencies"
+         contextId="org.eclipse.ui.contexts.window"
+         schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+         sequence="M1+L U">
+   </key>
+</extension>
+<extension
+      point="org.eclipse.ui.handlers">
+   <handler
+         commandId="ccw.leiningen.command.update-dependencies">
+      <class
+            class="ccw.util.GenericExecutableExtension">
+         <parameter
+               name="factory"
+               value="ccw.util.factories/handler-factory">
+         </parameter>
+         <parameter
+               name="handler"
+               value="ccw.leiningen.handlers/update-dependencies">
+         </parameter>
+      </class>
+      <activeWhen>
+         <or>
+            <with
+                  variable="activePart">
+               <adapt
+                     type="org.eclipse.ui.IEditorPart">
+                  <test
+                        forcePluginActivation="true"
+                        property="ccw.leiningen.propertyTester.leiningen-enabled-project">
+                  </test>
+               </adapt>
+            </with>
+            <iterate
+                  ifEmpty="false"
+                  operator="and">
+               <adapt
+                     type="org.eclipse.core.resources.IResource">
+                  <test
+                        forcePluginActivation="true"
+                        property="ccw.leiningen.propertyTester.leiningen-enabled-project">
+                  </test>
+               </adapt>
+            </iterate>
+         </or>
+      </activeWhen>
+   </handler>
+   <handler
+         commandId="ccw.leiningen.command.add-leiningen-nature">
+      <class
+            class="ccw.util.GenericExecutableExtension">
+         <parameter
+               name="factory"
+               value="ccw.util.factories/handler-factory">
+         </parameter>
+         <parameter
+               name="handler"
+               value="ccw.leiningen.handlers/add-leiningen-nature">
+         </parameter>
+      </class>
+      <activeWhen>
+         <and>
+            <iterate
+                  operator="and">
+               <adapt
+                     type="org.eclipse.core.resources.IProject">
+                  <test
+                        property="ccw.leiningen.propertyTester.leiningen-project-file-present-factory">
+                  </test>
+               </adapt>
+            </iterate>
+            <not>
+               <and>
+                  <count
+                        value="1">
+                  </count>
+                  <iterate
+                        ifEmpty="false"
+                        operator="or">
+                     <adapt
+                           type="org.eclipse.core.resources.IProject">
+                        <test
+                              property="org.eclipse.core.resources.projectNature"
+                              value="ccw.leiningen.nature">
+                        </test>
+                     </adapt>
+                  </iterate>
+               </and>
+            </not>
+         </and>
+      </activeWhen>
+      <enabledWhen>
+         <and>
+            <iterate
+                  operator="and">
+               <adapt
+                     type="org.eclipse.core.resources.IProject">
+                  <test
+                        property="ccw.leiningen.propertyTester.leiningen-project-file-present-factory">
+                  </test>
+               </adapt>
+            </iterate>
+            <not>
+               <and>
+                  <count
+                        value="1">
+                  </count>
+                  <iterate
+                        ifEmpty="false"
+                        operator="or">
+                     <adapt
+                           type="org.eclipse.core.resources.IProject">
+                        <test
+                              property="org.eclipse.core.resources.projectNature"
+                              value="ccw.leiningen.nature">
+                        </test>
+                     </adapt>
+                  </iterate>
+               </and>
+            </not>
+         </and>
+      </enabledWhen>
+   </handler>
+   <handler
+         commandId="ccw.leiningen.command.reset-project-classpath">
+      <class
+            class="ccw.util.GenericExecutableExtension">
+         <parameter
+               name="factory"
+               value="ccw.util.factories/handler-factory">
+         </parameter>
+         <parameter
+               name="handler"
+               value="ccw.leiningen.handlers/reset-project-build-path">
+         </parameter>
+      </class>
+      <activeWhen>
+         <or>
+            <with
+                  variable="activePart">
+               <adapt
+                     type="org.eclipse.ui.IEditorPart">
+                  <test
+                        forcePluginActivation="true"
+                        property="ccw.leiningen.propertyTester.leiningen-enabled-project">
+                  </test>
+               </adapt>
+            </with>
+            <iterate
+                  ifEmpty="false"
+                  operator="and">
+               <adapt
+                     type="org.eclipse.core.resources.IResource">
+                  <test
+                        forcePluginActivation="true"
+                        property="ccw.leiningen.propertyTester.leiningen-enabled-project">
+                  </test>
+               </adapt>
+            </iterate>
+         </or>
+      </activeWhen>
+   </handler>
+</extension>
+<extension
+      id="ccw.leiningen.nature"
+      name="Leiningen Nature"
+      point="org.eclipse.core.resources.natures">
+   <runtime>
+      <run
+            class="ccw.util.GenericExecutableExtension">
+         <parameter
+               name="factory"
+               value="ccw.leiningen.nature/factory">
+         </parameter>
+      </run>
+   </runtime>
+   <builder
+         id="ccw.leiningen.builder">
+   </builder>
+   <requires-nature
+         id="org.eclipse.jdt.core.javanature">
+   </requires-nature>
+</extension>
+<extension
+      id="ccw.leiningen.builder"
+      name="Leiningen Builder"
+      point="org.eclipse.core.resources.builders">
+   <builder
+         callOnEmptyDelta="false"
+         hasNature="true">
+      <run
+            class="ccw.leiningen.LeiningenBuilder">
+      </run></builder>
+</extension>
+<extension
+      point="org.eclipse.ui.menus">
+   <menuContribution
+         allPopups="true"
+         locationURI="popup:org.eclipse.ui.popup.any?after=additions">
+      <menu
+            id="ccw.leiningen.project.menu"
+            label="Leiningen"
+            mnemonic="L">
+         <command
+               commandId="ccw.leiningen.command.reset-project-classpath"
+               label="Reset Project Classpath from project.clj"
+               mnemonic="R"
+               style="push">
+            <visibleWhen
+                  checkEnabled="true">
+            </visibleWhen>
+         </command>
+         <command
+               commandId="ccw.leiningen.command.update-dependencies"
+               label="Update dependencies from project.clj"
+               mnemonic="U"
+               style="push"
+               tooltip="Update the Eclipse project&apos;s classpath container for Leiningen dependencies from project.clj">
+            <visibleWhen
+                  checkEnabled="true">
+            </visibleWhen>
+         </command>
+      </menu>
+   </menuContribution>
+   <menuContribution
+         allPopups="true"
+         locationURI="popup:org.eclipse.ui.projectConfigure?after=additions">
+      <command
+            commandId="ccw.leiningen.command.add-leiningen-nature"
+            style="push">
+         <visibleWhen
+               checkEnabled="true">
+         </visibleWhen>
+      </command>
+   </menuContribution>
+</extension>
+<extension
+      point="org.eclipse.core.expressions.definitions">
+   <definition
+         id="ccw.leiningen.expression.selection-single-leiningen-project">
+      <and>
+         <count
+               value="1">
+         </count>
+         <iterate
+               ifEmpty="false"
+               operator="or">
+            <adapt
+                  type="org.eclipse.core.resources.IProject">
+               <test
+                     property="org.eclipse.core.resources.projectNature"
+                     value="ccw.leiningen.nature">
+               </test>
+            </adapt>
+         </iterate>
+      </and>
+   </definition>
+   <definition
+         id="ccw.leiningen.expression.selection-single-non-leiningen-project">
+      <and>
+         <count
+               value="1">
+         </count>
+         <iterate
+               ifEmpty="false"
+               operator="or">
+            <adapt
+                  type="org.eclipse.core.resources.IProject">
+               <not>
+                  <test
+                        property="ccw.leiningen.propertyTester.leiningen-project-file-present-factory"
+                        value="ccw.leiningen.nature">
+                  </test>
+               </not>
+            </adapt>
+         </iterate>
+      </and>
+   </definition>
+</extension>
+<extension
+      point="org.eclipse.core.expressions.propertyTesters">
+   <propertyTester
+         class="ccw.util.GenericExecutableExtension:ccw.leiningen.handlers/leiningen-enabled-project-factory"
+         id="ccw.leiningen.propertyTester.leiningen-enabled-project"
+         namespace="ccw.leiningen.propertyTester"
+         properties="leiningen-enabled-project"
+         type="java.lang.Object">
+   </propertyTester>
+   <propertyTester
+         class="ccw.util.GenericExecutableExtension:ccw.leiningen.handlers/leiningen-project-file-present-factory"
+         id="ccw.leiningen.propertyTester.leiningen-project-file-present-factory"
+         namespace="ccw.leiningen.propertyTester"
+         properties="leiningen-project-file-present-factory"
+         type="org.eclipse.core.resources.IProject">
+   </propertyTester>
+</extension>
     
 </plugin>
