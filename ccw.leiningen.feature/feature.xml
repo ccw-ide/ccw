@@ -3,7 +3,8 @@
       id="ccw.leiningen.feature"
       label="%featureName"
       version="0.0.1.qualifier"
-      provider-name="%providerName">
+      provider-name="%providerName"
+      plugin="ccw.leiningen.branding">
 
    <description url="http://code.google.com/p/counterclockwise">
       %description
@@ -14,8 +15,12 @@
    </copyright>
 
    <license url="http://www.eclipse.org/legal/epl-v10.html">
-      [Enter License Description here.]
+      %license
    </license>
+
+   <url>
+      <update label="Leiningen Support Update Site" url="http://ccw.cgrand.net/updatesite-lein-betas/"/>
+   </url>
 
    <requires>
       <import plugin="org.eclipse.core.resources"/>
@@ -87,5 +92,11 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+
+   <plugin
+         id="ccw.leiningen.branding"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
 
 </feature>
