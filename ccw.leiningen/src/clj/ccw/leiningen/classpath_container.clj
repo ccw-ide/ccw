@@ -1,6 +1,7 @@
 (ns ccw.leiningen.classpath-container
   (:require [leiningen.core.project :as p]
             [leiningen.core.classpath :as cp]
+            [cemerick.pomegranate.aether :as aether]
             [clojure.string :as str]
             [ccw.util.eclipse :as e]
             [clojure.java.io :as io]
@@ -80,6 +81,21 @@
   (let [entry-list (map library-entry project-dependencies)]
     (make-leiningen-classpath-container entry-list)))
 
+(defn resolve-dependencies
+  "ADAPTED FROM LEININGEN-CORE resolve-dependencies.
+  Simply delegate regular dependencies to pomegranate. This will
+  ensure they are downloaded into ~/.m2/repositories and that native
+  deps have been extracted to :native-path.  If :add-classpath? is
+  logically true, will add the resolved dependencies to Leiningen's
+  classpath.
+
+   Returns a set of the dependencies' files."
+  [dependencies-key {:keys [repositories native-path] :as project} & rest]
+  (doto (->> (apply #'cp/get-dependencies dependencies-key project rest)
+             (aether/dependency-files)
+             (filter #(re-find #"\.(jar|zip)$" (.getName %))))
+    (cp/extract-native-deps native-path)))
+
 (defn get-project-dependencies
   "Given a project (anything that coerces to ccw.util.eclipse/IProjectCoercion),
    analyze its project.clj file, grab the dependencies, and return a list
@@ -87,7 +103,7 @@
    Throws Aether exceptions if a problem occured"
   [project]
   (let [lein-project (u/lein-project project)
-        dependencies (cp/resolve-dependencies lein-project)]
+        dependencies (resolve-dependencies :dependencies lein-project)]
     (filter #(-> % .getName (.endsWith ".jar")) dependencies)))
 
 (defn- delete-container-markers [?project]
