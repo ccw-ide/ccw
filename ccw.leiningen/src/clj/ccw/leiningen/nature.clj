@@ -1,12 +1,10 @@
 (ns ccw.leiningen.nature
   (:require [ccw.leiningen.classpath-container :as cpc]
-            [leiningen.core.project            :as p]
-            [leiningen.core.classpath          :as cp]
             [clojure.string                    :as str]
             [ccw.util.eclipse                  :as e]
             [clojure.java.io                   :as io]
             [ccw.leiningen.util                :as u]
-            [ccw.util.bundle-utils             :as b])
+            [ccw.util.bundle                   :as b])
   (:import 
     [org.eclipse.core.resources     IProjectNature]
     [org.eclipse.core.runtime       CoreException
@@ -120,11 +118,11 @@
   (or (jvm-entry java-project) (default-jvm-entry)))
 
 (defn lein-raw-source-folders [lein-proj]
-  (concat (:source-path lein-proj)))
+  (concat (:source-paths lein-proj)))
 
 (defn lein-raw-resource-folders [lein-proj]
-  (concat (:test-path lein-proj)
-          (:resources-path lein-proj)))
+  (concat (:test-paths lein-proj)
+          (:resources-paths lein-proj)))
 
 (defn lein-raw-compile-folder [lein-proj] (:compile-path lein-proj))
 
@@ -153,11 +151,14 @@
    - Install a Leiningen Classpath Container" 
   [java-proj]
   (let [lein-proj        (u/lein-project (e/project java-proj))
+        _ (println "lein-proj: " lein-proj)
         
         jvm-entry        (jvm-entry-or-default java-proj)
         
         source-entries   (map #(u/source-entry {:path %}) 
                               (lein-source-folders lein-proj))
+        _ (println "(lein-source-folders lein-proj): " (lein-source-folders lein-proj))
+        _ (println "source-entries: " source-entries)
 
         ;; TODO remove this hack once CCW 0.7.0 has been delivered with the Builder correction for missing source folders
         optional-entry-start-version (b/version :major 0 :minor 7 :micro 0 :qualifier "201203300000")

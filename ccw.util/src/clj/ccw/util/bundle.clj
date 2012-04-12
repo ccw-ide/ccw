@@ -1,4 +1,4 @@
-(ns ccw.util.bundle-utils
+(ns ccw.util.bundle
   (:refer-clojure :exclude [< > =])
   (:import org.eclipse.core.runtime.CoreException
            org.eclipse.core.runtime.IStatus
