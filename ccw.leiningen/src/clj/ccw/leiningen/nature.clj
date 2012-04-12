@@ -120,9 +120,9 @@
 (defn lein-raw-source-folders [lein-proj]
   (concat (:source-paths lein-proj)))
 
-(defn lein-raw-resource-folders [lein-proj]
+(defn lein-raw-optional-source-folders [lein-proj]
   (concat (:test-paths lein-proj)
-          (:resources-paths lein-proj)))
+          (:resource-paths lein-proj)))
 
 (defn lein-raw-compile-folder [lein-proj] (:compile-path lein-proj))
 
@@ -132,8 +132,8 @@
 (defn lein-source-folders [lein-proj]
   (map path-to-folder (lein-raw-source-folders lein-proj)))
 
-(defn lein-resource-folders [lein-proj]
-  (map path-to-folder (lein-raw-resource-folders lein-proj)))
+(defn lein-optional-source-folders [lein-proj]
+  (map path-to-folder (lein-raw-optional-source-folders lein-proj)))
 
 (defn lein-compile-folder [lein-proj]
   (-> lein-proj lein-raw-compile-folder path-to-folder))
@@ -164,19 +164,20 @@
         optional-entry-start-version (b/version :major 0 :minor 8 :micro 0 :qualifier "201204121312")
         ccw-version (or (ccw-bundle-version) (b/version :major 9999 :minor 9999 :micro 9999))
         optional-entries? (b/> ccw-version optional-entry-start-version)
-
+        
         _ (println "will handle optional entries: " optional-entries?)
+        _ (println "resource-folders:" (lein-optional-source-folders lein-proj))
         ; TODO remove the folder check, and add the optional extra attribute
         resource-entries (if optional-entries?
                            (->> lein-proj
-                             lein-resource-folders
+                             lein-optional-source-folders
                              (map #(u/source-entry {:path %, 
                                                     :extra-attributes {u/optional "true"}})))
                            (->> lein-proj
-                             lein-resource-folders
+                             lein-optional-source-folders
                              (filter #(.exists %))
                              (map #(u/source-entry {:path %}))))
-
+        _ (println "resource entries:" resource-entries)
         compile-entry    (u/library-entry {:path (lein-compile-folder lein-proj)
                                            :extra-attributes {u/optional "true"}})
 
