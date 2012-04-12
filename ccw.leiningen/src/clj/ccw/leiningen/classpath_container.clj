@@ -100,11 +100,14 @@
   "Given a project (anything that coerces to ccw.util.eclipse/IProjectCoercion),
    analyze its project.clj file, grab the dependencies, and return a list
    of jar files.
+   Return the dependencies sorted alphabetically via their file name.
    Throws Aether exceptions if a problem occured"
   [project]
   (let [lein-project (u/lein-project project)
         dependencies (resolve-dependencies :dependencies lein-project)]
-    (filter #(-> % .getName (.endsWith ".jar")) dependencies)))
+    (->> dependencies
+      (filter #(-> % .getName (.endsWith ".jar")))
+      (sort-by #(.getName %)))))
 
 (defn- delete-container-markers [?project]
   (.deleteMarkers (e/resource ?project) 
