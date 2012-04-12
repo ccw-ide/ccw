@@ -160,8 +160,8 @@
         _ (println "(lein-source-folders lein-proj): " (lein-source-folders lein-proj))
         _ (println "source-entries: " source-entries)
 
-        ;; TODO remove this hack once CCW 0.7.0 has been delivered with the Builder correction for missing source folders
-        optional-entry-start-version (b/version :major 0 :minor 7 :micro 0 :qualifier "201203300000")
+        ;; TODO remove this hack once CCW 0.8.0 has been delivered with the Builder correction for missing source folders
+        optional-entry-start-version (b/version :major 0 :minor 8 :micro 0 :qualifier "201204121312")
         ccw-version (or (ccw-bundle-version) (b/version :major 9999 :minor 9999 :micro 9999))
         optional-entries? (b/> ccw-version optional-entry-start-version)
 
