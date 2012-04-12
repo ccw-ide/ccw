@@ -1,8 +1,6 @@
 (ns ccw.leiningen.handlers
   (:require [ccw.leiningen.classpath-container :as cpc]
             [ccw.leiningen.nature              :as n]
-            [leiningen.core.project            :as p]
-            [leiningen.core.classpath          :as cp]
             [clojure.string                    :as str]
             [ccw.util.eclipse                  :as e]
             [clojure.java.io                   :as io])
