@@ -642,8 +642,8 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 			field.setText(text == null ? fErrorLabel : text);
 			field.setToolTipText(
 					(isStructuralEditingEnabled() 
-							? "strict/paredit edit mode:\neditor does its best to prevent you from breaking the structure of the code (requires you to know shortcut commands well).\nClick to switch to unrestricted edit mode."
-						    : "unrestricted edit mode:\nhelps you with edition, but does not get in your way.\nClick to switch to strict/paredit edit mode."));
+							? "strict/paredit edit mode:\neditor does its best to prevent you from breaking the structure of the code (requires you to know shortcut commands well)."
+						    : "unrestricted edit mode:\nhelps you with edition, but does not get in your way."));
 		}
 	}
 

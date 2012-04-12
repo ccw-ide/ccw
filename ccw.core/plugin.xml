@@ -889,6 +889,10 @@
                   visible="true">
             </separator>
             <command
+                  commandId="ccw.ui.edit.text.clojure.switch.structuraledition.mode"
+                  style="push">
+            </command>
+            <command
                   commandId="ccw.ui.edit.text.clojure.select.toplevel.s.expression"
                   label="Select top level s-expression"
                   style="push">
