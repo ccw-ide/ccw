@@ -57,8 +57,7 @@
           [log-style line-background-color-name] (get log-styles type [default-log-style nil])
           linecnt (.getLineCount log)]
       (.append log s)
-      (when (and (seq s) (not (Character/isWhitespace (last s))))
-        (.append log "\n"))
+      (when-not (re-find #"(\n|\r)$" s) (.append log "\n"))
       (doto log
         cursor-at-end
         .showSelection
@@ -71,7 +70,7 @@
   [status s]
   (format "Expression %s: %s"
     ({"timeout" "timed out", "interrupted" "was interrupted"} status "failed")
-    (-> s
+    (-?> s
       (.substring 0 (min 30 (count s)))
       (str (when (> (count s) 30) "..."))
       (.replaceAll "\\n|\\r" " "))))
