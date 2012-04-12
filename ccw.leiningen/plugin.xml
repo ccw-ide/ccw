@@ -12,13 +12,13 @@
          point="org.eclipse.jdt.ui.classpathContainerPage">
   <classpathContainerPage
    id="ccw.LEININGEN_CONTAINER"
-   name="Leiningen Managed Dependencies"
+   name="%ccw.LEININGEN_CONTAINER"
    class="ccw.util.GenericExecutableExtension:ccw.leiningen.classpath-container/page-factory">
   </classpathContainerPage>         
    </extension>
 <extension
        id="ccw.leiningen.problemmarkers.classpathcontainer"
-       name="Leiningen Classpath Container"
+       name="%ccw.leiningen.problemmarker.classpathcontainer"
        point="org.eclipse.core.resources.markers">
     <persistent
           value="true">
@@ -30,27 +30,27 @@
 <extension
       point="org.eclipse.ui.commands">
    <category
-         description="Leiningen Commands"
+         description="%ccw.leiningen.category"
          id="ccw.leiningen.category"
-         name="Leiningen Commands">
+         name="%ccw.leiningen.category">
    </category>
    <command
          categoryId="ccw.leiningen.category"
-         description="Update Leiningen dependencies in Classpath Container"
+         description="%ccw.leiningen.command.update-dependencies.description"
          id="ccw.leiningen.command.update-dependencies"
-         name="Update dependencies">
+         name="%ccw.leiningen.command.update-dependencies.name">
    </command>
    <command
          categoryId="ccw.leiningen.category"
-         description="Convert the project to a Leiningen Project"
+         description="%ccw.leiningen.command.add-leiningen-nature.description"
          id="ccw.leiningen.command.add-leiningen-nature"
-         name="Convert to Leiningen Project (resets Java Build Path)">
+         name="%ccw.leiningen.command.add-leiningen-nature.name">
    </command>
    <command
          categoryId="ccw.leiningen.category"
-         description="Reset Project Classpath (aka Java Build Path) from content of file project.clj"
+         description="%ccw.leiningen.command.reset-project-classpath.description"
          id="ccw.leiningen.command.reset-project-classpath"
-         name="Reset Project Classpath from project.clj">
+         name="%ccw.leiningen.command.reset-project-classpath.name">
    </command>
 </extension>
 <extension
@@ -257,11 +257,11 @@
          locationURI="popup:org.eclipse.ui.popup.any?after=additions">
       <menu
             id="ccw.leiningen.project.menu"
-            label="Leiningen"
+            label="%ccw.leiningen.popup.menu.label"
             mnemonic="L">
          <command
                commandId="ccw.leiningen.command.reset-project-classpath"
-               label="Reset Project Classpath from project.clj"
+               label="%ccw.leiningen.command.reset-project-classpath.name"
                mnemonic="R"
                style="push">
             <visibleWhen
@@ -270,7 +270,7 @@
          </command>
          <command
                commandId="ccw.leiningen.command.update-dependencies"
-               label="Update dependencies from project.clj"
+               label="%ccw.leiningen.command.update-dependencies.name"
                mnemonic="U"
                style="push"
                tooltip="Update the Eclipse project&apos;s classpath container for Leiningen dependencies from project.clj">
@@ -285,6 +285,7 @@
          locationURI="popup:org.eclipse.ui.projectConfigure?after=additions">
       <command
             commandId="ccw.leiningen.command.add-leiningen-nature"
+            label="%ccw.leiningen.command.add-leiningen-nature.name"
             style="push">
          <visibleWhen
                checkEnabled="true">
