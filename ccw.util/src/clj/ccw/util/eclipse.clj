@@ -100,6 +100,9 @@
   String
   (resource [filesystem-path] (resource (path filesystem-path)))
   
+  File
+  (resource [file] (resource (.getCanonicalPath file)))
+  
   IPath
   (resource [filesystem-path] 
     (.getFileForLocation (workspace-root) filesystem-path))

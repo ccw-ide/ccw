@@ -1,9 +1,11 @@
 (ns ccw.leiningen.util
   (:require [ccw.util.eclipse :as e]
-            [leiningen.core.project :as p])
+            [leiningen.core.project :as p]
+            [leiningen.core.eval :as eval])
   (:import [org.eclipse.jdt.core JavaCore
                                  IClasspathAttribute
                                  IAccessRule]
+           [org.eclipse.jdt.launching JavaRuntime]
            [org.eclipse.core.runtime IPath]))
 
 (println "ccw.leiningen.util load starts")
@@ -22,10 +24,14 @@
                       .toOSString)]
     (p/read project-clj)))
 
+(defn lein-native-platform-path [lein-project]
+  (eval/native-arch-path lein-project))
+
 ;;; JDT utilities
 
-(def optional (IClasspathAttribute/OPTIONAL))
+(def optional         (IClasspathAttribute/OPTIONAL))
 (def javadoc-location (IClasspathAttribute/JAVADOC_LOCATION_ATTRIBUTE_NAME))
+(def native-library   (JavaRuntime/CLASSPATH_ATTR_LIBRARY_PATH_ENTRY))
 
 (defn classpath-attribute [name value]
   (JavaCore/newClasspathAttribute name value))

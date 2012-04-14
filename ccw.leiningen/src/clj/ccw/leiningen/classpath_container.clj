@@ -1,4 +1,5 @@
 (ns ccw.leiningen.classpath-container
+  (:use [clojure.core.incubator :only [-?> -?>>]])
   (:require [leiningen.core.project :as p]
             [leiningen.core.classpath :as cp]
             [cemerick.pomegranate.aether :as aether]
@@ -70,9 +71,14 @@
 
 (defn- library-entry
   "Wrapper for the ccw.leiningen.util/library-entry function"
-  [file]
-  (u/library-entry 
-    {:path file}))
+  [{:keys [path native-path]}]
+  (let [params {:path path}
+        params (if native-path
+                 (update-in params [:extra-attributes] 
+                            assoc u/native-library (str (or (-?> native-path e/resource e/path .makeRelative) 
+                                                            (e/path native-path))))
+                 params)]
+    (u/library-entry params)))
 
 (defn leiningen-classpath-container
   "Given a project, grab its dependencies, and create an Eclipse Classpath Container
@@ -96,18 +102,24 @@
              (filter #(re-find #"\.(jar|zip)$" (.getName %))))
     (cp/extract-native-deps native-path)))
 
+(defn ser-dep [path native-path]
+  {:path (.getAbsolutePath (io/as-file path))
+   :native-path (.getAbsolutePath (io/as-file native-path))})
+
 (defn get-project-dependencies
   "Given a project (anything that coerces to ccw.util.eclipse/IProjectCoercion),
    analyze its project.clj file, grab the dependencies, and return a list
    of jar files.
    Return the dependencies sorted alphabetically via their file name.
    Throws Aether exceptions if a problem occured"
-  [project]
-  (let [lein-project (u/lein-project project)
-        dependencies (resolve-dependencies :dependencies lein-project)]
-    (->> dependencies
-      (filter #(-> % .getName (.endsWith ".jar")))
-      (sort-by #(.getName %)))))
+  [lein-project]
+  (let [dependencies (resolve-dependencies :dependencies lein-project)]
+    (map 
+      ser-dep
+      (->> dependencies
+        (filter #(-> % .getName (.endsWith ".jar")))
+        (sort-by #(.getName %)))
+      (repeat (u/lein-native-platform-path lein-project)))))
 
 (defn- delete-container-markers [?project]
   (.deleteMarkers (e/resource ?project) 
@@ -140,7 +152,7 @@
    project deps is a list of jar files (or coercible to jar files)
    Writes log and returns nil if save failed, or return the file"
   [project project-deps]
-  (save-project-state project ".container" (map #(.getAbsolutePath (io/as-file %)) project-deps)))
+  (save-project-state project ".container" project-deps))
 
 (defn load-project-state
   "Retrieve from disk (from the Plugin state directory), the state for state-name, for the project.
@@ -149,14 +161,21 @@
   [project state-name]
   (with-exc-logged
     (when-let [state-file (-> project (state-file state-name) u/file-exists?)]
-      (read-string (slurp state-file)))))
+      (let [state (read-string (slurp state-file))]
+        (println state)
+        (when (or (empty? state) (map? (first state))) (do (println "yo!") state))))))
+
+(defn deser-dep [dep-map]
+  (-> dep-map 
+    (update-in [:path] #(File. %))
+    (update-in [:native-path] #(File. %))))
 
 (defn load-project-dependencies
   "Retrieve from disk (from the Plugin state directory), the deps for the project.
    Return a list of Files
    Writes log and returns nil if loading failed."
   [project]
-  (map #(File. %) (load-project-state project ".container")))
+  (map deser-dep (load-project-state project ".container")))
 
 (defn- add-container-marker 
   "Delete previous container markers, add new one"
@@ -519,7 +538,8 @@
    do not touch the current lein container."
   [java-project] ;; TODO checks
   (try
-    (let [deps (get-project-dependencies java-project)]
+    (let [lein-project (u/lein-project java-project)
+          deps (get-project-dependencies lein-project)]
       (set-lein-container java-project deps)
       (delete-container-markers java-project)
       (save-project-dependencies java-project deps))
