@@ -109,9 +109,11 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
 
     public static void fullBuild(IProject project, IProgressMonitor monitor) throws CoreException{
         
-        if(monitor == null){
+        if(monitor == null) {
             monitor = new NullProgressMonitor();
         }
+
+        createClassesFolder(project, monitor);
         
         // Issue #203 is probably related to the following way of getting a REPLView.
         // A race condition between the builder and the Eclipse machinery creating the views, etc.
@@ -136,7 +138,8 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
         }
         
         deleteMarkers(project);
-
+        
+        
         ClojureVisitor visitor = new ClojureVisitor(repl.getToolingConnection());
         visitor.visit(getSrcFolders(project));
         
@@ -159,7 +162,8 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
                 IFolder folder = project.getWorkspace().getRoot().getFolder(entry.getPath());
                 IFolder outputFolder = project.getWorkspace().getRoot().getFolder(
                 		(entry.getOutputLocation()==null) ? defaultOutputFolder : entry.getOutputLocation());
-                srcFolders.put(folder, outputFolder);
+                if (folder.exists())
+                	srcFolders.put(folder, outputFolder);
                 break;
             case IClasspathEntry.CPE_LIBRARY:
                 break;
@@ -176,6 +180,12 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
         return srcFolders;
     }
     
+    private static void createClassesFolder(IProject project, IProgressMonitor monitor) throws CoreException {
+    	if (!getClassesFolder(project).exists()) {
+    		getClassesFolder(project).create(true, true, monitor);
+    	}
+    }
+    
     @Override
     protected void clean(IProgressMonitor monitor) throws CoreException {
     	if (monitor==null) {
@@ -184,9 +194,7 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
     	
     	try {
     		getClassesFolder(getProject()).delete(true, monitor);
-	    	if (!getClassesFolder(getProject()).exists()) {
-	    		getClassesFolder(getProject()).create(true, true, monitor);
-	    	}
+    		createClassesFolder(getProject(), monitor);
 	        getClassesFolder(getProject()).refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 0));
 	        getClassesFolder(getProject()).setDerived(true); //, monitor); removed monitor argument, probably a 3.5/3.6 only stuff
     	} catch (CoreException e) {
