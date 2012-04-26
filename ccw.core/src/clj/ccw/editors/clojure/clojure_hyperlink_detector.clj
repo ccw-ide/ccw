@@ -36,7 +36,7 @@
       (do
         (.setStatusLineErrorMessage editor ClojureEditorMessages/You_need_a_running_repl)
         nil)
-      (let [[ [file line _ ns] ] (repl/response-values (client {:op eval :code command}))]
+      (let [[ [file line _ ns] ] (repl/response-values (repl/message client {:op :eval :code command}))]
         (if (and file line ns)
           {"file" file
            "line" (Integer/valueOf line)
