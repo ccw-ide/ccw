@@ -62,11 +62,9 @@ import ccw.editors.clojure.IClojureEditorActionDefinitionIds;
 import ccw.preferences.PreferenceConstants;
 import ccw.util.ClojureUtils;
 import ccw.util.DisplayUtil;
-import clojure.lang.Atom;
 import clojure.lang.IFn;
 import clojure.lang.Keyword;
 import clojure.lang.PersistentHashMap;
-import clojure.lang.PersistentTreeMap;
 import clojure.lang.Symbol;
 import clojure.lang.Var;
 import clojure.osgi.ClojureOSGi;
@@ -566,6 +564,9 @@ public class REPLView extends ViewPart implements IAdaptable {
 						&& noSelection() 
 						&& textAfterCaret().trim().isEmpty()
 						&& !viewer.isParseTreeBroken()) {
+					
+					final String widgetText = viewerWidget.getText();
+					
 					// Executing evalExpression() via SWT's asyncExec mechanism,
 					// we ensure all the normal behaviour is done by the Eclipse
 					// framework on the Enter key, before sending the code.
@@ -574,13 +575,18 @@ public class REPLView extends ViewPart implements IAdaptable {
 					// with the selection before being sent for evaluation.
 					DisplayUtil.asyncExec(new Runnable() {
 						public void run() {
-							evalExpression();
+							// we do not execute auto eval if some text has
+							// been added between the check and the execution
+							if (viewerWidget.getText().equals(widgetText + "\n")
+									|| viewerWidget.getText().equals(widgetText + "\r\n")
+									|| viewerWidget.getText().equals(widgetText + "\r")) {
+								evalExpression();
+							}
 						}});
 				} 
 			}
         });
     }
-    
     private void installEvalTopLevelSExpressionCommand() {
         IHandlerService handlerService = (IHandlerService) getViewSite().getService(IHandlerService.class);
         handlerService.activateHandler(IClojureEditorActionDefinitionIds.EVALUATE_TOP_LEVEL_S_EXPRESSION, new AbstractHandler() {
