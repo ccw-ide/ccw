@@ -17,6 +17,8 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ST;
 import org.eclipse.swt.custom.SashForm;
@@ -28,6 +30,7 @@ import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
@@ -108,6 +111,12 @@ public class REPLView extends ViewPart implements IAdaptable {
     public StyledText viewerWidget; // public only to simplify interop with helpers impl'd in Clojure
     private ClojureSourceViewerConfiguration viewerConfig;
     
+    private final IPropertyChangeListener fontChangeListener = new IPropertyChangeListener() {
+        public void propertyChange(PropertyChangeEvent event) {
+            if (event.getProperty().equals(JFaceResources.TEXT_FONT)) resetFont();
+        }
+    };
+        
     private Connection interactive;
     private Connection toolConnection;
     
@@ -132,6 +141,12 @@ public class REPLView extends ViewPart implements IAdaptable {
 	private StatusLineContributionItem structuralEditionModeStatusContributionItem;
     
     public REPLView () {}
+    
+    private void resetFont () {
+        Font font= JFaceResources.getTextFont();
+        logPanel.setFont(font);
+        viewerWidget.setFont(font);
+    }
     
     private void copyToLog (StyledText s) {
         // sadly, need to reset text on the ST in order to get formatting/style ranges...
@@ -310,7 +325,7 @@ public class REPLView extends ViewPart implements IAdaptable {
 				}) {
         	public REPLView getCorrespondingREPL() { return REPLView.this; };
             private Connection getCorrespondingREPLConnection () {
-                // we'lÎñl be connected by the time this is called
+                // we'll be connected by the time this is called
                 return toolConnection;
             }
             public void setStatusLineErrorMessage(String msg) {
@@ -428,6 +443,9 @@ public class REPLView extends ViewPart implements IAdaptable {
 			}
     	});
         
+       
+        resetFont();
+        JFaceResources.getFontRegistry().addListener(fontChangeListener);
     }
     
     private interface MessageProvider {
@@ -439,13 +457,16 @@ public class REPLView extends ViewPart implements IAdaptable {
 				String message = hintProvider.getMessageText();
 				if (message == null) 
 					return;
-				
+
+                // keep the 'tooltip' using the default font 
+                event.gc.setFont(JFaceResources.getFont(JFaceResources.DEFAULT_FONT));
+
 				Point topRightPoint = topRightPoint(textViewer.getClientArea());
 				int sWidth = textWidthPixels(message, event);
 				int x = Math.max(topRightPoint.x - sWidth, 0);
 				int y = topRightPoint.y;
-				event.gc.setForeground(Display.getCurrent().getSystemColor(
-						SWT.COLOR_GRAY));
+				
+				event.gc.setAlpha(200);
 				event.gc.drawText(message, x, y, true);
 			}
 
@@ -556,6 +577,7 @@ public class REPLView extends ViewPart implements IAdaptable {
         if (toolConnection != null) {
         	toolConnection.close();
         }
+        JFaceResources.getFontRegistry().removeListener(fontChangeListener);
     }
 
     public boolean isDisposed () {
