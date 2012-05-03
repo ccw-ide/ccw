@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
-import org.eclipse.core.internal.jobs.JobManager;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -35,10 +34,10 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.console.ConsolePlugin;
@@ -79,6 +78,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 
         public void done() {
             super.done();
+
             Job ackJob = new Job("Waiting for new REPL process to be ready...") {
                 private IProgressMonitor monitor;
                 private CountDownLatch cancelOrAck = new CountDownLatch(1);
@@ -101,6 +101,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
                 
 				protected IStatus run(final IProgressMonitor monitor) {
 				    this.monitor = monitor;
+				    
 					monitor.beginTask("Waiting for new REPL process to be ready...", IProgressMonitor.UNKNOWN);
 
                     final Number port = (Number)Connection.find("clojure.tools.nrepl.ack", "wait-for-ack").invoke(30000);
@@ -113,16 +114,18 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
                         return done(monitor, new Status(IStatus.ERROR, CCWPlugin.PLUGIN_ID, "Waiting for new REPL process ack timed out"));
                     }
                     
-		            DisplayUtil.asyncExec(new Runnable() {
+                    // The syncExec is necessary to ensure the launch does not return
+                    // until either the repl is launched, either it failed
+		            DisplayUtil.syncExec(new Runnable() {
 		                public void run() {
 		                    
 		                    // only using a latch because getProject().touch can call done() more than once
-		                    final CountDownLatch latch = new CountDownLatch(1);
+		                    final CountDownLatch projectTouchLatch = new CountDownLatch(1);
 	                    	if (isAutoReloadEnabled(launch) && getProject() != null) {
                     			try {
 	                    			getProject().touch(new NullProgressMonitor() {
 	                    				public void done() {
-	                    					latch.countDown();
+	                    					projectTouchLatch.countDown();
 	                    				}
 	                    			});
                     			} catch (CoreException e) {
@@ -131,10 +134,10 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
                     						"REPL Connection failure", MSG, e.getStatus());
 	                    		}
 	                    	} else {
-	                    		latch.countDown();
+	                    		projectTouchLatch.countDown();
 	                    	}
 	                    	try {
-                                latch.await();
+                                projectTouchLatch.await();
                             } catch (InterruptedException e) {}
 	                    	connectRepl();
 		                }
@@ -167,6 +170,14 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
             };
             ackJob.setUser(true);
             ackJob.schedule();
+            
+            Thread.yield();
+            
+            try {
+				ackJob.join();
+			} catch (InterruptedException e) {
+				CCWPlugin.logError("Exception while launching a Clojure Application", e);
+			}
         }
     }
     

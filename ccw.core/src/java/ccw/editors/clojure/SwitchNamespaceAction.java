@@ -22,6 +22,10 @@ public class SwitchNamespaceAction extends Action {
 
     public void run() {
         REPLView repl = REPLView.activeREPL.get();
+        run(repl, editor, true);
+    }
+
+    public static void run(REPLView repl, ClojureEditor editor, boolean activateREPL) {
         if (repl == null || repl.isDisposed()) {
 
             return;
@@ -34,7 +38,7 @@ public class SwitchNamespaceAction extends Action {
         } else {
             //EvaluateTextUtil.evaluateText(repl, String.format(";; Switching to %s namespace", ns), false);
             EvaluateTextUtil.evaluateText(repl, String.format("(clojure.core/in-ns '%s)", ns), false);
-            Actions.ShowActiveREPL.execute(true);
+            Actions.ShowActiveREPL.execute(activateREPL);
         }
     }
 }
