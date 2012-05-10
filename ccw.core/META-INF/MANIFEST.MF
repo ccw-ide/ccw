@@ -35,7 +35,6 @@ Bundle-ClassPath: .,
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-Vendor: Counterclockwise team
 Export-Package: ccw,
- ccw.actions,
  ccw.builder,
  ccw.debug,
  ccw.editors.clojure,
