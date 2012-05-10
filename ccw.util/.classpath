@@ -4,6 +4,6 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src/clj"/>
 	<classpathentry kind="src" path="src/java"/>
-	<classpathentry exported="true" kind="lib" path="classes" sourcepath="classes"/>
+	<classpathentry kind="lib" path="classes"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

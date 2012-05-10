@@ -8,45 +8,36 @@
  * Contributors: 
  *    Casey Marshal - initial API and implementation
  *******************************************************************************/
-package ccw.actions;
+package ccw.commands;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.IObjectActionDelegate;
-import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.handlers.HandlerUtil;
 
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
 
 /**
- * Inspired from cusp
- * @author Laurent
+ * @author Laurent Petit
  */
-public class ToggleNatureAction implements IObjectActionDelegate {
+public class ToggleNatureCommand extends AbstractHandler {
 
-		private ISelection selection;
-		private IWorkbenchPart targetPart;
-		
-
-		public void selectionChanged(IAction action, ISelection selection) {
-			this.selection = selection;
-		}
-
-		public void setActivePart(IAction action, IWorkbenchPart targetPart) {
-			this.targetPart = targetPart;
-		}
-		
-		public void run(IAction action) {
+		public Object execute(ExecutionEvent event) throws ExecutionException {
+			ISelection selection = HandlerUtil.getCurrentSelection(event);
+			
 			if (selection instanceof IStructuredSelection) {
 				for (Iterator<?> it = ((IStructuredSelection) selection). iterator(); it
 						.hasNext();) {
@@ -59,13 +50,17 @@ public class ToggleNatureAction implements IObjectActionDelegate {
 								.getAdapter(IProject.class);
 					}
 					if (project != null) {
-						toggleNature(project);
+						Shell shell = HandlerUtil.getActiveShell(event);
+						
+						toggleNature(project, shell);
 					}
 				}
 			}
-		}
 
-		private void toggleNature(IProject project) {
+			return null;
+		}
+		
+		private void toggleNature(IProject project, Shell shell) {
 			String title = "Change Clojure language support";
 			String message;
 			try {
@@ -80,7 +75,7 @@ public class ToggleNatureAction implements IObjectActionDelegate {
 				}
 				CCWPlugin.logError(message, e);
 			}
-			MessageDialog.openInformation(targetPart.getSite().getShell(), title, message);
+			MessageDialog.openInformation(shell, title, message);
 		}
 		
 		/**

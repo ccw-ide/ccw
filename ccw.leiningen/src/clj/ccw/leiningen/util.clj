@@ -1,31 +1,86 @@
 (ns ccw.leiningen.util
   (:require [ccw.util.eclipse :as e]
-            [leiningen.core.project :as p]
-            [leiningen.core.eval :as eval])
+            [leiningen.core.eval :as eval]
+            [classlojure.core :as c]
+            [clojure.java.io :as io])
   (:import [org.eclipse.jdt.core JavaCore
                                  IClasspathAttribute
                                  IAccessRule]
            [org.eclipse.jdt.launching JavaRuntime]
-           [org.eclipse.core.runtime IPath]))
+           [org.eclipse.core.runtime IPath
+                                     Platform
+                                     FileLocator]
+           [java.io File IOException]))
 
 (println "ccw.leiningen.util load starts")
 
+;; from ccw.core
+
+(defn bundle-file 
+  [bundle-name]
+  (-> bundle-name Platform/getBundle FileLocator/getBundleFile))
+
+(defn bundle-dir 
+  [bundle-name]
+  (let [bundle-dir (bundle-file bundle-name)]
+    (if (.isFile bundle-dir)
+      (throw (RuntimeException. (str bundle-name " bundle should be deployed as a directory.")))
+      bundle-dir)))
+
+(defn- plugin-entry
+  [plugin-name entry-name]
+  (let [bundle-dir (bundle-dir plugin-name)
+        entry (File. bundle-dir entry-name)]
+    (if (.exists entry)
+      entry
+      (throw (RuntimeException. (str "Unable to locate " + entry-name " in " plugin-name " plugin."))))))
+
+(defn lein-env []
+  (let [leiningen-core (bundle-dir "ccw.leiningen-core")
+        jar (fn [f] (and (.isFile f) (.endsWith (.getName f) ".jar")))
+        classes-dir (fn [d] (let [manifest (io/file d "META-INF" "MANIFEST.MF")]
+                               (and (.exists manifest)
+                                    (.isFile manifest))))
+        libs (->> leiningen-core file-seq (filter #(or (jar %) (classes-dir %))))]
+    (apply c/classlojure libs)))
+
+(defonce projects-envs (ref {}))
+
+(defn project-env! [project & recreate?]
+  (let [pname (-> project e/project .getName)]
+    (dosync
+      (commute projects-envs
+               #(if (or recreate? (not (% pname)))
+                  (assoc % pname (delay (lein-env)))
+                  %)))
+    @(@projects-envs pname)))
+
 (defn file-exists? "Return the file if it exists, or nil" [f]
   (when (.exists f) f))
+
+(defn eval-in-project [project form & args]
+  (apply c/eval-in (project-env! project) form args))
+
+(defn project-clj 
+  [project]
+  (-> project
+    e/project
+    (.getFile "project.clj")
+    .getLocation
+    .toOSString))
 
 (defn lein-project
   "Given a project (anything that coerces to ccw.util.eclipse/IProjectCoercion),
    analyze its project.clj file and return the project map"
   [project]
-  (let [project (e/project project)
-        project-clj (-> project 
-                      (.getFile "project.clj")
-                      .getLocation
-                      .toOSString)]
-    (p/read project-clj)))
+  (eval-in-project project '(require 'leiningen.core.project))
+  (eval-in-project project 'leiningen.core.project/read (project-clj project)))
 
 (defn lein-native-platform-path [lein-project]
   (eval/native-arch-path lein-project))
+
+(defn lein-new [project]
+  (binding [leiningen.core.user/profiles (constantly {:user {:plugins [[lein-newnew "0.2.6"]]}})]))
 
 ;;; JDT utilities
 

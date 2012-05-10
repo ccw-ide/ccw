@@ -463,6 +463,11 @@
             id="ccw.ui.edit.text.clojure.switch.rainbow.parens"
             name="%command.switchRainbowParens.name">
       </command>
+      <command
+            description="%ccw.core.command.toggle-clojure-nature.description"
+            id="ccw.core.command.toggle-clojure-nature"
+            name="%ccw.core.command.toggle-clojure-nature.name">
+      </command>
       
    </extension>
    
@@ -1193,22 +1198,75 @@
                tooltip="Show the console for the JVM process to which this REPL is connected">
          </command>
       </menuContribution>
-   </extension>
-   <extension
-         point="org.eclipse.ui.popupMenus">
-      <objectContribution
-            adaptable="true"
-            id="ccw.objectContribution.clojure.nature"
-            objectClass="org.eclipse.core.resources.IContainer">
-         <action
-               class="ccw.actions.ToggleNatureAction"
-               enablesFor="+"
+      <menuContribution
+            allPopups="true"
+            locationURI="popup:org.eclipse.ui.projectConfigure?after=additions">
+         <command
+               commandId="ccw.core.command.toggle-clojure-nature"
+               label="%ccw.core.command.toggle-clojure-nature.add.name"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <not>
+                  <and>
+                     <count
+                           value="1">
+                     </count>
+                     <iterate
+                           ifEmpty="false"
+                           operator="or">
+                        <adapt
+                              type="org.eclipse.core.resources.IProject">
+                           <test
+                                 property="org.eclipse.core.resources.projectNature"
+                                 value="ccw.nature">
+                           </test>
+                        </adapt>
+                     </iterate>
+                  </and>
+               </not>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="true"
+            locationURI="popup:org.eclipse.ui.popup.any?after=additions">
+         <menu
                icon="icons/clojure16x16.png"
-               id="ccw.action.toggleClojureNature"
-               label="Enable/disable clojure language support"
-               menubarPath="additions">
-         </action>
-      </objectContribution>
+               id="ccw.core.project.menu"
+               label="%ccw.core.clojure.popup.menu.label"
+               mnemonic="C">
+            <separator
+                  name="ccw.core.project.menu.separator1"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="ccw.core.command.toggle-clojure-nature"
+                  label="%ccw.core.command.toggle-clojure-nature.remove.label"
+                  mnemonic="R"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <and>
+                     <count
+                           value="1">
+                     </count>
+                     <iterate
+                           ifEmpty="false"
+                           operator="or">
+                        <adapt
+                              type="org.eclipse.core.resources.IProject">
+                           <test
+                                 property="org.eclipse.core.resources.projectNature"
+                                 value="ccw.nature">
+                           </test>
+                        </adapt>
+                     </iterate>
+                  </and>
+               </visibleWhen>
+            </command>
+         </menu>
+      </menuContribution>
    </extension>
 	<extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">
     <launchConfigurationTypeImage
@@ -1365,6 +1423,25 @@
              </equals>
           </iterate>
        </with>
+    </definition>
+    <definition
+          id="ccw.core.project.with.clojure.nature">
+       <and>
+          <count
+                value="1">
+          </count>
+          <iterate
+                ifEmpty="false"
+                operator="or">
+             <adapt
+                   type="org.eclipse.core.resources.IProject">
+                <test
+                      property="org.eclipse.core.resources.projectNature"
+                      value="ccw.nature">
+                </test>
+             </adapt>
+          </iterate>
+       </and>
     </definition>
  </extension>
  <extension
@@ -1970,6 +2047,10 @@
               </iterate>
            </with>
         </enabledWhen>
+     </handler>
+     <handler
+           class="ccw.commands.ToggleNatureCommand"
+           commandId="ccw.core.command.toggle-clojure-nature">
      </handler>
   </extension>
   <extension

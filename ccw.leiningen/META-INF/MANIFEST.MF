@@ -18,7 +18,8 @@ Require-Bundle: org.eclipse.core.resources,
  org.eclipse.jface.text,
  org.eclipse.core.expressions,
  org.eclipse.jdt.launching,
- ccw.org.clojure.core.incubator;bundle-version="0.1.0"
+ ccw.org.clojure.core.incubator;bundle-version="0.1.0",
+ org.eclipse.platform
 Bundle-ClassPath: .,
  src/clj/,
  classes/
