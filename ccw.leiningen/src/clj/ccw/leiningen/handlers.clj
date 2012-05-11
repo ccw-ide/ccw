@@ -83,28 +83,37 @@
                        (.exists (.getFile project "project.clj")))))]
         res)))) 
 
+;; TODO too many imbrications here, decomplecting the code
+;;      from the job, etc. will help ...
+(defn add-natures
+  [project natures legend]
+  (println "add-natures:" project ", natures:" (seq natures) ", legend:'" legend "'")
+  (e/run-in-background
+    (e/runnable-with-progress-in-workspace
+      (fn [monitor]
+        (println "add-natures: background job started for natures:" (seq natures))
+        (.beginTask monitor 
+          (str legend)
+          1)
+        (n/set-description! 
+          project
+          (apply n/add-natures! (n/description project) natures))
+        (.worked monitor 1)
+        (.done monitor)
+        (println "add-natures: background job stopped for natures:" (seq natures)))
+      (e/workspace-root))))
+
 (defn add-leiningen-nature
   "Pre-requisites:
    - The event's selection has size one, and is an open project
    - The project does not already have the leiningen nature"
-  [handler event]
-  (let [project (e/project event)]
-    (when-not (n/has-nature? project n/NATURE-ID)
-    (e/run-in-background
-      (fn [monitor]
-        (.beginTask monitor 
-          (str "Adding leiningen support to project " (.getName project))
-          1)
-        (n/set-description! 
-          project
-          (-> (n/description project)
-            (n/add-natures! JavaCore/NATURE_ID)))
-        (n/set-description! 
-          project
-          (-> (n/description project)
-            (n/add-natures! n/NATURE-ID)))
-        ; TODO : report done ?
-        (.done monitor))))))
+  ([handler event]
+    (add-leiningen-nature (e/project event)))
+  ([project]
+    (add-natures 
+      project
+      [(JavaCore/NATURE_ID) n/NATURE-ID]
+      (str "Adding leiningen support to project " (.getName project)))))
 
 (defn- upgrade-project-build-path [java-project overwrite?]
   (e/run-in-background

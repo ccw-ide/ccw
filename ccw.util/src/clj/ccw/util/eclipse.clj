@@ -2,6 +2,7 @@
      ccw.util.eclipse
   (:require [clojure.java.io :as io])
   (:import [org.eclipse.core.resources IResource
+                                       IProject
                                        ResourcesPlugin
                                        IWorkspaceRunnable
                                        IWorkspace]

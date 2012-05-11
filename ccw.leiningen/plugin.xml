@@ -353,5 +353,43 @@
          type="org.eclipse.core.resources.IProject">
    </propertyTester>
 </extension>
+<extension
+      point="org.eclipse.ui.newWizards">
+   <category
+         id="ccw.leiningen.category.new"
+         name="Leiningen">
+   </category>
+   <wizard
+         category="ccw.leiningen.category.new"
+         class="ccw.leiningen.NewLeiningenProjectWizard"
+         descriptionImage="leiningen32x32.png"
+         hasPages="true"
+         icon="leiningen32x32.png"
+         id="ccw.leiningen.project.new.wizard"
+         name="Leiningen Project"
+         project="true">
+   </wizard>
+</extension>
+<extension
+      point="org.eclipse.ui.perspectiveExtensions">
+   <perspectiveExtension
+         targetID="org.eclipse.jdt.ui.JavaPerspective">
+      <newWizardShortcut
+            id="ccw.leiningen.project.new.wizard">
+      </newWizardShortcut>
+   </perspectiveExtension>
+   <perspectiveExtension
+         targetID="org.eclipse.pde.ui.PDEPerspective">
+      <newWizardShortcut
+            id="ccw.leiningen.project.new.wizard">
+      </newWizardShortcut>
+   </perspectiveExtension>
+   <perspectiveExtension
+         targetID="org.eclipse.debug.ui.DebugPerspective">
+      <newWizardShortcut
+            id="ccw.leiningen.project.new.wizard">
+      </newWizardShortcut>
+   </perspectiveExtension>
+</extension>
     
 </plugin>
