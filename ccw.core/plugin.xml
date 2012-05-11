@@ -1337,6 +1337,24 @@
              relative="org.eclipse.ui.views.ContentOutline">
        </view>
     </perspectiveExtension>
+    <perspectiveExtension
+          targetID="org.eclipse.debug.ui.DebugPerspective">
+       <newWizardShortcut
+             id="ccw.project.new.wizard">
+       </newWizardShortcut>
+       <newWizardShortcut
+             id="ccw.newClojureFileWizard">
+       </newWizardShortcut>
+       <viewShortcut
+             id="ccw.view.namespacebrowser">
+       </viewShortcut>
+       <view
+             id="ccw.view.namespacebrowser"
+             minimized="false"
+             relationship="stack"
+             relative="org.eclipse.ui.views.ContentOutline">
+       </view>
+    </perspectiveExtension>
  </extension>
  <extension
        id="ccw.markers.problemmarkers.compilation"

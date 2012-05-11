@@ -124,6 +124,7 @@
 
 (defn- add-lib-on-classpath!
   [java-project lib-path libSrc-path copy?]
+  (println "about to add lib-path=" lib-path ", libSrc-path=" libSrc-path)
   (io!
     (if (nil? lib-path)
       (throw (CoreException. (Status/CANCEL_STATUS)))
@@ -149,10 +150,12 @@
                (into-array 
                  (conj entries-old 
                    (JavaCore/newLibraryEntry (make-ws-path in-project-lib) (make-ws-path in-project-libSrc) nil)))]
+             (println "java-project:" java-project)
+             (println "entries-new:" (seq entries-new))
       	      (doto java-project
       	        (.setRawClasspath entries-new nil)
-      	        (.save nil true)
-                (-> .getProject (.refreshLocal (IResource/DEPTH_ONE) nil))))))))))
+      	        (.save nil false)
+                (-> .getProject (.refreshLocal (IResource/DEPTH_INFINITE) nil))))))))))
 
 (defn- file-to-path
   [file] (Path/fromOSString (.getAbsolutePath file)))

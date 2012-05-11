@@ -64,11 +64,12 @@
 (defn set-description! 
   ([proj desc] (set-description! proj desc nil))
   ([proj desc progress-monitor]
-    (doto proj
-      (.setDescription
-        desc,
-        IResource/KEEP_HISTORY
-        progress-monitor))))
+    (println "proj:" proj)
+    (println "desc:" desc)
+    (.setDescription
+      proj
+      desc
+      progress-monitor)))
 
 (defn has-builder? [desc builder-id]
   (let [spec (.getBuildSpec desc)]
@@ -83,13 +84,17 @@
   (.hasNature project nature-id))
 
 (defn set-natures! [desc natures]
+  (println "natures:" natures)
   (doto desc
     (.setNatureIds (into-array String natures))))
 
 (defn add-natures! [desc & nature-ids]
   (let [natures         (.getNatureIds desc)
+        _ (println "old natures:" natures)
         missing-natures (remove (set natures) nature-ids)
-        new-natures     (concat natures missing-natures)]
+        _ (println "missing natures:" natures)
+        new-natures     (concat natures missing-natures)
+        _ (println "new-natures:" new-natures)]
     (set-natures! desc new-natures)))
 
 (defn remove-nature! [desc nature-id]
