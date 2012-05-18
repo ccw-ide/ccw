@@ -2,8 +2,8 @@ package ccw.repl;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
@@ -46,14 +46,11 @@ public class ConnectDialog extends Dialog {
         new Label(parent, 0).setText("Port");
         
         port = new Text(parent, SWT.BORDER);
-        port.addKeyListener(new KeyListener() {
-            public void keyReleased(KeyEvent e) {
-            }
-            
-            public void keyPressed(KeyEvent e) {
-                e.doit = Character.isDigit(e.character);
-            }
-        });
+        port.addVerifyListener(new VerifyListener() {
+			public void verifyText(VerifyEvent e) {
+				e.doit = (e.text.equals("") || Character.isDigit(e.character));
+			}
+		});
         
         port.setFocus();
         return composite;
