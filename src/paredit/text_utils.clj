@@ -19,7 +19,7 @@
 
 (defn insert
   "insert what at offset. offset shifted by what's length, selection length unchanged"
-  ([{:keys [^String text offset length modifs] :as where :or {:modifs []}} ^String what]
+  ([{:keys [^String text offset length modifs] :as where :or {modifs []}} ^String what]
     (let [new-offset (+ offset (.length what))]
       (assoc where 
         :text (str (.substring text 0 offset) what (.substring text offset))
@@ -30,7 +30,7 @@
   "removes n chars at offset off. offset not shifted, selection length unchanged"
   ; TODO FIXME : decrease length if now that things are removed, length would make the selection overflow the text
   ; and also adjust :offset if off is before it
-  [{:keys [^String text offset length modifs] :as where :or {:modifs []}} off n]
+  [{:keys [^String text offset length modifs] :as where :or {modifs []}} off n]
   (assoc where 
     :text (str (.substring text 0 off) (.substring text (+ off n)))
     :offset offset
