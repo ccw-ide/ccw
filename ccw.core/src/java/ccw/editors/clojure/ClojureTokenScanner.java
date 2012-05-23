@@ -29,23 +29,18 @@ import org.eclipse.swt.widgets.Display;
 
 import ccw.CCWPlugin;
 import ccw.preferences.PreferenceConstants;
-import ccw.util.ClojureUtils;
+import ccw.util.ClojureInvoker;
 import clojure.lang.ISeq;
 import clojure.lang.Keyword;
-import clojure.osgi.ClojureOSGi;
 
 public final class ClojureTokenScanner implements ITokenScanner {
-    private static final String EDITOR_SUPPORT_NS = "ccw.editors.clojure.editor-support";
-    private static final String ClojureTopLevelFormsDamager_NS = "ccw.editors.clojure.ClojureTopLevelFormsDamagerImpl";
-    static {
-    	try {
-			ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), EDITOR_SUPPORT_NS);
-			ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), ClojureTopLevelFormsDamager_NS);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-    }
-
+	private static final ClojureInvoker editorSupport = ClojureInvoker.newInvoker(
+            CCWPlugin.getDefault(),
+            "ccw.editors.clojure.editor-support");
+	private static final ClojureInvoker topLevelFormsDamager = ClojureInvoker.newInvoker(
+            CCWPlugin.getDefault(),
+            "ccw.editors.clojure.ClojureTopLevelFormsDamagerImpl");
+	
     private int currentOffset;
     private final Map<Keyword, IToken> parserTokenKeywordToJFaceToken;
     private String text;
@@ -263,8 +258,8 @@ public final class ClojureTokenScanner implements ITokenScanner {
     	advanceTokenDuration = 0;
     	getSymbolTypeDuration = 0;
     	text = document.get();
-        tokenSeq = (ISeq) ClojureUtils.invoke(ClojureTopLevelFormsDamager_NS, "getTokensSeq",
-        		ClojureUtils.invoke(EDITOR_SUPPORT_NS, "getParseTree", clojureEditor.getParseState())
+        tokenSeq = (ISeq) topLevelFormsDamager._("getTokensSeq",
+        		editorSupport._("getParseTree", clojureEditor.getParseState())
         		, offset, length);
         // STRONG HYPOTHESES HERE (related to the Damager used: offset always corresponds to the start of a top level form
         {

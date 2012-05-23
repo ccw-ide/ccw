@@ -60,7 +60,7 @@ import ccw.editors.clojure.ClojureSourceViewerConfiguration;
 import ccw.editors.clojure.IClojureEditor;
 import ccw.editors.clojure.IClojureEditorActionDefinitionIds;
 import ccw.preferences.PreferenceConstants;
-import ccw.util.ClojureUtils;
+import ccw.util.ClojureInvoker;
 import ccw.util.DisplayUtil;
 import clojure.lang.IFn;
 import clojure.lang.Keyword;
@@ -71,17 +71,15 @@ import clojure.osgi.ClojureOSGi;
 import clojure.tools.nrepl.Connection;
 
 public class REPLView extends ViewPart implements IAdaptable {
-    private static final String EDITOR_SUPPORT_NS = "ccw.editors.clojure.editor-support";
-    private static final String CLOJURE_STRING_NS = "clojure.string";
-    static {
-    	try {
-			ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), EDITOR_SUPPORT_NS);
-			ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), CLOJURE_STRING_NS);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-    }
+
+	private static final ClojureInvoker editorSupport = ClojureInvoker.newInvoker(
+            CCWPlugin.getDefault(),
+            "ccw.editors.clojure.editor-support");
     
+	private static final ClojureInvoker str = ClojureInvoker.newInvoker(
+            CCWPlugin.getDefault(),
+            "clojure.string");
+
 	/* Keep this in sync with the context defined in plugin.xml */
 	public static final String CCW_UI_CONTEXT_REPL = "ccw.ui.context.repl";
 	
@@ -167,7 +165,7 @@ public class REPLView extends ViewPart implements IAdaptable {
     }
     
     private String removeTrailingSpaces(String s) {
-    	return (String) ClojureUtils.invoke(CLOJURE_STRING_NS, "trimr", s);
+    	return (String) str._("trimr", s);
     }
     private void evalExpression () {
     	// We remove trailing spaces so that we do not embark extra spaces,
@@ -612,7 +610,7 @@ public class REPLView extends ViewPart implements IAdaptable {
 					null/*getAnnotationAccess()*/, 
 					EditorsPlugin.getDefault().getSharedTextColors()/*getSharedColors()*/
 					);
-			ClojureUtils.invoke(EDITOR_SUPPORT_NS, "configureSourceViewerDecorationSupport",
+			editorSupport._("configureSourceViewerDecorationSupport",
 					fSourceViewerDecorationSupport, viewer);
 		}
 		return fSourceViewerDecorationSupport;
@@ -621,7 +619,7 @@ public class REPLView extends ViewPart implements IAdaptable {
     @Override
     public void dispose() {
         super.dispose();
-        fSourceViewerDecorationSupport = (SourceViewerDecorationSupport) ClojureUtils.invoke(EDITOR_SUPPORT_NS, "disposeSourceViewerDecorationSupport",
+        fSourceViewerDecorationSupport = (SourceViewerDecorationSupport) editorSupport._("disposeSourceViewerDecorationSupport",
         		fSourceViewerDecorationSupport);
         try {
             if (interactive != null) interactive.close();

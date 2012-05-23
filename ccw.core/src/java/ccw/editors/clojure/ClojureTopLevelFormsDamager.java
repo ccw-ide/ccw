@@ -7,34 +7,28 @@ import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.presentation.IPresentationDamager;
 
 import ccw.CCWPlugin;
-import ccw.util.ClojureUtils;
+import ccw.util.ClojureInvoker;
 import clojure.lang.Ref;
-import clojure.osgi.ClojureOSGi;
 
 public class ClojureTopLevelFormsDamager implements IPresentationDamager {
-	private static final String ClojureTopLevelFormsDamagerImpl_NS = "ccw.editors.clojure.ClojureTopLevelFormsDamagerImpl";
+	private static final ClojureInvoker topLevelFormsDamager = ClojureInvoker.newInvoker(
+            CCWPlugin.getDefault(),
+            "ccw.editors.clojure.ClojureTopLevelFormsDamagerImpl");
+
 	public final Ref state;
 	
-	static {
-		try {
-			ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), ClojureTopLevelFormsDamagerImpl_NS);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-	
 	public ClojureTopLevelFormsDamager(IClojureEditor editor) {
-		state = (Ref) ClojureUtils.invoke(ClojureTopLevelFormsDamagerImpl_NS, "init", editor);
+		state = (Ref) topLevelFormsDamager._("init", editor);
 	}
 	
 	public void setDocument(IDocument document) {
-		ClojureUtils.invoke(ClojureTopLevelFormsDamagerImpl_NS, "setDocument", 
+		topLevelFormsDamager._("setDocument", 
 				this, document);
 	}
 
 	public IRegion getDamageRegion(ITypedRegion partition, DocumentEvent event,
 			boolean documentPartitioningChanged) {
-		return (IRegion) ClojureUtils.invoke(ClojureTopLevelFormsDamagerImpl_NS, "getDamageRegion",
+		return (IRegion) topLevelFormsDamager._("getDamageRegion",
 				this, partition, event, documentPartitioningChanged);
 	}
 }

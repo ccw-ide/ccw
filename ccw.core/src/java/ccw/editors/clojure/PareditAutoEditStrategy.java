@@ -6,29 +6,23 @@ import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
 
 import ccw.CCWPlugin;
-import ccw.util.ClojureUtils;
+import ccw.util.ClojureInvoker;
 import clojure.lang.Ref;
-import clojure.osgi.ClojureOSGi;
 
 public class PareditAutoEditStrategy implements IAutoEditStrategy {
-	private static final String PareditAutoEditStrategyImpl_NS = "ccw.editors.clojure.PareditAutoEditStrategyImpl";
+	private static final ClojureInvoker pareditAutoEditStrategyImpl = ClojureInvoker.newInvoker(
+            CCWPlugin.getDefault(),
+            "ccw.editors.clojure.PareditAutoEditStrategyImpl");
+
 	public final Ref state;
 	
-	static {
-		try {
-			ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), PareditAutoEditStrategyImpl_NS);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-	
 	public PareditAutoEditStrategy(IClojureEditor editor, IPreferenceStore prefs) {
-		state = (Ref) ClojureUtils.invoke(PareditAutoEditStrategyImpl_NS, "init", editor, prefs);
+		state = (Ref) pareditAutoEditStrategyImpl._("init", editor, prefs);
 	}
 	
 	public void customizeDocumentCommand(IDocument document,
 			DocumentCommand command) {
-		ClojureUtils.invoke(PareditAutoEditStrategyImpl_NS, "customizeDocumentCommand", 
+		pareditAutoEditStrategyImpl._("customizeDocumentCommand", 
 				this, document, command);
 	}
 }

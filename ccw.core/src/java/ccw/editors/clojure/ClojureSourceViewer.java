@@ -52,23 +52,19 @@ import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.preferences.PreferenceConstants;
 import ccw.repl.REPLView;
-import ccw.util.ClojureUtils;
+import ccw.util.ClojureInvoker;
 import ccw.util.DisplayUtil;
-import clojure.osgi.ClojureOSGi;
 
 public abstract class ClojureSourceViewer extends ProjectionViewer implements
         IClojureEditor, IPropertyChangeListener {
     
-    private static final String EDITOR_SUPPORT_NS = "ccw.editors.clojure.editor-support";
-    private static final String HANDLERS_NS = "ccw.editors.clojure.handlers";
-    static {
-    	try {
-			ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), EDITOR_SUPPORT_NS);
-			ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), HANDLERS_NS);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-    }
+	private static final ClojureInvoker editorSupport = ClojureInvoker.newInvoker(
+            CCWPlugin.getDefault(),
+            "ccw.editors.clojure.editor-support");
+    
+	private static final ClojureInvoker handlers = ClojureInvoker.newInvoker(
+            CCWPlugin.getDefault(),
+            "ccw.editors.clojure.handlers");
 
     /** 
      * Status category used e.g. with TextEditors embedding a ClojureSourceViewer
@@ -398,9 +394,9 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     
     private void updateTextBuffer (String finalText, long offset, long length, String text) {
     	boolean firstTime = (parseState == null);
-    	parseState = ClojureUtils.invoke(EDITOR_SUPPORT_NS, "updateTextBuffer",parseState, finalText, offset, length, text);
+    	parseState = editorSupport._("updateTextBuffer",parseState, finalText, offset, length, text);
         if (firstTime) {
-        	ClojureUtils.invoke(EDITOR_SUPPORT_NS, "startWatchParseRef", parseState, this);
+        	editorSupport._("startWatchParseRef", parseState, this);
         }
     }
     
@@ -410,18 +406,18 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
         	String text = getDocument().get();
             updateTextBuffer(text, 0, -1, text);
         }
-        return ClojureUtils.invoke(EDITOR_SUPPORT_NS, "getParseState", getDocument().get(), parseState);
+        return editorSupport._("getParseState", getDocument().get(), parseState);
     }
     
     public boolean isParseTreeBroken() {
-    	return (Boolean) ClojureUtils.invoke(EDITOR_SUPPORT_NS, "brokenParseTree?", getParseState());
+    	return (Boolean) editorSupport._("brokenParseTree?", getParseState());
     }
     
     public Object getPreviousParseTree () {
         if (parseState == null) {
         	return null;
         } else {
-        	return ClojureUtils.invoke(EDITOR_SUPPORT_NS, "getPreviousParseTree", parseState);
+        	return editorSupport._("getPreviousParseTree", parseState);
         }
     }
     
@@ -484,7 +480,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     }
     
     public String findDeclaringNamespace() {
-		return ClojureCore.findDeclaringNamespace((Map) ClojureUtils.invoke(EDITOR_SUPPORT_NS, "getParseTree", getParseState()));
+		return ClojureCore.findDeclaringNamespace((Map) editorSupport._("getParseTree", getParseState()));
     }
 
     public IJavaProject getAssociatedProject() {
@@ -662,7 +658,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 	public void doOperation(int operation) {
 		if (operation == TextViewer.PASTE) {
 			if (!getTextWidget().getBlockSelection()) {
-				ClojureUtils.invoke(HANDLERS_NS, "smart-paste", this);
+				handlers._("smart-paste", this);
 				return;
 			} else {
 				// We're not trying (at least yet) to handle paste inside
