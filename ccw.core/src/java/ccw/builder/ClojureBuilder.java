@@ -112,7 +112,7 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
             monitor = new NullProgressMonitor();
         }
 
-        createClassesFolder(project, monitor);
+        createClassesFolder(project, new SubProgressMonitor(monitor, 0));
         
         // Issue #203 is probably related to the following way of getting a REPLView.
         // A race condition between the builder and the Eclipse machinery creating the views, etc.
@@ -192,8 +192,8 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
     	}
     	
     	try {
-    		getClassesFolder(getProject()).delete(true, monitor);
-    		createClassesFolder(getProject(), monitor);
+    		getClassesFolder(getProject()).delete(true, new SubProgressMonitor(monitor, 0));
+    		createClassesFolder(getProject(), new SubProgressMonitor(monitor, 0));
 	        getClassesFolder(getProject()).refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 0));
 	        getClassesFolder(getProject()).setDerived(true); //, monitor); removed monitor argument, probably a 3.5/3.6 only stuff
     	} catch (CoreException e) {
