@@ -110,6 +110,7 @@ public class LoadFileAction extends Action {
 	private void evaluateFileText(REPLView repl, String text, String filePath, String sourcePath, String fileName) {
         try {
         	final String loadFileText = (String)loadFileCommand.invoke(text, sourcePath, fileName);
+        	EvaluateTextUtil.evaluateText(repl, ";; Loading file " + filePath, true);
         	EvaluateTextUtil.evaluateText(repl, loadFileText, false);
             Actions.ShowActiveREPL.execute(false);
         } catch (Exception e) {
