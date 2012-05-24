@@ -15,6 +15,7 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
     private static final String BUNDLE_NAME = "ccw.preferences.messages"; //$NON-NLS-1$
 
+
     public static String ClojurePreferencePage_Description;
 
     public static String ClojurePreferencePage_description;
@@ -115,13 +116,13 @@ public class Messages extends NLS {
 	public static String SyntaxColoringPreferencePage_rainbowParenLevel7;
 	public static String SyntaxColoringPreferencePage_rainbowParenLevel8;
 
-    
-    
-    public static String SyntaxColoringPreferencePage_preview;
+	public static String SyntaxColoringPreferencePage_preview;
 
     public static String REPLViewPreferencePage_activate_autoEval_on_Enter;
 
     public static String REPLViewPreferencePage_displayHint;
+
+    public static String REPLViewPreferencePage_quietLoggingMode;
 
     static {
         // initialize resource bundle

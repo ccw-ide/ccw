@@ -142,6 +142,15 @@ public class PreferenceConstants {
     public static final String REPL_VIEW_AUTO_EVAL_ON_ENTER_ACTIVE = CCW_PREFERENCE_PREFIX + ".repl_view_autoeval_on_enter_active"; //$NON-NLS-1$
     public static final String REPL_VIEW_DISPLAY_HINTS = CCW_PREFERENCE_PREFIX + ".repl_view_display_hints"; //$NON-NLS-1$
     
+    /** 
+     * When "quiet logging mode" is on, interactions with a REPL such as user
+     * initiated commands (e.g. load file in REPL, switch namespace, etc.)
+     * Should report as little as possible to the log, whereas if the mode
+     * is off, every interaction with a REPL from a command, etc., should be
+     * very explicit about what happen (what the side effect or issued command
+     * is, and returned). */ 
+    public static final String REPL_QUIET_LOGGING_MODE = CCW_PREFERENCE_PREFIX + ".repl_quiet_logging_mode"; //$NON-NLS-1$
+
     public static final String EDITOR_BOLD_SUFFIX = ".bold"; //$NON-NLS-1$
     public static final String EDITOR_ITALIC_SUFFIX = ".italic"; //$NON-NLS-1$
     /* TODO enable these once text attributes are used in the editor
@@ -175,6 +184,13 @@ public class PreferenceConstants {
     			store.getBoolean(SyntaxColoringPreferencePage.getEnabledPreferenceKey(tokenKey))
     				? store.getBoolean(SyntaxColoringPreferencePage.getItalicPreferenceKey(tokenKey)) 
     				: null);
+    }
+    
+    public static boolean isReplQuietLoggingMode() {
+    	return CCWPlugin.getDefault().getCombinedPreferenceStore().getBoolean(PreferenceConstants.REPL_QUIET_LOGGING_MODE);
+    }
+    public static boolean isReplExplicitLoggingMode() {
+    	return !isReplQuietLoggingMode();
     }
 
 }

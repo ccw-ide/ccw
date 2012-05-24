@@ -10,6 +10,8 @@
  *******************************************************************************/
 package ccw.editors.clojure;
 
+import static ccw.preferences.PreferenceConstants.isReplExplicitLoggingMode;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -22,6 +24,7 @@ import ccw.ClojureCore;
 import ccw.ClojureNaturePropertyTest;
 import ccw.ClojureProject;
 import ccw.launching.ClojureLaunchShortcut;
+import ccw.preferences.PreferenceConstants;
 import ccw.repl.Actions;
 import ccw.repl.REPLView;
 import ccw.util.DisplayUtil;
@@ -110,7 +113,9 @@ public class LoadFileAction extends Action {
 	private void evaluateFileText(REPLView repl, String text, String filePath, String sourcePath, String fileName) {
         try {
         	final String loadFileText = (String)loadFileCommand.invoke(text, sourcePath, fileName);
-        	EvaluateTextUtil.evaluateText(repl, ";; Loading file " + filePath, true);
+        	//if (isReplExplicitLoggingMode()) {
+        		EvaluateTextUtil.evaluateText(repl, ";; Loading file " + filePath, isReplExplicitLoggingMode());
+        	//}
         	EvaluateTextUtil.evaluateText(repl, loadFileText, false);
             Actions.ShowActiveREPL.execute(false);
         } catch (Exception e) {
