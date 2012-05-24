@@ -16,10 +16,10 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.viewers.StructuredSelection;
 
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
+import ccw.ClojureNaturePropertyTest;
 import ccw.ClojureProject;
 import ccw.launching.ClojureLaunchShortcut;
 import ccw.repl.Actions;
@@ -57,6 +57,15 @@ public class LoadFileAction extends Action {
         final IFile editorFile = (IFile) editor.getEditorInput().getAdapter(IFile.class);
         if (editorFile == null) {
         	editor.setStatusLineErrorMessage("Unable to create a Clojure Application for this editor's content");
+        	return;
+        }
+        
+        if (!ClojureNaturePropertyTest.hasClojureNature(editorFile)) {
+        	editor.setStatusLineErrorMessage(
+        			"Cannot invoke command " 
+        			+ ClojureEditorMessages.LoadFileAction_label
+        			+ " because the current file does not belong to a project "
+        			+ " for which Clojure support has been enabled.");
         	return;
         }
         

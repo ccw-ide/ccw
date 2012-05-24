@@ -179,6 +179,10 @@
                               property="org.eclipse.debug.ui.matchesPattern"
                               value="*.clj">
                         </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="ccw.propertyTester.hasClojureNature">
+                        </test>
                      </and>
                   </iterate>
                </with>
@@ -1374,7 +1378,7 @@
           id="ccw.propertyTester.hasClojureNature"
           namespace="ccw.propertyTester"
           properties="hasClojureNature"
-          type="org.eclipse.core.resources.IProject">
+          type="org.eclipse.core.resources.IResource">
     </propertyTester>
  </extension>
  <extension
