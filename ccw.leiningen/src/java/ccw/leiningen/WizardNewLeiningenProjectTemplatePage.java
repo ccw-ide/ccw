@@ -143,8 +143,8 @@ public final class WizardNewLeiningenProjectTemplatePage extends
 		if (super.validatePage()) {
 	        String templateFieldContents = getTemplateNameFieldValue();
 	        if (templateFieldContents.equals("")) { //$NON-NLS-1$
-	            setErrorMessage(null);
-	            setMessage("The Leiningen template name cannot be empty");
+	            setErrorMessage("The Leiningen template name cannot be empty");
+	            setMessage(null);
 	            return false;
 	        } else {
 	        	return true;
