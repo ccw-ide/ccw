@@ -33,7 +33,6 @@ import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -43,7 +42,6 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IPerspectiveRegistry;
 import org.eclipse.ui.IPluginContribution;
@@ -60,13 +58,16 @@ import org.eclipse.ui.activities.IWorkbenchActivitySupport;
 import org.eclipse.ui.activities.WorkbenchActivityHelper;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 import org.eclipse.ui.dialogs.WizardNewProjectReferencePage;
+import org.eclipse.ui.dialogs.WorkingSetGroup;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.ide.undo.CreateProjectOperation;
 import org.eclipse.ui.ide.undo.WorkspaceUndoUtil;
 import org.eclipse.ui.internal.IPreferenceConstants;
 import org.eclipse.ui.internal.WorkbenchPlugin;
 import org.eclipse.ui.internal.ide.IDEInternalPreferences;
+import org.eclipse.ui.internal.ide.IDEWorkbenchMessages;
 import org.eclipse.ui.internal.ide.IDEWorkbenchPlugin;
+import org.eclipse.ui.internal.ide.IIDEHelpContextIds;
 import org.eclipse.ui.internal.ide.StatusUtil;
 import org.eclipse.ui.internal.registry.PerspectiveDescriptor;
 import org.eclipse.ui.internal.util.PrefUtil;
@@ -110,15 +111,13 @@ public class NewLeiningenProjectWizard extends BasicNewResourceWizard
 			                                         Activator.getDefault(),
 			                                         "ccw.leiningen.wizard");
 	
-	private WizardNewLeiningenProjectTemplatePage templatePage;
-	
 	/**
 	 * The wizard id for creating new projects in the workspace.
 	 * @since 3.4
 	 */
 	public static final String WIZARD_ID = "org.eclipse.ui.wizards.new.project"; //$NON-NLS-1$
 	
-	private WizardNewProjectCreationPage mainPage;
+	private WizardNewLeiningenProjectTemplatePage mainPage;
 
 	private WizardNewProjectReferencePage referencePage;
 
@@ -161,27 +160,12 @@ public class NewLeiningenProjectWizard extends BasicNewResourceWizard
 	 * (non-Javadoc) Method declared on IWizard.
 	 */
 	public void addPages() {
-		doLeinAddPagesPre();
-		
 		super.addPages();
 
-		mainPage = new WizardNewProjectCreationPage("basicNewProjectPage") { //$NON-NLS-1$
-			/*
-			 * (non-Javadoc)
-			 * 
-			 * @see org.eclipse.ui.dialogs.WizardNewProjectCreationPage#createControl(org.eclipse.swt.widgets.Composite)
-			 */
-			public void createControl(Composite parent) {
-				super.createControl(parent);
-				createWorkingSetGroup(
-						(Composite) getControl(),
-						getSelection(),
-						new String[] { "org.eclipse.ui.resourceWorkingSetPage" }); //$NON-NLS-1$
-				Dialog.applyDialogFont(getControl());
-			}
-		}; 
-		mainPage.setTitle(ResourceMessages.NewProject_title);
-		mainPage.setDescription(ResourceMessages.NewProject_description);
+		mainPage = new WizardNewLeiningenProjectTemplatePage(this, "basicNewProjectPage"); 
+
+		//mainPage.setTitle(ResourceMessages.NewProject_title);
+		//mainPage.setDescription(ResourceMessages.NewProject_description);
 		this.addPage(mainPage);
 
 		// only add page if there are already projects in the workspace
@@ -195,11 +179,6 @@ public class NewLeiningenProjectWizard extends BasicNewResourceWizard
 		}
 		
 		doLeinAddPagesPost();
-	}
-	
-	private void doLeinAddPagesPre() {
-    	templatePage = new WizardNewLeiningenProjectTemplatePage("Choose Newnew Template");
-		this.addPage(templatePage);
 	}
 	
 	private void doLeinAddPagesPost() {
@@ -380,7 +359,7 @@ public class NewLeiningenProjectWizard extends BasicNewResourceWizard
 		try {
 			wizard._(performFinish,
 					 project,
-					 templatePage.getTemplateName()
+					 mainPage.getTemplateName()
 						//,
 						//project.getLocation().toFile()
 					 );
