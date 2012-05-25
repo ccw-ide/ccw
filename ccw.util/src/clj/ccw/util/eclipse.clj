@@ -276,3 +276,26 @@
 
 (defn null-progress-monitor []
   (org.eclipse.core.runtime.NullProgressMonitor.))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; SWT utilities
+
+(defn ui*
+  "Calls f with (optionnaly) args on the UI Thread, using
+   Display/asyncExec.
+   Return a promise which can be used to get back the
+   eventual result of the execution of f.
+   If calling f throws an Exception, the exception itself is delivered
+   to the promise."
+  [f & args] 
+  (let [a (promise)]
+    (-> 
+      (org.eclipse.swt.widgets.Display/getDefault)
+      (.asyncExec 
+        #(deliver a (try
+                      (apply f args)
+                      (catch Exception e e)))))
+    a))
+
+(defmacro ui [& args]
+  `(ui* (fn [] ~@args)))
