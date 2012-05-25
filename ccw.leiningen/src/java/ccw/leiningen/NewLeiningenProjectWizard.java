@@ -13,14 +13,22 @@ public class NewLeiningenProjectWizard extends BasicNewProjectResourceWizard {
 			                                         Activator.getDefault(),
 			                                         "ccw.leiningen.wizard");
 	
+	public static NewLeiningenProjectWizard currentInstance;
+
+	private WizardNewLeiningenProjectTemplatePage templatePage;
+	
     public NewLeiningenProjectWizard() {
         super();
+        currentInstance = this;
     }
 
     public void addPages() {
+    	templatePage = new WizardNewLeiningenProjectTemplatePage("Choose Newnew Template");
+		this.addPage(templatePage);
         super.addPages();
         doAddPages();
     }
+    
 
 	private void doAddPages() {
 		getStartingPage().setDescription("Create a new Leiningen project.");
@@ -41,7 +49,8 @@ public class NewLeiningenProjectWizard extends BasicNewProjectResourceWizard {
 
 		try {
 			wizard._(performFinish,
-					 project
+					 project,
+					 templatePage.getTemplateName()
 						//,
 						//project.getLocation().toFile()
 					 );

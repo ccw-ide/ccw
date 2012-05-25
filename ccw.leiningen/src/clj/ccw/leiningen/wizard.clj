@@ -7,7 +7,7 @@
   (:import  [org.eclipse.core.resources IResource]
             [org.eclipse.jdt.core JavaCore]))
 
-(defn perform-finish [project]
+(defn perform-finish [project template-name]
   (let [project-name (.getName project)
         project-file (-> project .getLocation .toFile)]
     (println "project-name:" project-name
@@ -16,7 +16,7 @@
     ;(handlers/add-leiningen-nature (e/project project-name))
     ;(.refreshLocal (e/project project-name) (IResource/DEPTH_INFINITE) nil)
     ;(Thread/sleep 2000)
-    (u/lein-new (.getAbsolutePath project-file) project-name)
+    (u/lein-new (.getAbsolutePath project-file) template-name project-name)
     (.refreshLocal project (IResource/DEPTH_INFINITE) nil)
     (handlers/add-natures
       project
