@@ -1374,7 +1374,7 @@
  <extension
        point="org.eclipse.core.expressions.propertyTesters">
     <propertyTester
-          class="ccw.ClojureNaturePropertyTest"
+          class="ccw.nature.ClojureNaturePropertyTest"
           id="ccw.propertyTester.hasClojureNature"
           namespace="ccw.propertyTester"
           properties="hasClojureNature"

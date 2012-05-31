@@ -24,11 +24,12 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
+import ccw.util.DisplayUtil;
 
 /**
  * @author Laurent Petit
@@ -50,9 +51,7 @@ public class ToggleNatureCommand extends AbstractHandler {
 								.getAdapter(IProject.class);
 					}
 					if (project != null) {
-						Shell shell = HandlerUtil.getActiveShell(event);
-						
-						toggleNature(project, shell);
+						toggleNature(project, false);
 					}
 				}
 			}
@@ -60,29 +59,40 @@ public class ToggleNatureCommand extends AbstractHandler {
 			return null;
 		}
 		
-		private void toggleNature(IProject project, Shell shell) {
-			String title = "Change Clojure language support";
-			String message;
+		public static void toggleNature(IProject project, boolean quiet) {
+			final String title = "Change Clojure language support";
+			String mess;
+
 			try {
 				boolean added = doToggleNature(project);
-				message = "Clojure language support successfully "
-					+ (added ? "added" : "removed") + ".";
+				mess = "Clojure language support successfully "
+					+ (added ? "added" : "removed") + " for project " + project.getName() + ".";
 			} catch (CoreException e) {
-				message = "Error while trying to toggle clojure language support for project "
+				mess = "Error while trying to toggle clojure language support for project "
 					+ project.getName() + ":";
 				if (e.getMessage() != null) {
-					message += "\n\n" + e.getMessage();
+					mess += "\n\n" + e.getMessage();
 				}
-				CCWPlugin.logError(message, e);
+				CCWPlugin.logError(mess, e);
 			}
-			MessageDialog.openInformation(shell, title, message);
+			final String message = mess;
+			
+			if (quiet) {
+				CCWPlugin.log(title + " : " + message);
+			} else {
+				DisplayUtil.asyncExec(new Runnable() {
+					public void run() {
+						MessageDialog.openInformation(Display.getCurrent().getActiveShell(), title, message);
+					}
+				});
+			}
 		}
 		
 		/**
 		 * Toggles clojure nature on a project.
 		 * @return true if nature added, false if nature removed
 		 */
-		private boolean doToggleNature(IProject project) throws CoreException {
+		private static boolean doToggleNature(IProject project) throws CoreException {
 			IProjectDescription description = project.getDescription();
 			String[] natures = description.getNatureIds();
 			List<String> newNatures = new ArrayList<String>(natures.length + 1);

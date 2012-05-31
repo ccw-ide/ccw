@@ -14,9 +14,7 @@ package ccw;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.util.List;
 import java.util.Map;
-import clojure.lang.Agent;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -46,11 +44,13 @@ import org.osgi.framework.BundleContext;
 
 import ccw.editors.clojure.IScanContext;
 import ccw.launching.LaunchUtils;
+import ccw.nature.AutomaticNatureAdder;
 import ccw.preferences.PreferenceConstants;
 import ccw.preferences.SyntaxColoringPreferencePage;
 import ccw.repl.REPLView;
 import ccw.util.BundleUtils;
 import ccw.util.DisplayUtil;
+import clojure.lang.Agent;
 import clojure.lang.Keyword;
 import clojure.lang.Var;
 import clojure.osgi.ClojureOSGi;
@@ -81,6 +81,9 @@ public class CCWPlugin extends AbstractUIPlugin {
     private FontRegistry fontRegistry;
     
     private ServerSocket ackREPLServer;
+    
+	private AutomaticNatureAdder natureAdapter = new AutomaticNatureAdder();
+
     
     public synchronized void startREPLServer() throws CoreException {
     	if (ackREPLServer == null) {
@@ -117,6 +120,9 @@ public class CCWPlugin extends AbstractUIPlugin {
         super.start(context);
         plugin = this;
         startClojureCode(context);
+        
+        this.natureAdapter.start();
+        
         if (System.getProperty("ccw.autostartnrepl") != null) {
         	startREPLServer();
         }
@@ -205,6 +211,9 @@ public class CCWPlugin extends AbstractUIPlugin {
     	// corresponding method on the ColorRegistry instance!
     	// We also don't remove fonts when deregistered
     	stopREPLServer();
+    	
+    	this.natureAdapter.stop();
+    	
         plugin = null;
         super.stop(context);
     }

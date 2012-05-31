@@ -21,9 +21,9 @@ import org.eclipse.jface.action.Action;
 
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
-import ccw.ClojureNaturePropertyTest;
 import ccw.ClojureProject;
 import ccw.launching.ClojureLaunchShortcut;
+import ccw.nature.ClojureNaturePropertyTest;
 import ccw.preferences.PreferenceConstants;
 import ccw.repl.Actions;
 import ccw.repl.REPLView;

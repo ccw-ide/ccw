@@ -1,9 +1,12 @@
-package ccw;
+package ccw.nature;
 
 import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+
+import ccw.CCWPlugin;
+import ccw.ClojureCore;
 
 public class ClojureNaturePropertyTest extends PropertyTester {
     
