@@ -17,13 +17,13 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import ccw.CCWPlugin;
 
-public class REPLViewPreferencePage extends FieldEditorPreferencePage implements
+public class GeneralPreferencePage extends FieldEditorPreferencePage implements
         IWorkbenchPreferencePage {
 
-    public REPLViewPreferencePage() {
+    public GeneralPreferencePage() {
         super(GRID);
         setPreferenceStore(CCWPlugin.getDefault().getPreferenceStore());
-        setDescription(Messages.ClojureREPLPreferencePage_Description); 
+        setDescription(Messages.ClojureGeneralPreferencePage_Description); 
     }
 
     /**
@@ -33,23 +33,12 @@ public class REPLViewPreferencePage extends FieldEditorPreferencePage implements
      * restore itself.
      */
     public void createFieldEditors() {
-
-    	addField(new BooleanFieldEditor(
-    			ccw.preferences.PreferenceConstants.REPL_VIEW_AUTO_EVAL_ON_ENTER_ACTIVE, 
-    			Messages.REPLViewPreferencePage_activate_autoEval_on_Enter, 
-    			getFieldEditorParent()));
-
-    	addField(new BooleanFieldEditor(
-    			ccw.preferences.PreferenceConstants.REPL_VIEW_DISPLAY_HINTS, 
-    			Messages.REPLViewPreferencePage_displayHint, 
-    			getFieldEditorParent()));
-
-    	addField(new BooleanFieldEditor(
-    			ccw.preferences.PreferenceConstants.REPL_QUIET_LOGGING_MODE, 
-    			Messages.REPLViewPreferencePage_quietLoggingMode, 
-    			getFieldEditorParent()));
-
-    }
+        addField(
+            new BooleanFieldEditor(
+            	ccw.preferences.PreferenceConstants.CCW_GENERAL_AUTOMATIC_NATURE_ADDITION,
+                Messages.ClojureGeneralPreferencePage_automatic_nature_addition,
+                getFieldEditorParent()));
+}
 
     public void init(IWorkbench workbench) {
     }

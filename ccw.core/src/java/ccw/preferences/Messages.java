@@ -19,6 +19,8 @@ public class Messages extends NLS {
     public static String ClojurePreferencePage_Description;
 
     public static String ClojurePreferencePage_description;
+    
+    public static String ClojureEditorPreferencePage_Description;
 
     public static String ClojurePreferencePage_displayed_tab_width;
 
@@ -118,11 +120,16 @@ public class Messages extends NLS {
 
 	public static String SyntaxColoringPreferencePage_preview;
 
+	public static String ClojureREPLPreferencePage_Description;
+	
     public static String REPLViewPreferencePage_activate_autoEval_on_Enter;
 
     public static String REPLViewPreferencePage_displayHint;
 
     public static String REPLViewPreferencePage_quietLoggingMode;
+    
+    public static String ClojureGeneralPreferencePage_Description;
+    public static String ClojureGeneralPreferencePage_automatic_nature_addition;
 
     static {
         // initialize resource bundle

@@ -128,6 +128,8 @@ public class PreferenceConstants {
 	
     public static final String CCW_PREFERENCE_PREFIX = "ccw.preferences"; //$NON-NLS-1$
     
+    public static final String CCW_GENERAL_AUTOMATIC_NATURE_ADDITION = CCW_PREFERENCE_PREFIX + ".automatic_nature_addition";
+    
 	public static final String SWITCH_TO_NS_ON_REPL_STARTUP = CCW_PREFERENCE_PREFIX + ".switch_to_ns_on_repl_startup"; //$NON-NLS-1$
 
 	public static final String USE_STRICT_STRUCTURAL_EDITING_MODE_BY_DEFAULT = CCW_PREFERENCE_PREFIX + ".use_strict_structural_editing_mode_by_default"; //$NON-NLS-1$

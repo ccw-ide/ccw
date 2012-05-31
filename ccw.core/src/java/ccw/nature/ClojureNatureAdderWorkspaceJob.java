@@ -30,6 +30,9 @@ final class ClojureNatureAdderWorkspaceJob extends
 			throws CoreException {
 
 		try {
+			if (!project.exists() || !project.isOpen())
+				return Status.CANCEL_STATUS;
+
 			if (project.hasNature(ClojureCore.NATURE_ID)) {
 				return Status.CANCEL_STATUS;
 			}

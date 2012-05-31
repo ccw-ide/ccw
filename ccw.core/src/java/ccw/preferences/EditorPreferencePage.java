@@ -24,7 +24,7 @@ public class EditorPreferencePage extends FieldEditorPreferencePage implements
     public EditorPreferencePage() {
         super(GRID);
         setPreferenceStore(CCWPlugin.getDefault().getPreferenceStore());
-        setDescription(Messages.ClojurePreferencePage_Description); 
+        setDescription(Messages.ClojureEditorPreferencePage_Description); 
     }
 
     /**

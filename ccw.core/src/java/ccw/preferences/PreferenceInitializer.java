@@ -107,6 +107,9 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	@Override
 	public void initializeDefaultPreferences() {
 	    IPreferenceStore store = CCWPlugin.getDefault().getPreferenceStore();
+	    
+	    store.setDefault(PreferenceConstants.CCW_GENERAL_AUTOMATIC_NATURE_ADDITION, true);
+	    
 	    store.setDefault(org.eclipse.jdt.ui.PreferenceConstants.EDITOR_MATCHING_BRACKETS, true);
 	    store.setDefault(org.eclipse.jdt.ui.PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR, 
                 StringConverter.asString(new RGB(150, 150, 150)));

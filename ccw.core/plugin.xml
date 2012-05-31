@@ -1399,6 +1399,12 @@
           id="ccw.preferences.EmptyPreferencePage">
     </page>
     <page
+          name="%preferencePage.general.name"
+          category="ccw.preferences.EmptyPreferencePage"
+          class="ccw.preferences.GeneralPreferencePage"
+          id="ccw.preferences.GeneralPreferencePage">
+    </page>
+    <page
           name="%preferencePage.editor.name"
           category="ccw.preferences.EmptyPreferencePage"
           class="ccw.preferences.EditorPreferencePage"

@@ -12,6 +12,9 @@ import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
+import ccw.CCWPlugin;
+import ccw.preferences.PreferenceConstants;
+
 
 public final class ClojurePackageElementChangeListener implements
 		IElementChangedListener {
@@ -20,6 +23,10 @@ public final class ClojurePackageElementChangeListener implements
 	static final IPath CLOJURE_PACKAGE_PATH = new Path("clojure/lang");
 
 	public void elementChanged(ElementChangedEvent javaModelEvent) {
+		
+		if (!CCWPlugin.getDefault().getCombinedPreferenceStore().getBoolean(PreferenceConstants.CCW_GENERAL_AUTOMATIC_NATURE_ADDITION))
+			return;
+		
 		IJavaElementDelta delta = javaModelEvent.getDelta();
 		IJavaElement element = delta.getElement();
 		
@@ -49,8 +56,12 @@ public final class ClojurePackageElementChangeListener implements
 	
 	private void visitJavaProjectDelta(IJavaElementDelta javaProjectDelta) {
 		IJavaProject javaProject = (IJavaProject) javaProjectDelta.getElement();
+		IProject project = javaProject.getProject();
+
+		if (!project.exists() || !project.isOpen())
+			return;
 		
-		if (ClojureNaturePropertyTest.hasClojureNature(javaProject.getProject()))
+		if (ClojureNaturePropertyTest.hasClojureNature(project))
 			return;
 		
 		for (IJavaElementDelta fragmentRootDelta: javaProjectDelta.getAffectedChildren()) {
