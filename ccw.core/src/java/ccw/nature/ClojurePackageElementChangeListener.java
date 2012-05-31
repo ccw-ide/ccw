@@ -1,7 +1,10 @@
 package ccw.nature;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.ElementChangedEvent;
@@ -11,8 +14,11 @@ import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import ccw.CCWPlugin;
+import ccw.ClojureCore;
 import ccw.preferences.PreferenceConstants;
 
 
@@ -24,7 +30,7 @@ public final class ClojurePackageElementChangeListener implements
 
 	public void elementChanged(ElementChangedEvent javaModelEvent) {
 		
-		if (!CCWPlugin.getDefault().getCombinedPreferenceStore().getBoolean(PreferenceConstants.CCW_GENERAL_AUTOMATIC_NATURE_ADDITION))
+		if (!CCWPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.CCW_GENERAL_AUTOMATIC_NATURE_ADDITION))
 			return;
 		
 		IJavaElementDelta delta = javaModelEvent.getDelta();
@@ -88,7 +94,39 @@ public final class ClojurePackageElementChangeListener implements
 
 	private void addClojureNature(final IProject project) {
 		WorkspaceJob job = new ClojureNatureAdderWorkspaceJob(project);
-		job.schedule();
+		job.schedule(100);
+	}
+
+	public void performFullScan() {
+		if (!CCWPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.CCW_GENERAL_AUTOMATIC_NATURE_ADDITION))
+			return;
+		
+		IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
+		for (IProject project: workspaceRoot.getProjects()) {
+			if (isCandidateClojureProject(project)) {
+				addClojureNature(project);
+			}
+		}
+	}
+	
+	private boolean isCandidateClojureProject(IProject project) {
+		try {
+			return (project.exists()
+					&& 
+					project.isOpen()
+					&&
+					!project.hasNature(ClojureCore.NATURE_ID)
+					&&
+					project.hasNature(JavaCore.NATURE_ID)
+					&&
+					(JavaCore.create(project).findElement(CLOJURE_PACKAGE_PATH)) != null);
+		} catch (JavaModelException e) {
+			CCWPlugin.logError("Error while  trying to determine if project " + project.getName() + " is a candidate to be converted to a clojure project", e);
+			return false;
+		} catch (CoreException e) {
+			CCWPlugin.logError("Error while  trying to determine if project " + project.getName() + " is a candidate to be converted to a clojure project", e);
+			return false;
+		}
 	}
 	
 }

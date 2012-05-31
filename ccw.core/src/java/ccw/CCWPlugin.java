@@ -119,13 +119,15 @@ public class CCWPlugin extends AbstractUIPlugin {
 //    	System.out.println("CCWPlugin start() starts");
         super.start(context);
         plugin = this;
-        startClojureCode(context);
         
-        this.natureAdapter.start();
+        startClojureCode(context);
         
         if (System.getProperty("ccw.autostartnrepl") != null) {
         	startREPLServer();
         }
+        
+        this.natureAdapter.start();
+        
 //    	System.out.println("CCWPlugin start() ends");
     }
     
