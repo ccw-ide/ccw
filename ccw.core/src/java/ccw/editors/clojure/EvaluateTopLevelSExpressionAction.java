@@ -48,7 +48,7 @@ public class EvaluateTopLevelSExpressionAction extends Action {
 			}
 			
 			EvaluateTextUtil.evaluateText(repl, textToEvaluate, isReplExplicitLoggingMode());
-			Actions.ShowActiveREPL.execute(isReplExplicitLoggingMode());
+			Actions.ShowActiveREPL.execute(false);
 		}
 	}
 }
