@@ -63,7 +63,9 @@
   "Returns a classlojure environment for project, creating one if none exists yet,
    or if recreate? is true."
   [project & recreate?]
-  (let [pname (-> project e/project .getName)]
+  (let [pname (if (= :project-less project) 
+                project
+                (-> project e/project .getName))]
     (dosync
       (commute projects-envs
                #(if (or recreate? (not (% pname)))
