@@ -13,6 +13,7 @@ package ccw.editors.clojure;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -47,6 +48,11 @@ import ccw.util.ClojureInvoker;
 
 public class ClojureEditor extends TextEditor implements IClojureEditor {
 
+	@Override
+	protected void doSetInput(IEditorInput input) throws CoreException {
+		super.doSetInput(input);
+	}
+	
 	private static final ClojureInvoker editorSupport = ClojureInvoker.newInvoker(
             CCWPlugin.getDefault(),
             "ccw.editors.clojure.editor-support");
@@ -661,4 +667,6 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 	public boolean isEscapeInStringLiteralsEnabled() {
 		return sourceViewer().isEscapeInStringLiteralsEnabled();
 	}
+	
+	
 }

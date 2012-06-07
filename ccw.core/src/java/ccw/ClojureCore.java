@@ -32,12 +32,14 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.eclipse.core.internal.utils.FileUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.debug.core.sourcelookup.containers.LocalFileStorage;
 import org.eclipse.debug.core.sourcelookup.containers.ZipEntryStorage;
@@ -49,12 +51,15 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.JarEntryFile;
 import org.eclipse.jdt.internal.debug.ui.LocalFileStorageEditorInput;
 import org.eclipse.jdt.internal.debug.ui.ZipEntryStorageEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IDE;
@@ -259,8 +264,12 @@ public final class ClojureCore {
 					continue;
 				cpe = JavaCore.getResolvedClasspathEntry(cpe); // resolve if there are vars
 				IPath sourcePath = cpe.getSourceAttachmentPath();
-				if (sourcePath != null) {
-					sourcePath = toOSAbsoluteIPath(sourcePath);
+				if (true) {
+					if (sourcePath != null)
+						sourcePath = toOSAbsoluteIPath(sourcePath);
+					else
+						sourcePath = toOSAbsoluteIPath(cpe.getPath()); // XXXXXXXXX ARRIVER A DISTINGUER LES PATH DU WORKSPACE DES SYSTEM PATH XXXXX
+					
 					File sourceFile = sourcePath.toFile();
 					if (sourceFile.isDirectory()) {
 						// find whether it's in there or not
@@ -276,19 +285,34 @@ public final class ClojureCore {
 						}
 					} else {
 						try {
+							try {
+								IJavaElement je = javaProject.findElement(new Path("clojure/core.clj"));
+								if (je != null) {
+									System.out.println(je);
+								}
+							} catch (JavaModelException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							
 							ZipFile zipFile = new ZipFile(sourceFile, ZipFile.OPEN_READ);
 							ZipEntry zipEntry = zipFile.getEntry(initialSearchedFileName);
+
 							if (zipEntry != null) {
+//								JarEntryFile jarEntryFile = new JarEntryFile(sourcePath.toOSString());
+//								IPackageFragmentRoot[] pfr = javaProject.findPackageFragmentRoots(cpe);
+//								jarEntryFile.setParent(pfr[0]);
+	//							IEditorInput editorInput = new JarEntryEditorInput(jarEntryFile);
 								ZipEntryStorageEditorInput editorInput = new ZipEntryStorageEditorInput(
 										new ZipEntryStorage(zipFile, zipEntry));
-								IEditorPart editor = IDE.openEditor(CCWPlugin.getActivePage(), editorInput, ClojureEditor.ID);
+								IEditorPart editor = IDE.openEditor(CCWPlugin.getActivePage(), editorInput, ClojureEditor.ID, true);
 								gotoEditorLine(editor, line);
 								return true;
 							} else {
 								// let's fall through the CPE_SOURCE CASE
 							}
 						} catch (IOException e) {
-							CCWPlugin.logError("error while trying to open " + sourceFile + " for entry " + initialSearchedFileName, e);
+							CCWPlugin.logError("error while trying to open " + sourceFile + " for entry " + initialSearchedFileName);//, e);
 						}
 					}
 				} else {
