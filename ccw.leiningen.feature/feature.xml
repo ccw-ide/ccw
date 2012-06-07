@@ -2,7 +2,7 @@
 <feature
       id="ccw.leiningen.feature"
       label="%featureName"
-      version="0.0.1.qualifier"
+      version="0.8.1.qualifier"
       provider-name="%providerName"
       plugin="ccw.leiningen.branding">
 
@@ -19,7 +19,7 @@
    </license>
 
    <url>
-      <update label="Leiningen Support Update Site" url="http://ccw.cgrand.net/updatesite-lein-betas/"/>
+      <update label="Counterclockwise Update Site" url="http://ccw.cgrand.net/updatesite/"/>
    </url>
 
    <requires>
@@ -31,12 +31,12 @@
       <import plugin="ccw.clojure" version="1.3.0" match="greaterOrEqual"/>
       <import plugin="clojure.osgi" version="1.3.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.ui"/>
-      <import plugin="ccw.util" version="0.6.0" match="greaterOrEqual"/>
       <import plugin="ccw.leiningen-core" version="0.16.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.jface.text" match="greaterOrEqual"/>
       <import plugin="org.eclipse.core.expressions"/>
       <import plugin="org.eclipse.jdt.launching" match="greaterOrEqual"/>
       <import plugin="ccw.org.clojure.core.incubator" version="0.1.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.platform"/>
       <import plugin="org.eclipse.ui.ide"/>
       <import plugin="org.eclipse.jdt.debug.ui"/>
       <import plugin="org.eclipse.debug.ui"/>
