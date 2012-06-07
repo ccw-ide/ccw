@@ -96,24 +96,32 @@
   classpath.
 
    Returns a set of the dependencies' files."
-  [dependencies-key {:keys [repositories native-path] :as project} & rest]
-  (doto (->> (apply #'cp/get-dependencies dependencies-key project rest)
-             (aether/dependency-files)
-             (filter #(re-find #"\.(jar|zip)$" (.getName %))))
-    (cp/extract-native-deps native-path)))
+  [project-name dependencies-key {:keys [repositories native-path] :as project} & rest]
+  (let [deps-paths 
+          ; We use eval-in-project or else we may not benefit from the right SSL
+          ; certificates declared for the project
+          (u/eval-in-project
+            project-name
+            `(do
+               (require 'cemerick.pomegranate.aether)
+               (require 'leiningen.core.classpath)
+               (let [~'dependencies (->> (apply #'leiningen.core.classpath/get-dependencies '~dependencies-key '~project '~rest)
+                                      (cemerick.pomegranate.aether/dependency-files)
+                                      (filter #(re-find #"\.(jar|zip)$" (.getName %))))]
+                 (leiningen.core.classpath/extract-native-deps ~'dependencies '~native-path)
+                 ; we serialize paths to Strings so that clojure datastructures can be passed back
+                 (map #(.getAbsolutePath %) ~'dependencies))))]
+    (map #(File. %) deps-paths)))
 
 (defn ser-dep [path native-path]
   {:path (.getAbsolutePath (io/as-file path))
    :native-path (.getAbsolutePath (io/as-file native-path))})
 
 (defn get-project-dependencies
-  "Given a project (anything that coerces to ccw.util.eclipse/IProjectCoercion),
-   analyze its project.clj file, grab the dependencies, and return a list
-   of jar files.
-   Return the dependencies sorted alphabetically via their file name.
+  "Return the dependencies sorted alphabetically via their file name.
    Throws Aether exceptions if a problem occured"
-  [lein-project]
-  (let [dependencies (resolve-dependencies :dependencies lein-project)]
+  [project-name lein-project]
+  (let [dependencies (resolve-dependencies project-name :dependencies lein-project)]
     (map 
       ser-dep
       (->> dependencies
@@ -228,8 +236,9 @@
 
 (defn- unresolved-dependencies-string [exc]
   (let [unresolved (-> exc .getResult .getArtifactResults unresolved-artifacts)
-              artifacts (map (comp artifact-string requested-artifact) unresolved)]
-          (str/join ", " artifacts)))
+        artifacts (map (comp artifact-string requested-artifact) unresolved)]
+    (when-not artifacts (println "missing artifacts, printing the stacktrace instead:" (.printStackTrace exc)))      
+    (str/join ", " artifacts)))
 
 ;; TODO fixme: if the network is down, and we write a non existent dependency, the message does not manage to list the dependencies
 ;; we were not able to fetch. the following Exception chaining must be deciphered:
@@ -491,7 +500,7 @@
 
 
 (defn- dependency-resolution-message [exc java-project]
-  [(-> java-project e/resource (.getFile "project.clj"));(e/resource java-project) 
+  [(-> java-project e/resource (.getFile "project.clj"))
    (str "problem resolving following dependencies: "
         (unresolved-dependencies-string exc))])
 
@@ -501,20 +510,20 @@
    and java-project values"
   [exc java-project]
   (cond
-    (nil? exc) [(e/resource java-project) "unknown problem"]
-    (nil? (.getMessage exc)) [(e/resource java-project) "unknown problem"]
-    (.contains (.getMessage exc) "project.clj")
-      (if (.contains (.getMessage exc) "FileNotFoundException")
-        [(e/resource java-project) "project.clj file is missing"]
-        [(-> java-project e/resource (.getFile "project.clj")) "problem with project.clj file"])
+    (nil? exc) [(e/resource java-project) "unknown problem (missing exception)"]
     (instance? DependencyResolutionException exc)
       (dependency-resolution-message exc java-project)
     (instance? DependencyResolutionException (.getCause exc))
       (dependency-resolution-message (.getCause exc) java-project)
-    #_(.contains (.getMessage exc) "DependencyResolutionException")
-      #_[(e/resource java-project) "problem when grabbing dependencies from repositories."]
+    (nil? (.getMessage exc)) [(e/resource java-project) "unknown problem (missing exception message)"]
+    (.contains (.getMessage exc) "project.clj")
+      (if (.contains (.getMessage exc) "FileNotFoundException")
+        [(e/resource java-project) "project.clj file is missing"]
+        [(-> java-project e/resource (.getFile "project.clj")) "problem with project.clj file"])
+    (.contains (.getMessage exc) "DependencyResolutionException")
+      [(e/resource java-project) (str "problem when grabbing dependencies from repositories:" (.getMessage exc))]
     :else
-      [(e/resource java-project) "unknown problem"]))
+      [(e/resource java-project) (str "unknown problem: " (.getMessage exc))]))
 
 (defn set-classpath-container
   "Sets classpath-container for java-project under the key container-path"
@@ -539,7 +548,7 @@
   [java-project] ;; TODO checks
   (try
     (let [lein-project (u/lein-project java-project)
-          deps (get-project-dependencies lein-project)]
+          deps (get-project-dependencies (.getName (e/project java-project)) lein-project)]
       (set-lein-container java-project deps)
       (delete-container-markers java-project)
       (save-project-dependencies java-project deps))

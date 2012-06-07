@@ -63,7 +63,7 @@
   "Returns a classlojure environment for project, creating one if none exists yet,
    or if recreate? is true."
   [project & recreate?]
-  (let [pname (if (string? project) (-> project e/project .getName))]
+  (let [pname (-> project e/project .getName)]
     (dosync
       (commute projects-envs
                #(if (or recreate? (not (% pname)))
@@ -101,21 +101,23 @@
   [project & {:keys [static-loading? enhance-fn] :or {enhance-fn identity}}]
   (eval-in-project project '(require 'leiningen.core.project))
   (let [project-map (if (= :project-less project)
-                      {}
-                      (eval-in-project project 
-                                       'leiningen.core.project/read
-                                       (project-clj project)))
-        project-map (enhance-fn project-map)] 
+                      (eval-in-project 
+                        project
+                        `(leiningen.core.project/merge-profiles 
+                           leiningen.core.project/defaults
+                           [:user :default]))
+                      (eval-in-project
+                        project 
+                        'leiningen.core.project/read
+                        (project-clj project)))
+        project-map (enhance-fn project-map)]
     (when-not static-loading?
-      (if (= :project-less project)
-        (eval-in-project 
-          project
-          `(leiningen.core.project/load-plugins 
-             (leiningen.core.project/merge-profiles 
-               '~(enhance-fn project-map)
-               [:user :default])))
-        (eval-in-project 
-          project
+      (eval-in-project 
+        project
+        (if (= :project-less project)
+          `(do
+             (leiningen.core.project/load-certificates '~project-map)
+             (leiningen.core.project/load-plugins '~project-map))
           `(leiningen.core.project/init-project '~project-map))))
     project-map))
 
