@@ -59,7 +59,7 @@
          commandId="ccw.leiningen.command.update-dependencies"
          contextId="org.eclipse.ui.contexts.window"
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-         sequence="M1+L U">
+         sequence="M3+L U">
    </key>
 </extension>
 <extension
