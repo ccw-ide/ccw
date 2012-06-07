@@ -193,22 +193,19 @@
          ->files
          "Generate a file with content. path can be a java.io.File or string.\n   It will be turned into a File regardless. Any parent directories will\n   be created automatically. Data should include a key for :name so that\n   the project is created in the correct directory"
          [{:keys [name], :as data} & paths]
-         (let
-           [normalized-name (normalize-project-name name)]
-           (.mkdir (io/file (System/getProperty "user.dir")))
-           (doseq
-             [path paths]
-             (if
-               (string? path)
-               (.mkdirs (template-path normalized-name path data))
-               (let
-                 [[path content]
-                  path
-                  path
-                  (template-path normalized-name path data)
-                  path (io/file (System/getProperty "user.dir") path)]
-                 (.mkdirs (.getParentFile path))
-                 (io/copy content (io/file path))))))))))
+         (.mkdir (io/file (System/getProperty "user.dir")))
+         (doseq
+           [path paths]
+           (if
+             (string? path)
+             (.mkdirs (template-path name path data))
+             (let
+               [[path content] path
+                path (template-path name path data)
+                path (io/file (System/getProperty "user.dir") path)
+                ]
+               (.mkdirs (.getParentFile path))
+               (io/copy content (io/file path)))))))))
 
 (defn lein-new [location & args]
   (let [project-map (lein-project :project-less
@@ -218,7 +215,7 @@
                           `(-> '~p
                              (leiningen.core.project/add-profiles
                                '{:user 
-                                 ~'{:plugins [[lein-newnew "0.2.6"]]}})
+                                 ~'{:plugins [[lein-newnew "0.3.1"]]}})
                              (leiningen.core.project/merge-profiles 
                                [:user])))))]
     (monkey-patch-lein-new :project-less)
