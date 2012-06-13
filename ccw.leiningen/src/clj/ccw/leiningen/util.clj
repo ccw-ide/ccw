@@ -211,7 +211,7 @@
                (.mkdirs (.getParentFile path))
                (io/copy content (io/file path)))))))))
 
-(defn lein-new [location & args]
+(defn lein-new [location template name & args]
   (let [project-map (lein-project :project-less
                       :enhance-fn 
                       (fn [p]
@@ -230,7 +230,7 @@
           :project-less
           `(do
              (require 'leiningen.new)
-             (apply leiningen.new/new nil '~args)))
+             (apply (leiningen.new/resolve-template '~template) '~name '~args)))
         (finally (System/setProperty "user.dir" user-dir))))))
 
 
