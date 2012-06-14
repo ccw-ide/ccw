@@ -27,31 +27,29 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.jar.JarFile;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.eclipse.core.internal.utils.FileUtil;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.debug.core.sourcelookup.containers.LocalFileStorage;
 import org.eclipse.debug.core.sourcelookup.containers.ZipEntryStorage;
-import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJarEntryResource;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.core.JarEntryFile;
 import org.eclipse.jdt.internal.debug.ui.LocalFileStorageEditorInput;
 import org.eclipse.jdt.internal.debug.ui.ZipEntryStorageEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
@@ -63,6 +61,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IDE;
+import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import ccw.editors.clojure.ClojureEditor;
@@ -230,140 +229,162 @@ public final class ClojureCore {
 		}
 	}
     
-    private static boolean openInEditor(String searchedNS, final String initialSearchedFileName, int line, String projectName, boolean onlyExportedEntries) throws PartInitException {
-    	if (initialSearchedFileName==null) {
+    /**
+     * Tries to open a clojure file in an editor
+     * @return an editor input if the file has been found, or null
+     */
+    private static IEditorInput findEditorInput(IPackageFragment packageFragment, String searchedPackage, String searchedFileName) throws JavaModelException {
+			if (packageFragment.exists() 
+					&& packageFragment.getElementName().equals(searchedPackage)) {
+				for (Object njr: packageFragment.getNonJavaResources()) {
+					// differents cas a considerer
+					if (njr instanceof IJarEntryResource) {
+						IJarEntryResource jer = (IJarEntryResource) njr;
+						if (jer.getName().equals(searchedFileName)) {
+							System.out.println("FFFFFFFOOOOOUUUUUNNNNDDDDD!");
+							JarEntryEditorInput jeei = new JarEntryEditorInput(jer);
+							return jeei;
+						}
+					}
+				}
+			}
+			return null;
+    }
+
+    /**
+     * Tries to open a clojure file in an editor
+     * @return an editor input if the file has been found, or null
+     */
+    private static IEditorInput findEditorInput(
+    		IPackageFragmentRoot packageFragmentRoot, 
+    		String searchedPackage, 
+    		String searchedFileName) 
+    				throws JavaModelException {
+    	
+    	// Find in package fragment
+    	IPackageFragment packageFragment = packageFragmentRoot.getPackageFragment(searchedPackage);
+    	
+		IEditorInput editorInput = findEditorInput(packageFragment, 
+				                                   searchedPackage, 
+				                                   searchedFileName);
+		if (editorInput != null) {
+			return editorInput;
+		}
+    	
+    	return findEditorInputInSourceAttachment(
+    				packageFragmentRoot, 
+    				searchedPackage,
+    				searchedFileName);
+    }
+
+	private static IEditorInput findEditorInputInSourceAttachment(
+			IPackageFragmentRoot packageFragmentRoot, 
+			String searchedPackage,
+			String searchedFileName) throws JavaModelException {
+		
+    	final IPath sourceAttachmentPath = packageFragmentRoot.getSourceAttachmentPath();
+    	
+    	if (sourceAttachmentPath == null) {
+    		return null;
+    	}
+    	
+    	final String searchedPath = searchedPackage.replaceAll("\\.", "/");
+		
+		final IResource workspaceResource = ResourcesPlugin.getWorkspace().getRoot().findMember(sourceAttachmentPath);
+		
+		// Find in workspace
+		if (workspaceResource != null) {
+			if (workspaceResource.getType() == IResource.FOLDER) {
+				IFolder folder = (IFolder) workspaceResource;
+				IFile r = (IFile) folder.findMember(searchedPath + "/" + searchedFileName);
+				if (r != null && r.exists()) {
+					return new FileEditorInput(r);
+				}
+			} else {
+				// Don't know what to do here
+			}
+		}
+		
+		
+		// Find outside workspace or in archive 
+		final IPath sourceAbsolutePath = toOSAbsoluteIPath(sourceAttachmentPath);
+		
+		if (sourceAbsolutePath.toFile().isDirectory()) {
+			final File maybeSourceFile = sourceAbsolutePath.append(searchedPath + "/" + searchedFileName).toFile();
+			if (maybeSourceFile.exists()) {
+				return new LocalFileStorageEditorInput(
+						new LocalFileStorage(maybeSourceFile));
+			} else {
+				// Nothing, alas
+			}
+		} else {
+			ZipFile zipFile;
+			try {
+				zipFile = new JarFile(sourceAbsolutePath.toFile(), true, JarFile.OPEN_READ);
+				ZipEntry zipEntry = zipFile.getEntry(searchedPath + "/" + searchedFileName);
+				if (zipEntry != null) {
+					return new ZipEntryStorageEditorInput(
+							new ZipEntryStorage(zipFile, zipEntry));
+				} else {
+					// Nothing, alas
+				}
+			} catch (IOException e) {
+				CCWPlugin.logError("Error trying to open " + sourceAbsolutePath, e);
+			}
+		}
+		return null;
+	}
+
+    /**
+     * File name, without extension
+     */
+    private static String getFileName(final String path) {
+    	return ( path.contains("/") )  
+    			? path.substring(1 + path.lastIndexOf('/')) 
+    			: path; 
+    }
+    
+    private static boolean openInEditor(final String searchedNS, 
+    		                            final String initialSearchedFileName, 
+    		                            final int line, 
+    		                            final String projectName, 
+    		                            final boolean onlyExportedEntries) 
+    		                            		throws PartInitException {
+    	
+    	if (initialSearchedFileName == null) {
     		return false;
     	}
-    	String searchedFileName = initialSearchedFileName;
-    	// TODO at some point in time, remove the second behaviour
-    	// (when I estimate everybody is using the newer clojure version
-    	if (searchedFileName.contains("/")) {
-    		// new clojure version with namespace in searchedFileName
-    		//searchedNS = searchedFileName.substring(0, searchedFileName.lastIndexOf('.')).replace('/', '.');
-    		searchedFileName = searchedFileName.substring(1 + searchedFileName.lastIndexOf('/'));
-    	} else {
-    		// old clojure version without namespace in searchedFileName
-    		// let it be
-    	}
-		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-		IJavaProject javaProject = JavaCore.create(project);
-		IClasspathEntry[] classpathEntries;
+    	
+    	final String searchedFileName = getFileName(initialSearchedFileName);
+    	
+		final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+		
+		final IJavaProject javaProject = JavaCore.create(project);
+		
 		try {
-			classpathEntries = javaProject.getResolvedClasspath(true);
-		} catch (JavaModelException e) {
-			CCWPlugin.logError("error getting classpathEntries of javaProject " + javaProject.getPath() 
-					+ " while trying to localize for editor opening : " 
-					+ searchedNS + " " + searchedFileName, e);
-			return false;
-		}
-
-		for (IClasspathEntry cpe: classpathEntries) {
-			switch (cpe.getEntryKind()) {
-			case IClasspathEntry.CPE_LIBRARY:
-				if (onlyExportedEntries && !cpe.isExported())
-					continue;
-				cpe = JavaCore.getResolvedClasspathEntry(cpe); // resolve if there are vars
-				IPath sourcePath = cpe.getSourceAttachmentPath();
-				if (true) {
-					if (sourcePath != null)
-						sourcePath = toOSAbsoluteIPath(sourcePath);
-					else
-						sourcePath = toOSAbsoluteIPath(cpe.getPath()); // XXXXXXXXX ARRIVER A DISTINGUER LES PATH DU WORKSPACE DES SYSTEM PATH XXXXX
-					
-					File sourceFile = sourcePath.toFile();
-					if (sourceFile.isDirectory()) {
-						// find whether it's in there or not
-						File maybeSourceFile = new File(sourceFile, initialSearchedFileName);
-						if (maybeSourceFile.exists()) {
-							LocalFileStorageEditorInput editorInput = new LocalFileStorageEditorInput(
-									new LocalFileStorage(maybeSourceFile));
-							IEditorPart editor = IDE.openEditor(CCWPlugin.getActivePage(), editorInput, ClojureEditor.ID);
-							gotoEditorLine(editor, line);
-							return true;
-						} else {
-							// let's fall through the CPE_SOURCE CASE
-						}
-					} else {
-						try {
-							try {
-								IJavaElement je = javaProject.findElement(new Path("clojure/core.clj"));
-								if (je != null) {
-									System.out.println(je);
-								}
-							} catch (JavaModelException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-							
-							ZipFile zipFile = new ZipFile(sourceFile, ZipFile.OPEN_READ);
-							ZipEntry zipEntry = zipFile.getEntry(initialSearchedFileName);
-
-							if (zipEntry != null) {
-//								JarEntryFile jarEntryFile = new JarEntryFile(sourcePath.toOSString());
-//								IPackageFragmentRoot[] pfr = javaProject.findPackageFragmentRoots(cpe);
-//								jarEntryFile.setParent(pfr[0]);
-	//							IEditorInput editorInput = new JarEntryEditorInput(jarEntryFile);
-								ZipEntryStorageEditorInput editorInput = new ZipEntryStorageEditorInput(
-										new ZipEntryStorage(zipFile, zipEntry));
-								IEditorPart editor = IDE.openEditor(CCWPlugin.getActivePage(), editorInput, ClojureEditor.ID, true);
-								gotoEditorLine(editor, line);
-								return true;
-							} else {
-								// let's fall through the CPE_SOURCE CASE
-							}
-						} catch (IOException e) {
-							CCWPlugin.logError("error while trying to open " + sourceFile + " for entry " + initialSearchedFileName);//, e);
-						}
-					}
-				} else {
-					// 	no source attachment path case, fall through CPE_SOURCE like case
-				}
-			case IClasspathEntry.CPE_SOURCE:
-				IPackageFragmentRoot[] libPackageFragmentRoots = javaProject.findPackageFragmentRoots(cpe);
-				for (IPackageFragmentRoot pfr: libPackageFragmentRoots) {
-					try {
-						if ("".equals(getPackageNameFromNamespaceName(searchedNS))) {
-							try {
-								if (tryNonJavaResources(pfr.getNonJavaResources(), searchedFileName, line)) {
-									return true;
-								}
-							} catch (JavaModelException e) {
-								CCWPlugin.logError("error with packageFragment " + pfr.getPath() 
-										+ " while trying to localize for editor opening : " 
-										+ searchedNS + " " + searchedFileName, e);
-							}
-						}
-						for (IJavaElement javaElement: pfr.getChildren()) {
-							if (!javaElement.getElementName().equals(getPackageNameFromNamespaceName(searchedNS)))
-								continue;
-							if (! (javaElement instanceof IPackageFragment))
-								continue;
-							IPackageFragment packageFragment = (IPackageFragment) javaElement;
-							try {
-								if (tryNonJavaResources(packageFragment.getNonJavaResources(), searchedFileName, line)) {
-									return true;
-								}
-							} catch (JavaModelException e) {
-								CCWPlugin.logError("error with packageFragment " + packageFragment.getPath() 
-										+ " while trying to localize for editor opening : " 
-										+ searchedNS + " " + searchedFileName, e);
-							}
-						}
-					} catch (JavaModelException e) {
-						CCWPlugin.logError("error with packageFragmentRoot " + pfr.getPath() 
-								+ " while trying to localize for editor opening : " 
-								+ searchedNS + " " + searchedFileName, e);
-					}
-				}
-				break;
-			case IClasspathEntry.CPE_PROJECT:
-				String dependentProjectName = cpe.getPath().lastSegment();
-				if (openInEditor(searchedNS, searchedFileName, line, dependentProjectName, true))
+			System.out.println("search file name : " + searchedFileName);
+			System.out.println("searched ns : " + searchedNS);
+			
+			final String searchedPackage = (searchedNS.contains(".")) ? searchedNS.substring(0, searchedNS.lastIndexOf(".")) : "";
+			System.out.println("searched package: " + searchedPackage);
+			
+			for (IPackageFragmentRoot packageFragmentRoot: javaProject.getAllPackageFragmentRoots()) {
+				
+				final IEditorInput editorInput = 
+						findEditorInput(packageFragmentRoot, 
+								        searchedPackage, 
+								        searchedFileName);
+				
+				if (editorInput != null) {
+					IEditorPart editor = IDE.openEditor(CCWPlugin.getActivePage(), editorInput, ClojureEditor.ID);
+					gotoEditorLine(editor, line);
 					return true;
-				break;
-			default:
-				break;
+				} else {
+					continue;
+				}
 			}
+		} catch (JavaModelException e) {
+			e.printStackTrace();
 		}
 		return false;
 	}
