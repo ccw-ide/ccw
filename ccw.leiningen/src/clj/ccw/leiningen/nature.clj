@@ -123,7 +123,8 @@
   (or (jvm-entry java-project) (default-jvm-entry)))
 
 (defn lein-raw-source-folders [lein-proj]
-  (concat (:source-paths lein-proj)))
+  (concat (:source-paths lein-proj)
+          (:java-source-paths lein-proj)))
 
 (defn lein-raw-optional-source-folders [lein-proj]
   (concat (:test-paths lein-proj)
