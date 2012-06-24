@@ -41,7 +41,6 @@ public class GenericExecutableExtension implements IExecutableExtensionFactory, 
 
 	public void setInitializationData(IConfigurationElement config,
 			String propertyName, Object data) throws CoreException {
-		assert data instanceof String;
 		bundleName = config.getDeclaringExtension().getContributor().getName();
 		System.out.println("GenericExecutableExtension instance, bundleName=" + bundleName);
 		if (data instanceof String) {
