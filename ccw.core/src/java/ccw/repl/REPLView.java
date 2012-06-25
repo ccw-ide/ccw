@@ -573,11 +573,11 @@ public class REPLView extends ViewPart implements IAdaptable {
 					// with the selection before being sent for evaluation.
 					DisplayUtil.asyncExec(new Runnable() {
 						public void run() {
-							// we do not execute auto eval if some text has
+							// we do not execute auto eval if some non-blank text has
 							// been added between the check and the execution
-							if (viewerWidget.getText().equals(widgetText + "\n")
-									|| viewerWidget.getText().equals(widgetText + "\r\n")
-									|| viewerWidget.getText().equals(widgetText + "\r")) {
+							final String text = viewerWidget.getText();
+							int idx = text.indexOf(widgetText);
+							if (idx == 0 && text.substring(widgetText.length()).trim().isEmpty()) {
 								evalExpression();
 							}
 						}});
