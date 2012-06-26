@@ -35,7 +35,6 @@ import org.eclipse.jdt.internal.debug.ui.launcher.LauncherMessages;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -89,44 +88,41 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
             List<IFile> files = new ArrayList<IFile>();
             IProject proj = null;
             for (Object o : strSel.toList()) {
-                IFile f = (IFile) Platform.getAdapterManager().getAdapter(o, IFile.class);
-                if (f != null) {
-                    files.add(f);
+                IResource r = (IResource) Platform.getAdapterManager().getAdapter(o, IResource.class);
+                if (r != null) {
+                	if (r.getType() == IResource.FILE) {
+                		files.add((IFile) r);
+                	}
                     if (proj == null) {
-                        proj = f.getProject();
+                        proj = r.getProject();
                     }
-                    continue;
-                }
-                IProject p = (IProject) Platform.getAdapterManager().getAdapter(o, IProject.class);
-                if ( p != null  &&  strSel.size() == 1) {
-                    return launchProject(p, new IFile[] {}, mode, activateAutoReload);
                 }
             }
-            if (proj != null && !files.isEmpty()) {
+            if (proj != null) {
                 return launchProject(proj, files.toArray(new IFile[] {}), mode, activateAutoReload);
             }
         }
         return null;
     }
     public ILaunch launchProject(IProject project, String mode, Boolean activateAutoReload) {
-    	StructuredSelection sel = new StructuredSelection(project);
-    	return launchSelection(sel, mode, activateAutoReload);
+    	return launchProject(project, new IFile[] {}, mode, activateAutoReload);
     }
     
-    protected ILaunch launchProject(IProject project, IFile[] files, String mode, Boolean activateAutoReload) {
-    	activateAutoReload = activateAutoReload==null ? files.length==0 : activateAutoReload;
+    protected ILaunch launchProject(IProject project, IFile[] filesToLaunch, String mode, Boolean activateAutoReload) {
+    	activateAutoReload = activateAutoReload!=null ? activateAutoReload : ( filesToLaunch.length==0 );
         try {
-            ILaunchConfiguration config = findLaunchConfiguration(project, files);
+            ILaunchConfiguration config = findLaunchConfiguration(project);
             if (config == null) {
-                config = createConfiguration(project, files);
+                config = createConfiguration(project, null);
             }
             if (config != null) {
             	ILaunchConfigurationWorkingCopy runnableConfiguration =
             	    config.copy(config.getName() + " #" + incTempLaunchCount(project.getName()));;
             	try {
+            		LaunchUtils.setFilesToLaunchString(runnableConfiguration, Arrays.asList(filesToLaunch));
 	            	runnableConfiguration.setAttribute(LaunchUtils.ATTR_IS_AUTO_RELOAD_ENABLED, activateAutoReload);
-	            	if (files.length > 0) {
-	            		runnableConfiguration.setAttribute(LaunchUtils.ATTR_NS_TO_START_IN, ClojureCore.findMaybeLibNamespace(files[0]));
+	            	if (filesToLaunch.length > 0) {
+	            		runnableConfiguration.setAttribute(LaunchUtils.ATTR_NS_TO_START_IN, ClojureCore.findMaybeLibNamespace(filesToLaunch[0]));
 	            	}
 	            	ILaunch launch = runnableConfiguration.launch(mode, null);
 	            	return launch;
@@ -141,7 +137,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
         }
     }
 
-    private ILaunchConfiguration findLaunchConfiguration(IProject project, IFile[] files) {
+    private ILaunchConfiguration findLaunchConfiguration(IProject project) {
         ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
         ILaunchConfigurationType type =
             lm.getLaunchConfigurationType(LaunchUtils.LAUNCH_CONFIG_ID);
@@ -153,8 +149,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
             candidateConfigs = new ArrayList(configs.length);
             for (ILaunchConfiguration config:  configs) {
                 if (config.getAttribute(ATTR_MAIN_TYPE_NAME, "").startsWith("clojure.")
-                		&& config.getAttribute(ATTR_PROJECT_NAME, "").equals(project.getName())
-                		&& LaunchUtils.getFilesToLaunchList(config).equals(Arrays.asList(files))) {
+                		&& config.getAttribute(ATTR_PROJECT_NAME, "").equals(project.getName())) {
                     candidateConfigs.add(config);
                 }
             }
@@ -173,6 +168,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
 
     protected ILaunchConfiguration createConfiguration(IProject project, IFile[] files) {
         ILaunchConfiguration config = null;
+        if (files == null) files = new IFile[] {};
         try {
             ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
             ILaunchConfigurationType type =
