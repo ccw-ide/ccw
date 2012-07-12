@@ -159,8 +159,9 @@
       ICompletionProposalExtension6
       (getStyledDisplayString [this]
         (let [s (StyledString. (or display-string ""))]
-          (doseq [i (reductions (partial + 1) filter)]
-            (.setStyle s i 1 StyledString/COUNTER_STYLER))
+          (when (seq filter)
+            (doseq [i (reductions (partial + 1) filter)]
+              (.setStyle s i 1 StyledString/COUNTER_STYLER)))
           s)))))
 
 (defn context-information
