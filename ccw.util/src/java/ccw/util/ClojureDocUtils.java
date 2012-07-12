@@ -68,6 +68,9 @@ public final class ClojureDocUtils {
 	}
 	
 	public static String getHtmlVarDocInfo(Object varObject) {
+		if (varObject == null)
+			return "<i>no doc found</i>";
+		
 		Map<?,?> element = (Map<?,?>) varObject;
 		
 		StringBuilder result = new StringBuilder();
