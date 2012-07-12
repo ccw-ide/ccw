@@ -371,13 +371,13 @@
           idxy (distance-fn y s)]
       (cond
         (and idxx idxy)
-        (if (= idxx idxy)
-          (if-same-distances-comparator x y)
-          (- idxx idxy))
+          (if (= idxx idxy)
+            (if-same-distances-comparator x y)
+            (- idxx idxy))
         (and idxx (not idxy)) -1
         (and idxy (not idxx)) 1
-        if-nil-distances-comparator
-        (if-nil-distances-comparator x y)))))
+        :else
+        ((or if-nil-distances-comparator if-same-distances-comparator) x y)))))
 
 ;; TODO instead of this monolithic piece of code
 ;; see if we can instead compose comparators
