@@ -24,6 +24,7 @@ import org.eclipse.jface.text.IDocumentExtension3;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
+import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.presentation.IPresentationDamager;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
@@ -37,12 +38,17 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
 
 import ccw.CCWPlugin;
+import ccw.util.ClojureInvoker;
 
 public class ClojureSourceViewerConfiguration extends
 		TextSourceViewerConfiguration {
 	protected ITokenScanner tokenScanner;
 	private final IClojureEditor editor;
 
+	private static final ClojureInvoker proposalProcessor = ClojureInvoker.newInvoker(
+            CCWPlugin.getDefault(),
+            "ccw.editors.clojure.clojure-proposal-processor");
+	
 	public ClojureSourceViewerConfiguration(IPreferenceStore preferenceStore,
 			IClojureEditor editor) {
 		super(preferenceStore);
@@ -87,30 +93,32 @@ public class ClojureSourceViewerConfiguration extends
 	@Override
 	public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
 		ContentAssistant assistant = new ContentAssistant();
-
 		assistant.setDocumentPartitioning(ClojurePartitionScanner.CLOJURE_PARTITIONING);
-		assistant.setContentAssistProcessor(new ClojureProposalProcessor(
-				editor, assistant), IDocument.DEFAULT_CONTENT_TYPE);
-		assistant.setContentAssistProcessor(new ClojureProposalProcessor(
-				editor, assistant), ClojurePartitionScanner.CLOJURE_COMMENT);
-		assistant.setContentAssistProcessor(new ClojureProposalProcessor(
-				editor, assistant), ClojurePartitionScanner.CLOJURE_STRING);
+		assistant.setContentAssistProcessor(
+				(IContentAssistProcessor) proposalProcessor._("make-process", editor, assistant), 
+				IDocument.DEFAULT_CONTENT_TYPE);
+		//assistant.setContentAssistProcessor(
+		//		(IContentAssistProcessor) proposalProcessor._("make-process", editor, assistant), 
+		//		ClojurePartitionScanner.CLOJURE_COMMENT);
+		//assistant.setContentAssistProcessor(
+		//		(IContentAssistProcessor) proposalProcessor._("make-process", editor, assistant), 
+		//		ClojurePartitionScanner.CLOJURE_STRING);
 
-		assistant.enableAutoActivation(false);
-		assistant.setShowEmptyList(true);
+		assistant.enableAutoActivation(true);
+		assistant.setShowEmptyList(false);
 		assistant
 				.setEmptyMessage("No completions available. You may want to start a REPL for the project holding this file to activate the code completion feature.");
 		assistant.setStatusLineVisible(true);
-		assistant.setStatusMessage("no current status mesage");
+		assistant.setStatusMessage("no current status message");
 
 		assistant.enableAutoInsert(true);
-		assistant.setAutoActivationDelay(500);
+		assistant.setAutoActivationDelay(0);
 		// assistant.setProposalPopupOrientation(IContentAssistant.CONTEXT_INFO_BELOW);
 		assistant
-				.setProposalPopupOrientation(IContentAssistant.PROPOSAL_OVERLAY);
+				.setProposalPopupOrientation(IContentAssistant.PROPOSAL_STACKED);
 		// assistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_BELOW);
 		assistant
-				.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_ABOVE);
+				.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_BELOW);
 		assistant
 				.setInformationControlCreator(getInformationControlCreator(sourceViewer));
 		assistant.enableColoredLabels(true);
