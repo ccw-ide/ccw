@@ -347,43 +347,37 @@
   (let [i (.indexOf x s)]
     (when (not= -1 i) i)))
 
-(def string-comparator 
-  (reify java.util.Comparator
-    (compare [_ x y] (.compareTo ^String x ^String y))))
-
 (defn compose-comparators
   "Create a comparator made of comparators. When called for x & y, 
    applies first comparator to x and y. If x equals y, applies next
    comparator, etc."
   [& comparators]
   (letfn [(chain [[c & tail] x y]
-            (let [r (.compare ^java.util.Comparator c x y)]
+            (let [r (c x y)]
               (if (and (zero? r) tail)
                 (recur tail x y)
                 r)))]
-         (reify java.util.Comparator
-           (compare [_ x y] (chain comparators x y)))))
+         (fn [x y] (chain comparators x y))))
 
-(def length-comparator 
-  (reify java.util.Comparator
-    (compare [_ x y] (- (count x) (count y)))))
+(defn length-comparator
+  [x y]
+  (- (count x) (count y)))
 
 (defn distance-comparator
-  [s distance-fn ^java.util.Comparator if-same-distances-comparator
-   & [^java.util.Comparator if-nil-distances-comparator]]
-  (reify java.util.Comparator
-    (compare [_ x y]
-      (let [idxx (distance-fn x s)
-            idxy (distance-fn y s)]
-        (cond
-          (and idxx idxy)
-            (if (= idxx idxy)
-              (.compare if-same-distances-comparator x y)
-              (- idxx idxy))
-          (and idxx (not idxy)) -1
-          (and idxy (not idxx)) 1
-          if-nil-distances-comparator
-            (.compare if-nil-distances-comparator x y))))))
+  [s distance-fn if-same-distances-comparator
+   & [if-nil-distances-comparator]]
+  (fn [x y]
+    (let [idxx (distance-fn x s)
+          idxy (distance-fn y s)]
+      (cond
+        (and idxx idxy)
+        (if (= idxx idxy)
+          (if-same-distances-comparator x y)
+          (- idxx idxy))
+        (and idxx (not idxy)) -1
+        (and idxy (not idxx)) 1
+        if-nil-distances-comparator
+        (if-nil-distances-comparator x y)))))
 
 ;; TODO instead of this monolithic piece of code
 ;; see if we can instead compose comparators
@@ -400,11 +394,11 @@
   (distance-comparator
     s
     index-of-distance
-    (compose-comparators length-comparator string-comparator)
+    (compose-comparators length-comparator compare)
     (distance-comparator
       s
       textmate-distance
-      (compose-comparators length-comparator string-comparator))))
+      (compose-comparators length-comparator compare))))
 
 (defmulti filter-completion
   (fn [match-symbol ^String prefix filter-fn] (prefix-kind prefix)))
@@ -482,10 +476,10 @@
                    (if (<= (count completions) limit)
                      (textmate-comparator prefix)
                      (distance-comparator
-                       s
+                       prefix
                        index-of-distance
-                       string-comparator
-                       string-comparator))
+                       compare
+                       compare))
                    completions))))))
 
 ;; To filter with "textmate-like" logic, and also sort with
