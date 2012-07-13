@@ -13,7 +13,6 @@ package ccw.editors.clojure;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -32,9 +31,6 @@ import org.eclipse.jface.text.source.projection.ProjectionSupport;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorSite;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.StatusLineContributionItem;
@@ -45,12 +41,39 @@ import ccw.editors.outline.ClojureOutlinePage;
 import ccw.launching.ClojureLaunchShortcut;
 import ccw.repl.REPLView;
 import ccw.util.ClojureInvoker;
+import ccw.util.StringUtils;
 
 public class ClojureEditor extends TextEditor implements IClojureEditor {
 
-	@Override
-	protected void doSetInput(IEditorInput input) throws CoreException {
-		super.doSetInput(input);
+	/**
+	 * Shortens a namespace name,
+	 * e.g. net.cgrand.parsley.core => n.c.parsley.core.
+	 * @param namespace
+	 * @return
+	 */
+	private String shortenNamespace(String namespace) {
+		String[] segments = namespace.split("\\.");
+		int nextToLast = segments.length - 2;
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < nextToLast; i++) {
+			sb.append(segments[i].charAt(0));
+			sb.append('.');
+		}
+		if (nextToLast >= 0) {
+			sb.append(segments[nextToLast]);
+			sb.append('.');
+		}
+		sb.append(segments[nextToLast + 1]);
+		return sb.toString();
+	}
+	
+	private void updatePartNameAndDescription() {
+		final String maybeNamespace = this.findDeclaringNamespace();
+		if (!StringUtils.isEmpty(maybeNamespace)) {
+			this.setPartName(shortenNamespace(maybeNamespace));
+			this.setContentDescription(
+					String.format("Namespace %s", maybeNamespace));
+		}
 	}
 	
 	private static final ClojureInvoker editorSupport = ClojureInvoker.newInvoker(
@@ -77,11 +100,6 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 		setSourceViewerConfiguration(new ClojureSourceViewerConfiguration(getPreferenceStore(), this));
         setDocumentProvider(new ClojureDocumentProvider()); 
         setHelpContextId(EDITOR_REFERENCE_HELP_CONTEXT_ID);
-	}
-	
-	@Override
-	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
-		super.init(site, input);
 	}
 	
 	ClojureSourceViewer viewer; // TODO try a way of removing this horrible hack 
@@ -115,9 +133,6 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 		return viewer;
 	}
 
-	/*
-	 * @see org.eclipse.ui.texteditor.ExtendedTextEditor#createPartControl(org.eclipse.swt.widgets.Composite)
-	 */
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
 		ClojureSourceViewer viewer= (ClojureSourceViewer) getSourceViewer();
@@ -140,8 +155,16 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 		
 		fProjectionSupport.install();
 		viewer.doOperation(ClojureSourceViewer.TOGGLE);
-	}
 
+		updatePartNameAndDescription();
+	}
+	
+	@Override
+	protected void editorSaved() {
+		super.editorSaved();
+		updatePartNameAndDescription();
+	}
+	
 	/**
 	 * Updates the status fields for the given category.
 	 *
