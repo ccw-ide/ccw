@@ -365,7 +365,7 @@ public final class ClojureCore {
 			System.out.println("search file name : " + searchedFileName);
 			System.out.println("searched ns : " + searchedNS);
 			
-			final String searchedPackage = (searchedNS.contains(".")) ? searchedNS.substring(0, searchedNS.lastIndexOf(".")) : "";
+			final String searchedPackage = namespaceToPackage(searchedNS);
 			System.out.println("searched package: " + searchedPackage);
 			
 			for (IPackageFragmentRoot packageFragmentRoot: javaProject.getAllPackageFragmentRoots()) {
@@ -387,6 +387,12 @@ public final class ClojureCore {
 			e.printStackTrace();
 		}
 		return false;
+	}
+
+	private static String namespaceToPackage(final String searchedNS) {
+		String packagePart = (searchedNS.contains(".")) ? searchedNS.substring(0, searchedNS.lastIndexOf(".")) : "";
+		
+		return packagePart.replace('-', '_');
 	}
     
     public static IPath toOSAbsoluteIPath(IPath path) {
