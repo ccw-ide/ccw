@@ -4,7 +4,8 @@
             [clojure.tools.nrepl :as repl]
             [paredit.parser :as p]
             [paredit.loc-utils :as lu]
-            [clojure.zip :as z])
+            [clojure.zip :as z]
+            [ccw.util.doc-utils :as doc])
   (:use [clojure.core.incubator :only [-?>]])
   (:import [org.eclipse.jface.viewers StyledString
                                       StyledString$Styler]
@@ -18,7 +19,6 @@
             IContextInformation
             IContextInformationExtension
             IContextInformationValidator]
-           [ccw.util ClojureDocUtils]
            [org.eclipse.jdt.core JavaCore
                                  IMethod
                                  IType]))
@@ -287,7 +287,7 @@
           (str completion " - " ns)
           filter
           (context-info-data completion (+ prefix-offset (count completion)) metadata)
-          (ClojureDocUtils/getHtmlVarDocInfo metadata))))))
+          (doc/var-doc-info-html metadata))))))
 
 (def activation-characters
   "Characters which will trigger auto-completion"
