@@ -303,6 +303,7 @@
             name="%command.switchStructuralEditionMode.name">
       </command>	  
 <!-- navigate -->
+
       <command
             categoryId="org.eclipse.ui.category.navigate"
             description="%command.gotoPreviousMember.description"
@@ -1272,6 +1273,7 @@
          </menu>
       </menuContribution>
    </extension>
+   
 	<extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">
     <launchConfigurationTypeImage
           configTypeID="ccw.launching.clojure"
@@ -1472,6 +1474,7 @@
        </and>
     </definition>
  </extension>
+ 
  <extension
        point="org.eclipse.ui.workbench.texteditor.hyperlinkDetectors">
     <hyperlinkDetector
@@ -1529,6 +1532,7 @@
        </context>
     </target>
     
+    
 </extension>
   <extension
         point="org.eclipse.ui.handlers">
@@ -1547,6 +1551,18 @@
               </iterate>
            </with>
         </enabledWhen>
+        <activeWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </activeWhen>
      </handler>
      <handler
            class="ccw.repl.Actions$PrintErrorHandler"
@@ -1563,6 +1579,19 @@
               </iterate>
            </with>
         </enabledWhen>
+        <activeWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.context.repl">
+                 </equals>
+              </iterate>
+           </with>
+        </activeWhen>
+        
      </handler>
      <handler
            class="ccw.repl.Actions$ReconnectHandler"
@@ -1578,6 +1607,17 @@
               </iterate>
            </with>
         </enabledWhen>
+        <activeWhen>
+           <with variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.context.repl">
+                 </equals>
+              </iterate>
+           </with>
+        </activeWhen>
      </handler>
      <handler
            class="ccw.repl.Actions$InterruptHandler"
@@ -1589,6 +1629,13 @@
               </iterate>
            </with>
         </enabledWhen>
+        <activeWhen>
+           <with variable="activeContexts">
+              <iterate ifEmpty="false" operator="or">
+                 <equals value="ccw.ui.context.repl"/>
+              </iterate>
+           </with>
+        </activeWhen>
      </handler>
      <handler
            class="ccw.repl.Actions$ClearLogHandler"
@@ -1605,6 +1652,18 @@
               </iterate>
            </with>
         </enabledWhen>
+        <activeWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.context.repl">
+                 </equals>
+              </iterate>
+           </with>
+        </activeWhen>
      </handler>
      <handler
            class="ccw.repl.Actions$ShowConsoleHandler"
@@ -1621,6 +1680,18 @@
               </iterate>
            </with>
         </enabledWhen>
+        <activeWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.context.repl">
+                 </equals>
+              </iterate>
+           </with>
+        </activeWhen>
      </handler>
      <handler
            commandId="ccw.ui.edit.text.clojure.select.raise">
@@ -1647,6 +1718,18 @@
               </iterate>
            </with>
         </enabledWhen>
+        <activeWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </activeWhen>
      </handler>
      <handler
            commandId="ccw.ui.edit.text.clojure.split.sexpr">
@@ -1673,6 +1756,18 @@
               </iterate>
            </with>
         </enabledWhen>
+        <activeWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </activeWhen>
      </handler>
      <handler
            commandId="ccw.ui.edit.text.clojure.join.sexpr">
@@ -1699,6 +1794,18 @@
               </iterate>
            </with>
         </enabledWhen>
+        <activeWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </activeWhen>
      </handler>
      <handler
            commandId="ccw.ui.edit.text.clojure.expand.selection.right">
@@ -1725,6 +1832,18 @@
               </iterate>
            </with>
         </enabledWhen>
+        <activeWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </activeWhen>
      </handler>
      <handler
            commandId="ccw.ui.edit.text.clojure.expand.selection.left">
@@ -1751,6 +1870,18 @@
               </iterate>
            </with>
         </enabledWhen>
+        <activeWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </activeWhen>
      </handler>
      <handler
            commandId="ccw.ui.edit.text.clojure.expand.selection.up">
@@ -1777,6 +1908,18 @@
               </iterate>
            </with>
         </enabledWhen>
+        <activeWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </activeWhen>
      </handler>
      <handler
            commandId="ccw.ui.edit.text.clojure.select.last">
@@ -1803,6 +1946,18 @@
               </iterate>
            </with>
         </enabledWhen>
+        <activeWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </activeWhen>
      </handler>
      <handler
            commandId="ccw.ui.edit.text.clojure.open.declaration">
@@ -1829,6 +1984,18 @@
               </iterate>
            </with>
         </enabledWhen>
+        <activeWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </activeWhen>
      </handler>
      <handler
            commandId="ccw.ui.edit.text.clojure.indent.selection">
@@ -1855,7 +2022,20 @@
               </iterate>
            </with>
         </enabledWhen>
+        <activeWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </activeWhen>
      </handler>
+     
      <handler
            commandId="org.eclipse.ui.edit.text.contentAssist.proposals">
         <class
@@ -1881,7 +2061,20 @@
               </iterate>
            </with>
         </enabledWhen>
+        <activeWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </activeWhen>
      </handler>
+ 
      <handler
            commandId="ccw.ui.edit.text.clojure.switch.structuraledition.mode">
         <class
@@ -1907,6 +2100,18 @@
               </iterate>
            </with>
         </enabledWhen>
+        <activeWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </activeWhen>
      </handler>
      <handler
            commandId="ccw.ui.repl.history.previous">
@@ -1933,6 +2138,18 @@
               </iterate>
            </with>
         </enabledWhen>
+        <activeWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.context.repl">
+                 </equals>
+              </iterate>
+           </with>
+        </activeWhen>
      </handler>
      <handler
            commandId="ccw.ui.repl.history.next">
@@ -1959,6 +2176,18 @@
               </iterate>
            </with>
         </enabledWhen>
+        <activeWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.context.repl">
+                 </equals>
+              </iterate>
+           </with>
+        </activeWhen>
      </handler>
      <handler
            commandId="ccw.ui.edit.text.clojure.comment.toggle">
@@ -1985,6 +2214,18 @@
               </iterate>
            </with>
         </enabledWhen>
+        <activeWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </activeWhen>
      </handler>
      <handler
            commandId="ccw.ui.edit.text.clojure.pastewithescaping">
@@ -2011,6 +2252,18 @@
               </iterate>
            </with>
         </enabledWhen>
+        <activeWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </activeWhen>
      </handler>
      <handler
            commandId="org.eclipse.ui.edit.paste">
@@ -2075,12 +2328,25 @@
               </iterate>
            </with>
         </enabledWhen>
+        <activeWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </activeWhen>
      </handler>
      <handler
            class="ccw.commands.ToggleNatureCommand"
            commandId="ccw.core.command.toggle-clojure-nature">
      </handler>
   </extension>
+  
   <extension
         point="org.eclipse.core.contenttype.contentTypes">
      <content-type
