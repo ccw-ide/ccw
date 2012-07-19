@@ -12,16 +12,13 @@
 package ccw;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
+import ccw.editors.clojure.IScanContext;
+import ccw.preferences.PreferenceConstants;
 import clojure.lang.Keyword;
 import clojure.lang.RT;
 import clojure.lang.Var;
-
-import ccw.debug.ClojureClient;
-import ccw.editors.clojure.IScanContext;
-import ccw.preferences.PreferenceConstants;
 
 public class StaticScanContext implements IScanContext {
 	private Map<String,Keyword> clojureSymbolTypesCache = new HashMap<String, Keyword>();
@@ -42,13 +39,16 @@ public class StaticScanContext implements IScanContext {
 		return true;
 	}
 	
+	private boolean isEarmuffedVar(String symbol) {
+		return (symbol.startsWith("*") || symbol.contains("/*"))
+			   &&
+			   symbol.endsWith("*");
+	}
+	
 	public Keyword getSymbolType(String symbol, boolean isCallableSymbol) {
 		assert symbol != null && symbol.length() > 0;
 		
-		if (symbol.startsWith("*") && symbol.endsWith("*")) {
-			// Even if it is not true that it is a global var,
-			// force a global var look and feel to warn the user that
-			// something is wrong (convention not respected)
+		if (isEarmuffedVar(symbol)) {
 			return isCallableSymbol ? PreferenceConstants.callableGLOBAL_VAR_Token : PreferenceConstants.GLOBAL_VAR_Token;
 		}
 		
