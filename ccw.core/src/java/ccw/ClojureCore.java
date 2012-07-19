@@ -33,6 +33,8 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -60,6 +62,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -237,13 +240,21 @@ public final class ClojureCore {
 			if (packageFragment.exists() 
 					&& packageFragment.getElementName().equals(searchedPackage)) {
 				for (Object njr: packageFragment.getNonJavaResources()) {
-					// differents cas a considerer
 					if (njr instanceof IJarEntryResource) {
 						IJarEntryResource jer = (IJarEntryResource) njr;
 						if (jer.getName().equals(searchedFileName)) {
-							System.out.println("FFFFFFFOOOOOUUUUUNNNNDDDDD!");
-							JarEntryEditorInput jeei = new JarEntryEditorInput(jer);
-							return jeei;
+							return new JarEntryEditorInput(jer);
+						}
+					} else if (njr instanceof IFile) {
+						IFile file = (IFile) njr;
+						if (file.getName().equals(searchedFileName)) {
+							return new FileEditorInput(file);
+						}
+					} else if (njr instanceof File) {
+						File f = (File) njr;
+						if (f.getName().equals(searchedFileName)) {
+							IFileStore fileStore = EFS.getLocalFileSystem().getStore(f.toURI());
+							return new FileStoreEditorInput(fileStore);
 						}
 					}
 				}
