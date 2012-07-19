@@ -11,7 +11,9 @@
 package ccw.preferences;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jface.preference.*;
+import org.eclipse.jface.preference.BooleanFieldEditor;
+import org.eclipse.jface.preference.FieldEditorPreferencePage;
+import org.eclipse.jface.preference.IntegerFieldEditor;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
@@ -26,13 +28,7 @@ public class EditorPreferencePage extends FieldEditorPreferencePage implements
         setPreferenceStore(CCWPlugin.getDefault().getPreferenceStore());
         setDescription(Messages.ClojureEditorPreferencePage_Description); 
     }
-
-    /**
-     * Creates the field editors. Field editors are abstractions of
-     * the common GUI blocks needed to manipulate various types
-     * of preferences. Each field editor knows how to save and
-     * restore itself.
-     */
+    
     public void createFieldEditors() {
         addField(
             new BooleanFieldEditor(
@@ -57,11 +53,11 @@ public class EditorPreferencePage extends FieldEditorPreferencePage implements
         
         addField(
             	new BooleanFieldEditor(ccw.preferences.PreferenceConstants.USE_TAB_FOR_REINDENTING_LINE, Messages.ClojurePreferencePage_use_tab_for_reindenting_line, getFieldEditorParent()));
-}
+        
+        addField(
+            	new BooleanFieldEditor(ccw.preferences.PreferenceConstants.EDITOR_CODE_COMPLETION_AUTO_ACTIVATE, Messages.ClojurePreferencePage_code_completion_auto_activate, getFieldEditorParent()));
+    }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
-     */
     public void init(IWorkbench workbench) {
     }
 

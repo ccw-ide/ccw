@@ -140,6 +140,9 @@ public class PreferenceConstants {
 	public static final String EDITOR_COLORING_PREFIX = "editor_color"; //$NON-NLS-1$
 	
     public static final String EDITOR_ESCAPE_ON_PASTE = CCW_PREFERENCE_PREFIX + ".escape_on_paste"; //$NON-NLS-1$
+    
+	public static final String EDITOR_CODE_COMPLETION_AUTO_ACTIVATE = CCW_PREFERENCE_PREFIX + ".code_completion.auto_activate";
+
 
     public static final String REPL_VIEW_AUTO_EVAL_ON_ENTER_ACTIVE = CCW_PREFERENCE_PREFIX + ".repl_view_autoeval_on_enter_active"; //$NON-NLS-1$
     public static final String REPL_VIEW_DISPLAY_HINTS = CCW_PREFERENCE_PREFIX + ".repl_view_display_hints"; //$NON-NLS-1$

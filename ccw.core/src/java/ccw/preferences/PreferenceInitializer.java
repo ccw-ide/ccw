@@ -114,6 +114,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	    store.setDefault(org.eclipse.jdt.ui.PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR, 
                 StringConverter.asString(new RGB(150, 150, 150)));
 	    store.setDefault(PreferenceConstants.EDITOR_ESCAPE_ON_PASTE, false);
+	    store.setDefault(PreferenceConstants.EDITOR_CODE_COMPLETION_AUTO_ACTIVATE, true);
 	    store.setDefault(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH, 2);
 	    store.setDefault(PreferenceConstants.SWITCH_TO_NS_ON_REPL_STARTUP, true);
 	    store.setDefault(USE_STRICT_STRUCTURAL_EDITING_MODE_BY_DEFAULT, false);

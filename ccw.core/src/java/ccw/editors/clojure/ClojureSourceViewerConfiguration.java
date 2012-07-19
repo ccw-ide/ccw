@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
 
 import ccw.CCWPlugin;
+import ccw.preferences.PreferenceConstants;
 import ccw.util.ClojureInvoker;
 
 public class ClojureSourceViewerConfiguration extends
@@ -104,7 +105,7 @@ public class ClojureSourceViewerConfiguration extends
 		//		(IContentAssistProcessor) proposalProcessor._("make-process", editor, assistant), 
 		//		ClojurePartitionScanner.CLOJURE_STRING);
 
-		assistant.enableAutoActivation(true);
+		assistant.enableAutoActivation(this.fPreferenceStore.getBoolean(PreferenceConstants.EDITOR_CODE_COMPLETION_AUTO_ACTIVATE));
 		assistant.setShowEmptyList(false);
 		assistant.setEmptyMessage(
 				"No completions available. You may want to start a REPL for the"
