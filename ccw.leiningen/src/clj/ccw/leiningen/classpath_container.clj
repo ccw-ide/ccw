@@ -170,8 +170,8 @@
   (with-exc-logged
     (when-let [state-file (-> project (state-file state-name) u/file-exists?)]
       (let [state (read-string (slurp state-file))]
-        (println state)
-        (when (or (empty? state) (map? (first state))) (do (println "yo!") state))))))
+        (when (or (empty? state) (map? (first state))) 
+          state)))))
 
 (defn deser-dep [dep-map]
   (-> dep-map 
@@ -237,7 +237,8 @@
 (defn- unresolved-dependencies-string [exc]
   (let [unresolved (-> exc .getResult .getArtifactResults unresolved-artifacts)
         artifacts (map (comp artifact-string requested-artifact) unresolved)]
-    (when-not artifacts (println "missing artifacts, printing the stacktrace instead:" (.printStackTrace exc)))      
+    (when-not artifacts 
+      (println "missing artifacts, printing the stacktrace instead:" (.printStackTrace exc)))      
     (str/join ", " artifacts)))
 
 ;; TODO fixme: if the network is down, and we write a non existent dependency, the message does not manage to list the dependencies

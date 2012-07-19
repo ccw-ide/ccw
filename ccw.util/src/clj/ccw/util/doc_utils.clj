@@ -13,7 +13,7 @@
   "Formats correctly a raw docstring by adding real line breaks between
    2 line breaks, and rejoining lines separated by simple line breaks."
   [doc]
-  (;println (str "doc:'" doc "'"))
+  ;(println (str "doc:'" doc "'"))
   (let [lines (str/split-lines doc)
         ;_ (println (str "lines:" lines))
         indent-str (indent-str (second lines))
@@ -49,7 +49,7 @@
       (str "(" optional-meta ")"))))
 
 (defn header-doc [{:keys [name macro private dynamic ns] :as m}]
-  (println "m:" m)
+  ;(println "m:" m)
   (when name
     (join "<br/>"
           (format "<b>%s</b> %s" name ns)

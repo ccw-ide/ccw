@@ -87,11 +87,11 @@
 ;;      from the job, etc. will help ...
 (defn add-natures
   [project natures legend]
-  (println "add-natures:" project ", natures:" (seq natures) ", legend:'" legend "'")
+  ;(println "add-natures:" project ", natures:" (seq natures) ", legend:'" legend "'")
   (e/run-in-background
     (e/runnable-with-progress-in-workspace
       (fn [monitor]
-        (println "add-natures: background job started for natures:" (seq natures))
+        ;(println "add-natures: background job started for natures:" (seq natures))
         (.beginTask monitor 
           (str legend)
           1)
@@ -100,7 +100,8 @@
           (apply n/add-natures! (n/description project) natures))
         (.worked monitor 1)
         (.done monitor)
-        (println "add-natures: background job stopped for natures:" (seq natures)))
+        ;(println "add-natures: background job stopped for natures:" (seq natures))
+        )
       (e/workspace-root))))
 
 (defn add-leiningen-nature

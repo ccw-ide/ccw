@@ -209,14 +209,13 @@
                           current-namespace
                           var)
           response (send-message connection command)]
-      (println "response:" response)
+      ;(println "response:" response)
       (first response))))
 
 (defn find-suggestions
   "For the given prefix, inside the current editor and in the current namespace,
    query the remote REPL for code completions list"
   [current-namespace prefix editor find-only-public]
-  (println (str "prefix:'" prefix "'"))
   (cond
     (nil? namespace) []
     (s/blank? prefix) []
@@ -359,6 +358,6 @@
             (reset! context-info new-context-info))
           (isContextInformationValid 
             [this offset]
-            (println "isValid called for offset:" offset)
+            ;(println "isValid called for offset:" offset)
             (let [{:keys [start stop]} (meta @context-info)]
               (<= start offset stop))))))))
