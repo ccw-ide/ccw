@@ -106,8 +106,10 @@ public class ClojureSourceViewerConfiguration extends
 
 		assistant.enableAutoActivation(true);
 		assistant.setShowEmptyList(false);
-		assistant
-				.setEmptyMessage("No completions available. You may want to start a REPL for the project holding this file to activate the code completion feature.");
+		assistant.setEmptyMessage(
+				"No completions available. You may want to start a REPL for the"
+				+ " project holding this file to activate the code completion"
+				+ " feature.");
 		assistant.setStatusLineVisible(true);
 		assistant.setStatusMessage("no current status message");
 
@@ -122,7 +124,7 @@ public class ClojureSourceViewerConfiguration extends
 		assistant
 				.setInformationControlCreator(getInformationControlCreator(sourceViewer));
 		assistant.enableColoredLabels(true);
-
+		
 		return assistant;
 
 	}

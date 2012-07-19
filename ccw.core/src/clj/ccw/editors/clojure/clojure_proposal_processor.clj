@@ -351,7 +351,6 @@
     
     (getErrorMessage [this] )
     
-    ; IContextInformationValidator
     (getContextInformationValidator
       [this]
       (let [context-info (atom nil)]
