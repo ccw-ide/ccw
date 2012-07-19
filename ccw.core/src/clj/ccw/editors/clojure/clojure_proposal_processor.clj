@@ -219,7 +219,7 @@
   (println (str "prefix:'" prefix "'"))
   (cond
     (nil? namespace) []
-    (s/blank? prefix) [["" "" {} {}]]
+    (s/blank? prefix) []
     :else (when-let [repl (.getCorrespondingREPL editor)]
             (let [connection (.getToolingConnection repl)
                   command (complete-command current-namespace prefix false)
