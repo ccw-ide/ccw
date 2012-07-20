@@ -565,14 +565,16 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 	}
 	
 	public REPLView getCorrespondingREPL () {
-		IFile file = (IFile) getEditorInput().getAdapter(IFile.class);
-		if (file != null) {
-			REPLView repl = CCWPlugin.getDefault().getProjectREPL(file.getProject());
-			if (repl !=  null) {
-				return repl;
-			}
-		}
-		// Last resort : we return the current active REPL, if any
+		// Experiment: always return the active REPL instead of a potentially
+		//             better match being a REPL started from same project as the file
+//		IFile file = (IFile) getEditorInput().getAdapter(IFile.class);
+//		if (file != null) {
+//			REPLView repl = CCWPlugin.getDefault().getProjectREPL(file.getProject());
+//			if (repl !=  null) {
+//				return repl;
+//			}
+//		}
+//		// Last resort : we return the current active REPL, if any
 		return REPLView.activeREPL.get();
 	}
 
