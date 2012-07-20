@@ -83,6 +83,8 @@ public final class ClojureTokenScanner implements ITokenScanner {
 	private static Keyword closeListKeyword = Keyword.intern("close-list");
 	private static Keyword closeFnKeyword = Keyword.intern("close-fn");
 	private static Keyword closeChimeraKeyword = Keyword.intern("close-chimera");
+	private static Keyword metaKeyword = Keyword.intern("meta");
+	private static Keyword whitespaceKeyword = Keyword.intern("whitespace");
 	
     public ClojureTokenScanner(final ColorRegistry colorCache, IScanContext context, IPreferenceStore preferenceStore, IClojureEditor clojureEditor) {
         if (clojureEditor == null) {
@@ -164,16 +166,17 @@ public final class ClojureTokenScanner implements ITokenScanner {
     }
     
     private boolean isCallableSymbol = false;
-    private static final Set<?> nonCallableSymbolErasers = new HashSet()
-    		{
+    
+    private static final Set<?> nonCallableSymbolErasers = new HashSet() {
     	{
-    		add(Keyword.intern("whitespace"));
-    		add(Keyword.intern("meta"));
-    		add(Keyword.intern("open-list"));
+    		add(whitespaceKeyword);
+    		add(metaKeyword);
+    		add(openListKeyword);
+    		add(openFnKeyword);
     		//add(Keyword.intern("open-deref"));
     		//add(Keyword.intern("open-var"));
     	}
-    		};
+    };
     public final IToken nextToken() {
     	long start = System.currentTimeMillis();
     	advanceToken();   	
