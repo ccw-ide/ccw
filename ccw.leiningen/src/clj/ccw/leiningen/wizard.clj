@@ -7,6 +7,20 @@
   (:import  [org.eclipse.core.resources IResource]
             [org.eclipse.jdt.core JavaCore]))
 
+(defn check-project-name 
+  "A valid project name must be without space, and
+   a valid symbol."
+  [project-name]
+  (when
+    (or
+      (re-find #"\s+" project-name)
+      (not (symbol? 
+             (try 
+               (binding [*read-eval* false]
+                 (read-string project-name)) 
+               (catch Exception _)))))
+    "Project names must be valid Clojure symbols."))
+
 (defn perform-finish [project template-name]
   (let [project-name (.getName project)
         project-file (-> project .getLocation .toFile)]

@@ -12,8 +12,17 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 
+import ccw.util.ClojureInvoker;
+
 public final class WizardNewLeiningenProjectTemplatePage extends
 		WizardNewProjectCreationPage {
+	
+	private static final String checkProjectName = "check-project-name";
+
+	private static final ClojureInvoker wizard = ClojureInvoker.newInvoker(
+			                                         Activator.getDefault(),
+			                                         "ccw.leiningen.wizard");
+
 
 	private final NewLeiningenProjectWizard newLeiningenProjectWizard;
 	// constants
@@ -143,6 +152,12 @@ public final class WizardNewLeiningenProjectTemplatePage extends
 	@Override
 	protected boolean validatePage() {
 		if (super.validatePage()) {
+			String mess = (String) wizard._(checkProjectName, getProjectName());
+			if (mess != null) {
+				setMessage(mess, ERROR);
+				return false;
+			}
+			
 			String templateFieldContents = getTemplateNameFieldValue();
 			if (templateFieldContents.equals("")) { //$NON-NLS-1$
 				//setErrorMessage("The Leiningen template name cannot be empty");
