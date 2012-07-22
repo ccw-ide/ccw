@@ -43,7 +43,9 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.StatusLineContributionItem;
@@ -124,6 +126,8 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 
     private boolean inEscapeSequence;
     
+    private boolean isContentAssistantActive;
+    
 	/**
 	 * Set to true if the editor is in "Strict" Structural editing mode
 	 */
@@ -161,16 +165,18 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 	 * is not parseable.
 	 */
 	private boolean structuralEditingPossible;
-
+	
     public ClojureSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles, IPreferenceStore store, IStatusLineHandler statusLineHandler) {
         super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles);
         setPreferenceStore(store);
-        
-        getTextWidget().addKeyListener(new KeyListener() {
+
+        KeyListener escListener = new KeyListener() {
             public void keyPressed(KeyEvent e) {
                 if (e.character == SWT.ESC) {
-                    inEscapeSequence = true;
-                    updateTabsToSpacesConverter();
+                	if (!isContentAssistantActive) {
+                		inEscapeSequence = true;
+                		updateTabsToSpacesConverter();
+                	}
                 }
             }
 
@@ -180,7 +186,11 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
                     updateTabsToSpacesConverter();
                 }
             }
-        });
+        };
+        
+        // add before all other listeners so that we're certain we enable/disable 
+        //the Esc key feature based on accurate state information
+        addKeyListenerFirst(getTextWidget(), escListener);
         
         addTextInputListener(new ITextInputListener() {
             public void inputDocumentChanged(IDocument oldInput, IDocument newInput) {
@@ -202,6 +212,29 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 		isShowRainbowParens = store.getBoolean(ccw.preferences.PreferenceConstants.SHOW_RAINBOW_PARENS_BY_DEFAULT);
 		this.statusLineHandler = statusLineHandler;
 	}
+    
+    private void addKeyListenerFirst(Control control, KeyListener listener) {
+    	Listener[] keyDownListeners = control.getListeners(SWT.KeyDown);
+    	Listener[] keyUpListeners = control.getListeners(SWT.KeyUp);
+    	
+    	removeAll(control, SWT.KeyDown, keyDownListeners);
+    	removeAll(control, SWT.KeyUp, keyUpListeners);
+
+    	control.addKeyListener(listener);
+    	
+    	addAll(control, SWT.KeyDown, keyDownListeners);
+    	addAll(control, SWT.KeyUp, keyUpListeners);
+    }
+    private void removeAll(Control control, int eventType, Listener[] listeners) {
+    	for (Listener listener: listeners) {
+    		control.removeListener(eventType, listener);
+    	}
+    }
+    private void addAll(Control control, int eventType, Listener[] listeners) {
+    	for (Listener listener: listeners) {
+    		control.addListener(eventType, listener);
+    	}
+    }
     
     public static StatusLineContributionItem createStructuralEditionModeStatusContributionItem() {
 		return new StatusLineContributionItem(
@@ -366,7 +399,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 			fSelectionHistory.dispose();
 			fSelectionHistory = null;
 		}
-
+		
         super.unconfigure();
         fIsConfigured= false;
         fConfiguration = null;
@@ -683,4 +716,14 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 	public boolean isEscapeInStringLiteralsEnabled() {
 		return fPreferenceStore.getBoolean(PreferenceConstants.EDITOR_ESCAPE_ON_PASTE);
 	}
+
+	public boolean isContentAssistantActive() {
+		return isContentAssistantActive;
+	}
+
+	public void setContentAssistantActive(boolean isContentAssistantActive) {
+		this.isContentAssistantActive = isContentAssistantActive;
+	}
+
+	
 }

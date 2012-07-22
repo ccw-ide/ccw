@@ -23,7 +23,10 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension3;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
+import org.eclipse.jface.text.contentassist.ContentAssistEvent;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
+import org.eclipse.jface.text.contentassist.ICompletionListener;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.presentation.IPresentationDamager;
@@ -92,8 +95,20 @@ public class ClojureSourceViewerConfiguration extends
 	}
 
 	@Override
-	public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
+	public IContentAssistant getContentAssistant(final ISourceViewer sourceViewer) {
 		ContentAssistant assistant = new ContentAssistant();
+		
+		assistant.addCompletionListener(new ICompletionListener() {
+			public void assistSessionStarted(ContentAssistEvent event) {
+				((ClojureSourceViewer) sourceViewer).setContentAssistantActive(true);
+			}
+			public void assistSessionEnded(ContentAssistEvent event) {
+				((ClojureSourceViewer) sourceViewer).setContentAssistantActive(false);
+			}
+			public void selectionChanged(ICompletionProposal proposal,
+					boolean smartToggle) { }
+		});
+
 		assistant.setDocumentPartitioning(ClojurePartitionScanner.CLOJURE_PARTITIONING);
 		assistant.setContentAssistProcessor(
 				(IContentAssistProcessor) proposalProcessor._("make-process", editor, assistant), 
