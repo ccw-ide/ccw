@@ -1,14 +1,10 @@
 package ccw.repl;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
@@ -52,14 +48,12 @@ import org.eclipse.ui.part.ViewPart;
 
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
-import ccw.editors.clojure.EvaluateTextUtil;
-import ccw.launching.LaunchUtils;
-import ccw.preferences.PreferenceConstants;
 import ccw.util.ClojureDocUtils;
+import ccw.util.ClojureInvoker;
 import ccw.util.DisplayUtil;
+import clojure.lang.Keyword;
 import clojure.tools.nrepl.Connection;
 import clojure.tools.nrepl.Connection.Response;
-import clojure.lang.Keyword;
 
 public class NamespaceBrowser extends ViewPart implements ISelectionProvider, ISelectionChangedListener {
 	/**
@@ -93,6 +87,13 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 	private ISelection selectionBeforePatternSearchBegan;
 	private Object[] expandedElementsBeforeSearchBegan;
 
+	private static final ClojureInvoker docUtils = 
+			ClojureInvoker.newInvoker(
+					CCWPlugin.getDefault(), 
+					"ccw.util.doc-utils");
+	
+	private static final String VAR_DOC_INFO = "var-doc-info-text";
+	
 	/**
 	 * Creates a content outline view with no content outline pages.
 	 */
@@ -281,7 +282,8 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 	private static class LabelProvider extends CellLabelProvider {
 
 		public String getToolTipText(Object element) {
-			return ClojureDocUtils.getVarDocInfo(element);
+			return (String) docUtils._(VAR_DOC_INFO, element);
+			//return ClojureDocUtils.getVarDocInfo(element);
 		}
 
 		public Point getToolTipShift(Object object) {
