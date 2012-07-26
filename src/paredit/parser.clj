@@ -6,7 +6,8 @@
 	(:require [clojure.zip :as zip])
   (:require [net.cgrand.parsley :as p])
   (:require [net.cgrand.parsley.lrplus :as lr+])
-  (:require [net.cgrand.regex :as r]))
+  (:require [net.cgrand.regex :as r])
+  (:require [clojure.string :as str]))
 
 #_(set! *warn-on-reflection* true)
 
@@ -210,8 +211,7 @@
     (= :comment t) (token :comment count)
     (= :discard t) (token :comment count)
     (= :net.cgrand.parsley/root t) (concat (mapcat identity (view-children-seq tokens-view abstract-children)) (token :eof))
-    :else (token :unexpected count)
-    ))
+    :else (token :unexpected count)))
 
 (defn tokens-view
   ([abstract-leaf s] (do ;(print "(tokens-view) abstract-leaf:") (prn (list s)) 
@@ -219,6 +219,38 @@
   ([abstract-node t abstract-children]
     ;(print "(tokens-view) abstract-children:") (prn abstract-children)
     (tokens t abstract-children (node-count abstract-node))))
+
+#_(defn hippie-view
+  ([abstract-leaf s] nil)
+  ([abstract-node t abstract-children]
+    (letfn [(proposals [abstract-node pos]
+              (let [t (-> (abstract-node parse-tree-view) :content (get pos))]
+                #{t (str ":" t)}))]
+      (cond
+        (= :symbol t) (proposals abstract-node 0) 
+        (= :keyword t) (proposals abstract-node 1)
+        :else (let [child-views (map #(% hippie-view) abstract-children)]
+                (reduce into #{} child-views))))))
+
+(defn- proposals [abstract-node pos]
+  (-> (abstract-node parse-tree-view) :content (get pos)))
+
+(defn hippie-symbol-view
+  ([abstract-leaf s] nil)
+  ([abstract-node t abstract-children]
+    (cond
+      (= :symbol t) #{(proposals abstract-node 0)} 
+      (= :keyword t) #{(proposals abstract-node 1)}
+      :else (let [child-views (map #(% hippie-symbol-view) abstract-children)]
+              (reduce into #{} child-views)))))
+
+(defn hippie-keyword-view
+  ([abstract-leaf s] nil)
+  ([abstract-node t abstract-children]
+    (cond
+      (= :keyword t) #{(str ":" (proposals abstract-node 1))}
+      :else (let [child-views (map #(% hippie-keyword-view) abstract-children)]
+              (reduce into #{} child-views)))))
 
 #_(defn nesting-level-view
   [abstract-node t abstract-children]
