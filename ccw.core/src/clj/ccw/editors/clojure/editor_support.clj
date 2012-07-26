@@ -24,15 +24,7 @@
   ccw.editors.clojure.editor-support 
   (:require [paredit.parser :as p]
             [paredit.loc-utils :as lu])
-  (:import [org.eclipse.jdt.ui PreferenceConstants])
-  #_(:gen-class
-    :methods [^{:static true} [updateTextBuffer [Object String Object Object String] Object]
-              ^{:static true} [getParseState [String Object] Object]
-              ^{:static true} [getParseTree [Object] Object]
-              ^{:static true} [getPreviousParseTree [Object] Object]
-              ^{:static true} [startWatchParseRef [Object Object] Object]
-              ^{:static true} [disposeSourceViewerDecorationSupport [Object] org.eclipse.ui.texteditor.SourceViewerDecorationSupport]
-              ^{:static true} [configureSourceViewerDecorationSupport [Object Object] Object]]))
+  (:import [org.eclipse.jdt.ui PreferenceConstants]))
 
 #_(set! *warn-on-reflection* true)
 

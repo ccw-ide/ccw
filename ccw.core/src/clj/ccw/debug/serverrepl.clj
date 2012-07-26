@@ -128,12 +128,113 @@
                                                :else (resolve (symbol qualified-ns s))))
                                 [:ns :name :line :file]))))
 
+(defn starts-with-filter
+  "Filter completions starting with prefix"
+  [^String completion prefix]
+  (when (.startsWith completion prefix)
+    (repeat (count prefix) 0)))
+
+(defn contains-filter 
+  "Filter completions containing prefix"
+  [^String completion ^String prefix]
+  (when (.contains completion prefix)
+    (let [start (.indexOf completion prefix)]
+      (cons start (repeat (dec (count prefix)) 0)))))
+
+(defn textmate-filter 
+  "Filter completions containing"
+  ([^String completion prefix] (textmate-filter completion prefix []))
+  ([^String completion ^String prefix pos]
+    (if-not (.isEmpty prefix)
+      (let [c (.charAt prefix 0)
+            i (.indexOf completion (str c))]
+        (when-not (neg? i)
+          (recur (.substring completion (inc i))
+                 (.substring prefix 1)
+                 (conj pos i))))
+      pos)))
+
+(defn textmate-distance
+  "Distance between completion and prefix is the number of chars
+   separating the first match and the last match"
+  [completion prefix] 
+  (apply + (rest (textmate-filter completion prefix))))
+
+(require '[clojure.string :as s])
+(defn decompose-omni 
+  "Decomposes s (a String) into a vector
+   of vectors: first by splitting at dots,
+   then at hyphens."
+  [s]
+  (->> (s/split s #"\.")
+    (map #(s/split % #"-"))))
+
+(defn index-of-distance
+  "Return the 'distance' of x from s,
+   or nil if irrelevant." [^String x ^String s]
+  (let [i (.indexOf x s)]
+    (when (not= -1 i) i)))
+
+(defn compose-comparators
+  "Create a comparator made of comparators. When called for x & y, 
+   applies first comparator to x and y. If x equals y, applies next
+   comparator, etc."
+  [& comparators]
+  (letfn [(chain [[c & tail] x y]
+            (let [r (c x y)]
+              (if (and (zero? r) tail)
+                (recur tail x y)
+                r)))]
+         (fn [x y] (chain comparators x y))))
+
+(defn length-comparator
+  [x y]
+  (- (count x) (count y)))
+
+(defn distance-comparator
+  [s distance-fn if-same-distances-comparator
+   & [if-nil-distances-comparator]]
+  (fn [x y]
+    (let [idxx (distance-fn x s)
+          idxy (distance-fn y s)]
+      (cond
+        (and idxx idxy)
+          (if (= idxx idxy)
+            (if-same-distances-comparator x y)
+            (- idxx idxy))
+        (and idxx (not idxy)) -1
+        (and idxy (not idxx)) 1
+        :else
+        ((or if-nil-distances-comparator if-same-distances-comparator) x y)))))
+
+;; TODO instead of this monolithic piece of code
+;; see if we can instead compose comparators
+(defn textmate-comparator
+  "Construct a comparator which will base its comparison first
+   on starts-with
+   then on contains
+   then on omni-completion (<- TODO) with starts-with
+   then on omni-completion (<- TODO) with contains
+   then on omni-completion (<- TODO) with textmate-distance
+   then on textmate-distance (number of chars separating the first 
+   and last matching chars)."
+  [^String s]
+  (distance-comparator
+    s
+    index-of-distance
+    (compose-comparators length-comparator compare)
+    (distance-comparator
+      s
+      textmate-distance
+      (compose-comparators length-comparator compare))))
+
 
 ;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;
 (ns complete.core
   (:require [clojure.main])
-  (:import [java.util.jar JarFile] [java.io File]))
+  (:import [java.util.jar JarFile] [java.io File])
+  (:require [clojure.string :as s]))
 
 (set! *warn-on-reflection* true)
 ;; Code adapted from swank-clojure (http://github.com/jochu/swank-clojure)
@@ -300,106 +401,6 @@
    :vars (ns-vars ns)
    :classes (ns-classes ns)})
 
-(defn starts-with-filter
-  "Filter completions starting with prefix"
-  [^String completion prefix]
-  (when (.startsWith completion prefix)
-    (repeat (count prefix) 0)))
-
-(defn contains-filter 
-  "Filter completions containing prefix"
-  [^String completion ^String prefix]
-  (when (.contains completion prefix)
-    (let [start (.indexOf completion prefix)]
-      (cons start (repeat (dec (count prefix)) 0)))))
-
-(defn textmate-filter 
-  "Filter completions containing"
-  ([^String completion prefix] (textmate-filter completion prefix []))
-  ([^String completion ^String prefix pos]
-    (if-not (.isEmpty prefix)
-      (let [c (.charAt prefix 0)
-            i (.indexOf completion (str c))]
-        (when-not (neg? i)
-          (recur (.substring completion (inc i))
-                 (.substring prefix 1)
-                 (conj pos i))))
-      pos)))
-
-(defn textmate-distance
-  "Distance between completion and prefix is the number of chars
-   separating the first match and the last match"
-  [completion prefix] 
-  (apply + (rest (textmate-filter completion prefix))))
-
-(require '[clojure.string :as s])
-(defn decompose-omni 
-  "Decomposes s (a String) into a vector
-   of vectors: first by splitting at dots,
-   then at hyphens."
-  [s]
-  (->> (s/split s #"\.")
-    (map #(s/split % #"-"))))
-
-(defn index-of-distance
-  "Return the 'distance' of x from s,
-   or nil if irrelevant." [^String x ^String s]
-  (let [i (.indexOf x s)]
-    (when (not= -1 i) i)))
-
-(defn compose-comparators
-  "Create a comparator made of comparators. When called for x & y, 
-   applies first comparator to x and y. If x equals y, applies next
-   comparator, etc."
-  [& comparators]
-  (letfn [(chain [[c & tail] x y]
-            (let [r (c x y)]
-              (if (and (zero? r) tail)
-                (recur tail x y)
-                r)))]
-         (fn [x y] (chain comparators x y))))
-
-(defn length-comparator
-  [x y]
-  (- (count x) (count y)))
-
-(defn distance-comparator
-  [s distance-fn if-same-distances-comparator
-   & [if-nil-distances-comparator]]
-  (fn [x y]
-    (let [idxx (distance-fn x s)
-          idxy (distance-fn y s)]
-      (cond
-        (and idxx idxy)
-          (if (= idxx idxy)
-            (if-same-distances-comparator x y)
-            (- idxx idxy))
-        (and idxx (not idxy)) -1
-        (and idxy (not idxx)) 1
-        :else
-        ((or if-nil-distances-comparator if-same-distances-comparator) x y)))))
-
-;; TODO instead of this monolithic piece of code
-;; see if we can instead compose comparators
-(defn textmate-comparator
-  "Construct a comparator which will base its comparison first
-   on starts-with
-   then on contains
-   then on omni-completion (<- TODO) with starts-with
-   then on omni-completion (<- TODO) with contains
-   then on omni-completion (<- TODO) with textmate-distance
-   then on textmate-distance (number of chars separating the first 
-   and last matching chars)."
-  [^String s]
-  (distance-comparator
-    s
-    index-of-distance
-    (compose-comparators length-comparator compare)
-    (distance-comparator
-      s
-      textmate-distance
-      (compose-comparators length-comparator compare))))
-
 (defmulti filter-completion
   (fn [match-symbol ^String prefix filter-fn] (prefix-kind prefix)))
 
@@ -429,7 +430,7 @@
    and an optional current namespace."
   ([prefix] (completions* prefix *ns*))
   ([prefix ns & {:keys #{filter} 
-                 :or    {filter starts-with-filter}}]
+                 :or    {filter ccw.debug.serverrepl/starts-with-filter}}]
      (for [[kind completions] (potential-completions prefix ns)
            [match-symbol match-object :as completion] completions
            :let [f (filter-completion (name match-symbol) prefix filter)]
@@ -445,7 +446,7 @@
   ([prefix] (completions prefix *ns*))
   ([prefix ns limit
     & {:keys #{filter comparator renderer} 
-       :or    {filter starts-with-filter
+       :or    {filter ccw.debug.serverrepl/starts-with-filter
                comparator compare
                renderer :completion}}]
     (map renderer
@@ -468,16 +469,16 @@
   ([prefix] (ccw-completions prefix *ns* 50))
   ([prefix ns limit]
     (let [completions (completions* prefix ns 
-                                 :filter textmate-filter)]
+                                 :filter ccw.debug.serverrepl/textmate-filter)]
       (map ccw-renderer
            (take limit
                  (sort-by
                    (comp name :completion)
                    (if (<= (count completions) limit)
-                     (textmate-comparator prefix)
-                     (distance-comparator
+                     (ccw.debug.serverrepl/textmate-comparator prefix)
+                     (ccw.debug.serverrepl/distance-comparator
                        prefix
-                       index-of-distance
+                       ccw.debug.serverrepl/index-of-distance
                        compare
                        compare))
                    completions))))))
@@ -487,5 +488,5 @@
 (comment
   (let [prefix "run"] 
     (completions prefix *ns*
-                 :comparator (textmate-comparator prefix)
-                 :filter textmate-filter)))
+                 :comparator (ccw.debug.serverrepl/textmate-comparator prefix)
+                 :filter ccw.debug.serverrepl/textmate-filter)))

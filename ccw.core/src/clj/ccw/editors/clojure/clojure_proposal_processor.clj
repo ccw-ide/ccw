@@ -5,7 +5,8 @@
             [paredit.parser :as p]
             [paredit.loc-utils :as lu]
             [clojure.zip :as z]
-            [ccw.util.doc-utils :as doc])
+            [ccw.util.doc-utils :as doc]
+            [ccw.debug.serverrepl :as serverrepl])
   (:use [clojure.core.incubator :only [-?>]])
   (:import [org.eclipse.jface.viewers StyledString
                                       StyledString$Styler]
@@ -125,7 +126,6 @@
 
 (def completion-limit 
   "Maximum number of returned results" 50)
-
 
 ; TODO introduce polymorphism?
 (defn completion-proposal
@@ -257,21 +257,64 @@
       cursor-offset
       cursor-offset)))
 
+(def ca (atom nil))
+
+(defn find-hippie-suggestions 
+  [prefix offset editor]
+  (let [parse (.getParseState editor)
+        tokens ((-> parse :parse-tree :abstract-node) 
+                 #_paredit.parser/hippie-view
+                 (if (.startsWith prefix ":")
+                   paredit.parser/hippie-keyword-view
+                   paredit.parser/hippie-symbol-view))]
+    (sort-by
+      :completion
+      (if (<= (count tokens) 50) ; TODO remove magic number
+        (serverrepl/textmate-comparator prefix)
+        (serverrepl/distance-comparator
+          prefix
+          serverrepl/index-of-distance
+          compare
+          compare))
+      (for [token (sort tokens)
+            :when (not (or 
+                         (= token (str ":" prefix))
+                         (= token prefix)
+                         (.contains token "/")))
+            :let [filter (ccw.debug.serverrepl/textmate-filter token prefix)]
+            :when filter]
+        {:completion token
+         :match token
+         :filter filter
+         :metadata nil #_{:doc (.substring
+                                 (-> editor .getDocument .get)
+                         (max 0 (- offset 50))
+                         (min (+ offset 50) (-> editor .getDocument .get .length))
+                         )}}))))
+
 (defn compute-completion-proposals
   "Return the list of java completion objects to the Completion framework."
   [editor      content-assistant
    text-viewer offset]
+  (reset! ca content-assistant)
   (let [prefix-offset (compute-prefix-offset 
                         (-> text-viewer .getDocument .get)
                         offset)
-        current-namespace (.findDeclaringNamespace editor)]
-    (if-let [suggestions (find-suggestions 
+        current-namespace (.findDeclaringNamespace editor)
+        prefix (.substring
+                 (-> text-viewer .getDocument .get)
+                 prefix-offset
+                 offset)
+        hippie-suggestions (find-hippie-suggestions
+                             prefix
+                             offset
+                             editor)
+        repl-suggestions (find-suggestions 
                            current-namespace
-                           (.substring (-> text-viewer .getDocument .get)
-                             prefix-offset
-                             offset)
+                           prefix
                            editor
                            false)]
+    (if-let [suggestions (seq (concat hippie-suggestions repl-suggestions))]
       (for [{:keys [completion match filter]
              {:keys [arglists ns name added static 
                      type doc line file] 
@@ -283,7 +326,7 @@
           (- offset prefix-offset)
           (count completion)
           nil
-          (str completion " - " ns)
+          (doc/join " - " completion ns)
           filter
           (context-info-data completion (+ prefix-offset (count completion)) metadata)
           (doc/var-doc-info-html metadata))))))
