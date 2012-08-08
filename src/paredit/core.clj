@@ -671,10 +671,44 @@
    be-smart?]
   (let [to-paste (if (and be-smart? (inside-string-literal? parse-tree offset))
                    (escape-string-content to-paste)
-                   to-paste) 
+                   to-paste)
         new-text (t/str-replace text offset length to-paste)
         new-offset (+ offset (.length to-paste))]
     {:text new-text
      :offset new-offset
      :length 0
      :modifs [{:offset offset :length length :text to-paste}]}))
+
+(defmethod paredit
+  :paredit-splice-sexp
+  [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
+  (with-important-memoized
+    (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
+      (let [[l r] (normalized-selection rloc offset length)
+            ln (parse-node l)
+            ul (if-let [nl (z/up (parse-node l))] nl l)
+            un (parse-node ul)
+            un-so (start-offset un)
+            un-eo (end-offset un)
+            replace-offset un-so
+            text-to-replace (.substring text (start-offset un) (end-offset un))
+            replace-length (.length text-to-replace)
+            parent (if-let [nl (z/up (parse-node l))]
+                     nl
+                     l)
+            selection-strategy (*selection-strategy* (loc-tag parent) default-behaviour-sel)
+            [sel-so sel-eo] (selection-strategy parent l r)
+
+            ;; there is an edge case with a single-element collection that
+            ;; sel-so/eo are including the parent brackets. catered for here:
+            [inner-so inner-eo] (if (and (= un-so sel-so) (= un-eo sel-eo))
+                                  [(start-offset ln) (end-offset ln)]
+                                  [sel-so sel-eo])
+
+            new-offset (- offset (- inner-so un-so))
+            replace-text (.substring text inner-so inner-eo)]
+        (-> t
+            (assoc-in [:text] (t/str-replace text replace-offset replace-length replace-text))
+            (assoc-in [:offset] new-offset)
+            (update-in [:modifs] conj {:offset inner-so :length replace-length :text replace-text})))
+      t)))
