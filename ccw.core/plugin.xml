@@ -286,6 +286,12 @@
       </command>
       <command
             categoryId="org.eclipse.ui.category.edit"
+            description="%command.spliceSexp.description"
+            id="ccw.ui.edit.text.clojure.splice.sexpr"
+            name="%command.spliceSexp.name">
+      </command>
+      <command
+            categoryId="org.eclipse.ui.category.edit"
             description="%command.splitSexpr.description"
             id="ccw.ui.edit.text.clojure.split.sexpr"
             name="%command.splitSexpr.name">
@@ -573,6 +579,12 @@
             contextId="ccw.ui.clojureEditorScope"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M3+R">
+      </key>
+      <key
+            commandId="ccw.ui.edit.text.clojure.splice.sexpr"
+            contextId="ccw.ui.clojureEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M4+S">
       </key>
       <key
             commandId="ccw.ui.edit.text.clojure.indent.selection"
@@ -1704,6 +1716,45 @@
            <parameter
                  name="handler"
                  value="ccw.editors.clojure.handlers/raise">
+           </parameter>
+        </class>
+        <enabledWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </enabledWhen>
+        <activeWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </activeWhen>
+     </handler>
+
+     <handler
+           commandId="ccw.ui.edit.text.clojure.splice.sexpr">
+        <class
+              class="ccw.util.GenericExecutableExtension">
+           <parameter
+                 name="factory"
+                 value="ccw.util.factories/handler-factory">
+           </parameter>
+           <parameter
+                 name="handler"
+                 value="ccw.editors.clojure.handlers/splice">
            </parameter>
         </class>
         <enabledWhen>

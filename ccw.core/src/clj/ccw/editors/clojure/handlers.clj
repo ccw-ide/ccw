@@ -61,6 +61,9 @@
 (defn split [_ event]
   (apply-paredit-command (editor event)
                          (paredit-fn :paredit-split-sexp)))
+(defn splice [_ event]
+  (apply-paredit-command (editor event)
+                         (paredit-fn :paredit-splice-sexp)))
 (defn join [_ event]
   (apply-paredit-command (editor event)
                          (paredit-fn :paredit-join-sexps)))
