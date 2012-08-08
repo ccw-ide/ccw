@@ -706,9 +706,10 @@
                                   [sel-so sel-eo])
 
             new-offset (- offset (- inner-so un-so))
-            replace-text (.substring text inner-so inner-eo)]
-        (-> t
-            (assoc-in [:text] (t/str-replace text replace-offset replace-length replace-text))
-            (assoc-in [:offset] new-offset)
-            (update-in [:modifs] conj {:offset inner-so :length replace-length :text replace-text})))
+            replace-text (.substring text inner-so inner-eo)
+            ret (-> t
+                    (assoc-in [:text] (t/str-replace text replace-offset replace-length replace-text))
+                    (assoc-in [:offset] new-offset)
+                    (update-in [:modifs] conj {:offset un-so :length replace-length :text replace-text}))]
+        ret)
       t)))
