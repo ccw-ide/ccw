@@ -76,34 +76,35 @@
       (str (when (> (count s) 30) "..."))
       (.replaceAll "\\n|\\r" " "))))
 
-(defn- echo-responses
-  [repl-view log-component responses]
-  (doseq [{:keys [out err value ns status] :as resp} @responses]
-    (ui-sync
-      (when ns (.setCurrentNamespace repl-view ns))
-      (doseq [[k v] (dissoc resp :id :ns :status :session)]
-        (if (log-styles k)
-          (log log-component v k)
-          (CCWPlugin/log (str "Cannot handle REPL response: " k (pr-str resp)))))
-      (doseq [status status]
-        (case status
-          "interrupted" (log log-component (eval-failure-msg status "") :err)
-          "need-input" (ui-sync (.getStdIn repl-view))
-          nil)))))
+(defn handle-responses
+  [repl-view log-component expr responses]
+  (future (doseq [{:keys [out err value ns status] :as resp} responses]
+            (ui-sync
+              (when ns (.setCurrentNamespace repl-view ns))
+              (doseq [[k v] (dissoc resp :id :ns :status :session)]
+                (if (log-styles k)
+                  (log log-component v k)
+                  (CCWPlugin/log (str "Cannot handle REPL response: " k (pr-str resp)))))
+              ;(CCWPlugin/log (str resp))
+              (doseq [status status]
+                (case status
+                  "interrupted" (log log-component (eval-failure-msg status expr) :err)
+                  "need-input" (ui-sync (.getStdIn repl-view))
+                  nil))))))
 
-(defn- eval-expression
+(defn eval-expression
   [repl-view log-component client expr]
   (try
-    (client (update-in (if (map? expr)
-                        expr
-                        {:op :eval :code expr :ns (.getCurrentNamespace repl-view)})
-              [:id] #(or % (uuid))))
+    (handle-responses repl-view log-component expr
+      (repl/message client (if (map? expr)
+                             expr
+                             {:op :eval :code expr :ns (.getCurrentNamespace repl-view)})))  
     (catch Throwable t
       (CCWPlugin/logError (eval-failure-msg nil expr) t)
       (log log-component (eval-failure-msg nil expr) :err))))
 
 (defn configure-repl-view
-  [repl-view log-panel repl-client]
+  [repl-view log-panel repl-client session-id]
   (let [[history retain-expr-fn] (history/get-history (-?> repl-view
                                                         .getLaunch
                                                         ccw.launching.LaunchUtils/getProjectName))
@@ -129,14 +130,10 @@
                     (doto input-widget
                       (.setText (@history (dec (- (count @history) @current-step))))
                       cursor-at-end))))
-        session (repl/client-session repl-client)
+        session-client (repl/client-session repl-client :session session-id)
         responses-promise (promise)]
     (.setHistoryActionFn repl-view history-action-fn)
-    (future (echo-responses repl-view log-panel responses-promise))
-    (comp
-      #(when-not (realized? responses-promise)
-         (deliver responses-promise %))
-      (partial eval-expression repl-view log-panel session)
+    (comp (partial eval-expression repl-view log-panel session-client)
       (fn [expr add-to-log?]
         (reset! retained-input nil)
         (reset! current-step -1)

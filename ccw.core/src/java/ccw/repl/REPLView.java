@@ -2,6 +2,9 @@ package ccw.repl;
 
 import java.io.IOException;
 import java.net.ConnectException;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
@@ -69,6 +72,7 @@ import clojure.lang.Symbol;
 import clojure.lang.Var;
 import clojure.osgi.ClojureOSGi;
 import clojure.tools.nrepl.Connection;
+import clojure.tools.nrepl.Connection.Response;
 
 public class REPLView extends ViewPart implements IAdaptable {
 
@@ -88,11 +92,13 @@ public class REPLView extends ViewPart implements IAdaptable {
 
     private static Var log;
     private static Var configureREPLView;
+    private static Var handleResponses;
     static {
         try {
             ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), "ccw.repl.view-helpers");
             log = Var.find(Symbol.intern("ccw.repl.view-helpers/log"));
             configureREPLView = Var.find(Symbol.intern("ccw.repl.view-helpers/configure-repl-view"));
+            handleResponses = Var.find(Symbol.intern("ccw.repl.view-helpers/handle-responses"));
         } catch (Exception e) {
             CCWPlugin.logError("Could not initialize view helpers.", e);
         }
@@ -125,7 +131,9 @@ public class REPLView extends ViewPart implements IAdaptable {
     private ILaunch launch;
     
     private String currentNamespace = "user";
+    private Map<String, Object> describeInfo;
     private IFn evalExpression;
+    private String sessionId;
     
     /* function implementing load previous/next command from history into input area */
     private IFn historyActionFn;
@@ -211,6 +219,10 @@ public class REPLView extends ViewPart implements IAdaptable {
         evalExpression.invoke(PersistentHashMap.create("op", "stdin", "stdin", dlg.getValue() + "\n"), false);
     }
     
+    public void handleResponse (Response resp, String expression) {
+        handleResponses.invoke(this, logPanel, expression, resp.seq());        
+    }
+    
     public void closeView () throws Exception {
         IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
         page.hideView(this);
@@ -240,7 +252,8 @@ public class REPLView extends ViewPart implements IAdaptable {
     }
     
     private void prepareView () throws Exception {
-        evalExpression = (IFn)configureREPLView.invoke(this, logPanel, interactive.client);
+        sessionId = interactive.newSession(null);
+        evalExpression = (IFn)configureREPLView.invoke(this, logPanel, interactive.client, sessionId);
     }
     
     @SuppressWarnings("unchecked")
@@ -301,6 +314,22 @@ public class REPLView extends ViewPart implements IAdaptable {
     
     public Connection getToolingConnection () {
         return toolConnection;
+    }
+    
+    public String getSessionId () {
+        return sessionId;
+    }
+    
+    public Set<String> getAvailableOperations () throws IllegalStateException {
+        if (describeInfo == null) {
+            Response r = toolConnection.send("op", "describe");
+            if (!r.statuses().contains("done"))
+                throw new IllegalStateException("Invalid response to \"describe\" request: " + r.combinedResponse());
+            describeInfo = r.combinedResponse();
+        }
+        
+        Map<String, Object> ops = (Map<String, Object>)describeInfo.get("ops");
+        return ops == null ? new HashSet() : ops.keySet();
     }
     
     /**
