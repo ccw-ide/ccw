@@ -2,6 +2,8 @@ package ccw.repl;
 
 import java.io.IOException;
 import java.net.ConnectException;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -360,9 +362,18 @@ public class REPLView extends ViewPart implements IAdaptable {
     public Set<String> getAvailableOperations () throws IllegalStateException {
         if (describeInfo == null) {
             Response r = toolConnection.send("op", "describe");
-            if (!r.statuses().contains("done"))
-                throw new IllegalStateException("Invalid response to \"describe\" request: " + r.combinedResponse());
-            describeInfo = r.combinedResponse();
+            // working around the fact that nREPL < 0.2.0-beta9 does *not* send a
+            // :done status when an operation is unknown!
+            // TODO remove this and just check r.statuses() after we can assume usage
+            // of later versions of nREPL
+            Object status = ((Map<String, String>)r.seq().first()).get(Keyword.intern("status"));
+            if (clojure.lang.Util.equals(status, "unknown-op") || (status instanceof Collection &&
+                    ((Collection)status).contains("error"))) {
+                CCWPlugin.logError("Invalid response to \"describe\" request");
+                describeInfo = new HashMap();
+            } else {
+                describeInfo = r.combinedResponse();
+            }
         }
         
         Map<String, Object> ops = (Map<String, Object>)describeInfo.get("ops");
