@@ -505,6 +505,16 @@
    (str "problem resolving following dependencies: "
         (unresolved-dependencies-string exc))])
 
+(defn- check-class 
+  "Return true if the fully qualified class name of (.getClass o) is same
+   fully qualified name of class c.
+   Use it when you can't use instance?, e.g. when classes are same but from 
+   different classloaders."
+  [c o]
+  (let [o-class-name (-> o .getClass .getName)
+        c-classname (-> c .getName)]
+    (= o-class-name c-classname)))
+
 (defn- resource-message
   "Return [resource message] where resource is the Eclipse IResource to be used
    as the target of the problem marker, and message is personalized given exc
@@ -512,9 +522,9 @@
   [exc java-project]
   (cond
     (nil? exc) [(e/resource java-project) "unknown problem (missing exception)"]
-    (instance? DependencyResolutionException exc)
+    (check-class DependencyResolutionException exc)
       (dependency-resolution-message exc java-project)
-    (instance? DependencyResolutionException (.getCause exc))
+    (check-class DependencyResolutionException (.getCause exc))
       (dependency-resolution-message (.getCause exc) java-project)
     (nil? (.getMessage exc)) [(e/resource java-project) "unknown problem (missing exception message)"]
     (.contains (.getMessage exc) "project.clj")
