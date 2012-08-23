@@ -425,7 +425,7 @@
            replace-length (- (end-offset l) replace-offset)]
           (-> t (assoc-in [:text] (t/str-replace text replace-offset replace-length to-raise-text))
             (assoc-in [:offset] replace-offset)
-            (assoc-in [:length] 0)
+            (assoc-in [:length] (count to-raise-text))
             (update-in [:modifs] conj {:offset replace-offset :length replace-length :text to-raise-text})))))
     t)))
 
