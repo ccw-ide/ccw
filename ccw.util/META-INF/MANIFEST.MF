@@ -25,7 +25,7 @@ Require-Bundle: org.eclipse.ui,
 Bundle-ClassPath: .,
  src/clj/,
  classes/
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Vendor: Counterclockwise team
 Export-Package: ccw.util
 Bundle-ActivationPolicy: lazy

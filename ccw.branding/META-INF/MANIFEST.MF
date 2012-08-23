@@ -6,3 +6,4 @@ Bundle-Version: 0.9.1.qualifier
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Counterclockwise team
 Require-Bundle: org.eclipse.help
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6

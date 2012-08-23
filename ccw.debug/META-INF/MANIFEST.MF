@@ -21,4 +21,4 @@ Eclipse-LazyStart: true
 Created-By: 1.6.0_03-b05 (Sun Microsystems Inc.)
 Ant-Version: Apache Ant 1.7.0
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
