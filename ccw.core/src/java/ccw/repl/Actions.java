@@ -110,6 +110,21 @@ public class Actions {
         }
     }
     
+    public static class NewSessionHandler extends AbstractREPLViewHandler {
+        public void doExecute(ExecutionEvent event, REPLView repl) throws ExecutionException {
+            try {
+                REPLView.connect(repl.getConnection().url);
+            } catch (Exception e) {
+                final String msg = "Unexpected exception occured while trying to connect REPL view to clojure server"; 
+                ErrorDialog.openError(
+                        HandlerUtil.getActiveShell(event),
+                        "Connection Error",
+                        msg,
+                        CCWPlugin.createErrorStatus(msg, e));
+            }
+        }
+    }
+    
     public static class PrintErrorHandler extends AbstractREPLViewHandler {
 		public void doExecute(ExecutionEvent event, REPLView repl) throws ExecutionException {
 			repl.printErrorDetail();

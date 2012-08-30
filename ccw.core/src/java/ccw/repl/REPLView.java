@@ -2,7 +2,12 @@ package ccw.repl;
 
 import java.io.IOException;
 import java.net.ConnectException;
-import java.util.UUID;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
@@ -69,6 +74,7 @@ import clojure.lang.Symbol;
 import clojure.lang.Var;
 import clojure.osgi.ClojureOSGi;
 import clojure.tools.nrepl.Connection;
+import clojure.tools.nrepl.Connection.Response;
 
 public class REPLView extends ViewPart implements IAdaptable {
 
@@ -88,13 +94,48 @@ public class REPLView extends ViewPart implements IAdaptable {
 
     private static Var log;
     private static Var configureREPLView;
+    private static Var handleResponses;
     static {
         try {
             ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), "ccw.repl.view-helpers");
             log = Var.find(Symbol.intern("ccw.repl.view-helpers/log"));
             configureREPLView = Var.find(Symbol.intern("ccw.repl.view-helpers/configure-repl-view"));
+            handleResponses = Var.find(Symbol.intern("ccw.repl.view-helpers/handle-responses"));
         } catch (Exception e) {
             CCWPlugin.logError("Could not initialize view helpers.", e);
+        }
+    }
+
+    /**
+     * This misery around secondary IDs is due to the fact that:
+     * eclipse really, really wants views to be pre-defined; while you can have a view type that
+     * has multiple instances, doing so requires having *stable* secondary IDs in order for the
+     * IDE to retain positioning and size preferences.
+     * We could just use UUIDs to identify different REPL views, but that means no position info
+     * will be retained.  We could use nREPL URLs, but those are almost as bad as UUIDs insofar as
+     * the autoselected ports are hardly ever used twice.
+     * Try as I might, I cannot find a way to get a view to (a) be displayed in a particular place
+     * in the IDE (short of defining a Clojure perspective!) or (b) be notified of when a REPL
+     * view is moved to begin with.
+     * 
+     * This approach will result in a user "training" the IDE where to put REPL views
+     * (with seemingly intransigent or arbitrary behaviour to start); eventually, REPLs will
+     * all end up displaying in the desired location.
+     */
+    private static Set<String> SECONDARY_VIEW_IDS = new TreeSet<String>() {{
+       // no one will create more than 1000 REPLs at a time, right? :-P
+       for (int i = 0; i < 1000; i++) add(String.format("%03d", i)); 
+    }};
+    private static String getSecondaryId () {
+        synchronized (SECONDARY_VIEW_IDS) {
+            String id = SECONDARY_VIEW_IDS.iterator().next();
+            SECONDARY_VIEW_IDS.remove(id);
+            return id;
+        }
+    }
+    private static void releaseSecondaryId (String id) {
+        synchronized (SECONDARY_VIEW_IDS) {
+            SECONDARY_VIEW_IDS.add(id);
         }
     }
     
@@ -125,7 +166,10 @@ public class REPLView extends ViewPart implements IAdaptable {
     private ILaunch launch;
     
     private String currentNamespace = "user";
+    private Map<String, Object> describeInfo;
     private IFn evalExpression;
+    private String sessionId;
+    private String secondaryId;
     
     /* function implementing load previous/next command from history into input area */
     private IFn historyActionFn;
@@ -140,7 +184,7 @@ public class REPLView extends ViewPart implements IAdaptable {
     private SourceViewerDecorationSupport fSourceViewerDecorationSupport;
 	private StatusLineContributionItem structuralEditionModeStatusContributionItem;
     
-    public REPLView () {}
+    public REPLView () {}    
     
     private void resetFont () {
         Font font= JFaceResources.getTextFont();
@@ -211,6 +255,10 @@ public class REPLView extends ViewPart implements IAdaptable {
         evalExpression.invoke(PersistentHashMap.create("op", "stdin", "stdin", dlg.getValue() + "\n"), false);
     }
     
+    public void handleResponse (Response resp, String expression) {
+        handleResponses.invoke(this, logPanel, expression, resp.seq());        
+    }
+    
     public void closeView () throws Exception {
         IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
         page.hideView(this);
@@ -240,7 +288,8 @@ public class REPLView extends ViewPart implements IAdaptable {
     }
     
     private void prepareView () throws Exception {
-        evalExpression = (IFn)configureREPLView.invoke(this, logPanel, interactive.client);
+        sessionId = interactive.newSession(null);
+        evalExpression = (IFn)configureREPLView.invoke(this, logPanel, interactive.client, sessionId);
     }
     
     @SuppressWarnings("unchecked")
@@ -287,9 +336,12 @@ public class REPLView extends ViewPart implements IAdaptable {
     }
     
     public static REPLView connect (String url, IConsole console, ILaunch launch) throws Exception {
-        REPLView repl = (REPLView)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(VIEW_ID,
-                UUID.randomUUID().toString(),
+        String secondaryId;
+        REPLView repl = (REPLView)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(
+                VIEW_ID,
+                secondaryId = getSecondaryId(),
                 IWorkbenchPage.VIEW_ACTIVATE);
+        repl.secondaryId = secondaryId;
         repl.console = console;
         repl.launch = launch;
         return repl.configure(url) ? repl : null;
@@ -301,6 +353,31 @@ public class REPLView extends ViewPart implements IAdaptable {
     
     public Connection getToolingConnection () {
         return toolConnection;
+    }
+    
+    public String getSessionId () {
+        return sessionId;
+    }
+    
+    public Set<String> getAvailableOperations () throws IllegalStateException {
+        if (describeInfo == null) {
+            Response r = toolConnection.send("op", "describe");
+            // working around the fact that nREPL < 0.2.0-beta9 does *not* send a
+            // :done status when an operation is unknown!
+            // TODO remove this and just check r.statuses() after we can assume usage
+            // of later versions of nREPL
+            Object status = ((Map<String, String>)r.seq().first()).get(Keyword.intern("status"));
+            if (clojure.lang.Util.equals(status, "unknown-op") || (status instanceof Collection &&
+                    ((Collection)status).contains("error"))) {
+                CCWPlugin.logError("Invalid response to \"describe\" request");
+                describeInfo = new HashMap();
+            } else {
+                describeInfo = r.combinedResponse();
+            }
+        }
+        
+        Map<String, Object> ops = (Map<String, Object>)describeInfo.get("ops");
+        return ops == null ? new HashSet() : ops.keySet();
     }
     
     /**
@@ -619,6 +696,9 @@ public class REPLView extends ViewPart implements IAdaptable {
     @Override
     public void dispose() {
         super.dispose();
+
+        releaseSecondaryId(secondaryId);
+        
         fSourceViewerDecorationSupport = (SourceViewerDecorationSupport) editorSupport._("disposeSourceViewerDecorationSupport",
         		fSourceViewerDecorationSupport);
         try {

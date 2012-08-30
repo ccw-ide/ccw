@@ -40,7 +40,7 @@ public class SwitchNamespaceAction extends Action {
             CCWPlugin.logError("Could not switch ns to: " + ns);
         } else {
             EvaluateTextUtil.evaluateText(repl, String.format(";; Switching to %s namespace", ns), isReplExplicitLoggingMode());
-            EvaluateTextUtil.evaluateText(repl, String.format("(clojure.core/in-ns '%s)", ns), isReplExplicitLoggingMode());
+            EvaluateTextUtil.evaluateText(repl, String.format("(in-ns '%s)", ns), false);
             Actions.ShowActiveREPL.execute(activateREPL);
         }
     }

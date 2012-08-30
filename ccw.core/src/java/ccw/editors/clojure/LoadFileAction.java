@@ -31,6 +31,7 @@ import ccw.util.DisplayUtil;
 import clojure.lang.Symbol;
 import clojure.lang.Var;
 import clojure.osgi.ClojureOSGi;
+import clojure.tools.nrepl.Connection.Response;
 
 public class LoadFileAction extends Action {
 
@@ -112,11 +113,19 @@ public class LoadFileAction extends Action {
 	
 	private void evaluateFileText(REPLView repl, String text, String filePath, String sourcePath, String fileName) {
         try {
-        	final String loadFileText = (String)loadFileCommand.invoke(text, sourcePath, fileName);
-        	//if (isReplExplicitLoggingMode()) {
-        		EvaluateTextUtil.evaluateText(repl, ";; Loading file " + filePath, isReplExplicitLoggingMode());
-        	//}
-        	EvaluateTextUtil.evaluateText(repl, loadFileText, false);
+            if (repl.getAvailableOperations().contains("load-file")) {
+                Response resp = repl.getConnection().sendSession(repl.getSessionId(),
+                                    "op", "load-file", "file", text,
+                                    "file-path", sourcePath, "file-name", fileName);
+                repl.handleResponse(resp, "Loading file " + sourcePath);
+            } else {
+                String loadFileText = (String)loadFileCommand.invoke(text, sourcePath, fileName);
+                //if (isReplExplicitLoggingMode()) {
+                EvaluateTextUtil.evaluateText(repl, ";; Loading file " + filePath, isReplExplicitLoggingMode());
+                //}
+                EvaluateTextUtil.evaluateText(repl, loadFileText, false);
+                Actions.ShowActiveREPL.execute(false);
+            }
             Actions.ShowActiveREPL.execute(false);
         } catch (Exception e) {
             CCWPlugin.logError("Could not load file " + filePath, e);

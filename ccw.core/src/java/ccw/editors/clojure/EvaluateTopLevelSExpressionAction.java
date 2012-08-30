@@ -44,7 +44,7 @@ public class EvaluateTopLevelSExpressionAction extends Action {
 			String editorNamespace = editor.findDeclaringNamespace();
 			String replNamespace = repl.getCurrentNamespace();
 			if (editorNamespace != null && !editorNamespace.equals(replNamespace)) {
-				textToEvaluate = "(clojure.core/in-ns '" + editorNamespace + ")\n" + textToEvaluate + "\n(clojure.core/in-ns '" + replNamespace + ")";
+				textToEvaluate = "(in-ns '" + editorNamespace + ")\n" + textToEvaluate + "\n(in-ns '" + replNamespace + ")";
 			}
 			
 			EvaluateTextUtil.evaluateText(repl, textToEvaluate, isReplExplicitLoggingMode());

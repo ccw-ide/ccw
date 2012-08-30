@@ -354,21 +354,24 @@ public class ClojureOutlinePage extends ContentOutlinePage {
             });
             forms = sorted;
 	    }
-	    final List<List> theForms = forms; 
-		getControl().getDisplay().asyncExec(new Runnable() {
-			public void run() {
-				TreeViewer treeViewer = getTreeViewer();
-				if (treeViewer != null) {
-					treeViewer.getTree().setRedraw(false);
-					treeViewer.setInput(theForms);
-					ISelection treeSelection = treeViewer.getSelection();
-					if (treeSelection == null || treeSelection.isEmpty()) {
-						selectInOutline(lastSelection);
-					}
-					treeViewer.getTree().setRedraw(true);
-				}
-			}
-		});
+	    final List<List> theForms = forms;
+	    
+	    if (getControl() != null) {
+    		getControl().getDisplay().asyncExec(new Runnable() {
+    			public void run() {
+    				TreeViewer treeViewer = getTreeViewer();
+    				if (treeViewer != null) {
+    					treeViewer.getTree().setRedraw(false);
+    					treeViewer.setInput(theForms);
+    					ISelection treeSelection = treeViewer.getSelection();
+    					if (treeSelection == null || treeSelection.isEmpty()) {
+    						selectInOutline(lastSelection);
+    					}
+    					treeViewer.getTree().setRedraw(true);
+    				}
+    			}
+    		});
+	    }
 	}
 
 	private void selectInEditor(ISelection selection) {
