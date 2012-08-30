@@ -176,6 +176,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
                 	if (!isContentAssistantActive) {
                 		inEscapeSequence = true;
                 		updateTabsToSpacesConverter();
+                		updateStructuralEditingModeStatusField();
                 	}
                 }
             }
@@ -184,6 +185,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
                 if (inEscapeSequence && !(e.character == SWT.ESC)) {
                     inEscapeSequence = false;
                     updateTabsToSpacesConverter();
+                    updateStructuralEditingModeStatusField();
                 }
             }
         };
@@ -667,8 +669,8 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 			
 		StatusLineContributionItem field = this.statusLineHandler.getEditingModeStatusContributionItem();
 		if (field != null) {
-			String text = (isStructuralEditingEnabled() ? "strict/paredit" : "unrestricted") + " edit mode";
-			field.setText(text == null ? fErrorLabel : text);
+			field.setText((isStructuralEditingEnabled() ? "strict/paredit" : "unrestricted")
+			              + " edit mode" + (inEscapeSequence ? " ESC" : ""));
 			field.setToolTipText(
 					(isStructuralEditingEnabled() 
 							? "strict/paredit edit mode:\neditor does its best to prevent you from breaking the structure of the code (requires you to know shortcut commands well)."
@@ -676,7 +678,6 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 		}
 	}
 
-	
 	/*
 	 * Eclipse TextEditor framework uses old "Action" framework. So it is impossible
 	 * to use handlers declaratively, one must plug the new behaviour via code,
