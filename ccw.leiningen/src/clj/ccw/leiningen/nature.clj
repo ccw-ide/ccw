@@ -156,7 +156,7 @@
      - or if no JVM version specified in Lein, pick the default one
    - Install a Leiningen Classpath Container" 
   [java-proj]
-  (let [lein-proj        (u/lein-project (e/project java-proj))
+  (let [lein-proj        (u/lein-project (e/project java-proj) :enhance-fn #(do (println %) (dissoc % :hooks)))
         _ (println "lein-proj: " lein-proj)
         
         jvm-entry        (jvm-entry-or-default java-proj)

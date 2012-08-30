@@ -558,7 +558,7 @@
    do not touch the current lein container."
   [java-project] ;; TODO checks
   (try
-    (let [lein-project (u/lein-project java-project)
+    (let [lein-project (u/lein-project java-project :enhance-fn #(do (println %) (dissoc % :hooks)))
           deps (get-project-dependencies (.getName (e/project java-project)) lein-project)]
       (set-lein-container java-project deps)
       (delete-container-markers java-project)
