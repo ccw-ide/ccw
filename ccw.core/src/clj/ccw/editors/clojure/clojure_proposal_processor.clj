@@ -259,10 +259,13 @@
 
 (def ca (atom nil))
 
-(defn find-hippie-suggestions 
-  [prefix offset editor]
-  (let [parse (.getParseState editor)
-        tokens ((-> parse :parse-tree :abstract-node) 
+(defn find-hippie-suggestions
+  [prefix offset parse-state]
+  (let [buffer-wo-prefix (p/edit-buffer (parse-state :buffer) 
+                                        (- offset (count prefix))
+                                        (count prefix) "")
+        parse-tree (p/buffer-parse-tree buffer-wo-prefix :dummy-build-id)
+        tokens ((-> parse-tree :abstract-node) 
                  #_paredit.parser/hippie-view
                  (if (.startsWith prefix ":")
                    paredit.parser/hippie-keyword-view
@@ -276,11 +279,11 @@
           serverrepl/index-of-distance
           compare
           compare))
-      (for [token (sort tokens)
-            :when (not (or 
-                         (= token (str ":" prefix))
-                         (= token prefix)
-                         (.contains token "/")))
+      (for [token tokens
+;            :when (not (or 
+;                         (= token (str ":" prefix))
+;                         (= token prefix)
+;                         (.contains token "/")))
             :let [filter (ccw.debug.serverrepl/textmate-filter token prefix)]
             :when filter]
         {:completion token
@@ -291,6 +294,26 @@
                          (max 0 (- offset 50))
                          (min (+ offset 50) (-> editor .getDocument .get .length))
                          )}}))))
+
+;; TODO move to in ccw.util.core in ccw.util bundle
+(defn adapt-args 
+  "Delegate calls to f by first applying args-fns to its arguments
+   (applies identity if less args-fns than actual arguments)."
+  ([f arg1-fn]
+    (fn 
+      ([arg1] (f (arg1-fn arg1)))
+      ([arg1 arg2] (f (arg1-fn arg1) arg2))
+      ([arg1 arg2 arg3] (f (arg1-fn arg1) arg2 arg3))
+      ([arg1 arg2 arg3 & more] (apply f (arg1-fn arg1) arg2 arg3 more))))
+  ([f arg1-fn arg2-fn]
+    (fn 
+      ([arg1] (f (arg1-fn arg1)))
+      ([arg1 arg2] (f (arg1-fn arg1) (arg2-fn arg2)))
+      ([arg1 arg2 arg3] (f (arg1-fn arg1) (arg2-fn arg2) arg3))
+      ([arg1 arg2 arg3 & more] (apply f (arg1-fn arg1) (arg2-fn arg2) arg3 more))))
+  ([f arg1-fn arg2-fn & args-fn]
+    (fn [& args]
+      (apply f (map #(%1 %2) (cons arg1-fn (cons arg2-fn (concat args-fn (repeat identity)))) args)))))
 
 (defn compute-completion-proposals
   "Return the list of java completion objects to the Completion framework."
@@ -304,32 +327,37 @@
         prefix (.substring
                  (-> text-viewer .getDocument .get)
                  prefix-offset
-                 offset)
-        hippie-suggestions (find-hippie-suggestions
-                             prefix
-                             offset
-                             editor)
-        repl-suggestions (find-suggestions 
-                           current-namespace
-                           prefix
-                           editor
-                           false)]
-    (if-let [suggestions (seq (concat hippie-suggestions repl-suggestions))]
-      (for [{:keys [completion match filter]
-             {:keys [arglists ns name added static 
-                     type doc line file] 
-              :as metadata} :metadata
-             } suggestions]
-        (completion-proposal
-          completion
-          prefix-offset
-          (- offset prefix-offset)
-          (count completion)
-          nil
-          (doc/join " - " completion ns)
-          filter
-          (context-info-data completion (+ prefix-offset (count completion)) metadata)
-          (doc/var-doc-info-html metadata))))))
+                 offset)]
+    (when (pos? (count prefix))
+      (let [hippie-suggestions (find-hippie-suggestions
+                                 prefix
+                                 offset
+                                 (.getParseState editor))
+            repl-suggestions (find-suggestions 
+                               current-namespace
+                               prefix
+                               editor
+                               false)
+            suggestions (apply sorted-set-by 
+                               (adapt-args (serverrepl/textmate-comparator prefix) :completion :completion)
+                               #_#(let [comparator (serverrepl/textmate-comparator prefix)]
+                                    (comparator (:completion %1) (:completion %2)))
+                               (concat repl-suggestions hippie-suggestions ))]
+        (for [{:keys [completion match filter]
+               {:keys [arglists ns name added static 
+                       type doc line file] 
+                :as metadata} :metadata
+               } suggestions]
+          (completion-proposal
+            completion
+            prefix-offset
+            (- offset prefix-offset)
+            (count completion)
+            nil
+            (doc/join " - " completion ns)
+            filter
+            (context-info-data completion (+ prefix-offset (count completion)) metadata)
+            (doc/var-doc-info-html metadata)))))))
 
 (def activation-characters
   "Characters which will trigger auto-completion"
@@ -388,7 +416,8 @@
       [this]
       (into-array 
         Character/TYPE
-        (concat activation-characters
+        activation-characters
+        #_(concat activation-characters
                 [\newline \space \tab \( \) \{ \} \[ \] \,])))
     
     (getErrorMessage [this] )
