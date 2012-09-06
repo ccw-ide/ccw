@@ -5,6 +5,7 @@
             :distribution :repo
             :comments "same as Clojure"}
   :dependencies [[org.clojure/clojure           "1.3.0"]
+                 [org.clojure/core.incubator "0.1.1"]
                  [org.lpetit/net.cgrand.parsley "0.0.12.STABLE001"]
                  [org.lpetit/net.cgrand.regex   "0.0.4.STABLE001"]]
   :warn-on-reflection true)
