@@ -588,6 +588,7 @@
       <key
             commandId="ccw.ui.edit.text.clojure.splice.sexpr"
             contextId="ccw.ui.clojureEditorScope"
+            platform="carbon"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M4+S">
       </key>
