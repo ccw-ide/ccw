@@ -685,31 +685,27 @@
   (with-important-memoized
     (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
       (let [[l r] (normalized-selection rloc offset length)
-            ln (parse-node l)
-            ul (if-let [nl (z/up (parse-node l))] nl l)
-            un (parse-node ul)
-            un-so (start-offset un)
-            un-eo (end-offset un)
-            replace-offset un-so
-            text-to-replace (.substring text (start-offset un) (end-offset un))
+            ul (if (*tag-closing-brackets* (loc-tag l))  ;; if on closing punct, must select parent differently
+                     (loc-for-offset rloc offset)
+                     (if-let [nl (z/up (parse-node l))]
+                       nl l))
+            parent (parse-node ul)
+            parent-so (start-offset parent)
+            parent-eo (end-offset parent)
+            replace-offset parent-so
+            text-to-replace (.substring text parent-so parent-eo)
             replace-length (.length text-to-replace)
-            parent (if-let [nl (z/up (parse-node l))]
-                     nl
-                     l)
-            selection-strategy (*selection-strategy* (loc-tag parent) default-behaviour-sel)
-            [sel-so sel-eo] (selection-strategy parent l r)
 
-            ;; there is an edge case with a single-element collection that
-            ;; sel-so/eo are including the parent brackets. catered for here:
-            [inner-so inner-eo] (if (and (= un-so sel-so) (= un-eo sel-eo))
-                                  [(start-offset ln) (end-offset ln)]
-                                  [sel-so sel-eo])
+            [inner-so inner-eo] (let [pl (-> parent z/down z/right)
+                                      pr (-> pl z/rightmost z/left)]
+                                  [(start-offset pl) (end-offset pr)]) ;; all-children-but-punct
 
-            new-offset (- offset (- inner-so un-so))
+            new-offset (- offset (- inner-so parent-so))
             replace-text (.substring text inner-so inner-eo)
+
             ret (-> t
                     (assoc-in [:text] (t/str-replace text replace-offset replace-length replace-text))
                     (assoc-in [:offset] new-offset)
-                    (update-in [:modifs] conj {:offset un-so :length replace-length :text replace-text}))]
+                    (update-in [:modifs] conj {:offset parent-so :length replace-length :text replace-text}))]
         ret)
       t)))

@@ -446,11 +446,18 @@
                 "(bar| baz)" "bar| baz"
                 "(bar | baz)" "bar | baz"
                 "(foo (ba|r) baz)" "(foo ba|r baz)"
-                ; TODO Following edge case tests do not pass
-                ;"(foo \"bar|\" baz)" "(foo bar| baz)"
-                ;"(foo \"ba|r\" baz)" "(foo ba|r baz)"
-                ;"(foo (|) baz)" "(foo | baz)"
-                ;"(foo (bar|) baz)" "(foo bar| baz)"
+                "(foo \"bar|\" baz)" "(foo bar| baz)"
+                "(foo \"ba|r\" baz)" "(foo ba|r baz)"
+                "(foo (|) baz)" "(foo | baz)"
+                "(foo (bar|) baz)" "(foo bar| baz)"
+                "(foo {bar|} baz)" "(foo bar| baz)"
+                "(foo {ba|r} baz)" "(foo ba|r baz)"
+                "(|)" "|"
+                "(foo [ba|r] baz)" "(foo ba|r baz)"
+                "(foo (bar| blah) baz)" "(foo bar| blah baz)"
+                "(foo {bar| blah} baz)" "(foo bar| blah baz)"
+                "(foo {ba|r blah} baz)" "(foo ba|r blah baz)"
+                "(foo [ba|r blah] baz)" "(foo ba|r blah baz)"
                 }]
      ;[("M-<up>" "ESC <up>")
      ;           paredit-splice-sexp-killing-backward
