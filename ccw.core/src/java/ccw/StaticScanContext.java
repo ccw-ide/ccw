@@ -40,7 +40,9 @@ public class StaticScanContext implements IScanContext {
 	}
 	
 	private boolean isEarmuffedVar(String symbol) {
-		return (symbol.startsWith("*") || symbol.contains("/*"))
+		return (!symbol.equals("*")
+			   &&
+				symbol.startsWith("*") || symbol.contains("/*"))
 			   &&
 			   symbol.endsWith("*");
 	}
