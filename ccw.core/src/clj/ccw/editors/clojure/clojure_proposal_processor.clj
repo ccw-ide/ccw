@@ -388,6 +388,25 @@
                                               call-symbol))]
         (when context-info [context-info])))))
 
+(defn should-compute-proposals? 
+  "There is an edge case in Eclipse, inherited by the ClojurePartitionScanner,
+   which wrongly assumes that the cursor index at the end of the document
+   belongs to the default partition type, instead of the token defined for the
+   EndOfLineRule to which it really belongs.
+   Example: if the document ends with a single line comment and the cursor is
+   at the end of the document, then the partition type returned is DEFAULT
+   instead of COMMENT.
+   The problem is that Eclipse framework then triggers wrongly code completion
+   feature.
+   This predicate is there to restore the truth :-)"
+  [editor offset]
+  (def ed editor)
+  (def of offset)
+  (let [parse-tree     ((-> ed .getParseState :parse-tree :abstract-node) 
+                         paredit.parser/parse-tree-view)
+        last-token-tag (-> parse-tree :content peek :tag)]
+    (not= last-token-tag :comment)))
+
 (defn make-process [editor content-assistant]
   (reify IContentAssistProcessor
     (computeCompletionProposals
@@ -396,9 +415,10 @@
       ;; TODO manage error message
       (into-array 
         ICompletionProposal
-        (compute-completion-proposals
-          editor      content-assistant
-          text-viewer offset)))
+        (when (should-compute-proposals? editor offset)
+          (compute-completion-proposals
+            editor      content-assistant
+            text-viewer offset))))
     
     (computeContextInformation
       [this text-viewer new-offset]
