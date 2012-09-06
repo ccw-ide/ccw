@@ -441,8 +441,14 @@
        "|   \nfoo" "'|   \nfoo"
        }]
      ["M-s"       :paredit-splice-sexp
-               {"(foo (bar| baz) quux)"
-                "(foo bar| baz quux)"}]
+               {"(foo (bar| baz) quux)" "(foo bar| baz quux)"
+                "(foo (b|ar baz) quux)" "(foo b|ar baz quux)"
+                "(bar| baz)" "bar| baz"
+                "(bar | baz)" "bar | baz"
+                ; TODO Following edge case tests do not pass
+                ;"(foo (|) baz)" "(foo | baz)"
+                ;"(foo (bar|) baz)" "(foo bar| baz)"
+                }]
      ;[("M-<up>" "ESC <up>")
      ;           paredit-splice-sexp-killing-backward
      ;           ("(foo (let ((x 5)) |(sqrt n)) bar)"
@@ -452,13 +458,13 @@
      ;           ("(a (b c| d e) f)"
      ;            "(a b c f)"))
      ["M-r"       :paredit-raise-sexp
-                {"(dynamic-wind in (lambda () |body|) out)" "(dynamic-wind in |body out)"
-                 "(dynamic-wind in |body| out)" "|body" 
+                {"(dynamic-wind in (lambda () |body|) out)" "(dynamic-wind in |body| out)"
+                 "(dynamic-wind in |body| out)" "|body|" 
                  "(foo bar|)" "(foo bar|)"
-                 "(foo |bar)" "|bar"
-                 "(foo |(bar))" "|(bar)"
+                 "(foo |bar)" "|bar|"
+                 "(foo |(bar))" "|(bar)|"
                  "(foo |(bar]|)" "(foo |(bar]|)"
-                 "(foo |(bar])|" "|(bar])"
+                 "(foo |(bar])|" "|(bar])|"
                  ; (|foo|) => |foo|
                  }]
      ]
