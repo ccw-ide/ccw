@@ -365,7 +365,7 @@
                (concat 
                  (range (int \a) (inc (int \z)))
                  (range (int \A) (inc (int \Z)))))
-          [\. \-]))
+          [\. \- \? \!]))
 
 (def viewer (atom nil))
 (def offset (atom nil))
