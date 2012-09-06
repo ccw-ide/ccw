@@ -149,6 +149,8 @@ public class REPLView extends ViewPart implements IAdaptable {
     //     so that we can have one range that is still *highlighted* for clojure content (and not editable),
     //     and another range that is editable and has full paredit, code completion, etc.
     StyledText logPanel;
+    /** record for colors used in logPanel */
+    final ClojureSourceViewer.EditorColors logPanelEditorColors = new ClojureSourceViewer.EditorColors();
     private ClojureSourceViewer viewer;
     public StyledText viewerWidget; // public only to simplify interop with helpers impl'd in Clojure
     private ClojureSourceViewerConfiguration viewerConfig;
@@ -411,6 +413,16 @@ public class REPLView extends ViewPart implements IAdaptable {
         logPanel.setEditable(false);
         logPanel.setFont(JFaceResources.getFont(JFaceResources.TEXT_FONT));
         
+        // Enables logPanel to have same background, etc. colors than clojure
+        // editors.
+		ClojureSourceViewer.initializeViewerColors(logPanel, prefs, logPanelEditorColors);
+		logPanel.addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				logPanelEditorColors.unconfigure();
+			}
+		});
+        
         structuralEditionModeStatusContributionItem = ClojureSourceViewer.createStructuralEditionModeStatusContributionItem();
         viewer = new ClojureSourceViewer(split, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL, prefs,
         		new ClojureSourceViewer.IStatusLineHandler() {
@@ -453,6 +465,12 @@ public class REPLView extends ViewPart implements IAdaptable {
 		// ensure decoration support has been created and configured.
 		getSourceViewerDecorationSupport(viewer).install(prefs);
 
+		prefs.addPropertyChangeListener(new IPropertyChangeListener() {
+			@Override
+			public void propertyChange(PropertyChangeEvent event) {
+				initializeLogPanelColors();
+			}
+		});
 
         // push all keyboard input delivered to log panel into input widget
         logPanel.addListener(SWT.KeyDown, new Listener() {
@@ -541,6 +559,11 @@ public class REPLView extends ViewPart implements IAdaptable {
        
         resetFont();
         JFaceResources.getFontRegistry().addListener(fontChangeListener);
+    }
+    
+    private void initializeLogPanelColors() {
+		ClojureSourceViewer.initializeViewerColors(logPanel, getPreferences(), logPanelEditorColors);
+    	
     }
     
     private interface MessageProvider {

@@ -93,25 +93,51 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
      */
     private IPreferenceStore fPreferenceStore;
     
-	/**
-	 * This viewer's foreground color.
-	 */
-	private Color fForegroundColor;
-	
-	/**
-	 * The viewer's background color.
-	 */
-	private Color fBackgroundColor;
-	
-	/**
-	 * This viewer's selection foreground color.
-	 */
-	private Color fSelectionForegroundColor;
-	
-	/**
-	 * The viewer's selection background color.
-	 */
-	private Color fSelectionBackgroundColor;
+    public static class EditorColors {
+    	/**
+    	 * This viewer's foreground color.
+    	 */
+    	public Color fForegroundColor;
+    	
+    	/**
+    	 * The viewer's background color.
+    	 */
+    	public Color fBackgroundColor;
+    	
+    	/**
+    	 * This viewer's selection foreground color.
+    	 */
+    	public Color fSelectionForegroundColor;
+    	
+    	/**
+    	 * The viewer's selection background color.
+    	 */
+    	public Color fSelectionBackgroundColor;
+
+		public void unconfigure() {
+			if (fForegroundColor != null) {
+				fForegroundColor.dispose();
+				fForegroundColor= null;
+			}
+			
+			if (fBackgroundColor != null) {
+				fBackgroundColor.dispose();
+				fBackgroundColor= null;
+			}
+			
+			if (fSelectionForegroundColor != null) {
+				fSelectionForegroundColor.dispose();
+				fSelectionForegroundColor= null;
+			}
+			
+			if (fSelectionBackgroundColor != null) {
+				fSelectionBackgroundColor.dispose();
+				fSelectionBackgroundColor= null;
+			}
+		}
+    }
+    
+    private EditorColors editorColors = new EditorColors();
 
     /**
      * The source viewer configuration. Needed for property change events
@@ -318,54 +344,57 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     }
     
 	public void initializeViewerColors() {
+		initializeViewerColors(getTextWidget(), fPreferenceStore, editorColors);
 		if (fPreferenceStore != null) {
-			StyledText styledText= getTextWidget();
-
+			CCWPlugin.registerEditorColors(fPreferenceStore, getTextWidget().getForeground().getRGB());
+		}
+	}
+	
+	public static void initializeViewerColors(StyledText styledText, IPreferenceStore preferenceStore, EditorColors editorColors) {
+		if (preferenceStore != null) {
 			// ----------- foreground color --------------------
-			Color color= fPreferenceStore.getBoolean(AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND_SYSTEM_DEFAULT)
+			Color color= preferenceStore.getBoolean(AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND_SYSTEM_DEFAULT)
 			? null
-			: createColor(fPreferenceStore, AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND, styledText.getDisplay());
+			: createColor(preferenceStore, AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND, styledText.getDisplay());
 			styledText.setForeground(color);
 
-			if (fForegroundColor != null)
-				fForegroundColor.dispose();
+			if (editorColors.fForegroundColor != null)
+				editorColors.fForegroundColor.dispose();
 
-			fForegroundColor= color;
+			editorColors.fForegroundColor= color;
 
 			// ---------- background color ----------------------
-			color= fPreferenceStore.getBoolean(AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT)
+			color= preferenceStore.getBoolean(AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT)
 			? null
-			: createColor(fPreferenceStore, AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND, styledText.getDisplay());
+			: createColor(preferenceStore, AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND, styledText.getDisplay());
 			styledText.setBackground(color);
 
-			if (fBackgroundColor != null)
-				fBackgroundColor.dispose();
+			if (editorColors.fBackgroundColor != null)
+				editorColors.fBackgroundColor.dispose();
 
-			fBackgroundColor= color;
+			editorColors.fBackgroundColor= color;
 
 			// ----------- selection foreground color --------------------
-			color= fPreferenceStore.getBoolean(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_DEFAULT_COLOR)
+			color= preferenceStore.getBoolean(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_DEFAULT_COLOR)
 				? null
-				: createColor(fPreferenceStore, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_COLOR, styledText.getDisplay());
+				: createColor(preferenceStore, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_COLOR, styledText.getDisplay());
 			styledText.setSelectionForeground(color);
 
-			if (fSelectionForegroundColor != null)
-				fSelectionForegroundColor.dispose();
+			if (editorColors.fSelectionForegroundColor != null)
+				editorColors.fSelectionForegroundColor.dispose();
 
-			fSelectionForegroundColor= color;
+			editorColors.fSelectionForegroundColor= color;
 
 			// ---------- selection background color ----------------------
-			color= fPreferenceStore.getBoolean(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_DEFAULT_COLOR)
+			color= preferenceStore.getBoolean(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_DEFAULT_COLOR)
 				? null
-				: createColor(fPreferenceStore, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_COLOR, styledText.getDisplay());
+				: createColor(preferenceStore, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_COLOR, styledText.getDisplay());
 			styledText.setSelectionBackground(color);
 
-			if (fSelectionBackgroundColor != null)
-				fSelectionBackgroundColor.dispose();
+			if (editorColors.fSelectionBackgroundColor != null)
+				editorColors.fSelectionBackgroundColor.dispose();
 
-			fSelectionBackgroundColor= color;
-			
-            CCWPlugin.registerEditorColors(fPreferenceStore, styledText.getForeground().getRGB());
+			editorColors.fSelectionBackgroundColor= color;
 		}
     }
 
@@ -374,25 +403,8 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
      * @since 3.0
      */
     public void unconfigure() {
-		if (fForegroundColor != null) {
-			fForegroundColor.dispose();
-			fForegroundColor= null;
-		}
 		
-		if (fBackgroundColor != null) {
-			fBackgroundColor.dispose();
-			fBackgroundColor= null;
-		}
-		
-		if (fSelectionForegroundColor != null) {
-			fSelectionForegroundColor.dispose();
-			fSelectionForegroundColor= null;
-		}
-		
-		if (fSelectionBackgroundColor != null) {
-			fSelectionBackgroundColor.dispose();
-			fSelectionBackgroundColor= null;
-		}
+		editorColors.unconfigure();
 		
         if (fPreferenceStore != null)
             fPreferenceStore.removePropertyChangeListener(this);
@@ -406,7 +418,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
         fIsConfigured= false;
         fConfiguration = null;
     }
-
+    
     /** This is manipulated by clojure functions.
      * It's a ref, holding a map {:text "the raw text file" :parser parser}
      * where state is a future holding the parser's state
@@ -468,7 +480,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     	DisplayUtil.asyncExec(new Runnable() {
 			public void run() {
 				getTextWidget().setBackground(
-						structuralEditionPossible ? fBackgroundColor : Display.getCurrent().getSystemColor(SWT.COLOR_GRAY));
+						structuralEditionPossible ? editorColors.fBackgroundColor : Display.getCurrent().getSystemColor(SWT.COLOR_GRAY));
 				getTextWidget().setToolTipText(structuralEditionPossible ? null : "Unparseable source code. Structural Edition temporarily disabled.");
 			}
 		});
