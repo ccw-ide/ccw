@@ -131,10 +131,8 @@ public class ClojureSourceViewerConfiguration extends
 
 		assistant.enableAutoInsert(true);
 		assistant.setAutoActivationDelay(0);
-		// assistant.setProposalPopupOrientation(IContentAssistant.CONTEXT_INFO_BELOW);
 		assistant
 				.setProposalPopupOrientation(IContentAssistant.PROPOSAL_STACKED);
-		// assistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_BELOW);
 		assistant
 				.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_BELOW);
 		assistant
