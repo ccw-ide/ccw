@@ -578,6 +578,13 @@
                  "foo ([|bar|])" "foo (|[bar]|)"
                  "foo (|[bar]|)" "foo |([bar])|"
                  "(^foo |baz|)" "(|^foo baz|)"
+                 "(^fo|o baz)" "(^|foo| baz)"
+                 ; DOES NOT WORK YET "(^|foo| baz)" "(|^foo| baz)"
+
+                 "(foo #bar.ba|z [quux])" "(foo #|bar.baz| [quux])"
+                 "(foo #|bar.baz| [quux])" "(foo |#bar.baz| [quux])"
+                 "(foo |#bar.baz| [quux])" "(foo |#bar.baz [quux]|)"
+
                  ;with :chimera
                  "(foo |bar]" "|(foo bar]|"
                  "(foo |{bar)]" "|(foo {bar)]|"

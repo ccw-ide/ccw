@@ -82,6 +82,7 @@
 (def open-discard "#_")
 (def whitespace #"(?:,|\s)+")
 (def open-comment #"(?:\#\!|;)")
+(def open-reader-literal #"#(?![\(\^\"\{\'\_\!])")
 (def open-char "\\")
 (def symbol-exclusion #"[^\(\[\#\{\\\"\~\%\:\,\s\!\;\'\@\`;0-9]")
 (def ^{:private true} prefixes
@@ -175,6 +176,11 @@
                           (meta-target tokens-view)
                           ;(mapcat identity (view-children-seq tokens-view (pop abstract-children)))
                           )) 
+    (= :reader-literal t) (let [body (peek abstract-children)]
+                            (concat (token :reader-literal (- count (node-count body)))
+                                    (body tokens-view)
+                                    ;(mapcat identity (view-children-seq tokens-view (pop abstract-children)))
+                                    ))
     #_(let [abstract-children (mapcat identity abstract-children)]
                   ;(print "(tokens) (:meta) abstract-children:") (prn abstract-children)
                   ;(print "(get abstract-children 0):") (prn (first abstract-children))
@@ -319,6 +325,7 @@
              :string
              :regex
              :symbol 
+             :reader-literal
              :keyword 
              :int 
              :float 
@@ -364,8 +371,11 @@
     :string (p/unspaced open-string :string-body :? \")
     :regex-body #"(?:\\.|[^\\\"])++(?=\")"
     :regex (p/unspaced open-regex :regex-body :? \")
+    :reader-literal-prefix (p/unspaced open-reader-literal :symbol)
+    :reader-literal [:reader-literal-prefix :expr]
     :symbol
-      #"(?:[\-\+](?![0-9])[^\^\(^\[^\#^\{^\\^\"^\~^\%^\:^\,^\s^\;^\@^\`^\)^\]^\}]*)|(?:[^\^\(\[\#\{\\\"\~\%\:\,\s\;\'\@\`\)\]\}\-\+;0-9][^\^\(\[\#\{\\\"\~\%\:\,\s\;\@\`\)\]\}]*|#(?![\{\(\'\^\"\_\!])[^\^\(\[\#\{\\\"\~\%\:\,\s\;\'\@\`\)\]\}]*)#?"
+;      #"(?:[\-\+](?![0-9])[^\^\(^\[^\#^\{^\\^\"^\~^\%^\:^\,^\s^\;^\@^\`^\)^\]^\}]*)|(?:[^\^\(\[^\#\{\\\"\~\%\:\,\s\;\'\@\`\)\]\}\-\+;0-9][^\^\(\[\#\{\\\"\~\%\:\,\s\;\@\`\)\]\}]*|#(?![\{\(\'\^\"\_\!])[^\^\(\[\#\{\\\"\~\%\:\,\s\;\'\@\`\)\]\}]*)#?"
+      #"(?:[\-\+](?![0-9])[^\^\(^\[^\#^\{^\\^\"^\~^\%^\:^\,^\s^\;^\@^\`^\)^\]^\}]*)|(?:[^\^\(\[^\#\{\\\"\~\%\:\,\s\;\'\@\`\)\]\}\-\+;0-9][^\^\(\[\#\{\\\"\~\%\:\,\s\;\@\`\)\]\}]*)"
     :keyword (p/unspaced open-keyword #"[^\(\[\{\'\^\@\`\~\"\\\,\s\;\)\]\}]*"); factorize with symbol
     :int #"(?:[-+]?(?:0(?!\.)|[1-9][0-9]*+(?!\.)|0[xX][0-9A-Fa-f]+(?!\.)|0[0-7]+(?!\.)|[1-9][0-9]?[rR][0-9A-Za-z]+(?!\.)|0[0-9]+(?!\.))(?!/))"
     :ratio #"[-+]?[0-9]+/[0-9]*"
