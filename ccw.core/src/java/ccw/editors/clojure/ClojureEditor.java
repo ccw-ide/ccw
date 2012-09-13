@@ -28,8 +28,11 @@ import org.eclipse.jface.text.source.DefaultCharacterPairMatcher;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.projection.ProjectionSupport;
+import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
@@ -39,6 +42,7 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import ccw.CCWPlugin;
 import ccw.editors.outline.ClojureOutlinePage;
 import ccw.launching.ClojureLaunchShortcut;
+import ccw.preferences.PreferenceConstants;
 import ccw.repl.REPLView;
 import ccw.util.ClojureInvoker;
 import ccw.util.StringUtils;
@@ -67,13 +71,20 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 		return sb.toString();
 	}
 	
-	private void updatePartNameAndDescription() {
+	public void updatePartNameAndDescription() {
+		String partName = getEditorInput().getName();
+		String contentDescription = "";
+
 		final String maybeNamespace = this.findDeclaringNamespace();
 		if (!StringUtils.isEmpty(maybeNamespace)) {
-			this.setPartName(shortenNamespace(maybeNamespace));
-			this.setContentDescription(
-					String.format("Namespace %s", maybeNamespace));
+			if (getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_DISPLAY_NAMESPACE_IN_TABS)) {
+				partName = shortenNamespace(maybeNamespace);
+			}
+			contentDescription = String.format("Namespace %s", maybeNamespace);
 		}
+		
+		this.setPartName(partName);
+		this.setContentDescription(contentDescription);
 	}
 	
 	private static final ClojureInvoker editorSupport = ClojureInvoker.newInvoker(
@@ -157,6 +168,22 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 		viewer.doOperation(ClojureSourceViewer.TOGGLE);
 
 		updatePartNameAndDescription();
+		
+		final IPropertyChangeListener prefsListener = new IPropertyChangeListener() {
+			@Override
+			public void propertyChange(PropertyChangeEvent event) {
+				if (event.getProperty().equals(PreferenceConstants.EDITOR_DISPLAY_NAMESPACE_IN_TABS)) {
+					updatePartNameAndDescription();
+				}
+			}
+		};
+		getPreferenceStore().addPropertyChangeListener(prefsListener);
+		parent.addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				getPreferenceStore().removePropertyChangeListener(prefsListener);
+			}
+		});
 	}
 	
 	@Override

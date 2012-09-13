@@ -84,6 +84,7 @@ public final class ClojureTokenScanner implements ITokenScanner {
 	private static Keyword closeFnKeyword = Keyword.intern("close-fn");
 	private static Keyword closeChimeraKeyword = Keyword.intern("close-chimera");
 	private static Keyword metaKeyword = Keyword.intern("meta");
+	private static Keyword readerLiteralTagKeyword = Keyword.intern("reader-literal");
 	private static Keyword whitespaceKeyword = Keyword.intern("whitespace");
 	
     public ClojureTokenScanner(final ColorRegistry colorCache, IScanContext context, IPreferenceStore preferenceStore, IClojureEditor clojureEditor) {
@@ -171,6 +172,7 @@ public final class ClojureTokenScanner implements ITokenScanner {
     	{
     		add(whitespaceKeyword);
     		add(metaKeyword);
+    		add(readerLiteralTagKeyword);
     		add(openListKeyword);
     		add(openFnKeyword);
     		//add(Keyword.intern("open-deref"));

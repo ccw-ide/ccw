@@ -70,6 +70,7 @@ public class PreferenceConstants {
 	public static Keyword commentToken = Keyword.intern("comment");
 	public static Keyword whitespaceToken = Keyword.intern("whitespace");
 	public static Keyword metaToken = Keyword.intern("meta");
+	public static Keyword readerLiteralTag = Keyword.intern("reader-literal");
 	
 	/** 
 	 * Set of tokens keywords for which syntax color information can be retrieved
@@ -109,6 +110,7 @@ public class PreferenceConstants {
 				add(keywordToken);
 				add(commentToken);
 				add(metaToken);
+				add(readerLiteralTag);
 				add(deactivatedRainbowParen);
 				add(rainbowParenLevel1);
 				add(rainbowParenLevel2);
@@ -142,6 +144,8 @@ public class PreferenceConstants {
     public static final String EDITOR_ESCAPE_ON_PASTE = CCW_PREFERENCE_PREFIX + ".escape_on_paste"; //$NON-NLS-1$
     
 	public static final String EDITOR_CODE_COMPLETION_AUTO_ACTIVATE = CCW_PREFERENCE_PREFIX + ".code_completion.auto_activate";
+	
+	public static final String EDITOR_DISPLAY_NAMESPACE_IN_TABS = CCW_PREFERENCE_PREFIX + ".editor.display_namespace_in_tabs";
 
 
     public static final String REPL_VIEW_AUTO_EVAL_ON_ENTER_ACTIVE = CCW_PREFERENCE_PREFIX + ".repl_view_autoeval_on_enter_active"; //$NON-NLS-1$

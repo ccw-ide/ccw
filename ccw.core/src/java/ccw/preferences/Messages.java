@@ -39,6 +39,8 @@ public class Messages extends NLS {
     public static String ClojurePreferencePage_escape_on_paste;
 
     public static String ClojurePreferencePage_code_completion_auto_activate;
+    
+    public static String ClojurePreferencePage_show_more_context_in_tabs;
 
     public static String SyntaxColoringPreferencePage_function;
 
@@ -76,6 +78,8 @@ public class Messages extends NLS {
     public static String SyntaxColoringPreferencePage_keyword;
 
     public static String SyntaxColoringPreferencePage_metadataTypehint;
+    
+    public static String SyntaxColoringPreferencePage_readerLiteralTag;
     
     public static String SyntaxColoringPreferencePage_macro;
     

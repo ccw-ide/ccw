@@ -245,6 +245,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         { Messages.SyntaxColoringPreferencePage_comment, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.commentToken)},
         { Messages.SyntaxColoringPreferencePage_string, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.stringToken)},
         { Messages.SyntaxColoringPreferencePage_metadataTypehint, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.metaToken)},
+        { Messages.SyntaxColoringPreferencePage_readerLiteralTag, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.readerLiteralTag)},
         { Messages.SyntaxColoringPreferencePage_keyword, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.keywordToken)},
         { Messages.SyntaxColoringPreferencePage_regex, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.regexToken)},
         { Messages.SyntaxColoringPreferencePage_int, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.intToken)},

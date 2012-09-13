@@ -56,6 +56,9 @@ public class EditorPreferencePage extends FieldEditorPreferencePage implements
         
         addField(
             	new BooleanFieldEditor(ccw.preferences.PreferenceConstants.EDITOR_CODE_COMPLETION_AUTO_ACTIVATE, Messages.ClojurePreferencePage_code_completion_auto_activate, getFieldEditorParent()));
+        
+        addField(
+            	new BooleanFieldEditor(ccw.preferences.PreferenceConstants.EDITOR_DISPLAY_NAMESPACE_IN_TABS, Messages.ClojurePreferencePage_show_more_context_in_tabs, getFieldEditorParent()));
     }
 
     public void init(IWorkbench workbench) {
