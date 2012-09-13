@@ -185,6 +185,9 @@ public class REPLView extends ViewPart implements IAdaptable {
     
     private SourceViewerDecorationSupport fSourceViewerDecorationSupport;
 	private StatusLineContributionItem structuralEditionModeStatusContributionItem;
+
+	/** Eclipse Preferences Listener */ 
+	private IPropertyChangeListener prefsListener;
     
     public REPLView () {}    
     
@@ -404,7 +407,7 @@ public class REPLView extends ViewPart implements IAdaptable {
 
     @Override
     public void createPartControl(Composite parent) {
-        IPreferenceStore prefs = getPreferences();
+        final IPreferenceStore prefs = getPreferences();
         
         SashForm split = new SashForm(parent, SWT.VERTICAL);
         
@@ -465,13 +468,14 @@ public class REPLView extends ViewPart implements IAdaptable {
 		// ensure decoration support has been created and configured.
 		getSourceViewerDecorationSupport(viewer).install(prefs);
 
-		prefs.addPropertyChangeListener(new IPropertyChangeListener() {
+		prefsListener = new IPropertyChangeListener() {
 			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				initializeLogPanelColors();
 			}
-		});
-
+		};
+		prefs.addPropertyChangeListener(prefsListener);
+		
         // push all keyboard input delivered to log panel into input widget
         logPanel.addListener(SWT.KeyDown, new Listener() {
             public void handleEvent(Event e) {
@@ -526,12 +530,6 @@ public class REPLView extends ViewPart implements IAdaptable {
         
         logPanel.addFocusListener(new NamespaceRefreshFocusListener());
         
-        parent.addDisposeListener(new DisposeListener () {
-            public void widgetDisposed(DisposeEvent e) {
-                activeREPL.compareAndSet(REPLView.this, null);
-            }
-        });
-        
         /*
          * TODO find a way for the following code line to really work. That is add
          * the necessary additional code for enabling "handlers" (in fact, my fear
@@ -559,6 +557,14 @@ public class REPLView extends ViewPart implements IAdaptable {
        
         resetFont();
         JFaceResources.getFontRegistry().addListener(fontChangeListener);
+        parent.addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				JFaceResources.getFontRegistry().removeListener(fontChangeListener);
+				prefs.removePropertyChangeListener(prefsListener);
+				activeREPL.compareAndSet(REPLView.this, null);
+			}
+		});
     }
     
     private void initializeLogPanelColors() {
