@@ -1,4 +1,4 @@
-; todo 
+; todo
 ; done 1. emit text deltas, not plain text replacement (or IDEs will not like it)
 ; done 2. have a story for invalid parsetrees : just do nothing : currently = paredit deactivated if error from start-of-file to area of paredit's work
 
@@ -19,20 +19,20 @@
 
 (def ^:dynamic *real-spaces* #{(str \newline) (str \tab) (str \space)})
 (def ^:dynamic *extended-spaces* (conj *real-spaces* (str \,)))
-(def ^:dynamic *open-brackets* (conj #{"(" "[" "{"} nil)) ; we add nil to the list to also match beginning of text 
+(def ^:dynamic *open-brackets* (conj #{"(" "[" "{"} nil)) ; we add nil to the list to also match beginning of text
 (def ^:dynamic *close-brackets* (conj #{")" "]" "}"} nil)) ; we add nil to the list to also match end of text
 (def ^:dynamic *form-macro-chars* #{(str \#) (str \~) "~@" (str \') (str \`) (str \@) "^" "#'" "#_" "#!"})
 (def ^:dynamic *not-in-code* #{:string :string-body "\"\\" :comment :char :regex :regex-body})
 
 (defmacro with-memoized [func-names & body]
-  `(binding [~@(mapcat 
-                 (fn [func-name] [func-name `(memoize ~func-name)]) 
+  `(binding [~@(mapcat
+                 (fn [func-name] [func-name `(memoize ~func-name)])
                  func-names)]
      ~@body))
 
 (declare ^:dynamic normalized-selection)
 (defmacro with-important-memoized [& body]
-  `(with-memoized 
+  `(with-memoized
      [start-offset
       end-offset
       loc-text
@@ -55,58 +55,58 @@
   [rloc offset length]
   (let [left-leave (parse-leave (leave-for-offset rloc offset))
         right-leave (parse-leave (leave-for-offset rloc (+ offset length)))
-        right-leave (cond 
+        right-leave (cond
                       (root-node-tag? (loc-tag right-leave))
-                        (parse-leave (leave-for-offset rloc (dec (+ offset length)))) 
+                        (parse-leave (leave-for-offset rloc (dec (+ offset length))))
                       (not= (+ offset length) (start-offset right-leave))
-                        (parse-node right-leave) 
+                        (parse-node right-leave)
                       (nil? (seq (previous-leaves right-leave)))
                         (parse-node right-leave)
                       :else
                         (parse-node (first (previous-leaves right-leave))))]
     (if (or
           (= [0 0] [offset length])
-          (and 
+          (and
             (= 0 length)
             (= (start-offset left-leave) offset))
-          (and 
+          (and
             (= (start-offset (parse-node left-leave)) offset)
-            (= (end-offset (parse-node right-leave)) (+ offset length))  
-            (same-parent? (parse-node left-leave) (parse-node right-leave)))) 
+            (= (end-offset (parse-node right-leave)) (+ offset length))
+            (same-parent? (parse-node left-leave) (parse-node right-leave))))
       [left-leave (when-not (zero? length) right-leave)]
       (let [left-leave (parse-node left-leave)
             right-leave (parse-node right-leave)
             min-depth (min (loc-depth left-leave) (loc-depth right-leave))
             left-leave (up-to-depth left-leave min-depth)
             right-leave (up-to-depth right-leave min-depth)]
-        (first 
-          (filter 
-            (fn [[l r]] (= (z/up l) (z/up r))) 
-            (iterate 
+        (first
+          (filter
+            (fn [[l r]] (= (z/up l) (z/up r)))
+            (iterate
               (fn [[l r]] [(z/up l) (z/up r)])
               [left-leave right-leave])))))))
 
-(defn parsed-in-tags? 
+(defn parsed-in-tags?
   [parsed tags-set]
   (tags-set (-> parsed :parents peek :tag)))
 
 (defn parse-stopped-in-code?
   ; TODO the current function is not general enough, it just works for the offset
-  ; the parse stopped at  
+  ; the parse stopped at
   "true if character at offset offset is in a code
    position, e.g. not in a string, regexp, literal char or comment"
   [parsed]
   (not (parsed-in-tags? parsed *not-in-code*)))
 
 (defn in-code? [loc] (and loc (not (*not-in-code* (loc-tag (parse-node loc))))))
-  
+
 (defmulti paredit (fn [k & args] k))
 
 (defn insert-balanced
   [[o c] t chars-with-no-space-before chars-with-no-space-after]
-  (let [add-pre-space? (not (contains? chars-with-no-space-before 
+  (let [add-pre-space? (not (contains? chars-with-no-space-before
                                        (t/previous-char-str t 1 #_(count o))))
-        add-post-space? (not (contains? chars-with-no-space-after 
+        add-post-space? (not (contains? chars-with-no-space-after
                                         (t/next-char-str t)))
         ins-str (str (if add-pre-space? " " "")
                      (str o c)
@@ -117,69 +117,69 @@
 (declare wrap-with-balanced)
 
 (defn open-balanced
-  [parsed [o c] {:keys [^String text offset length] :as t} 
+  [parsed [o c] {:keys [^String text offset length] :as t}
    chars-with-no-space-before chars-with-no-space-after]
-  (if (zero? length) 
+  (if (zero? length)
     (let [offset-loc (-> parsed parsed-root-loc (loc-for-offset offset))]
       (if (in-code? offset-loc)
         (insert-balanced [o c] t chars-with-no-space-before chars-with-no-space-after)
         (-> t (t/insert (str o)))))
     (wrap-with-balanced parsed [o c] t)))
-  
+
 (defn close-balanced
-  [parsed [o c] {:keys [^String text offset length] :as t} 
+  [parsed [o c] {:keys [^String text offset length] :as t}
    chars-with-no-space-before chars-with-no-space-after]
-    (let [offset-loc (-> parsed parsed-root-loc (loc-for-offset offset))]       
+    (let [offset-loc (-> parsed parsed-root-loc (loc-for-offset offset))]
       (if (in-code? offset-loc)
         (let [up-locs (take-while identity (iterate z/up offset-loc))
               match (some #(when (= c (peek (:content (z/node %)))) %) up-locs)]
           (if match
             (let [last-loc (-> match z/down z/rightmost z/left)
-                  nb-delete (if (= :whitespace (loc-tag last-loc)) 
+                  nb-delete (if (= :whitespace (loc-tag last-loc))
                               (loc-count last-loc)
                               0)
-                  t (if (> nb-delete 0) 
+                  t (if (> nb-delete 0)
                       (t/delete t (start-offset last-loc) nb-delete)
                       t)] ; z/left because there is the closing node
               (-> t (t/set-offset (- (end-offset match) nb-delete))))
             (-> t (t/insert (str c)))))
         (-> t (t/insert (str c))))))
 
-(defmethod paredit 
+(defmethod paredit
   :paredit-open-round
   [cmd {:keys #{parse-tree buffer}} {:keys [text offset length] :as t}]
-  (with-important-memoized 
-    (open-balanced parse-tree ["(" ")"] t 
+  (with-important-memoized
+    (open-balanced parse-tree ["(" ")"] t
       (union (conj (into *real-spaces* *open-brackets*) "#") *form-macro-chars*)
       (into *extended-spaces* *close-brackets*))))
-    
-(defmethod paredit 
+
+(defmethod paredit
   :paredit-open-square
   [cmd {:keys #{parse-tree buffer}} {:keys [text offset length] :as t}]
   (with-important-memoized (open-balanced parse-tree ["[" "]"] t
     (union (into *real-spaces* *open-brackets*) *form-macro-chars*)
     (into *extended-spaces* *close-brackets*))))
-    
-(defmethod paredit 
+
+(defmethod paredit
   :paredit-open-curly
   [cmd {:keys #{parse-tree buffer}} {:keys [text offset length] :as t}]
   (with-important-memoized (open-balanced parse-tree ["{" "}"] t
     (union (conj (into *real-spaces* *open-brackets*) "#") *form-macro-chars*)
     (into *extended-spaces* *close-brackets*))))
-    
-(defmethod paredit 
+
+(defmethod paredit
   :paredit-close-round
   [cmd {:keys #{parse-tree buffer}} {:keys [text offset length] :as t}]
   (with-important-memoized (close-balanced parse-tree ["(" ")"] t
     nil nil)))
 
-(defmethod paredit 
+(defmethod paredit
   :paredit-close-square
   [cmd {:keys #{parse-tree buffer}} {:keys [text offset length] :as t}]
   (with-important-memoized (close-balanced parse-tree ["[" "]"] t
     nil nil)))
 
-(defmethod paredit 
+(defmethod paredit
   :paredit-close-curly
   [cmd {:keys #{parse-tree buffer}} {:keys [text offset length] :as t}]
   (with-important-memoized (close-balanced parse-tree ["{" "}"] t
@@ -188,14 +188,14 @@
 (defmethod paredit
   :paredit-doublequote
   [cmd {:keys #{parse-tree buffer}} {:keys [text offset length] :as t}]
-  (with-important-memoized 
-    (let [offset-loc (-> parse-tree parsed-root-loc (loc-for-offset offset))] 
+  (with-important-memoized
+    (let [offset-loc (-> parse-tree parsed-root-loc (loc-for-offset offset))]
       (cond
         (in-code? offset-loc)
           (if (zero? length)
-            (insert-balanced 
-              [\" \"] 
-              t 
+            (insert-balanced
+              [\" \"]
+              t
               (conj (into *real-spaces* *open-brackets*) "#")
               (into *extended-spaces* *close-brackets*))
             (wrap-with-balanced parse-tree [\" \"] t))
@@ -209,36 +209,36 @@
         :else
           (-> t (t/insert (str \\ \")))))))
 
-(defmethod paredit 
+(defmethod paredit
   :paredit-forward-delete
   [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
    (if (zero? (count text))
      t
-     (with-important-memoized 
+     (with-important-memoized
        (if parse-tree
          (let [offset-loc (-> parse-tree parsed-root-loc (loc-for-offset offset))
                handled-forms *brackets-tags*
                in-handled-form (handled-forms (loc-tag offset-loc))
                open-punct-length (.length ^String (first (:content (z/node offset-loc))))]
-           (cond 
+           (cond
              (and in-handled-form (= offset (start-offset offset-loc)))
                (t/shift-offset t open-punct-length)
              (and in-handled-form (= offset (dec (end-offset offset-loc))))
                (if (> (-> offset-loc z/node :content count) 2)
                  t     ; don't move
-                 (-> t ; delete the form 
+                 (-> t ; delete the form
                    (t/delete (start-offset offset-loc) (loc-count offset-loc))
                    (t/shift-offset (- open-punct-length))))
              :else
                (t/delete t offset 1)))
          (t/delete t offset 1)))))
 
-(defmethod paredit 
+(defmethod paredit
    :paredit-backward-delete
    [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
    (if (zero? (count text))
      t
-     (with-important-memoized 
+     (with-important-memoized
        (if parse-tree
          (let [offset (dec offset)
                offset-loc (-> parse-tree parsed-root-loc (loc-for-offset offset))
@@ -247,24 +247,24 @@
                in-handled-form (handled-forms (loc-tag offset-loc))
                ;_ (println "in-handled-form:" in-handled-form)
                ]
-           (cond 
+           (cond
              (and in-handled-form (<= (start-offset offset-loc) offset (+ (start-offset offset-loc) (dec (-> offset-loc z/down loc-count)))))
                (if (> (-> offset-loc z/node :content count) 2)
                  t     ; don't move
                  (do ;(println "delete the form:" (start-offset offset-loc) (loc-count offset-loc))
-                   (-> t ; delete the form 
+                   (-> t ; delete the form
                      (t/delete (start-offset offset-loc) (loc-count offset-loc))
                      (t/shift-offset (- (-> offset-loc z/down loc-count))))))
              (and in-handled-form (= offset (dec (end-offset offset-loc))))
                (do
-                 ;(println "final t:") 
+                 ;(println "final t:")
                  ;(println (start-offset offset-loc) (loc-count offset-loc))
                  (t/shift-offset t -1))
              :else
                (-> t (t/delete offset 1) (t/shift-offset -1))))
          (-> t (t/delete offset 1) (t/shift-offset -1))))))
 
-(def lisp-forms (into #{} (map str '(let fn binding proxy reify extend extend-protocol extend-type bound-fn 
+(def lisp-forms (into #{} (map str '(let fn binding proxy reify extend extend-protocol extend-type bound-fn
                             if if-not if-let when when-not when-let when-first condp case loop dotimes
                             for while do doto try catch locking dosync doseq dorun doall
                             -> -?> ->> future ns clojure.core/ns gen-class gen-interface))))
@@ -276,7 +276,7 @@
     (.startsWith s "with")
     (lisp-forms s)))
 
-(defn indent-column 
+(defn indent-column
   "pre-condition: line-offset is already the starting offset of a line"
   [root-loc line-offset]
   (let [loc (loc-for-offset root-loc (dec line-offset))]
@@ -288,13 +288,13 @@
           ; we reached the start of the parent form, indent depending on the form's type
           (if (#{"(" "#("} (loc-text loc))
             (cond
-              (nil? seen-loc) 
+              (nil? seen-loc)
                 (+ (loc-col loc) (loc-count loc) 1)
               (lisp-form? (loc-text (first seen-loc)))
                 (+ (loc-col loc) (loc-count loc) 1)
               (second seen-loc)
                 (loc-col (second seen-loc))
-              :else 
+              :else
                 (+ (loc-col loc) (loc-count loc) 1))
             (+ (loc-col loc) (loc-count loc)))
         (= :whitespace (loc-tag loc))
@@ -315,7 +315,7 @@
         length (if (nil? r) 0 (- (end-offset r) offset))]
     [offset length]))
 
-(defn sel-match-normalized? 
+(defn sel-match-normalized?
   "Does the selection denoted by offset and length match l (left) and r (right) locs ?"
   [offset length [l r]]
   (if (zero? length)
@@ -352,14 +352,14 @@
         (<= (count (z/children parent)) 2) ; TODO if we had :punct nodes, we could just check
                                            ; if only :punct nodes are present ...
         (and (= l pl) (= r pr)))
-        (do 
+        (do
           ;(println "already has children, lets expand to parent")
           [(start-offset parent) (end-offset parent)])
       :else
-        (do 
+        (do
           ;(println "not all children selected, lets expand to all children but punct")
           [(start-offset pl) (end-offset pr)])
-      
+
       ))
   )
 (def ^:dynamic *selection-strategy* {:list children-then-punct-sel
@@ -367,7 +367,7 @@
                            :map children-then-punct-sel
                            :set children-then-punct-sel
                            :fn children-then-punct-sel
-                           ;; :string children-then-punct-sel NOT WORKING WITH STRINGS CURRENTLY (SHOULD IT ?) 
+                           ;; :string children-then-punct-sel NOT WORKING WITH STRINGS CURRENTLY (SHOULD IT ?)
                            ;; :regex children-then-punct-sel  NOT WOKING WITH REGEXES CURRENTLY (SHOULD IT ?)
                            })
 (defmethod paredit
@@ -376,12 +376,12 @@
   (with-important-memoized (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
     (let [[l r] (normalized-selection rloc offset length)]
       (if-not (sel-match-normalized? offset length [l r])
-        (assoc t :offset (start-offset l) 
+        (assoc t :offset (start-offset l)
                  :length (if (nil? r) 0 (- (end-offset r) (start-offset l))))
         (let [parent (if-let [nl (z/up (if (= offset (start-offset (parse-node l)))
-                                         (parse-node l) 
+                                         (parse-node l)
                                          (parse-leave l)))]
-                       nl 
+                       nl
                        l)
               selection-strategy (*selection-strategy* (loc-tag parent) default-behaviour-sel)
               [start-offset end-offset] (selection-strategy parent l r)]
@@ -397,9 +397,9 @@
       (if-not (sel-match-normalized? offset length [l r])
         (-> t (assoc-in [:offset] (start-offset l))
           (assoc-in [:length] (if (nil? r) 0 (- (end-offset r) (start-offset l)))))
-        (let [r (if (nil? r) 
-                  l 
-                  (if-let [nr (z/right r)] 
+        (let [r (if (nil? r)
+                  l
+                  (if-let [nr (z/right r)]
                     nr
                     (z/up r)))
               [l r] (normalized-selection rloc (start-offset l) (- (end-offset r) (start-offset l)))]
@@ -413,10 +413,10 @@
   (with-important-memoized (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
     (let [[l r] (normalized-selection rloc offset length)]
       (if-not (and
-                (sel-match-normalized? offset length [l r]) 
+                (sel-match-normalized? offset length [l r])
                 (= offset (start-offset (parse-node l))))
         t
-        (let  
+        (let
           [to-raise-offset (start-offset l)
            to-raise-length (- (if r (end-offset r) (end-offset (parse-node l))) (start-offset l))
            to-raise-text (.substring text to-raise-offset (+ to-raise-offset to-raise-length))
@@ -444,13 +444,13 @@
         (if-not close-punct
           t
           (let [replace-text (str close-punct " " open-punct)
-                [replace-offset 
+                [replace-offset
                  replace-length] (if (and
                                        (not= :whitespace (loc-tag l))
                                        (or
                                          (= :string (loc-tag l))
                                          (not (and
-                                                (sel-match-normalized? offset length [l r]) 
+                                                (sel-match-normalized? offset length [l r])
                                                 (= offset (start-offset (parse-node l)))))))
                                    [offset 0]
                                    (let [start (or (some #(when-not (= :whitespace (loc-tag %)) (end-offset %)) (previous-leaves l)) offset)
@@ -465,7 +465,7 @@
 (defmethod paredit
   :paredit-join-sexps
   [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
-  (with-important-memoized 
+  (with-important-memoized
     (if (not= 0 length)
       t
       (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
@@ -475,7 +475,7 @@
             (if (or (nil? lf) (nil? rf) (start-punct? lf) (end-punct? rf))
               t
               (let [ln (parse-node lf)
-                    rn (parse-node rf)] 
+                    rn (parse-node rf)]
                 (if-not (and
                           (= (loc-tag ln) (loc-tag rn)))
                   t
@@ -491,29 +491,29 @@
 (defn wrap-with-balanced
   [parsed [^String o c] {:keys [^String text offset length] :as t}]
   (let [block (constantly t)
-        bypass #(-> t 
+        bypass #(-> t
                   (update-in [:text] t/str-replace offset length o)
                   (update-in [:offset] + (.length o))
                   (assoc-in [:length] 0)
                   (update-in [:modifs] conj {:text o :offset offset :length length}))]
     (if-let [rloc (-?> parsed (parsed-root-loc true))]
       (let [[left-leave right-leave] (normalized-selection rloc offset length)]
-        (if-not (sel-match-normalized? offset length [left-leave right-leave]) 
+        (if-not (sel-match-normalized? offset length [left-leave right-leave])
           (if (or (in-code? (loc-containing-offset rloc offset))
                   (in-code? (loc-containing-offset rloc (+ offset length))))
             (block)
             (bypass))
-          (let [text-to-wrap (.substring text (start-offset left-leave) (or (-?> right-leave end-offset) (.length text))) 
+          (let [text-to-wrap (.substring text (start-offset left-leave) (or (-?> right-leave end-offset) (.length text)))
                 new-text (str o text-to-wrap c)
                 t (update-in t [:text] t/str-replace (start-offset left-leave) (.length text-to-wrap) new-text)
                 t (assoc-in t [:offset] (inc (start-offset left-leave)))]
-            (update-in t [:modifs] conj {:text new-text :offset (start-offset left-leave) :length (.length text-to-wrap)})))) 
+            (update-in t [:modifs] conj {:text new-text :offset (start-offset left-leave) :length (.length text-to-wrap)}))))
       (block))))
 
 (defmethod paredit
   :paredit-wrap-quote
   [cmd {:keys #{parse-tree buffer}} t]
-  (-> t 
+  (-> t
     (update-in [:text] t/str-insert (:offset t) \')
     (update-in [:offset] inc)
     (update-in [:modifs] conj {:text "'", :offset (:offset t), :length 0})))
@@ -538,13 +538,13 @@
   [cmd {:keys #{parse-tree buffer}} {:keys [text offset length] :as t}]
   ; no call to with-important-memoized because we almost immediately delegate to :paredit-indent-line
   (let [text (-> text (t/str-remove offset length) (t/str-insert offset "\n"))
-        r (paredit :paredit-indent-line 
+        r (paredit :paredit-indent-line
                    (let [buffer (edit-buffer buffer offset length "\n")
-                         parse-tree (buffer-parse-tree buffer :intermediate-id)] 
+                         parse-tree (buffer-parse-tree buffer :intermediate-id)]
                      {:parse-tree parse-tree, :buffer buffer})
-                   {:text text 
-                    :offset (inc offset) 
-                    :length 0 
+                   {:text text
+                    :offset (inc offset)
+                    :length 0
                     :modifs [{:text *newline* :offset offset :length length}]})]
     (if (-?> r :modifs count (= 2))
       (let [m1 (get-in r [:modifs 0])
@@ -557,7 +557,7 @@
 (defmethod paredit
   :paredit-indent-line
   [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
-  (with-important-memoized 
+  (with-important-memoized
     (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
       (let [line-start (t/line-start text offset)
             line-stop (t/line-stop text offset)
@@ -565,9 +565,9 @@
         (if (and (#{:string, :string-body} (loc-tag loc)) (< (start-offset loc) line-start))
           t
           (let [indent (indent-column rloc line-start)
-                cur-indent-col (- 
+                cur-indent-col (-
                                  (loop [o line-start]
-                                   (if (>= o (.length text)) 
+                                   (if (>= o (.length text))
                                      o
                                      (let [c (.charAt text o)]
                                        (cond
@@ -581,13 +581,13 @@
             (zero? to-add) t
             :else (let [t (update-in t [:modifs] conj {:text (str/repeat " " indent) :offset line-start :length cur-indent-col})
                         t (update-in t [:text] t/str-replace line-start cur-indent-col (str/repeat " " indent))]
-                    (cond 
-                      (>= offset (+ line-start cur-indent-col)) 
+                    (cond
+                      (>= offset (+ line-start cur-indent-col))
                         (update-in t [:offset] + to-add)
                       (<= offset (+ line-start indent))
                         t
                       :else
-                        (update-in t [:offset] + (max to-add (- line-start 
+                        (update-in t [:offset] + (max to-add (- line-start
                                                                offset)))))))))
       t)))
 
@@ -598,10 +598,10 @@
   (let [start offset
         stop (+ start length)
         lines-start (t/line-start text start)
-        lines-stop (if (and (pos? length) 
-                            (= stop (t/line-start text stop))) 
+        lines-stop (if (and (pos? length)
+                            (= stop (t/line-start text stop)))
                      stop
-                     (t/line-stop text stop)) ; do not select the last line 
+                     (t/line-stop text stop)) ; do not select the last line
                                               ; if nothing selected in it
         lines-text (.substring text lines-start lines-stop)
         lines (t/full-lines lines-text)
@@ -637,7 +637,7 @@
 (defmethod paredit
   :paredit-toggle-line-comment
   [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
-  (update-lines t 
+  (update-lines t
     (fn [lines]
       (condp every? lines
         line-start-comment? (dec-lines-comments lines)
@@ -646,20 +646,20 @@
 
 (defn escape-string-content
   "Meant to escape text to be pasted into a String literal.
-   Escapes content of s: adds backslashes before each found double quote or 
+   Escapes content of s: adds backslashes before each found double quote or
    backslash."
   [s]
-  (when s 
+  (when s
     (s/escape s {\" "\\\"", \\ "\\\\"})))
 
-(defn inside-string-literal? 
+(defn inside-string-literal?
   "In the source code parse-tree is the representation of, is offset positioned
    inside a String literal (that is within a String literal double quotes)?"
   [parse-tree offset]
-  (let [offset-loc (-> parse-tree parsed-root-loc (loc-containing-offset offset))] 
+  (let [offset-loc (-> parse-tree parsed-root-loc (loc-containing-offset offset))]
       (#{:string, :string-body} (loc-tag offset-loc))))
 
-(defn smart-paste 
+(defn smart-paste
   "Takes a parse-tree, an editor state, a text to paste.
    If the cursor is inside a String literal, then double-quotes and backslashes
    found inside to-paste are escaped with a backslash, so that the resulting
@@ -709,3 +709,81 @@
                     (update-in [:modifs] conj {:offset parent-so :length replace-length :text replace-text}))]
         ret)
       t)))
+
+;;;
+;;; paredit-forward-slurp-sexp
+;;;
+;;; recurse up until the current node is not the rightmost node under parent
+;;; move the sibling to this nodes right into this node as last element (removing it from parent)
+;;; get new string from parent (re-indenting according to lisp rules)
+;;;
+
+(defn- rightmost-non-punct
+  [loc]
+  )
+
+(defn- up-to-right-sibling
+  [loc]
+  (if (= loc (-> loc z/rightmost z/left))
+    (when-let [u (z/up loc)]
+      (recur u))
+    loc))
+
+(defmethod paredit
+  :paredit-forward-slurp-sexp
+  [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
+  ;; (with-important-memoized)
+  (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
+    (let [[l r] (normalized-selection rloc offset length)
+          starting-loc (if (*tag-closing-brackets* (loc-tag l))  ;; if on closing punct, must select parent differently
+                         (loc-for-offset rloc offset)
+                         (if-let [nl (z/up (parse-node l))]
+                           nl l))]
+      (if-let [first-not-rightmost (up-to-right-sibling starting-loc)]
+        (let [
+              ;; rmost (z/rightmost starting-loc) ;; will rightmost always be punct?
+              ;; rightmost (if (punct-loc? rmost)
+              ;;             (z/left rmost)
+              ;;             rmost)
+              ;; rightmost? (= rightmost starting-loc)
+
+              slurpee (z/right first-not-rightmost) ;; we don't just need the one guy to right
+                                                    ;; we need all elements until non-punct
+
+              parent (parse-node starting-loc)
+              parent-so (start-offset parent)
+              parent-eo (end-offset parent)
+              replace-offset parent-so
+              text-to-replace (.substring text parent-so parent-eo)
+
+              grandparent (z/up parent)
+              grandparent-so (start-offset grandparent)
+              grandparent-eo (end-offset grandparent)
+              grandparent-text (.substring text grandparent-so grandparent-eo)
+
+              parent-removed (z/remove starting-loc)
+              text-sans-removed (loc-text (z/up (z/up parent-removed))) ;; (node-text (z/root parent-removed))
+              ;; replace-length (.length text-to-replace)
+
+              ;; [inner-so inner-eo] (let [pl (-> parent z/down z/right)
+              ;;                           pr (-> pl z/rightmost z/left)]
+              ;;                       [(start-offset pl) (end-offset pr)]) ;; all-children-but-punct
+
+              ;; new-offset (- offset (- inner-so parent-so))
+              ;; replace-text (.substring text inner-so inner-eo)
+
+              ret t]
+          (printf "text-to-replace: '%s'
+grandparent-text: '%s'
+removed: '%s'
+rightmost-text: '%s'
+slurpee (%s): '%s'"
+                      text-to-replace
+                      grandparent-text
+                      text-sans-removed
+                      (loc-text first-not-rightmost)
+                      (loc-tag slurpee)
+                      (loc-text slurpee))
+              ret)
+        t))
+    t))

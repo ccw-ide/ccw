@@ -181,26 +181,26 @@
 (def paredit-version 21)
 (def paredit-beta-p nil)
 
-(def ^{:doc "Keymap for the paredit minor mode."}  
+(def ^{:doc "Keymap for the paredit minor mode."}
   paredit-mode-map {})
 
 (defn check-parens "TODO LAP: implement it !" [text] true)
 (defn can-enable-paredit? [text] (check-parens text))
 
-(def 
+(def
   ^{ :doc "
     The format for documenting the commands is simple, and a slight varation of
     the original paredit.el format :
     paredit-commands := [ group* ]
     group := [ group-name-str command* ]
-    command := [ default-triggering-keys 
-                 command-name-keyword 
-                 { before-after-documentation-pair* } 
+    command := [ default-triggering-keys
+                 command-name-keyword
+                 { before-after-documentation-pair* }
                  { before-after-non-regression-pair* }* ]
     before-after-documentation-pair := before-after-non-regression-pair
     before-after-non-regression-pair := before-text-spec after-text-spec
     before-text-spec := after-text-spec := text-spec
-    text-spec := a string, with the caret position indicated by a pipe character |, 
+    text-spec := a string, with the caret position indicated by a pipe character |,
                  and if there is a selected portion of the text, the end of the text
                  selection is marked with another pipe character |"}
   ^:dynamic *paredit-commands*
@@ -219,7 +219,7 @@
 	                 "(a,| b)" "(a, (|) b)"
 	                 "(a,|b)" "(a, (|) b)"
 	                 "(a,|)" "(a, (|))"
-                   "\\| " "\\(| " 
+                   "\\| " "\\(| "
 	                 "~|" "~(|)"
 	                 "~@|" "~@(|)"
 	                 "\\\\| " "\\\\ (|) "
@@ -253,7 +253,7 @@
 	                 "; (Foo.)|"}]
       ["["         :paredit-open-square
                  {"(a b |c d)"  "(a b [|] c d)"
-                  "(foo \"bar |baz\" quux)" "(foo \"bar [|baz\" quux)" 
+                  "(foo \"bar |baz\" quux)" "(foo \"bar [|baz\" quux)"
                   }
                   {"(a b|c d)" "(a b [|] c d)"
                    "(|)" "([|])"
@@ -263,7 +263,7 @@
                    "(a,| b)" "(a, [|] b)"
                    "(a,|b)" "(a, [|] b)"
                    "(a,|)" "(a, [|])"
-                   "\\| " "\\[| " 
+                   "\\| " "\\[| "
                    "\\\\| " "\\\\ [|] "}]
       ["]"         :paredit-close-square
                   {"(define-key keymap [frob|  ] 'frobnicate)"
@@ -278,7 +278,7 @@
                    }]
       ["{"         :paredit-open-curly
                  {"(a b |c d)"  "(a b {|} c d)"
-                  "(foo \"bar |baz\" quux)" "(foo \"bar {|baz\" quux)" 
+                  "(foo \"bar |baz\" quux)" "(foo \"bar {|baz\" quux)"
                   }
                   {"(a b|c d)" "(a b {|} c d)"
                    "(|)" "({|})"
@@ -289,7 +289,7 @@
                    "(a,| b)" "(a, {|} b)"
                    "(a,|b)" "(a, {|} b)"
                    "(a,|)" "(a, {|})"
-                   "\\| " "\\{| " 
+                   "\\| " "\\{| "
                    "\\\\| " "\\\\ {|} "
                    }]
       ["}"         :paredit-close-curly
@@ -305,7 +305,7 @@
                   { "(frob grovel |full lexical)" "(frob grovel \"|\" full lexical)",
                    "(frob grovel \"|\" full lexical)" "(frob grovel \"\"| full lexical)",
                    "(foo \"bar |baz\" quux)" "(foo \"bar \\\"|baz\" quux)",
-                   ";|ab" ";\"|ab", 
+                   ";|ab" ";\"|ab",
                    "(frob grovel \"foo \\|bar\" full lexical)"
                      "(frob grovel \"foo \\\"|bar\" full lexical)",
                    "(frob grovel \"foo \\\\|bar\" full lexical)"
@@ -326,7 +326,7 @@
                  "(quux |\"zot\")" "(quux \"|zot\")",
                  "(quux \"|zot\")" "(quux \"|ot\")",
                  "(foo |(a) bar)" "(foo (|a) bar)"
-                 "(foo (|a) bar)" "(foo (|) bar)" 
+                 "(foo (|a) bar)" "(foo (|) bar)"
                  "(foo (|) bar)" "(foo | bar)"
                  "(foo [|] bar)" "(foo | bar)"
                  "(foo {|} bar)" "(foo | bar)"
@@ -350,11 +350,11 @@
                  "(foo #\"a |d\" bar)" "(foo #\"a |\" bar)"
                  "(|#\"foo bar\")" "(#\"|foo bar\")"
 
-                 "(foo \"a|\" bar)" "(foo \"a|\" bar)" 
+                 "(foo \"a|\" bar)" "(foo \"a|\" bar)"
                  "(|(foo bar))" "((|foo bar))"
                  "(|[foo bar])" "([|foo bar])"
                  "(|{foo bar})" "({|foo bar})"
-                 
+
                  "|" "|"
                  }]
       ["BackDel" :paredit-backward-delete
@@ -365,21 +365,21 @@
 
                  "(#\"zot\"| quux)" "(#\"zot|\" quux)",
                  "(#\"zot|\" quux)" "(#\"zo|\" quux)",
-                 
+
                  "(foo (|) bar)" "(foo | bar)",
                  "(foo #(|) bar)" "(foo | bar)",
                  "(foo #{|} bar)" "(foo | bar)",
-                 
+
                  "(foo bar)|" "(foo bar|)",
                  "(foo bar|)" "(foo ba|)",
-                 
+
                  "|" "|"
-                 
+
                  "\"\"|" "\"|\""
                  "\"|\"" "|"
                  "#\"\"|" "#\"|\""
                  "#\"|\"" "|"
-                 
+
                  "#(foo bar)|" "#(foo bar|)",
                  "#(foo bar|)" "#(foo ba|)",
                  "#{foo bar}|" "#{foo bar|}",
@@ -397,7 +397,7 @@
       ;          "(foo \"|bar baz\"\n     quux)"
       ;           "(foo \"|\"\n     quux)"}]
       ]
-    
+
     ["Depth-Changing Commands"
      ["M-("       :paredit-wrap-round
       {; not used yet "(foo |bar baz)" "(foo (|bar) baz)",
@@ -423,7 +423,7 @@
        "foo |bar baz\n|" "foo (|bar baz\n|)"
        "|a `b|" "(|a `b|)"
        "|a 'b|" "(|a 'b|)"
-       
+
        }]
      [""       :paredit-wrap-quote
       {"(foo |bar baz)" "(foo '|bar baz)",
@@ -469,7 +469,7 @@
      ;            "(a b c f)"))
      ["M-r"       :paredit-raise-sexp
                 {"(dynamic-wind in (lambda () |body|) out)" "(dynamic-wind in |body| out)"
-                 "(dynamic-wind in |body| out)" "|body|" 
+                 "(dynamic-wind in |body| out)" "|body|"
                  "(foo bar|)" "(foo bar|)"
                  "(foo |bar)" "|bar|"
                  "(foo |(bar))" "|(bar)|"
@@ -478,7 +478,13 @@
                  ; (|foo|) => |foo|
                  }]
      ]
-    
+    ["Barfage & Slurpage"
+     ["C-)" :paredit-forward-slurp-sexp
+      {"(foo (bar |baz) quux zot)" "(foo (bar |baz quux) zot)"
+       "(a b ((c| d)) e f)" "(a b ((c| d) e) f)"}]]
+
+
+
     ["Selection"
      ["Shift+Alt+Left" :paredit-expand-left
                 {
@@ -491,10 +497,10 @@
                  "foo bar| baz|" "foo |bar baz|"
                  "foo |bar baz|" "foo| bar baz|"
                  "|(foo bar baz)|" "|(foo bar baz)|"
-                 ;;not-yet "|fo|o bar baz" "|foo bar baz|" 
-                 ;;not-yet "|foo| bar baz" "|foo bar baz|" 
-                 ;;not-yet "|foo |bar baz" "|foo bar baz|" 
-                 ;;not-yet "|foo b|ar baz" "|foo bar baz|" 
+                 ;;not-yet "|fo|o bar baz" "|foo bar baz|"
+                 ;;not-yet "|foo| bar baz" "|foo bar baz|"
+                 ;;not-yet "|foo |bar baz" "|foo bar baz|"
+                 ;;not-yet "|foo b|ar baz" "|foo bar baz|"
                  "foo (bar| baz)" "foo (|bar| baz)"
                  "foo b|ar| baz" "foo |bar| baz"
                  "foo1 (|bar| baz)" "foo1 |(bar baz)|"
@@ -555,7 +561,7 @@
                  "|foo bar baz" "|foo bar baz|"
                  "|f|oo bar baz" "|foo| bar baz"
                  "|foo| bar baz" "|foo bar baz|"
-                 "|foo |bar baz" "|foo bar baz|" 
+                 "|foo |bar baz" "|foo bar baz|"
                  "|foo b|ar baz" "|foo bar| baz"
                  "foo4 (bar| baz)" "foo4 (|bar baz|)"
                  "foo4 (|bar baz|)" "foo4 |(bar baz)|"
@@ -583,7 +589,7 @@
                  "(foo |{bar)]" "|(foo {bar)]|"
                  }]
      ]
-    ["Miscellaneous"             
+    ["Miscellaneous"
       ["Tab"     :paredit-indent-line
                 {"[a\n|b]"  "[a\n |b]"
                  "([a1\n|b])"  "([a1\n  |b])"
@@ -605,14 +611,14 @@
                  " (\n |   ab c)" " (\n |  ab c)"
                  " (\n  |  ab c)" " (\n  | ab c)"
                  " (\n   | ab c)" " (\n   |ab c)"
-                 " (\n    |ab c)" " (\n   |ab c)" 
-                 " (\n    a|b c)" " (\n   a|b c)"  
-                 " (\n    |    ab c)" " (\n|   ab c)" 
+                 " (\n    |ab c)" " (\n   |ab c)"
+                 " (\n    a|b c)" " (\n   a|b c)"
+                 " (\n    |    ab c)" " (\n|   ab c)"
                  " (\n      |  ab c)" " (\n |  ab c)"
                  " (\n  |ab c)" " (\n   |ab c)"
-                 " (\n| ab c)" " (\n|   ab c)"  
+                 " (\n| ab c)" " (\n|   ab c)"
                  " (\n  | ab c)" " (\n  | ab c)"
-                 "(a\n |b" "(a\n  |b" 
+                 "(a\n |b" "(a\n  |b"
                  ;;;"foo (let [n (frobbotz)] \n|(display (+ n 1)\nport))\n        bar"
                  ;;;(str "foo (let [n (frobbotz)]"
                  ;;;   "\n      |(display (+ n 1)"
@@ -689,7 +695,7 @@
       [""    :paredit-dec-line-comment
                 {
                  ";hel|lo"         "hel|lo",
-                 ";h|el|lo"        "h|el|lo",       
+                 ";h|el|lo"        "h|el|lo",
                  ";a|b"             "a|b",
                  ";|\n"           "|\n",
                  ";|\r\n"         "|\r\n",
@@ -723,9 +729,9 @@
                  "a\nb\nc|d"    "a\nb\n;c|d",
                  "hel|lo"       ";hel|lo",
                  "h|el|lo"      ";h|el|lo"
-                 ; same as dec-line in non ambiguous cases                 
+                 ; same as dec-line in non ambiguous cases
                  ";hel|lo"         "hel|lo",
-                 ";h|el|lo"        "h|el|lo",       
+                 ";h|el|lo"        "h|el|lo",
                  ";a|b"             "a|b",
                  ";|\n"           "|\n",
                  ";|\r\n"         "|\r\n",
@@ -743,6 +749,6 @@
                  ; ambiguous cases
                  ";|a\nb|"        ";|a\nb|"
                  }]
-      
+
     ]
   ])
