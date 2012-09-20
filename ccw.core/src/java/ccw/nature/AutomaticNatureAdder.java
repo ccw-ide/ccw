@@ -13,10 +13,10 @@ public class AutomaticNatureAdder {
 	}
 	
 	public synchronized void stop() {
-		if (elementChangedListener == null) {
+		if (elementChangedListener != null) {
 			JavaCore.removeElementChangedListener(elementChangedListener);
+			elementChangedListener = null;
 		}
-		elementChangedListener = null;
 	}
 
 }
