@@ -24,7 +24,6 @@ import ccw.ClojureCore;
 import ccw.ClojureProject;
 import ccw.launching.ClojureLaunchShortcut;
 import ccw.nature.ClojureNaturePropertyTest;
-import ccw.preferences.PreferenceConstants;
 import ccw.repl.Actions;
 import ccw.repl.REPLView;
 import ccw.util.DisplayUtil;
@@ -94,7 +93,7 @@ public class LoadFileAction extends Action {
         	new Thread(new Runnable() {
 				public void run() {
 		        	final IProject project = editorFile.getProject();
-		        	new ClojureLaunchShortcut().launchProject(project, ILaunchManager.RUN_MODE, null);
+		        	new ClojureLaunchShortcut().launchProject(project, ILaunchManager.RUN_MODE, false);
 		        	DisplayUtil.asyncExec(new Runnable() {
 		        		public void run() {
 				        	REPLView repl = CCWPlugin.getDefault().getProjectREPL(project);
