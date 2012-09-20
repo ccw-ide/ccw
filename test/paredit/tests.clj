@@ -199,6 +199,7 @@
              "(foo #()"
              "(foo #!)"
              "(foo \\)"
+             "#"
              ]]
     (is (= s (parsetree-to-string (parse s)))))
   (doseq [r ["paredit/compile.clj" 
@@ -208,7 +209,17 @@
              "clojure/core.clj"
              ]]
     (let [s (slurp (.getResourceAsStream (clojure.lang.RT/baseLoader) r))]
-      (is (= s (parsetree-to-string (parse s)))))))
+      (is (= s (parsetree-to-string (parse s))))))
+  (are [text expected-tag] (= expected-tag (-?> text parse :content (get 0) :tag))
+       "#" :net.cgrand.parsley/unfinished
+       "f#" :symbol
+       "#'foo" :var
+       "#foo bar" :reader-literal
+       "#foo.bar baz" :reader-literal
+       "#foo.bar []" :reader-literal
+       "#foo 5" :reader-literal
+    )
+  )
 
 (defn pts []
   #_(normalized-selection-tests)
