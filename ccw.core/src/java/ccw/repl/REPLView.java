@@ -134,6 +134,8 @@ public class REPLView extends ViewPart implements IAdaptable {
         }
     }
     private static void releaseSecondaryId (String id) {
+    	assert id != null;
+    	
         synchronized (SECONDARY_VIEW_IDS) {
             SECONDARY_VIEW_IDS.add(id);
         }
@@ -726,7 +728,9 @@ public class REPLView extends ViewPart implements IAdaptable {
     public void dispose() {
         super.dispose();
 
-        releaseSecondaryId(secondaryId);
+        if (secondaryId != null) {
+        	releaseSecondaryId(secondaryId);
+        }
         
         fSourceViewerDecorationSupport = (SourceViewerDecorationSupport) editorSupport._("disposeSourceViewerDecorationSupport",
         		fSourceViewerDecorationSupport);
@@ -736,7 +740,6 @@ public class REPLView extends ViewPart implements IAdaptable {
         } catch (IOException e) {
             CCWPlugin.logError(e);
         }
-        JFaceResources.getFontRegistry().removeListener(fontChangeListener);
     }
 
     public boolean isDisposed () {
