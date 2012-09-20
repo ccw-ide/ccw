@@ -333,7 +333,12 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
     private Map<String, List<String>> getRemoteNsTree (Connection repl) {
 		try {
 		    Response res = repl.send("op", "eval", "code", "(ccw.debug.serverrepl/namespaces-info)");
-            return (Map<String, List<String>>)res.values().get(0);
+            List<Object> values = res.values();
+            if (values.isEmpty()) {
+            	return null;
+            } else {
+            	return (Map<String, List<String>>)values.get(0);
+            }
         } catch (Exception e) {
             System.out.println(e);
             return null;
