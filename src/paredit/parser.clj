@@ -345,7 +345,6 @@
                ;(p/unspaced open-string #"(?:\\.|[^\\\"])++(?!\")" :? eof)
                ;(p/unspaced open-regex #"(?:\\.|[^\\\"])++(?!\")" :? eof)
                [open-quote eof]
-               [open-meta :expr :? eof]
                [open-deprecated-meta :expr :? eof]
                [open-deref eof]
                [open-syntax-quote eof]
@@ -359,7 +358,9 @@
     :map [open-map :expr* "}"]
     :set [open-set :expr* "}"]
     :quote [open-quote :expr]
-    :meta [open-meta :expr :expr]
+    :open-meta "^"
+    :meta-prefix [:open-meta :expr]
+    :meta [:meta-prefix :expr]
     :deref [open-deref :expr]
     :syntax-quote [open-syntax-quote :expr]
     :var [open-var :expr]
