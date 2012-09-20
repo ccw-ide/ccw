@@ -359,6 +359,9 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 	    if (getControl() != null) {
     		getControl().getDisplay().asyncExec(new Runnable() {
     			public void run() {
+    				if (getControl().isDisposed())
+    					return;
+    				
     				TreeViewer treeViewer = getTreeViewer();
     				if (treeViewer != null) {
     					treeViewer.getTree().setRedraw(false);
