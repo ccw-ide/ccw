@@ -46,14 +46,27 @@
 ; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; support code  
 
+(defprotocol Serializable
+  "Protocol for preparing objects before they are sent over the wire"
+  (prepare-serialize [this]))
+
+(extend-protocol Serializable
+  Object
+    (prepare-serialize [this] this)
+  clojure.lang.LazySeq
+    (prepare-serialize [this] (seq this)))
+
+(defn serialize [o]
+  (str (prepare-serialize o)))
+
 (defn meta-info [v]
-  (reduce (fn [m e] (merge m {(first e) (str (second e))})) {} (meta v)))
+  (reduce (fn [m e] (merge m {(first e) (serialize (second e))})) {} (meta v)))
 
 (defn symbol-info [s]
-  (merge {:type "symbol" :name (str s)} (meta-info (find-var s))))
+  (merge {:type "symbol" :name (serialize s)} (meta-info (find-var s))))
 
 (defn var-info [v]
-  (merge {:type "var" :name (str v)} (meta-info v)))
+  (merge {:type "var" :name (serialize v)} (meta-info v)))
 
 (defn- ns-info
   ([n] (ns-info n true))
