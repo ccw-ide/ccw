@@ -718,13 +718,25 @@
 ;;; get new string from parent (re-indenting according to lisp rules)
 ;;;
 
-(defn- rightmost-non-punct
-  [loc]
-  )
+(defn- take-to-non-punct
+  ([dir-fn loc]
+     (take-to-non-punct dir-fn loc '()))
+  ([dir-fn loc ret]
+     (if (or (punct-loc? loc) (gspaces (loc-tag loc)))
+       (do (prn (loc-text loc))
+           (recur dir-fn (dir-fn loc) (cons loc ret)))
+       (cons loc ret))))
+
+(def non-puncts-to-left
+  (partial take-to-non-punct z/left))
+
+(def non-puncts-to-right
+  (partial take-to-non-punct z/right))
+
 
 (defn- up-to-right-sibling
   [loc]
-  (if (= loc (-> loc z/rightmost z/left))
+  (if (= loc (-> loc z/rightmost non-puncts-to-left first))
     (when-let [u (z/up loc)]
       (recur u))
     loc))
@@ -740,16 +752,7 @@
                          (if-let [nl (z/up (parse-node l))]
                            nl l))]
       (if-let [first-not-rightmost (up-to-right-sibling starting-loc)]
-        (let [
-              ;; rmost (z/rightmost starting-loc) ;; will rightmost always be punct?
-              ;; rightmost (if (punct-loc? rmost)
-              ;;             (z/left rmost)
-              ;;             rmost)
-              ;; rightmost? (= rightmost starting-loc)
-
-              slurpee (z/right first-not-rightmost) ;; we don't just need the one guy to right
-                                                    ;; we need all elements until non-punct
-
+        (let [slurpees (reverse (non-puncts-to-right (z/right first-not-rightmost)))
               parent (parse-node starting-loc)
               parent-so (start-offset parent)
               parent-eo (end-offset parent)
@@ -776,14 +779,14 @@
           (printf "text-to-replace: '%s'
 grandparent-text: '%s'
 removed: '%s'
-rightmost-text: '%s'
-slurpee (%s): '%s'"
+first-not-rightmost: '%s'
+slurpees (%s): '%s'"
                       text-to-replace
                       grandparent-text
                       text-sans-removed
                       (loc-text first-not-rightmost)
-                      (loc-tag slurpee)
-                      (loc-text slurpee))
+                      (apply str (map loc-tag slurpees))
+                      (apply str (map loc-text slurpees)))
               ret)
         t))
     t))
