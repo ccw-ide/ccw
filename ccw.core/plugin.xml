@@ -1404,13 +1404,20 @@
           id="ccw.propertyTester.hasClojureNature"
           namespace="ccw.propertyTester"
           properties="hasClojureNature"
-          type="org.eclipse.core.resources.IResource">
+          type="java.lang.Object">
     </propertyTester>
  </extension>
  <extension
        point="org.eclipse.core.runtime.adapters">
     <factory
           adaptableType="org.eclipse.core.resources.IProject"
+          class="ccw.ProjectLaunchableAdapter">
+       <adapter
+             type="org.eclipse.debug.ui.actions.ILaunchable">
+       </adapter>
+    </factory>
+    <factory
+          adaptableType="org.eclipse.core.resources.IFile"
           class="ccw.ProjectLaunchableAdapter">
        <adapter
              type="org.eclipse.debug.ui.actions.ILaunchable">

@@ -4,6 +4,7 @@ import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.ui.part.FileEditorInput;
 
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
@@ -11,10 +12,16 @@ import ccw.ClojureCore;
 public class ClojureNaturePropertyTest extends PropertyTester {
     
     public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {
-        assert IResource.class.isInstance(receiver);
-        assert "hasClojureNature".equals(property);
-        
-        return hasClojureNature((IResource) receiver);
+    	assert "hasClojureNature".equals(property);
+
+    	if (receiver instanceof IResource)
+    		return hasClojureNature((IResource) receiver);
+    	else if (receiver instanceof FileEditorInput) {
+    		FileEditorInput fei = (FileEditorInput) receiver;
+    		return hasClojureNature(fei.getFile());
+    	} else {
+    		return false;
+    	}
     }
 
     public static boolean hasClojureNature(IResource resource) {
