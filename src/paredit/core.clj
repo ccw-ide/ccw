@@ -723,8 +723,7 @@
      (take-to-non-punct dir-fn loc '()))
   ([dir-fn loc ret]
      (if (or (punct-loc? loc) (gspaces (loc-tag loc)))
-       (do (prn (loc-text loc))
-           (recur dir-fn (dir-fn loc) (cons loc ret)))
+       (recur dir-fn (dir-fn loc) (cons loc ret))
        (cons loc ret))))
 
 (def non-puncts-to-left
@@ -744,47 +743,31 @@
 (defmethod paredit
   :paredit-forward-slurp-sexp
   [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
-  ;; (with-important-memoized)
-  (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
-    (let [[l r] (normalized-selection rloc offset length)
-          ;; TODO need a big conditional for if we are in a string (still slurp, but move end-quote)
-          starting-loc (if (*tag-closing-brackets* (loc-tag l))  ;; if on closing punct, must select parent differently
-                         (loc-for-offset rloc offset)
-                         (if-let [nl (z/up (parse-node l))]
-                           nl l))]
-      (if-let [loc-with-right-sibling (up-to-right-sibling starting-loc)]
-        (let [slurpees (non-puncts-to-right (z/right loc-with-right-sibling))
-              slurp-text (apply str (map loc-text (reverse slurpees)))
-              slurp-to-loc (first slurpees)
-              slurp-to-eo (end-offset slurp-to-loc)
-              parent-loc loc-with-right-sibling ;; (z/up loc-with-right-sibling)
-              parent (parse-node parent-loc)
-              parent-so (start-offset parent)
-              parent-eo (end-offset parent)
-              ;; text-to-replace (.substring text parent-so parent-eo)
-              replace-offset (dec parent-eo)
-              text-to-replace (.substring text replace-offset slurp-to-eo)
-
-              close-punct (*tag-closing-brackets* (loc-tag parent-loc))
-              replace-text (str slurp-text close-punct)
-
-              replace-length (.length text-to-replace)
-
-
-              ;; new-offset (- offset (- inner-so parent-so))
-              ;; replace-text (.substring text inner-so inner-eo)
-
-              ret (-> t
-                    (assoc-in [:text] (t/str-replace text replace-offset replace-length replace-text))
-                    (update-in [:modifs] conj {:offset replace-offset :length replace-length :text replace-text}))]
-          (printf "text-to-replace: '%s'
-replace-text: '%s'
-slurp-text: '%s'
-close-punct: '%s'"
-                      text-to-replace
-                      replace-text
-                      slurp-text
-                      close-punct)
-              ret)
-        t))
-    t))
+  (with-important-memoized
+    (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
+      (let [[l r] (normalized-selection rloc offset length)
+            ;; TODO need to check if we are in a string (still slurp, but move end-quote)
+            starting-loc (if (*tag-closing-brackets* (loc-tag l))  ;; if on closing punct, must select parent differently
+                           (loc-for-offset rloc offset)
+                           (if-let [nl (z/up (parse-node l))]
+                             nl l))]
+        (if-let [slurper (up-to-right-sibling starting-loc)]
+          (let [slurpees (non-puncts-to-right (z/right slurper))
+                slurp-text (apply str (map loc-text (reverse slurpees)))
+                slurp-to-loc (first slurpees)
+                slurp-to-eo (end-offset slurp-to-loc)
+                slurper-node (parse-node slurper)
+                slurper-so (start-offset slurper-node)
+                slurper-eo (end-offset slurper-node)
+                replace-offset (dec slurper-eo)
+                text-to-replace (.substring text replace-offset slurp-to-eo)
+                close-punct (*tag-closing-brackets* (loc-tag slurper))
+                replace-text (str slurp-text close-punct)
+                replace-length (.length text-to-replace)
+                ;; TODO potentially need to re-indent the slurped-in text (if multi-line)
+                ret (-> t
+                        (assoc-in [:text] (t/str-replace text replace-offset replace-length replace-text))
+                        (update-in [:modifs] conj {:offset replace-offset :length replace-length :text replace-text}))]
+            ret)
+          t))
+      t)))
