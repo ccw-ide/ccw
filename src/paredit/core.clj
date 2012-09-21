@@ -747,46 +747,44 @@
   ;; (with-important-memoized)
   (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
     (let [[l r] (normalized-selection rloc offset length)
+          ;; TODO need a big conditional for if we are in a string (still slurp, but move end-quote)
           starting-loc (if (*tag-closing-brackets* (loc-tag l))  ;; if on closing punct, must select parent differently
                          (loc-for-offset rloc offset)
                          (if-let [nl (z/up (parse-node l))]
                            nl l))]
-      (if-let [first-not-rightmost (up-to-right-sibling starting-loc)]
-        (let [slurpees (reverse (non-puncts-to-right (z/right first-not-rightmost)))
-              parent (parse-node starting-loc)
+      (if-let [loc-with-right-sibling (up-to-right-sibling starting-loc)]
+        (let [slurpees (non-puncts-to-right (z/right loc-with-right-sibling))
+              slurp-text (apply str (map loc-text (reverse slurpees)))
+              slurp-to-loc (first slurpees)
+              slurp-to-eo (end-offset slurp-to-loc)
+              parent-loc loc-with-right-sibling ;; (z/up loc-with-right-sibling)
+              parent (parse-node parent-loc)
               parent-so (start-offset parent)
               parent-eo (end-offset parent)
-              replace-offset parent-so
-              text-to-replace (.substring text parent-so parent-eo)
+              ;; text-to-replace (.substring text parent-so parent-eo)
+              replace-offset (dec parent-eo)
+              text-to-replace (.substring text replace-offset slurp-to-eo)
 
-              grandparent (z/up parent)
-              grandparent-so (start-offset grandparent)
-              grandparent-eo (end-offset grandparent)
-              grandparent-text (.substring text grandparent-so grandparent-eo)
+              close-punct (*tag-closing-brackets* (loc-tag parent-loc))
+              replace-text (str slurp-text close-punct)
 
-              parent-removed (z/remove starting-loc)
-              text-sans-removed (loc-text (z/up (z/up parent-removed))) ;; (node-text (z/root parent-removed))
-              ;; replace-length (.length text-to-replace)
+              replace-length (.length text-to-replace)
 
-              ;; [inner-so inner-eo] (let [pl (-> parent z/down z/right)
-              ;;                           pr (-> pl z/rightmost z/left)]
-              ;;                       [(start-offset pl) (end-offset pr)]) ;; all-children-but-punct
 
               ;; new-offset (- offset (- inner-so parent-so))
               ;; replace-text (.substring text inner-so inner-eo)
 
-              ret t]
+              ret (-> t
+                    (assoc-in [:text] (t/str-replace text replace-offset replace-length replace-text))
+                    (update-in [:modifs] conj {:offset replace-offset :length replace-length :text replace-text}))]
           (printf "text-to-replace: '%s'
-grandparent-text: '%s'
-removed: '%s'
-first-not-rightmost: '%s'
-slurpees (%s): '%s'"
+replace-text: '%s'
+slurp-text: '%s'
+close-punct: '%s'"
                       text-to-replace
-                      grandparent-text
-                      text-sans-removed
-                      (loc-text first-not-rightmost)
-                      (apply str (map loc-tag slurpees))
-                      (apply str (map loc-text slurpees)))
+                      replace-text
+                      slurp-text
+                      close-punct)
               ret)
         t))
     t))
