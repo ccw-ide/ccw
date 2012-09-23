@@ -820,43 +820,82 @@ open-punct: '%s'"
           t))
       t)))
 
-;;; if there is a non-whitepace child
-;;; barf out the rightmost stuff up to first-rightmost-non-whitespace child
-
 (defmethod paredit
   :paredit-forward-barf-sexp
   [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
-  ;; (with-important-memoized)
-  (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
-    (let [[l r] (normalized-selection rloc offset length)
-          ;; TODO need to check if we are in a string (still slurp, but move end-quote)
-          starting-loc (if (*tag-closing-brackets* (loc-tag l))  ;; if on closing punct, must select parent differently
-                         (loc-for-offset rloc offset)
-                         (if-let [nl (z/up (parse-node l))]
-                           nl l))
-          ;; TODO we actually need non-puncts-to-left + whitepace until next sym
-          rightmost (-> starting-loc z/down z/rightmost z/left non-puncts-to-left)
-          more-non-puncts (-> (first rightmost) z/left non-puncts-to-left rest)
-          barfees (concat more-non-puncts rightmost)
-          barf-text (apply str (map loc-text barfees))
-          barf-start-loc (first barfees)
-          barf-so (start-offset barf-start-loc)
-          barf-eo (end-offset starting-loc)
-          text-to-replace (.substring text barf-so barf-eo)
-          close-punct (*tag-closing-brackets* (loc-tag starting-loc))
-          replace-text (str close-punct barf-text)
-          replace-length (.length text-to-replace)
-          replace-offset barf-so
-          ret (-> t
-                  (assoc-in [:text] (t/str-replace text replace-offset replace-length replace-text))
-                  (update-in [:modifs] conj {:offset replace-offset :length replace-length :text replace-text}))]
-      (printf "rightmost: '%s'
+  (with-important-memoized
+    (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
+      (let [[l r] (normalized-selection rloc offset length)
+            ;; TODO need to check if we are in a string (still barf, but needs to be balanced... see orig paredit)
+            starting-loc (if (*tag-closing-brackets* (loc-tag l))  ;; if on closing punct, must select parent differently
+                           (loc-for-offset rloc offset)
+                           (if-let [nl (z/up (parse-node l))]
+                             nl l))
+            ;; TODO what does this do with single elem lists?
+            rightmost (-> starting-loc z/down z/rightmost z/left non-puncts-to-left)
+            more-non-puncts (-> (first rightmost) z/left non-puncts-to-left rest)
+            barfees (concat more-non-puncts rightmost)
+            barf-text (apply str (map loc-text barfees))
+            barf-start-loc (first barfees)
+            barf-so (start-offset barf-start-loc)
+            barf-eo (end-offset starting-loc)
+            text-to-replace (.substring text barf-so barf-eo)
+            close-punct (*tag-closing-brackets* (loc-tag starting-loc))
+            replace-text (str close-punct barf-text)
+            replace-length (.length text-to-replace)
+            replace-offset barf-so
+            ret (-> t
+                    (assoc-in [:text] (t/str-replace text replace-offset replace-length replace-text))
+                    (update-in [:modifs] conj {:offset replace-offset :length replace-length :text replace-text}))]
+        (printf "rightmost: '%s'
 more-non-puncts: '%s'
 barfees: '%s'
 text-to-replace: '%s'
 replace-text: '%s'
 text: '%s'"
-              (apply str (map loc-text rightmost))
+                (apply str (map loc-text rightmost))
+                (apply str (map loc-text more-non-puncts))
+                (apply str (map loc-text barfees))
+                text-to-replace
+                replace-text
+                (:text ret))
+        ret)
+      t)))
+
+(defmethod paredit
+  :paredit-backward-barf-sexp
+  [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
+  ;; (with-important-memoized)
+  (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
+    (let [[l r] (normalized-selection rloc offset length)
+          ;; TODO need to check if we are in a string (still barf, but needs to be balanced... see orig paredit)
+          starting-loc (if (*tag-closing-brackets* (loc-tag l))  ;; if on closing punct, must select parent differently
+                         (loc-for-offset rloc offset)
+                         (if-let [nl (z/up (parse-node l))]
+                           nl l))
+          lefts (-> starting-loc z/down z/leftmost z/right non-puncts-to-right)
+          leftmost (reverse lefts)
+          more-non-puncts (-> (first lefts) z/right non-puncts-to-right rest reverse)
+          barfees (concat leftmost more-non-puncts)
+          barf-text (apply str (map loc-text barfees))
+          barf-end-loc (first (reverse barfees))
+          barf-so (start-offset starting-loc)
+          barf-eo (end-offset barf-end-loc)
+          text-to-replace (.substring text barf-so barf-eo)
+          open-punct (*tag-opening-brackets* (loc-tag starting-loc))
+          replace-text (str barf-text open-punct)
+          replace-length (.length text-to-replace)
+          replace-offset barf-so
+          ret (-> t
+                  (assoc-in [:text] (t/str-replace text replace-offset replace-length replace-text))
+                  (update-in [:modifs] conj {:offset replace-offset :length replace-length :text replace-text}))]
+      (printf "leftmost: '%s'
+more-non-puncts: '%s'
+barfees: '%s'
+text-to-replace: '%s'
+replace-text: '%s'
+text: '%s'"
+              (apply str (map loc-text leftmost))
               (apply str (map loc-text more-non-puncts))
               (apply str (map loc-text barfees))
               text-to-replace
