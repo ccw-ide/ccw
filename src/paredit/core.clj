@@ -740,6 +740,13 @@
       (recur u))
     loc))
 
+(defn- up-to-left-sibling
+  [loc]
+  (if (= loc (-> loc z/leftmost non-puncts-to-right first))
+    (when-let [u (z/up loc)]
+      (recur u))
+    loc))
+
 (defmethod paredit
   :paredit-forward-slurp-sexp
   [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
@@ -768,6 +775,47 @@
                 ret (-> t
                         (assoc-in [:text] (t/str-replace text replace-offset replace-length replace-text))
                         (update-in [:modifs] conj {:offset replace-offset :length replace-length :text replace-text}))]
+            ret)
+          t))
+      t)))
+
+(defmethod paredit
+  :paredit-backward-slurp-sexp
+  [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
+  (with-important-memoized
+    (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
+      (let [[l r] (normalized-selection rloc offset length)
+            ;; TODO need to check if we are in a string (still slurp, but move end-quote)
+            starting-loc (if (*tag-closing-brackets* (loc-tag l))  ;; if on closing punct, must select parent differently
+                           (loc-for-offset rloc offset)
+                           (if-let [nl (z/up (parse-node l))]
+                             nl l))]
+        (if-let [slurper (up-to-left-sibling starting-loc)]
+          (let [slurpees (non-puncts-to-left (z/left slurper))
+                slurp-text (apply str (map loc-text slurpees))
+                slurp-to-loc (first slurpees)
+                slurp-to-so (start-offset slurp-to-loc)
+                slurper-node (parse-node slurper)
+                slurper-so (start-offset slurper-node)
+                slurper-eo (end-offset slurper-node)
+                replace-offset slurp-to-so
+                replace-to-offset (inc slurper-so)
+                text-to-replace (.substring text slurp-to-so replace-to-offset)
+                open-punct (*tag-opening-brackets* (loc-tag slurper))
+                replace-text (str open-punct slurp-text)
+                replace-length (.length text-to-replace)
+                ;; TODO potentially need to re-indent the slurped-in text (if multi-line)
+                ret (-> t
+                        (assoc-in [:text] (t/str-replace text replace-offset replace-length replace-text))
+                        (update-in [:modifs] conj {:offset replace-offset :length replace-length :text replace-text}))]
+            (printf "text-to-replace: '%s'
+replace-text: '%s'
+slurp-text: '%s'
+open-punct: '%s'"
+                      text-to-replace
+                      replace-text
+                      slurp-text
+                      open-punct)
             ret)
           t))
       t)))
