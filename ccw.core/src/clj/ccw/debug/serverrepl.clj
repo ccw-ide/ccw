@@ -244,7 +244,7 @@
 
 ;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;
-(ns complete.core
+(ns ccw.complete
   (:require [clojure.main])
   (:import [java.util.jar JarFile] [java.io File])
   (:require [clojure.string :as s]))

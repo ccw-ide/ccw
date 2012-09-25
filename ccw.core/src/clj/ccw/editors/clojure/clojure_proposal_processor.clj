@@ -186,7 +186,7 @@
   "Create the complete command to be sent remotely to get back a list of
    completion proposals."
   [namespace prefix find-only-public]
-  (format (str "(complete.core/ccw-completions \"%s\" (clojure.core/the-ns '%s) %d)") 
+  (format (str "(ccw.complete/ccw-completions \"%s\" (clojure.core/the-ns '%s) %d)") 
           prefix
           namespace
           completion-limit))
