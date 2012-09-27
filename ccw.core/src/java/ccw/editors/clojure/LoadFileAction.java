@@ -113,10 +113,9 @@ public class LoadFileAction extends Action {
 	private void evaluateFileText(REPLView repl, String text, String filePath, String sourcePath, String fileName) {
         try {
             if (repl.getAvailableOperations().contains("load-file")) {
-                Response resp = repl.getConnection().sendSession(repl.getSessionId(),
-                                    "op", "load-file", "file", text,
-                                    "file-path", sourcePath, "file-name", fileName);
-                repl.handleResponse(resp, "Loading file " + sourcePath);
+                repl.getConnection().sendSession(repl.getSessionId(),
+                        "op", "load-file", "file", text,
+                        "file-path", sourcePath, "file-name", fileName);
             } else {
                 String loadFileText = (String)loadFileCommand.invoke(text, sourcePath, fileName);
                 //if (isReplExplicitLoggingMode()) {
