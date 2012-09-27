@@ -262,6 +262,14 @@ public class REPLView extends ViewPart implements IAdaptable {
         evalExpression.invoke(PersistentHashMap.create("op", "stdin", "stdin", dlg.getValue() + "\n"), false);
     }
     
+    /**
+     * Echos appropriate content to the log area for an nREPL
+     * Response provoked by an expression.
+     * 
+     * @deprecated this should no longer be needed; view_helpers.clj
+     * sets up a future that will handle all responses on a REPL's
+     * session
+     */
     public void handleResponse (Response resp, String expression) {
         handleResponses.invoke(this, logPanel, expression, resp.seq());        
     }

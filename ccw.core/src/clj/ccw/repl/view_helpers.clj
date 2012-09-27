@@ -85,7 +85,6 @@
                 (if (log-styles k)
                   (log log-component v k)
                   (CCWPlugin/log (str "Cannot handle REPL response: " k (pr-str resp)))))
-              ;(CCWPlugin/log (str resp))
               (doseq [status status]
                 (case status
                   "interrupted" (log log-component (eval-failure-msg status expr) :err)
@@ -95,10 +94,10 @@
 (defn eval-expression
   [repl-view log-component client expr]
   (try
-    (handle-responses repl-view log-component expr
-      (repl/message client (if (map? expr)
-                             expr
-                             {:op :eval :code expr :ns (.getCurrentNamespace repl-view)})))  
+    (repl/message client
+      (if (map? expr)
+        expr
+        {:op :eval :code expr :ns (.getCurrentNamespace repl-view)}))  
     (catch Throwable t
       (CCWPlugin/logError (eval-failure-msg nil expr) t)
       (log log-component (eval-failure-msg nil expr) :err))))
@@ -109,7 +108,8 @@
                                                         .getLaunch
                                                         ccw.launching.LaunchUtils/getProjectName))
         ^StyledText input-widget (.viewerWidget repl-view)
-        ; a bunch of atoms are just fine, since access to them is already serialized via the SWT event thread
+        ; a bunch of atoms are just fine, since access to them is already
+        ; serialized via the SWT event thread
         history (atom history)
         current-step (atom -1)
         retained-input (atom nil)
@@ -133,6 +133,11 @@
         session-client (repl/client-session repl-client :session session-id)
         responses-promise (promise)]
     (.setHistoryActionFn repl-view history-action-fn)
+    
+    ;; TODO need to make client-session accept a single arg to avoid
+    ;; dummy message sends
+    (handle-responses repl-view log-panel nil (session-client {:op "describe"}))
+    
     (comp (partial eval-expression repl-view log-panel session-client)
       (fn [expr add-to-log?]
         (reset! retained-input nil)
