@@ -2,9 +2,11 @@ package ccw.repl;
 
 import java.io.IOException;
 import java.net.ConnectException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -51,6 +53,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
+import org.eclipse.ui.contexts.IContextActivation;
 import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.internal.editors.text.EditorsPlugin;
@@ -537,22 +540,9 @@ public class REPLView extends ViewPart implements IAdaptable {
         viewer.propertyChange(null);
         
         viewerWidget.addFocusListener(new NamespaceRefreshFocusListener());
-        
+        viewerWidget.addFocusListener(new ViewContextActivationListener());
         logPanel.addFocusListener(new NamespaceRefreshFocusListener());
-        
-        /*
-         * TODO find a way for the following code line to really work. That is add
-         * the necessary additional code for enabling "handlers" (in fact, my fear
-         * is that those really are not handlers but "actions" that will need to be
-         * manually enabled as I did above for EVALUATE_TOP_LEVEL_S_EXPRESSION :-( )
-         */
-        ((IContextService) getSite().getService(IContextService.class)).activateContext("org.eclipse.ui.textEditorScope");
-
-        /* Thought just activating CCW_UI_CONTEXT_REPL would also activate its parent contexts
-         * but apparently not, so here we activate explicitly all the contexts we want (FIXME?)
-         */ 
-        ((IContextService) getSite().getService(IContextService.class)).activateContext(IClojureEditor.KEY_BINDING_SCOPE); 
-        ((IContextService) getSite().getService(IContextService.class)).activateContext(CCW_UI_CONTEXT_REPL);
+        logPanel.addFocusListener(new ViewContextActivationListener());
         
         split.setWeights(new int[] {100, 75});
         
@@ -709,6 +699,43 @@ public class REPLView extends ViewPart implements IAdaptable {
     			return null;
     		}
     	});
+    }
+    
+    /**
+     * This exists solely to work around what can only be considered a bug in Eclipse starting
+     * with Juno (I20120608-1400 FWIW), where views that can have multiple simultaneous instances
+     * (of which REPLView is one) cannot share activated contexts.  This means that actions
+     * bound to a given context will appear as active in one view, but not in another.
+     */
+    private class ViewContextActivationListener implements FocusListener {
+        private List<IContextActivation> activations = new ArrayList();
+        
+        public void focusLost(FocusEvent e) {
+            for (IContextActivation activation : activations) {
+                ((IContextService)getSite().getService(IContextService.class)).deactivateContext(activation);
+            }
+            activations = new ArrayList();
+        }
+        
+        private void activate (String contextId) {
+            activations.add(((IContextService)getSite().getService(IContextService.class)).activateContext(contextId));
+        }
+        
+        public void focusGained(FocusEvent e) {
+            /*
+             * TODO find a way for the following code line to really work. That is add
+             * the necessary additional code for enabling "handlers" (in fact, my fear
+             * is that those really are not handlers but "actions" that will need to be
+             * manually enabled as I did above for EVALUATE_TOP_LEVEL_S_EXPRESSION :-( )
+             */
+            activate("org.eclipse.ui.textEditorScope");
+
+            /* Thought just activating CCW_UI_CONTEXT_REPL would also activate its parent contexts
+             * but apparently not, so here we activate explicitly all the contexts we want (FIXME?)
+             */ 
+            activate(IClojureEditor.KEY_BINDING_SCOPE);
+            activate(CCW_UI_CONTEXT_REPL);
+        }
     }
     
 	/**
