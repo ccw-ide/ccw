@@ -16,7 +16,6 @@
             CompletionProposal
             ICompletionProposal
             ICompletionProposalExtension6
-            IContentAssistProcessor
             IContextInformation
             IContextInformationExtension
             IContextInformationValidator]
