@@ -367,15 +367,9 @@
                  (range (int \A) (inc (int \Z)))))
           [\. \- \? \!]))
 
-(def viewer (atom nil))
-(def offset (atom nil))
-
-
 (defn compute-context-information
   [editor
    text-viewer new-offset]
-  (reset! viewer text-viewer)
-  (reset! offset new-offset)
   (into-array
     IContextInformation
     (when-let [loc (call-context-loc text-viewer new-offset)]

@@ -70,6 +70,7 @@ import ccw.editors.clojure.IClojureEditorActionDefinitionIds;
 import ccw.preferences.PreferenceConstants;
 import ccw.util.ClojureInvoker;
 import ccw.util.DisplayUtil;
+import ccw.util.TextViewerSupport;
 import clojure.lang.IFn;
 import clojure.lang.Keyword;
 import clojure.lang.PersistentHashMap;
@@ -472,6 +473,10 @@ public class REPLView extends ViewPart implements IAdaptable {
         };
         viewerConfig = new ClojureSourceViewerConfiguration(prefs, viewer);
         viewer.configure(viewerConfig);
+        
+        // Adds support for undo, redo, context information, etc.
+        new TextViewerSupport(viewer, getHandlerService());
+        
         getViewSite().setSelectionProvider(viewer);
         viewer.setDocument(ClojureDocumentProvider.configure(new Document()));
         viewerWidget = viewer.getTextWidget();
@@ -691,9 +696,13 @@ public class REPLView extends ViewPart implements IAdaptable {
 			}
         });
     }
+    
+    IHandlerService getHandlerService() {
+        return (IHandlerService) getViewSite().getService(IHandlerService.class);
+    }
+    
     private void installEvalTopLevelSExpressionCommand() {
-        IHandlerService handlerService = (IHandlerService) getViewSite().getService(IHandlerService.class);
-        handlerService.activateHandler(IClojureEditorActionDefinitionIds.EVALUATE_TOP_LEVEL_S_EXPRESSION, new AbstractHandler() {
+        getHandlerService().activateHandler(IClojureEditorActionDefinitionIds.EVALUATE_TOP_LEVEL_S_EXPRESSION, new AbstractHandler() {
     		public Object execute(ExecutionEvent event) throws ExecutionException {
     			evalExpression();
     			return null;
