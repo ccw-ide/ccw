@@ -16,7 +16,6 @@
             CompletionProposal
             ICompletionProposal
             ICompletionProposalExtension6
-            IContentAssistProcessor
             IContextInformation
             IContextInformationExtension
             IContextInformationValidator]
@@ -50,18 +49,6 @@
                 offset)
           maybe-call-loc (-> loc parent-call)]
       (when (call? (z/node maybe-call-loc))
-        maybe-call-loc))))
-
-(defn call-context-loc
-  "for viewer, at offset 12, return the loc containing the encapsulatin
-   call, or nil"
-  [viewer offset]
-  (when (pos? offset)
-    (let [loc (lu/loc-containing-offset 
-                (-> viewer .getParseState :parse-tree lu/parsed-root-loc)
-                offset)
-          maybe-call-loc (-?> loc parent-call)]
-      (when (-?> maybe-call-loc z/node call?)
         maybe-call-loc))))
 
 (defn call-symbol
