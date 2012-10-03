@@ -50,7 +50,6 @@ import ccw.preferences.SyntaxColoringPreferencePage;
 import ccw.repl.REPLView;
 import ccw.util.BundleUtils;
 import ccw.util.DisplayUtil;
-import clojure.lang.Agent;
 import clojure.lang.Keyword;
 import clojure.lang.Var;
 import clojure.osgi.ClojureOSGi;
@@ -95,7 +94,7 @@ public class CCWPlugin extends AbstractUIPlugin {
 	        	Object handler = BundleUtils.requireAndGetVar(
 	        	        getBundle().getSymbolicName(),
 	        	        "clojure.tools.nrepl.ack/handle-ack").invoke(defaultHandler);
-	            ackREPLServer = (ServerSocket)((Map)((Agent)startServer.invoke(Keyword.intern("handler"), handler)).deref()).get(Keyword.intern("ss"));
+	            ackREPLServer = (ServerSocket)((Map)startServer.invoke(Keyword.intern("handler"), handler)).get(Keyword.intern("server-socket"));
 	            CCWPlugin.log("Started ccw nREPL server: nrepl://localhost:" + ackREPLServer.getLocalPort());
 	        } catch (Exception e) {
 	            CCWPlugin.logError("Could not start plugin-hosted REPL server", e);
