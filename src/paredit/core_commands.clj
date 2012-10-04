@@ -357,6 +357,10 @@
                  "(|{foo bar})" "({|foo bar})"
                  
                  "|" "|"
+                 
+                 "^java.util.List |(.add \"test\")" "^java.util.List (|.add \"test\")"
+                 "^java.util.List (|)" "^java.util.List |"
+                 "|^java.util.List (.add \"test\")" "^|java.util.List (.add \"test\")"
                  }]
       ["BackDel" :paredit-backward-delete
                 {
