@@ -156,7 +156,7 @@ public class REPLView extends ViewPart implements IAdaptable {
     //     and another range that is editable and has full paredit, code completion, etc.
     StyledText logPanel;
     /** record for colors used in logPanel */
-    final ClojureSourceViewer.EditorColors logPanelEditorColors = new ClojureSourceViewer.EditorColors();
+    public final ClojureSourceViewer.EditorColors logPanelEditorColors = new ClojureSourceViewer.EditorColors();
     private ClojureSourceViewer viewer;
     public StyledText viewerWidget; // public only to simplify interop with helpers impl'd in Clojure
     private ClojureSourceViewerConfiguration viewerConfig;
@@ -208,7 +208,7 @@ public class REPLView extends ViewPart implements IAdaptable {
         s.setText(boostIndent.matcher(s.getText()).replaceAll("   ").replaceFirst("^\\s+", "=> "));
         int start = logPanel.getCharCount();
         try {
-            log.invoke(logPanel, s.getText(), inputExprLogType);
+            log.invoke(this, logPanel, s.getText(), inputExprLogType);
             for (StyleRange sr : s.getStyleRanges()) {
                 sr.start += start;
                 logPanel.setStyleRange(sr);
@@ -239,7 +239,7 @@ public class REPLView extends ViewPart implements IAdaptable {
     public void evalExpression (String s, boolean userInput, boolean logExpression) {
         try {
             if (s.trim().length() > 0) {
-                if (logExpression) log.invoke(logPanel, s, inputExprLogType);
+                if (logExpression) log.invoke(this, logPanel, s, inputExprLogType);
                 evalExpression.invoke(s, userInput);
             }
         } catch (Exception e) {
@@ -252,7 +252,7 @@ public class REPLView extends ViewPart implements IAdaptable {
     }
 
     public void sendInterrupt() {
-        log.invoke(logPanel, ";; Interrupting...", inputExprLogType);
+        log.invoke(this, logPanel, ";; Interrupting...", inputExprLogType);
         evalExpression.invoke(PersistentHashMap.create("op", "interrupt"), false);
     }
     

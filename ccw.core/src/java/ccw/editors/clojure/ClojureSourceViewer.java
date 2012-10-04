@@ -114,26 +114,24 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     	 */
     	public Color fSelectionBackgroundColor;
 
+    	/**
+    	 * The viewer's background color for the selected line
+    	 */
+		public Color fCurrentLineBackgroundColor;
+
 		public void unconfigure() {
-			if (fForegroundColor != null) {
-				fForegroundColor.dispose();
-				fForegroundColor= null;
+			fForegroundColor = unconfigure(fForegroundColor);
+			fBackgroundColor = unconfigure(fBackgroundColor= null);
+			fSelectionForegroundColor = unconfigure(fSelectionForegroundColor);
+			fSelectionBackgroundColor = unconfigure(fSelectionBackgroundColor);
+			fCurrentLineBackgroundColor = unconfigure(fCurrentLineBackgroundColor);
+		}
+
+		private Color unconfigure(Color c) {
+			if (c != null) { 
+				c.dispose(); 
 			}
-			
-			if (fBackgroundColor != null) {
-				fBackgroundColor.dispose();
-				fBackgroundColor= null;
-			}
-			
-			if (fSelectionForegroundColor != null) {
-				fSelectionForegroundColor.dispose();
-				fSelectionForegroundColor= null;
-			}
-			
-			if (fSelectionBackgroundColor != null) {
-				fSelectionBackgroundColor.dispose();
-				fSelectionBackgroundColor= null;
-			}
+			return null;
 		}
     }
     
@@ -327,23 +325,24 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
      * @return the created color according to the specification in the preference store
      */
     static public Color createColor(IPreferenceStore store, String key, Display display) {
+        RGB rgb = getRGBColor(store, key);
+        return (rgb!= null) ? new Color(display, rgb) : null;
+    }
+    
+    static public RGB getRGBColor(IPreferenceStore store, String key) {
         RGB rgb = null;
 
         if (store.contains(key)) {
-
             if (store.isDefault(key))
                 rgb = PreferenceConverter.getDefaultColor(store, key);
             else
                 rgb = PreferenceConverter.getColor(store, key);
-
-            if (rgb != null)
-                return new Color(display, rgb);
         }
 
-        return null;
+        return rgb;
     }
-    
-	public void initializeViewerColors() {
+
+    public void initializeViewerColors() {
 		initializeViewerColors(getTextWidget(), fPreferenceStore, editorColors);
 		if (fPreferenceStore != null) {
 			CCWPlugin.registerEditorColors(fPreferenceStore, getTextWidget().getForeground().getRGB());
@@ -395,6 +394,14 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 				editorColors.fSelectionBackgroundColor.dispose();
 
 			editorColors.fSelectionBackgroundColor= color;
+
+			// ---------- current line background color ----------------------
+			color= createColor(preferenceStore, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE_COLOR, styledText.getDisplay());
+
+			if (editorColors.fCurrentLineBackgroundColor != null)
+				editorColors.fCurrentLineBackgroundColor.dispose();
+
+			editorColors.fCurrentLineBackgroundColor= color;
 		}
     }
 

@@ -29,32 +29,32 @@ import clojure.lang.Keyword;
  */
 public class PreferenceConstants {
 	
-	public static Keyword stringToken = Keyword.intern("string");
-	public static Keyword otherLiteralsToken = Keyword.intern("other-literals");
-	public static Keyword regexToken = Keyword.intern("regex");
-	public static Keyword intToken = Keyword.intern("int");
-	public static Keyword floatToken = Keyword.intern("float");
-	public static Keyword charToken = Keyword.intern("char");
-//	public static Keyword literalSymbolToken = Keyword.intern("literalSymbol");
+	public static final Keyword stringToken = Keyword.intern("string");
+	public static final Keyword otherLiteralsToken = Keyword.intern("other-literals");
+	public static final Keyword regexToken = Keyword.intern("regex");
+	public static final Keyword intToken = Keyword.intern("int");
+	public static final Keyword floatToken = Keyword.intern("float");
+	public static final Keyword charToken = Keyword.intern("char");
+//	public static final Keyword literalSymbolToken = Keyword.intern("literalSymbol");
 
-//	public static Keyword symbolToken = Keyword.intern("symbol");
+//	public static final Keyword symbolToken = Keyword.intern("symbol");
 
-	public static Keyword FUNCTION_Token = Keyword.intern("FUNCTION");
-	public static Keyword callableFUNCTION_Token = Keyword.intern("callableFUNCTION");
-	public static Keyword MACRO_Token = Keyword.intern("MACRO");
-	public static Keyword callableMACRO_Token = Keyword.intern("callableMACRO");
-	public static Keyword SPECIAL_FORM_Token = Keyword.intern("SPECIAL_FORM");
-	public static Keyword callableSPECIAL_FORM_Token = Keyword.intern("callableSPECIAL_FORM");
-	public static Keyword GLOBAL_VAR_Token = Keyword.intern("GLOBAL_VAR");
-	public static Keyword callableGLOBAL_VAR_Token = Keyword.intern("callableGLOBAL_VAR");
-	public static Keyword JAVA_CLASS_Token = Keyword.intern("JAVA_CLASS");
-	public static Keyword callableJAVA_CLASS_Token = Keyword.intern("callableJAVA_CLASS");
-	public static Keyword JAVA_INSTANCE_METHOD_Token = Keyword.intern("JAVA_INSTANCE_METHOD");
-	public static Keyword callableJAVA_INSTANCE_METHOD_Token = Keyword.intern("callableJAVA_INSTANCE_METHOD");
-	public static Keyword JAVA_STATIC_METHOD_Token = Keyword.intern("JAVA_STATIC_METHOD");
-	public static Keyword callableJAVA_STATIC_METHOD_Token = Keyword.intern("callableJAVA_STATIC_METHOD");
-	public static Keyword RAW_SYMBOL_Token = Keyword.intern("RAW_SYMBOL");
-	public static Keyword callable_RAW_SYMBOL_Token = Keyword.intern("callableRAW_SYMBOL");
+	public static final Keyword FUNCTION_Token = Keyword.intern("FUNCTION");
+	public static final Keyword callableFUNCTION_Token = Keyword.intern("callableFUNCTION");
+	public static final Keyword MACRO_Token = Keyword.intern("MACRO");
+	public static final Keyword callableMACRO_Token = Keyword.intern("callableMACRO");
+	public static final Keyword SPECIAL_FORM_Token = Keyword.intern("SPECIAL_FORM");
+	public static final Keyword callableSPECIAL_FORM_Token = Keyword.intern("callableSPECIAL_FORM");
+	public static final Keyword GLOBAL_VAR_Token = Keyword.intern("GLOBAL_VAR");
+	public static final Keyword callableGLOBAL_VAR_Token = Keyword.intern("callableGLOBAL_VAR");
+	public static final Keyword JAVA_CLASS_Token = Keyword.intern("JAVA_CLASS");
+	public static final Keyword callableJAVA_CLASS_Token = Keyword.intern("callableJAVA_CLASS");
+	public static final Keyword JAVA_INSTANCE_METHOD_Token = Keyword.intern("JAVA_INSTANCE_METHOD");
+	public static final Keyword callableJAVA_INSTANCE_METHOD_Token = Keyword.intern("callableJAVA_INSTANCE_METHOD");
+	public static final Keyword JAVA_STATIC_METHOD_Token = Keyword.intern("JAVA_STATIC_METHOD");
+	public static final Keyword callableJAVA_STATIC_METHOD_Token = Keyword.intern("callableJAVA_STATIC_METHOD");
+	public static final Keyword RAW_SYMBOL_Token = Keyword.intern("RAW_SYMBOL");
+	public static final Keyword callable_RAW_SYMBOL_Token = Keyword.intern("callableRAW_SYMBOL");
 	
 	public static final Keyword deactivatedRainbowParen = Keyword.intern("deactivated-rainbow-paren");
 	public static final Keyword rainbowParenLevel1 = Keyword.intern("rainbow-paren-level-1");
@@ -66,11 +66,14 @@ public class PreferenceConstants {
 	public static final Keyword rainbowParenLevel7 = Keyword.intern("rainbow-paren-level-7");
 	public static final Keyword rainbowParenLevel8 = Keyword.intern("rainbow-paren-level-8");
 
-	public static Keyword keywordToken = Keyword.intern("keyword");
-	public static Keyword commentToken = Keyword.intern("comment");
-	public static Keyword whitespaceToken = Keyword.intern("whitespace");
-	public static Keyword metaToken = Keyword.intern("meta");
-	public static Keyword readerLiteralTag = Keyword.intern("reader-literal");
+	public static final Keyword keywordToken = Keyword.intern("keyword");
+	public static final Keyword commentToken = Keyword.intern("comment");
+	public static final Keyword whitespaceToken = Keyword.intern("whitespace");
+	public static final Keyword metaToken = Keyword.intern("meta");
+	public static final Keyword readerLiteralTag = Keyword.intern("reader-literal");
+	
+	public static final Keyword replLogValue = Keyword.intern("repl-log-keyword-value");
+	public static final Keyword replLogError = Keyword.intern("repl-log-error");
 	
 	/** 
 	 * Set of tokens keywords for which syntax color information can be retrieved
@@ -120,6 +123,8 @@ public class PreferenceConstants {
 				add(rainbowParenLevel6);
 				add(rainbowParenLevel7);
 				add(rainbowParenLevel8);
+				add(replLogValue);
+				add(replLogError);
 			}
 		});
 		

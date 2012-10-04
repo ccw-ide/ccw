@@ -38,13 +38,18 @@
 (def ^{:private true} default-log-style (partial set-style-range #(StyleRange.)))
 
 (def ^{:private true} log-styles
-  (let [colored-style #(let [s (StyleRange.)]
-                         (set! (.foreground s) (CCWPlugin/getSystemColor %))
-                         s)]
-    {:err [(partial set-style-range #(colored-style SWT/COLOR_DARK_RED)) nil]
+  (let [colored-style #(let [s (StyleRange.)
+                             color-rgb (ccw.editors.clojure.ClojureSourceViewer/getRGBColor (.getCombinedPreferenceStore (CCWPlugin/getDefault)) %)
+                             color (CCWPlugin/getColor color-rgb)]
+                         (println "color: " color)
+                         (when color (set! (.foreground s) color))
+                         s)
+        error-rgb-key (ccw.preferences.PreferenceConstants/getTokenPreferenceKey ccw.preferences.PreferenceConstants/replLogError)
+        value-rgb-key (ccw.preferences.PreferenceConstants/getTokenPreferenceKey ccw.preferences.PreferenceConstants/replLogValue)]
+    {:err [(partial set-style-range #(colored-style error-rgb-key)) nil]
      :out [default-log-style nil]
-     :value [(partial set-style-range #(colored-style SWT/COLOR_DARK_GREEN)) nil]
-     :in-expr [default-log-style "ccw.repl.expressionBackground"]}))
+     :value [(partial set-style-range #(colored-style value-rgb-key)) nil]
+     :in-expr [default-log-style :highlight-background]}))
 
 (defn- cursor-at-end
   "Puts the cursor at the end of the text in the given widget."
@@ -52,10 +57,10 @@
   (.setCaretOffset widget (.getCharCount widget)))
 
 (defn log
-  [^StyledText log ^String s type]
+  [^ccw.repl.REPLView repl-view ^StyledText log ^String s type]
   (ui-sync
     (let [charcnt (.getCharCount log)
-          [log-style line-background-color-name] (get log-styles type [default-log-style nil])
+          [log-style highlight-background] (get log-styles type [default-log-style nil])
           linecnt (.getLineCount log)]
       (.append log s)
       (when-not (re-find #"(\n|\r)$" s) (.append log "\n"))
@@ -63,9 +68,13 @@
         cursor-at-end
         .showSelection
         (.setStyleRange (log-style charcnt (- (.getCharCount log) charcnt))))
-      (when line-background-color-name
+      (when highlight-background
         (.setLineBackground log (dec linecnt) (- (.getLineCount log) linecnt)
-          (-> (CCWPlugin/getDefault) .getColorCache (.get line-background-color-name)))))))
+          (ccw.CCWPlugin/getColor
+            ;; We use RGB color because we cannot take the Color directly since
+            ;; we do not "own" it (it would be disposed when colors are changed
+            ;; from the preferences, not good)
+            (-> repl-view .logPanelEditorColors .fCurrentLineBackgroundColor .getRGB)))))))
 
 (defn eval-failure-msg
   [status s]
@@ -83,11 +92,11 @@
               (when ns (.setCurrentNamespace repl-view ns))
               (doseq [[k v] (dissoc resp :id :ns :status :session)]
                 (if (log-styles k)
-                  (log log-component v k)
+                  (log repl-view log-component v k)
                   (CCWPlugin/log (str "Cannot handle REPL response: " k (pr-str resp)))))
               (doseq [status status]
                 (case status
-                  "interrupted" (log log-component (eval-failure-msg status expr) :err)
+                  "interrupted" (log repl-view log-component (eval-failure-msg status expr) :err)
                   "need-input" (ui-sync (.getStdIn repl-view))
                   nil))))))
 
@@ -100,7 +109,7 @@
         {:op :eval :code expr :ns (.getCurrentNamespace repl-view)}))  
     (catch Throwable t
       (CCWPlugin/logError (eval-failure-msg nil expr) t)
-      (log log-component (eval-failure-msg nil expr) :err))))
+      (log repl-view log-component (eval-failure-msg nil expr) :err))))
 
 (defn configure-repl-view
   [repl-view log-panel repl-client session-id]

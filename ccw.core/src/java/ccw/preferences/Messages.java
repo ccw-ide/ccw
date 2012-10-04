@@ -126,6 +126,9 @@ public class Messages extends NLS {
 	public static String SyntaxColoringPreferencePage_rainbowParenLevel7;
 	public static String SyntaxColoringPreferencePage_rainbowParenLevel8;
 
+	public static String SyntaxColoringPreferencePage_replLogValue;
+	public static String SyntaxColoringPreferencePage_replLogError;
+
 	public static String SyntaxColoringPreferencePage_preview;
 
 	public static String ClojureREPLPreferencePage_Description;

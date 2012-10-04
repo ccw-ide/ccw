@@ -263,7 +263,10 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         { Messages.SyntaxColoringPreferencePage_rainbowParenLevel6, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.rainbowParenLevel6)},
         { Messages.SyntaxColoringPreferencePage_rainbowParenLevel7, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.rainbowParenLevel7)},
         { Messages.SyntaxColoringPreferencePage_rainbowParenLevel8, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.rainbowParenLevel8)},
-    };
+
+        { Messages.SyntaxColoringPreferencePage_replLogValue, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.replLogValue)},
+        { Messages.SyntaxColoringPreferencePage_replLogError, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.replLogError)},
+};
     
     OverlayPreferenceStore fOverlayStore;
     

@@ -102,7 +102,9 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
         new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.rainbowParenLevel5), true, new RGB(122, 176, 204), false, false),
         new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.rainbowParenLevel6), true, new RGB(122, 122, 204), false, false),
         new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.rainbowParenLevel7), true, new RGB(176, 122, 204), false, false),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.rainbowParenLevel8), true, new RGB(204, 122, 176), false, false)
+        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.rainbowParenLevel8), true, new RGB(204, 122, 176), false, false),
+        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.replLogValue), true, new RGB(0, 0x80, 0), false, false),
+        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.replLogError), true, new RGB(0x80, 0, 0), false, false),
     };
     
 	@Override
