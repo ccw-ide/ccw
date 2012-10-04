@@ -23,18 +23,40 @@
   (lr+/match #{")" "]" "}" eof} s eof?))
 
 (def gspaces #{:whitespace :comment :discard})
-(def only-code (partial remove (comp gspaces :tag)))
-(defn code-children [e] (only-code (:content e)))
-(defn sym-name
-  "returns the symbol name" [e] (and (#{:symbol} (:tag e)) (apply str (:content e))))
-(defn call-of [e c] (and (#{"("} (nth (code-children e) 0)) (#{c} (sym-name (nth (code-children e) 1))) e))
-(defn call-args [e] (-> (code-children e) nnext butlast))
-(defn form 
-  "removes the meta(s) to get to the form" 
+(def only-code (partial remove (comp (conj gspaces :meta-prefix) :tag)))
+
+(defn code-children 
+  [e] 
+  (only-code (:content e)))
+
+(defn remove-meta 
+  "removes the meta(s) to get to the form"
   [e]
-  (if-not (#{:meta} (:tag e))
+  (if (not= :meta (:tag e))
     e
-    (recur (nth (code-children e) 2))))
+    (recur (first (code-children e)))))
+
+(defn ^:deprecated form 
+  "DEPRECATED - use remove-meta instead - removes the meta(s) to get to the form" 
+  [e] (remove-meta e))
+
+(defn sym-name
+  "returns the symbol name" 
+  [e] 
+  (let [e (remove-meta e)]
+    (and (#{:symbol} (:tag e)) (apply str (:content e)))))
+
+(defn call-of [e c] 
+  (let [e (remove-meta e)]
+    (and 
+      (#{"("} (nth (code-children e) 0))
+      (#{c} (sym-name (nth (code-children e) 1))) 
+      e)))
+
+(defn call-args
+  [e]
+  (-> (code-children e) nnext butlast))
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

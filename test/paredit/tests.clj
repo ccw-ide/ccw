@@ -7,6 +7,7 @@
   (:require [clojure.string :as str])
   (:use [clojure.core.incubator :only [-?>]])
   (:require [clojure.zip :as zip])
+  (:require [paredit.static-analysis :as st])
   (:use paredit.loc-utils))
 
 (def *spy?* (atom false))
@@ -23,6 +24,23 @@
 (defmacro spy 
   ([expr] (spy* "" expr))
   ([msg expr] (spy* msg expr)))
+
+(defn tree 
+  "creates parse-tree"
+  [text]
+  (-> text
+    paredit.parser/parse 
+    (paredit.loc-utils/parsed-root-loc true)
+    (clojure.zip/node)))
+
+(defn clean-tree 
+  "more human readable parse tree"
+  [tree]
+  (cond
+    (string? tree) tree
+    :else (-> tree 
+            (dissoc :build-id :count :content-cumulative-count :abstract-node :broken?)
+            (update-in [:content] #(map clean-tree %)))))
 
 (defn text-spec-to-text 
   "Converts a text spec to text map" 
@@ -221,6 +239,21 @@
     )
   )
 
+(deftest static-analysis-tests
+  (are [text]
+       (= "foo" (-?> text tree (st/find-namespace)))
+    "(ns foo)"
+    ";some comment\n(ns foo)"
+    "#!nasty comment\n(ns foo)"
+    " \"some string\"(ns foo) "
+    "(ns ^:foo foo)"
+    "^:foo (ns foo)"
+    "(ns ^{:author \"Laurent Petit\"} foo)"
+    "^:foo (ns ^:foo foo)"
+    "^:foo (ns ^:foo ^{:author \"Laurent Petit\"} foo)"
+    "^{:a :b};sdf\n^:bar ^:foo (ns ^:foo ^{:author ;comment\n\"Laurent Petit\"}\n;foo\n#_bleh foo)"
+    ))
+
 (defn pts []
   #_(normalized-selection-tests)
   (t/line-stop-tests)
@@ -229,6 +262,7 @@
   (parser-tests)
   (parsetree-tests)
   (unescape-string-content-tests)
+  (static-analysis-tests)
   ;;;;;;;#_(loc-for-offset-tests)
   #_(leave-for-offset-tests)
   #_(loc-containing-offset-tests))
