@@ -100,7 +100,8 @@ public class ClojureVisitor implements IResourceVisitor {
 					}
     			}
 		    } catch (Exception e) {
-		        throw new WorkbenchException("Could not visit: " + clojureLibs, e);
+		        throw new WorkbenchException(
+		        		String.format("Could not visit: %s.\nDid you kill the project's JVM during the build?", clojureLibs), e);
 		    }
 		}
 	}
