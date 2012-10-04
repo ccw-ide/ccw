@@ -204,7 +204,7 @@ public class CCWPlugin extends AbstractUIPlugin {
     	ClojureOSGi.require(bundleContext, "ccw.debug.clientrepl");
     	ClojureOSGi.require(bundleContext, "ccw.debug.serverrepl"); // <= to enable REPLView 
     	                                                            //    server-side tooling
-    	ClojureOSGi.require(bundleContext, "ccw.static-analysis");
+    	ClojureOSGi.require(bundleContext, "paredit.static-analysis");
     }
     
     public void stop(BundleContext context) throws Exception {

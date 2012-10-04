@@ -55,7 +55,7 @@
   "for viewer, at offset 12, return the symbol name if the offset
    is inside a function/macro call, or nil"
   [loc]
-  (when loc (-> loc z/node callee p/form p/sym-name)))
+  (when loc (-> loc z/node callee p/remove-meta p/sym-name)))
 
 ;; TODO find the prefix via the editor's parse tree !
 (defn prefix-info 
@@ -253,10 +253,10 @@
                                         (count prefix) "")
         parse-tree (p/buffer-parse-tree buffer-wo-prefix :dummy-build-id)
         tokens ((-> parse-tree :abstract-node) 
-                 #_paredit.parser/hippie-view
+                 #_p/hippie-view
                  (if (.startsWith prefix ":")
-                   paredit.parser/hippie-keyword-view
-                   paredit.parser/hippie-symbol-view))]
+                   p/hippie-keyword-view
+                   p/hippie-symbol-view))]
     (sort-by
       :completion
       (if (<= (count tokens) 50) ; TODO remove magic number
@@ -384,7 +384,7 @@
   (def ed editor)
   (def of offset)
   (let [parse-tree     ((-> ed .getParseState :parse-tree :abstract-node) 
-                         paredit.parser/parse-tree-view)
+                         p/parse-tree-view)
         last-token-tag (-> parse-tree :content peek :tag)]
     (not= last-token-tag :comment)))
 

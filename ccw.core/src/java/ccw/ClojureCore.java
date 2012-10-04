@@ -442,10 +442,11 @@ public final class ClojureCore {
 		}
 	}
 	public static String findDeclaringNamespace(Map tree) {
-		Var findNamespace = RT.var("ccw.static-analysis", "find-namespace");
+		Var findNamespace = RT.var("paredit.static-analysis", "find-namespace");
 		try {
 			return (String) findNamespace.invoke(tree);
 		} catch (Exception e) {
+			CCWPlugin.logError("exception while trying to find declaring namespace for " + tree, e);
 			return null;
 		}
 	}

@@ -16,7 +16,8 @@
      ccw.editors.clojure.ClojureTopLevelFormsDamagerImpl
   (:use [paredit.utils :as utils])
   (:import [org.eclipse.jface.text IRegion ITypedRegion DocumentEvent Region])
-  (:require [ccw.editors.clojure.editor-support :as editor]))
+  (:require [ccw.editors.clojure.editor-support :as editor])
+  (:require [paredit.parser :as p]))
 
 #_(set! *warn-on-reflection* true)
 
@@ -114,7 +115,7 @@
                        parse-tree
                        offset
                        length)]
-    (let [s (concat (mapcat #((:abstract-node %) paredit.parser/tokens-view) (subvec (:content parse-tree) start-index (inc stop-index))) 
+    (let [s (concat (mapcat #((:abstract-node %) p/tokens-view) (subvec (:content parse-tree) start-index (inc stop-index))) 
                     (list {:token-type :eof :token-length 0}) ;; from paredit.parser/token
                     )]
       s)))
