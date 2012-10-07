@@ -465,6 +465,18 @@
       </command>
       <command
             categoryId="org.eclipse.ui.category.edit"
+            description="%ccw.ui.repl.history.search.previous.description"
+            id="ccw.ui.repl.history.search.previous"
+            name="%ccw.ui.repl.history.search.previous.name">
+      </command>
+      <command
+            categoryId="org.eclipse.ui.category.edit"
+            description="%ccw.ui.repl.history.search.next.description"
+            id="ccw.ui.repl.history.search.next"
+            name="%ccw.ui.repl.history.search.next.name">
+      </command>
+      <command
+            categoryId="org.eclipse.ui.category.edit"
             description="%ccw.ui.edit.text.clojure.comment.toggle.description"
             id="ccw.ui.edit.text.clojure.comment.toggle"
             name="%ccw.ui.edit.text.clojure.comment.toggle.name">
@@ -837,6 +849,27 @@
             sequence="M4+P">
       </key>
       <key
+            commandId="ccw.ui.repl.history.search.previous"
+            contextId="ccw.ui.context.repl"
+            platform="win32"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+ARROW_RIGHT">
+      </key>
+      <key
+            commandId="ccw.ui.repl.history.search.previous"
+            contextId="ccw.ui.context.repl"
+            platform="gtk"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+ARROW_RIGHT">
+      </key>
+      <key
+            commandId="ccw.ui.repl.history.search.previous"
+            contextId="ccw.ui.context.repl"
+            platform="carbon"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M4+ARROW_RIGHT">
+      </key>
+      <key
             commandId="ccw.ui.repl.history.next"
             contextId="ccw.ui.context.repl"
             platform="win32"
@@ -863,6 +896,27 @@
             platform="carbon"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M4+N">
+      </key>
+      <key
+            commandId="ccw.ui.repl.history.search.next"
+            contextId="ccw.ui.context.repl"
+            platform="win32"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+ARROW_LEFT">
+      </key>
+      <key
+            commandId="ccw.ui.repl.history.search.next"
+            contextId="ccw.ui.context.repl"
+            platform="gtk"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+ARROW_LEFT">
+      </key>
+      <key
+            commandId="ccw.ui.repl.history.search.next"
+            contextId="ccw.ui.context.repl"
+            platform="carbon"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M4+ARROW_LEFT">
       </key>
       <key
             commandId="ccw.ui.edit.text.clojure.comment.toggle"
@@ -2262,6 +2316,82 @@
            <parameter
                  name="handler"
                  value="ccw.repl.view-helpers/history-next">
+           </parameter>
+        </class>
+        <enabledWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.context.repl">
+                 </equals>
+              </iterate>
+           </with>
+        </enabledWhen>
+        <activeWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.context.repl">
+                 </equals>
+              </iterate>
+           </with>
+        </activeWhen>
+     </handler>
+     <handler
+           commandId="ccw.ui.repl.history.search.previous">
+        <class
+              class="ccw.util.GenericExecutableExtension">
+           <parameter
+                 name="factory"
+                 value="ccw.util.factories/handler-factory">
+           </parameter>
+           <parameter
+                 name="handler"
+                 value="ccw.repl.view-helpers/history-backward-search">
+           </parameter>
+        </class>
+        <enabledWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.context.repl">
+                 </equals>
+              </iterate>
+           </with>
+        </enabledWhen>
+        <activeWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.context.repl">
+                 </equals>
+              </iterate>
+           </with>
+        </activeWhen>
+     </handler>
+     <handler
+           commandId="ccw.ui.repl.history.search.next">
+        <class
+              class="ccw.util.GenericExecutableExtension">
+           <parameter
+                 name="factory"
+                 value="ccw.util.factories/handler-factory">
+           </parameter>
+           <parameter
+                 name="handler"
+                 value="ccw.repl.view-helpers/history-forward-search">
            </parameter>
         </class>
         <enabledWhen>
