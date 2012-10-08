@@ -615,7 +615,7 @@
       (finish [] true)
       
       (getSelection []
-        (JavaCore/newContainerEntry CONTAINER-PATH))
+        (JavaCore/newContainerEntry CONTAINER-PATH true))
       
       (setSelection [_]))
     (.setDescription (Messages/PageDesc))

@@ -192,7 +192,7 @@
                            java-proj
                            cpc/CONTAINER-PATH
                            lein-container)
-        container-entry  (JavaCore/newContainerEntry (.getPath lein-container))]
+        container-entry  (JavaCore/newContainerEntry (.getPath lein-container) true)]
     (concat [jvm-entry]
             source-entries
             resource-entries
