@@ -479,8 +479,8 @@
                  "(foo |bar)" "|bar|"
                  "(foo |(bar))" "|(bar)|"
                  "(foo |(bar]|)" "(foo |(bar]|)"
-                 "(foo |(bar])|" "|(bar])|"
-                 ; (|foo|) => |foo|
+                 "(foo |(bar])|" "(foo |(bar])|"
+                 "(|foo|)" "|foo|"
                  }]
      ]
     
@@ -513,7 +513,6 @@
                  "fooz foo| (bar)| baz" "fooz |foo (bar)| baz"
                  ;with :chimera
                  "(foo bar|]" "(foo |bar|]"
-                 "(foo {bar)|]" "(foo {bar|)]|"
                  }]
      ["Shift+Alt+Right" :paredit-expand-right
                 {
@@ -543,7 +542,6 @@
                  "foo |(bar [baz (b|am)])" "foo |(bar [baz (bam)])|"
                  ;with :chimera
                  "(foo |bar]" "(foo |bar|]"
-                 "(foo |{bar)]" "(foo |{bar)]|"
                  }]
      ["Shift+Alt+Up" :paredit-expand-up
                 {
