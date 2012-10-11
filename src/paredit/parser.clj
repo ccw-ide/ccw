@@ -46,11 +46,22 @@
   (let [e (remove-meta e)]
     (and (#{:symbol} (:tag e)) (apply str (:content e)))))
 
-(defn call-of [e c] 
+(defn called 
+  "If e is a function call, return the called symbol name"
+  [e] 
+  (let [e (remove-meta e)
+        e-code-children (code-children e)]
+    (and 
+      (#{"("} (nth e-code-children 0))
+      (sym-name (nth e-code-children 1)))))
+
+(defn call-of 
+  "Is form e a call to c?
+   Return e"
+  [e c] 
   (let [e (remove-meta e)]
     (and 
-      (#{"("} (nth (code-children e) 0))
-      (#{c} (sym-name (nth (code-children e) 1))) 
+      (#{c} (called e)) 
       e)))
 
 (defn call-args

@@ -647,6 +647,14 @@
                  "   |" "|"
                  "(if toto\n|titi)" "(if toto\n  |titi)"
                  "(my-fn toto\n|titi)" "(my-fn toto\n       |titi)"
+                 "(letfn []\n|quux)" "(letfn []\n  |quux)"
+                 "(foo/with-bar baz\n|quux)" "(foo/with-bar baz\n  |quux)"
+                 "(defrecord Foo []\n  IFace\n  (foo []\n|))" "(defrecord Foo []\n  IFace\n  (foo []\n    |))"
+                 "(deftype Foo []\n  IFace\n  (foo []\n|))" "(deftype Foo []\n  IFace\n  (foo []\n    |))"
+                 "(extend-type Foo\n  IImpl\n  (foo []\n|))" "(extend-type Foo\n  IImpl\n  (foo []\n    |))"
+                 "(extend-protocol IProt\n  Type\n  (bar [])\n  (foo []\n|))" "(extend-protocol IProt\n  Type\n  (bar [])\n  (foo []\n    |))"
+                 "(reify IProt\n  (bar [])\n  (foo []\n|))" "(reify IProt\n  (bar [])\n  (foo []\n    |))"
+                 " (proxy [Foo] []\n     (foo []\n|bar))" " (proxy [Foo] []\n     (foo []\n       |bar))"
                  ;; future auto reindent children "(my-fn foo\n | baz\n  | baz)" "(my-fn foo\n       |baz\n       baz)"
                  }]
       [#"C-j"     :paredit-newline

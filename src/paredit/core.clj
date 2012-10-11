@@ -269,8 +269,9 @@
                             if if-not if-let when when-not when-let when-first condp case loop dotimes
                             for while do doto try catch locking dosync doseq dorun doall
                             -> -?> ->> future ns clojure.core/ns gen-class gen-interface))))
-(defn ^{:doc "Returns logical true if the String probably names a special form or macro var"}
-  lisp-form? [^String s]
+(defn lisp-form? 
+  "Returns logical true if the String probably names a special form or macro var"
+  [^String s]
   (let [name (name (symbol s))]
     (or
       (.startsWith s ".")
@@ -278,6 +279,16 @@
       (.startsWith name "with")
       (.startsWith name "let")
     (lisp-forms s))))
+
+
+(defn inline-implementation? 
+  "Returns logical true if the loc does not correspond to a function call, but
+   rather to a protocol/record inline implementation in defrecord, defprotocol,
+   extend-*, etc." 
+  [loc]
+  (when-let [pcalled (-?> loc z/up z/up z/node paredit.parser/called)]
+    (#{"defrecord", "extend-protocol", "extend-type", "proxy",
+       "deftype", "reify"} pcalled)))
 
 (defn indent-column 
   "pre-condition: line-offset is already the starting offset of a line"
@@ -293,7 +304,8 @@
             (cond
               (nil? seen-loc) 
                 (+ (loc-col loc) (loc-count loc) 1)
-              (lisp-form? (loc-text (first seen-loc)))
+              (or (lisp-form? (loc-text (first seen-loc)))
+                  (inline-implementation? (first seen-loc)))
                 (+ (loc-col loc) (loc-count loc) 1)
               (second seen-loc)
                 (loc-col (second seen-loc))
