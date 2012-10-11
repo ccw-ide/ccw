@@ -51,6 +51,8 @@
   (prepare-serialize [this]))
 
 (extend-protocol Serializable
+  nil
+    (prepare-serialize [this] nil)
   Object
     (prepare-serialize [this] this)
   clojure.lang.LazySeq

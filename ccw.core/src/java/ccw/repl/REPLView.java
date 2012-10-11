@@ -320,6 +320,7 @@ public class REPLView extends ViewPart implements IAdaptable {
             setCurrentNamespace(currentNamespace);
             prepareView();
             logPanel.append(";; Clojure " + toolConnection.send("op", "eval", "code", "(clojure-version)").values().get(0) + "\n");
+            NamespaceBrowser.setREPLConnection(toolConnection);
             return true;
         } catch (ConnectException e) {
             closeView();
