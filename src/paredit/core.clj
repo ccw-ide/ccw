@@ -98,7 +98,10 @@
   [parsed]
   (not (parsed-in-tags? parsed *not-in-code*)))
 
-(defn in-code? [loc] (and loc (not (*not-in-code* (loc-tag (parse-node loc))))))
+(defn in-code? 
+  [loc] 
+  (when-let [loc-tag (loc-tag (parse-node loc))]
+    (not (*not-in-code* loc-tag))))
   
 (defmulti paredit (fn [k & args] k))
 
@@ -120,7 +123,7 @@
   [parsed [o c] {:keys [^String text offset length] :as t} 
    chars-with-no-space-before chars-with-no-space-after]
   (if (zero? length) 
-    (let [offset-loc (-> parsed parsed-root-loc (loc-for-offset offset))]
+    (let [offset-loc (-> parsed parsed-root-loc (leave-for-offset offset))]
       (if (in-code? offset-loc)
         (insert-balanced [o c] t chars-with-no-space-before chars-with-no-space-after)
         (-> t (t/insert (str o)))))
