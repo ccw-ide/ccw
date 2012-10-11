@@ -27,13 +27,13 @@
 
 (defn render-identity [renderer name ns]
   (condp = renderer
-    :html (format "<b>%s</b> %s" name ns)
-    :text (format "%s %s" name ns)))
+    :html (format "<b>%s</b> %s" name (or ns ""))
+    :text (format "%s %s" name (or ns ""))))
 
 (defn- render-sections [renderer sections no-sections-text]
   (let [s (condp = renderer
-            :html (apply str (mapcat vector (repeat "<p>") sections (repeat "</p>")))
-            :text (str/join "\n\n" sections))]
+            :html (apply str (mapcat vector (repeat "<p>") (keep identity sections) (repeat "</p>")))
+            :text (str/join "\n\n" (keep identity sections)))]
     (if (str/blank? s)
       (condp = renderer
         :html (format "<i>%s</i>" no-sections-text)
@@ -67,12 +67,13 @@
                     doc)))
 
 (defn var-doc-info [renderer m]
-  (render-sections 
-    renderer
-    [(header-doc renderer m)
-     (arglist-doc renderer m)
-     (doc-doc renderer m)]
-    "no doc found"))
+  (let [sections [(header-doc renderer m)
+                  (arglist-doc renderer m)
+                  (doc-doc renderer m)]]
+    (render-sections 
+      renderer
+      sections
+      "no doc found")))
 
 (defn var-doc-info-html [m]
   (var-doc-info :html m))

@@ -283,7 +283,6 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 
 		public String getToolTipText(Object element) {
 			return (String) docUtils._(VAR_DOC_INFO, element);
-			//return ClojureDocUtils.getVarDocInfo(element);
 		}
 
 		public Point getToolTipShift(Object object) {
