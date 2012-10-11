@@ -124,8 +124,6 @@
     open-unquote open-anon-arg open-keyword open-discard whitespace open-comment
     open-char})
 
-(def *brackets-tags* #{:list :map :vector :string :set :fn :regex})
-
 (defn view-children-seq [view abstract-children]
   (map #(% view) abstract-children))
 

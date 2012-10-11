@@ -10,7 +10,7 @@
   (:require [paredit.static-analysis :as st])
   (:use paredit.loc-utils))
 
-(def *spy?* (atom false))
+(def ^:dynamic *spy?* (atom false))
 (defn start-spy [] (reset! *spy?* true))
 (defn stop-spy [] (reset! *spy?* false))
 
@@ -267,7 +267,10 @@
   #_(leave-for-offset-tests)
   #_(loc-containing-offset-tests))
 
-(def ^{:doc 
+(def ^{:dynamic true
+       :doc 
           "defines a text, with :offset being the cursor position,
-           and :length being a possible selection (may be negative)"} 
+           and :length being a possible selection (may be negative)"}
+
+
       *text* (atom {:text "" :offset 0 :length 0}))
