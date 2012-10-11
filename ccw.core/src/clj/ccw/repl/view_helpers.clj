@@ -41,7 +41,6 @@
   (let [colored-style #(let [s (StyleRange.)
                              color-rgb (ccw.editors.clojure.ClojureSourceViewer/getRGBColor (.getCombinedPreferenceStore (CCWPlugin/getDefault)) %)
                              color (CCWPlugin/getColor color-rgb)]
-                         (println "color: " color)
                          (when color (set! (.foreground s) color))
                          s)
         error-rgb-key (ccw.preferences.PreferenceConstants/getTokenPreferenceKey ccw.preferences.PreferenceConstants/replLogError)
