@@ -89,10 +89,9 @@
   (future (doseq [{:keys [out err value ns status] :as resp} responses]
             (ui-sync
               (when ns (.setCurrentNamespace repl-view ns))
-              (doseq [[k v] (dissoc resp :id :ns :status :session)]
-                (if (log-styles k)
-                  (log repl-view log-component v k)
-                  (CCWPlugin/log (str "Cannot handle REPL response: " k (pr-str resp)))))
+              (doseq [[k v] (dissoc resp :id :ns :status :session)
+                      :when (log-styles k)]
+                (log repl-view log-component v k))
               (doseq [status status]
                 (case status
                   "interrupted" (log repl-view log-component (eval-failure-msg status expr) :err)
