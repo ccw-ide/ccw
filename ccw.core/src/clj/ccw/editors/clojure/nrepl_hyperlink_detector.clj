@@ -48,7 +48,7 @@
     (when-let [[offset length [_ host port]] (find-match-for-offset pattern line (- offset line-offset))]
       ;(println "nrepl hyperlink:" :offset (+ line-offset offset) :length length)
       [{:offset (+ line-offset offset) :length length
-        :open #(ccw.repl.REPLView/connect (format "nrepl://%s:%s") host port)}])))
+        :open #(ccw.repl.REPLView/connect (format "nrepl://%s:%s" host port))}])))
 
 (defn factory [ _ ]
   (proxy [AbstractHyperlinkDetector]
