@@ -145,7 +145,10 @@
                       (t/delete t (start-offset last-loc) nb-delete)
                       t)] ; z/left because there is the closing node
               (-> t (t/set-offset (- (end-offset match) nb-delete))))
-            (-> t (t/insert (str c)))))
+            (if (or (:broken? parsed)
+                    (= :net.cgrand.parsley/unfinished (:tag parsed)))
+              (-> t (t/insert (str c)))
+              t)))
         (-> t (t/insert (str c))))))
 
 (defmethod paredit 
