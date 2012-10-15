@@ -200,6 +200,12 @@ public class REPLView extends ViewPart implements IAdaptable {
     
     public REPLView () {}    
     
+    @Override
+    public void init(IViewSite site) throws PartInitException {
+    	super.init(site);
+        activeREPL.set(REPLView.this);
+    }
+    
     private void resetFont () {
         Font font= JFaceResources.getTextFont();
         logPanel.setFont(font);
