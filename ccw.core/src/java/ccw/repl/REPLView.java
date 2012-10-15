@@ -48,8 +48,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
@@ -62,6 +64,7 @@ import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.StatusLineContributionItem;
 
 import ccw.CCWPlugin;
+import ccw.TraceOptions;
 import ccw.editors.clojure.ClojureDocumentProvider;
 import ccw.editors.clojure.ClojureSourceViewer;
 import ccw.editors.clojure.ClojureSourceViewerConfiguration;
@@ -566,6 +569,7 @@ public class REPLView extends ViewPart implements IAdaptable {
         parent.addDisposeListener(new DisposeListener() {
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
+				CCWPlugin.trace(TraceOptions.REPL, "REPLView ", REPLView.this.secondaryId, " parent composite disposed");
 				JFaceResources.getFontRegistry().removeListener(fontChangeListener);
 				prefs.removePropertyChangeListener(prefsListener);
 				activeREPL.compareAndSet(REPLView.this, null);
@@ -800,6 +804,7 @@ public class REPLView extends ViewPart implements IAdaptable {
 
     private final class NamespaceRefreshFocusListener implements FocusListener {
         public void focusGained(FocusEvent e) {
+        	CCWPlugin.trace(TraceOptions.REPL_FOCUS, "focus gained, marking repl as active");
             activeREPL.set(REPLView.this);
             NamespaceBrowser.setREPLConnection(toolConnection);
         }

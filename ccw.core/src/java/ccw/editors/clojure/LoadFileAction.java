@@ -22,6 +22,7 @@ import org.eclipse.jface.action.Action;
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.ClojureProject;
+import ccw.TraceOptions;
 import ccw.launching.ClojureLaunchShortcut;
 import ccw.nature.ClojureNaturePropertyTest;
 import ccw.repl.Actions;
@@ -30,7 +31,6 @@ import ccw.util.DisplayUtil;
 import clojure.lang.Symbol;
 import clojure.lang.Var;
 import clojure.osgi.ClojureOSGi;
-import clojure.tools.nrepl.Connection.Response;
 
 public class LoadFileAction extends Action {
 
@@ -90,6 +90,9 @@ public class LoadFileAction extends Action {
         if (repl != null && !repl.isDisposed()) {
     		evaluateFileText(repl, editor.getDocument().get(), filePath, sourcePath, editorFile.getName());
         } else {
+    		CCWPlugin.trace( TraceOptions.LAUNCHER, "No active REPL found (",
+    				(repl == null) ? "active repl is null" : "active repl is disposed", 
+    				"), so launching a new one");
         	new Thread(new Runnable() {
 				public void run() {
 		        	final IProject project = editorFile.getProject();

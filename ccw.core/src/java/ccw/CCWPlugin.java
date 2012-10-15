@@ -14,6 +14,8 @@ package ccw;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
@@ -28,6 +30,9 @@ import org.eclipse.jface.resource.FontRegistry;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.resource.StringConverter;
+import org.eclipse.osgi.service.debug.DebugOptions;
+import org.eclipse.osgi.service.debug.DebugOptionsListener;
+import org.eclipse.osgi.service.debug.DebugTrace;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.RGB;
@@ -41,6 +46,7 @@ import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 
 import ccw.editors.clojure.IScanContext;
 import ccw.launching.LaunchUtils;
@@ -127,7 +133,72 @@ public class CCWPlugin extends AbstractUIPlugin {
         
         this.natureAdapter.start();
         
+        enableTracing(context);
+        
 //    	System.out.println("CCWPlugin start() ends");
+    }
+    
+    /** Global flag stating if Tracing is enabled for the plugin */
+    public static boolean DEBUG = false;
+    
+    private TraceOptions traceOptions;
+    
+    private static DebugTrace TRACE = null;
+
+    private final CCWDebugOptionsListener traceOptionsListener = new CCWDebugOptionsListener(); 
+    private ServiceRegistration<?> debugOptionsListenerRegistration;
+
+    private class CCWDebugOptionsListener implements DebugOptionsListener {
+		@Override 
+		public void optionsChanged(DebugOptions options) {
+			DEBUG = options.isDebugEnabled();
+			TRACE = options.newDebugTrace(getBundle().getSymbolicName(), CCWPlugin.this.getClass());
+			traceOptions.updateOptions(options);
+		}
+    }
+    
+    /**
+     * Dynamically checks whether <code>traceOption</code> is enabled.
+     * 
+     * <code>traceOption</code> is the relative part of the tracing option
+     * (minus the plugin's symbolicName), e.g. the fully qualified trace option
+     * name that will be checked is <bundleSymbolicName>/<traceOption>.
+     * 
+     * @param traceOption
+     * @return true if enabled
+     */
+    public static boolean isTraceOptionEnabled(String traceOption) {
+    	TraceOptions traceOptions = CCWPlugin.getDefault().traceOptions;
+    	if (traceOptions == null) {
+    		return false;
+    	} else {
+    		return traceOptions.isOptionEnabled(traceOption);
+    	}
+    }
+    
+    /**
+     * Starts the tracing machinery for the bundle
+     * @param context
+     */
+    private void enableTracing(BundleContext context) {
+    	traceOptions = new TraceOptions(context.getBundle().getSymbolicName());
+    	
+    	Dictionary<String, String> props = new Hashtable<String, String>();
+    	props.put(DebugOptions.LISTENER_SYMBOLICNAME, getBundle().getSymbolicName());
+    	
+    	debugOptionsListenerRegistration = context.registerService(
+    			DebugOptionsListener.class.getName(),
+    			traceOptionsListener,
+    			props);
+    }
+    
+    /**
+     * Stops the tracing machinery for the bundle
+     */
+    private void disableTracing(BundleContext context) {
+    	if (debugOptionsListenerRegistration != null) {
+    		debugOptionsListenerRegistration.unregister();
+    	}
     }
     
     private synchronized void createColorCache() {
@@ -208,6 +279,9 @@ public class CCWPlugin extends AbstractUIPlugin {
     }
     
     public void stop(BundleContext context) throws Exception {
+    	
+    	disableTracing(context);
+    	
     	// We don't remove colors when deregistered, because, well, we don't have a
     	// corresponding method on the ColorRegistry instance!
     	// We also don't remove fonts when deregistered
@@ -274,6 +348,31 @@ public class CCWPlugin extends AbstractUIPlugin {
         plugin.getLog().log(new Status(IStatus.INFO, PLUGIN_ID, msg));
     }
     
+    /**
+     * Write trace messages using the Eclipse trace mechanism.
+     * 
+     * This is intended only for debugging. The use of variable
+     * number of parameters avoids the cost of building the message when the
+     * debug option is not enabled.
+     *
+     * @param traceOption
+     *            the trace option is just the relative part
+     *            after the $bundle.symbolicName/ prefix
+     * @param messageParts
+     *            a variable number of objects with each part of the message to
+     *            display.
+     */
+    public static void trace(final String traceOption, final 
+    		                 Object... messageParts) {
+    	if (CCWPlugin.DEBUG && CCWPlugin.isTraceOptionEnabled(traceOption)) {
+    		StringBuilder sb = new StringBuilder();
+    		for (Object messagePart: messageParts) {
+        		sb.append(messagePart);
+        	}
+    		CCWPlugin.TRACE.trace(traceOption, sb.toString());
+    	}
+    }
+
     @Override
     protected void initializeImageRegistry(ImageRegistry reg) {
     	reg.put(NS, ImageDescriptor.createFromURL(getBundle().getEntry("/icons/jdt/package_obj.gif")));
