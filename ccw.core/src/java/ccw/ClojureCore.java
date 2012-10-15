@@ -320,7 +320,11 @@ public final class ClojureCore {
 		// Find outside workspace or in archive 
 		final IPath sourceAbsolutePath = toOSAbsoluteIPath(sourceAttachmentPath);
 		
-		if (sourceAbsolutePath.toFile().isDirectory()) {
+		final File sourceFile = sourceAbsolutePath.toFile();
+		if (!sourceFile.exists()) {
+			CCWPlugin.logWarning("sourceFile " + sourceFile + " does not exist form sourceAttachmentPath " + sourceAttachmentPath);
+			// Nothing can be done
+		} else if (sourceFile.isDirectory()) {
 			final File maybeSourceFile = sourceAbsolutePath.append(searchedPath + "/" + searchedFileName).toFile();
 			if (maybeSourceFile.exists()) {
 				return new LocalFileStorageEditorInput(
@@ -331,7 +335,7 @@ public final class ClojureCore {
 		} else {
 			ZipFile zipFile;
 			try {
-				zipFile = new JarFile(sourceAbsolutePath.toFile(), true, JarFile.OPEN_READ);
+				zipFile = new JarFile(sourceFile, true, JarFile.OPEN_READ);
 				ZipEntry zipEntry = zipFile.getEntry(searchedPath + "/" + searchedFileName);
 				if (zipEntry != null) {
 					return new ZipEntryStorageEditorInput(
