@@ -90,7 +90,7 @@ public class LoadFileAction extends Action {
         if (repl != null && !repl.isDisposed()) {
     		evaluateFileText(repl, editor.getDocument().get(), filePath, sourcePath, editorFile.getName());
         } else {
-    		CCWPlugin.trace( TraceOptions.LAUNCHER, "No active REPL found (",
+    		CCWPlugin.getTracer().trace(TraceOptions.LAUNCHER, "No active REPL found (",
     				(repl == null) ? "active repl is null" : "active repl is disposed", 
     				"), so launching a new one");
         	new Thread(new Runnable() {

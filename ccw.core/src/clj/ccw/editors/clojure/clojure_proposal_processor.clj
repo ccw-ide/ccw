@@ -7,7 +7,7 @@
             [clojure.zip :as z]
             [ccw.util.doc-utils :as doc]
             [ccw.debug.serverrepl :as serverrepl]
-            [ccw.trace :as trace])
+            [ccw.core.trace :as trace])
   (:use [clojure.core.incubator :only [-?>]])
   (:import [org.eclipse.jface.viewers StyledString
                                       StyledString$Styler]
@@ -394,7 +394,6 @@
     (computeCompletionProposals
       [this text-viewer offset]
       (.setStatusMessage content-assistant "")
-      (trace/format :autocompletion "offset: %s" offset)
       ;; TODO manage error message
       (into-array 
         ICompletionProposal

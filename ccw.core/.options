@@ -1,0 +1,8 @@
+ccw.core/log/info=false
+ccw.core/log/warning=false
+ccw.core/log/error=false
+ccw.core/repl=false
+ccw.core/repl/focus=false
+ccw.core/builder=false
+ccw.core/launcher=false
+ccw.core/autocompletion=false

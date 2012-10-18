@@ -1,5 +1,7 @@
 package ccw.repl;
 
+import static ccw.CCWPlugin.getTracer;
+
 import java.io.IOException;
 import java.net.ConnectException;
 import java.util.ArrayList;
@@ -575,7 +577,7 @@ public class REPLView extends ViewPart implements IAdaptable {
         parent.addDisposeListener(new DisposeListener() {
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
-				CCWPlugin.trace(TraceOptions.REPL, "REPLView ", REPLView.this.secondaryId, " parent composite disposed");
+				CCWPlugin.getTracer().trace(TraceOptions.REPL, "REPLView ", REPLView.this.secondaryId, " parent composite disposed");
 				JFaceResources.getFontRegistry().removeListener(fontChangeListener);
 				prefs.removePropertyChangeListener(prefsListener);
 				activeREPL.compareAndSet(REPLView.this, null);
@@ -810,7 +812,7 @@ public class REPLView extends ViewPart implements IAdaptable {
 
     private final class NamespaceRefreshFocusListener implements FocusListener {
         public void focusGained(FocusEvent e) {
-        	CCWPlugin.trace(TraceOptions.REPL_FOCUS, "focus gained, marking repl as active");
+        	getTracer().trace(TraceOptions.REPL_FOCUS, "focus gained, marking repl as active");
             activeREPL.set(REPLView.this);
             NamespaceBrowser.setREPLConnection(toolConnection);
         }
