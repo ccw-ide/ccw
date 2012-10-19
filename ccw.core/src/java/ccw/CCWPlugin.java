@@ -328,7 +328,7 @@ public class CCWPlugin extends AbstractUIPlugin {
 		                        REPLView replView = (REPLView)v;
 		                        ILaunch launch = replView.getLaunch();
 		                        if (launch!=null && !launch.isTerminated()) {
-		                            String launchProject = launch.getAttribute(LaunchUtils.ATTR_PROJECT_NAME);
+		                            String launchProject = LaunchUtils.getProjectName(launch);
 		                            if (launchProject != null && launchProject.equals(project.getName())) {
 		                            	ret[0] = replView;
 		                                return;

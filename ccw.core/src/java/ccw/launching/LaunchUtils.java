@@ -49,6 +49,7 @@ public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
 	public static final String ATTR_IS_AUTO_RELOAD_ENABLED = "CCW_ATTR_IS_AUTO_RELOAD_ENABLED";
 	public static final String ATTR_NS_TO_START_IN = "CCW_ATTR_NS_TO_START_IN";
 	
+	public static final String LAUNCH_ATTR_PROJECT_NAME = "CCW_LAUNCH_ATTR_PROJECT_NAME";
 
     public static final String SYSPROP_LAUNCH_ID = "ccw.repl.launchid";
 
@@ -85,7 +86,11 @@ public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
     }
     
     public static String getProjectName (ILaunch launch) {
-        return launch.getAttribute(LaunchUtils.ATTR_PROJECT_NAME);
+        return launch.getAttribute(LaunchUtils.LAUNCH_ATTR_PROJECT_NAME);
+    }
+    
+    public static void setProjectName(ILaunch launch, String projectName) {
+        launch.setAttribute(LaunchUtils.LAUNCH_ATTR_PROJECT_NAME, projectName);
     }
 
     public static IProject getProject (String projectName) {
