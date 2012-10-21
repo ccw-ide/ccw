@@ -75,8 +75,10 @@ public class TextViewerSupport implements FocusListener, DisposeListener {
 					IWorkbenchCommandConstants.EDIT_COPY);
 			activateHandler(ITextOperationTarget.PASTE,
 					IWorkbenchCommandConstants.EDIT_PASTE);
-			activateHandler(ITextOperationTarget.DELETE,
-					IWorkbenchCommandConstants.EDIT_DELETE);
+			// We don't add DELETE, because if we do so, then the DELETE
+			// is done twice ...
+			//			activateHandler(ITextOperationTarget.DELETE,
+			//					IWorkbenchCommandConstants.EDIT_DELETE);
 			activateHandler(ITextOperationTarget.UNDO,
 					IWorkbenchCommandConstants.EDIT_UNDO);
 			activateHandler(ITextOperationTarget.REDO,
