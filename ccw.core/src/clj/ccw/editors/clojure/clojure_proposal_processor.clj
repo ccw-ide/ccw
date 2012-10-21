@@ -182,10 +182,14 @@
 (defn send-message 
   "Send the command over the nrepl connection."
   [connection command]
-  (-> (.client connection)
-    (repl/message {"op"   "eval"
-                   "code" command})
-    repl/response-values))
+  (try
+    (-> (.client connection)
+      (repl/message {"op"   "eval"
+                     "code" command})
+      repl/response-values)
+    (catch Exception e
+      (ccw.CCWPlugin/logError (str "exception while sending command " command " to connection " connection) e)
+      nil)))
 
 (defn find-var-metadata
   [current-namespace editor var]
