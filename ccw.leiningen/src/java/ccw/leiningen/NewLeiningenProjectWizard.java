@@ -28,10 +28,12 @@ import org.eclipse.core.resources.IResourceStatus;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -42,6 +44,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IPerspectiveRegistry;
 import org.eclipse.ui.IPluginContribution;
@@ -638,5 +641,11 @@ public class NewLeiningenProjectWizard extends BasicNewResourceWizard
 					preferenceValue);
 		}
 		return result == IDialogConstants.YES_ID;
+	}
+	
+	@Override
+	public void setDefaultPageImageDescriptor(ImageDescriptor imageDescriptor) {
+		ImageDescriptor d = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(), new Path("leiningen-new-project.png"), null));
+		super.setDefaultPageImageDescriptor(d);
 	}
 }

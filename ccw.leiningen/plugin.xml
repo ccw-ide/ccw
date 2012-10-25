@@ -256,6 +256,7 @@
          allPopups="true"
          locationURI="popup:org.eclipse.ui.popup.any?after=additions">
       <menu
+            icon="leiningen16x16.png"
             id="ccw.leiningen.project.menu"
             label="%ccw.leiningen.popup.menu.label"
             mnemonic="L">
@@ -285,6 +286,7 @@
          locationURI="popup:org.eclipse.ui.projectConfigure?after=additions">
       <command
             commandId="ccw.leiningen.command.add-leiningen-nature"
+            icon="leiningen16x16.png"
             label="%ccw.leiningen.command.add-leiningen-nature.name"
             style="push">
          <visibleWhen
@@ -364,7 +366,7 @@
          class="ccw.leiningen.NewLeiningenProjectWizard"
          descriptionImage="leiningen32x32.png"
          hasPages="true"
-         icon="leiningen32x32.png"
+         icon="leiningen16x16.png"
          id="ccw.leiningen.project.new.wizard"
          name="Leiningen Project"
          project="true">
