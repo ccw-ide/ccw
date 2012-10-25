@@ -6,3 +6,4 @@ ccw.core/repl/focus=false
 ccw.core/builder=false
 ccw.core/launcher=false
 ccw.core/autocompletion=false
+ccw.core/paredit=false

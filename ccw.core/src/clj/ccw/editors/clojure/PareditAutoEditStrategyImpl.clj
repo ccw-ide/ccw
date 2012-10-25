@@ -5,7 +5,8 @@
     [org.eclipse.jface.text IAutoEditStrategy
                             IDocument
                             DocumentCommand]
-    [ccw.editors.clojure IClojureEditor]))
+    [ccw.editors.clojure IClojureEditor])
+  (:require [ccw.core.trace :as trace]))
    
 #_(set! *warn-on-reflection* true)
 
@@ -90,7 +91,6 @@
                            :selection-length (:length signed-selection)}
             ;_ (println "document-text:" document-text)
             par-command {:text (.text command) :offset (.offset command) :length (.length command)}
-            ;_ (println (str "par-command:" par-command))
             [par-command par-text] (paredit-args par-command document-text)
             ;_ (println "here is the par-command:" par-command)
             ;_ (println "do-command?" (do-command? editor par-command))
@@ -98,7 +98,6 @@
                      par-command 
                      (do-command? editor par-command)
                      (paredit par-command (.getParseState editor) par-text))
-            ;_ (println "result:" result)
             ]
         (when (and result (not= :ko (-> result :parser-state)))
           (if-let [modif (-?> result :modifs first)]
