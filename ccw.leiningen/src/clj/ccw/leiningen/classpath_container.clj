@@ -73,11 +73,10 @@
   "Wrapper for the ccw.leiningen.util/library-entry function"
   [{:keys [path native-path]}]
   (let [params {:path path}
-        params (if native-path
-                 (update-in params [:extra-attributes] 
-                            assoc u/native-library (str (or (-?> native-path e/resource e/path .makeRelative) 
-                                                            (e/path native-path))))
-                 params)]
+        #_params #_(if native-path
+                     (update-in params [:extra-attributes] 
+                                assoc u/native-library (u/native-library-path native-path))
+                     params)]
     (u/library-entry params)))
 
 (defn leiningen-classpath-container
@@ -615,7 +614,8 @@
       (finish [] true)
       
       (getSelection []
-        (JavaCore/newContainerEntry CONTAINER-PATH true))
+        (u/container-entry {:path CONTAINER-PATH
+                            :is-exported true}))
       
       (setSelection [_]))
     (.setDescription (Messages/PageDesc))

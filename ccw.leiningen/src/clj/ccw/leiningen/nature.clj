@@ -192,7 +192,13 @@
                            java-proj
                            cpc/CONTAINER-PATH
                            lein-container)
-        container-entry  (JavaCore/newContainerEntry (.getPath lein-container) true)]
+        container-entry  (u/container-entry 
+                           {:path (.getPath lein-container)
+                            :extra-attributes 
+                            {u/native-library (u/native-library-path
+                                                (u/lein-native-platform-path
+                                                  lein-proj))}
+                            :is-exported true})]
     (concat [jvm-entry]
             source-entries
             resource-entries

@@ -1,4 +1,5 @@
 (ns ccw.leiningen.util
+  (:use [clojure.core.incubator :only [-?> -?>>]])
   (:require [ccw.util.eclipse :as e]
             [leiningen.core.eval :as eval]
             [classlojure.core :as c]
@@ -156,6 +157,13 @@
 (def javadoc-location (IClasspathAttribute/JAVADOC_LOCATION_ATTRIBUTE_NAME))
 (def native-library   (JavaRuntime/CLASSPATH_ATTR_LIBRARY_PATH_ENTRY))
 
+(defn native-library-path
+  "Take a path, absolute or relative, and transform it into a suitable path
+   for JDT library path entry (make it relative to workspace if possible)"
+  [native-path]
+  (str (or (-?> native-path e/resource e/path .makeRelative) 
+           (e/path native-path))))
+  
 (defn classpath-attribute [name value]
   (JavaCore/newClasspathAttribute name value))
 
@@ -182,7 +190,7 @@
                                       (classpath-attribute k v)))))
 
 (defn library-entry 
-  "Takes a ma representing a source entry, with following keys:
+  "Takes a map representing a source entry, with following keys:
      :path -> IPathCoercionable
      :source-attachment-path -> IPathCoercionable, for finding source files, Optional
      :source-attachment-root-path -> IPathCoercionable, the location of the root of the source files within the source archive or folder, Optional
@@ -200,6 +208,24 @@
       (e/path path),
       (e/path source-attachment-path),
       (e/path source-attachment-root-path),
+      (into-array IAccessRule access-rules),
+      (into-array IClasspathAttribute (for [[k v] extra-attributes] 
+                                      (classpath-attribute k v))),
+      (boolean is-exported)))
+
+(defn container-entry 
+  "Takes a map representing a container entry, with following keys:
+     :path -> IPathCoercionable
+     :access-rules -> list of IAccessRule 
+     :extra-attributes   -> map of name/values of IClasspathAttributes (see classpath-attribute*). Optional
+     :is-exported -> boolean-like, indicates whether this entry is contributed to dependent projects in addition to the output location , Optional (default false)
+   For complete semantic description, see javadoc for org.eclipse.jdt.core.JavaCore/newLibraryEntry"
+  [{:keys [path, 
+           access-rules, 
+           extra-attributes,
+           is-exported]}]
+  (JavaCore/newContainerEntry
+      (e/path path),
       (into-array IAccessRule access-rules),
       (into-array IClasspathAttribute (for [[k v] extra-attributes] 
                                       (classpath-attribute k v))),
