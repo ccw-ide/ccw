@@ -42,12 +42,15 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
+import ccw.TraceOptions;
 import ccw.util.ClojureDocUtils;
 import ccw.util.ClojureInvoker;
 import ccw.util.DisplayUtil;
@@ -495,7 +498,16 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 	}
 	
 	private static void inUIThreadSetREPLConnection (Connection repl) {
-		IViewPart[] views = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getViews(); // TODO fix potential NPE here			
+		IWorkbenchWindow activeWorkbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		if (activeWorkbenchWindow == null ) {
+			CCWPlugin.getTracer().trace(TraceOptions.REPL, "activeWorkbenchWindow is null");
+			return;
+		}
+		IWorkbenchPage activePage = activeWorkbenchWindow.getActivePage();
+		if (activePage == null) {
+			CCWPlugin.getTracer().trace(TraceOptions.REPL, "activePage is null");
+		}
+		IViewPart[] views = activePage.getViews();			
 		NamespaceBrowser co = null;
 		for (IViewPart v: views) {
 			if (NamespaceBrowser.class.isInstance(v)) {
