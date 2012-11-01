@@ -259,7 +259,7 @@ public class REPLView extends ViewPart implements IAdaptable {
     }
 
     public void printErrorDetail() {
-        evalExpression("(binding [*out* *err*] (if-not *e (println \"No prior exception bound to *e.\") (clojure.repl/pst *e)))", false, false);
+        evalExpression("(binding [*out* *err*] (if-not *e (println \"No prior exception bound to *e.\") (require 'clojure.repl) (clojure.repl/pst *e)))", false, false);
     }
 
     public void sendInterrupt() {
@@ -339,27 +339,6 @@ public class REPLView extends ViewPart implements IAdaptable {
                     "Could not connect", String.format("Could not connect to REPL @ %s", url));
             return false;
         }
-    }
-    
-    public static REPLView connect () throws Exception {
-        IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-        ConnectDialog dlg = new ConnectDialog(window.getShell());
-        
-        REPLView repl = null;
-        if (dlg.open() == ConnectDialog.OK) {
-            // cannot find any way to create a configured/connected REPLView, and install it programmatically
-            String host = dlg.getHost();
-            int port = dlg.getPort();
-            if (host == null || host.length() == 0 || port < 0 || port > 65535) {
-                MessageDialog.openInformation(window.getShell(),
-                        "Invalid connection info",
-                        "You must provide a useful hostname and port number to connect to a REPL.");
-            } else {
-                repl = connect(String.format("nrepl://%s:%s", host, port));
-            }
-        }
-        
-        return repl;
     }
     
     public static REPLView connect (String url) throws Exception {
