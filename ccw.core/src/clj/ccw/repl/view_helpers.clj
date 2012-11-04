@@ -124,11 +124,15 @@
                             history
                             (subvec history 0 (dec (- (count history) position))))))
                   ; seq of history entries forward from current position with retained input as last
-                  (when-not (neg? position) 
-                    (concat
-                      (map vector (range (dec position) -1 -1) (subvec history (- (count history) position)))
-                      [[-1 retained-input]])))]
-    (first (filter #(filter-pred cursor-split-text (second %)) entries))))
+                  (when-not (neg? position)
+                    (map vector 
+                      (range (dec position) -1 -1) 
+                      (subvec history (- (count history) position)))))]
+    (or 
+      (first (filter #(filter-pred cursor-split-text (second %)) entries))
+      ; when not backward in history, then ensure retained-input as last match
+      (when-not backward?
+        [-1 retained-input]))))
 
 
 (defn get-text-split-by-cursor
@@ -211,7 +215,10 @@
 
 (defn text-begin-matches?
   [[text-begin] ^String history-entry]
-  (when text-begin
+  ; if text-begin is nil or empty (not blank), match everything (= classic stepping through history)
+  (or
+    (nil? text-begin)
+    (= text-begin "")
     (.startsWith history-entry text-begin)))
 
 (defn history-backward-search [_ event] (load-history event true  restore-cursor text-begin-matches?))
