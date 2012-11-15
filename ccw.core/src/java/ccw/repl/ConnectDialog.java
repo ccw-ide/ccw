@@ -48,7 +48,8 @@ public class ConnectDialog extends Dialog {
         port = new Text(parent, SWT.BORDER);
         port.addVerifyListener(new VerifyListener() {
 			public void verifyText(VerifyEvent e) {
-				e.doit = (e.text.equals("") || Character.isDigit(e.character));
+				String newText = port.getText().substring(0, e.start) + e.text + port.getText().substring(e.end);
+				e.doit = newText.matches("\\d*");
 			}
 		});
         
