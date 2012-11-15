@@ -1181,8 +1181,8 @@
             locationURI="menu:window?before=preferences">
          <command
                commandId="ccw.ui.repl.showActiveREPL"
-               icon="icons/repl/showActive.png"
-               disabledIcon="icons/repl/showActive_disabled.png"
+               icon="icons/repl/console.gif"
+               disabledIcon="icons/repl/console_disabled.gif"
                id="ccw.ui.repl.showActiveREPL"
                label="Show active REPL"
                mode="FORCE_TEXT"
