@@ -23,7 +23,10 @@
   (lr+/match #{")" "]" "}" eof} s eof?))
 
 (def gspaces #{:whitespace :comment :discard})
-(def only-code (partial remove (comp (conj gspaces :meta-prefix) :tag)))
+(def only-code (partial remove (comp (conj gspaces 
+                                           :meta-prefix
+                                           :deprecated-meta-prefix) 
+                                     :tag)))
 
 (defn code-children 
   [e] 
@@ -119,8 +122,9 @@
 (def open-char "\\")
 (def symbol-exclusion #"[^\(\[\#\{\\\"\~\%\:\,\s\!\;\'\@\`;0-9]")
 (def ^{:private true} prefixes
-  #{open-list open-vector open-map open-set open-quote open-meta open-deref open-syntax-quote
-    open-fn open-var open-deprecated-meta open-string open-regex open-unquote-splicing
+  #{open-list open-vector open-map open-set open-quote 
+    open-meta open-deprecated-meta open-deref open-syntax-quote
+    open-fn open-var open-string open-regex open-unquote-splicing
     open-unquote open-anon-arg open-keyword open-discard whitespace open-comment
     open-char})
 
@@ -202,11 +206,10 @@
     (= :set t) (balanced :open :close-set abstract-children)
     (= :quote t) (unbalanced :open abstract-children)
     ;(= :meta t) (unbalanced :open abstract-children)
-    (= :meta t) (let [meta-target (peek abstract-children)]
-                  (concat (token :meta (- count (node-count meta-target)))
-                          (meta-target tokens-view)
-                          ;(mapcat identity (view-children-seq tokens-view (pop abstract-children)))
-                          )) 
+    (#{:meta :deprecated-meta} t)
+      (let [[meta & rest] abstract-children]
+        (concat (token :meta (node-count meta))
+                (mapcat identity (view-children-seq tokens-view rest)))) 
     (= :reader-literal t) (let [body (peek abstract-children)]
                             (concat (token :reader-literal (- count (node-count body)))
                                     (body tokens-view)
@@ -223,7 +226,6 @@
     (= :syntax-quote t) (unbalanced :open abstract-children) 
     (= :var t) (unbalanced :open-var abstract-children)
     (= :fn t) (concat (token :nest 0) (balanced :open-fn :close-fn abstract-children) (token :unnest 0))
-    (= :deprecated-meta t) (unbalanced :open abstract-children)
     (= :unquote-splicing t) (unbalanced :open abstract-children)
     (= :unquote t) (unbalanced :open abstract-children)
     (= :string t) (token :string count)
@@ -346,11 +348,11 @@
              :set
              :quote
              :meta
+             :deprecated-meta
              :deref
              :syntax-quote
              :var
              :fn
-             :deprecated-meta
              :unquote-splicing
              :unquote
              :string
@@ -376,7 +378,6 @@
                ;(p/unspaced open-string #"(?:\\.|[^\\\"])++(?!\")" :? eof)
                ;(p/unspaced open-regex #"(?:\\.|[^\\\"])++(?!\")" :? eof)
                [open-quote eof]
-               [open-deprecated-meta :expr :? eof]
                [open-deref eof]
                [open-syntax-quote eof]
                [open-var eof]
@@ -389,14 +390,16 @@
     :map [open-map :expr* "}"]
     :set [open-set :expr* "}"]
     :quote [open-quote :expr]
-    :open-meta "^"
-    :meta-prefix [:open-meta :expr]
-    :meta [:meta-prefix :expr]
+    :open-meta "^"             :open-deprecated-meta "#^"
+    :meta-prefix [:open-meta 
+                  :expr]       :deprecated-meta-prefix [:open-deprecated-meta 
+                                                        :expr]
+    :meta [:meta-prefix :expr] :deprecated-meta [:deprecated-meta-prefix 
+                                                 :expr]
     :deref [open-deref :expr]
     :syntax-quote [open-syntax-quote :expr]
     :var [open-var :expr]
     :fn [open-fn :expr* ")"]
-    :deprecated-meta [open-deprecated-meta :expr :expr]
     :unquote-splicing [open-unquote-splicing :expr]
     :unquote [open-unquote :expr]
     :string-body #"(?:\\.|[^\\\"])++(?=\")"
@@ -441,6 +444,11 @@
   [state]
   state)
 
+(defn pretty [parse]
+  (if (map? parse)
+    (into [] (cons (:tag parse) (map pretty (:content parse))))
+    parse))
+
 (comment 
 (require '[net.cgrand.parsley.lrplus :as l])
 (require '[net.cgrand.parsley.fold :as f])
@@ -484,3 +492,4 @@
               b)]
       b))
   (= c (lu/node-text (-> (edit-buffer nil 0 0 c) (buffer-parse-tree 0))) (lu/node-text (parse c)))))
+
