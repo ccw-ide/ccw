@@ -28,7 +28,7 @@ public class Actions {
                 
                 REPLView repl = null;
                 if (dlg.open() == ConnectDialog.OK) {
-                    repl = REPLView.connect(dlg.getURL());
+                    repl = REPLView.connect(dlg.getURL(), true);
                 }
                 
                 return repl;
@@ -41,7 +41,7 @@ public class Actions {
     public static class ConnectToEclipseNREPL extends AbstractHandler {
 		public Object execute(ExecutionEvent event) throws ExecutionException {
             try {
-                return REPLView.connect("nrepl://localhost:" + CCWPlugin.getDefault().getREPLServerPort());
+                return REPLView.connect("nrepl://localhost:" + CCWPlugin.getDefault().getREPLServerPort(), true);
             } catch (Exception e) {
                 throw new ExecutionException("Could not connect to Eclipse's internal nrepl server", e);
             }
@@ -121,7 +121,7 @@ public class Actions {
     public static class NewSessionHandler extends AbstractREPLViewHandler {
         public void doExecute(ExecutionEvent event, REPLView repl) throws ExecutionException {
             try {
-                REPLView.connect(repl.getConnection().url);
+                REPLView.connect(repl.getConnection().url, true);
             } catch (Exception e) {
                 final String msg = "Unexpected exception occured while trying to connect REPL view to clojure server"; 
                 ErrorDialog.openError(

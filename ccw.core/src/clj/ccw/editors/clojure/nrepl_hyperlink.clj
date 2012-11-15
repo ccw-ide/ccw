@@ -12,7 +12,7 @@
         s (.get document offset length)
         [[url]] (re-seq pattern s)
         hyperlink (reify org.eclipse.ui.console.IHyperlink
-                    (linkActivated [this] (ccw.repl.REPLView/connect url))
+                    (linkActivated [this] (ccw.repl.REPLView/connect url true))
                     (linkExited [this])
                     (linkEntered [this]))]
     (.addHyperlink console hyperlink offset length)))

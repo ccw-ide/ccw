@@ -341,11 +341,11 @@ public class REPLView extends ViewPart implements IAdaptable {
         }
     }
     
-    public static REPLView connect (String url) throws Exception {
-        return connect(url, null, null);
+    public static REPLView connect (String url, boolean makeActiveREPL) throws Exception {
+        return connect(url, null, null, makeActiveREPL);
     }
     
-    public static REPLView connect (String url, IConsole console, ILaunch launch) throws Exception {
+    public static REPLView connect (String url, IConsole console, ILaunch launch, boolean makeActiveREPL) throws Exception {
         String secondaryId;
         REPLView repl = (REPLView)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(
                 VIEW_ID,
@@ -354,7 +354,14 @@ public class REPLView extends ViewPart implements IAdaptable {
         repl.secondaryId = secondaryId;
         repl.console = console;
         repl.launch = launch;
-        return repl.configure(url) ? repl : null;
+        if (repl.configure(url)) {
+        	if (makeActiveREPL) {
+        		REPLView.activeREPL.set(repl);
+        	}
+        	return repl;
+        } else {
+        	return null;
+        }
     }
     
     public Connection getConnection () {

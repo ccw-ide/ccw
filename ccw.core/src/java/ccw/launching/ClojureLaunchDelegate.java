@@ -37,7 +37,6 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
 import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.console.ConsolePlugin;
@@ -70,10 +69,12 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
     
     private class REPLViewLaunchMonitor extends ProgressMonitorWrapper {
         private ILaunch launch;
+        private final boolean makeActiveREPL;
         
-        private REPLViewLaunchMonitor (IProgressMonitor m, ILaunch launch) {
+        private REPLViewLaunchMonitor (IProgressMonitor m, ILaunch launch, boolean makeActiveREPL) {
             super(m);
             this.launch = launch;
+            this.makeActiveREPL = makeActiveREPL;
         }
 
         public void done() {
@@ -151,7 +152,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 		            	}
 		                private void connectRepl() {
 		                    try {
-		                        REPLView replView = REPLView.connect("nrepl://localhost:" + port.intValue(), lastConsoleOpened, launch);
+		                        REPLView replView = REPLView.connect("nrepl://localhost:" + port.intValue(), lastConsoleOpened, launch, makeActiveREPL);
 		                        String startingNamespace = REPLViewLaunchMonitor.this.launch.getLaunchConfiguration().getAttribute(LaunchUtils.ATTR_NS_TO_START_IN, "user");
 		                        try {
 		                        	replView.setCurrentNamespace(startingNamespace);
@@ -190,7 +191,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
         try {
             Var.pushThreadBindings(RT.map(currentLaunch, launch));
             super.launch(configuration, mode, launch, (monitor == null || !isLaunchREPL(configuration)) ?
-                    monitor : new REPLViewLaunchMonitor(monitor, launch));
+                    monitor : new REPLViewLaunchMonitor(monitor, launch, true));
         } finally {
             Var.popThreadBindings();
         }

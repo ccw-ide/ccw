@@ -87,7 +87,7 @@ public class LoadFileAction extends Action {
         final String sourcePath = tempSourcePath;
 
         final REPLView repl = REPLView.activeREPL.get();
-        if (repl != null && !repl.isDisposed()) {
+        if (repl != null && !repl.isDisposed())  {
     		evaluateFileText(repl, editor.getDocument().get(), filePath, sourcePath, editorFile.getName());
         } else {
     		CCWPlugin.getTracer().trace(TraceOptions.LAUNCHER, "No active REPL found (",
