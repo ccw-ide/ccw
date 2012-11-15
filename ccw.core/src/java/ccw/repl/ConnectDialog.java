@@ -14,10 +14,10 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 public class ConnectDialog extends Dialog {
-    private Combo hosts;
+    private Text hosts;
     private Text port;
-    private String host;
     private int portNumber;
+    private String url;
     
     public ConnectDialog(Shell parentShell) {
         super(parentShell);
@@ -39,7 +39,7 @@ public class ConnectDialog extends Dialog {
         parent.setLayout(new GridLayout(2, false));
         new Label(parent, 0).setText("Hostname");
         
-        hosts = new Combo(parent, SWT.BORDER);
+        hosts = new Text(parent, SWT.BORDER);
         hosts.setText("127.0.0.1"); // don't know much about swt layouts yet :-(
         hosts.setSelection(new Point(0, hosts.getText().length()));
         
@@ -58,22 +58,11 @@ public class ConnectDialog extends Dialog {
     }
 
     protected void okPressed () {
-        host = hosts.getText();
-        
-        try {
-            portNumber = Integer.parseInt(port.getText());
-        } catch (NumberFormatException e) {
-            // shouldn't happen given the keylistener above
-        }
-
+        url = String.format("nrepl://%s:%s", hosts.getText(), port.getText());
         super.okPressed();
     }
-
-    public String getHost () {
-        return host;
-    }
     
-    public int getPort () {
-        return portNumber;
+    public String getURL () {
+        return url;
     }
 }

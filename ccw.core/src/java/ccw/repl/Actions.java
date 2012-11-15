@@ -23,7 +23,15 @@ public class Actions {
     public static class Connect extends AbstractHandler {
         public Object execute (ExecutionEvent event) throws ExecutionException {
             try {
-                return REPLView.connect();
+                IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+                ConnectDialog dlg = new ConnectDialog(window.getShell());
+                
+                REPLView repl = null;
+                if (dlg.open() == ConnectDialog.OK) {
+                    repl = REPLView.connect(dlg.getURL());
+                }
+                
+                return repl;
             } catch (Exception e) {
                 throw new ExecutionException("Could not connect to repl", e);
             }
