@@ -259,7 +259,7 @@ public class REPLView extends ViewPart implements IAdaptable {
     }
 
     public void printErrorDetail() {
-        evalExpression("(binding [*out* *err*] (if-not *e (println \"No prior exception bound to *e.\") (clojure.repl/pst *e)))", false, false);
+        evalExpression("(binding [*out* *err*] (if-not *e (println \"No prior exception bound to *e.\") (require 'clojure.repl) (clojure.repl/pst *e)))", false, false);
     }
 
     public void sendInterrupt() {
