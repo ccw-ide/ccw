@@ -259,7 +259,13 @@ public class REPLView extends ViewPart implements IAdaptable {
     }
 
     public void printErrorDetail() {
-        evalExpression("(binding [*out* *err*] (if-not *e (println \"No prior exception bound to *e.\") (require 'clojure.repl) (clojure.repl/pst *e)))", false, false);
+        evalExpression("(require 'clojure.repl)" +
+        		"(binding [*out* *err*]" +
+        		"  (if-not *e (println \"No prior exception bound to *e.\")" +
+        		// concession for Clojure 1.2.0 environments that don't have pst
+        		"    (if-let [pst (resolve 'clojure.repl/pst)]" +
+        		"      (pst *e)" +
+        		"      (.printStackTrace *e *out*))))", false, false);
     }
 
     public void sendInterrupt() {
