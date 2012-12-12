@@ -492,18 +492,25 @@
        "(a b ((c| d) );;a\n e f)" "(a b ((c| d) ;;a\n e) f)"
        "#{:a| :b} :c" "#{:a| :b :c}"
        "(let [a 1 b 2]|)\n(do blah)" "(let [a 1 b 2]|\n(do blah))"
-       "[[:a| :b] :c]" "[[:a| :b :c]]"}]
+       "[[:a| :b] :c]" "[[:a| :b :c]]"
+       "(foo (\"ba|r\" baz) quux zot)" "(foo (\"ba|r baz\") quux zot)"}]
      ["C-(" :paredit-backward-slurp-sexp
       {"(foo bar (baz| quux) zot)"
        "(foo (bar baz| quux) zot)"
        "(a b ((c| d)) e f)"
-       "(a (b (c| d)) e f)"}]
+       "(a (b (c| d)) e f)"
+       "(foo (baz \"ba|r\") quux zot)"
+       "(foo (\"baz ba|r\") quux zot)"}]
      ["C-}" :paredit-forward-barf-sexp
       {"(foo (bar |baz quux) zot)"
-       "(foo (bar |baz) quux zot)"}]
+       "(foo (bar |baz) quux zot)"
+       "(foo (baz \"ba|r\") quux zot)"
+       "(foo (baz \"ba|r\") quux zot)"}]
      ["C-{" :paredit-backward-barf-sexp
       {"(foo (bar baz |quux) zot)"
-       "(foo bar (baz |quux) zot)"}]]
+       "(foo bar (baz |quux) zot)"
+       "(foo (baz \"ba|r\") quux zot)"
+       "(foo (baz \"ba|r\") quux zot)"}]]
 
 
 
