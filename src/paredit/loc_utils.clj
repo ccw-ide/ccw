@@ -166,7 +166,14 @@
             (loop [start (int 0) end (int (count (-> loc zip/node :content)))]
               (if (<= end start)
                 (if (= start (count (-> loc zip/node :content)))
-                  [(root-loc loc) 0] ; problem, no loc found (end of text, will return root-loc instead)
+                  ; no loc found (end of text, will return root-loc instead)
+                  (let [last-leave (last 
+                                     (take-while 
+                                       #(and (zip/branch? %) (zip/children %))
+                                       (iterate (comp zip/rightmost zip/down) 
+                                                (zip/rightmost loc))))]
+                    [last-leave 0])                  
+                  
                   [(vdown loc start) (- offset (-> loc zip/node :content-cumulative-count (get start)))])
                 (let [n (int (+ start (quot (- end start) 2)))
                       n-offset (-> loc zip/node :content-cumulative-count (get n))

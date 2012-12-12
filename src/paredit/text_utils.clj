@@ -18,13 +18,14 @@
   (str (.substring s 0 offset) text (.substring s (+ offset length))))
 
 (defn insert
-  "insert what at offset. offset shifted by what's length, selection length unchanged"
+  "insert what at offset, replacing selection. offset shifted by what's length, selection reset"
   ([{:keys [^String text offset length modifs] :as where :or {modifs []}} ^String what]
     (let [new-offset (+ offset (.length what))]
       (assoc where 
-        :text (str (.substring text 0 offset) what (.substring text offset))
+        :text (str-replace text offset length what)
         :offset new-offset
-        :modifs (conj modifs {:text what, :offset offset, :length 0}))))) 
+        :length 0
+        :modifs (conj modifs {:text what, :offset offset, :length 0})))))
 
 (defn delete
   "removes n chars at offset off. offset not shifted, selection length unchanged"
