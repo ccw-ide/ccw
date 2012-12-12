@@ -98,7 +98,10 @@
   [parsed]
   (not (parsed-in-tags? parsed *not-in-code*)))
 
-(defn in-code? [loc] (and loc (not (*not-in-code* (loc-tag (parse-node loc))))))
+(defn in-code? 
+  [loc] 
+  (when-let [loc-tag (loc-tag (parse-node loc))]
+    (not (*not-in-code* loc-tag))))
   
 (defmulti paredit (fn [k & args] k))
 
@@ -120,7 +123,7 @@
   [parsed [o c] {:keys [^String text offset length] :as t} 
    chars-with-no-space-before chars-with-no-space-after]
   (if (zero? length) 
-    (let [offset-loc (-> parsed parsed-root-loc (loc-for-offset offset))]
+    (let [offset-loc (-> parsed parsed-root-loc (leave-for-offset offset))]
       (if (in-code? offset-loc)
         (insert-balanced [o c] t chars-with-no-space-before chars-with-no-space-after)
         (-> t (t/insert (str o)))))
@@ -142,7 +145,10 @@
                       (t/delete t (start-offset last-loc) nb-delete)
                       t)] ; z/left because there is the closing node
               (-> t (t/set-offset (- (end-offset match) nb-delete))))
-            (-> t (t/insert (str c)))))
+            (if (or (:broken? parsed)
+                    (= :net.cgrand.parsley/unfinished (:tag parsed)))
+              (-> t (t/insert (str c)))
+              t)))
         (-> t (t/insert (str c))))))
 
 (defmethod paredit 
@@ -217,18 +223,19 @@
      (with-important-memoized 
        (if parse-tree
          (let [offset-loc (-> parse-tree parsed-root-loc (loc-for-offset offset))
-               handled-forms *brackets-tags*
+               handled-forms (conj *brackets-tags* :meta)
                in-handled-form (handled-forms (loc-tag offset-loc))
-               open-punct-length (.length ^String (first (:content (z/node offset-loc))))]
+               open-punct-length #(.length ^String (z/node (first (next-leaves offset-loc))))
+               ]
            (cond 
              (and in-handled-form (= offset (start-offset offset-loc)))
-               (t/shift-offset t open-punct-length)
+               (t/shift-offset t (open-punct-length))
              (and in-handled-form (= offset (dec (end-offset offset-loc))))
                (if (> (-> offset-loc z/node :content count) 2)
                  t     ; don't move
                  (-> t ; delete the form 
                    (t/delete (start-offset offset-loc) (loc-count offset-loc))
-                   (t/shift-offset (- open-punct-length))))
+                   (t/shift-offset (- (open-punct-length)))))
              :else
                (t/delete t offset 1)))
          (t/delete t offset 1)))))
@@ -264,17 +271,30 @@
                (-> t (t/delete offset 1) (t/shift-offset -1))))
          (-> t (t/delete offset 1) (t/shift-offset -1))))))
 
-(def lisp-forms (into #{} (map str '(let fn binding proxy reify extend extend-protocol extend-type bound-fn 
+(def lisp-forms (into #{} (mapcat (fn [sym] [(str sym) (str "clojure.core/" sym)]) '(let fn binding proxy reify extend extend-protocol extend-type bound-fn 
                             if if-not if-let when when-not when-let when-first condp case loop dotimes
                             for while do doto try catch locking dosync doseq dorun doall
                             -> -?> ->> future ns clojure.core/ns gen-class gen-interface))))
-(defn ^{:doc "Returns logical true if the String probably names a special form or macro var"}
-  lisp-form? [^String s]
-  (or
-    (.startsWith s ".")
-    (.startsWith s "def")
-    (.startsWith s "with")
-    (lisp-forms s)))
+(defn lisp-form? 
+  "Returns logical true if the String probably names a special form or macro var"
+  [^String s]
+  (let [name (name (symbol s))]
+    (or
+      (.startsWith s ".")
+      (.startsWith name "def")
+      (.startsWith name "with")
+      (.startsWith name "let")
+    (lisp-forms s))))
+
+
+(defn inline-implementation? 
+  "Returns logical true if the loc does not correspond to a function call, but
+   rather to a protocol/record inline implementation in defrecord, defprotocol,
+   extend-*, etc." 
+  [loc]
+  (when-let [pcalled (-?> loc z/up z/up z/node paredit.parser/called)]
+    (#{"defrecord", "extend-protocol", "extend-type", "proxy",
+       "deftype", "reify"} pcalled)))
 
 (defn indent-column 
   "pre-condition: line-offset is already the starting offset of a line"
@@ -290,7 +310,8 @@
             (cond
               (nil? seen-loc) 
                 (+ (loc-col loc) (loc-count loc) 1)
-              (lisp-form? (loc-text (first seen-loc)))
+              (or (lisp-form? (loc-text (first seen-loc)))
+                  (inline-implementation? (first seen-loc)))
                 (+ (loc-col loc) (loc-count loc) 1)
               (second seen-loc)
                 (loc-col (second seen-loc))

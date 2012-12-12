@@ -23,18 +23,54 @@
   (lr+/match #{")" "]" "}" eof} s eof?))
 
 (def gspaces #{:whitespace :comment :discard})
-(def only-code (partial remove (comp gspaces :tag)))
-(defn code-children [e] (only-code (:content e)))
-(defn sym-name
-  "returns the symbol name" [e] (and (#{:symbol} (:tag e)) (apply str (:content e))))
-(defn call-of [e c] (and (#{"("} (nth (code-children e) 0)) (#{c} (sym-name (nth (code-children e) 1))) e))
-(defn call-args [e] (-> (code-children e) nnext butlast))
-(defn form 
-  "removes the meta(s) to get to the form" 
+(def only-code (partial remove (comp (conj gspaces 
+                                           :meta-prefix
+                                           :deprecated-meta-prefix) 
+                                     :tag)))
+
+(defn code-children 
+  [e] 
+  (only-code (:content e)))
+
+(defn remove-meta 
+  "removes the meta(s) to get to the form"
   [e]
-  (if-not (#{:meta} (:tag e))
+  (if (not= :meta (:tag e))
     e
-    (recur (nth (code-children e) 2))))
+    (recur (first (code-children e)))))
+
+(defn ^:deprecated form 
+  "DEPRECATED - use remove-meta instead - removes the meta(s) to get to the form" 
+  [e] (remove-meta e))
+
+(defn sym-name
+  "returns the symbol name" 
+  [e] 
+  (let [e (remove-meta e)]
+    (and (#{:symbol} (:tag e)) (apply str (:content e)))))
+
+(defn called 
+  "If e is a function call, return the called symbol name"
+  [e] 
+  (let [e (remove-meta e)
+        e-code-children (code-children e)]
+    (and 
+      (#{"("} (nth e-code-children 0))
+      (sym-name (nth e-code-children 1)))))
+
+(defn call-of 
+  "Is form e a call to c?
+   Return e"
+  [e c] 
+  (let [e (remove-meta e)]
+    (and 
+      (#{c} (called e)) 
+      e)))
+
+(defn call-args
+  [e]
+  (-> (code-children e) nnext butlast))
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -82,15 +118,15 @@
 (def open-discard "#_")
 (def whitespace #"(?:,|\s)+")
 (def open-comment #"(?:\#\!|;)")
+(def open-reader-literal #"#(?![\(\^\"\{\'\_\!])")
 (def open-char "\\")
 (def symbol-exclusion #"[^\(\[\#\{\\\"\~\%\:\,\s\!\;\'\@\`;0-9]")
 (def ^{:private true} prefixes
-  #{open-list open-vector open-map open-set open-quote open-meta open-deref open-syntax-quote
-    open-fn open-var open-deprecated-meta open-string open-regex open-unquote-splicing
+  #{open-list open-vector open-map open-set open-quote 
+    open-meta open-deprecated-meta open-deref open-syntax-quote
+    open-fn open-var open-string open-regex open-unquote-splicing
     open-unquote open-anon-arg open-keyword open-discard whitespace open-comment
     open-char})
-
-(def *brackets-tags* #{:list :map :vector :string :set :fn :regex})
 
 (defn view-children-seq [view abstract-children]
   (map #(% view) abstract-children))
@@ -170,11 +206,15 @@
     (= :set t) (balanced :open :close-set abstract-children)
     (= :quote t) (unbalanced :open abstract-children)
     ;(= :meta t) (unbalanced :open abstract-children)
-    (= :meta t) (let [meta-target (peek abstract-children)]
-                  (concat (token :meta (- count (node-count meta-target)))
-                          (meta-target tokens-view)
-                          ;(mapcat identity (view-children-seq tokens-view (pop abstract-children)))
-                          )) 
+    (#{:meta :deprecated-meta} t)
+      (let [[meta & rest] abstract-children]
+        (concat (token :meta (node-count meta))
+                (mapcat identity (view-children-seq tokens-view rest)))) 
+    (= :reader-literal t) (let [body (peek abstract-children)]
+                            (concat (token :reader-literal (- count (node-count body)))
+                                    (body tokens-view)
+                                    ;(mapcat identity (view-children-seq tokens-view (pop abstract-children)))
+                                    ))
     #_(let [abstract-children (mapcat identity abstract-children)]
                   ;(print "(tokens) (:meta) abstract-children:") (prn abstract-children)
                   ;(print "(get abstract-children 0):") (prn (first abstract-children))
@@ -186,7 +226,6 @@
     (= :syntax-quote t) (unbalanced :open abstract-children) 
     (= :var t) (unbalanced :open-var abstract-children)
     (= :fn t) (concat (token :nest 0) (balanced :open-fn :close-fn abstract-children) (token :unnest 0))
-    (= :deprecated-meta t) (unbalanced :open abstract-children)
     (= :unquote-splicing t) (unbalanced :open abstract-children)
     (= :unquote t) (unbalanced :open abstract-children)
     (= :string t) (token :string count)
@@ -309,16 +348,17 @@
              :set
              :quote
              :meta
+             :deprecated-meta
              :deref
              :syntax-quote
              :var
              :fn
-             :deprecated-meta
              :unquote-splicing
              :unquote
              :string
              :regex
              :symbol 
+             :reader-literal
              :keyword 
              :int 
              :float 
@@ -338,8 +378,6 @@
                ;(p/unspaced open-string #"(?:\\.|[^\\\"])++(?!\")" :? eof)
                ;(p/unspaced open-regex #"(?:\\.|[^\\\"])++(?!\")" :? eof)
                [open-quote eof]
-               [open-meta :expr :? eof]
-               [open-deprecated-meta :expr :? eof]
                [open-deref eof]
                [open-syntax-quote eof]
                [open-var eof]
@@ -352,20 +390,27 @@
     :map [open-map :expr* "}"]
     :set [open-set :expr* "}"]
     :quote [open-quote :expr]
-    :meta [open-meta :expr :expr]
+    :open-meta "^"             :open-deprecated-meta "#^"
+    :meta-prefix [:open-meta 
+                  :expr]       :deprecated-meta-prefix [:open-deprecated-meta 
+                                                        :expr]
+    :meta [:meta-prefix :expr] :deprecated-meta [:deprecated-meta-prefix 
+                                                 :expr]
     :deref [open-deref :expr]
     :syntax-quote [open-syntax-quote :expr]
     :var [open-var :expr]
     :fn [open-fn :expr* ")"]
-    :deprecated-meta [open-deprecated-meta :expr :expr]
     :unquote-splicing [open-unquote-splicing :expr]
     :unquote [open-unquote :expr]
     :string-body #"(?:\\.|[^\\\"])++(?=\")"
     :string (p/unspaced open-string :string-body :? \")
     :regex-body #"(?:\\.|[^\\\"])++(?=\")"
     :regex (p/unspaced open-regex :regex-body :? \")
+    :reader-literal-prefix (p/unspaced open-reader-literal :symbol)
+    :reader-literal [:reader-literal-prefix :expr]
     :symbol
-      #"(?:[\-\+](?![0-9])[^\^\(^\[^\#^\{^\\^\"^\~^\%^\:^\,^\s^\;^\@^\`^\)^\]^\}]*)|(?:[^\^\(\[\#\{\\\"\~\%\:\,\s\;\'\@\`\)\]\}\-\+;0-9][^\^\(\[\#\{\\\"\~\%\:\,\s\;\@\`\)\]\}]*|#(?![\{\(\'\^\"\_\!])[^\^\(\[\#\{\\\"\~\%\:\,\s\;\'\@\`\)\]\}]*)#?"
+;      #"(?:[\-\+](?![0-9])[^\^\(^\[^\#^\{^\\^\"^\~^\%^\:^\,^\s^\;^\@^\`^\)^\]^\}]*)|(?:[^\^\(\[^\#\{\\\"\~\%\:\,\s\;\'\@\`\)\]\}\-\+;0-9][^\^\(\[\#\{\\\"\~\%\:\,\s\;\@\`\)\]\}]*|#(?![\{\(\'\^\"\_\!])[^\^\(\[\#\{\\\"\~\%\:\,\s\;\'\@\`\)\]\}]*)#?"
+      #"(?:(?:[\-\+](?![0-9])[^\^\(^\[^\#^\{^\\^\"^\~^\%^\:^\,^\s^\;^\@^\`^\)^\]^\}]*)|(?:[^\^\(\[^\#\{\\\"\~\%\:\,\s\;\'\@\`\)\]\}\-\+;0-9][^\^\(\[\#\{\\\"\~\%\:\,\s\;\@\`\)\]\}]*))#?"
     :keyword (p/unspaced open-keyword #"[^\(\[\{\'\^\@\`\~\"\\\,\s\;\)\]\}]*"); factorize with symbol
     :int #"(?:[-+]?(?:0(?!\.)|[1-9][0-9]*+(?!\.)|0[xX][0-9A-Fa-f]+(?!\.)|0[0-7]+(?!\.)|[1-9][0-9]?[rR][0-9A-Za-z]+(?!\.)|0[0-9]+(?!\.))(?!/))"
     :ratio #"[-+]?[0-9]+/[0-9]*"
@@ -398,6 +443,11 @@
 (defn parse-tree
   [state]
   state)
+
+(defn pretty [parse]
+  (if (map? parse)
+    (into [] (cons (:tag parse) (map pretty (:content parse))))
+    parse))
 
 (comment 
 (require '[net.cgrand.parsley.lrplus :as l])
@@ -442,3 +492,4 @@
               b)]
       b))
   (= c (lu/node-text (-> (edit-buffer nil 0 0 c) (buffer-parse-tree 0))) (lu/node-text (parse c)))))
+

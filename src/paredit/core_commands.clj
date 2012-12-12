@@ -242,6 +242,8 @@
 	                 "(  \"Hello,| world!\" foo )" "(  \"Hello,)| world!\" foo )"
 	                 "  \"Hello,| world!" "  \"Hello,)| world!"
 	                 "foo \\|" "foo \\)|"
+                  "\"Blah blah (boo hoo|)| blah blah\"" "\"Blah blah (boo hoo)| blah blah\""
+                  "foo |bar" "foo |bar"
                   ; tests with the new :chimera
                    "({foo |bar])" "({foo )|bar])"
                    "({[foo |bar)})" "({[foo )|bar)})"
@@ -356,6 +358,10 @@
                  "(|{foo bar})" "({|foo bar})"
                  
                  "|" "|"
+                 
+                 "^java.util.List |(.add \"test\")" "^java.util.List (|.add \"test\")"
+                 "^java.util.List (|)" "^java.util.List |"
+                 "|^java.util.List (.add \"test\")" "^|java.util.List (.add \"test\")"
                  }]
       ["BackDel" :paredit-backward-delete
                 {
@@ -474,8 +480,8 @@
                  "(foo |bar)" "|bar|"
                  "(foo |(bar))" "|(bar)|"
                  "(foo |(bar]|)" "(foo |(bar]|)"
-                 "(foo |(bar])|" "|(bar])|"
-                 ; (|foo|) => |foo|
+                 "(foo |(bar])|" "(foo |(bar])|"
+                 "(|foo|)" "|foo|"
                  }]
      ]
     
@@ -508,7 +514,6 @@
                  "fooz foo| (bar)| baz" "fooz |foo (bar)| baz"
                  ;with :chimera
                  "(foo bar|]" "(foo |bar|]"
-                 "(foo {bar)|]" "(foo {bar|)]|"
                  }]
      ["Shift+Alt+Right" :paredit-expand-right
                 {
@@ -538,7 +543,6 @@
                  "foo |(bar [baz (b|am)])" "foo |(bar [baz (bam)])|"
                  ;with :chimera
                  "(foo |bar]" "(foo |bar|]"
-                 "(foo |{bar)]" "(foo |{bar)]|"
                  }]
      ["Shift+Alt+Up" :paredit-expand-up
                 {
@@ -578,6 +582,13 @@
                  "foo ([|bar|])" "foo (|[bar]|)"
                  "foo (|[bar]|)" "foo |([bar])|"
                  "(^foo |baz|)" "(|^foo baz|)"
+                 "(^fo|o baz)" "(^|foo| baz)"
+                 ; DOES NOT WORK YET "(^|foo| baz)" "(|^foo| baz)"
+
+                 "(foo #bar.ba|z [quux])" "(foo #|bar.baz| [quux])"
+                 "(foo #|bar.baz| [quux])" "(foo |#bar.baz| [quux])"
+                 "(foo |#bar.baz| [quux])" "(foo |#bar.baz [quux]|)"
+
                  ;with :chimera
                  "(foo |bar]" "|(foo bar]|"
                  "(foo |{bar)]" "|(foo {bar)]|"
@@ -635,6 +646,14 @@
                  "   |" "|"
                  "(if toto\n|titi)" "(if toto\n  |titi)"
                  "(my-fn toto\n|titi)" "(my-fn toto\n       |titi)"
+                 "(letfn []\n|quux)" "(letfn []\n  |quux)"
+                 "(foo/with-bar baz\n|quux)" "(foo/with-bar baz\n  |quux)"
+                 "(defrecord Foo []\n  IFace\n  (foo []\n|))" "(defrecord Foo []\n  IFace\n  (foo []\n    |))"
+                 "(deftype Foo []\n  IFace\n  (foo []\n|))" "(deftype Foo []\n  IFace\n  (foo []\n    |))"
+                 "(extend-type Foo\n  IImpl\n  (foo []\n|))" "(extend-type Foo\n  IImpl\n  (foo []\n    |))"
+                 "(extend-protocol IProt\n  Type\n  (bar [])\n  (foo []\n|))" "(extend-protocol IProt\n  Type\n  (bar [])\n  (foo []\n    |))"
+                 "(reify IProt\n  (bar [])\n  (foo []\n|))" "(reify IProt\n  (bar [])\n  (foo []\n    |))"
+                 " (proxy [Foo] []\n     (foo []\n|bar))" " (proxy [Foo] []\n     (foo []\n       |bar))"
                  ;; future auto reindent children "(my-fn foo\n | baz\n  | baz)" "(my-fn foo\n       |baz\n       baz)"
                  }]
       [#"C-j"     :paredit-newline
