@@ -1,6 +1,7 @@
 (ns ^{:doc "Eclipse interop utilities"}
      ccw.util.eclipse
   (:require [clojure.java.io :as io])
+  (:use [clojure.core.incubator :only [-?> -?>>]])
   (:import [org.eclipse.core.resources IResource
                                        IProject
                                        ResourcesPlugin
@@ -145,6 +146,18 @@
   [plugin]
   (.getStateLocation plugin))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; IProjects
+(defn project-name [p] (.getName (project p)))
+(defn project-close [p] (.close (project p) nil))
+(defn project-open [p] (.open (project p) nil))
+(defn project-open? [p] (.isOpen (project p)))
+(defn projects-referencing [p] (into [] (.getReferecingProjects (project p))))
+(defn projects-referenced-by [p] (into [] (.getReferencedProjects (project p))))
+(defn project-folder [p child-folder-name] (.getFolder (project p) child-folder-name))
+(defn project-file [p child-file-name] (.getFile (project p) child-file-name))
+(defn project-create [p] (.create (project p) nil))
+(defn projects [] (into [] (.getProjects (workspace-root))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Long-running tasks, background tasks, Workspace Resources related tasks
@@ -298,4 +311,251 @@
     a))
 
 (defmacro ui [& args]
-  `(ui* (fn [] ~@args)))
+  `(if (org.eclipse.swt.widgets.Display/getCurrent)
+     (atom (do ~@args))
+     (ui* (fn [] ~@args))))
+
+(defn active-shell []
+  (-> (org.eclipse.swt.widgets.Display/getDefault)
+    .getActiveShell))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Message dialogs
+
+(defn info-dialog 
+  ([title message] (info-dialog nil title message))
+  ([shell title message]
+    (ui
+      (let [shell (or shell (active-shell))]
+        (org.eclipse.jface.dialogs.MessageDialog/openInformation
+          shell title message)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Platform utilities
+
+(def services 
+  {:commands org.eclipse.ui.commands.ICommandService
+   :handlers org.eclipse.ui.handlers.IHandlerService
+   :bindings org.eclipse.ui.keys.IBindingService
+   :contexts org.eclipse.ui.contexts.IContextService
+   })
+
+(defn service [service-locator s]
+  (.getService service-locator (services s s)))
+
+;; command spec
+;{:name "command name"
+; :description "command description"
+; :id "the.qualified.unique.command.id"
+; :category {:id "kkk", :name "kkkk", :description "kkkk"}
+; }
+
+(defn- handler-proxy [ f ]
+  (proxy [org.eclipse.core.commands.AbstractHandler] []
+    (execute [event] 
+      (f event)
+      nil)))
+
+(defn define-handler!*
+  ([hdl-spec] (define-handler!* (workbench) hdl-spec))
+  ([service-locator hdl-spec]
+    (let [hdl-service (service service-locator :handlers)
+          handler (handler-proxy (:fn hdl-spec (constantly nil)))]
+      (.activateHandler hdl-service 
+        (name (:command-id hdl-spec))
+        handler
+        nil
+        true))))
+
+(def global-handlers (atom {}))
+
+(defn define-handler! [hspec]
+  (let [hdl-service (service (workbench) :handlers)
+        id (name (:command-id hspec))
+        prev-handler-activation (@global-handlers id)
+        handler-activation (define-handler!* hspec)]
+    (when prev-handler-activation
+      (.deactivateHandler hdl-service prev-handler-activation))
+    (swap! global-handlers assoc id handler-activation)))
+
+(def default-category
+  {:id :ccw.util.eclipse.default-category,
+   :name "Default Category (CCW)",
+   :description "Default Category (CCW)"})
+
+(defn category
+  ([cmd-service spec]
+    (let [c (.getCategory cmd-service (name (:id spec)))]
+      (doto c 
+        (.define 
+          (:name spec "<no name>") 
+          (:description spec "<no description>"))))))
+
+(defn category-ids
+  ([] (category-ids (workbench)))
+  ([service-locator]
+    (let [cmd-service (service service-locator :commands)]
+      (.getDefinedCategoryIds cmd-service))))
+
+(defn category-by-id 
+  ([id] (category-by-id (workbench) id))
+  ([service-locator id]
+    (let [cmd-service (service service-locator :commands)]
+      (.getCategory cmd-service (name id)))))
+
+(defn command-ids 
+  ([] (command-ids (workbench)))
+  ([service-locator]
+    (let [cmd-service (service service-locator :commands)]
+      (into [] (.getDefinedCommandIds cmd-service)))))
+
+(defn command-by-id
+  ([id] (command-by-id (workbench) id))
+  ([service-locator id]
+    (let [cmd-service (service service-locator :commands)]
+      (.getCommand cmd-service (name id)))))
+
+(defn define-command! 
+  ([cmd-spec] (define-command! (workbench) cmd-spec))
+  ([service-locator cmd-spec]
+    (let [cmd-service (service service-locator :commands)
+          c (command-by-id service-locator (name (:id cmd-spec)))]
+      (doto c
+        (.define 
+          (:name cmd-spec (name (:id cmd-spec)))
+          (:description cmd-spec "<no description>")
+          (category cmd-service (or (:category cmd-spec) default-category))))
+      (when-let [hdl (:handler cmd-spec)]
+        (define-handler! {:command-id (:id cmd-spec)
+                          :fn hdl}))
+      c)))
+
+(defn defined-commands
+  ([] (defined-commands (workbench)))
+  ([service-locator]
+    (let [cmd-service (service service-locator :commands)]
+      (into [] (.getDefinedCommands cmd-service)))))
+
+(defmethod print-method 
+  org.eclipse.core.commands.Command 
+  [o, ^java.io.Writer w]
+  (print-method
+    (with-meta
+      {:id (.getId o)
+       :name (.getName o)
+       :description (.getDescription o)
+       :category {:id (.getId (.getCategory o))}}
+      {:tag org.eclipse.core.commands.Command})
+    w))
+
+;; handler spec
+;{:command-id "...."
+; :fn #()}
+
+(defn execute-command 
+  ([command-id] (execute-command (workbench) (name command-id)))
+  ([service-locator command-id]
+    (let [hdl-service (service service-locator :handlers)]
+      (.executeCommand hdl-service (name command-id) nil))))
+
+(defn active-bindings-for 
+  ([command-id] (active-bindings-for (workbench) command-id))
+  ([service-locator command-id]
+    (let [binding-service (service service-locator :bindings)]
+      (into [] (.getActiveBindingsFor binding-service (name command-id))))))
+
+(defn key-sequence [s] 
+  (cond
+    (instance? org.eclipse.jface.bindings.keys.KeySequence s) 
+      s
+    :else
+      (org.eclipse.jface.bindings.keys.KeySequence/getInstance s)))
+
+(defn key-sequence-format [key-seq] (.format key-seq))
+
+(defn- parameterized-command [command]
+  (cond
+    (instance? org.eclipse.core.commands.ParameterizedCommand command) 
+      command
+    (instance? org.eclipse.core.commands.Command command)
+      (org.eclipse.core.commands.ParameterizedCommand. command nil)
+    :else 
+      (org.eclipse.core.commands.ParameterizedCommand. 
+        (command-by-id
+          (name command))
+        nil)))
+
+(import 'org.eclipse.core.commands.contexts.Context)
+
+(defn context 
+  ([id] (context (workbench) id))
+  ([service-locator id]
+    (if (instance? Context id)
+      id
+      (let [ctx-service (service service-locator :contexts)]
+        (.getContext ctx-service (name id))))))
+
+(defn active-context-ids 
+  ([] (active-context-ids (workbench)))
+  ([service-locator]
+    (let [ctx-service (service service-locator :contexts)]
+      (into [] (.getActiveContextIds ctx-service)))))
+
+(defn context-ids 
+  ([] (context-ids (workbench)))
+  ([service-locator]
+    (let [ctx-service (service service-locator :contexts)]
+      (into [] (.getDefinedContextIds ctx-service)))))
+;; key-binding desc
+
+;{:key-sequence (key-sequence "COMMAND+P O")
+; :command  ????
+; :scheme-id
+; :context-id
+; :locale
+; :platform
+; :window-manager
+; }
+(defn key-binding 
+  [{:keys [key-sequence command scheme-id context-id
+           locale platform window-manager type] 
+    :or {scheme-id "org.eclipse.ui.defaultAcceleratorConfiguration"
+         context-id "org.eclipse.ui.contexts.dialogAndWindow"
+         locale nil
+         platform nil
+         window-manager nil
+         type org.eclipse.jface.bindings.Binding/USER}
+    :as k}]
+  (cond
+    (instance? org.eclipse.jface.bindings.keys.KeyBinding k)
+      k
+    :else 
+      (org.eclipse.jface.bindings.keys.KeyBinding.
+        (ccw.util.eclipse/key-sequence key-sequence)
+        (parameterized-command command)
+        (when scheme-id (name scheme-id))
+        (name context-id)
+        (when locale (name locale))
+        (when platform (name platform))
+        (when window-manager (name window-manager))
+        type)))
+
+(defn bindings 
+  ([] (bindings (workbench))) 
+  ([service-locator] 
+    (let [binding-service (service service-locator :bindings)]
+      (into [] (.getBindings binding-service)))))
+
+(defn save-key-binding! 
+  ([desc] (save-key-binding! (workbench) desc))
+  ([service-locator desc]
+    (let [binding-service (service service-locator :bindings)
+          kb (key-binding desc)
+          kb-id (-?> kb .getParameterizedCommand .getId)
+          id-binding-map (-?>> (bindings service-locator) 
+                           (group-by #(-?> % .getParameterizedCommand .getId)))
+          id-binding-map (update-in id-binding-map [kb-id] (fnil conj []) kb)]
+      (.savePreferences binding-service 
+        (.getActiveScheme binding-service) 
+        (into-array org.eclipse.jface.bindings.Binding 
+                    (mapcat identity (vals id-binding-map)))))))

@@ -45,6 +45,7 @@ public class Activator extends AbstractUIPlugin {
     	ClojureOSGi.require(bundleContext, "ccw.util.bundle");
     	ClojureOSGi.require(bundleContext, "ccw.util.factories");
     	ClojureOSGi.require(bundleContext, "ccw.util.string");
+    	ClojureOSGi.require(bundleContext, "ccw.util.launch");
     }
     
     public void stop(BundleContext context) throws Exception {

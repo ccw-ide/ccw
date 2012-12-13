@@ -7,7 +7,8 @@
            org.osgi.framework.Bundle
            org.osgi.framework.Version
            org.osgi.framework.BundleException
-           clojure.osgi.ClojureOSGi))
+           clojure.osgi.ClojureOSGi)
+  (:require [clojure.xml :as xml]))
 
 ;(defn require-and-get-var)
 ;	public static Var requireAndGetVar(String bundleSymbolicName, String varName) throws CoreException {
@@ -109,14 +110,33 @@
       (run [this] (f)))))
 
 ;; http://www.ibm.com/developerworks/opensource/library/os-ecl-dynext/
-(defn add-contribution [s bundle]
+(defn add-contribution! [s bundle]
   (let [registry (org.eclipse.core.runtime.RegistryFactory/getRegistry)
         key (.getTemporaryUserToken registry)
         contributor (org.eclipse.core.runtime.ContributorFactoryOSGi/createContributor bundle)
         is (java.io.ByteArrayInputStream. (.getBytes s))]
     (.addContribution registry is contributor false nil nil key)))
 
-;(ccw.util.bundle-utils/add-contribution 
+(defn xml-map->extension [ext-map]
+  (let [m {:tag "plugin" :content [ext-map]}]
+    (with-out-str (xml/emit-element m))))
+
+(defn add-command! [bundle command-attrs]
+  (let [ext-str (xml-map->extension 
+                  {:tag "extension"
+                   :attrs {:point "org.eclipse.ui.commands"}
+                   :content [{:tag "command"
+                              :attrs command-attrs}]})]
+    (add-contribution! ext-str bundle)))
+
+(defn add-menu! [bundle menu-contribution]
+  (let [ext-str (xml-map->extension 
+                  {:tag "extension"
+                   :attrs {:point "org.eclipse.ui.menus"}
+                   :content [menu-contribution]})]
+    (add-contribution! ext-str bundle)))
+
+;(ccw.util.bundle/add-contribution! 
 ;     "
 ;   <plugin>
 ;      <extension
@@ -134,7 +154,7 @@
 ;   "
 ;     b)
 
-;(ccw.util.bundle-utils/add-contribution 
+;(ccw.util.bundle/add-contribution! 
 ;     "
 ;   <plugin>
 ;      <extension
@@ -150,7 +170,9 @@
 ;   "
 ;     b)
 
-;(ccw.util.bundle-utils/add-contribution 
+
+
+;(ccw.util.bundle/add-contribution! 
 ;     "
 ;   <plugin>
 ;      <extension
@@ -188,7 +210,7 @@
 
 
       
-;(ccw.util.bundle-utils/add-contribution 
+;(ccw.util.bundle/add-contribution! 
 ;     "
 ;<plugin>
 ;<extension
