@@ -21,21 +21,20 @@
                (catch Exception _)))))
     "Project names must be valid Clojure symbols."))
 
-(defn perform-finish [project template-name]
-  (let [project-name (.getName project)
-        project-file (-> project .getLocation .toFile)]
-    (println "project-name:" project-name
+(defn perform-finish [lein-project-name project template-name]
+  (let [project-file (-> project .getLocation .toFile)]
+    (println "lein-project-name:" lein-project-name
              \newline
              "project-file:" project-file)
     ;(handlers/add-leiningen-nature (e/project project-name))
     ;(.refreshLocal (e/project project-name) (IResource/DEPTH_INFINITE) nil)
     ;(Thread/sleep 2000)
-    (u/lein-new (.getAbsolutePath project-file) template-name project-name)
+    (u/lein-new (.getAbsolutePath project-file) template-name lein-project-name)
     (.refreshLocal project (IResource/DEPTH_INFINITE) nil)
     (handlers/add-natures
       project
       [(JavaCore/NATURE_ID) n/NATURE-ID]
-      (str "Adding leiningen support to project " project-name))
+      (str "Adding leiningen support to project " project))
     #_(handlers/add-natures
       project
       ["ccw.nature"]

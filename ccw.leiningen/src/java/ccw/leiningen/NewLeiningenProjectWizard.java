@@ -361,6 +361,7 @@ public class NewLeiningenProjectWizard extends BasicNewResourceWizard
 
 		try {
 			wizard._(performFinish,
+					 mainPage.getLeiningenProjectName(),
 					 project,
 					 mainPage.getTemplateName()
 						//,

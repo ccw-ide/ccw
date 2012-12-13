@@ -1,6 +1,10 @@
 package ccw.leiningen;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -11,6 +15,10 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
+import org.eclipse.ui.internal.ide.IDEWorkbenchMessages;
+import org.eclipse.ui.internal.ide.IDEWorkbenchPlugin;
+import org.eclipse.ui.internal.ide.dialogs.ProjectContentsLocationArea;
+import org.eclipse.ui.internal.ide.dialogs.ProjectContentsLocationArea.IErrorMessageReporter;
 
 import ccw.util.ClojureInvoker;
 
@@ -53,6 +61,8 @@ public final class WizardNewLeiningenProjectTemplatePage extends
 	 */
 	public void createControl(Composite parent) {
 		super.createControl(parent);
+		
+		locationArea = new ProjectContentsLocationArea(getErrorReporter(), (Composite) getControl());
 
 		createLeinTemplateGroup((Composite) getControl());
 
@@ -61,6 +71,33 @@ public final class WizardNewLeiningenProjectTemplatePage extends
 				new String[] { "org.eclipse.ui.resourceWorkingSetPage" }); //$NON-NLS-1$
 		Dialog.applyDialogFont(getControl());
 	}
+	
+    /**
+	 * Get an error reporter for the receiver.
+	 * @return IErrorMessageReporter
+	 */
+	private IErrorMessageReporter getErrorReporter() {
+		return new IErrorMessageReporter(){
+			/* (non-Javadoc)
+			 * @see org.eclipse.ui.internal.ide.dialogs.ProjectContentsLocationArea.IErrorMessageReporter#reportError(java.lang.String)
+			 */
+			public void reportError(String errorMessage, boolean infoOnly) {
+				if (infoOnly) {
+					setMessage(errorMessage, IStatus.INFO);
+					setErrorMessage(null);
+				}
+				else
+					setErrorMessage(errorMessage);
+				boolean valid = errorMessage == null;
+				if(valid) {
+					valid = validatePage();
+				}
+				
+				setPageComplete(valid);
+			}
+		};
+	}
+
 
 	/**
 	 * (non-Javadoc) Method declared on IDialogPage.
@@ -151,7 +188,7 @@ public final class WizardNewLeiningenProjectTemplatePage extends
 
 	@Override
 	protected boolean validatePage() {
-		if (super.validatePage()) {
+		if (superValidatePage()) {
 			String mess = (String) wizard._(checkProjectName, getProjectName());
 			if (mess != null) {
 				setMessage(mess, ERROR);
@@ -171,5 +208,69 @@ public final class WizardNewLeiningenProjectTemplatePage extends
 		} else {
 			return false;
 		}
+	}
+	
+	private ProjectContentsLocationArea locationArea;
+	
+	/* Copied from parent class */
+    protected boolean superValidatePage() {
+        IWorkspace workspace = IDEWorkbenchPlugin.getPluginWorkspace();
+
+        String projectFieldContents = getProjectName();
+        if (projectFieldContents.equals("")) { //$NON-NLS-1$
+            setErrorMessage(null);
+            setMessage(IDEWorkbenchMessages.WizardNewProjectCreationPage_projectNameEmpty);
+            return false;
+        }
+
+        IStatus nameStatus = workspace.validateName(projectFieldContents,
+                IResource.PROJECT);
+        if (!nameStatus.isOK()) {
+            setErrorMessage(nameStatus.getMessage());
+            return false;
+        }
+
+        IProject handle = getProjectHandle();
+        if (handle.exists()) {
+            setErrorMessage(IDEWorkbenchMessages.WizardNewProjectCreationPage_projectExistsMessage);
+            return false;
+        }
+                
+        IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(
+				getProjectName());
+		locationArea.setExistingProject(project);
+		
+		String validLocationMessage = locationArea.checkValidLocation();
+		if (validLocationMessage != null) { // there is no destination location given
+			setErrorMessage(validLocationMessage);
+			return false;
+		}
+
+        setErrorMessage(null);
+        setMessage(null);
+        return true;
+    }
+	
+	@Override
+	public String getProjectName() {
+		String name = super.getProjectName();
+		if (name.contains("/")) {
+			String[] parts = name.split("/");
+			if (parts.length < 2) {
+				return "";
+			} else {
+				return parts[1];
+			}
+		} else {
+			return name;
+		}
+	}
+	
+	/**
+	 * @return the raw entered project name, e.g. for Leiningen it can contain
+	 *         a groupId, as in my.groupId/myArtifactId
+	 */
+	public String getLeiningenProjectName() {
+		return super.getProjectName();
 	}
 }
