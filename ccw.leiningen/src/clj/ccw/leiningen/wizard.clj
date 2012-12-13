@@ -26,19 +26,9 @@
     (println "lein-project-name:" lein-project-name
              \newline
              "project-file:" project-file)
-    ;(handlers/add-leiningen-nature (e/project project-name))
-    ;(.refreshLocal (e/project project-name) (IResource/DEPTH_INFINITE) nil)
-    ;(Thread/sleep 2000)
     (u/lein-new (.getAbsolutePath project-file) template-name lein-project-name)
     (.refreshLocal project (IResource/DEPTH_INFINITE) nil)
     (handlers/add-natures
       project
       [(JavaCore/NATURE_ID) n/NATURE-ID]
-      (str "Adding leiningen support to project " project))
-    #_(handlers/add-natures
-      project
-      ["ccw.nature"]
-      "Adding Clojure Support")
-    
-    ;(.refreshLocal (e/project project-name) (IResource/DEPTH_INFINITE) nil)
-    ))
+      (str "Adding leiningen support to project " project))))
