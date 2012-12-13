@@ -168,6 +168,7 @@ public final class ClojureCore {
             return null;
         try {
             if (!project.exists()
+            		|| !project.isOpen()
                     || !project.hasNature(NATURE_ID))
                 return null;
         }
@@ -195,7 +196,8 @@ public final class ClojureCore {
         if (p != null)
             return p;
         try {
-            if (!project.exists() || !project.isOpen()
+            if (!project.exists() 
+            		|| !project.isOpen()
                     || !project.hasNature(NATURE_ID))
                 return null;
         }

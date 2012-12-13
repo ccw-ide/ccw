@@ -81,6 +81,7 @@
    problem).
    Pre-requisite: project exists and is open"
   [project nature-id]
+  {:pre [(.isOpen project)]}
   (.hasNature project nature-id))
 
 (defn set-natures! [desc natures]

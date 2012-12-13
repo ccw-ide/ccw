@@ -27,7 +27,11 @@ public class ClojureNaturePropertyTest extends PropertyTester {
     public static boolean hasClojureNature(IResource resource) {
         try {
         	IProject project = resource.getProject();
-            return project.hasNature(ClojureCore.NATURE_ID);
+        	if (project.isOpen()) {
+        		return project.hasNature(ClojureCore.NATURE_ID);
+        	} else {
+        		return false;
+        	}
         } catch (CoreException e) {
             CCWPlugin.logError("error while evaluating if resource " + resource +
                     " belongs to a project which has nature " + ClojureCore.NATURE_ID, e);
