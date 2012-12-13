@@ -137,7 +137,7 @@ public final class ClojureTokenScanner implements ITokenScanner {
 
     public final int getTokenLength() {
     	long start = System.currentTimeMillis();
-    	Long tokenLength = (Long) currentToken.get(tokenLengthKeyword);
+    	Number tokenLength = (Number) currentToken.get(tokenLengthKeyword);
         long localDuration = System.currentTimeMillis() - start;
         getTokenLengthDuration += localDuration;
 		duration += localDuration;
@@ -157,8 +157,8 @@ public final class ClojureTokenScanner implements ITokenScanner {
     		firstToken = false;
     	}
         if (!firstToken) {
-        	long count = (Long) currentToken.get(tokenLengthKeyword);
-        	currentOffset += count;
+        	Number count = (Number) currentToken.get(tokenLengthKeyword);
+        	currentOffset += count.intValue();
         	tokenSeq = tokenSeq.next();
         }
         //System.out.println(tokenSeq.first());
