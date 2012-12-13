@@ -11,7 +11,8 @@
 
 (ns ccw.editors.clojure.handlers
   (:require [paredit.core :as pc]
-            [ccw.editors.clojure.clojure-hyperlink-detector :as hlu]) ; hlu as HyperLinkUtil
+            [ccw.editors.clojure.clojure-hyperlink-detector :as hlu]
+            [ccw.editors.clojure.PareditAutoEditStrategyImpl :as pimpl]) ; hlu as HyperLinkUtil
   (:use [clojure.core.incubator :only [-?>]])  
   (:import
     [org.eclipse.ui.handlers HandlerUtil]
@@ -27,11 +28,15 @@
     (finally (-> editor .getSelectionHistory .listenToSelectionChanges))))
 
 ;; TODO remove duplications with appli-paredit-command
-(defn- apply-paredit-selection-command [editor command-key]
+(defn- apply-paredit-selection-command [editor command-key & options]
   (let [{:keys #{length offset}} (bean (.getUnSignedSelection editor))
         text  (.get (.getDocument editor))
         {new-length :length, new-offset :offset} 
-          (pc/paredit command-key (.getParseState editor) {:text text :offset offset :length length})]
+          (apply pc/paredit 
+                 command-key
+                 (.getParseState editor) 
+                 {:text text :offset offset :length length}
+                 (pimpl/paredit-options command-key))]
     (-> editor .getSelectionHistory (.remember (SourceRange. offset length)))
     (ignoring-selection-changes editor 
       #(.selectAndReveal editor new-offset new-length))))
@@ -78,7 +83,8 @@
                                    :paredit-expand-up))
 (defn indent-selection [_ event]
   (apply-paredit-selection-command (editor event) 
-                                   :paredit-indent-line))
+                                   :paredit-indent-line
+                                   :force-two-space-indent true))
 (defn toggle-structural-edition-mode [_ event]
   (.toggleStructuralEditionMode (editor event)))
 

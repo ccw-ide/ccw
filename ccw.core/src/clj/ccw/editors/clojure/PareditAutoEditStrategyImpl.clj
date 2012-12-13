@@ -35,9 +35,15 @@
     :paredit-open-round, :paredit-open-square, :paredit-open-curly,
     :paredit-doublequote})
 
+(def
+  command-preferences
+  "map of command to map of keyword -> associated global preference key"
+  {:paredit-newline {:force-two-spaces-indent ccw.preferences.PreferenceConstants/FORCE_TWO_SPACES_INDENT}
+   :paredit-indent-line {:force-two-spaces-indent ccw.preferences.PreferenceConstants/FORCE_TWO_SPACES_INDENT}})
+
 (def 
-  #^{:doc "{:command configuration-key ...}"} 
   *configuration-based-commands*
+  "{:command configuration-key ...}"
   {:paredit-indent-line ccw.preferences.PreferenceConstants/USE_TAB_FOR_REINDENTING_LINE})
 
 (defn par-command? [command] (contains? *commands* (:text command)))
@@ -64,6 +70,11 @@
 (defn- ccw-prefs
   []
   (.getCombinedPreferenceStore (ccw.CCWPlugin/getDefault)))
+
+(defn paredit-options [command]
+  (when-let [options-prefs (command-preferences command)]
+    (mapcat (fn [[k pref]] [k (.getBoolean (ccw-prefs) pref)]) 
+            options-prefs)))
 
 (defn do-command?
   "Will do command if it is :strict and the editor allows it, or if it is not :strict"
@@ -97,7 +108,11 @@
             result (and 
                      par-command 
                      (do-command? editor par-command)
-                     (paredit par-command (.getParseState editor) par-text))
+                     (apply paredit
+                            par-command
+                            (.getParseState editor)
+                            par-text
+                            (paredit-options par-command)))
             ]
         (when (and result (not= :ko (-> result :parser-state)))
           (if-let [modif (-?> result :modifs first)]

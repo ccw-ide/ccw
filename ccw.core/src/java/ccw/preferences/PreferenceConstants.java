@@ -144,6 +144,8 @@ public class PreferenceConstants {
 
 	public static final String USE_TAB_FOR_REINDENTING_LINE = CCW_PREFERENCE_PREFIX + ".use_tab_for_reindenting_line"; //$NON-NLS-1$
 	
+	public static final String FORCE_TWO_SPACES_INDENT = CCW_PREFERENCE_PREFIX + ".force_two_spaces_indent"; //$NON-NLS-1$
+	
 	public static final String EDITOR_COLORING_PREFIX = "editor_color"; //$NON-NLS-1$
 	
     public static final String EDITOR_ESCAPE_ON_PASTE = CCW_PREFERENCE_PREFIX + ".escape_on_paste"; //$NON-NLS-1$

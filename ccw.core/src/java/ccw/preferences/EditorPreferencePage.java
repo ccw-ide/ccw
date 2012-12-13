@@ -55,6 +55,9 @@ public class EditorPreferencePage extends FieldEditorPreferencePage implements
             	new BooleanFieldEditor(ccw.preferences.PreferenceConstants.USE_TAB_FOR_REINDENTING_LINE, Messages.ClojurePreferencePage_use_tab_for_reindenting_line, getFieldEditorParent()));
         
         addField(
+            	new BooleanFieldEditor(ccw.preferences.PreferenceConstants.FORCE_TWO_SPACES_INDENT, Messages.ClojurePreferencePage_force_two_spaces_indent, getFieldEditorParent()));
+        
+        addField(
             	new BooleanFieldEditor(ccw.preferences.PreferenceConstants.EDITOR_CODE_COMPLETION_AUTO_ACTIVATE, Messages.ClojurePreferencePage_code_completion_auto_activate, getFieldEditorParent()));
         
         addField(

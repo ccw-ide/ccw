@@ -16,8 +16,6 @@ public class Messages extends NLS {
     private static final String BUNDLE_NAME = "ccw.preferences.messages"; //$NON-NLS-1$
 
 
-
-
     public static String ClojurePreferencePage_Description;
 
     public static String ClojurePreferencePage_description;
@@ -35,6 +33,8 @@ public class Messages extends NLS {
     public static String ClojurePreferencePage_show_rainbow_parens_by_default;
 
     public static String ClojurePreferencePage_use_tab_for_reindenting_line;
+
+    public static String ClojurePreferencePage_force_two_spaces_indent;
 
     public static String ClojurePreferencePage_escape_on_paste;
 
