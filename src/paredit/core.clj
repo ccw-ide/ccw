@@ -298,7 +298,7 @@
 
 (defn indent-column 
   "pre-condition: line-offset is already the starting offset of a line"
-  [root-loc line-offset]
+  [root-loc line-offset force-two-spaces-indent]
   (let [loc (loc-for-offset root-loc (dec line-offset))]
     (loop [loc (z/left loc) seen-loc nil indent 0]
       (cond
@@ -310,7 +310,7 @@
             (cond
               (nil? seen-loc) 
                 (+ (loc-col loc) (loc-count loc) 1)
-              (or (lisp-form? (loc-text (first seen-loc)))
+              (or force-two-spaces-indent (lisp-form? (loc-text (first seen-loc)))
                   (inline-implementation? (first seen-loc)))
                 (+ (loc-col loc) (loc-count loc) 1)
               (second seen-loc)
@@ -556,7 +556,7 @@
 
 (defmethod paredit
   :paredit-newline
-  [cmd {:keys #{parse-tree buffer}} {:keys [text offset length] :as t}]
+  [cmd {:keys #{parse-tree buffer}} {:keys [text offset length] :as t} & {:keys [force-two-spaces-indent]}]
   ; no call to with-important-memoized because we almost immediately delegate to :paredit-indent-line
   (let [text (-> text (t/str-remove offset length) (t/str-insert offset "\n"))
         r (paredit :paredit-indent-line 
@@ -566,7 +566,8 @@
                    {:text text 
                     :offset (inc offset) 
                     :length 0 
-                    :modifs [{:text *newline* :offset offset :length length}]})]
+                    :modifs [{:text *newline* :offset offset :length length}]}
+                   :force-two-spaces-indent force-two-spaces-indent)]
     (if (-?> r :modifs count (= 2))
       (let [m1 (get-in r [:modifs 0])
             m2 (get-in r [:modifs 1])
@@ -577,7 +578,10 @@
 
 (defmethod paredit
   :paredit-indent-line
-  [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
+  [cmd 
+   {:keys #{parse-tree buffer}} 
+   {:keys [^String text offset length] :as t}
+   & {:keys [force-two-spaces-indent]}]
   (with-important-memoized 
     (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
       (let [line-start (t/line-start text offset)
@@ -585,7 +589,7 @@
             loc (loc-for-offset rloc line-start)]
         (if (and (#{:string, :string-body} (loc-tag loc)) (< (start-offset loc) line-start))
           t
-          (let [indent (indent-column rloc line-start)
+          (let [indent (indent-column rloc line-start force-two-spaces-indent)
                 cur-indent-col (- 
                                  (loop [o line-start]
                                    (if (>= o (.length text)) 
