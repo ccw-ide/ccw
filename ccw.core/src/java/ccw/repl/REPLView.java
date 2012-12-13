@@ -20,6 +20,7 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -791,6 +792,15 @@ public class REPLView extends ViewPart implements IAdaptable {
         try {
             if (interactive != null) interactive.close();
             if (toolConnection != null) toolConnection.close();
+            
+            if (launch != null && launch.canTerminate()) {
+            	try {
+					launch.terminate();
+				} catch (DebugException e) {
+					e.printStackTrace();
+				}
+            }
+            
         } catch (IOException e) {
             CCWPlugin.logError(e);
         }
