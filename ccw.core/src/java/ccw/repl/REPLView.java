@@ -151,6 +151,7 @@ public class REPLView extends ViewPart implements IAdaptable {
     }
     
     private static final Keyword inputExprLogType = Keyword.intern("in-expr");
+    private static final Keyword errLogType = Keyword.intern("err");
     private static final Pattern boostIndent = Pattern.compile("^", Pattern.MULTILINE);
     
     // TODO would like to eliminate separate log view, but:
@@ -251,7 +252,11 @@ public class REPLView extends ViewPart implements IAdaptable {
         try {
             if (s.trim().length() > 0) {
                 if (logExpression) log.invoke(this, logPanel, s, inputExprLogType);
-                evalExpression.invoke(s, userInput);
+                if (evalExpression == null) {
+                	log.invoke(this, logPanel, "Invalid REPL", errLogType);
+                } else {
+                	evalExpression.invoke(s, userInput);
+                }
             }
         } catch (Exception e) {
             CCWPlugin.logError(e);
