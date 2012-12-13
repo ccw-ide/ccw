@@ -34,6 +34,8 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IPropertyListener;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.StatusLineContributionItem;
@@ -111,6 +113,15 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 		setSourceViewerConfiguration(new ClojureSourceViewerConfiguration(getPreferenceStore(), this));
         setDocumentProvider(new ClojureDocumentProvider()); 
         setHelpContextId(EDITOR_REFERENCE_HELP_CONTEXT_ID);
+        addPropertyListener(new IPropertyListener() {
+			@Override
+			public void propertyChanged(Object source, int propId) {
+				if (propId == IEditorPart.PROP_INPUT) {
+					updatePartNameAndDescription();
+					outlinePage.setInput(getEditorInput());
+				}
+			}
+		});
 	}
 	
 	ClojureSourceViewer viewer; // TODO try a way of removing this horrible hack 
@@ -721,6 +732,5 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 	public boolean isEscapeInStringLiteralsEnabled() {
 		return sourceViewer().isEscapeInStringLiteralsEnabled();
 	}
-	
 	
 }
