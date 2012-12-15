@@ -135,7 +135,6 @@ public class PreferenceConstants {
 	
     public static final String CCW_PREFERENCE_PREFIX = "ccw.preferences"; //$NON-NLS-1$
     
-    
     public static final String CCW_GENERAL_AUTOMATIC_NATURE_ADDITION = CCW_PREFERENCE_PREFIX + ".automatic_nature_addition";
     
     public static final String CCW_GENERAL_AUTO_RELOAD_ON_STARTUP_SAVE = CCW_PREFERENCE_PREFIX + ".auto_reload_on_startup_save";
@@ -163,7 +162,10 @@ public class PreferenceConstants {
     public static final String REPL_VIEW_AUTO_EVAL_ON_ENTER_ACTIVE = CCW_PREFERENCE_PREFIX + ".repl_view_autoeval_on_enter_active"; //$NON-NLS-1$
     public static final String REPL_VIEW_DISPLAY_HINTS = CCW_PREFERENCE_PREFIX + ".repl_view_display_hints"; //$NON-NLS-1$
     
-    public static final String EDITOR_BOLD_SUFFIX = ".bold"; //$NON-NLS-1$
+    public static final String REPL_HISTORY_MAX_SIZE = CCW_PREFERENCE_PREFIX + ".repl_history_max_size"; //$NON-NLS-1$
+    public static final String REPL_HISTORY_PERSIST_SCHEDULE = CCW_PREFERENCE_PREFIX + ".repl_history_persist_schedule"; //$NON-NLS-1$
+    
+	public static final String EDITOR_BOLD_SUFFIX = ".bold"; //$NON-NLS-1$
     public static final String EDITOR_ITALIC_SUFFIX = ".italic"; //$NON-NLS-1$
     /* TODO enable these once text attributes are used in the editor
     public static final String EDITOR_UNDERLINE_SUFFIX = ".underline"; //$NON-NLS-1$

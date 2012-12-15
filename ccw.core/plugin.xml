@@ -1554,6 +1554,12 @@
           id="ccw.preferences.REPLViewPreferencePage"
           name="%preferencePage.repl.name">
     </page>
+    <page
+          category="ccw.preferences.EmptyPreferencePage"
+          class="ccw.preferences.REPLHistoryPreferencePage"
+          id="ccw.preferences.REPLHistoryPreferencePage"
+          name="%preferencePage.repl.history.name">
+    </page>
  </extension>
  <extension
        point="org.eclipse.debug.core.sourcePathComputers">

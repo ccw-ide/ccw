@@ -130,6 +130,9 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	    store.setDefault(PreferenceConstants.REPL_VIEW_AUTO_EVAL_ON_ENTER_ACTIVE, true);
 	    store.setDefault(PreferenceConstants.REPL_VIEW_DISPLAY_HINTS, true);
 	    
+	    store.setDefault(PreferenceConstants.REPL_HISTORY_MAX_SIZE, 1000);
+	    store.setDefault(PreferenceConstants.REPL_HISTORY_PERSIST_SCHEDULE, 30000);
+	    
 	    for (SyntaxColoringDefault d: coloringDefaults) {
 	        store.setDefault(d.getPreferenceConstant(),
 	                StringConverter.asString(d.getDefaultColor()));

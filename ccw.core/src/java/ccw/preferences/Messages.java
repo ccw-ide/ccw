@@ -137,6 +137,10 @@ public class Messages extends NLS {
 
     public static String REPLViewPreferencePage_displayHint;
 
+    public static String ClojureREPLHistoryPreferencePage_Description;
+    public static String REPLHistoryPreferencePage_max_size;
+    public static String REPLHistoryPreferencePage_persist_schedule;
+    
     public static String ClojureGeneralPreferencePage_Description;
     public static String ClojureGeneralPreferencePage_automatic_nature_addition;
     public static String ClojureGeneralPreferencePage_auto_reload_on_startup_save;
