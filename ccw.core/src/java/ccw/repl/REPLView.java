@@ -276,6 +276,11 @@ public class REPLView extends ViewPart implements IAdaptable {
             CCWPlugin.logError(e);
         }
     }
+    
+    public void logText(String s)
+    {
+    	log.invoke(this, logPanel, s, inputExprLogType);
+    }
 
     /** 
      * BE CAREFUL: this is a blocking method, waiting for the full 
