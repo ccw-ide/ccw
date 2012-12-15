@@ -155,7 +155,7 @@
                             (if (= expr (last %))
                               %
                               (conj % expr))
-                            (-> % count (- history/max-history) (max 0))))
+                            (-> % count (- (history/max-history)) (max 0))))
           (retain-expr-fn expr))
         expr))))
 
