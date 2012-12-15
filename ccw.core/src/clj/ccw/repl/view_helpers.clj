@@ -149,9 +149,23 @@
       :else
         [(.getText input-widget 0 (dec cursor-pos)) (.getText input-widget cursor-pos (dec length))])))
 
+(defn history-entry
+  [history, history-pos]
+  (@history (- (count @history) @history-pos 1)))
+
 (defn search-history
   [history history-position ^StyledText input-widget retained-input backward? modify-cursor filter-pred]
+  ; when there was a previous search and the history-entry was altered in the REPL, ...
+  (when (and @retained-input 
+             (<= 0 @history-position) 
+             (not= (history-entry history, history-position) (.getText input-widget)))
+    ; ... then reset the search by retaining the current input ...
+    (reset! retained-input (.getText input-widget))
+    ; ... and reset the history position to start search from the end of the history
+    (reset! history-position -1))
+  ; if no retained input, ...
   (when-not @retained-input
+    ; ... search is starting now and the current input needs to be retained
     (reset! retained-input (.getText input-widget)))
   (if-let [[next-position, entry] (next-history-entry @history @history-position @retained-input 
                                                       backward? filter-pred (get-text-split-by-cursor input-widget))]
