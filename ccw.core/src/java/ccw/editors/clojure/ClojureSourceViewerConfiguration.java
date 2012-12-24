@@ -23,6 +23,10 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension3;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextHover;
+import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ContentAssistEvent;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.ICompletionListener;
@@ -52,6 +56,9 @@ public class ClojureSourceViewerConfiguration extends
 	private static final ClojureInvoker proposalProcessor = ClojureInvoker.newInvoker(
             CCWPlugin.getDefault(),
             "ccw.editors.clojure.clojure-proposal-processor");
+	private static final ClojureInvoker textHover = ClojureInvoker.newInvoker(
+            CCWPlugin.getDefault(),
+            "ccw.editors.clojure.clojure-text-hover");
 	
 	public ClojureSourceViewerConfiguration(IPreferenceStore preferenceStore,
 			IClojureEditor editor) {
@@ -168,6 +175,12 @@ public class ClojureSourceViewerConfiguration extends
 		// Completely disable spellchecking until we can distinguish comments
 		// and code, and spell check based on these partitions
 		return null;
+	}
+	
+	@Override
+	public ITextHover getTextHover(ISourceViewer sourceViewer,
+			String contentType) {
+		return (ITextHover) textHover._("make-TextHover", editor);
 	}
 
 	@Override

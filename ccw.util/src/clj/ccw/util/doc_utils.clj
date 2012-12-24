@@ -80,3 +80,21 @@
 
 (defn var-doc-info-text [m]
   (var-doc-info :text m))
+
+(defn safe-split-lines 
+  "Same as clojure.string/split-lines but accepts a nil input and returns nil
+   instead of throwing an exception."
+  [s]
+  (when s (str/split-lines s)))
+
+(defn slim-doc 
+  "Summary of the documentation (arglist + start of the doc) taking up to 3
+   lines. Used e.g. for context information."
+  [s]
+  (let [lines (safe-split-lines s)
+        nb-display-lines 2
+        lines (if (> (count lines) nb-display-lines) 
+                (concat (take (dec nb-display-lines) lines)
+                        [(str (nth lines nb-display-lines) " ...")]) 
+                lines)]
+    (str/join \newline (map str/trim lines))))

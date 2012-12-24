@@ -7,10 +7,12 @@
             [clojure.zip :as z]
             [ccw.util.doc-utils :as doc]
             [ccw.debug.serverrepl :as serverrepl]
-            [ccw.core.trace :as trace])
+            [ccw.core.trace :as trace]
+            [ccw.editors.clojure.editor-common :as common])
   (:use [clojure.core.incubator :only [-?>]])
   (:import [org.eclipse.jface.viewers StyledString
                                       StyledString$Styler]
+           [org.eclipse.jface.text ITextViewer]
            [org.eclipse.jface.text.contentassist 
             IContentAssistProcessor
             ContentAssistant
@@ -22,7 +24,8 @@
             IContextInformationValidator]
            [org.eclipse.jdt.core JavaCore
                                  IMethod
-                                 IType]))
+                                 IType]
+           [ccw.editors.clojure IClojureEditor]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; parse tree manipulation functions
@@ -43,7 +46,7 @@
 (defn call-context-loc
   "for viewer, at offset 12, return the loc containing the encapsulating
    call, or nil"
-  [viewer offset]
+  [^IClojureEditor viewer offset]
   (when (pos? offset)
     (let [loc (lu/loc-containing-offset 
                 (-> viewer .getParseState :parse-tree lu/parsed-root-loc)
@@ -60,7 +63,7 @@
 
 ;; TODO find the prefix via the editor's parse tree !
 (defn prefix-info 
-  [ns offset prefix]
+  [ns offset ^String prefix]
   (let [[n1 n2] (s/split prefix #"/")
         [n1 n2] (cond
                   (and (nil? n2)
@@ -73,7 +76,7 @@
      :prefix-name n2}))
 
 ;; TODO find the prefix via the editor's parse tree !
-(defn invalid-symbol-char? [c]
+(defn invalid-symbol-char? [^Character c]
   (let [invalid-chars
         #{ \(, \), \[, \], \{, \}, \', \@,
           \~, \^, \`, \#, \" }]
@@ -89,7 +92,7 @@
 
 ;; TODO find the prefix via the editor's parse tree !
 (defn compute-prefix-offset
-  [string offset]
+  [^String string offset]
   (if-let [start (some
                    #(when (invalid-symbol-char? (.charAt string %)) %)
                    (range (dec offset) -1 -1))]
@@ -179,20 +182,8 @@
           namespace
           completion-limit))
 
-(defn send-message 
-  "Send the command over the nrepl connection."
-  [connection command]
-  (try
-    (-> (.client connection)
-      (repl/message {"op"   "eval"
-                     "code" command})
-      repl/response-values)
-    (catch Exception e
-      (ccw.CCWPlugin/logError (str "exception while sending command " command " to connection " connection) e)
-      nil)))
-
 (defn find-var-metadata
-  [current-namespace editor var]
+  [current-namespace ^IClojureEditor editor var]
   (when-let [repl (.getCorrespondingREPL editor)]
     (let [connection (.getToolingConnection repl)
           command (format (str "(ccw.debug.serverrepl/var-info "
@@ -200,48 +191,27 @@
                                    "(clojure.core/the-ns '%s) '%s))")
                           current-namespace
                           var)
-          response (send-message connection command)]
+          response (common/send-message connection command)]
       ;(println "response:" response)
       (first response))))
 
 (defn find-suggestions
   "For the given prefix, inside the current editor and in the current namespace,
    query the remote REPL for code completions list"
-  [current-namespace prefix editor find-only-public]
+  [current-namespace prefix ^IClojureEditor editor find-only-public]
   (cond
     (nil? namespace) []
     (s/blank? prefix) []
     :else (when-let [repl (.getCorrespondingREPL editor)]
             (let [connection (.getToolingConnection repl)
                   command (complete-command current-namespace prefix false)
-                  response (send-message connection command)]
+                  response (common/send-message connection command)]
               (first response)))))
-
-(defn safe-split-lines [s]
-  (when s (s/split-lines s)))
-
-(defn slim-doc [s]
-  (let [lines (safe-split-lines s)
-        nb-display-lines 2
-        lines (if (> (count lines) nb-display-lines) 
-                (concat (take (dec nb-display-lines) lines)
-                        [(str (nth lines nb-display-lines) " ...")]) 
-                lines)]
-    (s/join \newline (map s/trim lines))))
-
-(defn context-message
-  "Creates the context message"
-  [callee-name callee-metadata]
-  (when (some #{:arglists :doc} (keys callee-metadata))
-                       (format "%s: %s\n%s" 
-                               callee-name
-                               (or (:arglists callee-metadata) "")
-                               (slim-doc (:doc callee-metadata)))))
 
 (defn context-info-data
   "Create a context-information from the data"
   [callee-name cursor-offset callee-metadata]
-  (when-let [message (context-message callee-name callee-metadata)]
+  (when-let [message (common/context-message callee-name callee-metadata)]
     (context-information
       message
       nil
@@ -252,7 +222,7 @@
 (def ca (atom nil))
 
 (defn find-hippie-suggestions
-  [prefix offset parse-state]
+  [^String prefix offset parse-state]
   (let [buffer-wo-prefix (p/edit-buffer (parse-state :buffer) 
                                         (- offset (count prefix))
                                         (count prefix) "")
@@ -309,8 +279,8 @@
 
 (defn compute-completion-proposals
   "Return the list of java completion objects to the Completion framework."
-  [editor      content-assistant
-   text-viewer offset]
+  [^IClojureEditor editor      content-assistant
+   ^ITextViewer text-viewer offset]
   (reset! ca content-assistant)
   (let [prefix-offset (compute-prefix-offset 
                         (-> text-viewer .getDocument .get)
@@ -360,7 +330,7 @@
           [\. \- \? \!]))
 
 (defn compute-context-information
-  [editor
+  [^IClojureEditor editor
    text-viewer new-offset]
   (into-array
     IContextInformation
@@ -385,15 +355,13 @@
    The problem is that Eclipse framework then triggers wrongly code completion
    feature.
    This predicate is there to restore the truth :-)"
-  [editor offset]
-  (def ed editor)
-  (def of offset)
-  (let [parse-tree     ((-> ed .getParseState :parse-tree :abstract-node) 
+  [^IClojureEditor editor offset]
+  (let [parse-tree     ((-> editor .getParseState :parse-tree :abstract-node) 
                          p/parse-tree-view)
         last-token-tag (-> parse-tree :content peek :tag)]
     (not= last-token-tag :comment)))
 
-(defn make-process [editor content-assistant]
+(defn make-process [editor ^ContentAssistant content-assistant]
   (reify IContentAssistProcessor
     (computeCompletionProposals
       [this text-viewer offset]
