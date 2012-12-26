@@ -15,19 +15,24 @@
       "}
      ccw.editors.clojure.ClojureTopLevelFormsDamagerImpl
   (:use [paredit.utils :as utils])
-  (:import [org.eclipse.jface.text IRegion ITypedRegion DocumentEvent Region])
+  (:import [org.eclipse.jface.text IRegion ITypedRegion DocumentEvent Region
+                                   IDocument]
+           [ccw.editors.clojure ClojureTopLevelFormsDamager IClojureEditor])
   (:require [ccw.editors.clojure.editor-support :as editor])
   (:require [paredit.parser :as p]))
 
 #_(set! *warn-on-reflection* true)
 
-(defn state-val [this] (-> this .state deref))
+(defn state-val [^ClojureTopLevelFormsDamager this] (-> this .state deref))
+
+(defn ^IClojureEditor editor [^ClojureTopLevelFormsDamager this]
+  (:editor (state-val this)))
 
 (defn init
   [editor] (ref {:editor editor 
                  :document nil}))
 
-(defn setDocument [this document]
+(defn setDocument [^ClojureTopLevelFormsDamager this document]
   (dosync (alter (.state this) assoc :document document)))
 
 (defn parse-tree-get [parse-tree idx]
@@ -66,10 +71,10 @@
                 (.getLength event)
                 ", length: " 
                 (.length (.getText event)) "]"))
-  (if  (-> this state-val :editor .isForceRepair)
-    (Region. 0 (-> this state-val :editor .getDocument .get .length))
-    (let [previous-parse-tree (-> this state-val :editor .getPreviousParseTree)
-        parse-tree (-> this state-val :editor .getParseState (editor/getParseTree))
+  (if  (.isForceRepair (editor this))
+    (Region. 0 (-> this editor .getDocument .get .length))
+    (let [previous-parse-tree (-> this editor .getPreviousParseTree)
+        parse-tree (-> this editor .getParseState (editor/getParseTree))
         [start-offset 
          stop-offset] (if previous-parse-tree
                         (do
@@ -86,7 +91,7 @@
                                  (+
                                    ((:content-cumulative-count previous-parse-tree) start-index)
                                    (reduce + (map :count (subvec (:content previous-parse-tree) start-index (inc stop-index)))))])
-                              [0 (+ (-> this state-val :document .get .length) (.getLength event) (- (.length ^String (.getText event))))])))
+                              [0 (+ (-> this state-val ^IDocument (:document) .get .length) (.getLength event) (- (.length ^String (.getText event))))])))
                         (do #_(println "using default values")
                           [0 0]))
         #__            #_(println (str "[start-offset stop-offset]:" [start-offset stop-offset]))]

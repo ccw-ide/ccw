@@ -4,7 +4,7 @@
             [ccw.leiningen.nature :as n]
             [ccw.leiningen.handlers :as handlers]
             [clojure.java.io :as io])
-  (:import  [org.eclipse.core.resources IResource]
+  (:import  [org.eclipse.core.resources IProject IResource]
             [org.eclipse.jdt.core JavaCore]))
 
 (defn check-project-name 
@@ -21,7 +21,7 @@
                (catch Exception _)))))
     "Project names must be valid Clojure symbols."))
 
-(defn perform-finish [lein-project-name project template-name]
+(defn perform-finish [lein-project-name ^IProject project template-name]
   (let [project-file (-> project .getLocation .toFile)]
     (println "lein-project-name:" lein-project-name
              \newline

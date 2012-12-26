@@ -4,6 +4,7 @@
            org.eclipse.core.runtime.IStatus
            org.eclipse.core.runtime.Platform
            org.eclipse.core.runtime.Status
+           org.eclipse.core.internal.registry.ExtensionRegistry
            org.osgi.framework.Bundle
            org.osgi.framework.Version
            org.osgi.framework.BundleException
@@ -30,7 +31,7 @@
  
  (defn bundle 
    "Return the bundle object associated with the bundle-symbolic-name (a String)"
-   [bundle-symbolic-name]
+   ^Bundle [bundle-symbolic-name]
    (Platform/getBundle bundle-symbolic-name))
  
  (defn version 
@@ -43,7 +44,7 @@
    [& {:keys [major minor micro qualifier]}]
    (Version. major minor micro qualifier))
  
- (defn compareTo [v1 v2] (.compareTo v1 v2))
+ (defn compareTo [^Comparable v1 v2] (.compareTo v1 v2))
  
  (defn <
    "Return truethiness if version1 is < than version2"
@@ -109,9 +110,9 @@
       (run [this] (f)))))
 
 ;; http://www.ibm.com/developerworks/opensource/library/os-ecl-dynext/
-(defn add-contribution [s bundle]
+(defn add-contribution [^String s bundle]
   (let [registry (org.eclipse.core.runtime.RegistryFactory/getRegistry)
-        key (.getTemporaryUserToken registry)
+        key (.getTemporaryUserToken ^ExtensionRegistry registry)
         contributor (org.eclipse.core.runtime.ContributorFactoryOSGi/createContributor bundle)
         is (java.io.ByteArrayInputStream. (.getBytes s))]
     (.addContribution registry is contributor false nil nil key)))

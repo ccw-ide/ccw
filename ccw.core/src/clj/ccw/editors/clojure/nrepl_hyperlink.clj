@@ -1,11 +1,12 @@
 (ns ccw.editors.clojure.nrepl-hyperlink
   (:require [ccw.util.string :as s])
-  (:use [clojure.test]))
+  (:use [clojure.test])
+  (:import [org.eclipse.ui.console PatternMatchEvent TextConsole]))
 
 ;; TODO share it with editor hyperlink
 (def ^:private pattern #"nrepl://([^':',' ']+):(\d+)")
 
-(defn match-found [event console]
+(defn match-found [^PatternMatchEvent event ^TextConsole console]
   (let [offset (.getOffset event)
         length (.getLength event)
         document (.getDocument console)

@@ -5,14 +5,17 @@
                                        IProject
                                        ResourcesPlugin
                                        IWorkspaceRunnable
-                                       IWorkspace]
+                                       IWorkspace
+                                       IWorkspaceRoot]
            [org.eclipse.core.runtime IPath 
                                      Path
-                                     Platform]
+                                     Platform
+                                     Plugin]
            [org.eclipse.jdt.core IJavaProject]
            [org.eclipse.ui.handlers HandlerUtil]
            [org.eclipse.ui IEditorPart
-                           PlatformUI]
+                           PlatformUI
+                           IWorkbench]
            [org.eclipse.jface.viewers IStructuredSelection]
            [org.eclipse.jface.operation IRunnableWithProgress]
            [org.eclipse.core.commands ExecutionEvent]
@@ -42,26 +45,26 @@
   (io/as-url [p] (io/as-url (io/as-file p))))
 
 (defn workspace 
-  "Return the Eclipse Workspace" []
+  "Return the Eclipse Workspace" ^IWorkspace []
   (ResourcesPlugin/getWorkspace))
 
 (defn workbench 
-  "Return the Eclipse Workbench" []
+  "Return the Eclipse Workbench" ^IWorkbench []
   (PlatformUI/getWorkbench))
 
 (defn workspace-root 
   "Return the Eclipse Workspace root"
-  []
+  ^IWorkspaceRoot []
   (.getRoot (workspace)))
 
 (defprotocol IProjectCoercion
-  (project [this] "Coerce this into an IProject"))
+  (project ^IProject [this] "Coerce this into an IProject"))
 
 (defprotocol IResourceCoercion
-  (resource [this] "Coerce this in a IResource"))
+  (resource ^IResource [this] "Coerce this in a IResource"))
 
 (defprotocol IPathCoercion
-  (path [this] "Coerce this to an IPath"))
+  (path ^IPath [this] "Coerce this to an IPath"))
 
 (extend-protocol IProjectCoercion
   nil
@@ -142,7 +145,7 @@
 (defn plugin-state-location 
   "Return the plugin's state location as a path representing 
    an absolute filesystem path."
-  [plugin]
+  ^IPath [^Plugin plugin]
   (.getStateLocation plugin))
 
 

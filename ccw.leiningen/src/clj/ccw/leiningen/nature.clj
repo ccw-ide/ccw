@@ -6,7 +6,8 @@
             [ccw.leiningen.util                :as u]
             [ccw.util.bundle                   :as b])
   (:import 
-    [org.eclipse.core.resources     IProjectNature]
+    [org.eclipse.core.resources     IProjectNature IProjectDescription
+                                    IWorkspaceRoot]
     [org.eclipse.core.runtime       CoreException
                                     IPath
                                     Path]
@@ -20,6 +21,7 @@
                                     IProject
                                     IMarker
                                     ResourcesPlugin]
+    [org.osgi.framework             Bundle]
     [org.sonatype.aether.resolution DependencyResolutionException]
     [org.eclipse.jface.text         ITextSelection]
     [org.eclipse.jface.viewers      IStructuredSelection]
@@ -40,16 +42,16 @@
 
 ;; TODO copie de ccw.core, exporter dans ccw.util
 
-(defn description [project] (.getDescription project))
+(defn description [^IProject project] (.getDescription project))
 
 (defn alter-builders!
-  [desc f & args]
+  [^IProjectDescription desc f & args]
   (let [spec (.getBuildSpec desc)
         new-spec (apply f spec args)]
     (doto desc
       (.setBuildSpec (into-array new-spec)))))
 
-(defn builder [desc builder-id]
+(defn builder [^IProjectDescription desc builder-id]
   (doto (.newCommand desc)
     (.setBuilderName builder-id)))
 
@@ -62,8 +64,8 @@
   (alter-builders! desc (partial remove #(= builder-id (.getBuilderName %)))))
 
 (defn set-description! 
-  ([proj desc] (set-description! proj desc nil))
-  ([proj desc progress-monitor]
+  ([^IProject proj desc] (set-description! proj desc nil))
+  ([^IProject proj desc progress-monitor]
     (println "proj:" proj)
     (println "desc:" desc)
     (.setDescription
@@ -71,7 +73,7 @@
       desc
       progress-monitor)))
 
-(defn has-builder? [desc builder-id]
+(defn has-builder? [^IProjectDescription desc builder-id]
   (let [spec (.getBuildSpec desc)]
     (some #(= builder-id (.getBuilderName %)) spec)))
 
@@ -80,16 +82,16 @@
    nature is currently activated (which may not be the case if there's a consistency
    problem).
    Pre-requisite: project exists and is open"
-  [project nature-id]
+  [^IProject project nature-id]
   {:pre [(.isOpen project)]}
   (.hasNature project nature-id))
 
-(defn set-natures! [desc natures]
+(defn set-natures! [^IProjectDescription desc natures]
   (println "natures:" natures)
   (doto desc
     (.setNatureIds (into-array String natures))))
 
-(defn add-natures! [desc & nature-ids]
+(defn add-natures! [^IProjectDescription desc & nature-ids]
   (let [natures         (.getNatureIds desc)
         _ (println "old natures:" natures)
         missing-natures (remove (set natures) nature-ids)
@@ -98,7 +100,7 @@
         _ (println "new-natures:" new-natures)]
     (set-natures! desc new-natures)))
 
-(defn remove-nature! [desc nature-id]
+(defn remove-nature! [^IProjectDescription desc nature-id]
   (let [natures (.getNatureIds desc)]
     (when-not (some #{nature-id} natures)
       (let [new-natures (remove #{nature-id} natures)
@@ -107,7 +109,7 @@
 
 (defn jvm-entry
   "Returns the Classpath Entry for the found JVM, or nil if none found"
-  [java-project]
+  [^IJavaProject java-project]
   (when-let [jre-entry (JavaRuntime/computeJREEntry java-project)]
     (.getClasspathEntry jre-entry)))
 
@@ -146,7 +148,7 @@
   (-> lein-proj lein-raw-compile-folder path-to-folder))
 
 (defn ccw-bundle-version []
-  (when-let [bundle (b/bundle "ccw.core")]
+  (when-let [^Bundle bundle (b/bundle "ccw.core")]
     (.getVersion bundle)))
 
 (defn lein-entries
@@ -182,7 +184,7 @@
                                                     :extra-attributes {u/optional "true"}})))
                            (->> lein-proj
                              lein-optional-source-folders
-                             (filter #(.exists %))
+                             (filter #(.exists ^File %))
                              (map #(u/source-entry {:path %}))))
         _ (println "resource entries:" resource-entries)
         compile-entry    (u/library-entry {:path (lein-compile-folder lein-proj)

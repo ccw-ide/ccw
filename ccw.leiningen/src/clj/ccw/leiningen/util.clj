@@ -7,6 +7,7 @@
   (:import [org.eclipse.jdt.core JavaCore
                                  IClasspathAttribute
                                  IAccessRule]
+           [org.eclipse.core.resources IProject IResource]
            [org.eclipse.jdt.launching JavaRuntime]
            [org.eclipse.core.runtime IPath
                                      Platform
@@ -27,8 +28,8 @@
    of it, and that it has been installed as a directory and not a jar.
    Return the java.io.File corresponding to its directory.
    (So, it's really just bundle-file with a check)"
-  [bundle-name]
-  (let [bundle-dir (bundle-file bundle-name)]
+  ^File [bundle-name]
+  (let [^File bundle-dir (bundle-file bundle-name)]
     (if (.isFile bundle-dir)
       (throw (RuntimeException. (str bundle-name " bundle should be deployed as a directory.")))
       bundle-dir)))
@@ -36,7 +37,7 @@
 (defn- plugin-entry
   "given a plugin-name and an entry name inside the plugin, returns the 
    java.io.File instance for the entry if it is found in the plugin."
-  [plugin-name entry-name]
+  [plugin-name ^String entry-name]
   (let [bundle-dir (bundle-dir plugin-name)
         entry (File. bundle-dir entry-name)]
     (if (.exists entry)
@@ -48,7 +49,7 @@
    and classes directories found inside the ccw.leiningen-core plugin."
   []
   (let [leiningen-core (bundle-dir "ccw.leiningen-core")
-        jar (fn [f] (and (.isFile f) (.endsWith (.getName f) ".jar")))
+        jar (fn [^File f] (and (.isFile f) (.endsWith (.getName f) ".jar")))
         classes-dir (fn [d] (let [manifest (io/file d "META-INF" "MANIFEST.MF")]
                                (and (.exists manifest)
                                     (.isFile manifest))))
@@ -66,7 +67,7 @@
   [project & recreate?]
   (let [pname (if (= :project-less project) 
                 project
-                (-> project e/project .getName))]
+                (-> project ^IProject e/project .getName))]
     (dosync
       (commute projects-envs
                #(if (or recreate? (not (% pname)))
@@ -76,7 +77,7 @@
 
 (defn file-exists? 
   "Return the file if it exists, or nil" 
-  [f]
+  [^File f]
   (when (.exists f) f))
 
 (defn eval-in-project 

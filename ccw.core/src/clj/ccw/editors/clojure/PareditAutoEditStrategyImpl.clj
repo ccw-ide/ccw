@@ -5,7 +5,8 @@
     [org.eclipse.jface.text IAutoEditStrategy
                             IDocument
                             DocumentCommand]
-    [ccw.editors.clojure IClojureEditor])
+    [org.eclipse.jface.preference IPreferenceStore]
+    [ccw.editors.clojure IClojureEditor PareditAutoEditStrategy])
   (:require [ccw.core.trace :as trace]))
    
 #_(set! *warn-on-reflection* true)
@@ -15,7 +16,7 @@
 
 ; TODO move this into paredit itself ...
 ;  each command : trigger-str  [:paredit-command-name only-one-char-command?]
-(def *commands* 
+(def ^:dynamic *commands* 
   {"'" [:paredit-wrap-quote true]
    "(" [:paredit-open-round true]
    "[" [:paredit-open-square true]
@@ -29,7 +30,7 @@
    "\r\n" [:paredit-newline true]
    })
 
-(def *strict-commands*
+(def ^:dynamic *strict-commands*
   #{:paredit-close-round, :paredit-close-square, :paredit-close-curly, 
     :paredit-forward-delete, :paredit-backward-delete,
     :paredit-open-round, :paredit-open-square, :paredit-open-curly,
@@ -42,7 +43,7 @@
    :paredit-indent-line {:force-two-spaces-indent ccw.preferences.PreferenceConstants/FORCE_TWO_SPACES_INDENT}})
 
 (def 
-  *configuration-based-commands*
+  ^:dynamic *configuration-based-commands*
   "{:command configuration-key ...}"
   {:paredit-indent-line ccw.preferences.PreferenceConstants/USE_TAB_FOR_REINDENTING_LINE})
 
@@ -68,7 +69,7 @@
                 :length (:length command)}]))
 
 (defn- ccw-prefs
-  []
+  ^IPreferenceStore []
   (.getCombinedPreferenceStore (ccw.CCWPlugin/getDefault)))
 
 (defn paredit-options [command]
@@ -89,7 +90,7 @@
       true))
 
 (defn customizeDocumentCommand 
-  [this, #^IDocument document, #^DocumentCommand command]
+  [^PareditAutoEditStrategy this, #^IDocument document, #^DocumentCommand command]
   (let [^IClojureEditor editor (-> this .state deref :editor)]
     (when (and (.doit command) 
                (not (.isInEscapeSequence editor)) 

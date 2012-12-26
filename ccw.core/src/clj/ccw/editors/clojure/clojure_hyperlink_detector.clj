@@ -2,7 +2,7 @@
   (:require [clojure.zip :as z]
             [paredit.loc-utils :as lu]
             [clojure.tools.nrepl :as repl]
-            [ccw.editors.clojure.editor-support :as editor]
+            [ccw.editors.clojure.editor-support :as ed]
             [ccw.editors.clojure.hyperlink :as hyperlink])
   (:use [clojure.core.incubator :only [-?>]])
   (:import 
@@ -19,12 +19,12 @@
     [ccw.debug           ClojureClient]
     [ccw                 ClojureCore]))
 
-(def *ID* (IHyperlinkConstants/ClojureHyperlinkDetector_ID)) 
-(def *TARGET_ID* (IHyperlinkConstants/ClojureHyperlinkDetector_TARGET_ID))  
+(def ID (IHyperlinkConstants/ClojureHyperlinkDetector_ID)) 
+(def TARGET_ID (IHyperlinkConstants/ClojureHyperlinkDetector_TARGET_ID))  
 
-(defn editor [this] (.getClassAdapter this IClojureEditor))
+(defn editor [^AbstractHyperlinkDetector this] (.getClassAdapter this IClojureEditor))
 
-(defn find-decl [sym editor]
+(defn find-decl [^String sym ^IClojureEditor editor]
   (let [split (.split sym "/")
         n (when (= 2 (count split)) (aget split 0))
         s (aget split (if (= 2 (count split)) 1 0))  
@@ -36,7 +36,7 @@
       (do
         (.setStatusLineErrorMessage editor ClojureEditorMessages/You_need_a_running_repl)
         nil)
-      (let [[ [file line _ ns] ] (repl/response-values (repl/message client {:op :eval :code command}))]
+      (let [[ [file ^String line _ ns] ] (repl/response-values (repl/message client {:op :eval :code command}))]
         (if (and file line ns)
           {"file" file
            "line" (Integer/valueOf line)
@@ -46,8 +46,8 @@
             nil))))))
 
 (defn detect-hyperlinks
-  [offset editor]
-  (let [rloc (-> editor .getParseState (editor/getParseTree) lu/parsed-root-loc)
+  [offset ^IClojureEditor editor]
+  (let [rloc (-> editor .getParseState ed/getParseTree lu/parsed-root-loc)
         l (lu/loc-for-offset rloc offset)]
     (when-let [{:strs #{ns file line}} (and (= :symbol (-> l z/node :tag)) ; TODO transform :strs -> :keys
                                          (find-decl (lu/loc-text l) editor))]
@@ -57,7 +57,7 @@
 (defn factory [ _ ]
   (proxy [AbstractHyperlinkDetector]
          []
-    (detectHyperlinks [textViewer region canShowMultipleHyperlinks?]
+    (detectHyperlinks [textViewer ^IRegion region canShowMultipleHyperlinks?]
       (when-let [hyperlinks (detect-hyperlinks (.getOffset region) (editor this))] 
         (into-array IHyperlink (map (fn [{:keys #{offset length open}}] 
                                       (hyperlink/make 

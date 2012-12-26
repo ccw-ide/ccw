@@ -112,4 +112,6 @@ public interface IClojureEditor extends IAdaptable {
      * e.g., useful to have syntax coloring adapt to new preference settings.
      */
 	void markDamagedAndRedraw();
+	
+	boolean isForceRepair();
 }

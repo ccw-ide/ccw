@@ -40,7 +40,7 @@
         (-> part e/project JavaCore/create)
       (instance? IStructuredSelection sel)
         ;; TODO consider giving the user a hint for why the expected command did not work
-        (-> sel .getFirstElement e/project JavaCore/create))))
+        (-> ^IStructuredSelection sel .getFirstElement e/project JavaCore/create))))
 
 (defn update-dependencies
   "Pre-requisites:
@@ -90,7 +90,7 @@
   ;(println "add-natures:" project ", natures:" (seq natures) ", legend:'" legend "'")
   (e/run-in-background
     (e/runnable-with-progress-in-workspace
-      (fn [monitor]
+      (fn [^IProgressMonitor monitor]
         ;(println "add-natures: background job started for natures:" (seq natures))
         (.beginTask monitor 
           (str legend)
@@ -110,7 +110,7 @@
    - The project does not already have the leiningen nature"
   ([handler event]
     (add-leiningen-nature (e/project event)))
-  ([project]
+  ([^IProject project]
     (add-natures 
       project
       [(JavaCore/NATURE_ID) n/NATURE-ID]

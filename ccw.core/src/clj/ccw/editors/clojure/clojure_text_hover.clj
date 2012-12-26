@@ -28,7 +28,7 @@
    This is a function for optimizing the number of times the hover-info
    function is called."
   [editor offset]
-  (let [loc (offset-loc editor offset)]
+  (let [loc (common/offset-loc editor offset)]
     [(lu/start-offset loc) (lu/loc-count loc)]))
 
 (defn make-TextHover 

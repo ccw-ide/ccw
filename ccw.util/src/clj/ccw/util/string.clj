@@ -7,12 +7,12 @@
 
 (def split #'s/split)
 
-(defn take [s n]
+(defn take [^String s n]
   (if (< (count s) n)
     s
     (.substring s 0 n)))
 
-(defn drop [s n]
+(defn drop [^String s n]
   (if (< (count s) n)
     ""
     (.substring s n)))

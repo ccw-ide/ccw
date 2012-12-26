@@ -17,11 +17,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; library code
  
-(def *default-repl-port* 8503)
+(def ^:dynamic *default-repl-port* 8503)
 
-(defn remote-load [s]
+(defn remote-load [^String s]
   ;(println "remote-load: begin")
-  (with-open [client (new Socket "localhost" *default-repl-port*)]
+  (with-open [client (new Socket "localhost" (int *default-repl-port*))]
     ;(println "remote-load: opened socket on port " *default-repl-port*)
     (with-open [dis (new java.io.DataInputStream 
                          (new java.io.BufferedInputStream (.getInputStream client)))]
@@ -63,7 +63,7 @@
 (defn ns-sym [s]
   "returns a vector with the namespace in first position and the symbol in second position.
    if there is no namespace, first position will contain \"\"."
-  (let [[s n] (-> s (.split "/") reverse)] [(or n "") s]))
+  (let [[s n] (-> ^String s (.split "/") reverse)] [(or n "") s]))
 
 (defn qualify-sym [ns s]
   "returns a symbol with ns as a namespace if s does not yet have a namespace.

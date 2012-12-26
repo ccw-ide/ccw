@@ -50,7 +50,6 @@ import ccw.util.ClojureInvoker;
 import ccw.util.StringUtils;
 
 public class ClojureEditor extends TextEditor implements IClojureEditor {
-
 	/**
 	 * Shortens a namespace name,
 	 * e.g. net.cgrand.parsley.core => n.c.parsley.core.

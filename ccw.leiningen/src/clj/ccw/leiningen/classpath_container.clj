@@ -110,7 +110,7 @@
                  (leiningen.core.classpath/extract-native-deps ~'dependencies '~native-path)
                  ; we serialize paths to Strings so that clojure datastructures can be passed back
                  (map #(.getAbsolutePath %) ~'dependencies))))]
-    (map #(File. %) deps-paths)))
+    (map #(File. ^String %) deps-paths)))
 
 (defn ser-dep [path native-path]
   {:path (.getAbsolutePath (io/as-file path))
@@ -124,8 +124,8 @@
     (map 
       ser-dep
       (->> dependencies
-        (filter #(-> % .getName (.endsWith ".jar")))
-        (sort-by #(.getName %)))
+        (filter #(-> ^File % .getName (.endsWith ".jar")))
+        (sort-by #(.getName ^File %)))
       (repeat (u/lein-native-platform-path lein-project)))))
 
 (defn- delete-container-markers [?project]
@@ -174,8 +174,8 @@
 
 (defn deser-dep [dep-map]
   (-> dep-map 
-    (update-in [:path] #(File. %))
-    (update-in [:native-path] #(File. %))))
+    (update-in [:path] #(File. ^String %))
+    (update-in [:native-path] #(File. ^String %))))
 
 (defn load-project-dependencies
   "Retrieve from disk (from the Plugin state directory), the deps for the project.
@@ -203,7 +203,7 @@
     true
     nil))
 
-(defn- report-container-error [?project message e]
+(defn- report-container-error [?project message ^Throwable e]
   (add-container-marker (e/resource ?project) message)
   (println message)
   (.printStackTrace e))

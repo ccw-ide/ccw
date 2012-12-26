@@ -11,10 +11,11 @@
 
 (ns ccw.editors.clojure.stacktrace-hyperlink
   (:require [ccw.util.string :as s])
-  (:use [clojure.test]))
+  (:use [clojure.test])
+  (:import org.eclipse.ui.console.TextConsole))
 
 (defn- find-datas [s]
-  {:line (Integer/valueOf (second (re-find #":([0-9]+)" s)))
+  {:line (Integer/valueOf ^String (second (re-find #":([0-9]+)" s)))
    :file (str (s/replace (second (re-find #"at ([\w\.]+)\$" s)) "." "/") ".clj")
    :ns (s/replace (second (re-find #"at ([\w\.]+)\$" s)) "_" "-")})
 
@@ -32,7 +33,7 @@
         (dosync (reset! state console)))
       (disconnect [this] (reset! state nil))
       (matchFound [this event]
-                  (let [console @state
+                  (let [^TextConsole console @state
                         offset (.getOffset event)
                         s (.get (.getDocument console) offset (.getLength event))
                         [o l] (offset-and-length s)

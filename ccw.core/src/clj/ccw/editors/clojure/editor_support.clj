@@ -24,7 +24,9 @@
   ccw.editors.clojure.editor-support 
   (:require [paredit.parser :as p]
             [paredit.loc-utils :as lu])
-  (:import [org.eclipse.jdt.ui PreferenceConstants]))
+  (:import [org.eclipse.jdt.ui PreferenceConstants]
+           [ccw.editors.clojure IClojureEditor]
+           [org.eclipse.ui.texteditor SourceViewerDecorationSupport]))
 
 #_(set! *warn-on-reflection* true)
 
@@ -64,7 +66,7 @@
   (add-watch r :track-state (fn [_ _ _ new-state] 
                               (.setStructuralEditionPossible editor 
                                 (let [possible? (not (nil? (:parse-tree new-state)))
-                                      possible? (or possible? (.isEmpty (:text new-state)))]
+                                      possible? (or possible? (.isEmpty ^String (:text new-state)))]
                                   possible?)))))
 
 (defn getParseTree [parse-state] (:parse-tree parse-state))
@@ -92,12 +94,12 @@
   [r]
   (:previous-parse-tree @r))
 
-(defn disposeSourceViewerDecorationSupport [s]
+(defn disposeSourceViewerDecorationSupport [^SourceViewerDecorationSupport s]
   (when s
     (doto s .uninstall .dispose)
     nil))
 
-(defn configureSourceViewerDecorationSupport [support viewer]
+(defn configureSourceViewerDecorationSupport [^SourceViewerDecorationSupport support ^IClojureEditor viewer]
 		;; TODO more to pick in configureSourceViewerDecorationSupport of AbstractDecoratedTextEditor, if you want ...
   (doto support
 		(.setCharacterPairMatcher (.getPairsMatcher viewer))
