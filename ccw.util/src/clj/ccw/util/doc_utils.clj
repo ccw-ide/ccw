@@ -26,13 +26,15 @@
     :text (format "%s:\n%s" title body)))
 
 (defn render-identity [renderer name ns]
-  (condp = renderer
-    :html (format "<b>%s</b> %s" name (or ns ""))
-    :text (format "%s %s" name (or ns ""))))
+  (when-not (str/blank? name) 
+    (condp = renderer
+      :html (format "<b>%s</b> %s" name (or ns ""))
+      :text (format "%s %s" name (or ns "")))))
 
 (defn- render-sections [renderer sections no-sections-text]
   (let [s (condp = renderer
-            :html (apply str (mapcat vector (repeat "<p>") (keep identity sections) (repeat "</p>")))
+            :html (when-let [sections (keep identity sections)]
+                    (apply str (mapcat vector (repeat "<p>") sections (repeat "</p>"))))
             :text (str/join "\n\n" (keep identity sections)))]
     (if (str/blank? s)
       (condp = renderer
@@ -55,7 +57,7 @@
       (str "(" optional-meta ")"))))
 
 (defn header-doc [renderer {:keys [name ns] :as m}]
-  (when name
+  (when-not (str/blank? name)
     (render-lines renderer
                   [(render-identity renderer name ns)
                    (optional-meta m)])))
