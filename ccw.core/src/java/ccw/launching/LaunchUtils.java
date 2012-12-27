@@ -20,9 +20,11 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
@@ -181,4 +183,16 @@ public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
         }
         config.setAttribute(LaunchUtils.ATTR_FILES_LAUNCHED_AT_STARTUP, filesAsString.toString());
     }    
+    
+    public static List<ILaunch> findRunningLaunchesFor(String projectName) {
+    	List<ILaunch> ret = new ArrayList<ILaunch>();
+    	ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
+    	for (ILaunch launch: launchManager.getLaunches()) {
+    		if (!launch.isTerminated() 
+    				&& projectName.equals(getProjectName(launch))) {
+   				ret.add(launch);
+    		}
+    	}
+    	return ret;
+    }
 }

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package ccw.launching;
 
+import static ccw.launching.LaunchUtils.findRunningLaunchesFor;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,16 +35,22 @@ import org.eclipse.debug.ui.ILaunchShortcut;
 import org.eclipse.jdt.internal.debug.ui.JDIDebugUIPlugin;
 import org.eclipse.jdt.internal.debug.ui.launcher.LauncherMessages;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.part.FileEditorInput;
 
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
+import ccw.repl.Actions;
+import ccw.util.DisplayUtil;
 
 public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfigurationConstants {
     private static final HashMap<String, Long> tempLaunchCounters = new HashMap();
@@ -55,34 +63,19 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
             return cnt.intValue();
         }
     }
-
     
     public void launch(IEditorPart editor, String mode) {
-    	launchEditorPart(editor, mode);
-    }
-    
-    private ILaunch launchEditorPart(IEditorPart editor, String mode) {
         IEditorInput input = editor.getEditorInput();
         if (input instanceof FileEditorInput) {
             FileEditorInput fei = (FileEditorInput) input;
-            return launchProject(fei.getFile().getProject(), new IFile[] { fei
+            launchProject(fei.getFile().getProject(), new IFile[] { fei
                     .getFile() }, mode);
         } else {
-        	return null;
+        	return;
         }
     }
 
     public void launch(ISelection selection, String mode) {
-    	launchSelection(selection, mode);
-    }
-    
-    /**
-     * 
-     * @param selection
-     * @param mode
-     * @return
-     */
-    public ILaunch launchSelection(ISelection selection, String mode) {
         if (selection instanceof IStructuredSelection) {
             IStructuredSelection strSel = (IStructuredSelection) selection;
             List<IFile> files = new ArrayList<IFile>();
@@ -99,16 +92,51 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
                 }
             }
             if (proj != null) {
-                return launchProject(proj, files.toArray(new IFile[] {}), mode);
+                launchProject(proj, files.toArray(new IFile[] {}), mode);
             }
         }
-        return null;
-    }
-    public ILaunch launchProject(IProject project, String mode) {
-    	return launchProject(project, new IFile[] {}, mode);
     }
     
-    protected ILaunch launchProject(IProject project, IFile[] filesToLaunch, String mode) {
+    public void launchProject(IProject project, String mode) {
+    	launchProject(project, new IFile[] {}, mode);
+    }
+    
+    protected void launchProject(IProject project, IFile[] filesToLaunch, String mode) {
+
+    	String projectName = project.getName();
+    	List<ILaunch> running = findRunningLaunchesFor(projectName);
+    	
+    	if (running.size() == 0) {
+    		launchProject2(project, filesToLaunch, mode);
+    	} else {
+    		if (userConfirmsNewLaunch(project, running.size())) {
+    			launchProject2(project, filesToLaunch, mode);
+    		} else {
+    			IViewPart replView = CCWPlugin.getDefault().getProjectREPL(project);
+    			replView.getViewSite().getPage().activate(replView);
+    		}
+    	}
+    }    
+    
+    private boolean userConfirmsNewLaunch(final IProject project, final int nb) {
+    	final boolean[] ret = new boolean[1];
+    	final String title = "Clojure Application Launcher";
+    	final String msg = (nb==1?"A":nb) + " REPL" + (nb==1?" is":"s are") 
+    			+ " already running for this project. Changes you made can "
+    			+ "be evaluated in an existing REPL (see Clojure menu). "
+    			+ "\n\nAre you sure you want to start up another REPL for this project?\n"
+    			+ "(Cancel will open existing REPL)";
+        DisplayUtil.syncExec(new Runnable() {
+            public void run() {
+            	Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+                ret[0]  = MessageDialog.openConfirm(shell, title, msg);
+            }
+        });
+    	return ret[0];
+    }
+    
+    protected void launchProject2(IProject project, IFile[] filesToLaunch, String mode) {
+
     	Boolean activateAutoReload = CCWPlugin.isAutoReloadEnabled();
         try {
             ILaunchConfiguration config = findLaunchConfiguration(project);
@@ -125,19 +153,19 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
 	            		runnableConfiguration.setAttribute(LaunchUtils.ATTR_NS_TO_START_IN, ClojureCore.findMaybeLibNamespace(filesToLaunch[0]));
 	            	}
 	            	ILaunch launch = runnableConfiguration.launch(mode, null);
-	            	return launch;
+	            	return;
             	} finally {
             		runnableConfiguration.delete();
             	}
             } else {
-            	return null;
+            	return;
             }
         } catch (CoreException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private ILaunchConfiguration findLaunchConfiguration(IProject project) {
+	private ILaunchConfiguration findLaunchConfiguration(IProject project) {
         ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
         ILaunchConfigurationType type =
             lm.getLaunchConfigurationType(LaunchUtils.LAUNCH_CONFIG_ID);
