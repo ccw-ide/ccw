@@ -70,16 +70,20 @@
 
 (defn find-var-metadata
   "Given editor, and an already resolved current-namespace, makes a call to 
-   the editor REPL to find metadata associated to var. If there's currently
-   no REPL, just return nil."
+   the editor REPL to find metadata associated to symbol. If there's currently
+   no REPL, just return nil.
+   CURRENTLY works for namespace vars, and namespaces."
   [current-namespace ^IClojureEditor editor var]
   (when-let [repl (.getCorrespondingREPL editor)]
     (let [connection (.getToolingConnection repl)
           command (format (str "(ccw.debug.serverrepl/var-info "
-                               "(clojure.core/ns-resolve "
-                               "(clojure.core/the-ns '%s) '%s))")
+                               "  (or (try (clojure.core/ns-resolve "
+                               "             (clojure.core/the-ns '%s) '%s)"
+                               "        (catch Exception e nil))"
+                               "      (try (clojure.core/the-ns '%s)"
+                               "        (catch Exception e nil))))")
                           current-namespace
-                          var)
+                          var var)
           response (send-message connection command)]
       (first response))))
 
