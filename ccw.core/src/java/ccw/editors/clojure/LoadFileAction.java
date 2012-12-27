@@ -96,7 +96,7 @@ public class LoadFileAction extends Action {
         	new Thread(new Runnable() {
 				public void run() {
 		        	final IProject project = editorFile.getProject();
-		        	new ClojureLaunchShortcut().launchProject(project, ILaunchManager.RUN_MODE, false);
+		        	new ClojureLaunchShortcut().launchProject(project, ILaunchManager.RUN_MODE);
 		        	DisplayUtil.asyncExec(new Runnable() {
 		        		public void run() {
 				        	REPLView repl = CCWPlugin.getDefault().getProjectREPL(project);

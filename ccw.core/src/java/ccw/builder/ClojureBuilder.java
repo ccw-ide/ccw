@@ -54,12 +54,6 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
     protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
             throws CoreException {
     	
-    	// We disconnect the Builder, making it a deprecated piece of code
-    	// We may reactivate it when we know how to do good use of it.
-    	if (true) {
-    		return null;
-    	}
-    	
 //    	System.out.println("clojure build required");
     	if (getProject()==null) {
     		return null;

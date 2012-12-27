@@ -112,6 +112,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	    IPreferenceStore store = CCWPlugin.getDefault().getPreferenceStore();
 	    
 	    store.setDefault(PreferenceConstants.CCW_GENERAL_AUTOMATIC_NATURE_ADDITION, true);
+	    store.setDefault(PreferenceConstants.CCW_GENERAL_AUTO_RELOAD_ON_STARTUP_SAVE, false);
 	    
 	    store.setDefault(org.eclipse.jdt.ui.PreferenceConstants.EDITOR_MATCHING_BRACKETS, true);
 	    store.setDefault(org.eclipse.jdt.ui.PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR, 

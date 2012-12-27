@@ -38,6 +38,12 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements
             	ccw.preferences.PreferenceConstants.CCW_GENERAL_AUTOMATIC_NATURE_ADDITION,
                 Messages.ClojureGeneralPreferencePage_automatic_nature_addition,
                 getFieldEditorParent()));
+
+        addField(
+                new BooleanFieldEditor(
+                	ccw.preferences.PreferenceConstants.CCW_GENERAL_AUTO_RELOAD_ON_STARTUP_SAVE,
+                    Messages.ClojureGeneralPreferencePage_auto_reload_on_startup_save,
+                    getFieldEditorParent()));
 }
 
     public void init(IWorkbench workbench) {

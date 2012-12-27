@@ -243,7 +243,11 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
     }
 	
 	public static boolean isAutoReloadEnabled (ILaunch launch) {
-	    return Boolean.valueOf(launch.getAttribute(LaunchUtils.ATTR_IS_AUTO_RELOAD_ENABLED));
+		if (launch == null) {
+			return false;
+		} else {
+			return Boolean.valueOf(launch.getAttribute(LaunchUtils.ATTR_IS_AUTO_RELOAD_ENABLED));
+		}
 	}
 
     @Override

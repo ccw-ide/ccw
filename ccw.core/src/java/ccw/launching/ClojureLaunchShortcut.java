@@ -41,6 +41,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.part.FileEditorInput;
 
+import ccw.CCWPlugin;
 import ccw.ClojureCore;
 
 public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfigurationConstants {
@@ -57,32 +58,31 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
 
     
     public void launch(IEditorPart editor, String mode) {
-    	launchEditorPart(editor, mode, null);
+    	launchEditorPart(editor, mode);
     }
     
-    private ILaunch launchEditorPart(IEditorPart editor, String mode, Boolean activateAutoReload) {
+    private ILaunch launchEditorPart(IEditorPart editor, String mode) {
         IEditorInput input = editor.getEditorInput();
         if (input instanceof FileEditorInput) {
             FileEditorInput fei = (FileEditorInput) input;
             return launchProject(fei.getFile().getProject(), new IFile[] { fei
-                    .getFile() }, mode, activateAutoReload);
+                    .getFile() }, mode);
         } else {
         	return null;
         }
     }
 
     public void launch(ISelection selection, String mode) {
-    	launchSelection(selection, mode, null);
+    	launchSelection(selection, mode);
     }
     
     /**
      * 
      * @param selection
      * @param mode
-     * @param activateAutoReload if null, then will be automatically detected
      * @return
      */
-    public ILaunch launchSelection(ISelection selection, String mode, Boolean activateAutoReload) {
+    public ILaunch launchSelection(ISelection selection, String mode) {
         if (selection instanceof IStructuredSelection) {
             IStructuredSelection strSel = (IStructuredSelection) selection;
             List<IFile> files = new ArrayList<IFile>();
@@ -99,17 +99,17 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
                 }
             }
             if (proj != null) {
-                return launchProject(proj, files.toArray(new IFile[] {}), mode, activateAutoReload);
+                return launchProject(proj, files.toArray(new IFile[] {}), mode);
             }
         }
         return null;
     }
-    public ILaunch launchProject(IProject project, String mode, Boolean activateAutoReload) {
-    	return launchProject(project, new IFile[] {}, mode, activateAutoReload);
+    public ILaunch launchProject(IProject project, String mode) {
+    	return launchProject(project, new IFile[] {}, mode);
     }
     
-    protected ILaunch launchProject(IProject project, IFile[] filesToLaunch, String mode, Boolean activateAutoReload) {
-    	activateAutoReload = activateAutoReload!=null ? activateAutoReload : ( filesToLaunch.length==0 );
+    protected ILaunch launchProject(IProject project, IFile[] filesToLaunch, String mode) {
+    	Boolean activateAutoReload = CCWPlugin.isAutoReloadEnabled();
         try {
             ILaunchConfiguration config = findLaunchConfiguration(project);
             if (config == null) {
