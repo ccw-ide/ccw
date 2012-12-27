@@ -868,6 +868,18 @@
             commandId="ccw.ui.edit.text.clojure.comment.toggle"
             contextId="ccw.ui.clojureEditorScope"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+M2+C">
+      </key>
+      <key
+            commandId="ccw.ui.edit.text.clojure.comment.toggle"
+            contextId="ccw.ui.clojureEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+;">
+      </key>
+      <key
+            commandId="ccw.ui.edit.text.clojure.comment.toggle"
+            contextId="ccw.ui.clojureEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+/">
       </key>
       <key
