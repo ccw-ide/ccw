@@ -55,6 +55,7 @@
   (let [e (remove-meta e)
         e-code-children (code-children e)]
     (and 
+      (<= 2 (count e-code-children))
       (#{"("} (nth e-code-children 0))
       (sym-name (nth e-code-children 1)))))
 
