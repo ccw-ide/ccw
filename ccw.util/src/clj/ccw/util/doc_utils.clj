@@ -66,7 +66,7 @@
   (when-not (str/blank? doc)
     (render-section renderer
                     "Documentation"
-                    doc)))
+                    (str "<pre>" doc "</pre>"))))
 
 (defn var-doc-info [renderer m]
   (let [sections [(header-doc renderer m)
