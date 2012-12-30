@@ -24,7 +24,7 @@ public class Actions {
         public Object execute (ExecutionEvent event) throws ExecutionException {
             try {
                 IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-                ConnectDialog dlg = new ConnectDialog(window.getShell());
+                ConnectDialog dlg = new ConnectDialog(window.getShell(), CCWPlugin.getDefault().getDialogSettings());
                 
                 REPLView repl = null;
                 if (dlg.open() == ConnectDialog.OK) {
