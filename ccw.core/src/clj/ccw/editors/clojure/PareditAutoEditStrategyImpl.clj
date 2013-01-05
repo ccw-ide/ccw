@@ -32,9 +32,7 @@
 
 (def ^:dynamic *strict-commands*
   #{:paredit-close-round, :paredit-close-square, :paredit-close-curly, 
-    :paredit-forward-delete, :paredit-backward-delete,
-    :paredit-open-round, :paredit-open-square, :paredit-open-curly,
-    :paredit-doublequote})
+    :paredit-forward-delete, :paredit-backward-delete})
 
 (def
   command-preferences
