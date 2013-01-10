@@ -46,13 +46,6 @@
       <import plugin="org.eclipse.core.expressions"/>
       <import plugin="org.eclipse.ui.forms"/>
       <import plugin="org.eclipse.ui.workbench.texteditor"/>
-      <import plugin="ccw.clojure" version="1.3.0" match="greaterOrEqual"/>
-      <import plugin="clojure.osgi" version="1.3.0" match="greaterOrEqual"/>
-      <import plugin="org.clojure.tools.nrepl" version="0.2.0" match="greaterOrEqual"/>
-      <import plugin="ccw.org.clojure.core.incubator" version="0.1.0" match="greaterOrEqual"/>
-      <import plugin="ccw.util"/>
-      <import plugin="net.cgrand.parsley" version="0.0.12" match="greaterOrEqual"/>
-      <import plugin="net.cgrand.regex" version="0.0.4" match="greaterOrEqual"/>
       <import plugin="org.eclipse.osgi"/>
    </requires>
 
@@ -119,5 +112,17 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+
+   <plugin
+         id="ccw.clojurecontrib"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="ccw.util"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
 
 </feature>
