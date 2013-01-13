@@ -24,19 +24,19 @@
 (def ^{:private true}
       history-key "cmdhistory")
 
-(defn ^IPreferenceStore get-preference-store
+(defn ^IPreferenceStore preference-store
   []
   (.getCombinedPreferenceStore (CCWPlugin/getDefault)))
 
 (defn max-history
   "Maximum number of retained history entries."
   []
-  (.getInt (get-preference-store) PreferenceConstants/REPL_HISTORY_MAX_SIZE))
+  (.getInt (preference-store) PreferenceConstants/REPL_HISTORY_MAX_SIZE))
 
 (defn- persist-schedule-ms
   "Queued commands are persisted to project preferences every _ milliseconds."
   []
-  (.getInt (get-preference-store) PreferenceConstants/REPL_HISTORY_PERSIST_SCHEDULE))
+  (.getInt (preference-store) PreferenceConstants/REPL_HISTORY_PERSIST_SCHEDULE))
 
 (defn- ^IEclipsePreferences get-pref-node
   [^String project-name]
