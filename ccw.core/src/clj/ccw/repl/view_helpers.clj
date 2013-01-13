@@ -1,6 +1,7 @@
 (ns ccw.repl.view-helpers
   (:require [clojure.tools.nrepl :as repl]
-    [ccw.repl.cmdhistory :as history])
+    [ccw.repl.cmdhistory :as history]
+    [clojure.string :as str])
   (:use [clojure.core.incubator :only (-?>)]
         [clojure.tools.nrepl.misc :only (uuid)])
   (:import ccw.CCWPlugin
@@ -114,8 +115,10 @@
   [history position retained-input backward? filter-pred cursor-split-text]
   (let [cnt (count history),
         ; -1 <= position < count
-        position (if (< position -1) -1 position),
-        position (if (>= position cnt) (dec cnt) position),
+        position (condp < position
+                   -1 -1
+                   cnt position
+                   (dec cnt)),
         entries (if backward? 
                   ; seq of history entries backward from current position
                   (map vector 
@@ -228,11 +231,11 @@
 
 
 (defn text-begin-matches?
+  "Check whether the text begin matches the history entry.
+  If the text begin is blank, every history entry is matched (= classic stepping through history)."
   [[text-begin] ^String history-entry]
-  ; if text-begin is nil or empty (not blank), match everything (= classic stepping through history)
   (or
-    (nil? text-begin)
-    (= text-begin "")
+    (str/blank? text-begin)
     (.startsWith history-entry text-begin)))
 
 (defn history-backward-search [_ event] (load-history event true  restore-cursor text-begin-matches?))

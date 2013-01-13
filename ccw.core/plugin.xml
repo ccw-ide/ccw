@@ -851,21 +851,6 @@
       <key
             commandId="ccw.ui.repl.history.search.previous"
             contextId="ccw.ui.context.repl"
-            platform="win32"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="M1+M3+ARROW_UP">
-      </key>
-      <key
-            commandId="ccw.ui.repl.history.search.previous"
-            contextId="ccw.ui.context.repl"
-            platform="gtk"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="M1+M3+ARROW_UP">
-      </key>
-      <key
-            commandId="ccw.ui.repl.history.search.previous"
-            contextId="ccw.ui.context.repl"
-            platform="carbon"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+M3+ARROW_UP">
       </key>
@@ -900,21 +885,6 @@
       <key
             commandId="ccw.ui.repl.history.search.next"
             contextId="ccw.ui.context.repl"
-            platform="win32"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="M1+M3+ARROW_DOWN">
-      </key>
-      <key
-            commandId="ccw.ui.repl.history.search.next"
-            contextId="ccw.ui.context.repl"
-            platform="gtk"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="M1+M3+ARROW_DOWN">
-      </key>
-      <key
-            commandId="ccw.ui.repl.history.search.next"
-            contextId="ccw.ui.context.repl"
-            platform="carbon"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+M3+ARROW_DOWN">
       </key>
