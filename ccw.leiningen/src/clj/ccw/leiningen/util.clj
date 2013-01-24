@@ -108,7 +108,8 @@
                       (eval-in-project 
                         project
                         `(leiningen.core.project/merge-profiles 
-                           leiningen.core.project/defaults
+                           (update-in leiningen.core.project/defaults
+                             [:repositories] (fnil conj []) ["clojars-ccw-added" {:url "https://clojars.org/repo/"}])
                            [:user :default]))
                       (eval-in-project
                         project 
