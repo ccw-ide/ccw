@@ -44,7 +44,6 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IPerspectiveRegistry;
 import org.eclipse.ui.IPluginContribution;
@@ -59,18 +58,14 @@ import org.eclipse.ui.activities.IActivityManager;
 import org.eclipse.ui.activities.IIdentifier;
 import org.eclipse.ui.activities.IWorkbenchActivitySupport;
 import org.eclipse.ui.activities.WorkbenchActivityHelper;
-import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 import org.eclipse.ui.dialogs.WizardNewProjectReferencePage;
-import org.eclipse.ui.dialogs.WorkingSetGroup;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.ide.undo.CreateProjectOperation;
 import org.eclipse.ui.ide.undo.WorkspaceUndoUtil;
 import org.eclipse.ui.internal.IPreferenceConstants;
 import org.eclipse.ui.internal.WorkbenchPlugin;
 import org.eclipse.ui.internal.ide.IDEInternalPreferences;
-import org.eclipse.ui.internal.ide.IDEWorkbenchMessages;
 import org.eclipse.ui.internal.ide.IDEWorkbenchPlugin;
-import org.eclipse.ui.internal.ide.IIDEHelpContextIds;
 import org.eclipse.ui.internal.ide.StatusUtil;
 import org.eclipse.ui.internal.registry.PerspectiveDescriptor;
 import org.eclipse.ui.internal.util.PrefUtil;
@@ -79,6 +74,7 @@ import org.eclipse.ui.statushandlers.StatusAdapter;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 
+import ccw.CCWPlugin;
 import ccw.util.ClojureInvoker;
 
 /**
@@ -111,7 +107,7 @@ public class NewLeiningenProjectWizard extends BasicNewResourceWizard
 	private static final String performFinish = "perform-finish";
 
 	private static final ClojureInvoker wizard = ClojureInvoker.newInvoker(
-			                                         Activator.getDefault(),
+			                                         CCWPlugin.getDefault(),
 			                                         "ccw.leiningen.wizard");
 	
 	/**
@@ -369,7 +365,7 @@ public class NewLeiningenProjectWizard extends BasicNewResourceWizard
 					 );
 			return true;
 		} catch (Exception e) {
-			Activator.logError("Exception while creating new project " + project.getName(), e);
+			CCWPlugin.logError("Exception while creating new project " + project.getName(), e);
 			return false;
 		}
 	}
@@ -646,7 +642,7 @@ public class NewLeiningenProjectWizard extends BasicNewResourceWizard
 	
 	@Override
 	public void setDefaultPageImageDescriptor(ImageDescriptor imageDescriptor) {
-		ImageDescriptor d = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(), new Path("leiningen-new-project.png"), null));
+		ImageDescriptor d = ImageDescriptor.createFromURL(FileLocator.find(CCWPlugin.getDefault().getBundle(), new Path("leiningen-new-project.png"), null));
 		super.setDefaultPageImageDescriptor(d);
 	}
 }

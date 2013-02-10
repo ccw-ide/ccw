@@ -1,2 +1,5 @@
 bin/*
 classes/*
+lib/*
+target/*
+target/

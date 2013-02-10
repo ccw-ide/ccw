@@ -20,6 +20,7 @@ import org.eclipse.ui.internal.ide.IDEWorkbenchPlugin;
 import org.eclipse.ui.internal.ide.dialogs.ProjectContentsLocationArea;
 import org.eclipse.ui.internal.ide.dialogs.ProjectContentsLocationArea.IErrorMessageReporter;
 
+import ccw.CCWPlugin;
 import ccw.util.ClojureInvoker;
 
 public final class WizardNewLeiningenProjectTemplatePage extends
@@ -28,7 +29,7 @@ public final class WizardNewLeiningenProjectTemplatePage extends
 	private static final String checkProjectName = "check-project-name";
 
 	private static final ClojureInvoker wizard = ClojureInvoker.newInvoker(
-			                                         Activator.getDefault(),
+			                                         CCWPlugin.getDefault(),
 			                                         "ccw.leiningen.wizard");
 
 

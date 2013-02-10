@@ -22,10 +22,6 @@
       <update label="Counterclockwise Update Site" url="http://ccw.cgrand.net/updatesite/"/>
    </url>
 
-   <includes
-         id="ccw.leiningen.feature"
-         version="0.0.0"/>
-
    <requires>
       <import plugin="org.eclipse.help"/>
       <import plugin="org.eclipse.ui"/>
@@ -56,73 +52,41 @@
          version="0.0.0"/>
 
    <plugin
-         id="ccw.debug"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="ccw.core"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
-         id="paredit.clj"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="clojure.osgi"
+         id="ccw.debug"
          download-size="0"
          install-size="0"
          version="0.0.0"
+         fragment="true"
          unpack="false"/>
 
    <plugin
-         id="ccw.clojure"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.clojure.tools.nrepl"
+         id="ccw.leiningen"
          download-size="0"
          install-size="0"
          version="0.0.0"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="paredit.clj"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
          unpack="false"/>
 
    <plugin
          id="net.cgrand.parsley"
          download-size="0"
          install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="net.cgrand.regex"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="ccw.org.clojure.core.incubator"
-         download-size="0"
-         install-size="0"
          version="0.0.0"
+         fragment="true"
          unpack="false"/>
-
-   <plugin
-         id="ccw.clojurecontrib"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="ccw.util"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
 
 </feature>

@@ -53,7 +53,6 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.ConsolePlugin;
@@ -77,17 +76,20 @@ import ccw.preferences.PreferenceConstants;
 import ccw.util.ClojureInvoker;
 import ccw.util.DisplayUtil;
 import ccw.util.TextViewerSupport;
+import ccw.util.osgi.ClojureOSGi;
+import ccw.util.osgi.RunnableWithException;
 import clojure.lang.IFn;
 import clojure.lang.Keyword;
 import clojure.lang.PersistentHashMap;
 import clojure.lang.Symbol;
 import clojure.lang.Var;
-import clojure.osgi.ClojureOSGi;
 import clojure.tools.nrepl.Connection;
 import clojure.tools.nrepl.Connection.Response;
 
 public class REPLView extends ViewPart implements IAdaptable {
 
+	private static final ClojureInvoker core = ClojureInvoker.newInvoker(CCWPlugin.getDefault(), "clojure.core");
+	
 	private static final ClojureInvoker editorSupport = ClojureInvoker.newInvoker(
             CCWPlugin.getDefault(),
             "ccw.editors.clojure.editor-support");
@@ -107,10 +109,19 @@ public class REPLView extends ViewPart implements IAdaptable {
     private static Var handleResponses;
     static {
         try {
-            ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), "ccw.repl.view-helpers");
-            log = Var.find(Symbol.intern("ccw.repl.view-helpers/log"));
-            configureREPLView = Var.find(Symbol.intern("ccw.repl.view-helpers/configure-repl-view"));
-            handleResponses = Var.find(Symbol.intern("ccw.repl.view-helpers/handle-responses"));
+        	ClojureOSGi.withBundle(CCWPlugin.getDefault().getBundle(), new RunnableWithException() {
+				@Override
+				public Object run() throws Exception {
+		        	core._("require", Symbol.intern("ccw.repl.view-helpers"));
+		            //ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), "ccw.repl.view-helpers");
+		        	core._("require",  Symbol.intern("cemerick.drawbridge.client"));
+		            log = Var.find(Symbol.intern("ccw.repl.view-helpers/log"));
+		            configureREPLView = Var.find(Symbol.intern("ccw.repl.view-helpers/configure-repl-view"));
+		            handleResponses = Var.find(Symbol.intern("ccw.repl.view-helpers/handle-responses"));
+
+		            return null;
+				}
+			});
         } catch (Exception e) {
             CCWPlugin.logError("Could not initialize view helpers.", e);
         }

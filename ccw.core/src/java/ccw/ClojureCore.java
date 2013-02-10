@@ -69,6 +69,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import ccw.editors.clojure.ClojureEditor;
 import ccw.repl.REPLView;
+import ccw.util.ClojureInvoker;
 import clojure.lang.RT;
 import clojure.lang.Var;
 
@@ -78,6 +79,7 @@ import clojure.lang.Var;
  */
 public final class ClojureCore {
 	
+	private static ClojureInvoker staticAnalysis = ClojureInvoker.newInvoker(CCWPlugin.getDefault(), "paredit.static-analysis");
 	static public final String NATURE_ID = "ccw.nature";
     /**
      * Clojure file extension
@@ -448,9 +450,8 @@ public final class ClojureCore {
 		}
 	}
 	public static String findDeclaringNamespace(Map tree) {
-		Var findNamespace = RT.var("paredit.static-analysis", "find-namespace");
 		try {
-			return (String) findNamespace.invoke(tree);
+			return (String) staticAnalysis._("find-namespace", tree);
 		} catch (Exception e) {
 			CCWPlugin.logError("exception while trying to find declaring namespace for " + tree, e);
 			return null;

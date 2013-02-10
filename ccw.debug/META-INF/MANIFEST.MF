@@ -3,8 +3,8 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Debug Plug-in
 Bundle-SymbolicName: ccw.debug;singleton:=true
 Bundle-Version: 1.0.6.STABLE
+Fragment-Host: ccw.core;bundle-version="0.11.2"
 Bundle-ClassPath: .
-Bundle-Activator: ccw.debug.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.jface.text,
@@ -15,8 +15,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jdt.debug.ui,
  org.eclipse.ui,
  org.eclipse.core.runtime,
- org.eclipse.ui.ide;bundle-version="3.4.2",
- ccw.core
+ org.eclipse.ui.ide;bundle-version="3.4.2"
 Eclipse-LazyStart: true
 Created-By: 1.6.0_03-b05 (Sun Microsystems Inc.)
 Ant-Version: Apache Ant 1.7.0

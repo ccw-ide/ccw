@@ -21,8 +21,7 @@
            [org.eclipse.jface.text         ITextSelection]
            [org.eclipse.jface.viewers      IStructuredSelection]
            [org.eclipse.core.expressions   PropertyTester]
-           [ccw.leiningen                  Activator
-                                           Messages]
+           [ccw.leiningen                  Messages]
            [ccw.util                       Logger
                                            Logger$Severity]
            [java.io                        File
@@ -76,7 +75,8 @@
   (proxy [PropertyTester]
          []
     (test [receiver, property, args, expectedValue]
-      (let [res  (boolean
+      true
+      #_(let [res  (boolean
                    (when-let [project (e/project receiver)]
                      (and
                        (.isOpen project)

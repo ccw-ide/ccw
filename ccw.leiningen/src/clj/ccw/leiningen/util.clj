@@ -21,6 +21,7 @@
   "given bundle-name (a String), return the java.io.File corresponding to the
    currently loaded instance of this bundle"
   [bundle-name]
+  (println "bundle-file:" bundle-name)
   (-> bundle-name Platform/getBundle FileLocator/getBundleFile))
 
 (defn bundle-dir 
@@ -48,13 +49,13 @@
   "Create a new classlojure based leiningen environment by fetching all jars
    and classes directories found inside the ccw.leiningen-core plugin."
   []
-  (let [leiningen-core (bundle-dir "ccw.leiningen-core")
+  (let [leiningen-core (io/file (bundle-dir "ccw.core") "lib")
         jar (fn [^File f] (and (.isFile f) (.endsWith (.getName f) ".jar")))
         classes-dir (fn [d] (let [manifest (io/file d "META-INF" "MANIFEST.MF")]
                                (and (.exists manifest)
                                     (.isFile manifest))))
         libs (->> leiningen-core file-seq (filter #(or (jar %) (classes-dir %))))]
-    (apply c/classlojure libs)))
+    (c/classlojure leiningen-core)))
 
 (defonce ^{:doc 
            "Ref of map of \"project-name\" -> delay of classlojure environment.

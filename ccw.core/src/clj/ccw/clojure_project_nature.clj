@@ -202,28 +202,28 @@
 (defn make []
   (let [state (ref {:project nil :errors []})]
     (reify org.eclipse.core.resources.IProjectNature
-    (configure
-      [this]
-      (let [proj (:project @state)]
-        (when-let [desc (get-project-description proj)]
+      (configure
+        [this]
+        (let [proj (:project @state)]
+          (when-let [desc (get-project-description proj)]
+            (let [spec (.getBuildSpec desc)]
+              (when (not (builder-present? spec (ClojureBuilder/BUILDER_ID)))
+                (insert-clojure-builder! proj spec desc)
+                (setup-clojure-project-classpath! proj))))))
+      (deconfigure
+        [this]
+        (when-let [desc (get-project-description (.getProject this))]
           (let [spec (.getBuildSpec desc)]
-            (when (not (builder-present? spec (ClojureBuilder/BUILDER_ID)))
-              (insert-clojure-builder! proj spec desc)
-              (setup-clojure-project-classpath! proj))))))
-    (deconfigure
-      [this]
-      (when-let [desc (get-project-description (.getProject this))]
-        (let [spec (.getBuildSpec desc)]
-          (when (builder-present? spec (ClojureBuilder/BUILDER_ID))
-            (let [newSpec (remove #(= (ClojureBuilder/BUILDER_ID) (.getBuilderName %)) spec)]
-              (.setBuildSpec desc (into-array newSpec))
-              (try
-                (.setDescription (.getProject this) desc nil)
-                (catch CoreException e
-                  (CCWPlugin/logError "Could not set project description" e))))))))
-    (getProject
-      [this] (:project @state))
-    (setProject
-      [this proj] (dosync (alter state assoc :project proj))))))
+            (when (builder-present? spec (ClojureBuilder/BUILDER_ID))
+              (let [newSpec (remove #(= (ClojureBuilder/BUILDER_ID) (.getBuilderName %)) spec)]
+                (.setBuildSpec desc (into-array newSpec))
+                (try
+                  (.setDescription (.getProject this) desc nil)
+                  (catch CoreException e
+                    (CCWPlugin/logError "Could not set project description" e))))))))
+      (getProject
+        [this] (:project @state))
+      (setProject
+        [this proj] (dosync (alter state assoc :project proj))))))
 
 (defn factory [ _ ] (make))

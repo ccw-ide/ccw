@@ -16,7 +16,6 @@
                          ClojureEditorMessages
                          IHyperlinkConstants
                          AbstractHyperlinkDetector]
-    [ccw.debug           ClojureClient]
     [ccw                 ClojureCore]))
 
 (def ID (IHyperlinkConstants/ClojureHyperlinkDetector_ID)) 

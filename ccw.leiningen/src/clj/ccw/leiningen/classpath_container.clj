@@ -25,9 +25,7 @@
                                        IMarker
                                        ResourcesPlugin]
            [org.sonatype.aether.resolution DependencyResolutionException]
-           [ccw.leiningen Activator
-                          Messages
-                          ]
+           [ccw.leiningen Messages]
            [ccw.util Logger
                      Logger$Severity]
            [java.io File
@@ -42,7 +40,7 @@
 (def LEININGEN_CLASSPATH_CONTAINER_PROBLEM_MARKER_TYPE
   "ccw.leiningen.problemmarkers.classpathcontainer")
 
-(def logger (Logger. (Activator/PLUGIN_ID)))
+(def logger (Logger. (ccw.CCWPlugin/PLUGIN_ID)))
 
 (defmacro with-exc-logged [& body]
   `(try ~@body
@@ -54,7 +52,7 @@
 (defn plugin 
   "Return the plugin instance"
   []
-  (ccw.leiningen.Activator/getDefault))
+  (ccw.CCWPlugin/getDefault))
 
 (defn make-leiningen-classpath-container 
   "Create an instance of an IClasspathContainer given the arguments.

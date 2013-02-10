@@ -1,7 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: Leiningen Integration Plugin
-Bundle-SymbolicName: ccw.leiningen.branding;singleton:=true
-Bundle-Version: 0.11.2.qualifier
-Bundle-ActivationPolicy: lazy
-Bundle-Vendor: Counterclockwise team

@@ -6,12 +6,11 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.VerifyEvent;
-import org.eclipse.swt.events.VerifyListener;
-import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -19,15 +18,14 @@ import org.eclipse.swt.widgets.Text;
 import ccw.util.StringUtils;
 
 public class ConnectDialog extends Dialog {
-    private static final String PORT_SETTING_DEFAULT = "";
-	private static final String HOST_SETTING_DEFAULT = "127.0.0.1";
-	private Text host;
-    private Text port;
+	private static final String URL_SETTING = "url";
+	private static final String URL_SETTING_DEFAULT = "nrepl://127.0.0.1";
+	
+	private Text rawUrl;
     private String url;
     
     private static final String CONNECT_DIALOG_SECTION = "ccw.repl.ConnectDialog";
-    private static final String PORT_SETTING = "port";
-    private static final String HOST_SETTING = "host";
+    
     private IDialogSettings dialogSettings;
     
     public ConnectDialog(Shell parentShell, IDialogSettings dialogSettings) {
@@ -38,11 +36,16 @@ public class ConnectDialog extends Dialog {
         	this.dialogSettings = DialogSettings.getOrCreateSection(dialogSettings, CONNECT_DIALOG_SECTION);
         }
     }
+    
+    @Override
+    protected boolean isResizable() {
+    	return true;
+    }
 
     @Override
     protected void configureShell(Shell newShell) {
         super.configureShell(newShell);
-        newShell.setText("Connect to REPL");
+        newShell.setText("Connect to a REPL");
     }
 
     @Override
@@ -50,21 +53,36 @@ public class ConnectDialog extends Dialog {
         
         Composite composite = (Composite) super.createDialogArea(parent);
         
-        parent = new Composite(composite, 0);
-        parent.setLayout(new GridLayout(2, false));
-        new Label(parent, 0).setText("Hostname");
+        GridLayout layout = (GridLayout) composite.getLayout();
+        layout.numColumns = 1;
         
-        host = new Text(parent, SWT.BORDER);
+        {
+	        Label l = new Label(composite, 0);
+	        GridData gd = new GridData();
+	        l.setLayoutData(gd);
+	        
+	        l.setText("nRepl URL:");
+        }
+        {
+	        rawUrl = new Text(composite, SWT.BORDER);
+	        GridData gd = new GridData();
+	        gd.grabExcessHorizontalSpace = true;
+	        gd.horizontalAlignment = SWT.FILL;
+	        gd.widthHint = 300;
+	        rawUrl.setLayoutData(gd);
+        }
         
-        new Label(parent, 0).setText("Port");
-        
-        port = new Text(parent, SWT.BORDER);
-        port.addVerifyListener(new VerifyListener() {
-			public void verifyText(VerifyEvent e) {
-				String newText = port.getText().substring(0, e.start) + e.text + port.getText().substring(e.end);
-				e.doit = newText.matches("\\d*");
-			}
-		});
+        {
+        	Label l;
+        	
+        	l = new Label(composite, SWT.NONE);
+        	l.setText("Example: nrepl://127.0.0.1:5678");
+        	l.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY));
+        	
+        	l = new Label(composite, SWT.NONE);
+        	l.setText("Example: http://yourapp.herokuapp.com/repl");
+        	l.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY));
+        }
         
         initValues();
         
@@ -75,29 +93,27 @@ public class ConnectDialog extends Dialog {
 			}
 		});
         
-        port.setFocus();
-        port.setSelection(0, port.getText().length());
+        applyDialogFont(composite);
+        
         return composite;
     }
     
     private void initValues() {
-    	if (dialogSettings == null) return;
-    	setText(host, dialogSettings.get(HOST_SETTING), HOST_SETTING_DEFAULT);
-    	setText(port, dialogSettings.get(PORT_SETTING), PORT_SETTING_DEFAULT);
+    	setText(rawUrl, dialogSettings.get(URL_SETTING), URL_SETTING_DEFAULT);
     }
     
     
     private void setText(Text w, String value, String defaultValue) {
+    	if (dialogSettings == null) return;
     	w.setText((value!=null) ? value : defaultValue);
     }
 
     private void saveValues() {
-    	if (dialogSettings == null) return;
-    	saveValue(host, HOST_SETTING, HOST_SETTING_DEFAULT);
-    	saveValue(port, PORT_SETTING, PORT_SETTING_DEFAULT);
+    	saveValue(rawUrl, URL_SETTING, URL_SETTING_DEFAULT);
     }
     
     private void saveValue(Text w, String key, String defaultValue) {
+    	if (dialogSettings == null) return;
     	String value = w.getText();
 		dialogSettings.put(
 				key, 
@@ -105,7 +121,7 @@ public class ConnectDialog extends Dialog {
     }
 
     protected void okPressed () {
-        url = String.format("nrepl://%s:%s", host.getText(), port.getText());
+        url = rawUrl.getText();
         super.okPressed();
     }
     

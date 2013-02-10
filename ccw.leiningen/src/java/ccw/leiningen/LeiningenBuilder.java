@@ -11,14 +11,15 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
+import ccw.CCWPlugin;
 import ccw.util.ClojureInvoker;
 
 public class LeiningenBuilder extends IncrementalProjectBuilder {
 	
 	public static final String ID = "ccw.leiningen.builder";
 	
-	private static final ClojureInvoker classpathContainer = ClojureInvoker.newInvoker(
-            Activator.getDefault(),
+	private final ClojureInvoker classpathContainer = ClojureInvoker.newInvoker(
+            CCWPlugin.getDefault(),
             "ccw.leiningen.classpath-container");
 
 	private static final String updateProjectDependencies = "update-project-dependencies";
@@ -38,7 +39,7 @@ public class LeiningenBuilder extends IncrementalProjectBuilder {
 				IJavaProject javaProject = JavaCore.create(getProject());
 				classpathContainer._(updateProjectDependencies, javaProject);
 			} catch (Exception e) {
-				throw new CoreException(Activator.createErrorStatus("Unexpected exception while trying to update Leiningen Managed Dependencies for project " + getProject().getName(), e));
+				throw new CoreException(CCWPlugin.createErrorStatus("Unexpected exception while trying to update Leiningen Managed Dependencies for project " + getProject().getName(), e));
 			}
 		}
 		

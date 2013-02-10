@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<fragment>
+
+   <extension
+         point="org.eclipse.core.runtime.adapters">
+      <factory
+            adaptableType="ccw.editors.clojure.ClojureEditor"
+            class="ccw.debug.BreakpointAdapterFactory">
+         <adapter
+               type="org.eclipse.debug.ui.actions.IToggleBreakpointsTarget">
+         </adapter>
+      </factory>
+   </extension>
+   <extension point="org.eclipse.ui.popupMenus">
+    <viewerContribution
+          id="ccw.editors.ClojureEditor.RulerPopupActions"
+          targetID="ccw.clojureeditor.RulerContext">
+       <action
+             class="org.eclipse.debug.ui.actions.RulerEnableDisableBreakpointActionDelegate"
+             id="ccw.editors.ClojureEditor.RulerContext.enableBreakpointAction"
+             label="Enable Breakpoint"
+             menubarPath="additions">
+       </action>
+       <action
+             class="org.eclipse.debug.ui.actions.RulerToggleBreakpointActionDelegate"
+             id="ccw.editors.ClojureEditor.RulerContext.toggleBreakpointAction"
+             label="Toggle Breakpoint"
+             menubarPath="additions">
+       </action>
+    </viewerContribution>
+   </extension>
+   <extension
+	      point="org.eclipse.ui.editorActions">
+    <editorContribution
+          id="ccw.editors.ClojureEditor.RulerActions"
+          targetID="ccw.clojureeditor">
+       <action
+             actionID="RulerDoubleClick"
+             class="org.eclipse.debug.ui.actions.RulerToggleBreakpointActionDelegate"
+             id="ccw.editors.ClojureEditor.RulerContext.doubleClickBreakpointAction"
+             label="Not Used"
+             style="push">
+       </action>
+    </editorContribution>
+   </extension>
+
+</fragment>

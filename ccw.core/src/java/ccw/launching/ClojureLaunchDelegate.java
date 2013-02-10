@@ -278,15 +278,16 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
         
         if (clojureProject.getJavaProject().findElement(new Path("clojure/tools/nrepl")) == null) {
             try {
-                File repllib = FileLocator.getBundleFile(Platform.getBundle("org.clojure.tools.nrepl"));
+                File repllib = FileLocator.getBundleFile(CCWPlugin.getDefault().getBundle());
                 // this should *always* be a file, *unless* the user is getting nREPL from a clone of its
                 // project, in which case we need to reach into that project's directory...
                 ArrayList replAdditions = new ArrayList();
                 if (repllib.isFile()) {
                     replAdditions.add(repllib.getAbsolutePath());
                 } else {
-                    replAdditions.add(new File(repllib, "src/main/clojure").getAbsolutePath());
-                    replAdditions.add(new File(repllib, "target/classes").getAbsolutePath());
+                    //replAdditions.add(new File(repllib, "src/main/clojure").getAbsolutePath());
+                    //replAdditions.add(new File(repllib, "target/classes").getAbsolutePath());
+                	replAdditions.add(new File(repllib, "lib").getAbsolutePath());
                 }
                 
                 CCWPlugin.log("Adding to project's classpath to support nREPL: " + replAdditions);

@@ -27,19 +27,29 @@ import ccw.launching.ClojureLaunchShortcut;
 import ccw.nature.ClojureNaturePropertyTest;
 import ccw.repl.Actions;
 import ccw.repl.REPLView;
+import ccw.util.ClojureInvoker;
 import ccw.util.DisplayUtil;
+import ccw.util.osgi.ClojureOSGi;
+import ccw.util.osgi.RunnableWithException;
 import clojure.lang.Symbol;
 import clojure.lang.Var;
-import clojure.osgi.ClojureOSGi;
 
 public class LoadFileAction extends Action {
 
+	private static ClojureInvoker core = ClojureInvoker.newInvoker(CCWPlugin.getDefault(), "clojure.core");
+	
 	public final static String ID = "LoadFileAction"; //$NON-NLS-1$
 	
     private static Var loadFileCommand;
     static {
         try {
-            ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), "clojure.tools.nrepl.helpers");
+            ClojureOSGi.withBundle(CCWPlugin.getDefault().getBundle(), new RunnableWithException() {
+				@Override
+				public Object run() throws Exception {
+					core._("require", Symbol.intern("clojure.tools.nrepl.helpers"));
+					return null;
+				}
+			}); 
             loadFileCommand = Var.find(Symbol.intern("clojure.tools.nrepl.helpers/load-file-command"));
         } catch (Exception e) {
             CCWPlugin.logError("Could not initialize code loading helpers.", e);

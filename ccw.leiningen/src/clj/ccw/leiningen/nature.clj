@@ -26,8 +26,7 @@
     [org.eclipse.jface.text         ITextSelection]
     [org.eclipse.jface.viewers      IStructuredSelection]
     [org.eclipse.core.expressions   PropertyTester]
-    [ccw.leiningen                  Activator
-                                    Messages
+    [ccw.leiningen                  Messages
                                     LeiningenBuilder]
     [ccw.util                       Logger
                                     Logger$Severity]
@@ -38,7 +37,7 @@
 
 (def NATURE-ID "ccw.leiningen.nature")
 
-(def logger (Logger. (Activator/PLUGIN_ID)))
+(def logger (Logger. (ccw.CCWPlugin/PLUGIN_ID)))
 
 ;; TODO copie de ccw.core, exporter dans ccw.util
 

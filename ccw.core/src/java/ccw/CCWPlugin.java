@@ -49,13 +49,14 @@ import ccw.preferences.PreferenceConstants;
 import ccw.preferences.SyntaxColoringPreferencePage;
 import ccw.repl.REPLView;
 import ccw.util.BundleUtils;
+import ccw.util.ClojureInvoker;
 import ccw.util.DisplayUtil;
 import ccw.util.ITracer;
 import ccw.util.NullTracer;
 import ccw.util.Tracer;
 import clojure.lang.Keyword;
+import clojure.lang.Symbol;
 import clojure.lang.Var;
-import clojure.osgi.ClojureOSGi;
 import clojure.tools.nrepl.Connection;
 
 /**
@@ -133,8 +134,6 @@ public class CCWPlugin extends AbstractUIPlugin {
         
         tracer = new Tracer(context, TraceOptions.getTraceOptions());
 
-        startClojureCode(context);
-        
         if (System.getProperty("ccw.autostartnrepl") != null) {
         	startREPLServer();
         }
@@ -204,22 +203,6 @@ public class CCWPlugin extends AbstractUIPlugin {
         return prefs;
     }
 
-    private void startClojureCode(BundleContext bundleContext) throws Exception {
-//    	ClojureOSGi.loadAOTClass(bundleContext, "ccw.editors.clojure.ClojureFormat");
-    	
-    	ClojureOSGi.require(bundleContext, "ccw.editors.clojure.hyperlink");
-    	
-    	ClojureOSGi.require(bundleContext, "ccw.editors.clojure.editor-support");
-
-    	ClojureOSGi.require(bundleContext, "ccw.editors.clojure.ClojureTopLevelFormsDamagerImpl");
-    	ClojureOSGi.require(bundleContext, "ccw.editors.clojure.PareditAutoEditStrategyImpl");
-
-    	ClojureOSGi.require(bundleContext, "ccw.debug.clientrepl");
-    	ClojureOSGi.require(bundleContext, "ccw.debug.serverrepl"); // <= to enable REPLView 
-    	                                                            //    server-side tooling
-    	ClojureOSGi.require(bundleContext, "paredit.static-analysis");
-    }
-    
     public void stop(BundleContext context) throws Exception {
     	
     	// We don't remove colors when deregistered, because, well, we don't have a

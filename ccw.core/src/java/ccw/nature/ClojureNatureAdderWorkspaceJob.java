@@ -11,6 +11,8 @@ import org.eclipse.jdt.core.JavaCore;
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.commands.ToggleNatureCommand;
+import ccw.util.osgi.ClojureOSGi;
+import ccw.util.osgi.RunnableWithException;
 
 final class ClojureNatureAdderWorkspaceJob extends
 		WorkspaceJob {
@@ -28,29 +30,37 @@ final class ClojureNatureAdderWorkspaceJob extends
 	@Override
 	public IStatus runInWorkspace(IProgressMonitor monitor)
 			throws CoreException {
-
 		try {
-			if (!project.exists() || !project.isOpen())
-				return Status.CANCEL_STATUS;
-
-			if (project.hasNature(ClojureCore.NATURE_ID)) {
-				return Status.CANCEL_STATUS;
-			}
-			
-			boolean hasClojurePackage = JavaCore.create(project).findElement(ClojurePackageElementChangeListener.CLOJURE_PACKAGE_PATH) != null;
-			
-			if (hasClojurePackage) {
-				ToggleNatureCommand.toggleNature(project, true);
-			}
-			
-		} catch (CoreException e) {
-			e.printStackTrace();
-			return CCWPlugin.createErrorStatus(
-					"Exception occured while trying to automatically " 
-			        + "add Clojure nature for project " 
-					+ project.getName(), 
-					e);
+			return (IStatus) ClojureOSGi.withBundle(CCWPlugin.getDefault().getBundle(), new RunnableWithException() {
+				@Override
+				public Object run() throws Exception {
+					try {
+						if (!project.exists() || !project.isOpen())
+							return Status.CANCEL_STATUS;
+	
+						if (project.hasNature(ClojureCore.NATURE_ID)) {
+							return Status.CANCEL_STATUS;
+						}
+						
+						boolean hasClojurePackage = JavaCore.create(project).findElement(ClojurePackageElementChangeListener.CLOJURE_PACKAGE_PATH) != null;
+						
+						if (hasClojurePackage) {
+							ToggleNatureCommand.toggleNature(project, true);
+						}
+						
+					} catch (CoreException e) {
+						e.printStackTrace();
+						return CCWPlugin.createErrorStatus(
+								"Exception occured while trying to automatically " 
+						        + "add Clojure nature for project " 
+								+ project.getName(), 
+								e);
+					}
+					return Status.OK_STATUS;
+				}
+			});
+		} catch (Exception e) {
+			return CCWPlugin.createErrorStatus("Error adding clojure nature", e);
 		}
-		return Status.OK_STATUS;
 	}
 }

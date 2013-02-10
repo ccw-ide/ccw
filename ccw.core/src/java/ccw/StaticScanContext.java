@@ -16,12 +16,16 @@ import java.util.Map;
 
 import ccw.editors.clojure.IScanContext;
 import ccw.preferences.PreferenceConstants;
+import ccw.util.ClojureInvoker;
 import clojure.lang.Keyword;
 import clojure.lang.RT;
 import clojure.lang.Var;
 
 public class StaticScanContext implements IScanContext {
 	private Map<String,Keyword> clojureSymbolTypesCache = new HashMap<String, Keyword>();
+	
+	// TODO this is to ensure that ccw.debug.clientrepl is launched ...
+	private static ClojureInvoker clientrepl = ClojureInvoker.newInvoker(CCWPlugin.getDefault(), "ccw.debug.clientrepl");
 	
 	private static final Var coreSymbolType = RT.var("ccw.debug.clientrepl", "core-symbol-type");
 	
