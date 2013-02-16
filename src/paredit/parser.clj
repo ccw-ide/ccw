@@ -6,7 +6,6 @@
 	(:require [clojure.zip :as zip])
   (:require [net.cgrand.parsley :as p])
   (:require [net.cgrand.parsley.lrplus :as lr+])
-  (:require [net.cgrand.regex :as r])
   (:require [clojure.string :as str]))
 
 #_(set! *warn-on-reflection* true)
