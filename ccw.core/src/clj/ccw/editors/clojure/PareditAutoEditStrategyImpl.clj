@@ -31,9 +31,12 @@
    })
 
 (def ^:dynamic *strict-commands*
-  #{:paredit-close-round, :paredit-close-square, :paredit-close-curly, 
-    :paredit-forward-delete, :paredit-backward-delete})
-
+  #{:paredit-open-round, :paredit-close-round,
+    :paredit-open-square, :paredit-close-square,
+    :paredit-open-curly, :paredit-close-curly, 
+    :paredit-forward-delete, :paredit-backward-delete,
+    :paredit-doublequote})
+ 
 (def
   command-preferences
   "map of command to map of keyword -> associated global preference key"
