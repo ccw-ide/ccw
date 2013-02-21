@@ -292,11 +292,11 @@ public class CCWPlugin extends AbstractUIPlugin {
 	public static final String CLASS = "class_obj.gif";
 	public static final String SORT = "alphab_sort_co.gif";
 
-	public static boolean isAutoReloadEnabled() {
+	public static boolean isAutoReloadOnStartupSaveEnabled() {
 		return CCWPlugin.getDefault().getCombinedPreferenceStore().getBoolean(PreferenceConstants.CCW_GENERAL_AUTO_RELOAD_ON_STARTUP_SAVE);
 	}
 	
-	public static boolean isAutoReloadEnabled(ILaunch launch) {
+	public static boolean isAutoReloadOnStartupSaveEnabled(ILaunch launch) {
 		return (Boolean.parseBoolean(launch.getAttribute(LaunchUtils.ATTR_IS_AUTO_RELOAD_ENABLED)));
 	}
     

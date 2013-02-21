@@ -54,6 +54,10 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
     protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
             throws CoreException {
     	
+    	if (!CCWPlugin.isAutoReloadOnStartupSaveEnabled()) {
+    		return null;
+    	}
+    	
 //    	System.out.println("clojure build required");
     	if (getProject()==null) {
     		return null;

@@ -137,7 +137,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     
     protected void launchProject2(IProject project, IFile[] filesToLaunch, String mode) {
 
-    	Boolean activateAutoReload = CCWPlugin.isAutoReloadEnabled();
+    	Boolean activateAutoReload = CCWPlugin.isAutoReloadOnStartupSaveEnabled();
         try {
             ILaunchConfiguration config = findLaunchConfiguration(project);
             if (config == null) {
