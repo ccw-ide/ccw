@@ -2,6 +2,7 @@
   (:require [ccw.leiningen.classpath-container :as cpc]
             [clojure.string                    :as str]
             [ccw.util.eclipse                  :as e]
+            [ccw.util.jdt                      :as jdt]
             [clojure.java.io                   :as io]
             [ccw.leiningen.util                :as u]
             [ccw.util.bundle                   :as b])
@@ -163,7 +164,7 @@
         
         jvm-entry        (jvm-entry-or-default java-proj)
         
-        source-entries   (map #(u/source-entry {:path %}) 
+        source-entries   (map #(jdt/source-entry {:path %}) 
                               (lein-source-folders lein-proj))
         _ (println "(lein-source-folders lein-proj): " (lein-source-folders lein-proj))
         _ (println "source-entries: " source-entries)
@@ -179,25 +180,25 @@
         resource-entries (if optional-entries?
                            (->> lein-proj
                              lein-optional-source-folders
-                             (map #(u/source-entry {:path %, 
-                                                    :extra-attributes {u/optional "true"}})))
+                             (map #(jdt/source-entry {:path %, 
+                                                    :extra-attributes {jdt/optional "true"}})))
                            (->> lein-proj
                              lein-optional-source-folders
                              (filter #(.exists ^File %))
-                             (map #(u/source-entry {:path %}))))
+                             (map #(jdt/source-entry {:path %}))))
         _ (println "resource entries:" resource-entries)
-        compile-entry    (u/library-entry {:path (lein-compile-folder lein-proj)
-                                           :extra-attributes {u/optional "true"}})
+        compile-entry    (jdt/library-entry {:path (lein-compile-folder lein-proj)
+                                           :extra-attributes {jdt/optional "true"}})
 
         lein-container   (cpc/get-lein-container java-proj)
         _                (cpc/set-classpath-container
                            java-proj
                            cpc/CONTAINER-PATH
                            lein-container)
-        container-entry  (u/container-entry 
+        container-entry  (jdt/container-entry 
                            {:path (.getPath lein-container)
                             :extra-attributes 
-                            {u/native-library (u/native-library-path
+                            {jdt/native-library (jdt/native-library-path
                                                 (u/lein-native-platform-path
                                                   lein-proj))}
                             :is-exported true})]

@@ -5,6 +5,7 @@
             [cemerick.pomegranate.aether :as aether]
             [clojure.string :as str]
             [ccw.util.eclipse :as e]
+            [ccw.util.jdt :as jdt]
             [clojure.java.io :as io]
             [ccw.leiningen.util :as u])
   (:import [org.eclipse.core.runtime CoreException
@@ -75,7 +76,7 @@
                      (update-in params [:extra-attributes] 
                                 assoc u/native-library (u/native-library-path native-path))
                      params)]
-    (u/library-entry params)))
+    (jdt/library-entry params)))
 
 (defn leiningen-classpath-container
   "Given a project, grab its dependencies, and create an Eclipse Classpath Container
@@ -612,7 +613,7 @@
       (finish [] true)
       
       (getSelection []
-        (u/container-entry {:path CONTAINER-PATH
+        (jdt/container-entry {:path CONTAINER-PATH
                             :is-exported true}))
       
       (setSelection [_]))
