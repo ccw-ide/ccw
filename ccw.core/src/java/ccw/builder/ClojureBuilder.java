@@ -197,10 +197,14 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
     	}
     	
     	try {
-    		getClassesFolder(getProject()).delete(true, new SubProgressMonitor(monitor, 0));
-    		createClassesFolder(getProject(), new SubProgressMonitor(monitor, 0));
-	        getClassesFolder(getProject()).refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 0));
-	        getClassesFolder(getProject()).setDerived(true); //, monitor); removed monitor argument, probably a 3.5/3.6 only stuff
+        	if (CCWPlugin.isAutoReloadOnStartupSaveEnabled()) {
+        		// Only when autoReloadOnStartupSave is enabled do we have AOT compilation
+        		//active and a classes/ folder to manage
+	    		getClassesFolder(getProject()).delete(true, new SubProgressMonitor(monitor, 0));
+	    		createClassesFolder(getProject(), new SubProgressMonitor(monitor, 0));
+		        getClassesFolder(getProject()).refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 0));
+		        getClassesFolder(getProject()).setDerived(true); //, monitor); removed monitor argument, probably a 3.5/3.6 only stuff
+        	}
     	} catch (CoreException e) {
     		CCWPlugin.logError("Unable to correctly clean classes folder", e);
     	}

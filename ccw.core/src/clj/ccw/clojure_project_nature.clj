@@ -9,14 +9,15 @@
 ;*    Laurent PETIT - initial API and implementation
 ;*******************************************************************************/
 (ns ccw.clojure-project-nature
+  (:require [clojure.java.io :as io]
+            [ccw.util.jdt :as jdt])
   (:import
     [ccw CCWPlugin ClojureCore]
     [java.io IOException File]
     [ccw.builder ClojureBuilder] 
     [org.eclipse.core.runtime CoreException Platform Path Status IPath IProgressMonitor FileLocator]
     [org.eclipse.core.resources WorkspaceJob IResource ResourcesPlugin]
-    [org.eclipse.jdt.core JavaCore])
-  (:require [clojure.java.io :as io]))
+    [org.eclipse.jdt.core JavaCore]))
 
 ;; FIXME : see in Clojure 1.3 if it is possible to extend copy's behaviour ...
 (defn copy [^IPath input ^IPath output & opts]
@@ -171,16 +172,11 @@
 (defn- add-classes-directory!
   [java-project]
   (io!
-	  (let [classes-folder (-> java-project .getProject (.getFolder "classes"))]
-	    (if (not (.exists classes-folder))
-	      (.create classes-folder true true nil)
-	      ; TODO preparer un "rapport" au cas où certaines choses ne se soient pas correctement passees
-	    )
-	    (add-lib-on-classpath!
-	      java-project
-	      (.getFullPath classes-folder)
-	      nil ; (-> java-project .getPath (.append "src"))
-	      false))))
+	  (let [classes-folder (-> java-project .getProject (.getFolder "classes"))
+          classes-entry (jdt/library-entry {:path classes-folder
+                         :is-exported true
+                         :extra-attributes {jdt/optional "true"}})]
+     (jdt/conj-entries! java-project [classes-entry]))))
 
 (defn- setup-clojure-project-classpath!
   [proj]
