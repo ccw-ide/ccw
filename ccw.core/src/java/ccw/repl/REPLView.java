@@ -475,11 +475,12 @@ public class REPLView extends ViewPart implements IAdaptable {
             }
             public void setStatusLineErrorMessage(String msg) {
             	if (msg != null) {
-	            	IStatusLineManager slm = (IStatusLineManager) REPLView.super.getSite().getService(IStatusLineManager.class);
+	            	IStatusLineManager slm = REPLView.this.getViewSite().getActionBars().getStatusLineManager();
+
 	            	if (slm != null) {
 	            		slm.setErrorMessage(msg);
 	            	} else {
-	            		MessageDialog.openError(Display.getCurrent().getActiveShell(), "REPL View status", msg);
+	            		CCWPlugin.logWarning("Could not find status line manager to send the following message from the REPL: " + msg);
 	            	}
             	}
             };
