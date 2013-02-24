@@ -76,14 +76,14 @@
 (defn set-context-classloader! [l]
   (-> (Thread/currentThread) (.setContextClassLoader l)))
 
-;(defn bundle-classloader [bundle]
-;  (clojure.osgi.BundleClassLoader. bundle))
+(defn bundle-classloader [bundle]
+  (ccw.util.osgi.BundleClassLoader. bundle))
 
-;(defn set-bundle-classloader! [bundle-symbolic-name]
-;  (-> bundle-symbolic-name 
-;    load-and-get-bundle
-;    bundle-classloader
-;    set-context-classloader!))
+(defn set-bundle-classloader! [bundle-symbolic-name]
+  (-> bundle-symbolic-name 
+    load-and-get-bundle
+    bundle-classloader
+    set-context-classloader!))
 
 ;(defn with-bundle* [bundle f]
 ;  (clojure.osgi.ClojureOSGi/withBundle 

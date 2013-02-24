@@ -49,13 +49,11 @@ import ccw.preferences.PreferenceConstants;
 import ccw.preferences.SyntaxColoringPreferencePage;
 import ccw.repl.REPLView;
 import ccw.util.BundleUtils;
-import ccw.util.ClojureInvoker;
 import ccw.util.DisplayUtil;
 import ccw.util.ITracer;
 import ccw.util.NullTracer;
 import ccw.util.Tracer;
 import clojure.lang.Keyword;
-import clojure.lang.Symbol;
 import clojure.lang.Var;
 import clojure.tools.nrepl.Connection;
 
@@ -102,6 +100,7 @@ public class CCWPlugin extends AbstractUIPlugin {
     public synchronized void startREPLServer() throws CoreException {
     	if (ackREPLServer == null) {
 	        try {
+	        	// TODO use ClojureOSGi.withBundle instead
 	        	Var startServer = BundleUtils.requireAndGetVar(getBundle().getSymbolicName(), "clojure.tools.nrepl.server/start-server");
 	        	Object defaultHandler = BundleUtils.requireAndGetVar(
 	        	        getBundle().getSymbolicName(),
@@ -131,7 +130,15 @@ public class CCWPlugin extends AbstractUIPlugin {
     public void start(BundleContext context) throws Exception {
         super.start(context);
         plugin = this;
-        
+        /*
+        ClojureOSGi.withBundle(this.getBundle(), new RunnableWithException() {
+			@Override
+			public Object run() throws Exception {
+				RT.var("clojure.core", "require");
+				return null;
+			}
+		});
+        */
         tracer = new Tracer(context, TraceOptions.getTraceOptions());
 
         if (System.getProperty("ccw.autostartnrepl") != null) {

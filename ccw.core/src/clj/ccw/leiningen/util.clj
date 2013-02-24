@@ -5,6 +5,7 @@
             [classlojure.core :as c]
             [clojure.java.io :as io])
   (:import [org.eclipse.core.resources IProject]
+           [java.io File]
            [org.eclipse.core.runtime Platform
                                      FileLocator]))
 

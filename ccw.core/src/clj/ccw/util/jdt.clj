@@ -1,3 +1,4 @@
+(.println (System/out) "_________________________ccw.util.jdt")
 (ns ccw.util.jdt
   (:use [clojure.core.incubator :only [-?> -?>>]])
   (:require [ccw.util.eclipse :as e])
@@ -6,6 +7,7 @@
                                  IClasspathEntry
                                  IAccessRule]
            [org.eclipse.jdt.launching JavaRuntime]
+           [org.eclipse.core.resources IResource]
            [org.eclipse.core.runtime IPath]))
 
 (println "ccw.util.jdt load starts")
@@ -101,5 +103,6 @@
       (e/null-progress-monitor))))
 
 (defn conj-entries! [java-project entries] 
-  (update-entries java-project entries false))
+  (update-entries! java-project entries false))
+
 (println "ccw.util.jdt namespace loaded")
