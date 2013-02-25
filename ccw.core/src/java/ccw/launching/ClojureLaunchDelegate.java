@@ -27,7 +27,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.ProgressMonitorWrapper;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -278,16 +277,18 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
         
         if (clojureProject.getJavaProject().findElement(new Path("clojure/tools/nrepl")) == null) {
             try {
-                File repllib = FileLocator.getBundleFile(CCWPlugin.getDefault().getBundle());
+                File ccwPluginDir = FileLocator.getBundleFile(CCWPlugin.getDefault().getBundle());
                 // this should *always* be a file, *unless* the user is getting nREPL from a clone of its
                 // project, in which case we need to reach into that project's directory...
                 ArrayList replAdditions = new ArrayList();
-                if (repllib.isFile()) {
-                    replAdditions.add(repllib.getAbsolutePath());
+                if (ccwPluginDir.isFile()) {
+                	throw new WorkbenchException("Bundle ccw.core is a file. Cannot install nrepl");
                 } else {
                     //replAdditions.add(new File(repllib, "src/main/clojure").getAbsolutePath());
                     //replAdditions.add(new File(repllib, "target/classes").getAbsolutePath());
-                	replAdditions.add(new File(repllib, "lib").getAbsolutePath());
+                	
+                	// Hack, until the project is launched via leiningen instead
+                	replAdditions.add(new File(ccwPluginDir, "tools.nrepl-0.2.1.jar").getAbsolutePath());
                 }
                 
                 CCWPlugin.log("Adding to project's classpath to support nREPL: " + replAdditions);
