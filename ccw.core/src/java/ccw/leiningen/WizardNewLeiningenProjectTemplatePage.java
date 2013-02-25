@@ -62,10 +62,15 @@ public final class WizardNewLeiningenProjectTemplatePage extends
 	 */
 	public void createControl(Composite parent) {
 		super.createControl(parent);
-		
-		locationArea = new ProjectContentsLocationArea(getErrorReporter(), (Composite) getControl());
 
 		createLeinTemplateGroup((Composite) getControl());
+
+		// locationArea is only instanciated for reusing validation code
+		{
+			Composite hidden = new Composite((Composite) getControl(), SWT.NONE);
+			locationArea = new ProjectContentsLocationArea(getErrorReporter(), hidden);
+			hidden.setVisible(false); // Hide the double entry composite
+		}
 
 		createWorkingSetGroup((Composite) getControl(),
 				this.newLeiningenProjectWizard.getSelection(),
