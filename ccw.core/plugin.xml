@@ -46,12 +46,16 @@
       </category>
       <wizard
             category="ccw.category.new"
-            class="ccw.wizards.NewClojureProjectWizard"
+            class="ccw.leiningen.NewLeiningenProjectWizard"
             hasPages="true"
             icon="icons/clojure16x16.png"
+             descriptionImage="icons/clojure42x42.png"
             id="ccw.project.new.wizard"
             name="Clojure Project"
             project="true">
+         <description>
+            Create a new Clojure project
+         </description>
       </wizard>
       <wizard
             category="ccw.category.new"
@@ -2812,23 +2816,6 @@
          properties="leiningen-project-file-present-factory"
          type="org.eclipse.core.resources.IProject">
    </propertyTester>
-</extension>
-<extension
-      point="org.eclipse.ui.newWizards">
-   <category
-         id="ccw.leiningen.category.new"
-         name="Leiningen">
-   </category>
-   <wizard
-         category="ccw.leiningen.category.new"
-         class="ccw.leiningen.NewLeiningenProjectWizard"
-         descriptionImage="leiningen32x32.png"
-         hasPages="true"
-         icon="leiningen16x16.png"
-         id="ccw.leiningen.project.new.wizard"
-         name="Leiningen Project"
-         project="true">
-   </wizard>
 </extension>
 <extension
       point="org.eclipse.ui.perspectiveExtensions">

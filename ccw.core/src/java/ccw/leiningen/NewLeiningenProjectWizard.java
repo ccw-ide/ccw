@@ -181,9 +181,10 @@ public class NewLeiningenProjectWizard extends BasicNewResourceWizard
 	}
 	
 	private void doLeinAddPagesPost() {
-		getStartingPage().setDescription("Create a new Leiningen project.");
-        getStartingPage().setTitle("Leiningen project");
-        setWindowTitle("New Leiningen project");
+		getStartingPage().setDescription("Leverages Leiningen 2.0, the recommanded project management tool for Clojure."
+				+ "\n(Don't wanna use Leiningen? Then simply create a maven/gradle/whatever java project, and add Clojure in its classpath)");
+        getStartingPage().setTitle("Clojure project");
+        setWindowTitle("New Clojure project");
 	}
 	
 
@@ -642,7 +643,7 @@ public class NewLeiningenProjectWizard extends BasicNewResourceWizard
 	
 	@Override
 	public void setDefaultPageImageDescriptor(ImageDescriptor imageDescriptor) {
-		ImageDescriptor d = ImageDescriptor.createFromURL(FileLocator.find(CCWPlugin.getDefault().getBundle(), new Path("leiningen-new-project.png"), null));
+		ImageDescriptor d = ImageDescriptor.createFromURL(FileLocator.find(CCWPlugin.getDefault().getBundle(), new Path("icons/clojure64x64.png"), null));
 		super.setDefaultPageImageDescriptor(d);
 	}
 }
