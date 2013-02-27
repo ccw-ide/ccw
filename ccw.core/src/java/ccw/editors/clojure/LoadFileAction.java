@@ -29,34 +29,13 @@ import ccw.repl.Actions;
 import ccw.repl.REPLView;
 import ccw.util.ClojureInvoker;
 import ccw.util.DisplayUtil;
-import ccw.util.osgi.ClojureOSGi;
-import ccw.util.osgi.RunnableWithException;
-import clojure.lang.Symbol;
-import clojure.lang.Var;
 
 public class LoadFileAction extends Action {
 
-	private static ClojureInvoker core = ClojureInvoker.newInvoker(CCWPlugin.getDefault(), "clojure.core");
+	private ClojureInvoker nreplHelpers = ClojureInvoker.newInvoker(CCWPlugin.getDefault(), "clojure.tools.nrepl.helpers");
 	
 	public final static String ID = "LoadFileAction"; //$NON-NLS-1$
 	
-    private static Var loadFileCommand;
-    static {
-        try {
-            ClojureOSGi.withBundle(CCWPlugin.getDefault().getBundle(), new RunnableWithException() {
-				@Override
-				public Object run() throws Exception {
-					core._("require", Symbol.intern("clojure.tools.nrepl.helpers"));
-					return null;
-				}
-			}); 
-            loadFileCommand = Var.find(Symbol.intern("clojure.tools.nrepl.helpers/load-file-command"));
-        } catch (Exception e) {
-            CCWPlugin.logError("Could not initialize code loading helpers.", e);
-        }
-    }
-
-
 	private final ClojureEditor editor;
 
 	public LoadFileAction(ClojureEditor editor) {
@@ -130,7 +109,7 @@ public class LoadFileAction extends Action {
                         "op", "load-file", "file", text,
                         "file-path", sourcePath, "file-name", fileName);
             } else {
-                String loadFileText = (String)loadFileCommand.invoke(text, sourcePath, fileName);
+                String loadFileText = (String) nreplHelpers._("load-file-command", text, sourcePath, fileName);
                 //if (isReplExplicitLoggingMode()) {
                 EvaluateTextUtil.evaluateText(repl, ";; Loading file " + filePath, isReplExplicitLoggingMode());
                 //}

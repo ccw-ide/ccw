@@ -28,7 +28,7 @@ public final class WizardNewLeiningenProjectTemplatePage extends
 	
 	private static final String checkProjectName = "check-project-name";
 
-	private static final ClojureInvoker wizard = ClojureInvoker.newInvoker(
+	private final ClojureInvoker wizard = ClojureInvoker.newInvoker(
 			                                         CCWPlugin.getDefault(),
 			                                         "ccw.leiningen.wizard");
 

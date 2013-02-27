@@ -88,7 +88,7 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 		this.setContentDescription(contentDescription);
 	}
 	
-	private static final ClojureInvoker editorSupport = ClojureInvoker.newInvoker(
+	private final ClojureInvoker editorSupport = ClojureInvoker.newInvoker(
             CCWPlugin.getDefault(),
             "ccw.editors.clojure.editor-support");
 

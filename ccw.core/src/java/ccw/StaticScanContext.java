@@ -25,9 +25,9 @@ public class StaticScanContext implements IScanContext {
 	private Map<String,Keyword> clojureSymbolTypesCache = new HashMap<String, Keyword>();
 	
 	// TODO this is to ensure that ccw.debug.clientrepl is launched ...
-	private static ClojureInvoker clientrepl = ClojureInvoker.newInvoker(CCWPlugin.getDefault(), "ccw.debug.clientrepl");
+	private ClojureInvoker clientrepl = ClojureInvoker.newInvoker(CCWPlugin.getDefault(), "ccw.debug.clientrepl");
 	
-	private static final Var coreSymbolType = RT.var("ccw.debug.clientrepl", "core-symbol-type");
+	private final Var coreSymbolType = RT.var("ccw.debug.clientrepl", "core-symbol-type");
 	
 	private boolean isJavaIdentifier(String s) {
 		assert s != null && s.length() > 0;

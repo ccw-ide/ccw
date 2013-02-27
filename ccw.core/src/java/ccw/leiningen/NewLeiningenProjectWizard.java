@@ -106,7 +106,7 @@ public class NewLeiningenProjectWizard extends BasicNewResourceWizard
 	
 	private static final String performFinish = "perform-finish";
 
-	private static final ClojureInvoker wizard = ClojureInvoker.newInvoker(
+	private final ClojureInvoker wizard = ClojureInvoker.newInvoker(
 			                                         CCWPlugin.getDefault(),
 			                                         "ccw.leiningen.wizard");
 	

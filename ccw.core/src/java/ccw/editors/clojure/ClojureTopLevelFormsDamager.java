@@ -11,7 +11,7 @@ import ccw.util.ClojureInvoker;
 import clojure.lang.Ref;
 
 public class ClojureTopLevelFormsDamager implements IPresentationDamager {
-	private static final ClojureInvoker topLevelFormsDamager = ClojureInvoker.newInvoker(
+	private final ClojureInvoker topLevelFormsDamager = ClojureInvoker.newInvoker(
             CCWPlugin.getDefault(),
             "ccw.editors.clojure.ClojureTopLevelFormsDamagerImpl");
 

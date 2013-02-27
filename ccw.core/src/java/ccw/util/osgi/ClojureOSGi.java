@@ -6,6 +6,7 @@ import ccw.CCWPlugin;
 import clojure.lang.Compiler;
 import clojure.lang.IPersistentMap;
 import clojure.lang.RT;
+import clojure.lang.Symbol;
 import clojure.lang.Var;
 
 public class ClojureOSGi {
@@ -50,6 +51,10 @@ public class ClojureOSGi {
 			return aCode.run();
 			
 		} catch (Exception e) {
+			CCWPlugin.logError(
+					"Exception while calling withBundle(" 
+							+ aBundle.getSymbolicName() + ", aCode)"
+					, e);
 			throw new RuntimeException(
 					"Exception while calling withBundle(" 
 							+ aBundle.getSymbolicName() + ", aCode)",
@@ -60,5 +65,22 @@ public class ClojureOSGi {
 
 			Thread.currentThread().setContextClassLoader(saved);
 		}
+	}
+
+	public synchronized static void require(final Bundle bundle, final String namespace) {
+		ClojureOSGi.withBundle(bundle, new RunnableWithException() {
+			@Override
+			public Object run() throws Exception {
+				try {
+					System.out.println("ClojureOSGi.require(" + bundle.getSymbolicName() + ", " + namespace + ") - START");
+					RT.var("clojure.core", "require").invoke(Symbol.intern(namespace));
+					System.out.println("ClojureOSGi.require(" + bundle.getSymbolicName() + ", " + namespace + ") - DONE");
+					return null;
+				} catch (Exception e) {
+					CCWPlugin.logError("ClojureOSGi.require(" + bundle.getSymbolicName() + ", " + namespace + ") - ERROR", e);
+					throw e;
+				}
+			}
+		});
 	}
 }

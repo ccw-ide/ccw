@@ -21,7 +21,7 @@ public class GenericExecutableExtension implements IExecutableExtensionFactory, 
 	
 	public Object create() throws CoreException {
 		try {
-			return ClojureOSGi.withBundle(BundleUtils.loadAndGetBundle(bundleName), new RunnableWithException() {
+			return ClojureOSGi.withBundle(CCWPlugin.getDefault().getBundle(), new RunnableWithException() {
 				public Object run() throws Exception {
 					System.out.println("GenericExecutableExtension.create() - with factory: " + factory);
 					Object ret = factory.invoke(factoryParams);
@@ -29,9 +29,14 @@ public class GenericExecutableExtension implements IExecutableExtensionFactory, 
 					return ret;
 				}
 			});
-		} catch (CoreException e) {
-			throw e;
 		} catch (Exception e) {
+			CCWPlugin.logError(
+					this.getClass().getName() + " was unable"
+							+ " to instanciate Clojure factory "
+							+ factory.ns.name.getName() + "/" 
+							+ factory.sym.getName() 
+							+ " from bundle " + bundleName 
+							+ " with following factory params:" + factoryParams, e);
 			throw new CoreException(CCWPlugin.createErrorStatus(
 					this.getClass().getName() + " was unable"
 						+ " to instanciate Clojure factory "

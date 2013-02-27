@@ -50,10 +50,10 @@ public class ClojureSourceViewerConfiguration extends
 	protected ITokenScanner tokenScanner;
 	private final IClojureEditor editor;
 
-	private static final ClojureInvoker proposalProcessor = ClojureInvoker.newInvoker(
+	private final ClojureInvoker proposalProcessor = ClojureInvoker.newInvoker(
             CCWPlugin.getDefault(),
             "ccw.editors.clojure.clojure-proposal-processor");
-	private static final ClojureInvoker textHover = ClojureInvoker.newInvoker(
+	private final ClojureInvoker textHover = ClojureInvoker.newInvoker(
             CCWPlugin.getDefault(),
             "ccw.editors.clojure.clojure-text-hover");
 	

@@ -34,10 +34,10 @@ import clojure.lang.ISeq;
 import clojure.lang.Keyword;
 
 public final class ClojureTokenScanner implements ITokenScanner {
-	private static final ClojureInvoker editorSupport = ClojureInvoker.newInvoker(
+	private final ClojureInvoker editorSupport = ClojureInvoker.newInvoker(
             CCWPlugin.getDefault(),
             "ccw.editors.clojure.editor-support");
-	private static final ClojureInvoker topLevelFormsDamager = ClojureInvoker.newInvoker(
+	private final ClojureInvoker topLevelFormsDamager = ClojureInvoker.newInvoker(
             CCWPlugin.getDefault(),
             "ccw.editors.clojure.ClojureTopLevelFormsDamagerImpl");
 	

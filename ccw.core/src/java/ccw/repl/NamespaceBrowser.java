@@ -90,7 +90,7 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 	private ISelection selectionBeforePatternSearchBegan;
 	private Object[] expandedElementsBeforeSearchBegan;
 
-	private static final ClojureInvoker docUtils = 
+	private final ClojureInvoker docUtils = 
 			ClojureInvoker.newInvoker(
 					CCWPlugin.getDefault(), 
 					"ccw.util.doc-utils");
@@ -282,7 +282,7 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 		}
 	}
 
-	private static class LabelProvider extends CellLabelProvider {
+	private class LabelProvider extends CellLabelProvider {
 
 		public String getToolTipText(Object element) {
 			return (String) docUtils._(VAR_DOC_INFO, element);

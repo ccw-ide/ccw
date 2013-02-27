@@ -4,20 +4,8 @@ import org.eclipse.core.runtime.Plugin;
 
 import ccw.CCWPlugin;
 import ccw.util.osgi.ClojureOSGi;
-import ccw.util.osgi.RunnableWithException;
-import clojure.lang.RT;
-import clojure.lang.Symbol;
-import clojure.lang.Var;
 
 public class ClojureInvoker {
-	private static final Var require = (Var) ClojureOSGi.withBundle(
-			CCWPlugin.getDefault().getBundle(), 
-			new RunnableWithException() {
-				@Override
-				public Object run() throws Exception {
-					return RT.var("clojure.core", "require");
-				}
-			});
 	
 	private final String namespace;
 	
@@ -47,22 +35,19 @@ public class ClojureInvoker {
 	
 	public static ClojureInvoker newInvoker(Plugin plugin, final String namespace) {
 		try {
-			ClojureOSGi.withBundle(plugin.getBundle(), new RunnableWithException() {
-				
-				@Override
-				public Object run() throws Exception {
-					require.invoke(Symbol.intern(namespace));
-					return null;
-				}
-			});
+			ClojureOSGi.require(plugin.getBundle(), namespace);
+			return new ClojureInvoker(namespace);
 		} catch (Exception e) {
+			CCWPlugin.logError("Exception while calling newInvoker(" 
+					+ plugin.getBundle().getSymbolicName() 
+					+ ", " + namespace + ")"
+				, e);
 			throw new RuntimeException(
 					"Exception while calling newInvoker(" 
 							+ plugin.getBundle().getSymbolicName() 
 							+ ", " + namespace + ")",
 			        e);
 		}
-		return new ClojureInvoker(namespace);
 	}
 
 

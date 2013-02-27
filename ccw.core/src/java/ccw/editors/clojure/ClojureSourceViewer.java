@@ -60,11 +60,11 @@ import ccw.util.DisplayUtil;
 public abstract class ClojureSourceViewer extends ProjectionViewer implements
         IClojureEditor, IPropertyChangeListener {
     
-	private static final ClojureInvoker editorSupport = ClojureInvoker.newInvoker(
+	private final ClojureInvoker editorSupport = ClojureInvoker.newInvoker(
             CCWPlugin.getDefault(),
             "ccw.editors.clojure.editor-support");
     
-	private static final ClojureInvoker handlers = ClojureInvoker.newInvoker(
+	private final ClojureInvoker handlers = ClojureInvoker.newInvoker(
             CCWPlugin.getDefault(),
             "ccw.editors.clojure.handlers");
 

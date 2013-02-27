@@ -130,15 +130,7 @@ public class CCWPlugin extends AbstractUIPlugin {
     public void start(BundleContext context) throws Exception {
         super.start(context);
         plugin = this;
-        /*
-        ClojureOSGi.withBundle(this.getBundle(), new RunnableWithException() {
-			@Override
-			public Object run() throws Exception {
-				RT.var("clojure.core", "require");
-				return null;
-			}
-		});
-        */
+        
         tracer = new Tracer(context, TraceOptions.getTraceOptions());
 
         if (System.getProperty("ccw.autostartnrepl") != null) {

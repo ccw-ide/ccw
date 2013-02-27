@@ -48,7 +48,6 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IViewSite;
@@ -76,25 +75,21 @@ import ccw.preferences.PreferenceConstants;
 import ccw.util.ClojureInvoker;
 import ccw.util.DisplayUtil;
 import ccw.util.TextViewerSupport;
-import ccw.util.osgi.ClojureOSGi;
-import ccw.util.osgi.RunnableWithException;
 import clojure.lang.IFn;
 import clojure.lang.Keyword;
 import clojure.lang.PersistentHashMap;
-import clojure.lang.Symbol;
-import clojure.lang.Var;
 import clojure.tools.nrepl.Connection;
 import clojure.tools.nrepl.Connection.Response;
 
 public class REPLView extends ViewPart implements IAdaptable {
 
-	private static final ClojureInvoker core = ClojureInvoker.newInvoker(CCWPlugin.getDefault(), "clojure.core");
+	private final ClojureInvoker viewHelpers = ClojureInvoker.newInvoker(CCWPlugin.getDefault(), "ccw.repl.view-helpers");
 	
-	private static final ClojureInvoker editorSupport = ClojureInvoker.newInvoker(
+	private final ClojureInvoker editorSupport = ClojureInvoker.newInvoker(
             CCWPlugin.getDefault(),
             "ccw.editors.clojure.editor-support");
     
-	private static final ClojureInvoker str = ClojureInvoker.newInvoker(
+	private final ClojureInvoker str = ClojureInvoker.newInvoker(
             CCWPlugin.getDefault(),
             "clojure.string");
 
@@ -104,28 +99,7 @@ public class REPLView extends ViewPart implements IAdaptable {
     public static final String VIEW_ID = "ccw.view.repl";
     public static final AtomicReference<REPLView> activeREPL = new AtomicReference();
 
-    private static Var log;
-    private static Var configureREPLView;
-    private static Var handleResponses;
-    static {
-        try {
-        	ClojureOSGi.withBundle(CCWPlugin.getDefault().getBundle(), new RunnableWithException() {
-				@Override
-				public Object run() throws Exception {
-		        	core._("require", Symbol.intern("ccw.repl.view-helpers"));
-		            //ClojureOSGi.require(CCWPlugin.getDefault().getBundle().getBundleContext(), "ccw.repl.view-helpers");
-		        	core._("require",  Symbol.intern("cemerick.drawbridge.client"));
-		            log = Var.find(Symbol.intern("ccw.repl.view-helpers/log"));
-		            configureREPLView = Var.find(Symbol.intern("ccw.repl.view-helpers/configure-repl-view"));
-		            handleResponses = Var.find(Symbol.intern("ccw.repl.view-helpers/handle-responses"));
-
-		            return null;
-				}
-			});
-        } catch (Exception e) {
-            CCWPlugin.logError("Could not initialize view helpers.", e);
-        }
-    }
+//		        	core._("require",  Symbol.intern("cemerick.drawbridge.client"));
 
     /**
      * This misery around secondary IDs is due to the fact that:
@@ -232,7 +206,7 @@ public class REPLView extends ViewPart implements IAdaptable {
         s.setText(boostIndent.matcher(s.getText()).replaceAll("   ").replaceFirst("^\\s+", "=> "));
         int start = logPanel.getCharCount();
         try {
-            log.invoke(this, logPanel, s.getText(), inputExprLogType);
+            viewHelpers._("log", this, logPanel, s.getText(), inputExprLogType);
             for (StyleRange sr : s.getStyleRanges()) {
                 sr.start += start;
                 logPanel.setStyleRange(sr);
@@ -263,9 +237,9 @@ public class REPLView extends ViewPart implements IAdaptable {
     public void evalExpression (String s, boolean userInput, boolean logExpression) {
         try {
             if (s.trim().length() > 0) {
-                if (logExpression) log.invoke(this, logPanel, s, inputExprLogType);
+                if (logExpression) viewHelpers._("log", this, logPanel, s, inputExprLogType);
                 if (evalExpression == null) {
-                	log.invoke(this, logPanel, "Invalid REPL", errLogType);
+                	viewHelpers._("log", this, logPanel, "Invalid REPL", errLogType);
                 } else {
                 	evalExpression.invoke(s, userInput);
                 }
@@ -286,7 +260,7 @@ public class REPLView extends ViewPart implements IAdaptable {
     }
 
     public void sendInterrupt() {
-        log.invoke(this, logPanel, ";; Interrupting...", inputExprLogType);
+        viewHelpers._("log", this, logPanel, ";; Interrupting...", inputExprLogType);
         evalExpression.invoke(PersistentHashMap.create("op", "interrupt"), false);
     }
     
@@ -309,7 +283,7 @@ public class REPLView extends ViewPart implements IAdaptable {
      * session
      */
     public void handleResponse (Response resp, String expression) {
-        handleResponses.invoke(this, logPanel, expression, resp.seq());        
+        viewHelpers._("handle-responses", this, logPanel, expression, resp.seq());        
     }
     
     public void closeView () throws Exception {
@@ -342,7 +316,7 @@ public class REPLView extends ViewPart implements IAdaptable {
     
     private void prepareView () throws Exception {
         sessionId = interactive.newSession(null);
-        evalExpression = (IFn)configureREPLView.invoke(this, logPanel, interactive.client, sessionId);
+        evalExpression = (IFn) viewHelpers._("configure-repl-view", this, logPanel, interactive.client, sessionId);
     }
     
     @SuppressWarnings("unchecked")

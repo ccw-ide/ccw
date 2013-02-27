@@ -10,7 +10,7 @@ import ccw.util.ClojureInvoker;
 import clojure.lang.Ref;
 
 public class PareditAutoEditStrategy implements IAutoEditStrategy {
-	private static final ClojureInvoker pareditAutoEditStrategyImpl = ClojureInvoker.newInvoker(
+	private final ClojureInvoker pareditAutoEditStrategyImpl = ClojureInvoker.newInvoker(
             CCWPlugin.getDefault(),
             "ccw.editors.clojure.PareditAutoEditStrategyImpl");
 
