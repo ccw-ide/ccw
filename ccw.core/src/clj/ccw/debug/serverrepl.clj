@@ -320,7 +320,7 @@
 (defn static-members
   [^java.lang.Class class]
   (for [member (concat (.getMethods class) (.getDeclaredFields class)) :when (static? member)]
-    [(symbol (str (.getSimpleName (.getDeclaringClass ^java.lang.reflect.Member member)) "/" (.getName ^java.lang.reflect.Member member)))
+    [(symbol (str (.getName (.getDeclaringClass ^java.lang.reflect.Member member)) "/" (.getName ^java.lang.reflect.Member member)))
        member]))
 
 (defn static-members-names
@@ -484,7 +484,7 @@
   ([prefix] (ccw-completions prefix *ns* 50))
   ([prefix ns limit]
     (let [completions (completions* prefix ns 
-                                 :filter ccw.debug.serverrepl/textmate-filter)]
+                                    :filter ccw.debug.serverrepl/textmate-filter)]
       (map ccw-renderer
            (take limit
                  (sort-by

@@ -152,7 +152,11 @@
         (let [s (StyledString. (or display-string ""))]
           (when (seq filter)
             (doseq [i (reductions (partial + 1) filter)]
-              (.setStyle s i 1 StyledString/COUNTER_STYLER)))
+              (if (< i (count display-string))
+                (.setStyle s i 1 StyledString/COUNTER_STYLER)
+                (printf (str "ERROR: Completion proposal trying to apply color style"
+                             "at invalid offset %d for display-string '%s'")
+                        i display-string))))
           s)))))
 
 (defn context-information
