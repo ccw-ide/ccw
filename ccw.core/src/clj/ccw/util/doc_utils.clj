@@ -97,6 +97,6 @@
         nb-display-lines 2
         lines (if (> (count lines) nb-display-lines) 
                 (concat (take (dec nb-display-lines) lines)
-                        [(str (nth lines nb-display-lines) " ...")]) 
+                        [(str (nth lines (dec nb-display-lines)) " ...")]) 
                 lines)]
     (str/join \newline (map str/trim lines))))
