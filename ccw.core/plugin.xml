@@ -2541,16 +2541,6 @@
       </class>
       <activeWhen>
          <or>
-            <with
-                  variable="activePart">
-               <adapt
-                     type="org.eclipse.ui.IEditorPart">
-                  <test
-                        forcePluginActivation="true"
-                        property="ccw.leiningen.propertyTester.leiningen-enabled-project">
-                  </test>
-               </adapt>
-            </with>
             <iterate
                   ifEmpty="false"
                   operator="and">
@@ -2656,16 +2646,6 @@
       </class>
       <activeWhen>
          <or>
-            <with
-                  variable="activePart">
-               <adapt
-                     type="org.eclipse.ui.IEditorPart">
-                  <test
-                        forcePluginActivation="true"
-                        property="ccw.leiningen.propertyTester.leiningen-enabled-project">
-                  </test>
-               </adapt>
-            </with>
             <iterate
                   ifEmpty="false"
                   operator="and">
