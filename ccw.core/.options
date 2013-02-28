@@ -7,3 +7,4 @@ ccw.core/builder=false
 ccw.core/launcher=false
 ccw.core/autocompletion=false
 ccw.core/paredit=false
+ccw.core/clojure.osgi=false

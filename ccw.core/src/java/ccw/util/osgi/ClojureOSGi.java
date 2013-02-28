@@ -3,6 +3,7 @@ package ccw.util.osgi;
 import org.osgi.framework.Bundle;
 
 import ccw.CCWPlugin;
+import ccw.TraceOptions;
 import clojure.lang.Compiler;
 import clojure.lang.IPersistentMap;
 import clojure.lang.RT;
@@ -12,7 +13,7 @@ import clojure.lang.Var;
 public class ClojureOSGi {
 
 	static {
-		System.out.println("ClojureOSGi: Static initialization, loading clojure.core");
+		CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI, "ClojureOSGi: Static initialization, loading clojure.core");
 		ClassLoader loader = new BundleClassLoader(CCWPlugin.getDefault().getBundle());
 		ClassLoader saved = Thread.currentThread().getContextClassLoader();
 		try {
@@ -24,13 +25,13 @@ public class ClojureOSGi {
 		} finally {
 			Thread.currentThread().setContextClassLoader(saved);
 		}
-		System.out.println("ClojureOSGi: Static initialization, clojure.core loaded");
+		CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI, "ClojureOSGi: Static initialization, clojure.core loaded");
 	}
 
 	public static Object withBundle(Bundle aBundle, RunnableWithException aCode)
 			throws RuntimeException {
 		
-		System.out.println("ClojureOSGi.withBundle(" + aBundle.getSymbolicName() + ")");
+		CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI, "ClojureOSGi.withBundle(" + aBundle.getSymbolicName() + ")");
 		ClassLoader loader = new BundleClassLoader(aBundle);
 		IPersistentMap bindings = RT.map(Compiler.LOADER, loader);
 
@@ -72,9 +73,9 @@ public class ClojureOSGi {
 			@Override
 			public Object run() throws Exception {
 				try {
-					System.out.println("ClojureOSGi.require(" + bundle.getSymbolicName() + ", " + namespace + ") - START");
+					CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI, "ClojureOSGi.require(" + bundle.getSymbolicName() + ", " + namespace + ") - START");
 					RT.var("clojure.core", "require").invoke(Symbol.intern(namespace));
-					System.out.println("ClojureOSGi.require(" + bundle.getSymbolicName() + ", " + namespace + ") - DONE");
+					CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI, "ClojureOSGi.require(" + bundle.getSymbolicName() + ", " + namespace + ") - DONE");
 					return null;
 				} catch (Exception e) {
 					CCWPlugin.logError("ClojureOSGi.require(" + bundle.getSymbolicName() + ", " + namespace + ") - ERROR", e);

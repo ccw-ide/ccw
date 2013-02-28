@@ -1,4 +1,3 @@
-(.println (System/out) "_________________________ccw.util.jdt")
 (ns ccw.util.jdt
   (:use [clojure.core.incubator :only [-?> -?>>]])
   (:require [ccw.util.eclipse :as e])

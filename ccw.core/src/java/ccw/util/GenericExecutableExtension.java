@@ -9,6 +9,7 @@ import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IExecutableExtensionFactory;
 
 import ccw.CCWPlugin;
+import ccw.TraceOptions;
 import ccw.util.osgi.ClojureOSGi;
 import ccw.util.osgi.RunnableWithException;
 import clojure.lang.Var;
@@ -23,9 +24,9 @@ public class GenericExecutableExtension implements IExecutableExtensionFactory, 
 		try {
 			return ClojureOSGi.withBundle(CCWPlugin.getDefault().getBundle(), new RunnableWithException() {
 				public Object run() throws Exception {
-					System.out.println("GenericExecutableExtension.create() - with factory: " + factory);
+					CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI,"GenericExecutableExtension.create() - with factory: " + factory);
 					Object ret = factory.invoke(factoryParams);
-					System.out.println("GenericExecutableExtension.create() - factory: " + factory + " returned");
+					CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI,"GenericExecutableExtension.create() - factory: " + factory + " returned");
 					return ret;
 				}
 			});
@@ -74,8 +75,8 @@ public class GenericExecutableExtension implements IExecutableExtensionFactory, 
 	}
 	
 	private void initFactory(String varName) throws CoreException {
-		System.out.println("initFactory(" + varName + ") - START");
+		CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI,"initFactory(" + varName + ") - START");
 		factory = BundleUtils.requireAndGetVar(bundleName, varName);
-		System.out.println("initFactory(" + varName + ") - STOP");
+		CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI,"initFactory(" + varName + ") - STOP");
 	}
 }
