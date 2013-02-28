@@ -220,7 +220,13 @@
   clojure.lang.IFn
   (runnable-with-progress [f]
     (reify IRunnableWithProgress
-      (run [this progress-monitor] (f progress-monitor)))))
+      (run [this progress-monitor] 
+        (try 
+          (f progress-monitor)
+          (catch RuntimeException e 
+            (throw e))
+          (catch Exception e
+            (throw (java.lang.reflect.InvocationTargetException. e))))))))
 
 (defn runnable-with-progress-in-workspace
   "Takes an operation, a Scheduling rule, and returns an instance of WorkspaceModifyDelegationOperation"
@@ -232,7 +238,7 @@
 (defn run-in-background
   "Uses Eclipse's IProgressService API to run tasks in the background and have
    them play nicely with other background taks, jobs, etc.
-   If is the function to be executed, taking a progress-monitor as argument.
+   operation is the function to be executed, taking a progress-monitor as argument.
    Must switch to the UI Thread if not already within it before calling the
    operation."
   [operation]

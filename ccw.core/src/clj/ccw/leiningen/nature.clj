@@ -130,6 +130,9 @@
           (:java-source-paths lein-proj)))
 
 (defn lein-raw-optional-source-folders [lein-proj]
+  (println "lein-raw-optional-source-folders:"
+           (concat (:test-paths lein-proj)
+                   (:resource-paths lein-proj)))
   (concat (:test-paths lein-proj)
           (:resource-paths lein-proj)))
 
@@ -222,10 +225,13 @@
         existing-entries (if overwrite? () (seq (.getRawClasspath java-proj)))
         new-entries (remove (set existing-entries) lein-entries)
         entries (concat existing-entries new-entries)]
-    (.setRawClasspath 
-      java-proj
-      (into-array IClasspathEntry entries)
-      (e/null-progress-monitor))
+    (try 
+      (.setRawClasspath 
+        java-proj
+        (into-array IClasspathEntry entries)
+        (e/null-progress-monitor))
+      (catch Exception e
+        (throw (org.eclipse.core.runtime.CoreException. (ccw.CCWPlugin/createErrorStatus "Could not reset project classpath", e)))))
     (.beginTask monitor (str "Project " (-> java-proj e/project .getName) ": Updating Leiningen Dependencies") 1)
     (cpc/update-project-dependencies java-proj)
     (.worked monitor 1)
