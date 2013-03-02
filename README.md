@@ -21,6 +21,6 @@ http://code.google.com/p/counterclockwise/wiki/HowToBuild
 
 ## License
 
-Copyright © 2008-2013 Laurent Petit
+Copyright © 2009-2013 Laurent Petit
 
 Distributed under the Eclipse Public License, the same as Clojure.
