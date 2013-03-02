@@ -1,13 +1,26 @@
-= Official Website landing page
-https://code.google.com/p/counterclockwise/
+# Counterclockwise (aka CCW)
 
-= Issues tracker
-https://code.google.com/p/counterclockwise/issues/list
+Counterclockwise is an Eclipse plugin helping developers write Clojure code
 
-= Software Update Site
+## Install: Software Update Sites
+
 - Stable versions: http://ccw.cgrand.net/updatesite/
 - Beta versions: http://ccw.cgrand.net/updatesite-betas/
 
-= How to build manually
+## Website
+
+https://code.google.com/p/counterclockwise/
+
+## Issues tracker
+
+https://code.google.com/p/counterclockwise/issues/list
+
+## How to build manually
+
 http://code.google.com/p/counterclockwise/wiki/HowToBuild
 
+## License
+
+Copyright © 2008-2013 Laurent Petit
+
+Distributed under the Eclipse Public License, the same as Clojure.
