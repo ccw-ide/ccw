@@ -89,7 +89,7 @@ public class CCWPlugin extends AbstractUIPlugin {
     
     private ServerSocket ackREPLServer;
     
-	private AutomaticNatureAdder natureAdapter = new AutomaticNatureAdder();
+	private AutomaticNatureAdder synchronizedNatureAdapter;
 
 	private ITracer tracer = NullTracer.INSTANCE;
 	
@@ -137,8 +137,15 @@ public class CCWPlugin extends AbstractUIPlugin {
         	startREPLServer();
         }
         
-        this.natureAdapter.start();
+        this.getNatureAdapter().start();
         
+    }
+    
+    private synchronized AutomaticNatureAdder getNatureAdapter() {
+    	if (synchronizedNatureAdapter == null) {
+    		synchronizedNatureAdapter = new AutomaticNatureAdder();
+    	}
+    	return synchronizedNatureAdapter;
     }
     
     private synchronized void createColorCache() {
@@ -209,7 +216,7 @@ public class CCWPlugin extends AbstractUIPlugin {
     	// We also don't remove fonts when deregistered
     	stopREPLServer();
     	
-    	this.natureAdapter.stop();
+    	this.getNatureAdapter().stop();
     	
         plugin = null;
         super.stop(context);
