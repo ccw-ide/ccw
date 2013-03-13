@@ -7,6 +7,10 @@
                  [leiningen-core "2.0.0"]
                  [org.clojure/tools.nrepl "0.2.1"]
                  [org.clojure/core.incubator "0.1.0"]
-                 [com.cemerick/drawbridge "0.0.6"]]
+                 [com.cemerick/drawbridge "0.0.6"]
+                 [org.lpetit/net.cgrand.parsley "0.0.13.STABLE002"]
+                 [ccw/ccw.server "0.1.0-SNAPSHOT"]
+                 ;[net.cgrand/parsley "0.9.1"]
+                 ]
   :source-paths []
   :plugins [[ccw/lein-ccw-deps "0.1.0"]])
