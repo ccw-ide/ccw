@@ -94,7 +94,11 @@ public class CCWPlugin extends AbstractUIPlugin {
 	private ITracer tracer = NullTracer.INSTANCE;
 	
 	public static ITracer getTracer() {
-		return getDefault().tracer;
+		CCWPlugin plugin = getDefault();
+		if (plugin != null && plugin.tracer != null)
+			return plugin.tracer;
+		else
+			return NullTracer.INSTANCE;
 	}
     
     public synchronized void startREPLServer() throws CoreException {
@@ -125,10 +129,12 @@ public class CCWPlugin extends AbstractUIPlugin {
     }
 
     public CCWPlugin() {
+    	System.out.println("CCWPlugin instanciated");
     }
     
     public void start(BundleContext context) throws Exception {
         super.start(context);
+        System.out.println("CCWPlugin.start: ENTER");
         plugin = this;
         
         tracer = new Tracer(context, TraceOptions.getTraceOptions());
@@ -139,6 +145,7 @@ public class CCWPlugin extends AbstractUIPlugin {
         
         this.getNatureAdapter().start();
         
+        System.out.println("CCWPlugin.start: EXIT");
     }
     
     private synchronized AutomaticNatureAdder getNatureAdapter() {

@@ -70,7 +70,7 @@ public class Tracer implements ITracer {
         }
     }
 
-    private String buildMessage(Object[] message) {
+    public static String buildMessage(Object[] message) {
         StringBuilder sb = new StringBuilder();
         for (Object m: message) {
             sb.append(m);
