@@ -1206,6 +1206,14 @@
                tooltip="Show last-focused REPL, where all code will be sent to be evaluated.">
          </command>
       </menuContribution>
+      <!--
+         * There's a BUG starting with Eclipse Juno 4.2.2 with the compatibility
+         * layer and the context mgt / toolbar icons mgt (they just don't work).
+         * Reverting back from Command+Handler+MenuItems to Actions works,
+         * so that's what we're doing here.
+         * So for a temporary (Ah!) time, we're disabling menuContributions for REPL toolbar
+      -->
+      <!--
       <menuContribution
             locationURI="toolbar:ccw.view.repl">
          <command
@@ -1245,6 +1253,7 @@
                tooltip="Show the console for the JVM process to which this REPL is connected">
          </command>
       </menuContribution>
+      -->
       <menuContribution
             allPopups="true"
             locationURI="popup:org.eclipse.ui.projectConfigure?after=additions">

@@ -4,6 +4,8 @@ import static ccw.CCWPlugin.getTracer;
 
 import java.io.IOException;
 import java.net.ConnectException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -24,9 +26,12 @@ import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.source.ISourceViewer;
@@ -345,11 +350,13 @@ public class REPLView extends ViewPart implements IAdaptable {
     public static REPLView connect (String url, IConsole console, ILaunch launch, boolean makeActiveREPL) throws Exception {
         String secondaryId;
         REPLView repl = (REPLView)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(
-                VIEW_ID,
-                secondaryId = getSecondaryId(),
-                IWorkbenchPage.VIEW_ACTIVATE);
+                VIEW_ID
+                ,secondaryId = getSecondaryId()
+                ,IWorkbenchPage.VIEW_ACTIVATE
+                );
         repl.secondaryId = secondaryId;
         repl.console = console;
+        repl.showConsoleAction.setEnabled(console != null);
         repl.launch = launch;
         if (repl.configure(url)) {
         	if (makeActiveREPL) {
@@ -402,7 +409,7 @@ public class REPLView extends ViewPart implements IAdaptable {
         return console;
     }
     
-    public void showConsole () {
+    public void showConsole() {
         if (console != null) ConsolePlugin.getDefault().getConsoleManager().showConsoleView(console);
     }
     
@@ -541,9 +548,9 @@ public class REPLView extends ViewPart implements IAdaptable {
         viewer.propertyChange(null);
         
         viewerWidget.addFocusListener(new NamespaceRefreshFocusListener());
-        viewerWidget.addFocusListener(new ViewContextActivationListener());
+        //viewerWidget.addFocusListener(new ViewContextActivationListener());
         logPanel.addFocusListener(new NamespaceRefreshFocusListener());
-        logPanel.addFocusListener(new ViewContextActivationListener());
+        //logPanel.addFocusListener(new ViewContextActivationListener());
         
         split.setWeights(new int[] {100, 75});
         
@@ -567,6 +574,154 @@ public class REPLView extends ViewPart implements IAdaptable {
 				activeREPL.compareAndSet(REPLView.this, null);
 			}
 		});
+        
+        /*
+         * There's a BUG starting with Eclipse Juno 4.2.2 with the compatibility
+         * layer and the context mgt / toolbar icons mgt (they just don't work).
+         * Reverting back from Command+Handler+MenuItems to Actions works,
+         * so that's what we're doing here.
+         */
+        createActions();
+        createToolbar();
+    
+        /*
+         * TODO find a way for the following code line to really work. That is add
+         * the necessary additional code for enabling "handlers" (in fact, my fear
+         * is that those really are not handlers but "actions" that will need to be
+         * manually enabled as I did above for EVALUATE_TOP_LEVEL_S_EXPRESSION :-( )
+         */
+        activate("org.eclipse.ui.textEditorScope");
+
+        /* Thought just activating CCW_UI_CONTEXT_REPL would also activate its parent contexts
+         * but apparently not, so here we activate explicitly all the contexts we want (FIXME?)
+         */ 
+        activate(IClojureEditor.KEY_BINDING_SCOPE);
+        activate(CCW_UI_CONTEXT_REPL);
+    }
+    
+    private Action printErrorAction;
+    private Action interruptAction;
+    private Action reconnectAction;
+    private Action clearLogAction;
+    private Action newSessionAction;
+    private Action showConsoleAction;
+    
+	private void createActions() {
+
+		
+		printErrorAction = new Action("Print detailed output from the last exception") {
+			@Override
+			public void run() {
+				printErrorDetail();
+			}
+		};
+		printErrorAction.setToolTipText("Print detailed output from the last exception");
+		printErrorAction
+				.setImageDescriptor(getImageDescriptor("repl/print_last_error.gif"));
+
+		
+		interruptAction = new Action("Interrupt Evaluation") {
+			@Override
+			public void run() {
+				sendInterrupt();
+			}
+		};
+		interruptAction.setToolTipText("Forcibly interrupt the currently-running evaluation for this session.");
+		interruptAction
+				.setImageDescriptor(getImageDescriptor("repl/interrupt.gif"));
+
+		
+		reconnectAction = new Action("Reconnect") {
+			@Override
+			public void run() {
+	            try {
+	                reconnect();
+	            } catch (Exception e) {
+	            	final String MSG = "Unexpected exception occured while trying to reconnect REPL view to clojure server"; 
+	            	ErrorDialog.openError(
+	            			REPLView.this.getSite().getShell(),
+	            			"Reconnection Error",
+	            			MSG,
+	            			CCWPlugin.createErrorStatus(MSG, e));
+	            }
+	        }
+		};
+		reconnectAction.setToolTipText("Reconnect to this REPL's host and port (first disconnecting if necessary)");
+		reconnectAction
+				.setImageDescriptor(getImageDescriptor("repl/reconnect.gif"));
+
+		
+		clearLogAction = new Action("Clear REPL log") {
+			public void run() {
+				logPanel.setText("");
+			}
+		};
+		clearLogAction.setToolTipText("Clear the REPL&apos;s log");
+		clearLogAction.setImageDescriptor(getImageDescriptor("repl/clear.gif"));
+
+		
+		newSessionAction = new Action("New Session") {
+			public void run() {
+	            try {
+	                REPLView.connect(getConnection().url, true);
+	            } catch (Exception e) {
+	                final String msg = "Unexpected exception occured while trying to connect REPL view to clojure server"; 
+	                ErrorDialog.openError(
+	            			REPLView.this.getSite().getShell(),
+	                        "Connection Error",
+	                        msg,
+	                        CCWPlugin.createErrorStatus(msg, e));
+	            }
+			}
+		};
+		newSessionAction.setToolTipText("Open a new REPL session connected to this REPL's Clojure process.");
+		newSessionAction
+				.setImageDescriptor(getImageDescriptor("repl/new_wiz.gif"));
+
+		
+		showConsoleAction = new Action("Show Console") {
+			public void run() {
+				showConsole();
+			}
+		};
+		showConsoleAction.setToolTipText("Show the console for the JVM process to which this REPL is connected");
+		showConsoleAction.setDisabledImageDescriptor(getImageDescriptor("repl/console_disabled.gif"));
+		showConsoleAction
+				.setImageDescriptor(getImageDescriptor("repl/console.gif"));
+		
+		
+	}
+    
+    private void createToolbar() {
+    	IToolBarManager mgr = getViewSite().getActionBars().getToolBarManager();
+    	mgr.add(printErrorAction);
+    	mgr.add(interruptAction);
+    	mgr.add(reconnectAction);
+    	mgr.add(clearLogAction);
+    	mgr.add(newSessionAction);
+    	mgr.add(showConsoleAction);
+    }
+    
+    /**
+     * Returns the image descriptor with the given relative path.
+     */
+    private ImageDescriptor getImageDescriptor(String relativePath) {
+            String iconPath = "icons/";
+            try {
+                    CCWPlugin plugin = CCWPlugin.getDefault();
+                    URL installURL = plugin.getDescriptor().getInstallURL();
+                    URL url = new URL(installURL, iconPath + relativePath);
+                    return ImageDescriptor.createFromURL(url);
+            }
+            catch (MalformedURLException e) {
+                    // should not happen
+                    return ImageDescriptor.getMissingImageDescriptor();
+            }
+    }
+    
+    private void activate(String contextId) {
+        ((IContextService)getSite().getService(IContextService.class)).activateContext(contextId);
+
     }
     
     private void initializeLogPanelColors() {
@@ -717,9 +872,9 @@ public class REPLView extends ViewPart implements IAdaptable {
         private List<IContextActivation> activations = new ArrayList();
         
         public void focusLost(FocusEvent e) {
-            for (IContextActivation activation : activations) {
-                ((IContextService)getSite().getService(IContextService.class)).deactivateContext(activation);
-            }
+            //for (IContextActivation activation : activations) {
+            //    ((IContextService)REPLView.this.getSite().getService(IContextService.class)).deactivateContext(activation);
+            //}
             activations = new ArrayList();
         }
         
