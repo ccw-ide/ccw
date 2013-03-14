@@ -41,6 +41,8 @@ import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.BundleListener;
 
 import ccw.editors.clojure.IScanContext;
 import ccw.launching.LaunchUtils;
@@ -137,13 +139,31 @@ public class CCWPlugin extends AbstractUIPlugin {
         System.out.println("CCWPlugin.start: ENTER");
         plugin = this;
         
-        tracer = new Tracer(context, TraceOptions.getTraceOptions());
-
-        if (System.getProperty("ccw.autostartnrepl") != null) {
-        	startREPLServer();
-        }
+        context.addBundleListener(new BundleListener() {
+			
+			@Override
+			public void bundleChanged(BundleEvent evt) {
+				if (evt.getBundle() == CCWPlugin.this.getBundle()
+					&&	evt.getType() == BundleEvent.STARTED) {
+					
+					tracer = new Tracer(evt.getBundle().getBundleContext(), TraceOptions.getTraceOptions());
+					
+			        if (System.getProperty("ccw.autostartnrepl") != null) {
+			        	try {
+							startREPLServer();
+						} catch (CoreException e) {
+							e.printStackTrace();
+						}
+			        }
+			        
+			        getNatureAdapter().start();
+			        
+				}
+				
+			}
+		});
         
-        this.getNatureAdapter().start();
+
         
         System.out.println("CCWPlugin.start: EXIT");
     }
