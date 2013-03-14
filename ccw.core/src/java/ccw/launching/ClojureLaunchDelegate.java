@@ -288,7 +288,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
                     //replAdditions.add(new File(repllib, "target/classes").getAbsolutePath());
                 	
                 	// Hack, until the project is launched via leiningen instead
-                	replAdditions.add(new File(ccwPluginDir, "tools.nrepl-0.2.1.jar").getAbsolutePath());
+                	replAdditions.add(new File(ccwPluginDir, "tools.nrepl-0.2.2.jar").getAbsolutePath());
                 }
                 
                 CCWPlugin.log("Adding to project's classpath to support nREPL: " + replAdditions);
