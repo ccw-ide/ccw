@@ -2,8 +2,8 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Paredit.clj
 Bundle-SymbolicName: paredit.clj;singleton:=true
-Bundle-Version: 0.19.1.qualifier
-Fragment-Host: ccw.core;bundle-version="0.11.2"
+Bundle-Version: 0.19.1.STABLE001
+Fragment-Host: ccw.core;bundle-version="0.12.0"
 Bundle-ClassPath: .,
  classes/
 Bundle-ActivationPolicy: lazy
