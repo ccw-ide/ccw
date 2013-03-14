@@ -18,8 +18,12 @@
 (defn eof [s eof?]
   (when (and (= 0 (.length ^String s)) eof?) [0 eof]))
 
-(defn bracket-end [s eof?]
-  (lr+/match #{")" "]" "}" eof} s eof?))
+#_(reify MatcherFactory
+  (matcher-fn [this id]
+    (fn [s eof?] (when (and (= 0 (.length ^String s)) eof?) [0 id]))))
+
+;(defn bracket-end [s eof?]
+;  (lr+/match #{")" "]" "}" eof} s eof?))
 
 (def gspaces #{:whitespace :comment :discard})
 (def only-code (partial remove (comp (conj gspaces 
