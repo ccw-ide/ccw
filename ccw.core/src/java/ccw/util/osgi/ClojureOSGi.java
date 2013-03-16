@@ -11,8 +11,10 @@ import clojure.lang.Symbol;
 import clojure.lang.Var;
 
 public class ClojureOSGi {
-
-	static {
+	private static volatile boolean initialized;
+	private synchronized static void initialize() {
+		if (initialized) return;
+		
 		CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI, "ClojureOSGi: Static initialization, loading clojure.core");
 		ClassLoader loader = new BundleClassLoader(CCWPlugin.getDefault().getBundle());
 		ClassLoader saved = Thread.currentThread().getContextClassLoader();
@@ -26,11 +28,13 @@ public class ClojureOSGi {
 			Thread.currentThread().setContextClassLoader(saved);
 		}
 		CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI, "ClojureOSGi: Static initialization, clojure.core loaded");
+		initialized = true;
 	}
 
-	public static Object withBundle(Bundle aBundle, RunnableWithException aCode)
+	public synchronized static Object withBundle(Bundle aBundle, RunnableWithException aCode)
 			throws RuntimeException {
 		
+		initialize();
 		CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI, "ClojureOSGi.withBundle(" + aBundle.getSymbolicName() + ")");
 		ClassLoader loader = new BundleClassLoader(aBundle);
 		IPersistentMap bindings = RT.map(Compiler.LOADER, loader);

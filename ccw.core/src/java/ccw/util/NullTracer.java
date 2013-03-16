@@ -11,7 +11,8 @@ public final class NullTracer implements ITracer {
     public boolean isEnabled(String traceOption) { return true; }
 
     public void trace(String traceOption, Object... message) {
-    	
+    	System.out.println("trace[traceOption:" + traceOption + ", message:"
+    			+ Tracer.buildMessage(message) + "]");
     }
 
     public void trace(String traceOption, Throwable throwable, Object... message) {
