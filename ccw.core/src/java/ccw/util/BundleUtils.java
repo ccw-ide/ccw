@@ -36,10 +36,18 @@ public final class BundleUtils {
 			return (Var) ClojureOSGi.withBundle(bundle, new RunnableWithException() {
 				@Override
 				public Object run() throws Exception {
-					return RT.var(nsName, nsFn[1]);
+					try {
+						return RT.var(nsName, nsFn[1]);
+					} catch( Exception e) {
+						System.out.println("Error while getting var " + varName);
+						throw e;
+					}
 				}
 			});
 		} catch (Exception e) {
+			System.out.println( 
+					"Problem requiring namespace/getting var " + varName 
+					+ " from bundle " + bundle.getSymbolicName());
 			IStatus status = new Status(IStatus.ERROR, bundle.getSymbolicName(), 
 					"Problem requiring namespace/getting var " + varName 
 					+ " from bundle " + bundle.getSymbolicName(), e);

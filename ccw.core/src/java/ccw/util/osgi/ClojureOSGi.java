@@ -15,6 +15,7 @@ public class ClojureOSGi {
 	private synchronized static void initialize() {
 		if (initialized) return;
 		
+		System.out.println("ClojureOSGi: Static initialization, loading clojure.core");
 		CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI, "ClojureOSGi: Static initialization, loading clojure.core");
 		ClassLoader loader = new BundleClassLoader(CCWPlugin.getDefault().getBundle());
 		ClassLoader saved = Thread.currentThread().getContextClassLoader();
@@ -27,14 +28,16 @@ public class ClojureOSGi {
 		} finally {
 			Thread.currentThread().setContextClassLoader(saved);
 		}
+		System.out.println("ClojureOSGi: Static initialization, clojure.core loaded");
 		CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI, "ClojureOSGi: Static initialization, clojure.core loaded");
+		
 		initialized = true;
 	}
-
 	public synchronized static Object withBundle(Bundle aBundle, RunnableWithException aCode)
 			throws RuntimeException {
 		
 		initialize();
+		
 		CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI, "ClojureOSGi.withBundle(" + aBundle.getSymbolicName() + ")");
 		ClassLoader loader = new BundleClassLoader(aBundle);
 		IPersistentMap bindings = RT.map(Compiler.LOADER, loader);
@@ -73,6 +76,8 @@ public class ClojureOSGi {
 	}
 
 	public synchronized static void require(final Bundle bundle, final String namespace) {
+		System.out.println("ClojureOSGi.require(" + bundle.getSymbolicName() + ", " 
+				+ namespace + ")");
 		ClojureOSGi.withBundle(bundle, new RunnableWithException() {
 			@Override
 			public Object run() throws Exception {
