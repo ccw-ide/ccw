@@ -16,12 +16,18 @@ public class ClojureOSGi {
 		if (initialized) return;
 		
 		System.out.println("ClojureOSGi: Static initialization, loading clojure.core");
+		System.out.flush();
 		CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI, "ClojureOSGi: Static initialization, loading clojure.core");
-		ClassLoader loader = new BundleClassLoader(CCWPlugin.getDefault().getBundle());
+		CCWPlugin plugin = CCWPlugin.getDefault();
+		if (plugin == null) {
+			System.out.println("======= ClojureOSGi.initialize will fail because ccw.core plugin not activated yet");
+			System.out.flush();
+		}
+		ClassLoader loader = new BundleClassLoader(plugin.getBundle());
 		ClassLoader saved = Thread.currentThread().getContextClassLoader();
 		try {
 			Thread.currentThread().setContextClassLoader(loader);
-			RT.var("clojure.core", "require");
+			Class.forName("clojure.lang.RT", true, loader); // very important, uses the right classloader
 		} catch (Exception e) {
 			throw new RuntimeException(
 					"ClojureOSGi: Static initialization, Exception while loading clojure.core", e);
@@ -29,6 +35,7 @@ public class ClojureOSGi {
 			Thread.currentThread().setContextClassLoader(saved);
 		}
 		System.out.println("ClojureOSGi: Static initialization, clojure.core loaded");
+		System.out.flush();
 		CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI, "ClojureOSGi: Static initialization, clojure.core loaded");
 		
 		initialized = true;
