@@ -594,7 +594,7 @@
   (proxy [ClasspathContainerInitializer]
          []
     (initialize [container-path, java-project]
-      (if-let [deps (load-project-dependencies java-project)]
+      (if-let [deps (seq (load-project-dependencies java-project))]
         (set-lein-container java-project deps)
         (update-project-dependencies java-project)))
     
