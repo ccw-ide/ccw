@@ -2,6 +2,8 @@
   (:use [clojure.core.incubator :only [-?> -?>>]])
   (:require [ccw.util.eclipse :as e]
             [leiningen.core.eval :as eval]
+            [leiningen.core.utils :as utils]
+            [leiningen.core.classpath :as classpath]
             [classlojure.core :as c]
             [clojure.java.io :as io])
   (:import [org.eclipse.core.resources IProject]
@@ -122,8 +124,20 @@
           `(leiningen.core.project/init-project '~project-map))))
     project-map))
 
-(defn lein-native-platform-path [lein-project]
-  (eval/native-arch-path lein-project))
+(defn lein-native-platform-path
+  "Default native arch path when no prefix is specified for a dependency"
+  [project]
+  (let [os (:os project (utils/get-os))
+        arch (:arch project (utils/get-arch))
+        native-path (:native-path project)]
+    (if (and os arch)
+      (io/file native-path (name os) (name arch)))))
+
+(defn lein-native-dependency-path 
+  "May be null. In this case, the caller should use lein-native-platform-path
+   as a default value" [lein-project dependency-file]
+  (when-let [prefix (classpath/get-native-prefix dependency-file)]
+    (io/file (:native-path lein-project) prefix)))
 
 (defn lein-new [location template name & args]
   (let [project-map 

@@ -74,9 +74,9 @@
   "Wrapper for the ccw.leiningen.util/library-entry function"
   [{:keys [path native-path]}]
   (let [params {:path path}
-        #_params #_(if native-path
+        params (if native-path
                      (update-in params [:extra-attributes] 
-                                assoc u/native-library (u/native-library-path native-path))
+                                assoc jdt/native-library (jdt/native-library-path native-path))
                      params)]
     (jdt/library-entry params)))
 
@@ -103,12 +103,11 @@
           (u/eval-in-project
             project-name
             `(do
-               (require 'cemerick.pomegranate.aether)
                (require 'leiningen.core.classpath)
-               (let [~'dependencies (->> (apply #'leiningen.core.classpath/get-dependencies '~dependencies-key '~project '~rest)
-                                      (cemerick.pomegranate.aether/dependency-files)
-                                      (filter #(re-find #"\.(jar|zip)$" (.getName %))))]
-                 (leiningen.core.classpath/extract-native-deps ~'dependencies '~native-path)
+               (let [~'dependencies (apply leiningen.core.classpath/resolve-dependencies
+                                           '~dependencies-key
+                                           '~project
+                                           '~rest)]
                  ; we serialize paths to Strings so that clojure datastructures can be passed back
                  (map #(.getAbsolutePath %) ~'dependencies))))]
     (map #(File. ^String %) deps-paths)))
@@ -121,13 +120,16 @@
   "Return the dependencies sorted alphabetically via their file name.
    Throws Aether exceptions if a problem occured"
   [project-name lein-project]
-  (let [dependencies (resolve-dependencies project-name :dependencies lein-project)]
-    (map 
-      ser-dep
-      (->> dependencies
-        (filter #(-> ^File % .getName (.endsWith ".jar")))
-        (sort-by #(.getName ^File %)))
-      (repeat (u/lein-native-platform-path lein-project)))))
+  (let [dependencies (resolve-dependencies project-name :dependencies lein-project)
+        default-native-platform-path (u/lein-native-platform-path lein-project)]
+    (println "default-native-platform-path:" default-native-platform-path)
+    (->> dependencies
+      (filter #(re-find #"\.(jar|zip)$" (.getName ^File %)))
+      (sort-by #(.getName ^File %))
+      (map #(ser-dep %
+                     (.getParent default-native-platform-path)
+                     #_(or #_(u/lein-native-dependency-path lein-project %) ;; TODO make this work :-(
+                         default-native-platform-path))))))
 
 (defn- delete-container-markers [?project]
   (.deleteMarkers (e/resource ?project) 
@@ -511,7 +513,7 @@
    Use it when you can't use instance?, e.g. when classes are same but from 
    different classloaders."
   [c o]
-  (let [o-class-name (-> o .getClass .getName)
+  (let [o-class-name (-?> o .getClass .getName)
         c-classname (-> c .getName)]
     (= o-class-name c-classname)))
 
