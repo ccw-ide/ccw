@@ -42,6 +42,9 @@
 
 (declare schedule-job)
 
+(defn safe-read-string [s]
+  (try (read-string s) (catch Exception e (.printStackTrace e) nil)))
+
 (defn get-history
   "Given a project name, returns a vector containing:
 
@@ -58,7 +61,7 @@
     (if pref-node
       [(into (or (-?> pref-node
                    (.get history-key "[]")
-                   read-string)
+                   safe-read-string)
                [])
          (@queued-commands project-name))
        (partial queue-expression project-name)]
