@@ -31,9 +31,24 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.workbench.texteditor
 Bundle-ClassPath: .,
  src/clj/,
- classes/,
  lib/
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Vendor: Counterclockwise team
 Bundle-ActivationPolicy: lazy
+Export-Package: ccw,
+ ccw.builder,
+ ccw.commands,
+ ccw.core,
+ ccw.debug,
+ ccw.editors.clojure,
+ ccw.editors.outline,
+ ccw.launching,
+ ccw.leiningen,
+ ccw.nature,
+ ccw.preferences,
+ ccw.repl,
+ ccw.util,
+ ccw.util.eclipse,
+ ccw.util.osgi,
+ ccw.wizards
 
