@@ -7,7 +7,8 @@
            org.eclipse.core.internal.registry.ExtensionRegistry
            org.osgi.framework.Bundle
            org.osgi.framework.Version
-           org.osgi.framework.BundleException))
+           org.osgi.framework.BundleException)
+  (:require [clojure.xml :as xml]))
 
 ;(defn require-and-get-var)
 ;	public static Var requireAndGetVar(String bundleSymbolicName, String varName) throws CoreException {
@@ -85,21 +86,44 @@
     bundle-classloader
     set-context-classloader!))
 
-;(defn with-bundle* [bundle f]
-;  (clojure.osgi.ClojureOSGi/withBundle 
-;    bundle
-;    (reify clojure.osgi.RunnableWithException
-;      (run [this] (f)))))
+(defn with-bundle* [bundle f]
+  (ccw.util.osgi.ClojureOSGi/withBundle 
+    bundle
+    (reify ccw.util.osgi.RunnableWithException
+      (run [this] (f)))))
+
+(defmacro with-bundle [bundle-name & body]
+  `(with-bundle* (load-and-get-bundle ~(name bundle-name))
+     (fn [] ~@body)))
 
 ;; http://www.ibm.com/developerworks/opensource/library/os-ecl-dynext/
-(defn add-contribution [^String s bundle]
+(defn add-contribution! [s bundle]
   (let [registry (org.eclipse.core.runtime.RegistryFactory/getRegistry)
         key (.getTemporaryUserToken ^ExtensionRegistry registry)
         contributor (org.eclipse.core.runtime.ContributorFactoryOSGi/createContributor bundle)
         is (java.io.ByteArrayInputStream. (.getBytes s))]
     (.addContribution registry is contributor false nil nil key)))
 
-;(ccw.util.bundle-utils/add-contribution 
+(defn xml-map->extension [ext-map]
+  (let [m {:tag "plugin" :content [ext-map]}]
+    (with-out-str (xml/emit-element m))))
+
+(defn add-command! [bundle command-attrs]
+  (let [ext-str (xml-map->extension 
+                  {:tag "extension"
+                   :attrs {:point "org.eclipse.ui.commands"}
+                   :content [{:tag "command"
+                              :attrs command-attrs}]})]
+    (add-contribution! ext-str bundle)))
+
+(defn add-menu! [bundle menu-contribution]
+  (let [ext-str (xml-map->extension 
+                  {:tag "extension"
+                   :attrs {:point "org.eclipse.ui.menus"}
+                   :content [menu-contribution]})]
+    (add-contribution! ext-str bundle)))
+
+;(ccw.util.bundle/add-contribution! 
 ;     "
 ;   <plugin>
 ;      <extension
@@ -117,7 +141,7 @@
 ;   "
 ;     b)
 
-;(ccw.util.bundle-utils/add-contribution 
+;(ccw.util.bundle/add-contribution! 
 ;     "
 ;   <plugin>
 ;      <extension
@@ -133,7 +157,9 @@
 ;   "
 ;     b)
 
-;(ccw.util.bundle-utils/add-contribution 
+
+
+;(ccw.util.bundle/add-contribution! 
 ;     "
 ;   <plugin>
 ;      <extension
@@ -171,7 +197,7 @@
 
 
       
-;(ccw.util.bundle-utils/add-contribution 
+;(ccw.util.bundle/add-contribution! 
 ;     "
 ;<plugin>
 ;<extension

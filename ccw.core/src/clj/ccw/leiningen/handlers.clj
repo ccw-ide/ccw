@@ -1,6 +1,7 @@
 (ns ccw.leiningen.handlers
   (:require [ccw.leiningen.classpath-container :as cpc]
             [ccw.leiningen.nature              :as n]
+            [ccw.leiningen.generic-launch      :as launch]
             [clojure.string                    :as str]
             [ccw.util.eclipse                  :as e]
             [clojure.java.io                   :as io])
@@ -29,17 +30,24 @@
 
 (println "ccw.leiningen.handlers load starts")
 
-(defn event->java-project
-  "Extract (if possible) a java project from an execution event"
+(defn event->project
+  "Extract (if possible) a project from an execution event"
   [event]
   (let [sel (e/current-selection event)
         part (e/active-part event)]
     (cond
-      (e/project part)
-        (-> part e/project JavaCore/create)
+      (e/project part) (e/project part)
       (instance? IStructuredSelection sel)
         ;; TODO consider giving the user a hint for why the expected command did not work
-        (-> ^IStructuredSelection sel .getFirstElement e/project JavaCore/create))))
+        (-> ^IStructuredSelection sel .getFirstElement e/resource .getProject e/project)
+      :else (if-let [editor (e/active-editor)]
+              (e/project editor)))))
+
+(defn event->java-project
+  "Extract (if possible) a java project from an execution event"
+  [event]
+  (when-let [p (event->project event)]
+    (JavaCore/create p)))
 
 (defn update-dependencies
   "Pre-requisites:
@@ -53,6 +61,21 @@
   [handler event]
   (when-let [java-project (event->java-project event)]
     (cpc/update-project-dependencies java-project)))
+
+(defn generic-launch
+  "Pre-requisites:
+   - Either the event's selection is a selection containing resources of the 
+     same project, in which case the first element will be picked for getting 
+     the project to use
+   - or the event's active Part can be coerced to a project and we can then try
+     to check it.
+   In both cases, the found project must be open, and with the Leiningen nature
+   enabled."
+  [handler event]
+  (println "update-dependencies")
+  (if-let [project (event->project event)]
+    (launch/generic-launch project)
+    (println "unable to launch leiningen - no project found")))
 
 (defn leiningen-enabled-project-factory 
   "Creates a PropertyTester. It will try to derive the IProject from the

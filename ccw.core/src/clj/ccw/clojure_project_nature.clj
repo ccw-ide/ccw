@@ -10,7 +10,8 @@
 ;*******************************************************************************/
 (ns ccw.clojure-project-nature
   (:require [clojure.java.io :as io]
-            [ccw.util.jdt :as jdt])
+            [ccw.util.jdt :as jdt]
+            [ccw.util.eclipse :as e])
   (:import
     [ccw CCWPlugin ClojureCore]
     [java.io IOException File]
@@ -52,27 +53,6 @@
 (defn- builder-present?
   [builders builder-name]
   (some #(= builder-name (.getBuilderName %)) builders))
-    
-(defn- get-jar-inside-plugin
-  [plugin-name jar-name]
-  (try
-    (let [bundle (Platform/getBundle plugin-name)
-          clojure-bundle-path (FileLocator/getBundleFile bundle)]
-      (if (.isFile clojure-bundle-path)
-        (do
-          (CCWPlugin/logError (str plugin-name " plugin should be deployed as a directory. This is a regression."))
-          nil)
-        (let [clojure-lib-entry (File. clojure-bundle-path
-        											     (str jar-name ".jar"))]
-          (if (.exists clojure-lib-entry)
-            clojure-lib-entry
-            (do
-              (CCWPlugin/logError (str "Unable to locate " + jar-name " jar in " plugin-name " plugin. This is a regression."))
-              nil)))))
-    (catch IOException e
-      (do
-        (CCWPlugin/logError (str "Unable to find " plugin-name " plugin. This is probably a regression."))
-        nil))))
           
 (defn- has-classes-folder?
   [java-project]
@@ -165,8 +145,8 @@
   [java-project]
   (add-lib-on-classpath!
     java-project
-    (file-to-path (get-jar-inside-plugin "ccw.clojure", "clojure"))
-    (file-to-path (get-jar-inside-plugin "ccw.clojure", "src"))
+    (file-to-path (e/get-file-inside-plugin "ccw.clojure", "clojure.jar"))
+    (file-to-path (e/get-file-inside-plugin "ccw.clojure", "src.jar"))
     true))      	    
 
 (defn- add-classes-directory!
