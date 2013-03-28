@@ -2810,9 +2810,21 @@
          id="ccw.leiningen.command.reset-project-classpath"
          name="%ccw.leiningen.command.reset-project-classpath.name">
    </command>
+   <command
+         categoryId="ccw.leiningen.category"
+         description="%ccw.leiningen.command.generic-launch.description"
+         id="ccw.leiningen.command.generic-launch"
+         name="%ccw.leiningen.command.generic-launch.name">
+   </command>
 </extension>
 <extension
       point="org.eclipse.ui.bindings">
+   <key
+         commandId="ccw.leiningen.command.generic-launch"
+         contextId="org.eclipse.ui.contexts.window"
+         schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+         sequence="M3+L L">
+   </key>
    <key
          commandId="ccw.leiningen.command.update-dependencies"
          contextId="org.eclipse.ui.contexts.window"
@@ -2950,6 +2962,20 @@
          </or>
       </activeWhen>
    </handler>
+   <handler
+         commandId="ccw.leiningen.command.generic-launch">
+      <class
+            class="ccw.util.GenericExecutableExtension">
+         <parameter
+               name="factory"
+               value="ccw.util.factories/handler-factory">
+         </parameter>
+         <parameter
+               name="handler"
+               value="ccw.leiningen.handlers/generic-launch">
+         </parameter>
+      </class>
+   </handler>
 </extension>
 <extension
       id="ccw.leiningen.nature"
@@ -2992,6 +3018,16 @@
             id="ccw.leiningen.project.menu"
             label="%ccw.leiningen.popup.menu.label"
             mnemonic="L">
+         <command
+               commandId="ccw.leiningen.command.generic-launch"
+               label="%ccw.leiningen.command.generic-launch.name"
+               mnemonic="L"
+               style="push"
+               tooltip="Launch a popup to run arbitrary Leiningen command">
+            <visibleWhen
+                  checkEnabled="true">
+            </visibleWhen>
+         </command>
          <command
                commandId="ccw.leiningen.command.reset-project-classpath"
                label="%ccw.leiningen.command.reset-project-classpath.name"
