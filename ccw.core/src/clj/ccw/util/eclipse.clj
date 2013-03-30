@@ -12,7 +12,8 @@
                                      Path
                                      Platform
                                      Plugin
-                                     FileLocator]
+                                     FileLocator
+                                     IAdaptable]
            [org.eclipse.jdt.core IJavaProject]
            [org.eclipse.ui.handlers HandlerUtil]
            [org.eclipse.ui IEditorPart
@@ -74,7 +75,7 @@
   (project [_] nil)
   
   Object
-  (project [s] nil)
+  (project [o] (adapter o IProject))
   
   String
   (project [s] (.getProject (workspace-root) s))

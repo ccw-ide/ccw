@@ -40,7 +40,7 @@
       (instance? IStructuredSelection sel)
         ;; TODO consider giving the user a hint for why the expected command did not work
         (-> ^IStructuredSelection sel .getFirstElement e/resource .getProject e/project)
-      :else (if-let [editor (e/active-editor)]
+      :else (if-let [editor (e/active-editor event)]
               (e/project editor)))))
 
 (defn event->java-project
