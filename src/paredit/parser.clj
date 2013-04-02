@@ -15,15 +15,9 @@
 (def ^:dynamic *tag-opening-brackets* {:list "(", :map "{", :vector "[", :string "\"", :regex "#\"", :set "#{", :fn "#("})
 (def ^:dynamic *atom* #{:symbol :keyword :int :float :ratio :anon-arg})
 
-(defn eof [s eof?]
-  (when (and (= 0 (.length ^String s)) eof?) [0 eof]))
-
-#_(reify MatcherFactory
-  (matcher-fn [this id]
-    (fn [s eof?] (when (and (= 0 (.length ^String s)) eof?) [0 id]))))
-
-;(defn bracket-end [s eof?]
-;  (lr+/match #{")" "]" "}" eof} s eof?))
+(def eof (reify net.cgrand.parsley.lrplus/MatcherFactory
+           (matcher-fn [this id]
+             (fn [s eof?] (when (and (= 0 (.length ^String s)) eof?) [0 id])))))
 
 (def gspaces #{:whitespace :comment :discard})
 (def only-code (partial remove (comp (conj gspaces 
