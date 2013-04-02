@@ -77,35 +77,6 @@
     (launch/generic-launch project)
     (println "unable to launch leiningen - no project found")))
 
-(defn leiningen-enabled-project-factory 
-  "Creates a PropertyTester. It will try to derive the IProject from the
-   receiver, and if an IProject is found, detect if the project is open,
-   and the Leiningen Nature is enabled."
-  [_]
-  (proxy [PropertyTester]
-         []
-    (test [receiver, property, args, expectedValue]
-      (boolean
-        (when-let [project (e/project receiver)]
-          (and
-            (.isOpen project)
-            (.isNatureEnabled project "ccw.leiningen.nature")))))))
-
-(defn leiningen-project-file-present-factory
-  "Creates a PropertyTester whose purpose will be to test the presence of the
-   project.clj file."
-  [_]
-  (proxy [PropertyTester]
-         []
-    (test [receiver, property, args, expectedValue]
-      true
-      #_(let [res  (boolean
-                   (when-let [project (e/project receiver)]
-                     (and
-                       (.isOpen project)
-                       (.exists (.getFile project "project.clj")))))]
-        res)))) 
-
 ;; TODO too many imbrications here, decomplecting the code
 ;;      from the job, etc. will help ...
 (defn add-natures
