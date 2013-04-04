@@ -60,13 +60,18 @@
 
 (def launch-configuration-types
   "Pre-defined types of launch configurations"
-  {:java 
-   IJavaLaunchConfigurationConstants/ID_JAVA_APPLICATION})
+  {:ccw 
+     "ccw.launching.clojure"
+   :java 
+     IJavaLaunchConfigurationConstants/ID_JAVA_APPLICATION})
 
 (def attrs-map
   "Launch configuration pre-existing attributes."
   {
    :private IDebugUIConstants/ATTR_PRIVATE
+   :launch-in-background IDebugUIConstants/ATTR_LAUNCH_IN_BACKGROUND
+   
+   :environment-variables ILaunchManager/ATTR_ENVIRONMENT_VARIABLES
    
    :java/vm-install-type IJavaLaunchConfigurationConstants/ATTR_VM_INSTALL_TYPE
    :java/vm-install-name IJavaLaunchConfigurationConstants/ATTR_VM_INSTALL_NAME
@@ -138,7 +143,7 @@
   working-copy)
 
 (defn- new-working-copy
-  "Create a launch configurationw working copy with given name and type-id"
+  "Create a launch configuration working copy with given name and type-id"
   [& {:keys #{name type-id} :or {name (.toString (java.util.UUID/randomUUID))
                                  type-id :java}}]
   (let [manager (-> (DebugPlugin/getDefault) .getLaunchManager)

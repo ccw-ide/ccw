@@ -77,6 +77,12 @@
   Object
   (project [o] (adapter o IProject))
   
+  clojure.lang.Symbol
+  (project [s] (project (name s)))
+  
+  clojure.lang.Keyword
+  (project [s] (project (name s)))
+  
   String
   (project [s] (.getProject (workspace-root) s))
   

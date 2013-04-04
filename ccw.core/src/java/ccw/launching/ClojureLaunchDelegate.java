@@ -207,6 +207,11 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 	
 	@Override
 	public String getProgramArguments(ILaunchConfiguration configuration) throws CoreException {
+		if (isLeiningenConfiguration(configuration)) {
+			// Leiningen configuration does not need (yet) program arguments tweaks
+			return super.getProgramArguments(configuration);
+		}
+		
 		String userProgramArguments = super.getProgramArguments(configuration);
 
 		if (isLaunchREPL(configuration)) {
@@ -241,6 +246,10 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
         return configuration.getAttribute(LaunchUtils.ATTR_CLOJURE_START_REPL, true);
     }
 	
+	private static boolean isLeiningenConfiguration(ILaunchConfiguration configuration) throws CoreException {
+		return configuration.getAttribute(LaunchUtils.ATTR_LEININGEN_CONFIGURATION, true);
+	}
+	
 	public static boolean isAutoReloadEnabled (ILaunch launch) {
 		if (launch == null) {
 			return false;
@@ -252,6 +261,11 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
     @Override
 	public String getMainTypeName(ILaunchConfiguration configuration)
 			throws CoreException {
+    	if (isLeiningenConfiguration(configuration)) {
+    		// Leiningen configuration don't need last minute classpath tweaks (yet)
+    		return super.getMainTypeName(configuration);
+    	}
+    	
 	    String main = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, (String)null); 
 	    return main == null ? clojure.main.class.getName() : main;
 	}
@@ -259,6 +273,11 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
     @Override
     public String[] getClasspath(ILaunchConfiguration configuration)
             throws CoreException {
+    	
+    	if (isLeiningenConfiguration(configuration)) {
+    		// Leiningen configurations don't need last minute classpath tweaks (yet)
+    		return super.getClasspath(configuration);
+    	}
        
         List<String> classpath = new ArrayList<String>(Arrays.asList(super.getClasspath(configuration)));
        

@@ -4,3 +4,5 @@
 /target/*
 /target/
 /*.jar
+/leiningen-standalone/
+/leiningen-standalone.*

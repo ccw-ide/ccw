@@ -66,6 +66,9 @@ public class CCWPlugin extends AbstractUIPlugin {
 
     /** The plug-in ID */
     public static final String PLUGIN_ID = "ccw.core";
+    
+    /** Leiningen project nature */
+    public static final String LEININGEN_NATURE_ID = "ccw.leiningen.nature";
 
     /** 
      * @param swtKey a key from SWT.COLOR_xxx
