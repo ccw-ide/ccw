@@ -144,9 +144,9 @@
 
 (defn- new-working-copy
   "Create a launch configuration working copy with given name and type-id"
-  [& {:keys #{name type-id} :or {name (.toString (java.util.UUID/randomUUID))
-                                 type-id :java}}]
-  (let [manager (-> (DebugPlugin/getDefault) .getLaunchManager)
+  [& {:keys #{name type-id} :or {type-id :java}}]
+  (let [name (or name (.toString (java.util.UUID/randomUUID)))
+        manager (-> (DebugPlugin/getDefault) .getLaunchManager)
         type (.getLaunchConfigurationType manager (launch-configuration-types type-id type-id))]
     (.newInstance type nil name)))
 

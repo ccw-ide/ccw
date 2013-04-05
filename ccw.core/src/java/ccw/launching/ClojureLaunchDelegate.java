@@ -185,7 +185,10 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
     @Override
     public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor) throws CoreException {
     	LaunchUtils.setProjectName(launch, configuration.getAttribute(LaunchUtils.ATTR_PROJECT_NAME, (String) null));
-        launch.setAttribute(LaunchUtils.ATTR_IS_AUTO_RELOAD_ENABLED, Boolean.toString(configuration.getAttribute(LaunchUtils.ATTR_IS_AUTO_RELOAD_ENABLED, false)));
+    	
+    	Boolean activateAutoReload = CCWPlugin.isAutoReloadOnStartupSaveEnabled();
+        launch.setAttribute(LaunchUtils.ATTR_IS_AUTO_RELOAD_ENABLED, Boolean.toString(activateAutoReload));
+        
         BundleUtils.requireAndGetVar(CCWPlugin.getDefault().getBundle().getSymbolicName(), "clojure.tools.nrepl.ack/reset-ack-port!").invoke();
         try {
             Var.pushThreadBindings(RT.map(currentLaunch, launch));
@@ -203,6 +206,25 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 	            LaunchUtils.SYSPROP_LAUNCH_ID,
 	            launchId,
 	            super.getVMArguments(configuration));
+	}
+	
+	@Override
+	public String[] getEnvironment(ILaunchConfiguration configuration)
+			throws CoreException {
+		String[] ret;
+		String[] superEnv = super.getEnvironment(configuration);
+		if (isLeiningenConfiguration(configuration)) {
+			if (superEnv != null) {
+				ret = new String[superEnv.length + 1];
+				System.arraycopy(superEnv, 0, ret, 1, superEnv.length);
+			} else {
+				ret = new String[1];
+			}
+			ret[0] = "LEIN_REPL_ACK_PORT" + "=" + CCWPlugin.getDefault().getREPLServerPort();
+		} else {
+			ret = superEnv;
+		}
+		return ret;
 	}
 	
 	@Override
@@ -246,7 +268,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
         return configuration.getAttribute(LaunchUtils.ATTR_CLOJURE_START_REPL, true);
     }
 	
-	private static boolean isLeiningenConfiguration(ILaunchConfiguration configuration) throws CoreException {
+	public static boolean isLeiningenConfiguration(ILaunchConfiguration configuration) throws CoreException {
 		return configuration.getAttribute(LaunchUtils.ATTR_LEININGEN_CONFIGURATION, true);
 	}
 	

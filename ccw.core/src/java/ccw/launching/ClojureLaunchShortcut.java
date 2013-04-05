@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -32,7 +33,6 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugModelPresentation;
-import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.debug.ui.ILaunchShortcut;
 import org.eclipse.jdt.internal.debug.ui.JDIDebugUIPlugin;
 import org.eclipse.jdt.internal.debug.ui.launcher.LauncherMessages;
@@ -49,12 +49,11 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.part.FileEditorInput;
 
-import clojure.lang.Keyword;
-
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.util.ClojureInvoker;
 import ccw.util.DisplayUtil;
+import clojure.lang.Keyword;
 
 public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfigurationConstants {
     private static final HashMap<String, Long> tempLaunchCounters = new HashMap();
@@ -154,24 +153,14 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     
     protected void launchProject(IProject project, IFile[] filesToLaunch, String mode) {
 
-    	Boolean activateAutoReload = CCWPlugin.isAutoReloadOnStartupSaveEnabled();
         try {
-        	ILaunchConfiguration config;
-        	if (project.hasNature(CCWPlugin.LEININGEN_NATURE_ID)) {
-        		clojure.lang.IPersistentMap configMap = 
-        				(clojure.lang.IPersistentMap) 
-        				leiningenConfiguration._("lein-launch-configuration",
-					    project,	
-					    "update-in :dependencies conj \"[ccw/ccw-server \\\"0.1.0\\\"]\" -- update-in :injections conj \"(require 'ccw.debug.serverrepl)\" -- repl :headless");
-        		configMap = configMap.assoc(Keyword.intern("type-id"), Keyword.intern("ccw"));
-        		config = (ILaunchConfiguration) 
-        				launch._("launch-configuration",
-        				    configMap);
-        	} else {
-        		config = findLaunchConfiguration(project);
-        		if (config == null) {
-        			config = createConfiguration(project, null);
-        		}
+        	ILaunchConfiguration config = findLaunchConfiguration(project);
+    		if (config == null) {
+    			if (project.hasNature(CCWPlugin.LEININGEN_NATURE_ID)) {
+            		config = createLeiningenLaunchConfiguration(project);
+    			} else {
+            		config = createConfiguration(project, null);
+    			}
         	}
         		
             if (config != null) {
@@ -179,14 +168,10 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
             	    config.copy(config.getName() + " #" + incTempLaunchCount(project.getName()));
             	try {
             		if (project.hasNature(CCWPlugin.LEININGEN_NATURE_ID)) {
-            			runnableConfiguration.setAttribute(LaunchUtils.ATTR_CLOJURE_START_REPL, true);
-            			Map additionalEnv= new HashMap();
-            			additionalEnv.put("LEIN_REPL_ACK_PORT", "" + CCWPlugin.getDefault().getREPLServerPort());
-            			runnableConfiguration.setAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, additionalEnv);
+            			// Nothing special
             		} else {
             			LaunchUtils.setFilesToLaunchString(runnableConfiguration, Arrays.asList(filesToLaunch));
             		}
-	            	runnableConfiguration.setAttribute(LaunchUtils.ATTR_IS_AUTO_RELOAD_ENABLED, activateAutoReload);
 	            	if (filesToLaunch.length > 0) {
 	            		runnableConfiguration.setAttribute(LaunchUtils.ATTR_NS_TO_START_IN, ClojureCore.findMaybeLibNamespace(filesToLaunch[0]));
 	            	}
@@ -202,21 +187,47 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
             throw new RuntimeException(e);
         }
     }
+    
+    private ILaunchConfiguration createLeiningenLaunchConfiguration(IProject project) {
+		clojure.lang.IPersistentMap configMap = 
+				(clojure.lang.IPersistentMap) 
+				leiningenConfiguration._("lein-launch-configuration",
+			    project,	
+			    "update-in :dependencies conj \"[ccw/ccw-server \\\"0.1.0\\\"]\" -- update-in :injections conj \"(require 'ccw.debug.serverrepl)\" -- repl :headless");
+		configMap = configMap.assoc(Keyword.intern("type-id"), Keyword.intern("ccw"));
+		configMap = configMap.assoc(Keyword.intern("name"), project.getName());
+		configMap = configMap.assoc(LaunchUtils.ATTR_CLOJURE_START_REPL, true);
+		configMap = configMap.assoc(LaunchUtils.ATTR_LEININGEN_CONFIGURATION, true);
+		configMap = configMap.assoc(Keyword.intern("private"), false);
+		configMap = configMap.assoc(Keyword.intern("launch-in-background"), false);
+		
+		return (ILaunchConfiguration) 
+				launch._("launch-configuration",
+				    configMap);
 
-	private ILaunchConfiguration findLaunchConfiguration(IProject project) {
+    }
+
+	private ILaunchConfiguration findLaunchConfiguration(IProject project) throws CoreException {
         ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
         ILaunchConfigurationType type =
             lm.getLaunchConfigurationType(LaunchUtils.LAUNCH_CONFIG_ID);
         
         List candidateConfigs = Collections.EMPTY_LIST;
         
+        boolean isLeinProject = project.hasNature(CCWPlugin.LEININGEN_NATURE_ID);
+        
         try {
             ILaunchConfiguration[] configs = DebugPlugin.getDefault().getLaunchManager().getLaunchConfigurations(type);
             candidateConfigs = new ArrayList(configs.length);
             for (ILaunchConfiguration config:  configs) {
                 if (config.getAttribute(ATTR_MAIN_TYPE_NAME, "").startsWith("clojure.")
-                		&& config.getAttribute(ATTR_PROJECT_NAME, "").equals(project.getName())) {
-                    candidateConfigs.add(config);
+                		&& config.getAttribute(ATTR_PROJECT_NAME, "").equals(project.getName())
+                		&& !config.getAttribute(ILaunchManager.ATTR_PRIVATE, false)) {
+                	if ( 	(isLeinProject && ClojureLaunchDelegate.isLeiningenConfiguration(config))
+                			||
+                			(!isLeinProject && !ClojureLaunchDelegate.isLeiningenConfiguration(config)) ) {
+                		candidateConfigs.add(config);
+                	}
                 }
             }
         }
@@ -267,25 +278,32 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
         return config;
     }
     
-    protected ILaunchConfiguration chooseConfiguration(List configList) {
-        IDebugModelPresentation labelProvider = null;
-    	try {
-    		labelProvider = DebugUITools.newDebugModelPresentation();
-	        ElementListSelectionDialog dialog= new ElementListSelectionDialog(JDIDebugUIPlugin.getActiveWorkbenchShell(), labelProvider);
-	        dialog.setElements(configList.toArray());
-	        dialog.setTitle("Choose a Clojure launch configuration");  
-	        dialog.setMessage(LauncherMessages.JavaLaunchShortcut_2);
-	        dialog.setMultipleSelection(false);
-	        int result = dialog.open();
-	        if (result == Window.OK) {
-	            return (ILaunchConfiguration) dialog.getFirstResult();
-	        }
-	        return null;
-    	} finally {
-    		if (labelProvider!= null) {
-    			labelProvider.dispose();
-    		}
-    	}
+    protected ILaunchConfiguration chooseConfiguration(final List configList) {
+    	final AtomicReference<ILaunchConfiguration> ret = new AtomicReference<ILaunchConfiguration>();
+    	DisplayUtil.syncExec(new Runnable() {
+			@Override
+			public void run() {
+		        IDebugModelPresentation labelProvider = null;
+		    	try {
+		    		labelProvider = DebugUITools.newDebugModelPresentation();
+			        ElementListSelectionDialog dialog= new ElementListSelectionDialog(JDIDebugUIPlugin.getActiveWorkbenchShell(), labelProvider);
+			        dialog.setElements(configList.toArray());
+			        dialog.setTitle("Choose a Clojure launch configuration");  
+			        dialog.setMessage(LauncherMessages.JavaLaunchShortcut_2);
+			        dialog.setMultipleSelection(false);
+			        dialog.setAllowDuplicates(true);
+			        int result = dialog.open();
+			        if (result == Window.OK) {
+			        	ret.set((ILaunchConfiguration) dialog.getFirstResult());
+			        }
+		    	} finally {
+		    		if (labelProvider!= null) {
+		    			labelProvider.dispose();
+		    		}
+		    	}
+			}
+		});
+    	return ret.get();
     }
     
 }

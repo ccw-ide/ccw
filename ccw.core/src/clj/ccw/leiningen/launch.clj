@@ -8,7 +8,6 @@
     (lein-launch-configuration project command nil))
   ([project command {:keys [leiningen-standalone-path] :as options}]
     {
-     "ccw.leiningen.configuration" true
      :private                true
      :launch-in-background   false
      
