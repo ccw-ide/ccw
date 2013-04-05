@@ -29,8 +29,6 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -39,12 +37,12 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
 import org.eclipse.ui.model.BaseWorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 import ccw.CCWPlugin;
+import ccw.util.StringUtils;
 
 /**
  * Heavily adapted from JDT's java launcher tabs.
@@ -105,6 +103,9 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
             @Override
             public void widgetSelected(SelectionEvent e) {
                 String currentProjName = fProjText.getText().trim();
+                if (StringUtils.isBlank(currentProjName)) {
+                	return;
+                }
                 final IProject proj = ResourcesPlugin.getWorkspace().getRoot().getProject(currentProjName);
                 if (proj == null) {
                     return;
@@ -181,12 +182,6 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
     public void initializeFrom(ILaunchConfiguration config) {
         super.initializeFrom(config);
 
-        String currentProjName = fProjText.getText().trim();
-        IProject proj = ResourcesPlugin.getWorkspace().getRoot().getProject(currentProjName);
-        if (proj == null) {
-            return;
-        }
-        
         try {
         	installREPLChoice.setSelection(config.getAttribute(LaunchUtils.ATTR_CLOJURE_START_REPL, true));
         } catch (CoreException e) {
