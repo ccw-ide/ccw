@@ -104,7 +104,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 				    
 					monitor.beginTask("Waiting for new REPL process to be ready...", IProgressMonitor.UNKNOWN);
 
-                    final Number port = (Number)Connection.find("clojure.tools.nrepl.ack", "wait-for-ack").invoke(30000);
+                    final Number port = (Number)Connection.find("clojure.tools.nrepl.ack", "wait-for-ack").invoke(60000);
                     cancelOrAck.countDown();
 
                     if (monitor.isCanceled()) {
