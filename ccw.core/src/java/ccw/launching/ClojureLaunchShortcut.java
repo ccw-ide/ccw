@@ -56,7 +56,7 @@ import ccw.util.DisplayUtil;
 import clojure.lang.Keyword;
 
 public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfigurationConstants {
-    private static final HashMap<String, Long> tempLaunchCounters = new HashMap();
+    private static final Map<String, Long> tempLaunchCounters = new HashMap<String, Long>();
     
     private ClojureInvoker leiningenConfiguration = ClojureInvoker.newInvoker(CCWPlugin.getDefault(), "ccw.leiningen.launch");
     private ClojureInvoker launch = ClojureInvoker.newInvoker(CCWPlugin.getDefault(), "ccw.util.launch");
@@ -77,8 +77,6 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
             FileEditorInput fei = (FileEditorInput) input;
             launchProjectCheckRunning(fei.getFile().getProject(), new IFile[] { fei
                     .getFile() }, mode);
-        } else {
-        	return;
         }
     }
 
@@ -118,7 +116,6 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
      * @param mode
      */
     protected void launchProjectCheckRunning(IProject project, IFile[] filesToLaunch, String mode) {
-
     	String projectName = project.getName();
     	List<ILaunch> running = findRunningLaunchesForProject(projectName);
     	
@@ -152,7 +149,6 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     }
     
     protected void launchProject(IProject project, IFile[] filesToLaunch, String mode) {
-
         try {
         	ILaunchConfiguration config = findLaunchConfiguration(project);
     		if (config == null) {
@@ -180,8 +176,6 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
             	} finally {
             		runnableConfiguration.delete();
             	}
-            } else {
-            	return;
             }
         } catch (CoreException e) {
             throw new RuntimeException(e);
@@ -204,7 +198,6 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
 		return (ILaunchConfiguration) 
 				launch._("launch-configuration",
 				    configMap);
-
     }
 
 	private ILaunchConfiguration findLaunchConfiguration(IProject project) throws CoreException {
@@ -212,14 +205,14 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
         ILaunchConfigurationType type =
             lm.getLaunchConfigurationType(LaunchUtils.LAUNCH_CONFIG_ID);
         
-        List candidateConfigs = Collections.EMPTY_LIST;
+        List<ILaunchConfiguration> candidateConfigs = Collections.EMPTY_LIST;
         
         boolean isLeinProject = project.hasNature(CCWPlugin.LEININGEN_NATURE_ID);
         
         try {
             ILaunchConfiguration[] configs = DebugPlugin.getDefault().getLaunchManager().getLaunchConfigurations(type);
-            candidateConfigs = new ArrayList(configs.length);
-            for (ILaunchConfiguration config:  configs) {
+            candidateConfigs = new ArrayList<ILaunchConfiguration>(configs.length);
+            for (ILaunchConfiguration config : configs) {
                 if (config.getAttribute(ATTR_MAIN_TYPE_NAME, "").startsWith("clojure.")
                 		&& config.getAttribute(ATTR_PROJECT_NAME, "").equals(project.getName())
                 		&& !config.getAttribute(ILaunchManager.ATTR_PRIVATE, false)) {
@@ -244,7 +237,6 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     }
 
     protected ILaunchConfiguration createConfiguration(IProject project, IFile[] files) {
-        ILaunchConfiguration config = null;
         if (files == null) files = new IFile[] {};
         try {
             ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
@@ -270,15 +262,14 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
             
             wc.setMappedResources(new IResource[] {project});
             
-            config = wc.doSave();
+            return wc.doSave();
         }
         catch (CoreException ce) {
             throw new RuntimeException(ce);
         }
-        return config;
     }
     
-    protected ILaunchConfiguration chooseConfiguration(final List configList) {
+    protected ILaunchConfiguration chooseConfiguration(final List<ILaunchConfiguration> configList) {
     	final AtomicReference<ILaunchConfiguration> ret = new AtomicReference<ILaunchConfiguration>();
     	DisplayUtil.syncExec(new Runnable() {
 			@Override
@@ -297,7 +288,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
 			        	ret.set((ILaunchConfiguration) dialog.getFirstResult());
 			        }
 		    	} finally {
-		    		if (labelProvider!= null) {
+		    		if (labelProvider != null) {
 		    			labelProvider.dispose();
 		    		}
 		    	}
@@ -305,5 +296,4 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
 		});
     	return ret.get();
     }
-    
 }
