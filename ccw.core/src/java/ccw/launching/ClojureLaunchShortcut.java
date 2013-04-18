@@ -128,6 +128,8 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     			IViewPart replView = CCWPlugin.getDefault().getProjectREPL(project);
     			if (replView != null) {
     				replView.getViewSite().getPage().activate(replView);
+    			} else {
+    				System.out.println("Should not be there: because in the normal course of things, a Launch does not survive its REPLView");
     			}
     		}
     	}
