@@ -21,6 +21,7 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 
 import ccw.CCWPlugin;
+import ccw.util.DisplayUtil;
 
 public class PreferenceInitializer extends AbstractPreferenceInitializer {
 
@@ -109,7 +110,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
     
 	@Override
 	public void initializeDefaultPreferences() {
-	    IPreferenceStore store = CCWPlugin.getDefault().getPreferenceStore();
+	    final IPreferenceStore store = CCWPlugin.getDefault().getPreferenceStore();
 	    
 	    store.setDefault(PreferenceConstants.CCW_GENERAL_AUTOMATIC_NATURE_ADDITION, true);
 	    store.setDefault(PreferenceConstants.CCW_GENERAL_AUTO_RELOAD_ON_STARTUP_SAVE, false);
@@ -130,14 +131,21 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	    store.setDefault(PreferenceConstants.REPL_VIEW_AUTO_EVAL_ON_ENTER_ACTIVE, true);
 	    store.setDefault(PreferenceConstants.REPL_VIEW_DISPLAY_HINTS, true);
 	    
-	    for (SyntaxColoringDefault d: coloringDefaults) {
-	        store.setDefault(d.getPreferenceConstant(),
-	                StringConverter.asString(d.getDefaultColor()));
-	        store.setDefault(SyntaxColoringPreferencePage.getEnabledPreferenceKey(d.getPreferenceConstant()),
-                    d.isDefaultEnabled());
-	        store.setDefault(SyntaxColoringPreferencePage.getBoldPreferenceKey(d.getPreferenceConstant()), d.isBold());
-	        store.setDefault(SyntaxColoringPreferencePage.getItalicPreferenceKey(d.getPreferenceConstant()), d.isItalic());
-	    }
+	    DisplayUtil.syncExec(new Runnable() {
+
+			@Override
+			public void run() {
+			    for (SyntaxColoringDefault d: coloringDefaults) {
+			        store.setDefault(d.getPreferenceConstant(),
+			                StringConverter.asString(d.getDefaultColor()));
+			        store.setDefault(SyntaxColoringPreferencePage.getEnabledPreferenceKey(d.getPreferenceConstant()), // Ca declenche du code qui DOIT s'executer dans le thread UI
+		                    d.isDefaultEnabled());
+			        store.setDefault(SyntaxColoringPreferencePage.getBoldPreferenceKey(d.getPreferenceConstant()), d.isBold());
+			        store.setDefault(SyntaxColoringPreferencePage.getItalicPreferenceKey(d.getPreferenceConstant()), d.isItalic());
+			    }
+			}
+	    	
+	    });
 	    
 	    store.setDefault(PreferenceConstants.REPL_QUIET_LOGGING_MODE, false);
 	}
