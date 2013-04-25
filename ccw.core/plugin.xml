@@ -986,7 +986,7 @@
             commandId="ccw.ui.edit.text.clojure.switch.rainbow.parens"
             contextId="ccw.ui.clojureEditorScope"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="M1+(+R">
+            sequence="M1+( R">
       </key>
 	</extension>
    <extension
