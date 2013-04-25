@@ -41,7 +41,7 @@ public class Actions {
     public static class ConnectToEclipseNREPL extends AbstractHandler {
 		public Object execute(ExecutionEvent event) throws ExecutionException {
             try {
-                return REPLView.connect("nrepl://localhost:" + CCWPlugin.getDefault().getREPLServerPort(), true);
+                return REPLView.connect("nrepl://127.0.0.1:" + CCWPlugin.getDefault().getREPLServerPort(), true);
             } catch (Exception e) {
                 throw new ExecutionException("Could not connect to Eclipse's internal nrepl server", e);
             }

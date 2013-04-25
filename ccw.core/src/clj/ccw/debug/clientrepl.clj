@@ -21,7 +21,7 @@
 
 (defn remote-load [^String s]
   ;(println "remote-load: begin")
-  (with-open [client (new Socket "localhost" (int *default-repl-port*))]
+  (with-open [client (new Socket "127.0.0.1" (int *default-repl-port*))]
     ;(println "remote-load: opened socket on port " *default-repl-port*)
     (with-open [dis (new java.io.DataInputStream 
                          (new java.io.BufferedInputStream (.getInputStream client)))]
