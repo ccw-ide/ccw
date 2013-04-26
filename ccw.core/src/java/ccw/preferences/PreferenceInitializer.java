@@ -110,31 +110,32 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
     
 	@Override
 	public void initializeDefaultPreferences() {
-	    final IPreferenceStore store = CCWPlugin.getDefault().getPreferenceStore();
-	    
-	    store.setDefault(PreferenceConstants.CCW_GENERAL_AUTOMATIC_NATURE_ADDITION, true);
-	    store.setDefault(PreferenceConstants.CCW_GENERAL_AUTO_RELOAD_ON_STARTUP_SAVE, false);
-	    
-	    store.setDefault(org.eclipse.jdt.ui.PreferenceConstants.EDITOR_MATCHING_BRACKETS, true);
-	    store.setDefault(org.eclipse.jdt.ui.PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR, 
-                StringConverter.asString(new RGB(150, 150, 150)));
-	    store.setDefault(PreferenceConstants.EDITOR_ESCAPE_ON_PASTE, false);
-	    store.setDefault(PreferenceConstants.EDITOR_CODE_COMPLETION_AUTO_ACTIVATE, true);
-	    store.setDefault(PreferenceConstants.EDITOR_DISPLAY_NAMESPACE_IN_TABS, true);
-	    store.setDefault(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH, 2);
-	    store.setDefault(PreferenceConstants.SWITCH_TO_NS_ON_REPL_STARTUP, true);
-	    store.setDefault(USE_STRICT_STRUCTURAL_EDITING_MODE_BY_DEFAULT, false);
-	    store.setDefault(PreferenceConstants.SHOW_RAINBOW_PARENS_BY_DEFAULT, true);
-	    store.setDefault(PreferenceConstants.USE_TAB_FOR_REINDENTING_LINE, true);
-	    store.setDefault(PreferenceConstants.FORCE_TWO_SPACES_INDENT, false);
-	    
-	    store.setDefault(PreferenceConstants.REPL_VIEW_AUTO_EVAL_ON_ENTER_ACTIVE, true);
-	    store.setDefault(PreferenceConstants.REPL_VIEW_DISPLAY_HINTS, true);
-	    
+	    System.out.println("ccw.core: initializeDefaultPreferences() START");
 	    DisplayUtil.syncExec(new Runnable() {
-
 			@Override
 			public void run() {
+			    System.out.println("ccw.core: initializeDefaultPreferences().DisplayExec() START");
+			    final IPreferenceStore store = CCWPlugin.getDefault().getPreferenceStore();
+			    
+			    store.setDefault(PreferenceConstants.CCW_GENERAL_AUTOMATIC_NATURE_ADDITION, true);
+			    store.setDefault(PreferenceConstants.CCW_GENERAL_AUTO_RELOAD_ON_STARTUP_SAVE, false);
+			    
+			    store.setDefault(org.eclipse.jdt.ui.PreferenceConstants.EDITOR_MATCHING_BRACKETS, true);
+			    store.setDefault(org.eclipse.jdt.ui.PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR, 
+		                StringConverter.asString(new RGB(150, 150, 150)));
+			    store.setDefault(PreferenceConstants.EDITOR_ESCAPE_ON_PASTE, false);
+			    store.setDefault(PreferenceConstants.EDITOR_CODE_COMPLETION_AUTO_ACTIVATE, true);
+			    store.setDefault(PreferenceConstants.EDITOR_DISPLAY_NAMESPACE_IN_TABS, true);
+			    store.setDefault(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH, 2);
+			    store.setDefault(PreferenceConstants.SWITCH_TO_NS_ON_REPL_STARTUP, true);
+			    store.setDefault(USE_STRICT_STRUCTURAL_EDITING_MODE_BY_DEFAULT, false);
+			    store.setDefault(PreferenceConstants.SHOW_RAINBOW_PARENS_BY_DEFAULT, true);
+			    store.setDefault(PreferenceConstants.USE_TAB_FOR_REINDENTING_LINE, true);
+			    store.setDefault(PreferenceConstants.FORCE_TWO_SPACES_INDENT, false);
+			    
+			    store.setDefault(PreferenceConstants.REPL_VIEW_AUTO_EVAL_ON_ENTER_ACTIVE, true);
+			    store.setDefault(PreferenceConstants.REPL_VIEW_DISPLAY_HINTS, true);
+
 			    for (SyntaxColoringDefault d: coloringDefaults) {
 			        store.setDefault(d.getPreferenceConstant(),
 			                StringConverter.asString(d.getDefaultColor()));
@@ -143,10 +144,10 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 			        store.setDefault(SyntaxColoringPreferencePage.getBoldPreferenceKey(d.getPreferenceConstant()), d.isBold());
 			        store.setDefault(SyntaxColoringPreferencePage.getItalicPreferenceKey(d.getPreferenceConstant()), d.isItalic());
 			    }
+			    store.setDefault(PreferenceConstants.REPL_QUIET_LOGGING_MODE, false);
+			    System.out.println("ccw.core: initializeDefaultPreferences().DisplayExec() STOP");
 			}
-	    	
 	    });
-	    
-	    store.setDefault(PreferenceConstants.REPL_QUIET_LOGGING_MODE, false);
+	    System.out.println("ccw.core: initializeDefaultPreferences() STOP");
 	}
 }
