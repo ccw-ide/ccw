@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                      http://maven.apache.org/xsd/maven-4.0.0.xsd"
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>ccw</groupId>
+  <artifactId>parent</artifactId>
+  <version>0.12.4-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <properties>
+    <tycho-version>0.17.0</tycho-version>
+    <enforcer.skip>true</enforcer.skip>
+  </properties>
+  
+  <profiles>
+    <profile>
+      <id>release</id>
+      <properties>
+        <enforcer.skip>false</enforcer.skip>
+      </properties>
+    </profile>
+  </profiles>
+  
+  
+  <repositories>
+    <!-- configure p2 repository to resolve against -->
+    <repository>
+      <id>juno</id>
+      <layout>p2</layout>
+      <url>http://download.eclipse.org/releases/juno</url>
+    </repository>
+    <repository>
+      <id>clojars.org</id>
+      <url>http://clojars.org/repo</url>
+    </repository>
+  </repositories>
+  <build>
+    <plugins>
+      <plugin>
+        <!-- enable tycho build extension -->
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-maven-plugin</artifactId>
+        <version>${tycho-version}</version>
+        <extensions>true</extensions>
+      </plugin>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>target-platform-configuration</artifactId>
+        <version>${tycho-version}</version>
+        <configuration>
+          <!-- recommended: use p2-based target platform resolver -->
+          <resolver>p2</resolver>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>1.2</version>
+        <executions>
+          <execution>
+            <id>enforce-versions</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <skip>${enforcer.skip}</skip>
+              <rules>
+                <requireReleaseDeps>
+                  <message>No SNAPSHOT dependencies allowed</message>
+                </requireReleaseDeps>
+                <requireReleaseVersion>
+                  <message>Artifact cannot be SNAPSHOT</message>
+                </requireReleaseVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

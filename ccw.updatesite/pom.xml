@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                      http://maven.apache.org/xsd/maven-4.0.0.xsd"
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>ccw</groupId>
+    <artifactId>parent</artifactId>
+    <version>0.12.4-SNAPSHOT</version>
+    <relativePath>../ccw.parent/pom.xml</relativePath>
+  </parent>
+
+  <groupId>ccw</groupId>
+  <artifactId>ccw.updatesite</artifactId>
+  <version>0.12.4-SNAPSHOT</version>
+  <packaging>eclipse-repository</packaging>
+  
+  
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-p2-director-plugin</artifactId>
+        <version>${tycho-version}</version>
+        <executions>
+          <execution>
+            <id>materialize-products</id>
+            <goals>
+              <goal>materialize-products</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>archive-products</id>
+              <goals>
+                <goal>archive-products</goal>
+              </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+  
+  <profiles>
+    <profile>
+        <id>publish</id>
+        <build>
+            <plugins>
+                <plugin>
+                    <groupId>org.eclipse.tycho.extras</groupId>
+                    <artifactId>tycho-p2-extras-plugin</artifactId>
+                    <version>${tycho-version}</version>
+                    <executions>
+                        <execution>
+                            <id>publish</id>
+                            <phase>install</phase>
+                            <goals>
+                                <goal>mirror</goal>
+                            </goals>
+                            <configuration>
+                                <source>
+                                    <repository>
+                                        <url>${project.build.directory}/repository</url>
+                                    </repository>
+                                </source>
+                                <append>true</append>
+                                <destination>${project.basedir}</destination>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </build>
+    </profile>
+  </profiles>  
+</project>

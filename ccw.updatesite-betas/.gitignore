@@ -1,0 +1,8 @@
+/features
+/plugins
+/*.tgz
+/*.zip
+/*.jar
+/target
+/bin
+/upload-betas.sh

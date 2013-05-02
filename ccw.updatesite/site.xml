@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <description url="http://ccw.cgrand.net/updatesite/">
+      Counterclockwise Update Site. Counterclockwise is an Eclipse feature supporting the development of clojure code
+   </description>
+   <feature url="features/ccw.feature_0.9.0.STABLE001.jar" id="ccw.feature" version="0.9.0.STABLE001">
+      <category name="Clojure Programming"/>
+   </feature>
+   <feature url="features/ccw.feature_0.10.2.STABLE001.jar" id="ccw.feature" version="0.10.2.STABLE001">
+      <category name="Clojure Programming"/>
+   </feature>
+   <feature url="features/ccw.feature_0.11.1.STABLE001.jar" id="ccw.feature" version="0.11.1.STABLE001">
+      <category name="Clojure Programming"/>
+   </feature>
+   <feature url="features/ccw.feature_0.12.0.STABLE001.jar" id="ccw.feature" version="0.12.0.STABLE001">
+      <category name="Clojure Programming"/>
+   </feature>
+   <feature url="features/ccw.feature_0.12.1.STABLE001.jar" id="ccw.feature" version="0.12.1.STABLE001">
+      <category name="Clojure Programming"/>
+   </feature>
+   <feature url="features/ccw.feature_0.12.2.STABLE001.jar" id="ccw.feature" version="0.12.2.STABLE001">
+      <category name="Clojure Programming"/>
+   </feature>
+   <feature url="features/ccw.feature_0.12.3.STABLE001.jar" id="ccw.feature" version="0.12.3.STABLE001">
+      <category name="Clojure Programming"/>
+   </feature>
+   <category-def name="Clojure Programming" label="Clojure Programming">
+      <description>
+         Clojure Programming tools and environments
+      </description>
+   </category-def>
+</site>

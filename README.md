@@ -15,7 +15,8 @@ https://code.google.com/p/counterclockwise/
 
 https://code.google.com/p/counterclockwise/issues/list
 
-## How to build manually
+## Hack CCW
+### Install CCW development environment, build CCW with Maven
 
 http://code.google.com/p/counterclockwise/wiki/HowToBuild
 

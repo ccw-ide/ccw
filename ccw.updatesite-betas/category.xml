@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <description url="http://ccw.cgrand.net/updatesite/">
+      Counterclockwise Update Site. Counterclockwise is an Eclipse feature supporting the development of clojure code
+   </description>
+   <feature url="" id="ccw.feature" version="0.0.0">
+      <category name="Clojure Programming - BETAS"/>
+   </feature>
+   <category-def name="Clojure Programming - BETAS" label="Clojure Programming - BETAS"/>
+</site>

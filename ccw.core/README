@@ -1,1 +1,3 @@
 For understanding how Classpath Containers work, this IBM resource is invaluable: https://www.ibm.com/developerworks/opensource/tutorials/os-eclipse-classpath/
+
+For understanding how the build using maven and Tycho works: https://github.com/tesla/book-tycho/blob/master/en/01-introduction/01-chapter1.md
