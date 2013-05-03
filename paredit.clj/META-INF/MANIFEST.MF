@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Paredit.clj
+Bundle-SymbolicName: paredit.clj;singleton:=true
+Bundle-Version: 0.12.4.qualifier
+Fragment-Host: ccw.core
+Bundle-ClassPath: .,
+ classes/
+Bundle-ActivationPolicy: lazy
+Bundle-Vendor: Laurent Petit
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Export-Package: paredit
+
