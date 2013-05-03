@@ -3,3 +3,5 @@ classes/*
 lib/*
 target/*
 target/
+/*.jar
+/*.tgz
