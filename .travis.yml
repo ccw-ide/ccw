@@ -2,5 +2,5 @@ language: java
 jdk:
   - oraclejdk7
   - openjdk6
-install:
-script: mvn clean install
+install: true
+script: mvn clean install --batch-mode
