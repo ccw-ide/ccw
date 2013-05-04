@@ -1,0 +1,5 @@
+/target
+/bin
+/*.jar
+/*.tgz
+/classes

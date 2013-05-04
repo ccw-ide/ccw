@@ -5,6 +5,7 @@
   xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
+
   <groupId>ccw</groupId>
   <artifactId>parent</artifactId>
   <version>0.12.4-SNAPSHOT</version>
@@ -22,22 +23,82 @@
         <enforcer.skip>false</enforcer.skip>
       </properties>
     </profile>
+    <profile>
+      <id>default-target</id>
+      <activation>
+        <property>
+          <name>!env.ECLIPSE_TARGET</name>
+        </property>
+      </activation>
+      <repositories>
+        <!-- configure p2 repository to resolve against -->
+        <repository>
+          <id>juno</id>
+          <layout>p2</layout>
+          <url>http://download.eclipse.org/eclipse/updates/4.2</url>
+        </repository>
+      </repositories>
+    </profile>
+    <profile>
+      <id>juno</id>
+      <activation>
+        <property>
+          <name>env.ECLIPSE_TARGET</name>
+          <value>juno</value>
+        </property>
+      </activation>
+      <repositories>
+        <!-- configure p2 repository to resolve against -->
+        <repository>
+          <id>juno</id>
+          <layout>p2</layout>
+          <url>http://download.eclipse.org/eclipse/updates/4.2</url>
+        </repository>
+      </repositories>
+    </profile>
+    <profile>
+      <id>indigo</id>
+      <activation>
+        <property>
+          <name>env.ECLIPSE_TARGET</name>
+          <value>indigo</value>
+        </property>
+      </activation>
+      <repositories>
+        <!-- configure p2 repository to resolve against -->
+        <repository>
+          <id>indigo</id>
+          <layout>p2</layout>
+          <url>http://download.eclipse.org/eclipse/updates/3.7</url>
+        </repository>
+      </repositories>
+    </profile>
+    <profile>
+      <id>kepler</id>
+      <activation>
+        <property>
+          <name>env.ECLIPSE_TARGET</name>
+          <value>kepler</value>
+        </property>
+      </activation>
+      <repositories>
+        <!-- configure p2 repository to resolve against -->
+        <repository>
+          <id>kepler</id>
+          <layout>p2</layout>
+          <url>http://download.eclipse.org/eclipse/updates/4.3milestones</url>
+        </repository>
+      </repositories>
+    </profile>
   </profiles>
   
-  
   <repositories>
-    <!-- configure p2 repository to resolve against -->
-    <repository>
-      <id>juno</id>
-      <layout>p2</layout>
-      <url>http://download.eclipse.org/releases/juno</url>
-    </repository>
     <repository>
       <id>clojars.org</id>
       <url>http://clojars.org/repo</url>
     </repository>
   </repositories>
-
+  
   <build>
     <plugins>
       <plugin>
