@@ -1,0 +1,66 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>ccw</groupId>
+    <artifactId>parent</artifactId>
+    <version>0.12.4-SNAPSHOT</version>
+    <relativePath>../ccw.parent/pom.xml</relativePath>
+  </parent>
+
+  <groupId>ccw</groupId>
+  <artifactId>ccw.core.test</artifactId>
+  <version>0.12.4-SNAPSHOT</version>
+  <packaging>eclipse-test-plugin</packaging>
+
+  <properties>
+     <os-jvm-flags/>
+  </properties>
+  
+  <build>
+    <sourceDirectory>src</sourceDirectory>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-surefire-plugin</artifactId>
+        <version>${tycho-version}</version>
+        <configuration>
+          <useUIHarness>true</useUIHarness>
+          <useUIThread>false</useUIThread>
+          <!-- <argLine>-XX:MaxPermSize=128m -Xms40m -Xmx512m -ea ${os-jvm-flags}</argLine> -->
+          <argLine>-Xms40m -Xmx512m -ea ${os-jvm-flags}</argLine>
+          <includes>
+            <include>**/*Test.java</include>
+            <include>**/*Tests.java</include>
+          </includes>
+          
+          <!-- 
+          <dependencies>
+            <dependency>
+              <type>eclipse-feature</type>
+              <artifactId>com.example.my-component.feature</artifactId>
+              <version>0.0.0</version>
+            </dependency>
+          </dependencies>
+           -->
+          
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  
+  <profiles>
+    <profile>
+      <id>macosx-jvm-flags</id>
+      <activation>
+        <os><family>mac</family></os>
+      </activation>
+      <properties>
+        <os-jvm-flags>-XstartOnFirstThread</os-jvm-flags>
+      </properties>
+    </profile>
+  </profiles>
+  
+</project>

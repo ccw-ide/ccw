@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: CCW Tests
+Bundle-SymbolicName: ccw.core.test
+Bundle-Version: 0.12.4.qualifier
+Fragment-Host: ccw.core;bundle-version="0.12.4"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: org.junit4;bundle-version="4.8.1",
+ org.eclipse.swtbot.eclipse.finder;bundle-version="2.1.0",
+ org.eclipse.swtbot.swt.finder;bundle-version="2.1.0",
+ org.eclipse.swtbot.junit4_x;bundle-version="2.1.0"
