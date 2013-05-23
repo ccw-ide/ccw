@@ -69,16 +69,18 @@
           <value>true</value>
         </property>
       </activation>
-      <plugins>
-        <plugin>
-          <groupId>org.eclipse.tycho</groupId>
-          <artifactId>tycho-surefire-plugin</artifactId>
-          <configuration>
-            <showEclipseLog>true</showEclipseLog>
-            <redirectTestOutputToFile>false</redirectTestOutputToFile>
-          </configuration>
-        </plugin>
-      </plugins>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>tycho-surefire-plugin</artifactId>
+            <configuration>
+              <showEclipseLog>true</showEclipseLog>
+              <redirectTestOutputToFile>false</redirectTestOutputToFile>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 </project>
