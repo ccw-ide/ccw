@@ -18,3 +18,5 @@ env:
     - ECLIPSE_TARGET=indigo
 after_success: 
   - test ${ECLIPSE_TARGET} = "juno" && test ${TRAVIS_JDK_VERSION} = "openjdk7" && chmod 777 ./travis-deploy.sh && ./travis-deploy.sh
+after_failure:
+  - chmod 777 ./travis-test-report.sh && ./travis-test-report.sh
