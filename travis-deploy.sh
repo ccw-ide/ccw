@@ -1,13 +1,17 @@
 #!/bin/bash
 
+sudo apt-get install -qq ftp
+
 FTP_UPDATESITE_ROOT=/www/updatesite/branch
 BUILD_DIR="${TRAVIS_BUILD_DIR}/ccw.updatesite/target/repository"
-UPDATESITE="${TRAVIS_BRANCH}-travis-${TRAVIS_BUILD_NUMBER}_git-${TRAVIS_COMMIT}"
+PADDED_TRAVIS_BUILD_NUMBER=`printf "%0*d" 6 ${TRAVIS_BUILD_NUMBER}`
+UPDATESITE=${TRAVIS_BRANCH}-travis${PADDED_TRAVIS_BUILD_NUMBER}-git${TRAVIS_COMMIT}
 
-ftp -Vipn ${FTP_HOST} <<EOF
+ftp -pn ${FTP_HOST} <<EOF
 quote USER ${FTP_USER}
 quote PASS ${FTP_PASSWORD}
 bin
+prompt off
 lcd ${BUILD_DIR}
 cd ${FTP_UPDATESITE_ROOT}
 mkdir ${TRAVIS_BRANCH}
