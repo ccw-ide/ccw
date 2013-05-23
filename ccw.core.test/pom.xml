@@ -23,6 +23,21 @@
     <sourceDirectory>src</sourceDirectory>
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.14.1</version>
+        <configuration>
+          <useFile>false</useFile>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.maven.surefire</groupId>
+            <artifactId>surefire-junit47</artifactId>
+            <version>2.14.1</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+      <plugin>
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>tycho-surefire-plugin</artifactId>
         <version>${tycho-version}</version>
@@ -35,6 +50,9 @@
             <include>**/*Test.java</include>
             <include>**/*Tests.java</include>
           </includes>
+          <showEclipseLog>true</showEclipseLog>
+          <redirectTestOutputToFile>false</redirectTestOutputToFile>
+          <useFile>false</useFile>
           
           <!-- 
           <dependencies>
@@ -61,6 +79,7 @@
         <os-jvm-flags>-XstartOnFirstThread</os-jvm-flags>
       </properties>
     </profile>
+    <!--
     <profile>
       <id>travis-tests</id>
       <activation>
@@ -82,5 +101,6 @@
         </plugins>
       </build>
     </profile>
+    -->
   </profiles>
 </project>
