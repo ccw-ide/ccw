@@ -30,3 +30,4 @@ put content.jar
 quit
 EOF
 test $? && wget http://updatesite.ccw-ide.org/branch/${TRAVIS_BRANCH}/${UPDATESITE}/content.jar
+exit $?
