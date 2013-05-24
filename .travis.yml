@@ -9,6 +9,7 @@ before_script:
   - sleep 5 # give xvfb some time to start
   - sudo apt-get install -qq metacity
   - metacity --sm-disable --replace &
+  - sleep 5 # give xvfb some time to start
 script: mvn clean install --batch-mode
 env:
   global:
