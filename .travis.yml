@@ -11,7 +11,7 @@ before_script:
   - sudo apt-get install -qq metacity
   - metacity --sm-disable --replace &
   - sleep 5 # give xvfb some time to start
-script: mvn clean install --batch-mode
+script: mvn clean install --batch-mode -e
 env:
   global:
     - secure: "VK+IqyTFmEf5sv8OYOa6vLqcs0SAjC/ODklIDs0rr1zU/w21mZI2eH1w5YVk\ngwWA1QR7JOxWM6S9ED4NqHymK6QOj85W4FUv0seRv5LGJ1ATAUSzyElP0BXS\n46XsROFj9itTRwZkLdFaGGO14PRAQAznS6XM22uyQO3dg1wB4bQ="
