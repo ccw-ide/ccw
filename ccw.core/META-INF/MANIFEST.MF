@@ -36,4 +36,5 @@ Bundle-ClassPath: .,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Vendor: Counterclockwise team
 Bundle-ActivationPolicy: lazy
+Eclipse-BundleShape: dir
 
