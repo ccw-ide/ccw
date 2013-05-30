@@ -20,10 +20,9 @@
     <nrepl.version>0.2.1</nrepl.version>
   </properties>
 
-
 	<!-- These are ignored by Tycho
 	     but will be incorporated into ccw.core/lib/ -->
-	<dependencies>
+    <dependencies>
         <dependency>
             <groupId>org.clojure</groupId>
             <artifactId>clojure</artifactId>
@@ -64,7 +63,7 @@
             <artifactId>ccw.server</artifactId>
             <version>0.1.0</version>
         </dependency>
-	</dependencies>
+    </dependencies>
 
 	<build>
       <plugins>
@@ -74,17 +73,17 @@
           <version>2.7</version>
             <executions>
               <execution>
-                <id>unpack-dependencies</id>
+                <id>import-dependencies</id>
                 <phase>initialize</phase>
                 <goals>
                   <goal>unpack-dependencies</goal>
                 </goals>
                 <configuration>
-                  <overWriteIfNewer>true</overWriteIfNewer>
-                  <copyPom>true</copyPom>
                   <stripVersion>true</stripVersion>
-                  <!--  useSubDirectoryPerArtifact default false -->
                   <outputDirectory>${project.basedir}/lib</outputDirectory>
+                  <excludeGroupIds>p2.eclipse-plugin</excludeGroupIds>
+                  <excludeArtifactIds>paredit.clj,ccw.feature,ccw.branding,ccw.core,ccw.core.jar</excludeArtifactIds>
+                  <useJvmChmod>true</useJvmChmod>
                 </configuration>
               </execution>
               <execution>
