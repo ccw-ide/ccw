@@ -79,7 +79,7 @@ public class SmokeTests {
 	@Test
 	public void canCreateANewClojureProject() throws Exception {
 		createClojureProject(bot, "MyFirstClojureProject");
-		assertProjectExists(bot, "MyFirstClojreProject");
+		assertProjectExists(bot, "MyFirstClojureProject");
 	}
  
 }
