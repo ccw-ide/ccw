@@ -52,7 +52,7 @@
                                (and (.exists manifest)
                                     (.isFile manifest))))
         libs (->> leiningen-core file-seq (filter #(or (jar %) (classes-dir %))))]
-    (c/classlojure leiningen-core)))
+    (apply c/classlojure libs)))
 
 (defonce ^{:doc 
            "Ref of map of \"project-name\" -> delay of classlojure environment.

@@ -53,11 +53,9 @@
           <showEclipseLog>true</showEclipseLog>
           <redirectTestOutputToFile>false</redirectTestOutputToFile>
           <useFile>false</useFile>
-          <!--
           <explodedBundles>
             <explodedBundle>ccw.core</explodedBundle>
           </explodedBundles>
-          -->
         </configuration>
       </plugin>
     </plugins>

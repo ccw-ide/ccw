@@ -65,53 +65,52 @@
         </dependency>
     </dependencies>
 
-	<build>
+    <build>
       <plugins>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-dependency-plugin</artifactId>
           <version>2.7</version>
-            <executions>
-              <execution>
-                <id>import-dependencies</id>
-                <phase>initialize</phase>
-                <goals>
-                  <goal>unpack-dependencies</goal>
-                </goals>
-                <configuration>
-                  <stripVersion>true</stripVersion>
-                  <outputDirectory>${project.basedir}/lib</outputDirectory>
-                  <excludeGroupIds>p2.eclipse-plugin</excludeGroupIds>
-                  <excludeArtifactIds>paredit.clj,ccw.feature,ccw.branding,ccw.core,ccw.core.jar</excludeArtifactIds>
-                  <useJvmChmod>true</useJvmChmod>
-                </configuration>
-              </execution>
-              <execution>
-                <id>copy-nrepl</id>
-                <phase>initialize</phase>
-                <goals>
-                  <goal>copy</goal>
-                </goals>
-                <configuration>
-                  <artifactItems>
-                    <artifact-item>
-                      <groupId>org.clojure</groupId>
-                      <artifactId>tools.nrepl</artifactId>
-                      <version>${nrepl.version}</version>
-                      <outputDirectory>${project.basedir}</outputDirectory>
-                    </artifact-item>
-                  </artifactItems>
-                  <useBaseVersion>true</useBaseVersion>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-clean-plugin</artifactId>
-            <version>2.5</version>
-            <executions>
-              <execution>
+          <executions>
+            <execution>
+              <id>import-dependencies</id>
+              <phase>initialize</phase>
+              <goals>
+                <goal>copy-dependencies</goal>
+              </goals>
+              <configuration>
+                <stripVersion>true</stripVersion>
+                <outputDirectory>${project.basedir}/lib</outputDirectory>
+                <excludeGroupIds>p2.eclipse-plugin</excludeGroupIds>
+                <excludeArtifactIds>paredit.clj,ccw.feature,ccw.branding,ccw.core</excludeArtifactIds>
+              </configuration>
+            </execution>
+            <execution>
+              <id>copy-nrepl</id>
+              <phase>initialize</phase>
+              <goals>
+                <goal>copy</goal>
+             </goals>
+             <configuration>
+               <artifactItems>
+                 <artifact-item>
+                   <groupId>org.clojure</groupId>
+                   <artifactId>tools.nrepl</artifactId>
+                   <version>${nrepl.version}</version>
+                   <outputDirectory>${project.basedir}</outputDirectory>
+                 </artifact-item>
+               </artifactItems>
+               <useBaseVersion>true</useBaseVersion>
+             </configuration>
+           </execution>
+         </executions>
+       </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>2.5</version>
+          <executions>
+            <execution>
               <id>clean-dependencies</id>
               <phase>clean</phase>
               <goals>

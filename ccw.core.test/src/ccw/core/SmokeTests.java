@@ -3,13 +3,16 @@ package ccw.core;
 import static org.junit.Assert.assertEquals;
 
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
+import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import ccw.CCWPlugin;
 
+@RunWith(SWTBotJunit4ClassRunner.class)
 public class SmokeTests {
 
 	/**************************************************************************
@@ -76,7 +79,7 @@ public class SmokeTests {
 	@Test
 	public void canCreateANewClojureProject() throws Exception {
 		createClojureProject(bot, "MyFirstClojureProject");
-		assertProjectExists(bot, "MyFirstClojureProject");
+		assertProjectExists(bot, "MyFirstClojreProject");
 	}
  
 }

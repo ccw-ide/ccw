@@ -1,9 +1,83 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="lib/aether-api.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/aether-connector-file.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/aether-connector-wagon.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/aether-impl.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/aether-spi.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/aether-util.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/bultitude.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ccw.server.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/cd-client.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/cheshire.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/classlojure.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/clj-http-lite.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/clj-http.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/clj-stacktrace.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/clojure-complete.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/clojure-contrib.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/clojure.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/commons-codec.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/commons-fileupload.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/commons-io.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/commons-logging.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/core.cache.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/core.incubator.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/data.xml.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/drawbridge.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/dynapath.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/hooke.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/httpclient.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/httpcore.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/httpmime.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/indexer-artifact.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/indexer-core.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/io.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jackson-core.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jackson-dataformat-smile.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jakarta-regexp.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jline.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jsoup.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/leiningen-core.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/leiningen.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lucene-core.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lucene-highlighter.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lucene-memory.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lucene-queries.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/maven-aether-provider.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/maven-model-builder.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/maven-model.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/maven-repository-metadata.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/net.cgrand.parsley.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/parsley.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/plexus-classworlds.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/plexus-component-annotations.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/plexus-interpolation.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/plexus-utils.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/pomegranate.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/quoin.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/regex.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/reply.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ring-core.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/scout.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/servlet-api.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/sisu-guice-no_aop.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/sisu-inject-bean.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/sisu-inject-plexus.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/sjacket.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/slingshot.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/stencil.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/tools.cli.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/tools.macro.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/tools.nrepl.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/useful.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/versioneer.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/wagon-http-shared4.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/wagon-http.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/wagon-provider-api.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src/clj"/>
 	<classpathentry kind="src" path="src/java"/>
-	<classpathentry kind="lib" path="lib"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
