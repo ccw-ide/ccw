@@ -54,9 +54,9 @@
             <version>0.0.6</version>
         </dependency>
         <dependency>
-            <groupId>org.lpetit</groupId>
-            <artifactId>net.cgrand.parsley</artifactId>
-            <version>0.0.13.STABLE002</version>
+            <groupId>net.cgrand</groupId>
+            <artifactId>parsley</artifactId>
+            <version>0.9.2</version>
         </dependency>
         <dependency>
             <groupId>ccw</groupId>

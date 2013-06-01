@@ -45,7 +45,7 @@
           <useUIHarness>true</useUIHarness>
           <useUIThread>false</useUIThread>
           <!-- <argLine>-XX:MaxPermSize=128m -Xms40m -Xmx512m -ea ${os-jvm-flags}</argLine> -->
-          <argLine>-Xms40m -Xmx512m -ea ${os-jvm-flags}</argLine>
+          <argLine>-XX:MaxPermSize=128m -Xms40m -Xmx512m -ea ${os-jvm-flags}</argLine>
           <includes>
             <include>**/*Test.java</include>
             <include>**/*Tests.java</include>
@@ -56,6 +56,12 @@
           <explodedBundles>
             <explodedBundle>ccw.core</explodedBundle>
           </explodedBundles>
+          <dependencies>
+            <dependency>
+              <groupId>ccw</groupId>
+              <artifactId>paredit.clj</artifactId>
+            </dependency>
+          </dependencies>
         </configuration>
       </plugin>
     </plugins>

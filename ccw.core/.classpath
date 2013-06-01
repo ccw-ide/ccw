@@ -48,7 +48,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/maven-model-builder.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/maven-model.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/maven-repository-metadata.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/net.cgrand.parsley.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/parsley.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/plexus-classworlds.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/plexus-component-annotations.jar"/>
