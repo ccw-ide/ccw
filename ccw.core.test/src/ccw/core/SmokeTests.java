@@ -70,14 +70,13 @@ public class SmokeTests {
 		bot.button("Next >").click();
 		bot.textWithLabel("Project name:").setText(projectName);
 		bot.button("Finish").click();
-		//waitForWorkspace();
+		waitForWorkspace();
 	}
 	
 	/** Test if a project exists by checking the Package Explorer View */
 	public static void assertProjectExists(SWTWorkbenchBot bot, String projectName) {
 		SWTBotView packageExplorer = bot.viewByTitle("Package Explorer");
 		SWTBotTree projectsTree = packageExplorer.bot().tree();
-		projectsTree.setFocus();
 		projectsTree.expandNode(projectName);
 	}
 	
