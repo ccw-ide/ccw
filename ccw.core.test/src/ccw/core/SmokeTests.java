@@ -2,10 +2,17 @@ package ccw.core;
 
 import static org.junit.Assert.assertEquals;
 
+import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
+import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,18 +54,31 @@ public class SmokeTests {
 		return s;
 	}
 	
-	public static void createClojureProject(SWTWorkbenchBot bot, String projectName) {
+	public static void waitForWorkspace() throws Exception {
+		// ensure that all queued workspace operations and locks are released
+		ResourcesPlugin.getWorkspace().run(new IWorkspaceRunnable() {
+		public void run(IProgressMonitor monitor) throws CoreException {
+					// nothing to do!
+				}
+			}, new NullProgressMonitor());
+	}
+	
+	public static void createClojureProject(SWTWorkbenchBot bot, String projectName) throws Exception {
 		menu(bot, "File", "New", "Project...").click();
 		activateShell(bot, "New Project");
 		bot.tree().expandNode("Clojure").select("Clojure Project");
 		bot.button("Next >").click();
 		bot.textWithLabel("Project name:").setText(projectName);
 		bot.button("Finish").click();
+		waitForWorkspace();
 	}
 	
 	/** Test if a project exists by checking the Package Explorer View */
 	public static void assertProjectExists(SWTWorkbenchBot bot, String projectName) {
-		bot.viewByTitle("Package Explorer").bot().tree().expandNode(projectName);
+		SWTBotView packageExplorer = bot.viewByTitle("Package Explorer");
+		SWTBotTree projectsTree = packageExplorer.bot().tree();
+		projectsTree.setFocus();
+		projectsTree.expandNode(projectName);
 	}
 	
 	/**************************************************************************
@@ -79,7 +99,7 @@ public class SmokeTests {
 	@Test
 	public void canCreateANewClojureProject() throws Exception {
 		createClojureProject(bot, "MyFirstClojureProject");
-		assertProjectExists(bot, "MyFirstClojureProject");
+		assertProjectExists(bot,  "MyFirstClojureProject");
 	}
  
 }
