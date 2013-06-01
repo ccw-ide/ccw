@@ -53,6 +53,7 @@
           <showEclipseLog>true</showEclipseLog>
           <redirectTestOutputToFile>false</redirectTestOutputToFile>
           <useFile>false</useFile>
+          <!--
           <explodedBundles>
             <explodedBundle>ccw.core</explodedBundle>
           </explodedBundles>
@@ -62,6 +63,7 @@
               <artifactId>paredit.clj</artifactId>
             </dependency>
           </dependencies>
+          -->
         </configuration>
       </plugin>
     </plugins>
