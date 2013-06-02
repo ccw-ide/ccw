@@ -58,7 +58,8 @@
         spec (if (zero? (:length text)) spec (t/str-insert spec (+ 1 (:offset text) (:length text)) "|"))]
     spec))
 
-(deftest normalized-selection-tests
+
+#_(deftest normalized-selection-tests
   (are [text offset length expected-offset expected-length]
     (= [expected-offset expected-length] (-?> (parse text) (parsed-root-loc true) (normalized-selection offset length) (text-selection)))
     "foo bar baz" 4 0 4 0
@@ -112,11 +113,12 @@
 (deftest paredit-tests
   (doseq [group *paredit-commands*]
     (testing (str (first group) ":")
+      (is (= false true))
       (doseq [command (rest group)]
         (test-command "public documentation of paredit command" command)
         (test-command "additional non regression tests of paredit command " (assoc command 2 (get command 3)))))))
 
-(deftest spec-text-tests
+#_(deftest spec-text-tests
   (are [spec text] (and 
                      (= text (text-spec-to-text spec))
                      (= spec (text-to-text-spec text)))
@@ -126,7 +128,7 @@
     "foo|" {:text "foo" :offset 3 :length 0}
     "foo |bar| foo" {:text "foo bar foo" :offset 4 :length 3}))
 
-(deftest loc-for-offset-tests
+#_(deftest loc-for-offset-tests
   (are [text offset expected-tag] (= expected-tag (-?> (parse text) (parsed-root-loc true) (loc-for-offset offset) (zip/node) :tag))
     "foo (bar baz) baz" 12 :list ;nil
     "foo (bar baz) baz" 4 :list ;nil
@@ -140,7 +142,7 @@
     "foo \"bar\" foo" 3 :whitespace
     "foo \"bar\" foo" 4 :string))
 
-(deftest leave-for-offset-tests
+#_(deftest leave-for-offset-tests
   (are [text offset expected-tag ?expected-node]
     (let [l (-?> (parse text) (parsed-root-loc true) (leave-for-offset offset))] 
       (and
@@ -160,7 +162,7 @@
 (deftest parser-tests
   (is (not= nil (sexp ":"))))
 
-(deftest loc-containing-offset-tests
+#_(deftest loc-containing-offset-tests
   (are [text offset expected-tag] (= expected-tag (-?> (parse text) (parsed-root-loc true) (loc-containing-offset offset) (zip/node) :tag))
     "hello" 1 :atom
     "foo bar" 3 :root
