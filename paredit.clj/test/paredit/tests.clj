@@ -113,7 +113,6 @@
 (deftest paredit-tests
   (doseq [group *paredit-commands*]
     (testing (str (first group) ":")
-      (is (= false true))
       (doseq [command (rest group)]
         (test-command "public documentation of paredit command" command)
         (test-command "additional non regression tests of paredit command " (assoc command 2 (get command 3)))))))
