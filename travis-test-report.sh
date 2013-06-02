@@ -9,6 +9,8 @@ SCREENSHOTS_DIR="${TRAVIS_BUILD_DIR}/ccw.core.test/screenshots"
 PADDED_TRAVIS_BUILD_NUMBER=`printf "%0*d" 6 ${TRAVIS_BUILD_NUMBER}`
 UPDATESITE=ERROR-${TRAVIS_BRANCH}-travis${PADDED_TRAVIS_BUILD_NUMBER}-${ECLIPSE_TARGET}-${TRAVIS_JDK_VERSION}-git${TRAVIS_COMMIT}
 
+
+# Create infrastructure
 ftp -pn ${FTP_HOST} <<EOF
 quote USER ${FTP_USER}
 quote PASS ${FTP_PASSWORD}
@@ -18,15 +20,35 @@ cd ${FTP_UPDATESITE_ROOT}
 mkdir ${TRAVIS_BRANCH}
 cd ${TRAVIS_BRANCH}
 mkdir ${UPDATESITE}
-cd ${UPDATESITE}
+quit
+EOF
+
+
+# Report paredit.clj unit tests
+[ -d ${PAREDIT_TESTS_DIR} ] || echo "Skipping ftp reporting for missing directory ${PAREDIT_TESTS_DIR}" && ftp -pn ${FTP_HOST} <<EOF
+quote USER ${FTP_USER}
+quote PASS ${FTP_PASSWORD}
+bin
+prompt off
+cd ${FTP_UPDATESITE_ROOT}/${TRAVIS_BRANCH}/${UPDATESITE}
+mkdir paredit
+cd paredit
+lcd ${PAREDIT_TESTS_DIR}
+mput *
+quit
+EOF
+
+
+# Report ccw.core.tests integration tests
+[ -d ${TESTS_DIR} ] || echo "Skipping ftp reporting for missing directory ${TESTS_DIR}" && ftp -pn ${FTP_HOST} <<EOF
+quote USER ${FTP_USER}
+quote PASS ${FTP_PASSWORD}
+bin
+prompt off
+cd ${FTP_UPDATESITE_ROOT}/${TRAVIS_BRANCH}/${UPDATESITE}
 lcd ${TESTS_DIR}
 mput *
 lcd ${SCREENSHOTS_DIR}
 mput *
-lcd ${PAREDIT_TESTS_DIR}
-mkdir paredit
-cd paredit
-mput *
 quit
 EOF
-exit $?

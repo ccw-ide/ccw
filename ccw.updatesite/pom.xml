@@ -17,8 +17,7 @@
   <artifactId>ccw.updatesite</artifactId>
   <version>0.12.4-SNAPSHOT</version>
   <packaging>eclipse-repository</packaging>
-  
-  
+<!--  
   <build>
     <plugins>
       <plugin>
@@ -42,37 +41,5 @@
       </plugin>
     </plugins>
   </build>
-  
-  <profiles>
-    <profile>
-        <id>publish</id>
-        <build>
-            <plugins>
-                <plugin>
-                    <groupId>org.eclipse.tycho.extras</groupId>
-                    <artifactId>tycho-p2-extras-plugin</artifactId>
-                    <version>${tycho-version}</version>
-                    <executions>
-                        <execution>
-                            <id>publish</id>
-                            <phase>install</phase>
-                            <goals>
-                                <goal>mirror</goal>
-                            </goals>
-                            <configuration>
-                                <source>
-                                    <repository>
-                                        <url>${project.build.directory}/repository</url>
-                                    </repository>
-                                </source>
-                                <append>true</append>
-                                <destination>${project.basedir}</destination>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-            </plugins>
-        </build>
-    </profile>
-  </profiles>  
+-->  
 </project>

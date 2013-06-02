@@ -13,16 +13,9 @@
 
   <properties>
     <tycho-version>0.18.0</tycho-version>
-    <enforcer.skip>true</enforcer.skip>
   </properties>
   
   <profiles>
-    <profile>
-      <id>release</id>
-      <properties>
-        <enforcer.skip>false</enforcer.skip>
-      </properties>
-    </profile>
     <profile>
       <id>default-target</id>
       <activation>
@@ -122,30 +115,7 @@
           <resolver>p2</resolver>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-enforcer-plugin</artifactId>
-        <version>1.2</version>
-        <executions>
-          <execution>
-            <id>enforce-versions</id>
-            <goals>
-              <goal>enforce</goal>
-            </goals>
-            <configuration>
-              <skip>${enforcer.skip}</skip>
-              <rules>
-                <requireReleaseDeps>
-                  <message>No SNAPSHOT dependencies allowed</message>
-                </requireReleaseDeps>
-                <requireReleaseVersion>
-                  <message>Artifact cannot be SNAPSHOT</message>
-                </requireReleaseVersion>
-              </rules>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
   </build>
+
 </project>

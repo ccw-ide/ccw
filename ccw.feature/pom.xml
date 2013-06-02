@@ -17,4 +17,5 @@
   <version>0.12.4-SNAPSHOT</version>
 
   <packaging>eclipse-feature</packaging>
+
 </project>

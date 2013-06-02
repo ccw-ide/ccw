@@ -7,7 +7,7 @@
 
   <groupId>ccw</groupId>
   <artifactId>aggregator</artifactId>
-  <version>0.12.3.STABLE001</version>
+  <version>0.12.4-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <modules>
@@ -15,24 +15,9 @@
     <module>ccw.branding</module>
     <module>paredit.clj</module>
     <module>ccw.core</module>
+    <module>ccw.core.test</module>
     <module>ccw.feature</module>
     <module>ccw.updatesite</module>
-    <module>ccw.core.test</module>
   </modules>
-
-  <profiles>
-    <profile>
-      <id>release</id>
-      <modules>
-        <module>ccw.updatesite</module>
-      </modules>
-    </profile>
-    <profile>
-      <id>snapshot</id>
-      <modules>
-        <module>ccw.updatesite-betas</module>
-      </modules>
-    </profile>
-  </profiles>
 
 </project>

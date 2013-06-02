@@ -90,7 +90,7 @@
               <phase>initialize</phase>
               <goals>
                 <goal>copy</goal>
-             </goals>
+            </goals>
              <configuration>
                <artifactItems>
                  <artifact-item>

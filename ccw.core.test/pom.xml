@@ -44,7 +44,6 @@
         <configuration>
           <useUIHarness>true</useUIHarness>
           <useUIThread>false</useUIThread>
-          <!-- <argLine>-XX:MaxPermSize=128m -Xms40m -Xmx512m -ea ${os-jvm-flags}</argLine> -->
           <argLine>-XX:MaxPermSize=128m -Xms40m -Xmx512m -ea ${os-jvm-flags}</argLine>
           <includes>
             <include>**/*Test.java</include>
@@ -53,17 +52,6 @@
           <showEclipseLog>true</showEclipseLog>
           <redirectTestOutputToFile>false</redirectTestOutputToFile>
           <useFile>false</useFile>
-          <!--
-          <explodedBundles>
-            <explodedBundle>ccw.core</explodedBundle>
-          </explodedBundles>
-          <dependencies>
-            <dependency>
-              <groupId>ccw</groupId>
-              <artifactId>paredit.clj</artifactId>
-            </dependency>
-          </dependencies>
-          -->
         </configuration>
       </plugin>
     </plugins>
@@ -79,28 +67,6 @@
         <os-jvm-flags>-XstartOnFirstThread</os-jvm-flags>
       </properties>
     </profile>
-    <!--
-    <profile>
-      <id>travis-tests</id>
-      <activation>
-        <property>
-          <name>env.TRAVIS</name>
-          <value>true</value>
-        </property>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.eclipse.tycho</groupId>
-            <artifactId>tycho-surefire-plugin</artifactId>
-            <configuration>
-              <showEclipseLog>true</showEclipseLog>
-              <redirectTestOutputToFile>false</redirectTestOutputToFile>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-    -->
   </profiles>
+
 </project>
