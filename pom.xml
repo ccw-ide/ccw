@@ -11,6 +11,8 @@
   <packaging>pom</packaging>
 
   <modules>
+    <module>ccw.target.e37</module>
+    <module>ccw.target.e42</module>
     <module>ccw.parent</module>
     <module>ccw.branding</module>
     <module>paredit.clj</module>
@@ -18,6 +20,7 @@
     <module>ccw.core.test</module>
     <module>ccw.feature</module>
     <module>ccw.updatesite</module>
+    <module>ccw.product</module>
   </modules>
 
 </project>

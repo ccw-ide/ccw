@@ -7,6 +7,8 @@ BUILD_DIR="${TRAVIS_BUILD_DIR}/ccw.updatesite/target/repository"
 PADDED_TRAVIS_BUILD_NUMBER=`printf "%0*d" 6 ${TRAVIS_BUILD_NUMBER}`
 UPDATESITE=${TRAVIS_BRANCH}-travis${PADDED_TRAVIS_BUILD_NUMBER}-git${TRAVIS_COMMIT}
 
+PRODUCTS_DIR="${TRAVIS_BUILD_DIR}/ccw.product/target/products"
+
 
 ## Push the p2 repository for the build <branch>-<travisbuild>-<gitSha1>
 ftp -pn ${FTP_HOST} <<EOF
@@ -89,3 +91,19 @@ put compositeContent.xml
 quit
 EOF
 test $? || ( echo "Problem while updating branch ${TRAVIS-BRANCH} repository artifacts for build ${UPDATESITE}" ; exit $? )
+
+
+# Push CCW products files via FTP
+[ -d ${PRODUCTS_DIR} ] || echo "Skipping ftp publication of CCW products for missing directory ${PRODUCTS_DIR}" && ftp -pn ${FTP_HOST} <<EOF
+quote USER ${FTP_USER}
+quote PASS ${FTP_PASSWORD}
+bin
+prompt off
+lcd ${PRODUCTS_DIR}
+cd ${FTP_UPDATESITE_ROOT}/${TRAVIS_BRANCH}
+mkdir products 
+cd products
+mput *
+quit
+EOF
+test $? || ( echo "Problem while pushing CCW products via FTP" ; exit $? )

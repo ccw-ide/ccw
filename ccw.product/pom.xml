@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/*******************************************************************************
+* Copyright 2013 Jeff MAURY
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+******************************************************************************/
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>ccw</groupId>
+    <artifactId>parent</artifactId>
+    <version>0.12.4-SNAPSHOT</version>
+    <relativePath>../ccw.parent/pom.xml</relativePath>
+  </parent>
+  <groupId>ccw</groupId>
+  <artifactId>ccw.product</artifactId>
+  <packaging>eclipse-repository</packaging>
+  <name>Counterclockwise Product (Repository)</name>
+  <properties>
+    <features>org.eclipse.rcp.feature.group,org.eclipse.platform.feature.group,org.eclipse.help.feature.group,org.eclipse.emf.ecore.feature.group,org.eclipse.e4.rcp.feature.group,org.eclipse.equinox.p2.core.feature.feature.group,org.eclipse.emf.common.feature.group,org.eclipse.equinox.p2.rcp.feature.feature.group,org.eclipse.equinox.p2.user.ui.feature.group,org.eclipse.equinox.p2.extras.feature.feature.group</features>
+  </properties>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.twdata.maven</groupId>
+        <artifactId>mojo-executor-maven-plugin</artifactId>
+        <version>2.0</version>
+        <executions>
+          <execution>
+            <id>materialize</id>
+            <phase>package</phase>
+            <goals>
+              <goal>execute-mojo</goal>
+            </goals>
+            <configuration>
+              <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-p2-director-plugin</artifactId>
+                <version>${tycho-version}</version>
+              </plugin>
+              <goal>materialize-products</goal>
+              <configuration/>
+            </configuration>
+          </execution>
+          <execution>
+            <id>install-win32-win32-x86_64</id>
+            <phase>package</phase>
+            <goals>
+              <goal>execute-mojo</goal>
+            </goals>
+            <configuration>
+              <plugin>
+                <groupId>org.eclipse.tycho.extras</groupId>
+                <artifactId>tycho-eclipserun-plugin</artifactId>
+                <version>${tycho-version}</version>
+              </plugin>
+              <goal>eclipse-run</goal>
+              <configuration>
+                <appArgLine>-consoleLog -application org.eclipse.equinox.p2.director -nosplash -repository "${project.baseUri}/target/repository" -destination "${project.build.directory}/products/ccw/win32/win32/x86_64" -installIUs ${features}</appArgLine>
+                <repositories>
+                  <repository>
+                    <id>juno</id>
+                    <layout>p2</layout>
+                    <url>http://download.eclipse.org/releases/juno</url>
+                  </repository>
+                </repositories>
+                <dependencies>
+                  <dependency>
+                    <artifactId>org.eclipse.equinox.p2.transport.ecf</artifactId>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                  <dependency>
+                    <artifactId>org.eclipse.equinox.p2.repository</artifactId>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                  <dependency>
+                    <artifactId>org.eclipse.equinox.p2.touchpoint.natives</artifactId>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                  <dependency>
+                    <artifactId>org.eclipse.equinox.p2.touchpoint.eclipse</artifactId>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                  <dependency>
+                    <artifactId>org.eclipse.equinox.p2.artifact.repository</artifactId>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                  <dependency>
+                    <artifactId>org.eclipse.equinox.p2.director.app</artifactId>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                  <dependency>
+                    <artifactId>org.eclipse.equinox.ds</artifactId>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                  <dependency>
+                    <artifactId>org.eclipse.core.net</artifactId>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                </dependencies>
+              </configuration>
+            </configuration>
+          </execution>
+          <execution>
+            <id>install-linux-gtk-x86_64</id>
+            <phase>package</phase>
+            <goals>
+              <goal>execute-mojo</goal>
+            </goals>
+            <configuration>
+              <plugin>
+                <groupId>org.eclipse.tycho.extras</groupId>
+                <artifactId>tycho-eclipserun-plugin</artifactId>
+                <version>${tycho-version}</version>
+              </plugin>
+              <goal>eclipse-run</goal>
+              <configuration>
+                <appArgLine>-consoleLog -application org.eclipse.equinox.p2.director -nosplash -repository "${project.baseUri}/target/repository" -destination "${project.build.directory}/products/ccw/linux/gtk/x86_64" -installIUs ${features}</appArgLine>
+                <repositories>
+                  <repository>
+                    <id>juno</id>
+                    <layout>p2</layout>
+                    <url>http://download.eclipse.org/releases/juno</url>
+                  </repository>
+                </repositories>
+                <dependencies>
+                  <dependency>
+                    <artifactId>org.eclipse.equinox.p2.transport.ecf</artifactId>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                  <dependency>
+                    <artifactId>org.eclipse.equinox.p2.repository</artifactId>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                  <dependency>
+                    <artifactId>org.eclipse.equinox.p2.touchpoint.natives</artifactId>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                  <dependency>
+                    <artifactId>org.eclipse.equinox.p2.touchpoint.eclipse</artifactId>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                  <dependency>
+                    <artifactId>org.eclipse.equinox.p2.artifact.repository</artifactId>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                  <dependency>
+                    <artifactId>org.eclipse.equinox.p2.director.app</artifactId>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                  <dependency>
+                    <artifactId>org.eclipse.equinox.ds</artifactId>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                  <dependency>
+                    <artifactId>org.eclipse.core.net</artifactId>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                </dependencies>
+              </configuration>
+            </configuration>
+          </execution>
+          <execution>
+            <id>install-macosx-cocoa-x86_64</id>
+            <phase>package</phase>
+            <goals>
+              <goal>execute-mojo</goal>
+            </goals>
+            <configuration>
+              <plugin>
+                <groupId>org.eclipse.tycho.extras</groupId>
+                <artifactId>tycho-eclipserun-plugin</artifactId>
+                <version>${tycho-version}</version>
+              </plugin>
+              <goal>eclipse-run</goal>
+              <configuration>
+                <appArgLine>-consoleLog -application org.eclipse.equinox.p2.director -nosplash -repository "${project.baseUri}/target/repository" -destination "${project.build.directory}/products/ccw/macosx/cocoa/x86_64" -installIUs ${features}</appArgLine>
+                <repositories>
+                  <repository>
+                    <id>juno</id>
+                    <layout>p2</layout>
+                    <url>http://download.eclipse.org/releases/juno</url>
+                  </repository>
+                </repositories>
+                <dependencies>
+                  <dependency>
+                    <artifactId>org.eclipse.equinox.p2.transport.ecf</artifactId>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                  <dependency>
+                    <artifactId>org.eclipse.equinox.p2.repository</artifactId>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                  <dependency>
+                    <artifactId>org.eclipse.equinox.p2.touchpoint.natives</artifactId>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                  <dependency>
+                    <artifactId>org.eclipse.equinox.p2.touchpoint.eclipse</artifactId>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                  <dependency>
+                    <artifactId>org.eclipse.equinox.p2.artifact.repository</artifactId>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                  <dependency>
+                    <artifactId>org.eclipse.equinox.p2.director.app</artifactId>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                  <dependency>
+                    <artifactId>org.eclipse.equinox.ds</artifactId>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                  <dependency>
+                    <artifactId>org.eclipse.core.net</artifactId>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                </dependencies>
+              </configuration>
+            </configuration>
+          </execution>
+          <execution>
+            <id>archive</id>
+            <phase>package</phase>
+            <goals>
+              <goal>execute-mojo</goal>
+            </goals>
+            <configuration>
+              <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-p2-director-plugin</artifactId>
+                <version>${tycho-version}</version>
+              </plugin>
+              <goal>archive-products</goal>
+              <configuration/>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
+
