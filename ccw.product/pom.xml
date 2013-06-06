@@ -29,7 +29,7 @@
   <packaging>eclipse-repository</packaging>
   <name>Counterclockwise Product (Repository)</name>
   <properties>
-    <features>org.eclipse.rcp.feature.group,org.eclipse.platform.feature.group,org.eclipse.help.feature.group,org.eclipse.emf.ecore.feature.group,org.eclipse.e4.rcp.feature.group,org.eclipse.equinox.p2.core.feature.feature.group,org.eclipse.emf.common.feature.group,org.eclipse.equinox.p2.rcp.feature.feature.group,org.eclipse.equinox.p2.user.ui.feature.group,org.eclipse.equinox.p2.extras.feature.feature.group</features>
+    <features>ccw.feature.feature.group,org.eclipse.rcp.feature.group,org.eclipse.platform.feature.group,org.eclipse.help.feature.group,org.eclipse.emf.ecore.feature.group,org.eclipse.e4.rcp.feature.group,org.eclipse.equinox.p2.core.feature.feature.group,org.eclipse.emf.common.feature.group,org.eclipse.equinox.p2.rcp.feature.feature.group,org.eclipse.equinox.p2.user.ui.feature.group,org.eclipse.equinox.p2.extras.feature.feature.group</features>
   </properties>
   <build>
     <plugins>
