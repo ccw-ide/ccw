@@ -234,6 +234,7 @@ litigation.
       <feature id="ccw.feature" version="0.12.4.qualifier"/>
       <feature id="org.eclipse.rcp"/>
       <feature id="org.eclipse.platform"/>
+      <!--
       <feature id="org.eclipse.help"/>
       <feature id="org.eclipse.emf.ecore"/>
       <feature id="org.eclipse.e4.rcp"/>
@@ -242,6 +243,7 @@ litigation.
       <feature id="org.eclipse.equinox.p2.rcp.feature"/>
       <feature id="org.eclipse.equinox.p2.user.ui"/>
       <feature id="org.eclipse.equinox.p2.extras.feature"/>
+      -->
    </features>
 
    <configurations>
