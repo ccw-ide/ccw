@@ -100,7 +100,7 @@ quote PASS ${FTP_PASSWORD}
 bin
 prompt off
 lcd ${PRODUCTS_DIR}
-cd ${FTP_UPDATESITE_ROOT}/${TRAVIS_BRANCH}
+cd ${FTP_UPDATESITE_ROOT}/${TRAVIS_BRANCH}/${UPDATESITE}
 mkdir products 
 cd products
 mput *
