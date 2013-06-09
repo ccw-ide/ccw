@@ -74,9 +74,9 @@
                 <appArgLine>-consoleLog -application org.eclipse.equinox.p2.director -nosplash -repository "${project.baseUri}/target/repository" -destination "${project.build.directory}/products/ccw/win32/win32/x86" -installIUs ${features}</appArgLine>
                 <repositories>
                   <repository>
-                    <id>juno</id>
+                    <id>indigo</id>
                     <layout>p2</layout>
-                    <url>http://download.eclipse.org/releases/juno</url>
+                    <url>http://download.eclipse.org/eclipse/updates/3.7</url>
                   </repository>
                 </repositories>
                 <dependencies>
@@ -133,9 +133,9 @@
                 <appArgLine>-consoleLog -application org.eclipse.equinox.p2.director -nosplash -repository "${project.baseUri}/target/repository" -destination "${project.build.directory}/products/ccw/win32/win32/x86_64" -installIUs ${features}</appArgLine>
                 <repositories>
                   <repository>
-                    <id>juno</id>
+                    <id>indigo</id>
                     <layout>p2</layout>
-                    <url>http://download.eclipse.org/releases/juno</url>
+                    <url>http://download.eclipse.org/eclipse/updates/3.7</url>
                   </repository>
                 </repositories>
                 <dependencies>
@@ -192,9 +192,9 @@
                 <appArgLine>-consoleLog -application org.eclipse.equinox.p2.director -nosplash -repository "${project.baseUri}/target/repository" -destination "${project.build.directory}/products/ccw/linux/gtk/x86_64" -installIUs ${features}</appArgLine>
                 <repositories>
                   <repository>
-                    <id>juno</id>
+                    <id>indigo</id>
                     <layout>p2</layout>
-                    <url>http://download.eclipse.org/releases/juno</url>
+                    <url>http://download.eclipse.org/eclipse/updates/3.7</url>
                   </repository>
                 </repositories>
                 <dependencies>
@@ -251,9 +251,9 @@
                 <appArgLine>-consoleLog -application org.eclipse.equinox.p2.director -nosplash -repository "${project.baseUri}/target/repository" -destination "${project.build.directory}/products/ccw/macosx/cocoa/x86_64" -installIUs ${features}</appArgLine>
                 <repositories>
                   <repository>
-                    <id>juno</id>
+                    <id>indigo</id>
                     <layout>p2</layout>
-                    <url>http://download.eclipse.org/releases/juno</url>
+                    <url>http://download.eclipse.org/eclipse/updates/3.7</url>
                   </repository>
                 </repositories>
                 <dependencies>
