@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="Counterclockwise product" uid="ccw" application="org.eclipse.ui.ide.workbench" version="0.12.4.qualifier" useFeatures="true" includeLaunchers="true">
+<product name="Counterclockwise" uid="ccw" application="org.eclipse.ui.ide.workbench" version="0.12.4.qualifier" useFeatures="true" includeLaunchers="true">
 
    <configIni use="default">
    </configIni>
@@ -15,7 +15,7 @@
 
    <splash
       location="ccw.product" />
-   <launcher name="Counterclockwise Product">
+   <launcher name="Counterclockwise">
       <solaris/>
       <win useIco="false">
          <bmp/>
@@ -235,6 +235,7 @@ litigation.
       <feature id="org.eclipse.rcp"/>
       <feature id="org.eclipse.platform"/>
       <!--
+      <feature id="org.eclipse.egit"/>
       <feature id="org.eclipse.help"/>
       <feature id="org.eclipse.emf.ecore"/>
       <feature id="org.eclipse.e4.rcp"/>
@@ -243,6 +244,7 @@ litigation.
       <feature id="org.eclipse.equinox.p2.rcp.feature"/>
       <feature id="org.eclipse.equinox.p2.user.ui"/>
       <feature id="org.eclipse.equinox.p2.extras.feature"/>
+      <feature id="org.eclipse.equinox.executable" version="3.6.0.v20121119-201001-7P7OG2BFLWUl7UnqBnO8V4Of"/>
       -->
    </features>
 
