@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="Counterclockwise" uid="ccw" application="org.eclipse.ui.ide.workbench" version="0.12.4.qualifier" useFeatures="true" includeLaunchers="true">
+<product name="Counterclockwise" uid="ccw" id="org.eclipse.platform.ide" application="org.eclipse.ui.ide.workbench" version="0.12.4.qualifier" useFeatures="true" includeLaunchers="true">
+
+   <aboutInfo>
+      <image path="/ccw.branding/images/ccw-250x250.png"/>
+   </aboutInfo>
 
    <configIni use="default">
    </configIni>
@@ -11,16 +15,20 @@
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts</vmArgsMac>
    </launcherArgs>
 
-   <windowImages/>
+   <windowImages i16="/ccw.branding/images/ccw-16x16.png" i32="/ccw.branding/images/ccw-32x32.png" i48="/ccw.branding/images/ccw-48x48.png" i64="/ccw.branding/images/ccw-64x64.png" i128="/ccw.branding/images/ccw-128x128.png"/>
 
    <splash
-      location="ccw.branding" />
+      location="ccw.branding"
+      startupProgressRect="5,275,445,15"
+      startupMessageRect="7,252,445,20"
+      startupForegroundColor="000000" />
    <launcher name="Counterclockwise">
       <solaris/>
       <win useIco="false">
          <bmp/>
       </win>
    </launcher>
+
 
    <vm>
    </vm>
@@ -234,18 +242,6 @@ litigation.
       <feature id="ccw.feature" version="0.12.4.qualifier"/>
       <feature id="org.eclipse.rcp"/>
       <feature id="org.eclipse.platform"/>
-      <!--
-      <feature id="org.eclipse.egit"/>
-      <feature id="org.eclipse.help"/>
-      <feature id="org.eclipse.emf.ecore"/>
-      <feature id="org.eclipse.e4.rcp"/>
-      <feature id="org.eclipse.equinox.p2.core.feature"/>
-      <feature id="org.eclipse.emf.common"/>
-      <feature id="org.eclipse.equinox.p2.rcp.feature"/>
-      <feature id="org.eclipse.equinox.p2.user.ui"/>
-      <feature id="org.eclipse.equinox.p2.extras.feature"/>
-      <feature id="org.eclipse.equinox.executable" version="3.6.0.v20121119-201001-7P7OG2BFLWUl7UnqBnO8V4Of"/>
-      -->
    </features>
 
    <configurations>
