@@ -14,7 +14,7 @@
    <windowImages/>
 
    <splash
-      location="ccw.product" />
+      location="ccw.branding" />
    <launcher name="Counterclockwise">
       <solaris/>
       <win useIco="false">
