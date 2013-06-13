@@ -176,6 +176,65 @@
             </configuration>
           </execution>
           <execution>
+            <id>install-linux-gtk-x86</id>
+            <phase>package</phase>
+            <goals>
+              <goal>execute-mojo</goal>
+            </goals>
+            <configuration>
+              <plugin>
+                <groupId>org.eclipse.tycho.extras</groupId>
+                <artifactId>tycho-eclipserun-plugin</artifactId>
+                <version>${tycho-version}</version>
+              </plugin>
+              <goal>eclipse-run</goal>
+              <configuration>
+                <appArgLine>-consoleLog -application org.eclipse.equinox.p2.director -nosplash -repository "${project.baseUri}/target/repository" -destination "${project.build.directory}/products/ccw/linux/gtk/x86" -installIUs ${features}</appArgLine>
+                <repositories>
+                  <repository>
+                    <id>indigo</id>
+                    <layout>p2</layout>
+                    <url>http://download.eclipse.org/eclipse/updates/3.7</url>
+                  </repository>
+                </repositories>
+                <dependencies>
+                  <dependency>
+                    <artifactId>org.eclipse.equinox.p2.transport.ecf</artifactId>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                  <dependency>
+                    <artifactId>org.eclipse.equinox.p2.repository</artifactId>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                  <dependency>
+                    <artifactId>org.eclipse.equinox.p2.touchpoint.natives</artifactId>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                  <dependency>
+                    <artifactId>org.eclipse.equinox.p2.touchpoint.eclipse</artifactId>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                  <dependency>
+                    <artifactId>org.eclipse.equinox.p2.artifact.repository</artifactId>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                  <dependency>
+                    <artifactId>org.eclipse.equinox.p2.director.app</artifactId>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                  <dependency>
+                    <artifactId>org.eclipse.equinox.ds</artifactId>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                  <dependency>
+                    <artifactId>org.eclipse.core.net</artifactId>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                </dependencies>
+              </configuration>
+            </configuration>
+          </execution>
+          <execution>
             <id>install-linux-gtk-x86_64</id>
             <phase>package</phase>
             <goals>

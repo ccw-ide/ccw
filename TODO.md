@@ -2,12 +2,9 @@
 
 ### TODO
 
-- Fix Bug in Travis preventing Juno to work
-- Definitively move from openbar p2 repository to fine tuned target platforms
 - Fix Bug reporting wrong files when an error occurs (e.g. http://updatesite.ccw-ide.org/branch/master/ERROR-master-travis000048-juno-openjdk7-git0a7469ca03d907dd2fc3b8848fbec3d007088683/ )
 - Incorporate all images in all sizes for the differnt platforms sent by Tom Hickey (/Users/laurentpetit/Counterclockwise/Counterclockwise-glyph.zip)
 - Fix Bug with Create new project link: why not test this via SWTBot ?
-- Add Linux 32 bits to the created products
 - Brand the product: better About page
 - Install the EGit, m2e features etc. as is done for CCW so that they can be updated via Software Update Site
   - Add SWTBot tests for checking EGit and m2e are behaving correctly ?
@@ -23,6 +20,9 @@
 
 ### DONE
 
+- Add Linux 32 bits to the created products
+- Fix Bug in Travis preventing Juno to work
+- Definitively move from "openbar" p2 repository to fine tuned target platforms
 - Splash screen with progress bar
   - EGit support
   - Maven Support
