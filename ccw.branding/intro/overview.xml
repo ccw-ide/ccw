@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<introContent>
+    <extensionContent id="ccw-new-project" style="css/ccw.css" name="New Clojure Project" path="overview/@">
+        <group style-id="content-group" id="ccw-new-project-group">
+            <link label="New Clojure Project" 
+                  url="http://org.eclipse.ui.intro/newClojureProject" 
+                  id="ccw-new-project-link"
+                  style-id="content-link">
+                <text>Create a new Clojure Project</text>
+            </link>
+        </group>
+    </extensionContent>
+  	<extensionContent id="ccw-doc" style="css/ccw.css" name="Counterclockwise Documentation" path="overview/@">
+		<group style-id="content-group" id="ccw-doc-group">
+       		<link label="Counterclockwise Documentation" 
+       		      url="https://code.google.com/p/counterclockwise/wiki/Documentation" 
+       		      id="ccw-doc-link"
+       		      style-id="content-link">
+          		<text>Consult the Counterclockwise online documentation</text>
+       		</link>
+       	</group>
+  	</extensionContent>
+    <extensionContent id="ccw-clojure-doc" style="css/ccw.css" name="Clojure Documentation" path="overview/@">
+        <group style-id="content-group" id="ccw-clojure-doc-group">
+            <link label="Clojure Documentation" 
+                  url="http://clojure.org/documentation" 
+                  id="ccw-clojure-doc-link"
+                  style-id="content-link">
+                <text>Consult the Clojure online documentation</text>
+            </link>
+        </group>
+    </extensionContent>
+</introContent>

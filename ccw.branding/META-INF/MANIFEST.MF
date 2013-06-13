@@ -5,5 +5,9 @@ Bundle-SymbolicName: ccw.branding;singleton:=true
 Bundle-Version: 0.12.4.qualifier
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Counterclockwise team
-Require-Bundle: org.eclipse.help
+Require-Bundle: org.eclipse.help,
+ org.eclipse.ui.intro.universal,
+ org.eclipse.ui.intro,
+ org.eclipse.ui,
+ org.eclipse.core.runtime
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

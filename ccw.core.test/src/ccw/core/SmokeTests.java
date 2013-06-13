@@ -36,7 +36,7 @@ public class SmokeTests {
 		} catch (Exception e) { 
 			// Nevermind
 		}
-		bot.perspectiveByLabel("Java").activate();
+		//bot.perspectiveByLabel("Java").activate();
 		return bot;
 	}
 	
@@ -88,6 +88,11 @@ public class SmokeTests {
 	@BeforeClass
 	public static void setupClass() {
 		bot = eclipseBot();
+		checkProductDefaultConfiguration();
+	}
+	
+	private static void checkProductDefaultConfiguration() {
+		assertEquals("Java", bot.activePerspective().getLabel());
 	}
 	
 	@Test

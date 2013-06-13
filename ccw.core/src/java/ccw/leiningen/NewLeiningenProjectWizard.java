@@ -379,7 +379,10 @@ public class NewLeiningenProjectWizard extends BasicNewResourceWizard
 		}
 		
 		IWorkingSet[] workingSets = mainPage.getSelectedWorkingSets();
-		getWorkbench().getWorkingSetManager().addToWorkingSets(newProject,
+		getWorkbench()
+				.getWorkingSetManager()
+				.addToWorkingSets(
+						newProject,
 				workingSets);
         
 		updatePerspective();

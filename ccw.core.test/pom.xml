@@ -44,6 +44,7 @@
         <configuration>
           <useUIHarness>true</useUIHarness>
           <useUIThread>false</useUIThread>
+          <product>ccw.branding.ccw</product>
           <argLine>-XX:MaxPermSize=128m -Xms40m -Xmx512m -ea ${os-jvm-flags}</argLine>
           <includes>
             <include>**/*Test.java</include>

@@ -25,5 +25,79 @@
          point="org.eclipse.help.contexts">
          <contexts file="context_help.xml"/>
    </extension>
-
+   <extension
+         id="ccw"
+         name="Counterclockwise"
+         point="org.eclipse.core.runtime.products">
+      <product
+            application="org.eclipse.ui.ide.workbench"
+            description="Counterclockwise - Clojure IDE based on Eclipse"
+            name="Counterclockwise">
+         <property
+               name="windowImages"
+               value="images/ccw-16x16.png,images/ccw-32x32.png,images/ccw-48x48.png,images/ccw-64x64.png,images/ccw-128x128.png">
+         </property>
+         <property
+               name="aboutImage"
+               value="images/ccw-250x250.png">
+         </property>
+         <property
+               name="startupForegroundColor"
+               value="1C0F3C">
+         </property>
+         <property
+               name="startupProgressRect"
+               value="5,465,500,30">
+         </property>
+         <property
+               name="startupMessageRect"
+               value="7,490,500,30">
+         </property>
+         <property
+               name="appName"
+               value="Counterclockwise">
+         </property>
+         <property
+               name="preferenceCustomization"
+               value="plugin_customization.ini">
+         </property>
+         
+         <property
+            name="introTitle"
+            value="Counterclockwise, the Clojure IDE"/>
+          <property
+                name="introBrandingImage"
+                value="product:images/ccw-64x64.png"/>
+          <property
+                name="introBrandingImageText"
+                value="Counterclockwise, the Clojure IDE based on Eclipse"/>
+      </product>
+   </extension>
+   <extension point="org.eclipse.ui.intro"> 
+      <introProductBinding
+            introId="org.eclipse.ui.intro.universal"
+            productId="ccw.branding.ccw">
+      </introProductBinding>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="org.eclipse.ui.preferencePages.Workbench"
+            class="org.eclipse.ui.intro.universal.ExtensionFactory:welcomeCustomization"
+            id="com.example.intro.introCustomization"
+            name="Welcome Page">
+         <keywordReference id="org.eclipse.ui.ide.appearance"/>
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.ui.intro.configExtension">
+      <configExtension
+            configId="org.eclipse.ui.intro.universalConfig"
+            content="intro/overview.xml">
+      </configExtension>
+      <action
+            name="newClojureProject"
+            replaces="runAction?pluginId=ccw.branding&amp;class=ccw.ui.NewProjectIntroAction">
+      </action>
+   </extension>
 </plugin>
