@@ -19,8 +19,8 @@
 
    <splash
       location="ccw.branding"
-      startupProgressRect="5,465,500,30"
-      startupMessageRect="7,490,500,30"
+      startupProgressRect="5,465,500,25"
+      startupMessageRect="7,490,500,25"
       startupForegroundColor="1C0F3C" />
    <launcher name="Counterclockwise">
       <solaris/>
