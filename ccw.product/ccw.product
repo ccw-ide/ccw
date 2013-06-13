@@ -249,8 +249,7 @@ litigation.
       <feature id="org.eclipse.equinox.p2.extras.feature"/>
       <feature id="org.eclipse.jdt"/>
       <feature id="org.eclipse.egit"/>
-      <feature id="org.eclipse.m2e.feature" version="1.0.200.20111228-1245"/>
-      <feature id="org.eclipse.m2e.logback.feature" version="1.0.200.20111228-1245"/>
+      <feature id="org.eclipse.m2e.feature"/>
    </features>
 
    <configurations>
