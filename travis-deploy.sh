@@ -93,8 +93,10 @@ EOF
 test $? || ( echo "Problem while updating branch ${TRAVIS-BRANCH} repository artifacts for build ${UPDATESITE}" ; exit $? )
 
 
-# Push CCW products files via FTP
-[ -d ${PRODUCTS_DIR} ] || echo "Skipping ftp publication of CCW products for missing directory ${PRODUCTS_DIR}" && ftp -pn ${FTP_HOST} <<EOF
+[ -d ${PRODUCTS_DIR} ] || ( echo "Skipping ftp publication of CCW products for missing directory ${PRODUCTS_DIR}"; exit 1; )
+
+# Create directory products in ftp
+ftp -pn ${FTP_HOST} <<EOF
 quote USER ${FTP_USER}
 quote PASS ${FTP_PASSWORD}
 bin
@@ -102,8 +104,24 @@ prompt off
 lcd ${PRODUCTS_DIR}
 cd ${FTP_UPDATESITE_ROOT}/${TRAVIS_BRANCH}/${UPDATESITE}
 mkdir products 
-cd products
-mput *
 quit
 EOF
-test $? || ( echo "Problem while pushing CCW products via FTP" ; exit $? )
+
+# iterate over the products to push
+PRODUCTS="ccw-linux.gtk.x86_64.zip ccw-macosx.cocoa.x86_64.zip ccw-win32.win32.x86.zip ccw-win32.win32.x86_64.zip"
+for PRODUCT in ${PRODUCTS}
+do
+# Push CCW products files via FTP
+ftp -pn ${FTP_HOST} <<EOF
+quote USER ${FTP_USER}
+quote PASS ${FTP_PASSWORD}
+bin
+prompt off
+lcd ${PRODUCTS_DIR}
+cd ${FTP_UPDATESITE_ROOT}/${TRAVIS_BRANCH}/${UPDATESITE}/products
+put ${PRODUCT}
+quit
+EOF
+test $? && wget http://updatesite.ccw-ide.org/branch/${UPDATESITE}/products/${PRODUCT}  || ( echo "Problem while pushing CCW product ${PRODUCT} via FTP" ; exit $? )
+echo "Pushed product ${PRODUCT}"
+done
