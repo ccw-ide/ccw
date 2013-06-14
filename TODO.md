@@ -2,7 +2,6 @@
 
 ### TODO
 
-- Fix Bug reporting wrong files when an error occurs (e.g. http://updatesite.ccw-ide.org/branch/master/ERROR-master-travis000048-juno-openjdk7-git0a7469ca03d907dd2fc3b8848fbec3d007088683/ )
 - Incorporate all images in all sizes for the differnt platforms sent by Tom Hickey (/Users/laurentpetit/Counterclockwise/Counterclockwise-glyph.zip)
 - Fix Bug with Create new project link: why not test this via SWTBot ?
 - Brand the product: better About page
@@ -20,6 +19,7 @@
 
 ### DONE
 
+- Fix Bug reporting wrong files when an error occurs (e.g. http://updatesite.ccw-ide.org/branch/master/ERROR-master-travis000048-juno-openjdk7-git0a7469ca03d907dd2fc3b8848fbec3d007088683/ )
 - Add Linux 32 bits to the created products
 - Fix Bug in Travis preventing Juno to work
 - Definitively move from "openbar" p2 repository to fine tuned target platforms

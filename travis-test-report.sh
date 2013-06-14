@@ -25,7 +25,8 @@ EOF
 
 
 # Report paredit.clj unit tests
-[ -d ${PAREDIT_TESTS_DIR} ] || echo "Skipping ftp reporting for missing directory ${PAREDIT_TESTS_DIR}" && ftp -pn ${FTP_HOST} <<EOF
+[ -d ${PAREDIT_TESTS_DIR} ] || echo "Skipping ftp reporting for missing directory ${PAREDIT_TESTS_DIR}"
+[ -d ${PAREDIT_TESTS_DIR} ] && ftp -pn ${FTP_HOST} <<EOF
 quote USER ${FTP_USER}
 quote PASS ${FTP_PASSWORD}
 bin
@@ -40,7 +41,8 @@ EOF
 
 
 # Report ccw.core.tests integration tests
-[ -d ${TESTS_DIR} ] || echo "Skipping ftp reporting for missing directory ${TESTS_DIR}" && ftp -pn ${FTP_HOST} <<EOF
+[ -d ${TESTS_DIR} ] || echo "Skipping ftp reporting for missing directory ${TESTS_DIR}"
+[ -d ${TESTS_DIR} ] && ftp -pn ${FTP_HOST} <<EOF
 quote USER ${FTP_USER}
 quote PASS ${FTP_PASSWORD}
 bin
@@ -48,6 +50,17 @@ prompt off
 cd ${FTP_UPDATESITE_ROOT}/${TRAVIS_BRANCH}/${UPDATESITE}
 lcd ${TESTS_DIR}
 mput *
+quit
+EOF
+
+# Report ccw.core.tests integration tests screenshots
+[ -d ${SCREENSHOTS_DIR} ] || echo "Skipping ftp reporting for missing directory ${SCREENSHOTS_DIR}"
+[ -d ${SCREENSHOTS_DIR} ] && ftp -pn ${FTP_HOST} <<EOF
+quote USER ${FTP_USER}
+quote PASS ${FTP_PASSWORD}
+bin
+prompt off
+cd ${FTP_UPDATESITE_ROOT}/${TRAVIS_BRANCH}/${UPDATESITE}
 lcd ${SCREENSHOTS_DIR}
 mput *
 quit
