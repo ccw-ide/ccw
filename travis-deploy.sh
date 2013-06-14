@@ -108,7 +108,7 @@ quit
 EOF
 
 # iterate over the products to push
-PRODUCTS="ccw-linux.gtk.x86_64.zip ccw-macosx.cocoa.x86_64.zip ccw-win32.win32.x86.zip ccw-win32.win32.x86_64.zip"
+PRODUCTS="ccw-linux.gtk.x86.zip ccw-linux.gtk.x86_64.zip ccw-macosx.cocoa.x86_64.zip ccw-win32.win32.x86.zip ccw-win32.win32.x86_64.zip"
 for PRODUCT in ${PRODUCTS}
 do
 # Push CCW products files via FTP
