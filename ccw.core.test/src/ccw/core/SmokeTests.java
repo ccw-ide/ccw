@@ -13,6 +13,7 @@ import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,15 +32,23 @@ public class SmokeTests {
 	 */
 	public static SWTWorkbenchBot eclipseBot() {
 		SWTWorkbenchBot bot = new SWTWorkbenchBot();
+		return bot;
+	}
+
+	public static SWTWorkbenchBot openJavaPerspective(SWTWorkbenchBot bot) {
+		bot.perspectiveByLabel("Java").activate();
+		return bot;
+	}
+	
+	public static SWTWorkbenchBot closeWelcome(SWTWorkbenchBot bot) {
 		try {
 			bot.viewByTitle("Welcome").close();
 		} catch (Exception e) { 
 			// Nevermind
 		}
-		//bot.perspectiveByLabel("Java").activate();
 		return bot;
+		
 	}
-	
 	public static SWTBotMenu menu(SWTWorkbenchBot bot, String menu, String... subMenus) {
 		SWTBotMenu ret = bot.menu(menu);
 		for (String subMenu: subMenus) {
@@ -63,16 +72,20 @@ public class SmokeTests {
 			}, new NullProgressMonitor());
 	}
 	
-	public static void createClojureProject(SWTWorkbenchBot bot, String projectName) throws Exception {
+	public static SWTWorkbenchBot createClojureProject(SWTWorkbenchBot bot, String projectName) throws Exception {
 		menu(bot, "File", "New", "Project...").click();
+		return fillNewProject(bot, projectName);
+	}
+
+	public static SWTWorkbenchBot fillNewProject(SWTWorkbenchBot bot, String projectName) throws Exception {
 		activateShell(bot, "New Project");
 		bot.tree().expandNode("Clojure").select("Clojure Project");
 		bot.button("Next >").click();
 		bot.textWithLabel("Project name:").setText(projectName);
 		bot.button("Finish").click();
 		waitForWorkspace();
+		return bot;
 	}
-	
 	/** Test if a project exists by checking the Package Explorer View */
 	public static void assertProjectExists(SWTWorkbenchBot bot, String projectName) {
 		SWTBotView packageExplorer = bot.viewByTitle("Package Explorer");
@@ -86,12 +99,22 @@ public class SmokeTests {
 	public static SWTWorkbenchBot bot = null;
 	
 	@BeforeClass
-	public static void setupClass() {
+	public static void setupClass() throws Exception {
 		bot = eclipseBot();
-		checkProductDefaultConfiguration();
+		//checkProductDefaultConfiguration();
+		closeWelcome(bot);
 	}
 	
-	private static void checkProductDefaultConfiguration() {
+	private static void checkProductDefaultConfiguration() throws Exception {
+		bot.viewByTitle("Welcome").setFocus();
+		bot.link("New Clojure Project").click();
+		fillNewProject(bot, "ProjectFromWelcomePageLink");
+		assertProjectExists(bot,  "ProjectFromWelcomePageLink");
+	}
+	
+	@Before
+	public void beforeTest() {
+		openJavaPerspective(bot);
 		assertEquals("Java", bot.activePerspective().getLabel());
 	}
 	
