@@ -11,3 +11,4 @@ Require-Bundle: org.eclipse.help,
  org.eclipse.ui,
  org.eclipse.core.runtime
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ClassPath: .
