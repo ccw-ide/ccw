@@ -107,12 +107,12 @@ mkdir products
 quit
 EOF
 
-# iterate over the products to push
+# iterate over the products to push in parallel
 PRODUCTS="ccw-linux.gtk.x86.zip ccw-linux.gtk.x86_64.zip ccw-macosx.cocoa.x86_64.zip ccw-win32.win32.x86.zip ccw-win32.win32.x86_64.zip"
 for PRODUCT in ${PRODUCTS}
 do
 # Push CCW products files via FTP
-ftp -pn ${FTP_HOST} <<EOF
+ftp -pn ${FTP_HOST} <<EOF &
 quote USER ${FTP_USER}
 quote PASS ${FTP_PASSWORD}
 bin
@@ -122,6 +122,13 @@ cd ${FTP_UPDATESITE_ROOT}/${TRAVIS_BRANCH}/${UPDATESITE}/products
 put ${PRODUCT}
 quit
 EOF
-test $? && wget http://updatesite.ccw-ide.org/branch/${UPDATESITE}/products/${PRODUCT}  || ( echo "Problem while pushing CCW product ${PRODUCT} via FTP" ; exit $? )
+done
+
+wait
+
+for PRODUCT in ${PRODUCTS}
+do
+# --spider option only checks for file presence, without downloading it
+wget --spider http://updatesite.ccw-ide.org/branch/${UPDATESITE}/products/${PRODUCT}  || ( echo "Problem while pushing CCW product ${PRODUCT} via FTP" ; exit $? )
 echo "Pushed product ${PRODUCT}"
 done
