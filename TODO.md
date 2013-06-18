@@ -3,7 +3,6 @@
 ### TODO
 
 - Incorporate all images in all sizes for the differnt platforms sent by Tom Hickey (/Users/laurentpetit/Counterclockwise/Counterclockwise-glyph.zip)
-- Install the EGit, m2e features etc. as is done for CCW so that they can be updated via Software Update Site
 - Incorporate by default:
   - XML, JS, CSS support
   - ? Eclipse ColorTheme
@@ -21,6 +20,7 @@
 
 ### DONE
 
+- Install the EGit, m2e features etc. as is done for CCW so that they can be updated via Software Update Site
 - Brand the product: better About page
 - Fix Bug with Create new project link
 - Fix Bug reporting wrong files when an error occurs (e.g. http://updatesite.ccw-ide.org/branch/master/ERROR-master-travis000048-juno-openjdk7-git0a7469ca03d907dd2fc3b8848fbec3d007088683/ )
