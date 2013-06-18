@@ -4,7 +4,6 @@
 
 - Incorporate all images in all sizes for the differnt platforms sent by Tom Hickey (/Users/laurentpetit/Counterclockwise/Counterclockwise-glyph.zip)
 - Install the EGit, m2e features etc. as is done for CCW so that they can be updated via Software Update Site
-  - Add SWTBot tests for checking EGit and m2e are behaving correctly ?
 - Incorporate by default:
   - XML, JS, CSS support
   - ? Eclipse ColorTheme
@@ -13,7 +12,12 @@
   - for Donations
 - Update the Wiki pages for Update Sites, How to Build
 - Bring the www.ccw-ide.org web site to life (1 landing page, 1 installation page)
+
+### PLUGIN
 - re-show the welcome page when plugin is updated: http://codeandme.blogspot.fr/2011/11/welcome-page.html
+- solve the problem that menus are not incorporated before people do Reset Perspective
+  - either add some text
+  - either add some popup the first time
 
 ### DONE
 
