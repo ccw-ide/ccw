@@ -101,7 +101,6 @@ public class SmokeTests {
 	
 	@BeforeClass
 	public static void setupClass() throws Exception {
-		SWTBotPreferences.TIMEOUT = 30000;
 		bot = eclipseBot();
 		//checkProductDefaultConfiguration();
 		closeWelcome(bot);
