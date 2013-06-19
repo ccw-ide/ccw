@@ -6,7 +6,6 @@ FTP_UPDATESITE_ROOT=/www/updatesite/branch
 TESTS_DIR="${TRAVIS_BUILD_DIR}/ccw.core.test/target/surefire-reports"
 PAREDIT_TESTS_DIR="${TRAVIS_BUILD_DIR}/paredit.clj/target/test-reports"
 SCREENSHOTS_DIR="${TRAVIS_BUILD_DIR}/ccw.core.test/screenshots"
-PADDED_TRAVIS_BUILD_NUMBER=`printf "%0*d" 6 ${TRAVIS_BUILD_NUMBER}`
 UPDATESITE=${QUALIFIER}
 ERROR=ERROR-${ECLIPSE_TARGET}-${TRAVIS_JDK_VERSION}
 
