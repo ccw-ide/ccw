@@ -5,7 +5,7 @@ sudo apt-get install -qq ftp
 FTP_UPDATESITE_ROOT=/www/updatesite/branch
 BUILD_DIR="${TRAVIS_BUILD_DIR}/ccw.updatesite/target/repository"
 PADDED_TRAVIS_BUILD_NUMBER=`printf "%0*d" 6 ${TRAVIS_BUILD_NUMBER}`
-UPDATESITE=${TRAVIS_BRANCH}-travis${PADDED_TRAVIS_BUILD_NUMBER}-git${TRAVIS_COMMIT}
+UPDATESITE=${QUALIFIER}
 
 PRODUCTS_DIR="${TRAVIS_BUILD_DIR}/ccw.product/target/products"
 

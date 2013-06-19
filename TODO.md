@@ -2,7 +2,6 @@
 
 ### TODO
 
-- Have the qualifier match the <branch>-travis<build>-git<sha1> convention 
 - Incorporate by default:
   - XML, JS, CSS support
   - ? Eclipse ColorTheme
@@ -20,6 +19,7 @@
 
 ### DONE
 
+- Have the qualifier match the <branch>-travis<build>-git<sha1> convention 
 - Incorporate all images in all sizes for the different platforms sent by Tom Hickey (/Users/laurentpetit/Counterclockwise/Counterclockwise-glyph.zip)
 - Install the EGit, m2e features etc. as is done for CCW so that they can be updated via Software Update Site
 - Brand the product: better About page
