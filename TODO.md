@@ -2,7 +2,6 @@
 
 ### TODO
 
-- Split Product-only resources into their own product that will not be delivered on the Software Update Site
 - Have the qualifier match the <branch>-travis<build>-git<sha1> convention 
 - Incorporate by default:
   - XML, JS, CSS support
