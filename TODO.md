@@ -2,13 +2,11 @@
 
 ### TODO
 
-- Incorporate by default:
-  - XML, JS, CSS support
-  - ? Eclipse ColorTheme
 - Have a Welcome Page: 
   - for the Project Homepage on the Internet, 
   - for Donations
-- Update the Wiki pages for Update Sites, How to Build
+- Update the Update Sites Wiki page
+- Update the How to Build Wiki page
 - Bring the www.ccw-ide.org web site to life (1 landing page, 1 installation page)
 
 ### PLUGIN
@@ -19,6 +17,9 @@
 
 ### DONE
 
+- Incorporate by default:
+  - XML, JS, CSS support
+  - Eclipse ColorTheme
 - Have the qualifier match the <branch>-travis<build>-git<sha1> convention 
 - Incorporate all images in all sizes for the different platforms sent by Tom Hickey (/Users/laurentpetit/Counterclockwise/Counterclockwise-glyph.zip)
 - Install the EGit, m2e features etc. as is done for CCW so that they can be updated via Software Update Site

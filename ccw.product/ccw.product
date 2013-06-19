@@ -266,6 +266,8 @@ litigation.
       <feature id="org.eclipse.jdt"/>
       <feature id="org.eclipse.egit"/>
       <feature id="org.eclipse.m2e.feature"/>
+      <feature id="org.eclipse.wst.web_ui.feature"/>
+      <feature id="com.github.eclipsecolortheme.feature"/>
    </features>
 
    <configurations>
