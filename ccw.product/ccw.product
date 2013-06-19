@@ -34,12 +34,17 @@ Apache Software Foundation http://www.apache.org/
       startupMessageRect="7,490,500,25"
       startupForegroundColor="1C0F3C" />
    <launcher name="Counterclockwise">
+      <linux icon="images/ccw-48x48.xpm"/>
+      <macosx icon="images/ccw.icns"/>
       <solaris/>
       <win useIco="false">
-         <bmp/>
+         <bmp
+            winSmallHigh="images/ccw-16x16-32bits.bmp"
+            winMediumHigh="images/ccw-32x32-32bits.bmp"
+            winLargeHigh="images/ccw-48x48-32bits.bmp"
+            winExtraLargeHigh="images/ccw-256x256-32bits.bmp"/>
       </win>
    </launcher>
-
 
    <vm>
    </vm>
