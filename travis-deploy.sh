@@ -132,3 +132,4 @@ do
 wget --spider http://updatesite.ccw-ide.org/branch/${UPDATESITE}/products/${PRODUCT}  || ( echo "Problem while pushing CCW product ${PRODUCT} via FTP" ; exit $? )
 echo "Pushed product ${PRODUCT}"
 done
+
