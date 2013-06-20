@@ -2,8 +2,6 @@
 
 ### TODO
 
-- brand updatesite.ccw-ide.org a little better: showing directory structure, products, etc.
-- do the updatesite switch: make cgrand legacy, make ccw-ide official
 - Bring the www.ccw-ide.org web site to life (1 landing page, 1 installation page)
 - Update the Update Sites Wiki page
 - Update the How to Build Wiki page
@@ -19,6 +17,7 @@
 
 ### DONE
 
+- do the updatesite switch: make cgrand legacy, make ccw-ide official
 - Product now contains Software Update Sites for CCW, Indigo
 - Incorporate by default:
   - XML, JS, CSS support
