@@ -2,12 +2,14 @@
 
 ### TODO
 
+- brand updatesite.ccw-ide.org a little better: showing directory structure, products, etc.
+- do the updatesite switch: make cgrand legacy, make ccw-ide official
+- Bring the www.ccw-ide.org web site to life (1 landing page, 1 installation page)
+- Update the Update Sites Wiki page
+- Update the How to Build Wiki page
 - Have a Welcome Page: 
   - for the Project Homepage on the Internet, 
   - for Donations
-- Update the Update Sites Wiki page
-- Update the How to Build Wiki page
-- Bring the www.ccw-ide.org web site to life (1 landing page, 1 installation page)
 
 ### PLUGIN
 - re-show the welcome page when plugin is updated: http://codeandme.blogspot.fr/2011/11/welcome-page.html
@@ -17,6 +19,7 @@
 
 ### DONE
 
+- Product now contains Software Update Sites for CCW, Indigo
 - Incorporate by default:
   - XML, JS, CSS support
   - Eclipse ColorTheme
