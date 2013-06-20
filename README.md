@@ -4,8 +4,10 @@ Counterclockwise is an Eclipse plugin helping developers write Clojure code
 
 ## Install: Software Update Sites
 
-- Stable versions: http://ccw.cgrand.net/updatesite/
-- Beta versions: http://ccw.cgrand.net/updatesite-betas/
+- Stable versions: http://updatesite.ccw-ide.org/stable/
+- Beta versions: http://updatesite.ccw-ide.org/beta/
+
+More about Counterclockwise Software Update Sites: https://code.google.com/p/counterclockwise/wiki/UpdateSites 
 
 ## Website
 

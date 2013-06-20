@@ -19,7 +19,7 @@
    </license>
 
    <url>
-      <update label="Counterclockwise Update Site" url="http://ccw.cgrand.net/updatesite/"/>
+      <update label="Counterclockwise Update Site" url="http://updatesite.ccw-ide.org/stable/"/>
    </url>
 
    <requires>
