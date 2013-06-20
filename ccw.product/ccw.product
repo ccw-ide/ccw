@@ -37,12 +37,9 @@ Apache Software Foundation http://www.apache.org/
       <linux icon="images/ccw-48x48.xpm"/>
       <macosx icon="images/ccw.icns"/>
       <solaris/>
-      <win useIco="false">
-         <bmp
-            winSmallHigh="images/ccw-16x16-32bits.bmp"
-            winMediumHigh="images/ccw-32x32-32bits.bmp"
-            winLargeHigh="images/ccw-48x48-32bits.bmp"
-            winExtraLargeHigh="images/ccw-256x256-32bits.bmp"/>
+      <win useIco="true">
+         <ico path="images/ccw.ico"/>
+         <bmp/>
       </win>
    </launcher>
 
