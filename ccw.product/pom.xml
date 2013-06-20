@@ -51,7 +51,16 @@
                 <version>${tycho-version}</version>
               </plugin>
               <goal>materialize-products</goal>
-              <configuration/>
+              <configuration>
+                 <!-- not working yet
+                <products>
+                  <product>
+                    <id>ccw</id>
+                    <rootFolder>counterclockwise</rootFolder>
+                  </product>
+                </products>
+                -->
+              </configuration>
             </configuration>
           </execution>
           <execution>
