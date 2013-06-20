@@ -3,20 +3,14 @@
 ### TODO
 
 - Bring the www.ccw-ide.org web site to life (1 landing page, 1 installation page)
-- Update the Update Sites Wiki page
-- Update the How to Build Wiki page
 - Have a Welcome Page: 
   - for the Project Homepage on the Internet, 
   - for Donations
 
-### PLUGIN
-- re-show the welcome page when plugin is updated: http://codeandme.blogspot.fr/2011/11/welcome-page.html
-- solve the problem that menus are not incorporated before people do Reset Perspective
-  - either add some text
-  - either add some popup the first time
-
 ### DONE
 
+- Update the How to Build Wiki page
+- Update the Update Sites Wiki page
 - do the updatesite switch: make cgrand legacy, make ccw-ide official
 - Product now contains Software Update Sites for CCW, Indigo
 - Incorporate by default:
