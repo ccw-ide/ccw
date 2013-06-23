@@ -2,6 +2,8 @@
 
 Counterclockwise is an Eclipse plugin helping developers write Clojure code
 
+[![Build Status](https://travis-ci.org/laurentpetit/ccw.png?branch=master)](https://travis-ci.org/laurentpetit/ccw)
+
 ## Install: Software Update Sites
 
 - Stable versions: http://updatesite.ccw-ide.org/stable/
