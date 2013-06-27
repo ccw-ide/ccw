@@ -28,7 +28,7 @@ The software update site has been updated to its new location:
 
 For more information on the available Software Update Sites and their retention policies, and more, see the Wiki Page [Update Sites](https://code.google.com/p/counterclockwise/wiki/UpdateSites)
 
-### Editor enhancements
+### Editor
 
 - More intuitive Ctrl+Enter: hitting Ctrl+Enter when the cursor is located at the top level selects the preceding top level form to be sent to the REPL. Only when the cursor is right in front of a top level form will it be selected instead of the previous one. (Fix Issue #580)
 
@@ -44,3 +44,6 @@ e.g. if the caret is materialized with the symbol |:
 ;; => qix's declaration will be sent to the REPL
 ```
 
+### Repl 
+
+- A bug had slipped in the project classpath management preventing native libraries to load properly, for instance when trying to work with Overtone. Fix Issue #577 

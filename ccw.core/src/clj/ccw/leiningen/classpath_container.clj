@@ -127,7 +127,7 @@
       (filter #(re-find #"\.(jar|zip)$" (.getName ^File %)))
       (sort-by #(.getName ^File %))
       (map #(ser-dep %
-                     (.getParent default-native-platform-path)
+                     default-native-platform-path
                      #_(or #_(u/lein-native-dependency-path lein-project %) ;; TODO make this work :-(
                          default-native-platform-path))))))
 
