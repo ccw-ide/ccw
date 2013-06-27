@@ -255,6 +255,45 @@
     "^{:a :b};sdf\n^:bar ^:foo (ns ^:foo ^{:author ;comment\n\"Laurent Petit\"}\n;foo\n#_bleh foo)"
     ))
 
+(deftest code-forms-tests
+  (are [before after]
+       (= after (->> before 
+                       parse
+                       parsed-root-loc
+                       zip/down
+                       (#(take-while identity (iterate zip/right %))) ; children locs
+                       st/code-forms
+                       (map loc-text)
+                       (apply str)))
+  "" ""
+  "a" "a"
+  "(a)"        "(a)"
+  "(a)(b)"     "(a)(b)" 
+  "(a)\n\n(b)" "(a)(b)"
+  "(a);foo\n^:anything(b)" "(a)^:anything(b)"
+  "#_(a)" ""
+  "#_(a)b c" "bc"))
+
+(deftest top-level-code-form-tests
+  (are [code offset sel]
+       (= sel (-> code 
+                       parse
+                       parsed-root-loc
+                       (st/top-level-code-form offset)
+                       loc-text))
+       "(a)" 0 "(a)"
+  "(a)" 1 "(a)"
+  "(a)" 2 "(a)"
+  "(a)" 3 "(a)"
+  "(a)\n(b)" 3 "(a)"
+  "(a)\n(b)" 4 "(b)"
+  "(a)\n(b)" 5 "(b)"
+  "(a)\n(b)" 7 "(b)"
+  "(a)\n;foo\n\n^:true b" 6 "(a)"
+  "(a)\n;foo\n\n^:true b" 9 "(a)"
+  "(a)\n;foo\n\n^:true b" 10 "^:true b"
+  "(a)\n;foo\n\n^:true b" 17 "^:true b"))
+
 (defn pts []
   #_(normalized-selection-tests)
   (t/line-stop-tests)

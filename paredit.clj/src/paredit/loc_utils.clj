@@ -223,3 +223,11 @@
   (and
     (punct-loc? loc)
     (= (end-offset loc) (end-offset (parse-node loc)))))
+
+(defn top-level-loc 
+  "Returns the top level loc"
+  [loc]
+  (first 
+    (filter 
+      #(= :root (loc-tag (zip/up %)))
+      (iterate zip/up loc))))
