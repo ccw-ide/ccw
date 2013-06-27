@@ -23,7 +23,8 @@
    "}
   ccw.editors.clojure.editor-support 
   (:require [paredit.parser :as p]
-            [paredit.loc-utils :as lu])
+            [paredit.loc-utils :as lu]
+            [paredit.static-analysis :as static-analysis])
   (:import [org.eclipse.jdt.ui PreferenceConstants]
            [ccw.editors.clojure IClojureEditor]
            [org.eclipse.ui.texteditor SourceViewerDecorationSupport]))
@@ -87,6 +88,14 @@
         (println (str "cached parse-tree miss: expected text='" (:text rv) "'" ", text received: '" text "'"))
         (updateTextBuffer r text 0 -1 text)
         (recur text r)))))
+
+(defn top-level-code-form 
+  "Return the top level form which corresponds to code for the current offset" 
+  [parse-state offset]
+  (when-let [parse-tree (getParseTree parse-state)]
+    (let [root-loc (lu/parsed-root-loc parse-tree)
+          top-level-loc (static-analysis/top-level-code-form root-loc offset)]
+      (lu/loc-text top-level-loc))))
 
 ;; Now, I don't like the fact that getting the current and the previous parse tree may lead to incorrect code
 ;; since they both are dereferencing a ref instead of decomposing a consistent snapshot of a ref

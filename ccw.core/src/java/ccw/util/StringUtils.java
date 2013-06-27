@@ -6,4 +6,5 @@ public final class StringUtils {
 		return s == null
 			|| s.length() == 0;
 	}
+	public static String safeString(String s) { return (s == null) ? "" : s; }
 }

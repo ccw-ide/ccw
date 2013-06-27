@@ -35,7 +35,7 @@ public class EvaluateTopLevelSExpressionAction extends Action {
 		String selectedText = editor.getSelectedText();
 		
 		if (selectedText==null || selectedText.trim().equals("")) {
-			selectedText = editor.getCurrentOrNextTopLevelSExpression();
+			selectedText = editor.getCurrentTopLevelSExpression();
 		}
 
 		REPLView repl = REPLView.activeREPL.get();

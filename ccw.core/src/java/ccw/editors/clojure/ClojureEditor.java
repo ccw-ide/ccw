@@ -409,7 +409,7 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 		if (r != null)
 			selectAndReveal(r.getOffset(), r.getLength());
 	}
-	
+
 	private IRegion getTopLevelSExpression() {
 		if (!checkSelectionAndWarnUserIfProblem(ClojureEditorMessages.GotoMatchingBracketAction_error_invalidSelection))
 			return null;
@@ -428,19 +428,9 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 			return null;
 		}
 	}
-	
-	public String getCurrentOrNextTopLevelSExpression() {
-		IRegion r = getTopLevelSExpression();
-		
-		if (r != null) {
-			try {
-				return getDocument().get(r.getOffset(), r.getLength());
-			} catch (BadLocationException e) {
-				return null;
-			}
-		} else {
-			return null;
-		}
+
+	public String getCurrentTopLevelSExpression() {
+		return (String) editorSupport._("top-level-code-form", getParseState(), getSourceCaretOffset());
 	}
 	
 	/**
