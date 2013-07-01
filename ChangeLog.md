@@ -47,3 +47,8 @@ e.g. if the caret is materialized with the symbol |:
 ### Repl 
 
 - A bug had slipped in the project classpath management preventing native libraries to load properly, for instance when trying to work with Overtone. Fix Issue #577 
+
+### Stability
+
+- There were reports of restart issues after Eclipse crashes. Hopefully this has been improved in this release (Fix Issue #568	CCW Beta 0.13.0.201304190010 prevents Eclipse from loading)
+
