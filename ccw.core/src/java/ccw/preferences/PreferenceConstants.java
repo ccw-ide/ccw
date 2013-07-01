@@ -196,11 +196,11 @@ public class PreferenceConstants {
     	String tokenKey = getTokenPreferenceKey(token);
     	return new ColorizableToken(
     			CCWPlugin.getPreferenceRGB(store, tokenKey, defaultColor),
-    			store.getBoolean(SyntaxColoringPreferencePage.getEnabledPreferenceKey(tokenKey)) 
-    				? store.getBoolean(SyntaxColoringPreferencePage.getBoldPreferenceKey(tokenKey)) 
+    			store.getBoolean(SyntaxColoringHelper.getEnabledPreferenceKey(tokenKey)) 
+    				? store.getBoolean(SyntaxColoringHelper.getBoldPreferenceKey(tokenKey)) 
     				: null,
-    			store.getBoolean(SyntaxColoringPreferencePage.getEnabledPreferenceKey(tokenKey))
-    				? store.getBoolean(SyntaxColoringPreferencePage.getItalicPreferenceKey(tokenKey)) 
+    			store.getBoolean(SyntaxColoringHelper.getEnabledPreferenceKey(tokenKey))
+    				? store.getBoolean(SyntaxColoringHelper.getItalicPreferenceKey(tokenKey)) 
     				: null);
     }
     
