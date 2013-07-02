@@ -284,6 +284,35 @@
             id="ccw.ui.edit.text.clojure.select.last"
             name="%command.selectLast.name">
       </command>
+
+      <command
+            categoryId="org.eclipse.ui.category.edit"
+            description="%command.forward-slurp.description"
+            id="ccw.ui.edit.text.clojure.forward-slurp"
+            name="%command.forward-slurp.name">
+      </command>
+
+      <command
+            categoryId="org.eclipse.ui.category.edit"
+            description="%command.backward-slurp.description"
+            id="ccw.ui.edit.text.clojure.backward-slurp"
+            name="%command.backward-slurp.name">
+      </command>
+
+      <command
+            categoryId="org.eclipse.ui.category.edit"
+            description="%command.forward-barf.description"
+            id="ccw.ui.edit.text.clojure.forward-barf"
+            name="%command.forward-barf.name">
+      </command>
+
+      <command
+            categoryId="org.eclipse.ui.category.edit"
+            description="%command.backward-barf.description"
+            id="ccw.ui.edit.text.clojure.backward-barf"
+            name="%command.backward-barf.name">
+      </command>
+
       <command
             categoryId="org.eclipse.ui.category.edit"
             description="%command.raiseSelection.description"
@@ -585,6 +614,59 @@
             sequence="M2+M1+ARROW_DOWN"
             platform="carbon">
       </key>
+
+      <key
+            commandId="ccw.ui.edit.text.clojure.forward-slurp"
+            contextId="ccw.ui.clojureEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+) ARROW_LEFT">
+      </key>
+      <key
+            commandId="ccw.ui.edit.text.clojure.forward-slurp"
+            contextId="ccw.ui.clojureEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+) S">
+      </key>
+
+      <key
+            commandId="ccw.ui.edit.text.clojure.backward-slurp"
+            contextId="ccw.ui.clojureEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+( ARROW_RIGHT">
+      </key>
+      <key
+            commandId="ccw.ui.edit.text.clojure.backward-slurp"
+            contextId="ccw.ui.clojureEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+( S">
+      </key>
+
+      <key
+            commandId="ccw.ui.edit.text.clojure.forward-barf"
+            contextId="ccw.ui.clojureEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+) ARROW_RIGHT">
+      </key>
+      <key
+            commandId="ccw.ui.edit.text.clojure.forward-barf"
+            contextId="ccw.ui.clojureEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+) B">
+      </key>
+
+      <key
+            commandId="ccw.ui.edit.text.clojure.backward-barf"
+            contextId="ccw.ui.clojureEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+( ARROW_LEFT">
+      </key>
+      <key
+            commandId="ccw.ui.edit.text.clojure.backward-barf"
+            contextId="ccw.ui.clojureEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+( B">
+      </key>
+
       <key
             commandId="ccw.ui.edit.text.clojure.select.raise"
             contextId="ccw.ui.clojureEditorScope"
@@ -890,7 +972,7 @@
             commandId="ccw.ui.edit.text.clojure.switch.rainbow.parens"
             contextId="ccw.ui.clojureEditorScope"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="M1+(">
+            sequence="M1+(+R">
       </key>
 	</extension>
    <extension
@@ -1767,6 +1849,163 @@
            </with>
         </activeWhen>
      </handler>
+     
+     <handler
+           commandId="ccw.ui.edit.text.clojure.forward-slurp">
+        <class
+              class="ccw.util.GenericExecutableExtension">
+           <parameter
+                 name="factory"
+                 value="ccw.util.factories/handler-factory">
+           </parameter>
+           <parameter
+                 name="handler"
+                 value="ccw.editors.clojure.handlers/forward-slurp">
+           </parameter>
+        </class>
+        <enabledWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </enabledWhen>
+        <activeWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </activeWhen>
+     </handler>
+     
+     <handler
+           commandId="ccw.ui.edit.text.clojure.backward-slurp">
+        <class
+              class="ccw.util.GenericExecutableExtension">
+           <parameter
+                 name="factory"
+                 value="ccw.util.factories/handler-factory">
+           </parameter>
+           <parameter
+                 name="handler"
+                 value="ccw.editors.clojure.handlers/backward-slurp">
+           </parameter>
+        </class>
+        <enabledWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </enabledWhen>
+        <activeWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </activeWhen>
+     </handler>
+     
+     <handler
+           commandId="ccw.ui.edit.text.clojure.forward-barf">
+        <class
+              class="ccw.util.GenericExecutableExtension">
+           <parameter
+                 name="factory"
+                 value="ccw.util.factories/handler-factory">
+           </parameter>
+           <parameter
+                 name="handler"
+                 value="ccw.editors.clojure.handlers/forward-barf">
+           </parameter>
+        </class>
+        <enabledWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </enabledWhen>
+        <activeWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </activeWhen>
+     </handler>
+     
+          <handler
+           commandId="ccw.ui.edit.text.clojure.backward-barf">
+        <class
+              class="ccw.util.GenericExecutableExtension">
+           <parameter
+                 name="factory"
+                 value="ccw.util.factories/handler-factory">
+           </parameter>
+           <parameter
+                 name="handler"
+                 value="ccw.editors.clojure.handlers/backward-barf">
+           </parameter>
+        </class>
+        <enabledWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </enabledWhen>
+        <activeWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </activeWhen>
+     </handler>
+          
      <handler
            commandId="ccw.ui.edit.text.clojure.select.raise">
         <class

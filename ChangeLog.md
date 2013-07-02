@@ -44,6 +44,10 @@ e.g. if the caret is materialized with the symbol |:
 ;; => qix's declaration will be sent to the REPL
 ```
 
+- Addition of 2 important paredit/structural manipulation features: slurp and barf, backward and forward. (Fixes Issue #486: Add support for barfage and slurpage)
+
+See the Keybindings documentation for Slurp / Barf : https://code.google.com/p/counterclockwise/wiki/EditorKeyBindingsFeatures
+
 ### Repl 
 
 - A bug had slipped in the project classpath management preventing native libraries to load properly, for instance when trying to work with Overtone. Fix Issue #577 
