@@ -52,6 +52,9 @@ See the Keybindings documentation for Slurp / Barf : https://code.google.com/p/c
 
 - A bug had slipped in the project classpath management preventing native libraries to load properly, for instance when trying to work with Overtone. Fix Issue #577 
 
+- Reverting the behaviour of the "Evaluate selection" when sending to the REPL : back to using 'in-ns instead of 'ns while transitioning to the selection's namespace
+Fixes Issue #533: ns is sent to REPL instead of in-ns
+
 ### Stability
 
 - There were reports of restart issues after Eclipse crashes. Hopefully this has been improved in this release (Fix Issue #568	CCW Beta 0.13.0.201304190010 prevents Eclipse from loading)
