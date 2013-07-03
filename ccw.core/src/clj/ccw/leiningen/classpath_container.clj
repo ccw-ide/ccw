@@ -553,6 +553,15 @@
   (let [container (leiningen-classpath-container deps)]
     (set-classpath-container java-project CONTAINER-PATH container)))
 
+(defn refresh-target-folder 
+  "Refreshes the target folder of a project, if it exists.
+   project may be anything coercible to an IProject.
+   This function does not call refresh on a background job, nor does it run
+   inside a workspace runnable."
+  [project-coercible]
+  (if-let [target-folder (.getFolder (e/project project-coercible) "target")]
+    (.refreshLocal target-folder (IResource/DEPTH_INFINITE) nil)))
+
 (defn update-project-dependencies
   "Get the dependencies.
    If deps fetched ok: sets lein container, save the dependencies list on disk.
@@ -565,6 +574,7 @@
       (set-lein-container java-project deps)
       (delete-container-markers java-project)
       (save-project-dependencies java-project deps))
+    (refresh-target-folder java-project)
     (catch Exception e
       ;; TODO enhance this in the future ... (more accurate problem markers)
       (let [[jresource message] (resource-message e java-project)

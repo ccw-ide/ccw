@@ -322,12 +322,12 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
             fListModel.add(new HighlightingColorListItem(
                     modelItem[0],
                     modelItem[1], 
-                    getBoldPreferenceKey(modelItem[1]),
-                    getItalicPreferenceKey(modelItem[1]),
+                    SyntaxColoringHelper.getBoldPreferenceKey(modelItem[1]),
+                    SyntaxColoringHelper.getItalicPreferenceKey(modelItem[1]),
                     /*
                     getStrikethroughPreferenceKey(model[1]),
                     getUnderlinePreferenceKey(model[1]),*/
-                    getEnabledPreferenceKey(modelItem[1])));
+                    SyntaxColoringHelper.getEnabledPreferenceKey(modelItem[1])));
     }
 
 /*    private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
@@ -792,9 +792,9 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
 
         for (String[] s: fSyntaxColorListModel) {
             overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, s[1]));
-            overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, getBoldPreferenceKey(s[1])));
-            overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, getItalicPreferenceKey(s[1])));
-            overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, getEnabledPreferenceKey(s[1])));
+            overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, SyntaxColoringHelper.getBoldPreferenceKey(s[1])));
+            overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, SyntaxColoringHelper.getItalicPreferenceKey(s[1])));
+            overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, SyntaxColoringHelper.getEnabledPreferenceKey(s[1])));
         }
         
         OverlayPreferenceStore.OverlayKey[] keys= new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];
@@ -821,35 +821,5 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         return PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + semanticHighlighting.getPreferenceKey() + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_UNDERLINE_SUFFIX;
     }
 */
-    /**
-     * A named preference that controls if the given Clojure syntax highlighting is enabled.
-     *
-     * @param the preference key
-     * @return the enabled preference key
-     */
-    public static String getEnabledPreferenceKey(String preferenceKey) {
-    	return preferenceKey + PreferenceConstants.EDITOR_COLORING_ENABLED_SUFFIX;
-    }
-    
-    /**
-     * A named preference that controls if the given semantic highlighting has the text attribute bold.
-     *
-     * @param semanticHighlighting the semantic highlighting
-     * @return the bold preference key
-     */
-    public static String getBoldPreferenceKey(String keyPrefix) {
-        return keyPrefix + PreferenceConstants.EDITOR_BOLD_SUFFIX;
-    }
-
-    /**
-     * A named preference that controls if the given semantic highlighting has the text attribute italic.
-     *
-     * @param semanticHighlighting the semantic highlighting
-     * @return the italic preference key
-     */
-    public static String getItalicPreferenceKey(String keyPrefix) {
-        return keyPrefix + PreferenceConstants.EDITOR_ITALIC_SUFFIX;
-    }
-
 }
 

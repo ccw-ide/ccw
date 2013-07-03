@@ -48,7 +48,7 @@ import ccw.editors.clojure.IScanContext;
 import ccw.launching.LaunchUtils;
 import ccw.nature.AutomaticNatureAdder;
 import ccw.preferences.PreferenceConstants;
-import ccw.preferences.SyntaxColoringPreferencePage;
+import ccw.preferences.SyntaxColoringHelper;
 import ccw.repl.REPLView;
 import ccw.util.BundleUtils;
 import ccw.util.DisplayUtil;
@@ -380,7 +380,7 @@ public class CCWPlugin extends AbstractUIPlugin {
 	
 	public static RGB getPreferenceRGB(IPreferenceStore store, String preferenceKey, RGB defaultColor) {
 	    return
-    	    store.getBoolean(SyntaxColoringPreferencePage.getEnabledPreferenceKey(preferenceKey))
+    	    store.getBoolean(SyntaxColoringHelper.getEnabledPreferenceKey(preferenceKey))
                 ? PreferenceConverter.getColor(store, preferenceKey)
                 : defaultColor;
 	}

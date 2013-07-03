@@ -60,6 +60,22 @@
 
 (defn- paredit-fn [command-key] #(pc/paredit command-key %1 %2))
 
+(defn forward-slurp [_ event] 
+  (apply-paredit-command (editor event) 
+                         (paredit-fn :paredit-forward-slurp-sexp)))
+
+(defn backward-slurp [_ event] 
+  (apply-paredit-command (editor event) 
+                         (paredit-fn :paredit-backward-slurp-sexp)))
+
+(defn forward-barf [_ event] 
+  (apply-paredit-command (editor event) 
+                         (paredit-fn :paredit-forward-barf-sexp)))
+
+(defn backward-barf [_ event] 
+  (apply-paredit-command (editor event) 
+                         (paredit-fn :paredit-backward-barf-sexp)))
+
 (defn raise [_ event] 
   (apply-paredit-command (editor event) 
                          (paredit-fn :paredit-raise-sexp)))

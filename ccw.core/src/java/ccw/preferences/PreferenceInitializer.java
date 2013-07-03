@@ -133,10 +133,10 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	    for (SyntaxColoringDefault d: coloringDefaults) {
 	        store.setDefault(d.getPreferenceConstant(),
 	                StringConverter.asString(d.getDefaultColor()));
-	        store.setDefault(SyntaxColoringPreferencePage.getEnabledPreferenceKey(d.getPreferenceConstant()),
+	        store.setDefault(SyntaxColoringHelper.getEnabledPreferenceKey(d.getPreferenceConstant()),
                     d.isDefaultEnabled());
-	        store.setDefault(SyntaxColoringPreferencePage.getBoldPreferenceKey(d.getPreferenceConstant()), d.isBold());
-	        store.setDefault(SyntaxColoringPreferencePage.getItalicPreferenceKey(d.getPreferenceConstant()), d.isItalic());
+	        store.setDefault(SyntaxColoringHelper.getBoldPreferenceKey(d.getPreferenceConstant()), d.isBold());
+	        store.setDefault(SyntaxColoringHelper.getItalicPreferenceKey(d.getPreferenceConstant()), d.isItalic());
 	    }
 	    
 	    store.setDefault(PreferenceConstants.REPL_QUIET_LOGGING_MODE, false);
