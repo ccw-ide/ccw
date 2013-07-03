@@ -154,8 +154,8 @@
                      <adapt
                            type="org.eclipse.core.resources.IProject">
                         <test
-                              forcePluginActivation="true"
-                              property="ccw.propertyTester.hasClojureNature">
+                              property="org.eclipse.core.resources.projectNature"
+                              value="ccw.leiningen.nature">
                         </test>
                      </adapt>
                   </iterate>
@@ -179,13 +179,13 @@
                   <iterate>
                      <and>
                         <test
-                              forcePluginActivation="true"
+                              forcePluginActivation="false"
                               property="org.eclipse.debug.ui.matchesPattern"
                               value="*.clj">
                         </test>
                         <test
-                              forcePluginActivation="true"
-                              property="ccw.propertyTester.hasClojureNature">
+                              property="org.eclipse.core.resources.projectNature"
+                              value="ccw.leiningen.nature">
                         </test>
                      </and>
                   </iterate>
@@ -1507,16 +1507,6 @@
     </super>
  </extension>
  <extension
-       point="org.eclipse.core.expressions.propertyTesters">
-    <propertyTester
-          class="ccw.nature.ClojureNaturePropertyTest"
-          id="ccw.propertyTester.hasClojureNature"
-          namespace="ccw.propertyTester"
-          properties="hasClojureNature"
-          type="java.lang.Object">
-    </propertyTester>
- </extension>
- <extension
        point="org.eclipse.core.runtime.adapters">
     <factory
           adaptableType="org.eclipse.core.resources.IProject"
@@ -2795,9 +2785,9 @@
                <adapt
                      type="org.eclipse.core.resources.IResource">
                   <test
-                        forcePluginActivation="true"
-                        property="ccw.leiningen.propertyTester.leiningen-enabled-project">
-                  </test>
+                              property="org.eclipse.core.resources.projectNature"
+                              value="ccw.leiningen.nature">
+                        </test>
                </adapt>
             </iterate>
          </or>
@@ -2822,9 +2812,6 @@
                   operator="and">
                <adapt
                      type="org.eclipse.core.resources.IProject">
-                  <test
-                        property="ccw.leiningen.propertyTester.leiningen-project-file-present-factory">
-                  </test>
                </adapt>
             </iterate>
             <not>
@@ -2853,9 +2840,6 @@
                   operator="and">
                <adapt
                      type="org.eclipse.core.resources.IProject">
-                  <test
-                        property="ccw.leiningen.propertyTester.leiningen-project-file-present-factory">
-                  </test>
                </adapt>
             </iterate>
             <not>
@@ -2899,10 +2883,10 @@
                   operator="and">
                <adapt
                      type="org.eclipse.core.resources.IResource">
-                  <test
-                        forcePluginActivation="true"
-                        property="ccw.leiningen.propertyTester.leiningen-enabled-project">
-                  </test>
+                <test
+                      property="org.eclipse.core.resources.projectNature"
+                      value="ccw.leiningen.nature">
+                </test>
                </adapt>
             </iterate>
          </or>
@@ -3006,44 +2990,6 @@
          </iterate>
       </and>
    </definition>
-   <definition
-         id="ccw.leiningen.expression.selection-single-non-leiningen-project">
-      <and>
-         <count
-               value="1">
-         </count>
-         <iterate
-               ifEmpty="false"
-               operator="or">
-            <adapt
-                  type="org.eclipse.core.resources.IProject">
-               <not>
-                  <test
-                        property="ccw.leiningen.propertyTester.leiningen-project-file-present-factory"
-                        value="ccw.leiningen.nature">
-                  </test>
-               </not>
-            </adapt>
-         </iterate>
-      </and>
-   </definition>
-</extension>
-<extension
-      point="org.eclipse.core.expressions.propertyTesters">
-   <propertyTester
-         class="ccw.util.GenericExecutableExtension:ccw.leiningen.handlers/leiningen-enabled-project-factory"
-         id="ccw.leiningen.propertyTester.leiningen-enabled-project"
-         namespace="ccw.leiningen.propertyTester"
-         properties="leiningen-enabled-project"
-         type="java.lang.Object">
-   </propertyTester>
-   <propertyTester
-         class="ccw.util.GenericExecutableExtension:ccw.leiningen.handlers/leiningen-project-file-present-factory"
-         id="ccw.leiningen.propertyTester.leiningen-project-file-present-factory"
-         namespace="ccw.leiningen.propertyTester"
-         properties="leiningen-project-file-present-factory"
-         type="org.eclipse.core.resources.IProject">
-   </propertyTester>
 </extension>
 <extension
       point="org.eclipse.ui.perspectiveExtensions">

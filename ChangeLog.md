@@ -63,3 +63,7 @@ Fixes Issue #533: ns is sent to REPL instead of in-ns
 
 - Internally switched to Leiningen 2.1.2
 
+### Better plays as an Eclipse plugin
+
+- CCW plugin does not start unnecessarily when invoking the project's contextual menu
+
