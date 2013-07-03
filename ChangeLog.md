@@ -59,3 +59,7 @@ Fixes Issue #533: ns is sent to REPL instead of in-ns
 
 - There were reports of restart issues after Eclipse crashes. Hopefully this has been improved in this release (Fix Issue #568	CCW Beta 0.13.0.201304190010 prevents Eclipse from loading)
 
+### Leiningen
+
+- Internally switched to Leiningen 2.1.2
+
