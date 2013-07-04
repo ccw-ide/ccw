@@ -205,7 +205,7 @@ public class PreferenceConstants {
     }
     
     public static boolean isReplQuietLoggingMode() {
-    	return CCWPlugin.getDefault().getCombinedPreferenceStore().getBoolean(PreferenceConstants.REPL_QUIET_LOGGING_MODE);
+    	return CCWPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.REPL_QUIET_LOGGING_MODE);
     }
     public static boolean isReplExplicitLoggingMode() {
     	return !isReplQuietLoggingMode();

@@ -224,6 +224,9 @@ public class CCWPlugin extends AbstractUIPlugin {
      * the PlatformUI preference stores to inherit all the default text editor
      * settings from the Eclipse preferences.
      * 
+     * <p>Beware, the combined preference store can only be instanciated from the
+     *    UI Thread.</p>
+     * 
      * @return the combined preference store.
      */
     public IPreferenceStore getCombinedPreferenceStore() {
@@ -326,7 +329,7 @@ public class CCWPlugin extends AbstractUIPlugin {
 	public static final String SORT = "alphab_sort_co.gif";
 
 	public static boolean isAutoReloadOnStartupSaveEnabled() {
-		return CCWPlugin.getDefault().getCombinedPreferenceStore().getBoolean(PreferenceConstants.CCW_GENERAL_AUTO_RELOAD_ON_STARTUP_SAVE);
+		return CCWPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.CCW_GENERAL_AUTO_RELOAD_ON_STARTUP_SAVE);
 	}
 	
 	public static boolean isAutoReloadOnStartupSaveEnabled(ILaunch launch) {
