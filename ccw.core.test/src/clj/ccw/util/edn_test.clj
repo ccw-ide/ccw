@@ -5,7 +5,6 @@
 (deftest test-read-vector
   (testing "read-vector"
     (testing "returns the vector in the input string"
-      (is (= false true))
       (is (= [123 456] (read-vector "[123 456]"))))
     (testing "returns an empty vector if the input is invalid EDN"
       (is (= [] (read-vector "[123"))))
