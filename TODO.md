@@ -8,6 +8,7 @@
 - Have a Welcome Page: 
   - for the Project Homepage on the Internet, 
   - for Donations
+- Enable in-tycho test compilation of Clojure namespaces to check that at least they AOT-compile correctly
 
 ### DONE
 
