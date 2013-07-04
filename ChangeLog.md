@@ -59,6 +59,8 @@ Fixes Issue #533: ns is sent to REPL instead of in-ns
 
 - Launch repl ack timeout set to 60 sec instead of 30
 
+- Better IPv6 support: replaced "localhost" occurences by "127.0.0.1"
+
 ### Stability
 
 - There were reports of restart issues after Eclipse crashes. Hopefully this has been improved in this release (Fix Issue #568	CCW Beta 0.13.0.201304190010 prevents Eclipse from loading)

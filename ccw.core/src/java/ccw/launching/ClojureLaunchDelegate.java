@@ -151,7 +151,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 		            	}
 		                private void connectRepl() {
 		                    try {
-		                        REPLView replView = REPLView.connect("nrepl://localhost:" + port.intValue(), lastConsoleOpened, launch, makeActiveREPL);
+		                        REPLView replView = REPLView.connect("nrepl://127.0.0.1:" + port.intValue(), lastConsoleOpened, launch, makeActiveREPL);
 		                        String startingNamespace = REPLViewLaunchMonitor.this.launch.getLaunchConfiguration().getAttribute(LaunchUtils.ATTR_NS_TO_START_IN, "user");
 		                        try {
 		                        	replView.setCurrentNamespace(startingNamespace);
