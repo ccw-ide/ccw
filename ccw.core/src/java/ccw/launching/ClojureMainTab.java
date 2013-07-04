@@ -42,6 +42,7 @@ import org.eclipse.ui.model.BaseWorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 import ccw.CCWPlugin;
+import ccw.util.StringUtils;
 
 /**
  * Heavily adapted from JDT's java launcher tabs.
@@ -102,6 +103,9 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
             @Override
             public void widgetSelected(SelectionEvent e) {
                 String currentProjName = fProjText.getText().trim();
+                if (StringUtils.isBlank(currentProjName)) {
+                	return;
+                }
                 final IProject proj = ResourcesPlugin.getWorkspace().getRoot().getProject(currentProjName);
                 if (proj == null) {
                     return;
@@ -178,12 +182,6 @@ public class ClojureMainTab extends AbstractJavaMainTab implements IJavaLaunchCo
     public void initializeFrom(ILaunchConfiguration config) {
         super.initializeFrom(config);
 
-        String currentProjName = fProjText.getText().trim();
-        IProject proj = ResourcesPlugin.getWorkspace().getRoot().getProject(currentProjName);
-        if (proj == null) {
-            return;
-        }
-        
         try {
         	installREPLChoice.setSelection(config.getAttribute(LaunchUtils.ATTR_CLOJURE_START_REPL, true));
         } catch (CoreException e) {
