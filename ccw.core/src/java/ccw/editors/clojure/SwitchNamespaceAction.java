@@ -6,7 +6,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.action.Action;
 
 import ccw.CCWPlugin;
-import ccw.preferences.PreferenceConstants;
 import ccw.repl.Actions;
 import ccw.repl.REPLView;
 

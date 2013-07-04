@@ -20,10 +20,9 @@ import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 
-import clojure.lang.Keyword;
-
 import ccw.CCWPlugin;
 import ccw.repl.REPLView;
+import clojure.lang.Keyword;
 import clojure.tools.nrepl.Connection;
 import clojure.tools.nrepl.Connection.Response;
 

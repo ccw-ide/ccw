@@ -12,7 +12,6 @@ package ccw.preferences;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-
 import org.eclipse.ui.forms.widgets.SharedScrolledComposite;
 
 public class ScrolledPageContent extends SharedScrolledComposite {

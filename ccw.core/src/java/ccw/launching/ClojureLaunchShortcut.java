@@ -49,7 +49,6 @@ import org.eclipse.ui.part.FileEditorInput;
 
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
-import ccw.repl.Actions;
 import ccw.util.DisplayUtil;
 
 public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfigurationConstants {
