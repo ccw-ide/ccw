@@ -181,7 +181,7 @@ public class NewLeiningenProjectWizard extends BasicNewResourceWizard
 	}
 	
 	private void doLeinAddPagesPost() {
-		getStartingPage().setDescription("Leverages Leiningen 2.0, the recommanded project management tool for Clojure."
+		getStartingPage().setDescription("Leverages Leiningen 2.0, the recommended project management tool for Clojure."
 				+ "\n(Don't wanna use Leiningen? Then simply create a maven/gradle/whatever java project, and add Clojure in its classpath)");
         getStartingPage().setTitle("Clojure project");
         setWindowTitle("New Clojure project");
@@ -506,7 +506,7 @@ public class NewLeiningenProjectWizard extends BasicNewResourceWizard
 				}
 			}
 		} else {
-			IDEWorkbenchPlugin.log("Unable to find persective " //$NON-NLS-1$
+			IDEWorkbenchPlugin.log("Unable to find perspective " //$NON-NLS-1$
 					+ finalPerspId
 					+ " in BasicNewProjectResourceWizard.updatePerspective"); //$NON-NLS-1$
 			return;
