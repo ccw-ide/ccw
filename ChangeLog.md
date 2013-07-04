@@ -48,6 +48,8 @@ e.g. if the caret is materialized with the symbol |:
 
 See the Keybindings documentation for Slurp / Barf : https://code.google.com/p/counterclockwise/wiki/EditorKeyBindingsFeatures
 
+- Fixed wrong keybinding for switching Rainbow Parens: "Cmd+( R" instead of "Cmd+(+R" (replace Cmd by Ctrl for Windows/Linux ; space indicates that you first type Cmd+(, then type R)
+
 ### Repl 
 
 - A bug had slipped in the project classpath management preventing native libraries to load properly, for instance when trying to work with Overtone. Fix Issue #577 
