@@ -151,13 +151,22 @@
                         value="1">
                   </count>
                   <iterate>
-                     <adapt
-                           type="org.eclipse.core.resources.IProject">
-                        <test
-                              property="org.eclipse.core.resources.projectNature"
-                              value="ccw.leiningen.nature">
-                        </test>
-                     </adapt>
+                     <or>
+                        <adapt
+                              type="org.eclipse.core.resources.IProject">
+                           <test
+                                 property="org.eclipse.core.resources.projectNature"
+                                 value="ccw.nature">
+                           </test>
+                        </adapt>
+                        <adapt
+                              type="org.eclipse.core.resources.IFolder">
+                           <test
+                                 property="org.eclipse.core.resources.projectNature"
+                                 value="ccw.nature">
+                           </test>
+                        </adapt>
+                     </or>
                   </iterate>
                </with>
             </enablement>
@@ -178,15 +187,20 @@
                   </count>
                   <iterate>
                      <and>
-                        <test
-                              forcePluginActivation="false"
-                              property="org.eclipse.debug.ui.matchesPattern"
-                              value="*.clj">
-                        </test>
-                        <test
-                              property="org.eclipse.core.resources.projectNature"
-                              value="ccw.leiningen.nature">
-                        </test>
+                        <adapt
+                              type="org.eclipse.core.resources.IFile">
+                           <and>
+                              <test
+                                    property="org.eclipse.core.resources.projectNature"
+                                    value="ccw.nature">
+                              </test>
+                              <test
+                                    forcePluginActivation="false"
+                                    property="org.eclipse.debug.ui.matchesPattern"
+                                    value="*.clj">
+                              </test>
+                           </and>
+                        </adapt>
                      </and>
                   </iterate>
                </with>
