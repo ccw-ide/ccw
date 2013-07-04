@@ -191,7 +191,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
 				(clojure.lang.IPersistentMap) 
 				leiningenConfiguration._("lein-launch-configuration",
 			    project,	
-			    "update-in :dependencies conj \"[ccw/ccw-server \\\"0.1.0\\\"]\" -- update-in :injections conj \"(require 'ccw.debug.serverrepl)\" -- repl :headless");
+			    "update-in :dependencies conj \"[ccw/ccw.server \\\"0.1.0\\\"]\" -- update-in :injections conj \"(require 'ccw.debug.serverrepl)\" -- repl :headless");
 		configMap = configMap.assoc(Keyword.intern("type-id"), Keyword.intern("ccw"));
 		configMap = configMap.assoc(Keyword.intern("name"), project.getName() + " Leiningen");
 		configMap = configMap.assoc(LaunchUtils.ATTR_CLOJURE_START_REPL, true);
