@@ -1,5 +1,6 @@
 (ns ccw.repl.cmdhistory
   (:use [clojure.core.incubator :only [-?>]])
+  (:require [ccw.util.edn :refer [read-vector]])
   (:import
     ccw.CCWPlugin
     org.eclipse.core.runtime.jobs.Job
@@ -32,7 +33,7 @@
     ccw.launching.LaunchUtils/getProject
     org.eclipse.core.resources.ProjectScope.
     (.getNode pref-node-id)
-    (doto .sync))) 
+    (doto .sync)))
 
 (defn- queue-expression
   [project-name expr]
@@ -58,7 +59,7 @@
     (if pref-node
       [(into (or (-?> pref-node
                    (.get history-key "[]")
-                   read-string)
+                   read-vector)
                [])
          (@queued-commands project-name))
        (partial queue-expression project-name)]
