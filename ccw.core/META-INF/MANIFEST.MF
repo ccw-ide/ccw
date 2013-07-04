@@ -106,7 +106,9 @@ Bundle-ClassPath: .,
  lib/versioneer.jar,
  lib/wagon-http-shared4.jar,
  lib/wagon-http.jar,
- lib/wagon-provider-api.jar
+ lib/wagon-provider-api.jar,
+ lib/junit.jar,
+ lib/cljunit.jar
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Vendor: Counterclockwise team
 Bundle-ActivationPolicy: lazy

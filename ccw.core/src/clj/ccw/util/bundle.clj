@@ -7,7 +7,8 @@
            org.eclipse.core.internal.registry.ExtensionRegistry
            org.osgi.framework.Bundle
            org.osgi.framework.Version
-           org.osgi.framework.BundleException))
+           org.osgi.framework.BundleException)
+  (:require [clojure.xml :as xml]))
 
 ;(defn require-and-get-var)
 ;	public static Var requireAndGetVar(String bundleSymbolicName, String varName) throws CoreException {
