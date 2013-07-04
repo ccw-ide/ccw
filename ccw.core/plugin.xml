@@ -2713,7 +2713,7 @@
   <classpathContainerPage
    id="ccw.LEININGEN_CONTAINER"
    name="%ccw.LEININGEN_CONTAINER"
-   class="ccw.util.GenericExecutableExtension:ccw.leiningen.classpath-container/page-factory">
+   class="ccw.util.GenericExecutableExtension:ccw.leiningen.classpath-container-ui/page-factory">
   </classpathContainerPage>         
    </extension>
 <extension
