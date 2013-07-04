@@ -5,3 +5,6 @@
 /target/
 /*.jar
 /*.tgz
+/leiningen-standalone/
+/leiningen-standalone.*
+/bin

@@ -55,6 +55,8 @@ public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
 
     public static final String SYSPROP_LAUNCH_ID = "ccw.repl.launchid";
 
+	public static final String ATTR_LEININGEN_CONFIGURATION = "ccw.leiningen.configuration";
+
 	/**
 	 * @param files
 	 * @param lastFileAsScript if true, does not install the last arg as a resource to load, but as
@@ -184,7 +186,7 @@ public final class LaunchUtils implements IJavaLaunchConfigurationConstants {
         config.setAttribute(LaunchUtils.ATTR_FILES_LAUNCHED_AT_STARTUP, filesAsString.toString());
     }    
     
-    public static List<ILaunch> findRunningLaunchesFor(String projectName) {
+    public static List<ILaunch> findRunningLaunchesForProject(String projectName) {
     	List<ILaunch> ret = new ArrayList<ILaunch>();
     	ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
     	for (ILaunch launch: launchManager.getLaunches()) {
