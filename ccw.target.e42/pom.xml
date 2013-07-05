@@ -22,7 +22,7 @@
     <groupId>ccw</groupId>
     <artifactId>parent</artifactId>
     <version>0.12.4-SNAPSHOT</version>
-    <relativePath>../ccw.parent/pom.xml</relativePath>
+    <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>ccw.target.e42</artifactId>
   <packaging>eclipse-target-definition</packaging>

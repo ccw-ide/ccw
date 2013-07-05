@@ -6,14 +6,20 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>ccw</groupId>
-  <artifactId>aggregator</artifactId>
+  <artifactId>parent</artifactId>
   <version>0.12.4-SNAPSHOT</version>
   <packaging>pom</packaging>
 
+  <properties>
+    <tycho-version>0.18.0</tycho-version>
+  </properties>
+  
   <modules>
     <module>ccw.target.e37</module>
     <module>ccw.target.e42</module>
+    <!--
     <module>ccw.parent</module>
+    -->
     <module>ccw.branding</module>
     <module>paredit.clj</module>
     <module>ccw.core</module>
@@ -23,4 +29,144 @@
     <module>ccw.product</module>
   </modules>
 
+  <profiles>
+    <profile>
+      <id>default-target</id>
+      <activation>
+        <property>
+          <name>!env.ECLIPSE_TARGET</name>
+        </property>
+      </activation>
+      <!-- configure p2 repository to resolve against -->
+      <!--
+      <repositories>
+        <repository>
+          <id>indigo</id>
+          <layout>p2</layout>
+          <url>http://download.eclipse.org/eclipse/updates/3.7</url>
+        </repository>
+      </repositories>
+      -->
+      <properties>
+        <target-platform>e37</target-platform>
+      </properties>
+    </profile>
+    <profile>
+      <id>indigo</id>
+      <activation>
+        <property>
+          <name>env.ECLIPSE_TARGET</name>
+          <value>indigo</value>
+        </property>
+      </activation>
+      <!-- configure p2 repository to resolve against -->
+      <!--
+      <repositories>
+        <repository>
+          <id>indigo</id>
+          <layout>p2</layout>
+          <url>http://download.eclipse.org/eclipse/updates/3.7</url>
+        </repository>
+      </repositories>
+      -->
+      <properties>
+        <target-platform>e37</target-platform>
+      </properties>
+    </profile>
+    <profile>
+      <id>juno</id>
+      <activation>
+        <property>
+          <name>env.ECLIPSE_TARGET</name>
+          <value>juno</value>
+        </property>
+      </activation>
+      <!-- configure p2 repository to resolve against -->
+       <!--
+      <repositories>
+        <repository>
+          <id>juno</id>
+          <layout>p2</layout>
+          <url>http://download.eclipse.org/eclipse/updates/4.2</url>
+        </repository>
+      </repositories>
+      -->
+      <properties>
+        <target-platform>e42</target-platform>
+      </properties>
+    </profile>
+  </profiles>
+  
+  <repositories>
+    <repository>
+      <id>clojars.org</id>
+      <url>http://clojars.org/repo</url>
+    </repository>
+    <!--
+    <repository>
+      <id>swtbot</id>
+      <layout>p2</layout>
+      <url>http://download.eclipse.org/technology/swtbot/releases/latest</url>
+    </repository>
+    -->
+  </repositories>
+  
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-versions-plugin</artifactId>
+        <version>${tycho-version}</version>
+      </plugin>
+      <plugin>
+        <!-- enable tycho build extension -->
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-maven-plugin</artifactId>
+        <version>${tycho-version}</version>
+        <extensions>true</extensions>
+      </plugin>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>target-platform-configuration</artifactId>
+        <version>${tycho-version}</version>
+        <configuration>
+          <resolver>p2</resolver>
+          <environments>
+            <environment>
+              <os>win32</os>
+              <ws>win32</ws>
+              <arch>x86</arch>
+            </environment>
+            <environment>
+              <os>win32</os>
+              <ws>win32</ws>
+              <arch>x86_64</arch>
+            </environment>
+            <environment>
+              <os>linux</os>
+              <ws>gtk</ws>
+              <arch>x86</arch>
+            </environment>
+            <environment>
+              <os>linux</os>
+              <ws>gtk</ws>
+              <arch>x86_64</arch>
+            </environment>
+            <environment>
+              <os>macosx</os>
+              <ws>cocoa</ws>
+              <arch>x86_64</arch>
+            </environment>
+          </environments>
+          <target>
+            <artifact>
+              <groupId>${project.groupId}</groupId>
+              <artifactId>${project.groupId}.target.${target-platform}</artifactId>
+              <version>${project.version}</version>
+            </artifact>
+          </target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
