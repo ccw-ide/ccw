@@ -98,7 +98,7 @@
           ; certificates declared for the project
           (u/eval-in-project
             project-name
-            `(do
+            `(do 
                (require 'leiningen.core.classpath)
                (let [~'dependencies (apply leiningen.core.classpath/resolve-dependencies
                                            '~dependencies-key
@@ -235,268 +235,9 @@
 (defn- unresolved-dependencies-string [exc]
   (let [unresolved (-> exc .getResult .getArtifactResults unresolved-artifacts)
         artifacts (map (comp artifact-string requested-artifact) unresolved)]
-    (when-not artifacts 
-      (println "missing artifacts, printing the stacktrace instead:" (.printStackTrace exc)))      
-    (str/join ", " artifacts)))
-
-;; TODO fixme: if the network is down, and we write a non existent dependency, the message does not manage to list the dependencies
-;; we were not able to fetch. the following Exception chaining must be deciphered:
-;java.lang.RuntimeException: org.sonatype.aether.resolution.DependencyResolutionException: Failed to collect dependencies for clojure.lang.LazySeq@47d9ca99
-;	at clojure.lang.Util.runtimeException(Util.java:165)
-;	at clojure.lang.Reflector.invokeInstanceMethod(Reflector.java:35)
-;	at cemerick.pomegranate.aether$resolve_dependencies.doInvoke(aether.clj:269)
-;	at clojure.lang.RestFn.invoke(RestFn.java:457)
-;	at leiningen.core.classpath$resolve_dependencies.invoke(classpath.clj:51)
-;	at ccw.leiningen.classpath_container$get_project_dependencies.invoke(classpath_container.clj:91)
-;	at ccw.leiningen.classpath_container$update_project_dependencies.invoke(NO_SOURCE_FILE:9)
-;	at ccw.leiningen.handlers$update_dependencies.invoke(handlers.clj:51)
-;	at clojure.lang.Var.invoke(Var.java:405)
-;	at ccw.util.factories$handler_factory$fn__2017.invoke(factories.clj:14)
-;	at ccw.util.factories.proxy$org.eclipse.core.commands.AbstractHandler$0.execute(Unknown Source)
-;	at org.eclipse.ui.internal.handlers.HandlerProxy.execute(HandlerProxy.java:293)
-;	at org.eclipse.core.commands.Command.executeWithChecks(Command.java:476)
-;	at org.eclipse.core.commands.ParameterizedCommand.executeWithChecks(ParameterizedCommand.java:508)
-;	at org.eclipse.ui.internal.handlers.HandlerService.executeCommand(HandlerService.java:169)
-;	at org.eclipse.ui.internal.keys.WorkbenchKeyboard.executeCommand(WorkbenchKeyboard.java:468)
-;	at org.eclipse.ui.internal.keys.WorkbenchKeyboard.press(WorkbenchKeyboard.java:786)
-;	at org.eclipse.ui.internal.keys.WorkbenchKeyboard.processKeyEvent(WorkbenchKeyboard.java:885)
-;	at org.eclipse.ui.internal.keys.WorkbenchKeyboard.filterKeySequenceBindings(WorkbenchKeyboard.java:567)
-;	at org.eclipse.ui.internal.keys.WorkbenchKeyboard.access$3(WorkbenchKeyboard.java:508)
-;	at org.eclipse.ui.internal.keys.WorkbenchKeyboard$KeyDownFilter.handleEvent(WorkbenchKeyboard.java:123)
-;	at org.eclipse.swt.widgets.EventTable.sendEvent(EventTable.java:84)
-;	at org.eclipse.swt.widgets.Display.filterEvent(Display.java:1069)
-;	at org.eclipse.swt.widgets.Display.sendEvent(Display.java:4127)
-;	at org.eclipse.swt.widgets.Widget.sendEvent(Widget.java:1457)
-;	at org.eclipse.swt.widgets.Widget.sendEvent(Widget.java:1480)
-;	at org.eclipse.swt.widgets.Widget.sendEvent(Widget.java:1465)
-;	at org.eclipse.swt.widgets.Widget.sendKeyEvent(Widget.java:1494)
-;	at org.eclipse.swt.widgets.Control.insertText(Control.java:2056)
-;	at org.eclipse.swt.widgets.Canvas.insertText(Canvas.java:256)
-;	at org.eclipse.swt.widgets.Display.windowProc(Display.java:5561)
-;	at org.eclipse.swt.internal.cocoa.OS.objc_msgSend(Native Method)
-;	at org.eclipse.swt.internal.cocoa.NSResponder.interpretKeyEvents(NSResponder.java:68)
-;	at org.eclipse.swt.widgets.Composite.keyDown(Composite.java:587)
-;	at org.eclipse.swt.widgets.Display.windowProc(Display.java:5473)
-;	at org.eclipse.swt.internal.cocoa.OS.objc_msgSendSuper(Native Method)
-;	at org.eclipse.swt.widgets.Widget.callSuper(Widget.java:220)
-;	at org.eclipse.swt.widgets.Widget.windowSendEvent(Widget.java:2092)
-;	at org.eclipse.swt.widgets.Shell.windowSendEvent(Shell.java:2252)
-;	at org.eclipse.swt.widgets.Display.windowProc(Display.java:5535)
-;	at org.eclipse.swt.internal.cocoa.OS.objc_msgSendSuper(Native Method)
-;	at org.eclipse.swt.widgets.Display.applicationSendEvent(Display.java:4989)
-;	at org.eclipse.swt.widgets.Display.applicationProc(Display.java:5138)
-;	at org.eclipse.swt.internal.cocoa.OS.objc_msgSend(Native Method)
-;	at org.eclipse.swt.internal.cocoa.NSApplication.sendEvent(NSApplication.java:128)
-;	at org.eclipse.swt.widgets.Display.readAndDispatch(Display.java:3610)
-;	at org.eclipse.ui.internal.Workbench.runEventLoop(Workbench.java:2696)
-;	at org.eclipse.ui.internal.Workbench.runUI(Workbench.java:2660)
-;	at org.eclipse.ui.internal.Workbench.access$4(Workbench.java:2494)
-;	at org.eclipse.ui.internal.Workbench$7.run(Workbench.java:674)
-;	at org.eclipse.core.databinding.observable.Realm.runWithDefault(Realm.java:332)
-;	at org.eclipse.ui.internal.Workbench.createAndRunWorkbench(Workbench.java:667)
-;	at org.eclipse.ui.PlatformUI.createAndRunWorkbench(PlatformUI.java:149)
-;	at org.eclipse.ui.internal.ide.application.IDEApplication.start(IDEApplication.java:123)
-;	at org.eclipse.equinox.internal.app.EclipseAppHandle.run(EclipseAppHandle.java:196)
-;	at org.eclipse.core.runtime.internal.adaptor.EclipseAppLauncher.runApplication(EclipseAppLauncher.java:110)
-;	at org.eclipse.core.runtime.internal.adaptor.EclipseAppLauncher.start(EclipseAppLauncher.java:79)
-;	at org.eclipse.core.runtime.adaptor.EclipseStarter.run(EclipseStarter.java:344)
-;	at org.eclipse.core.runtime.adaptor.EclipseStarter.run(EclipseStarter.java:179)
-;	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-;	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
-;	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
-;	at java.lang.reflect.Method.invoke(Method.java:597)
-;	at org.eclipse.equinox.launcher.Main.invokeFramework(Main.java:622)
-;	at org.eclipse.equinox.launcher.Main.basicRun(Main.java:577)
-;	at org.eclipse.equinox.launcher.Main.run(Main.java:1410)
-;	at org.eclipse.equinox.launcher.Main.main(Main.java:1386)
-;Caused by: org.sonatype.aether.resolution.DependencyResolutionException: Failed to collect dependencies for clojure.lang.LazySeq@47d9ca99
-;	at org.sonatype.aether.impl.internal.DefaultRepositorySystem.resolveDependencies(DefaultRepositorySystem.java:371)
-;	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-;	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
-;	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
-;	at java.lang.reflect.Method.invoke(Method.java:597)
-;	at clojure.lang.Reflector.invokeMatchingMethod(Reflector.java:92)
-;	at clojure.lang.Reflector.invokeInstanceMethod(Reflector.java:30)
-;	... 65 more
-;Caused by: org.sonatype.aether.collection.DependencyCollectionException: Failed to collect dependencies for clojure.lang.LazySeq@47d9ca99
-;	at org.sonatype.aether.impl.internal.DefaultDependencyCollector.collectDependencies(DefaultDependencyCollector.java:258)
-;	at org.sonatype.aether.impl.internal.DefaultRepositorySystem.resolveDependencies(DefaultRepositorySystem.java:333)
-;	... 71 more
-;Caused by: org.sonatype.aether.resolution.ArtifactDescriptorException: Failed to read artifact descriptor for foobar:foobar:jar:1.24.1
-;	at org.apache.maven.repository.internal.DefaultArtifactDescriptorReader.loadPom(DefaultArtifactDescriptorReader.java:282)
-;	at org.apache.maven.repository.internal.DefaultArtifactDescriptorReader.readArtifactDescriptor(DefaultArtifactDescriptorReader.java:172)
-;	at org.sonatype.aether.impl.internal.DefaultDependencyCollector.process(DefaultDependencyCollector.java:412)
-;	at org.sonatype.aether.impl.internal.DefaultDependencyCollector.collectDependencies(DefaultDependencyCollector.java:240)
-;	... 72 more
-;Caused by: org.sonatype.aether.resolution.ArtifactResolutionException: Could not transfer artifact foobar:foobar:pom:1.24.1 from/to clojars (http://clojars.org/repo): Error transferring file: clojars.org
-;	at org.sonatype.aether.impl.internal.DefaultArtifactResolver.resolve(DefaultArtifactResolver.java:538)
-;	at org.sonatype.aether.impl.internal.DefaultArtifactResolver.resolveArtifacts(DefaultArtifactResolver.java:216)
-;	at org.sonatype.aether.impl.internal.DefaultArtifactResolver.resolveArtifact(DefaultArtifactResolver.java:193)
-;	at org.apache.maven.repository.internal.DefaultArtifactDescriptorReader.loadPom(DefaultArtifactDescriptorReader.java:267)
-;	... 75 more
-;Caused by: org.sonatype.aether.transfer.ArtifactTransferException: Could not transfer artifact foobar:foobar:pom:1.24.1 from/to clojars (http://clojars.org/repo): Error transferring file: clojars.org
-;	at org.sonatype.aether.connector.wagon.WagonRepositoryConnector$4.wrap(WagonRepositoryConnector.java:950)
-;	at org.sonatype.aether.connector.wagon.WagonRepositoryConnector$4.wrap(WagonRepositoryConnector.java:940)
-;	at org.sonatype.aether.connector.wagon.WagonRepositoryConnector$GetTask.run(WagonRepositoryConnector.java:669)
-;	at org.sonatype.aether.util.concurrency.RunnableErrorForwarder$1.run(RunnableErrorForwarder.java:60)
-;	at java.util.concurrent.ThreadPoolExecutor$Worker.runTask(ThreadPoolExecutor.java:886)
-;	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:908)
-;	at java.lang.Thread.run(Thread.java:680)
-;Caused by: org.apache.maven.wagon.TransferFailedException: Error transferring file: clojars.org
-;	at org.apache.maven.wagon.providers.http.LightweightHttpWagon.fillInputData(LightweightHttpWagon.java:143)
-;	at org.apache.maven.wagon.StreamWagon.getInputStream(StreamWagon.java:116)
-;	at org.apache.maven.wagon.StreamWagon.getIfNewer(StreamWagon.java:88)
-;	at org.apache.maven.wagon.StreamWagon.get(StreamWagon.java:61)
-;	at org.sonatype.aether.connector.wagon.WagonRepositoryConnector$GetTask.run(WagonRepositoryConnector.java:601)
-;	... 4 more
-;Caused by: java.net.UnknownHostException: clojars.org
-;	at java.net.PlainSocketImpl.connect(PlainSocketImpl.java:195)
-;	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:432)
-;	at java.net.Socket.connect(Socket.java:529)
-;	at java.net.Socket.connect(Socket.java:478)
-;	at sun.net.NetworkClient.doConnect(NetworkClient.java:163)
-;	at sun.net.www.http.HttpClient.openServer(HttpClient.java:395)
-;	at sun.net.www.http.HttpClient.openServer(HttpClient.java:530)
-;	at sun.net.www.http.HttpClient.<init>(HttpClient.java:234)
-;	at sun.net.www.http.HttpClient.New(HttpClient.java:307)
-;	at sun.net.www.http.HttpClient.New(HttpClient.java:324)
-;	at sun.net.www.protocol.http.HttpURLConnection.getNewHttpClient(HttpURLConnection.java:970)
-;	at sun.net.www.protocol.http.HttpURLConnection.plainConnect(HttpURLConnection.java:911)
-;	at sun.net.www.protocol.http.HttpURLConnection.connect(HttpURLConnection.java:836)
-;	at sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1172)
-;	at java.net.HttpURLConnection.getResponseCode(HttpURLConnection.java:379)
-;	at org.apache.maven.wagon.providers.http.LightweightHttpWagon.fillInputData(LightweightHttpWagon.java:115)
-;	... 8 more
-;Leiningen Managed Dependencies issue: problem resolving following dependencies: 
-;java.lang.RuntimeException: org.sonatype.aether.resolution.DependencyResolutionException: Failed to collect dependencies for clojure.lang.LazySeq@47d9ca99
-;	at clojure.lang.Util.runtimeException(Util.java:165)
-;	at clojure.lang.Reflector.invokeInstanceMethod(Reflector.java:35)
-;	at cemerick.pomegranate.aether$resolve_dependencies.doInvoke(aether.clj:269)
-;	at clojure.lang.RestFn.invoke(RestFn.java:457)
-;	at leiningen.core.classpath$resolve_dependencies.invoke(classpath.clj:51)
-;	at ccw.leiningen.classpath_container$get_project_dependencies.invoke(classpath_container.clj:91)
-;	at ccw.leiningen.classpath_container$update_project_dependencies.invoke(NO_SOURCE_FILE:9)
-;	at ccw.leiningen.handlers$update_dependencies.invoke(handlers.clj:51)
-;	at clojure.lang.Var.invoke(Var.java:405)
-;	at ccw.util.factories$handler_factory$fn__2017.invoke(factories.clj:14)
-;	at ccw.util.factories.proxy$org.eclipse.core.commands.AbstractHandler$0.execute(Unknown Source)
-;	at org.eclipse.ui.internal.handlers.HandlerProxy.execute(HandlerProxy.java:293)
-;	at org.eclipse.core.commands.Command.executeWithChecks(Command.java:476)
-;	at org.eclipse.core.commands.ParameterizedCommand.executeWithChecks(ParameterizedCommand.java:508)
-;	at org.eclipse.ui.internal.handlers.HandlerService.executeCommand(HandlerService.java:169)
-;	at org.eclipse.ui.internal.keys.WorkbenchKeyboard.executeCommand(WorkbenchKeyboard.java:468)
-;	at org.eclipse.ui.internal.keys.WorkbenchKeyboard.press(WorkbenchKeyboard.java:786)
-;	at org.eclipse.ui.internal.keys.WorkbenchKeyboard.processKeyEvent(WorkbenchKeyboard.java:885)
-;	at org.eclipse.ui.internal.keys.WorkbenchKeyboard.filterKeySequenceBindings(WorkbenchKeyboard.java:567)
-;	at org.eclipse.ui.internal.keys.WorkbenchKeyboard.access$3(WorkbenchKeyboard.java:508)
-;	at org.eclipse.ui.internal.keys.WorkbenchKeyboard$KeyDownFilter.handleEvent(WorkbenchKeyboard.java:123)
-;	at org.eclipse.swt.widgets.EventTable.sendEvent(EventTable.java:84)
-;	at org.eclipse.swt.widgets.Display.filterEvent(Display.java:1069)
-;	at org.eclipse.swt.widgets.Display.sendEvent(Display.java:4127)
-;	at org.eclipse.swt.widgets.Widget.sendEvent(Widget.java:1457)
-;	at org.eclipse.swt.widgets.Widget.sendEvent(Widget.java:1480)
-;	at org.eclipse.swt.widgets.Widget.sendEvent(Widget.java:1465)
-;	at org.eclipse.swt.widgets.Widget.sendKeyEvent(Widget.java:1494)
-;	at org.eclipse.swt.widgets.Control.insertText(Control.java:2056)
-;	at org.eclipse.swt.widgets.Canvas.insertText(Canvas.java:256)
-;	at org.eclipse.swt.widgets.Display.windowProc(Display.java:5561)
-;	at org.eclipse.swt.internal.cocoa.OS.objc_msgSend(Native Method)
-;	at org.eclipse.swt.internal.cocoa.NSResponder.interpretKeyEvents(NSResponder.java:68)
-;	at org.eclipse.swt.widgets.Composite.keyDown(Composite.java:587)
-;	at org.eclipse.swt.widgets.Display.windowProc(Display.java:5473)
-;	at org.eclipse.swt.internal.cocoa.OS.objc_msgSendSuper(Native Method)
-;	at org.eclipse.swt.widgets.Widget.callSuper(Widget.java:220)
-;	at org.eclipse.swt.widgets.Widget.windowSendEvent(Widget.java:2092)
-;	at org.eclipse.swt.widgets.Shell.windowSendEvent(Shell.java:2252)
-;	at org.eclipse.swt.widgets.Display.windowProc(Display.java:5535)
-;	at org.eclipse.swt.internal.cocoa.OS.objc_msgSendSuper(Native Method)
-;	at org.eclipse.swt.widgets.Display.applicationSendEvent(Display.java:4989)
-;	at org.eclipse.swt.widgets.Display.applicationProc(Display.java:5138)
-;	at org.eclipse.swt.internal.cocoa.OS.objc_msgSend(Native Method)
-;	at org.eclipse.swt.internal.cocoa.NSApplication.sendEvent(NSApplication.java:128)
-;	at org.eclipse.swt.widgets.Display.readAndDispatch(Display.java:3610)
-;	at org.eclipse.ui.internal.Workbench.runEventLoop(Workbench.java:2696)
-;	at org.eclipse.ui.internal.Workbench.runUI(Workbench.java:2660)
-;	at org.eclipse.ui.internal.Workbench.access$4(Workbench.java:2494)
-;	at org.eclipse.ui.internal.Workbench$7.run(Workbench.java:674)
-;	at org.eclipse.core.databinding.observable.Realm.runWithDefault(Realm.java:332)
-;	at org.eclipse.ui.internal.Workbench.createAndRunWorkbench(Workbench.java:667)
-;	at org.eclipse.ui.PlatformUI.createAndRunWorkbench(PlatformUI.java:149)
-;	at org.eclipse.ui.internal.ide.application.IDEApplication.start(IDEApplication.java:123)
-;	at org.eclipse.equinox.internal.app.EclipseAppHandle.run(EclipseAppHandle.java:196)
-;	at org.eclipse.core.runtime.internal.adaptor.EclipseAppLauncher.runApplication(EclipseAppLauncher.java:110)
-;	at org.eclipse.core.runtime.internal.adaptor.EclipseAppLauncher.start(EclipseAppLauncher.java:79)
-;	at org.eclipse.core.runtime.adaptor.EclipseStarter.run(EclipseStarter.java:344)
-;	at org.eclipse.core.runtime.adaptor.EclipseStarter.run(EclipseStarter.java:179)
-;	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-;	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
-;	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
-;	at java.lang.reflect.Method.invoke(Method.java:597)
-;	at org.eclipse.equinox.launcher.Main.invokeFramework(Main.java:622)
-;	at org.eclipse.equinox.launcher.Main.basicRun(Main.java:577)
-;	at org.eclipse.equinox.launcher.Main.run(Main.java:1410)
-;	at org.eclipse.equinox.launcher.Main.main(Main.java:1386)
-;Caused by: org.sonatype.aether.resolution.DependencyResolutionException: Failed to collect dependencies for clojure.lang.LazySeq@47d9ca99
-;	at org.sonatype.aether.impl.internal.DefaultRepositorySystem.resolveDependencies(DefaultRepositorySystem.java:371)
-;	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-;	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
-;	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
-;	at java.lang.reflect.Method.invoke(Method.java:597)
-;	at clojure.lang.Reflector.invokeMatchingMethod(Reflector.java:92)
-;	at clojure.lang.Reflector.invokeInstanceMethod(Reflector.java:30)
-;	... 65 more
-;Caused by: org.sonatype.aether.collection.DependencyCollectionException: Failed to collect dependencies for clojure.lang.LazySeq@47d9ca99
-;	at org.sonatype.aether.impl.internal.DefaultDependencyCollector.collectDependencies(DefaultDependencyCollector.java:258)
-;	at org.sonatype.aether.impl.internal.DefaultRepositorySystem.resolveDependencies(DefaultRepositorySystem.java:333)
-;	... 71 more
-;Caused by: org.sonatype.aether.resolution.ArtifactDescriptorException: Failed to read artifact descriptor for foobar:foobar:jar:1.24.1
-;	at org.apache.maven.repository.internal.DefaultArtifactDescriptorReader.loadPom(DefaultArtifactDescriptorReader.java:282)
-;	at org.apache.maven.repository.internal.DefaultArtifactDescriptorReader.readArtifactDescriptor(DefaultArtifactDescriptorReader.java:172)
-;	at org.sonatype.aether.impl.internal.DefaultDependencyCollector.process(DefaultDependencyCollector.java:412)
-;	at org.sonatype.aether.impl.internal.DefaultDependencyCollector.collectDependencies(DefaultDependencyCollector.java:240)
-;	... 72 more
-;Caused by: org.sonatype.aether.resolution.ArtifactResolutionException: Could not transfer artifact foobar:foobar:pom:1.24.1 from/to clojars (http://clojars.org/repo): Error transferring file: clojars.org
-;	at org.sonatype.aether.impl.internal.DefaultArtifactResolver.resolve(DefaultArtifactResolver.java:538)
-;	at org.sonatype.aether.impl.internal.DefaultArtifactResolver.resolveArtifacts(DefaultArtifactResolver.java:216)
-;	at org.sonatype.aether.impl.internal.DefaultArtifactResolver.resolveArtifact(DefaultArtifactResolver.java:193)
-;	at org.apache.maven.repository.internal.DefaultArtifactDescriptorReader.loadPom(DefaultArtifactDescriptorReader.java:267)
-;	... 75 more
-;Caused by: org.sonatype.aether.transfer.ArtifactTransferException: Could not transfer artifact foobar:foobar:pom:1.24.1 from/to clojars (http://clojars.org/repo): Error transferring file: clojars.org
-;	at org.sonatype.aether.connector.wagon.WagonRepositoryConnector$4.wrap(WagonRepositoryConnector.java:950)
-;	at org.sonatype.aether.connector.wagon.WagonRepositoryConnector$4.wrap(WagonRepositoryConnector.java:940)
-;	at org.sonatype.aether.connector.wagon.WagonRepositoryConnector$GetTask.run(WagonRepositoryConnector.java:669)
-;	at org.sonatype.aether.util.concurrency.RunnableErrorForwarder$1.run(RunnableErrorForwarder.java:60)
-;	at java.util.concurrent.ThreadPoolExecutor$Worker.runTask(ThreadPoolExecutor.java:886)
-;	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:908)
-;	at java.lang.Thread.run(Thread.java:680)
-;Caused by: org.apache.maven.wagon.TransferFailedException: Error transferring file: clojars.org
-;	at org.apache.maven.wagon.providers.http.LightweightHttpWagon.fillInputData(LightweightHttpWagon.java:143)
-;	at org.apache.maven.wagon.StreamWagon.getInputStream(StreamWagon.java:116)
-;	at org.apache.maven.wagon.StreamWagon.getIfNewer(StreamWagon.java:88)
-;	at org.apache.maven.wagon.StreamWagon.get(StreamWagon.java:61)
-;	at org.sonatype.aether.connector.wagon.WagonRepositoryConnector$GetTask.run(WagonRepositoryConnector.java:601)
-;	... 4 more
-;Caused by: java.net.UnknownHostException: clojars.org
-;	at java.net.PlainSocketImpl.connect(PlainSocketImpl.java:195)
-;	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:432)
-;	at java.net.Socket.connect(Socket.java:529)
-;	at java.net.Socket.connect(Socket.java:478)
-;	at sun.net.NetworkClient.doConnect(NetworkClient.java:163)
-;	at sun.net.www.http.HttpClient.openServer(HttpClient.java:395)
-;	at sun.net.www.http.HttpClient.openServer(HttpClient.java:530)
-;	at sun.net.www.http.HttpClient.<init>(HttpClient.java:234)
-;	at sun.net.www.http.HttpClient.New(HttpClient.java:307)
-;	at sun.net.www.http.HttpClient.New(HttpClient.java:324)
-;	at sun.net.www.protocol.http.HttpURLConnection.getNewHttpClient(HttpURLConnection.java:970)
-;	at sun.net.www.protocol.http.HttpURLConnection.plainConnect(HttpURLConnection.java:911)
-;	at sun.net.www.protocol.http.HttpURLConnection.connect(HttpURLConnection.java:836)
-;	at sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1172)
-;	at java.net.HttpURLConnection.getResponseCode(HttpURLConnection.java:379)
-;	at org.apache.maven.wagon.providers.http.LightweightHttpWagon.fillInputData(LightweightHttpWagon.java:115)
-;	... 8 more
-
-
-
+    (if-not (seq artifacts) 
+      (-> exc .getMessage (str/replace "#<" "") (str/replace ">" ""))
+      (str/join ", " artifacts))))
 
 (defn- dependency-resolution-message [exc java-project]
   [(-> java-project e/resource (.getFile "project.clj"))
@@ -518,21 +259,25 @@
    as the target of the problem marker, and message is personalized given exc
    and java-project values"
   [exc java-project]
-  (cond
-    (nil? exc) [(e/resource java-project) "unknown problem (missing exception)"]
-    (check-class DependencyResolutionException exc)
-      (dependency-resolution-message exc java-project)
-    (check-class DependencyResolutionException (.getCause exc))
-      (dependency-resolution-message (.getCause exc) java-project)
-    (nil? (.getMessage exc)) [(e/resource java-project) "unknown problem (missing exception message)"]
-    (.contains (.getMessage exc) "project.clj")
-      (if (.contains (.getMessage exc) "FileNotFoundException")
-        [(e/resource java-project) "project.clj file is missing"]
-        [(-> java-project e/resource (.getFile "project.clj")) "problem with project.clj file"])
-    (.contains (.getMessage exc) "DependencyResolutionException")
-      [(e/resource java-project) (str "problem when grabbing dependencies from repositories:" (.getMessage exc))]
-    :else
-      [(e/resource java-project) (str "unknown problem: " (.getMessage exc))]))
+  (if-not exc
+    [(e/resource java-project) "unknown problem (missing exception)"]
+    (let [exc (if (check-class java.lang.reflect.InvocationTargetException exc) (.getCause exc) exc)
+          exc (if (check-class clojure.lang.ExceptionInfo exc) (.getCause exc) exc)]
+      (cond
+        (check-class DependencyResolutionException exc)
+          (dependency-resolution-message exc java-project)
+        (check-class DependencyResolutionException (.getCause exc))
+          (dependency-resolution-message (.getCause exc) java-project)
+        (nil? (.getMessage exc))
+          [(e/resource java-project) "unknown problem (missing exception message)"]
+        (.contains (.getMessage exc) "project.clj")
+          (if (.contains (.getMessage exc) "FileNotFoundException")
+            [(e/resource java-project) "project.clj file is missing"]
+            [(-> java-project e/resource (.getFile "project.clj")) (str "problem with project.clj file: " (.getMessage exc))])
+        (.contains (.getMessage exc) "DependencyResolutionException")
+          [(e/resource java-project) (str "problem when grabbing dependencies from repositories:" (.getMessage exc))]
+        :else
+          [(e/resource java-project) (str "unknown problem: " (.getMessage exc))]))))
 
 (defn set-classpath-container
   "Sets classpath-container for java-project under the key container-path"
