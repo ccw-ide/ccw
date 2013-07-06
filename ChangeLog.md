@@ -50,6 +50,19 @@ See the Keybindings documentation for Slurp / Barf : https://code.google.com/p/c
 
 - Fixed wrong keybinding for switching Rainbow Parens: "Cmd+( R" instead of "Cmd+(+R" (replace Cmd by Ctrl for Windows/Linux ; space indicates that you first type Cmd+(, then type R)
 
+- Experimental Feature: enabling auto-reevaluation of last command typed in the REPL, after a successful evaluation from the Editor
+  - when the "repeat last expression" REPL command is active
+  - when the user sends a form tom evaluate to the REPL
+  - if the form evaluated without error
+  - then the last expression evaluated from the REPL input is evaluated agai
+
+A common usecase for this is while you're defining a function in the Editor and you want to repeat the same test expression again and again until it passes. The workflow then becomes:
+- define the function in the editor, eval via Cmd+Enter
+- switch to the REPL, enter a test expression, send the test expression via Cmd+Enter
+- Click on the "Repeat last evaluation ..." button in the REPL
+- switch to the editor, modify the function, eval via Cmd+Enter ... when the eval succeeds, the last expression entered in the REPl is reevaluated ... repeat ...
+
+
 ### Repl 
 
 - A bug had slipped in the project classpath management preventing native libraries to load properly, for instance when trying to work with Overtone. Fix Issue #577 

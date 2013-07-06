@@ -74,7 +74,6 @@ import ccw.TraceOptions;
 import ccw.editors.clojure.ClojureDocumentProvider;
 import ccw.editors.clojure.ClojureSourceViewer;
 import ccw.editors.clojure.ClojureSourceViewerConfiguration;
-import ccw.editors.clojure.EvaluateTextUtil;
 import ccw.editors.clojure.IClojureEditor;
 import ccw.editors.clojure.IClojureEditorActionDefinitionIds;
 import ccw.preferences.PreferenceConstants;
@@ -83,6 +82,7 @@ import ccw.util.DisplayUtil;
 import ccw.util.StringUtils;
 import ccw.util.TextViewerSupport;
 import clojure.lang.IFn;
+import clojure.lang.ISeq;
 import clojure.lang.Keyword;
 import clojure.lang.PersistentHashMap;
 import clojure.tools.nrepl.Connection;
@@ -145,6 +145,7 @@ public class REPLView extends ViewPart implements IAdaptable {
     
     private static final Keyword inputExprLogType = Keyword.intern("in-expr");
     private static final Keyword errLogType = Keyword.intern("err");
+    private static final Keyword errorResponseKey = Keyword.intern("err");
     private static final Pattern boostIndent = Pattern.compile("^", Pattern.MULTILINE);
     
     // TODO would like to eliminate separate log view, but:
@@ -196,6 +197,8 @@ public class REPLView extends ViewPart implements IAdaptable {
     
 	/** Last expression sent via the REPL input area, as opposed to sent by CCW, or sent via an editor, etc. */
 	private String lastExpressionSentFromREPL;
+
+	private boolean lastEvalSentInError;
 	
     public REPLView () {}    
     
@@ -258,17 +261,33 @@ public class REPLView extends ViewPart implements IAdaptable {
                 if (evalExpression == null) {
                 	viewHelpers._("log", this, logPanel, "Invalid REPL", errLogType);
                 } else {
-                	evalExpression.invoke(s, addToHistory);
+                	registerEvalStatus(evalExpression.invoke(s, addToHistory));
                 }
             }
         } catch (Exception e) {
             CCWPlugin.logError(e);
         }
     }
+
+    private void registerEvalStatus(Object evalResponse) {
+    	ISeq responseSeq = (ISeq) evalResponse;
+    	while (responseSeq != null) {
+    		Map<?,?> m = (Map<?,?>) responseSeq.first();
+    		if (m.containsKey(errorResponseKey)) {
+    			lastEvalSentInError = true;
+    			return;
+    		}
+    		responseSeq = responseSeq.next();
+    	}
+    	lastEvalSentInError = false;
+    }
     
     /** Called by an editor after having sent an expression for evaluation */
     public void afterExpressionSentFromEditor() {
     	if (!autoRepeatLastAction.isChecked())
+    		return;
+    	
+    	if (lastEvalSentInError)
     		return;
     	
 		String lastREPLExpr = getLastExpressionSentFromREPL();
