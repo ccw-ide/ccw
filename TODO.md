@@ -2,9 +2,6 @@
 
 ### TODO
 
-- Document how to add Clojure Tests
-- Document how to bump version numbers
-- Update version to 0.14.0-SNAPSHOT, using maven tycho helpers, and explain how to do so in the build page
 - Change build/product target from Juno to Kepler. Don't change the default deployed product yet.
 - Bring the www.ccw-ide.org web site to life (1 landing page, 1 installation page)
 - Have a Welcome Page: 
@@ -14,6 +11,8 @@
 
 ### DONE
 
+- Document how to add Clojure Tests
+- Document how to bump version numbers
 - Update the How to Build Wiki page
 - Update the Update Sites Wiki page
 - do the updatesite switch: make cgrand legacy, make ccw-ide official
