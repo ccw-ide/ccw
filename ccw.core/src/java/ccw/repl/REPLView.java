@@ -74,11 +74,13 @@ import ccw.TraceOptions;
 import ccw.editors.clojure.ClojureDocumentProvider;
 import ccw.editors.clojure.ClojureSourceViewer;
 import ccw.editors.clojure.ClojureSourceViewerConfiguration;
+import ccw.editors.clojure.EvaluateTextUtil;
 import ccw.editors.clojure.IClojureEditor;
 import ccw.editors.clojure.IClojureEditorActionDefinitionIds;
 import ccw.preferences.PreferenceConstants;
 import ccw.util.ClojureInvoker;
 import ccw.util.DisplayUtil;
+import ccw.util.StringUtils;
 import ccw.util.TextViewerSupport;
 import clojure.lang.IFn;
 import clojure.lang.Keyword;
@@ -192,6 +194,9 @@ public class REPLView extends ViewPart implements IAdaptable {
 	/** Eclipse Preferences Listener */ 
 	private IPropertyChangeListener prefsListener;
     
+	/** Last expression sent via the REPL input area, as opposed to sent by CCW, or sent via an editor, etc. */
+	private String lastExpressionSentFromREPL;
+	
     public REPLView () {}    
     
     @Override
@@ -231,27 +236,45 @@ public class REPLView extends ViewPart implements IAdaptable {
     	// Enter key (which automatically adds a new line
     	viewerWidget.setText(removeTrailingSpaces(viewerWidget.getText()));
         evalExpression(viewerWidget.getText(), true, false);
+        if (viewerWidget.getText().trim().length() > 0) {
+        	lastExpressionSentFromREPL = viewerWidget.getText();
+        }
         copyToLog(viewerWidget);
         viewerWidget.setText("");
+    }
+    
+    public String getLastExpressionSentFromREPL() {
+    	return lastExpressionSentFromREPL;
     }
     
     public void evalExpression (String s) {
         evalExpression(s, true, true);
     }
     
-    public void evalExpression (String s, boolean userInput, boolean logExpression) {
+    public void evalExpression (String s, boolean addToHistory, boolean printToLog) {
         try {
             if (s.trim().length() > 0) {
-                if (logExpression) viewHelpers._("log", this, logPanel, s, inputExprLogType);
+                if (printToLog) viewHelpers._("log", this, logPanel, s, inputExprLogType);
                 if (evalExpression == null) {
                 	viewHelpers._("log", this, logPanel, "Invalid REPL", errLogType);
                 } else {
-                	evalExpression.invoke(s, userInput);
+                	evalExpression.invoke(s, addToHistory);
                 }
             }
         } catch (Exception e) {
             CCWPlugin.logError(e);
         }
+    }
+    
+    /** Called by an editor after having sent an expression for evaluation */
+    public void afterExpressionSentFromEditor() {
+    	if (!autoRepeatLastAction.isChecked())
+    		return;
+    	
+		String lastREPLExpr = getLastExpressionSentFromREPL();
+		if (!StringUtils.isBlank(lastREPLExpr)) {
+			evalExpression(lastREPLExpr, false, false);
+		}
     }
 
     public void printErrorDetail() {
@@ -327,7 +350,7 @@ public class REPLView extends ViewPart implements IAdaptable {
     @SuppressWarnings("unchecked")
     public boolean configure (String url) throws Exception {
         try {
-            // TODO — don't need multiple connections anymore, just separate sessions will do.
+            // TODO - don't need multiple connections anymore, just separate sessions will do.
             interactive = new Connection(url);
             toolConnection = new Connection(url);
             setCurrentNamespace(currentNamespace);
@@ -599,6 +622,7 @@ public class REPLView extends ViewPart implements IAdaptable {
         activate(CCW_UI_CONTEXT_REPL);
     }
     
+    private Action autoRepeatLastAction;
     private Action printErrorAction;
     private Action interruptAction;
     private Action reconnectAction;
@@ -608,6 +632,14 @@ public class REPLView extends ViewPart implements IAdaptable {
     
 	private void createActions() {
 
+		autoRepeatLastAction = new Action("Repeat last evaluation each time editor sends changes", Action.AS_CHECK_BOX) {
+			@Override
+			public void run() {
+				// Nothing to do, only the button state is relevant
+			}
+		};
+		autoRepeatLastAction.setToolTipText("Repeat last evaluation each time editor sends changes");
+		autoRepeatLastAction.setImageDescriptor(getImageDescriptor("repl/arrow-repeat-once_16x16.png"));
 		
 		printErrorAction = new Action("Print detailed output from the last exception") {
 			@Override
@@ -694,6 +726,7 @@ public class REPLView extends ViewPart implements IAdaptable {
     
     private void createToolbar() {
     	IToolBarManager mgr = getViewSite().getActionBars().getToolBarManager();
+    	mgr.add(autoRepeatLastAction);
     	mgr.add(printErrorAction);
     	mgr.add(interruptAction);
     	mgr.add(reconnectAction);

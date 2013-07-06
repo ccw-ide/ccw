@@ -17,6 +17,7 @@ import org.eclipse.jface.action.Action;
 
 import ccw.repl.Actions;
 import ccw.repl.REPLView;
+import ccw.util.StringUtils;
 
 public class EvaluateTopLevelSExpressionAction extends Action {
 
@@ -48,6 +49,7 @@ public class EvaluateTopLevelSExpressionAction extends Action {
 			}
 			
 			EvaluateTextUtil.evaluateText(repl, textToEvaluate, isReplExplicitLoggingMode());
+			repl.afterExpressionSentFromEditor();
 			Actions.ShowActiveREPL.execute(false);
 		}
 	}

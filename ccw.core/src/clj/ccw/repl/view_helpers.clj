@@ -146,10 +146,10 @@
     (handle-responses repl-view log-panel nil (session-client {:op "describe"}))
     
     (comp (partial eval-expression repl-view log-panel session-client)
-      (fn [expr add-to-log?]
+      (fn [expr add-to-history?]
         (reset! retained-input nil)
         (reset! current-step -1)
-        (when add-to-log?
+        (when add-to-history?
           (swap! history #(subvec
                             ; don't add duplicate expressions to the history
                             (if (= expr (last %))
