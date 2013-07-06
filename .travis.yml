@@ -22,6 +22,6 @@ before_script:
   - export QUALIFIER=${TRAVIS_BRANCH}-travis$(printf "%0*d" 6 ${TRAVIS_BUILD_NUMBER})-git${TRAVIS_COMMIT}
 script: mvn clean install --batch-mode -e -DforceContextQualifier=${QUALIFIER}
 after_success: 
-  - test ${ECLIPSE_TARGET} = "indigo" && test ${TRAVIS_JDK_VERSION} = "openjdk7" && chmod 777 ./travis-deploy.sh && ./travis-deploy.sh
+  - test ${ECLIPSE_TARGET} = "indigo" && test ${TRAVIS_JDK_VERSION} = "openjdk7" && chmod 777 ./scripts/travis-deploy.sh && ./scripts/travis-deploy.sh
 after_failure:
-  - chmod 777 ./travis-test-report.sh && ./travis-test-report.sh
+  - chmod 777 ./scripts/travis-test-report.sh && ./scripts/travis-test-report.sh
