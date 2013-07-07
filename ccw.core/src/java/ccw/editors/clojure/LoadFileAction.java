@@ -114,8 +114,8 @@ public class LoadFileAction extends Action {
                 EvaluateTextUtil.evaluateText(repl, ";; Loading file " + filePath, isReplExplicitLoggingMode());
                 //}
                 EvaluateTextUtil.evaluateText(repl, loadFileText, false);
-                Actions.ShowActiveREPL.execute(false);
             }
+            repl.afterExpressionSentFromEditor();
             Actions.ShowActiveREPL.execute(false);
         } catch (Exception e) {
             CCWPlugin.logError("Could not load file " + filePath, e);
