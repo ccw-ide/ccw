@@ -53,11 +53,20 @@ public class CompileLibAction extends Action {
 			return;
 		}
 		
+		IFolder classesFolder = editorFile.getProject().getFolder("classes");
+		try {
+			classesFolder.refreshLocal(IFolder.DEPTH_INFINITE, null);
+			if (!classesFolder.exists()) {
+				classesFolder.create(true, true, null);
+			}
+		} catch (CoreException e) {
+			e.printStackTrace();
+		}
 		
-		EvaluateTextUtil.evaluateText(editor.getCorrespondingREPL(), compileLibCommand(lib), true);
+		EvaluateTextUtil.evaluateText(editor.getCorrespondingREPL(), compileLibCommand(lib), false);
 		// TODO: send the compile via the server to synchronize with the compilation end before refreshing the project
 		try {
-			editorFile.getProject().getFolder("classes").refreshLocal(IFolder.DEPTH_INFINITE, null);
+			classesFolder.refreshLocal(IFolder.DEPTH_INFINITE, null);
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
