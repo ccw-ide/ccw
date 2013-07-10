@@ -74,6 +74,8 @@ Fixes Issue #533: ns is sent to REPL instead of in-ns
 
 - Better IPv6 support: replaced "localhost" occurences by "127.0.0.1"
 
+- "Quiet command report mode" Preference has been removed. Now considered always ON by default. So always quiet.
+
 ### Stability
 
 - There were reports of restart issues after Eclipse crashes. Hopefully this has been improved in this release (Fix Issue #568	CCW Beta 0.13.0.201304190010 prevents Eclipse from loading)
