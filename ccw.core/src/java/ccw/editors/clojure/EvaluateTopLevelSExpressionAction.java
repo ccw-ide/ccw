@@ -10,14 +10,11 @@
  *******************************************************************************/
 package ccw.editors.clojure;
 
-import static ccw.preferences.PreferenceConstants.isReplExplicitLoggingMode;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.action.Action;
 
 import ccw.repl.Actions;
 import ccw.repl.REPLView;
-import ccw.util.StringUtils;
 
 public class EvaluateTopLevelSExpressionAction extends Action {
 
@@ -48,7 +45,7 @@ public class EvaluateTopLevelSExpressionAction extends Action {
 				textToEvaluate = "(in-ns '" + editorNamespace + ")\n" + textToEvaluate + "\n(in-ns '" + replNamespace + ")";
 			}
 			
-			EvaluateTextUtil.evaluateText(repl, textToEvaluate, isReplExplicitLoggingMode(), true);
+			EvaluateTextUtil.evaluateText(repl, textToEvaluate, true);
 			Actions.ShowActiveREPL.execute(false);
 		}
 	}

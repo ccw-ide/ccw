@@ -63,7 +63,7 @@ public class CompileLibAction extends Action {
 			e.printStackTrace();
 		}
 		
-		EvaluateTextUtil.evaluateText(editor.getCorrespondingREPL(), compileLibCommand(lib), false, true);
+		EvaluateTextUtil.evaluateText(editor.getCorrespondingREPL(), compileLibCommand(lib), true);
 		// TODO: send the compile via the server to synchronize with the compilation end before refreshing the project
 		try {
 			classesFolder.refreshLocal(IFolder.DEPTH_INFINITE, null);

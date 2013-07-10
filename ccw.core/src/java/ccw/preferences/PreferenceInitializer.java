@@ -138,7 +138,5 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	        store.setDefault(SyntaxColoringHelper.getBoldPreferenceKey(d.getPreferenceConstant()), d.isBold());
 	        store.setDefault(SyntaxColoringHelper.getItalicPreferenceKey(d.getPreferenceConstant()), d.isItalic());
 	    }
-	    
-	    store.setDefault(PreferenceConstants.REPL_QUIET_LOGGING_MODE, false);
 	}
 }

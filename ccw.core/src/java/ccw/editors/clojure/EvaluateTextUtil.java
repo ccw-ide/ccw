@@ -22,7 +22,7 @@ final public class EvaluateTextUtil {
 		// Not intended to be subclassed
 	}
 	
-	public static final void evaluateText(REPLView console, final String text, boolean userInput, boolean repeatLastREPLEvalIfActive) {
+	public static final void evaluateText(REPLView console, final String text, boolean repeatLastREPLEvalIfActive) {
 	    if (console == null || console.isDisposed()) {
             DisplayUtil.syncExec(new Runnable() {
                 public void run() {
@@ -32,7 +32,7 @@ final public class EvaluateTextUtil {
                 }
             });
         } else {
-            console.evalExpression(text, userInput, userInput, repeatLastREPLEvalIfActive);
+            console.evalExpression(text, false, false, repeatLastREPLEvalIfActive);
         }
 	}
 	

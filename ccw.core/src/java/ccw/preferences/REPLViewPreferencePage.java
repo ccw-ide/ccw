@@ -44,11 +44,6 @@ public class REPLViewPreferencePage extends FieldEditorPreferencePage implements
     			Messages.REPLViewPreferencePage_displayHint, 
     			getFieldEditorParent()));
 
-    	addField(new BooleanFieldEditor(
-    			ccw.preferences.PreferenceConstants.REPL_QUIET_LOGGING_MODE, 
-    			Messages.REPLViewPreferencePage_quietLoggingMode, 
-    			getFieldEditorParent()));
-
     }
 
     public void init(IWorkbench workbench) {
