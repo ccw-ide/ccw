@@ -38,8 +38,8 @@ public class SwitchNamespaceAction extends Action {
             // put error msg in footer instead
             CCWPlugin.logError("Could not switch ns to: " + ns);
         } else {
-            EvaluateTextUtil.evaluateText(repl, String.format(";; Switching to %s namespace", ns), isReplExplicitLoggingMode());
-            EvaluateTextUtil.evaluateText(repl, String.format("(in-ns '%s)", ns), false);
+            EvaluateTextUtil.evaluateText(repl, String.format(";; Switching to %s namespace", ns), isReplExplicitLoggingMode(), false);
+            EvaluateTextUtil.evaluateText(repl, String.format("(in-ns '%s)", ns), false, false);
             Actions.ShowActiveREPL.execute(activateREPL);
         }
     }

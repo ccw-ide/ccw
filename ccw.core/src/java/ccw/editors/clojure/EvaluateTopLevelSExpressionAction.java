@@ -48,8 +48,7 @@ public class EvaluateTopLevelSExpressionAction extends Action {
 				textToEvaluate = "(in-ns '" + editorNamespace + ")\n" + textToEvaluate + "\n(in-ns '" + replNamespace + ")";
 			}
 			
-			EvaluateTextUtil.evaluateText(repl, textToEvaluate, isReplExplicitLoggingMode());
-			repl.afterExpressionSentFromEditor();
+			EvaluateTextUtil.evaluateText(repl, textToEvaluate, isReplExplicitLoggingMode(), true);
 			Actions.ShowActiveREPL.execute(false);
 		}
 	}

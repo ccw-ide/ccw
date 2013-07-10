@@ -110,12 +110,9 @@ public class LoadFileAction extends Action {
                         "file-path", sourcePath, "file-name", fileName);
             } else {
                 String loadFileText = (String) nreplHelpers._("load-file-command", text, sourcePath, fileName);
-                //if (isReplExplicitLoggingMode()) {
-                EvaluateTextUtil.evaluateText(repl, ";; Loading file " + filePath, isReplExplicitLoggingMode());
-                //}
-                EvaluateTextUtil.evaluateText(repl, loadFileText, false);
+                EvaluateTextUtil.evaluateText(repl, ";; Loading file " + filePath, isReplExplicitLoggingMode(), false);
+                EvaluateTextUtil.evaluateText(repl, loadFileText, false, true);
             }
-            repl.afterExpressionSentFromEditor();
             Actions.ShowActiveREPL.execute(false);
         } catch (Exception e) {
             CCWPlugin.logError("Could not load file " + filePath, e);

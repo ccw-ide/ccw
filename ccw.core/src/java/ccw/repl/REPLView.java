@@ -198,8 +198,6 @@ public class REPLView extends ViewPart implements IAdaptable {
 	/** Last expression sent via the REPL input area, as opposed to sent by CCW, or sent via an editor, etc. */
 	private String lastExpressionSentFromREPL;
 
-	private boolean lastEvalSentInError;
-	
     public REPLView () {}    
     
     @Override
@@ -238,7 +236,7 @@ public class REPLView extends ViewPart implements IAdaptable {
     	// newlines, etc. for example when evaluating after having hit the
     	// Enter key (which automatically adds a new line
     	viewerWidget.setText(removeTrailingSpaces(viewerWidget.getText()));
-        evalExpression(viewerWidget.getText(), true, false);
+        evalExpression(viewerWidget.getText(), true, false, false);
         if (viewerWidget.getText().trim().length() > 0) {
         	lastExpressionSentFromREPL = viewerWidget.getText();
         }
@@ -250,18 +248,28 @@ public class REPLView extends ViewPart implements IAdaptable {
     	return lastExpressionSentFromREPL;
     }
     
-    public void evalExpression (String s) {
-        evalExpression(s, true, true);
-    }
-    
-    public void evalExpression (String s, boolean addToHistory, boolean printToLog) {
+    public void evalExpression (String s, boolean addToHistory, boolean printToLog, boolean repeatLastREPLEvalIfActive) {
         try {
-            if (s.trim().length() > 0) {
+        	if (s.trim().length() > 0) {
                 if (printToLog) viewHelpers._("log", this, logPanel, s, inputExprLogType);
                 if (evalExpression == null) {
                 	viewHelpers._("log", this, logPanel, "Invalid REPL", errLogType);
                 } else {
-                	registerEvalStatus(evalExpression.invoke(s, addToHistory));
+                	final Object ret = evalExpression.invoke(s, addToHistory);
+                	
+                	if (repeatLastREPLEvalIfActive && autoRepeatLastAction.isChecked()) {
+	            		final String lastREPLExpr = getLastExpressionSentFromREPL();
+	            		if (!StringUtils.isBlank(lastREPLExpr)) {
+	            			new Thread(new Runnable() {
+								@Override
+								public void run() {
+			            			if (hasEvalResponseException(ret))
+			            				return;
+			            			evalExpression(lastREPLExpr, false, false, false);
+								}
+							}).start();
+	            		}
+                	}
                 }
             }
         } catch (Exception e) {
@@ -269,33 +277,22 @@ public class REPLView extends ViewPart implements IAdaptable {
         }
     }
 
-    private void registerEvalStatus(Object evalResponse) {
+    /** 
+     * BE CAREFUL: this is a blocking method, waiting for the full 
+     * nrepl response to come back !
+     */
+    private boolean hasEvalResponseException(Object evalResponse) {
     	ISeq responseSeq = (ISeq) evalResponse;
     	while (responseSeq != null) {
     		Map<?,?> m = (Map<?,?>) responseSeq.first();
     		if (m.containsKey(errorResponseKey)) {
-    			lastEvalSentInError = true;
-    			return;
+    			return true;
     		}
     		responseSeq = responseSeq.next();
     	}
-    	lastEvalSentInError = false;
+    	return false;
     }
     
-    /** Called by an editor after having sent an expression for evaluation */
-    public void afterExpressionSentFromEditor() {
-    	if (!autoRepeatLastAction.isChecked())
-    		return;
-    	
-    	if (lastEvalSentInError)
-    		return;
-    	
-		String lastREPLExpr = getLastExpressionSentFromREPL();
-		if (!StringUtils.isBlank(lastREPLExpr)) {
-			evalExpression(lastREPLExpr, false, false);
-		}
-    }
-
     public void printErrorDetail() {
         evalExpression("(require 'clojure.repl)" +
         		"(binding [*out* *err*]" +
@@ -303,7 +300,7 @@ public class REPLView extends ViewPart implements IAdaptable {
         		// concession for Clojure 1.2.0 environments that don't have pst
         		"    (if-let [pst (resolve 'clojure.repl/pst)]" +
         		"      (pst *e)" +
-        		"      (.printStackTrace *e *out*))))", false, false);
+        		"      (.printStackTrace *e *out*))))", false, false, false);
     }
 
     public void sendInterrupt() {
