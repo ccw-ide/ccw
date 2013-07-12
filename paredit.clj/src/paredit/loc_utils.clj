@@ -41,11 +41,6 @@
   (node-text (zip/node loc)))
 
 (defn loc-count [loc]
- ;(cond
- ;   (nil? loc) 0
- ;   (string? (zip/node loc)) (.length ^String (zip/node loc))
- ;   (zip/down loc) (apply + (map #'loc-count (concat [(zip/down loc)] (zip/rights (zip/down loc)))))
- ;   :else 0))
  (if (zip/branch? loc)
    (or (:count (zip/node loc)) 0) 
    (count (zip/node loc))))

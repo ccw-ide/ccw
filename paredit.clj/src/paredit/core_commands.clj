@@ -685,6 +685,14 @@
                  " (proxy [Foo] []\n     (foo []\n|bar))" " (proxy [Foo] []\n     (foo []\n       |bar))"
                  ;; future auto reindent children "(my-fn foo\n | baz\n  | baz)" "(my-fn foo\n       |baz\n       baz)"
                  }]
+      ["Tab"     :paredit-indent-selection
+                {
+                 "(if toto\n|t|iti)" "(if toto\n  |titi)"
+                 " (foo\n      b|ar\n ba|z\nqux)" " (foo\n   b|ar\n   baz\nqux)"
+                 " (foo\n      b|ar\n baz\nq|ux)" " (foo\n   b|ar\n   baz\n   qux)"
+                 " (foo\n      b|ar\n baz\nqux\n\nq|ix)" " (foo\n   b|ar\n   baz\n   qux\n   \n   qix)"
+                 " |a\na|b" "|a\nab"
+                 }]
       [#"C-j"     :paredit-newline
                 {"(ab|cd)" "(ab\n  |cd)"
                  ;"(ab|ce)\r\n" "(ab\r\n  |ce)\r\n"

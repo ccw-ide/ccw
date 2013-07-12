@@ -80,6 +80,24 @@
         (#{\return \newline} (.charAt s offset)) offset
         :else (recur (inc offset))))))
 
+(defn next-line-start 
+  "Return the offset for the start of the next line after offset, or nil if
+   end of String was reached."
+  [^String s offset]
+  (let [next-start (inc (.indexOf s "\n" offset))]
+    (when (pos? next-start) next-start)))
+
+(defn line-starts 
+  "Returns the list of the n char offsets in String s,
+  starting with the line of start-offset, and the following ones.
+  If n is greater than number of remainding end of lines, the list
+  will have size < n" 
+  [^String s start-offset n]
+  (let [start (line-start s start-offset)]
+    (keep identity (take n (iterate 
+                             #(when % (next-line-start s %))
+                             start)))))
+
 (defn index-of 
   "Like String.indexOf, but returns nil instead of -1 if not found"
   [^String s c] 
@@ -94,6 +112,16 @@
       (if-let [i (-?> (index-of s "\n") inc)]
         (cons (.substring s 0 i) (if (= i (.length s)) nil (full-lines (.substring s i))))
         (cons s nil)))))
+
+(defn text-diff
+  "Given 2 String values, before and after, compute the text modification
+   to be applied to before to get after"
+  [before after]
+  (let [n-common-start (count (take-while true? (map = before after)))
+        n-common-end (count (take-while true? (map = (reverse (subs before n-common-start)) (reverse (subs after n-common-start)))))]
+    {:offset n-common-start
+     :length (- (count before) n-common-start n-common-end)
+     :text (subs after n-common-start (- (count after) n-common-end))}))
 
 (deftest line-stop-tests
   (are [expected s o] (= expected (line-stop s o))

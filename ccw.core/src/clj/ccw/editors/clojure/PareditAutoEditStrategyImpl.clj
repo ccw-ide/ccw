@@ -25,7 +25,7 @@
    "]" [:paredit-close-square true]
    "}" [:paredit-close-curly true]
    "\"" [:paredit-doublequote true]
-   "\t" [:paredit-indent-line true]
+   "\t" [:paredit-indent true]
    "\n" [:paredit-newline true]
    "\r\n" [:paredit-newline true]
    })
@@ -81,7 +81,6 @@
 (defn do-command?
   "Will do command if it is :strict and the editor allows it, or if it is not :strict"
   [#^IClojureEditor editor par-command]
-  ;(println (str "do-command? : '" par-command "'"))
   (cond
     (*strict-commands* par-command)
       (.isStructuralEditingEnabled editor)
@@ -96,17 +95,12 @@
     (when (and (.doit command) 
                (not (.isInEscapeSequence editor)) 
                (.isStructuralEditionPossible editor))
-      ;(println "yo!")
       (let [signed-selection (bean (.getSignedSelection editor))
-            ;_ (println (str "signed-selection:" signed-selection))
             document-text {:text (.get document) 
                            :caret-offset (+ (:offset signed-selection) (:length signed-selection)) 
                            :selection-length (:length signed-selection)}
-            ;_ (println "document-text:" document-text)
             par-command {:text (.text command) :offset (.offset command) :length (.length command)}
             [par-command par-text] (paredit-args par-command document-text)
-            ;_ (println "here is the par-command:" par-command)
-            ;_ (println "do-command?" (do-command? editor par-command))
             result (and 
                      par-command 
                      (do-command? editor par-command)

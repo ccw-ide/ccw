@@ -576,33 +576,31 @@
         r)
       r)))
 
-(defmethod paredit
-  :paredit-indent-line
-  [cmd 
-   {:keys #{parse-tree buffer}} 
+(defn paredit-indent-line
+  "common fn: does not call with-important-memoized"
+  [{:keys #{parse-tree buffer}} 
    {:keys [^String text offset length] :as t}
    & {:keys [force-two-spaces-indent]}]
-  (with-important-memoized 
-    (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
-      (let [line-start (t/line-start text offset)
-            line-stop (t/line-stop text offset)
-            loc (loc-for-offset rloc line-start)]
-        (if (and (#{:string, :string-body} (loc-tag loc)) (< (start-offset loc) line-start))
-          t
-          (let [indent (indent-column rloc line-start force-two-spaces-indent)
-                cur-indent-col (- 
-                                 (loop [o line-start]
-                                   (if (>= o (.length text)) 
-                                     o
-                                     (let [c (.charAt text o)]
-                                       (cond
-                                         (#{\return \newline} c) o ; test CR/LF before .isWhitespace !
-                                         (Character/isWhitespace c) (recur (inc o))
-                                         (= \, c) (recur (inc o))
-                                         :else o))))
-                                 line-start)
-                to-add (- indent cur-indent-col)]
-            (cond
+  (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
+    (let [line-start (t/line-start text offset)
+          line-stop (t/line-stop text offset)
+          loc (loc-for-offset rloc line-start)]
+      (if (and (#{:string, :string-body} (loc-tag loc)) (< (start-offset loc) line-start))
+        t
+        (let [indent (indent-column rloc line-start force-two-spaces-indent)
+              cur-indent-col (- 
+                               (loop [o line-start]
+                                 (if (>= o (.length text)) 
+                                   o
+                                   (let [c (.charAt text o)]
+                                     (cond
+                                       (#{\return \newline} c) o ; test CR/LF before .isWhitespace !
+                                       (Character/isWhitespace c) (recur (inc o))
+                                       (= \, c) (recur (inc o))
+                                       :else o))))
+                               line-start)
+              to-add (- indent cur-indent-col)]
+          (cond
             (zero? to-add) t
             :else (let [t (update-in t [:modifs] conj {:text (str/repeat " " indent) :offset line-start :length cur-indent-col})
                         t (update-in t [:text] t/str-replace line-start cur-indent-col (str/repeat " " indent))]
@@ -613,8 +611,87 @@
                         t
                       :else
                         (update-in t [:offset] + (max to-add (- line-start 
-                                                               offset)))))))))
+                                                                offset)))))))))
+    t))
+
+(defmethod paredit
+  :paredit-indent-line
+  [cmd 
+   {:keys #{parse-tree buffer} :as parse-tree-buffer} 
+   {:keys [^String text offset length] :as t}
+   & options]
+  (with-important-memoized 
+    (apply paredit-indent-line parse-tree-buffer t options)))
+
+(defn- nb-lines 
+  "How many new lines between start-offset and stop-offset?"
+  [s start-offset stop-offset]
+  (count (re-seq #"\n" (subs s start-offset stop-offset))))
+
+(defn result->input
+  "Given the return value of a paredit call of the form 
+     {:modifs {..} :text .. :length .. :offset ..}, 
+   and the buffer value before the call,
+   return the map {:parse-tree new-parse-tree, :buffer new-buffer}
+   Right now, only works if :modifs has a single element."
+  [t-result buffer]
+  (let [{:keys [text offset length] :or {offset 0 length 0 text ""}} (first (:modifs t-result))
+        new-buffer (edit-buffer buffer offset length text)
+        new-parse-tree (buffer-parse-tree new-buffer 0)]
+    {:parse-tree new-parse-tree
+     :buffer new-buffer}))
+
+(defn indent-line 
+  "Input: {:parse-tree parse-tree :buffer buffer}, t
+   Output: [[new-parse-tree new-buffer] new-t]"
+  [{:keys [pt, buffer] :as pt-buffer} t & {:keys [force-two-spaces-indent]}]
+  (let [t-result (paredit-indent-line
+                   pt-buffer
+                   t
+                   :force-two-spaces-indent force-two-spaces-indent)
+        new-pt-buffer (result->input t-result buffer)]
+    [new-pt-buffer t-result]))
+
+(defmethod paredit
+  :paredit-indent-selection
+  [cmd 
+   {:keys #{parse-tree buffer} :as parse-tree-buffer} 
+   {:keys [^String text offset length] :as t}
+   & {:keys [force-two-spaces-indent]}]
+  (with-important-memoized 
+    (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
+      (let [nb-lines (nb-lines text offset (+ offset length))
+            [pt-b-0 tr-0] (indent-line 
+                            parse-tree-buffer 
+                            (assoc t :length 0) 
+                            :force-two-spaces-indent force-two-spaces-indent)]
+        (if (zero? nb-lines)
+          (assoc tr-0 :length 0)
+          (let [indent-next (fn [[pt-b-0 tr-0]]
+                              (let [next-line-offset (t/next-line-start (:text tr-0) (:offset tr-0))
+                                    [pt-b-1 tr-1] (indent-line
+                                                    pt-b-0
+                                                    (-> tr-0
+                                                      (dissoc :modifs)
+                                                      (assoc :offset next-line-offset))
+                                                    :force-two-spaces-indent force-two-spaces-indent)]
+                                [pt-b-1 (assoc tr-1 :length 0)])) 
+                [pt-b-n tr-n] (nth (iterate indent-next [pt-b-0 tr-0]) nb-lines)]
+            (assoc tr-n
+                   :offset (:offset tr-0)
+                   :length 0
+                   :modifs [(t/text-diff text (:text tr-n))]))))
       t)))
+ 
+(defmethod paredit
+  :paredit-indent
+  [cmd parse-tree-buffer t & {:keys [force-two-spaces-indent]}]
+  (paredit (if (zero? (:length t))
+             :paredit-indent-line
+             :paredit-indent-selection)
+           parse-tree-buffer
+           t
+           :force-two-spaces-indent force-two-spaces-indent))
 
 (defn update-lines
   "line-updater-factory-fn is a f which takes the lines to transform as its input"

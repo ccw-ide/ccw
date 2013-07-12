@@ -41,6 +41,14 @@
     (ignoring-selection-changes editor 
       #(.selectAndReveal editor new-offset new-length))))
 
+(defn editor-text 
+  "Return the current text, cursor offset and selection length
+   in the Editor editor, in the form
+   {:text text, :offset offset, :length length}"
+  [editor]
+  (assoc (bean (.getUnSignedSelection editor))
+         :text (.get (.getDocument editor))))
+
 ;; TODO remove duplication with PareditAutoEditStrategy (or not)
 (defn- apply-paredit-command 
   "f is a function which takes the parse state, and the editor state as a
@@ -49,16 +57,14 @@
    maps under the key :modifs, as well as global final offset in the :offset key,
    and selection in the :length key"
   [editor f]
-  (let [{:keys #{length offset}} (bean (.getUnSignedSelection editor))
-        text  (.get (.getDocument editor))
-        result (f (.getParseState editor) {:text text :offset offset :length length})]
+  (let [result (f (.getParseState editor) (editor-text editor))]
     (when-let [modif (-?> result :modifs first)] ;; TODO what if more than one modif in :modifs ?
       (let [{:keys #{length offset text}} modif
             document (-> editor .getDocument)]
         (.replace document offset length text)
         (.selectAndReveal editor (:offset result) (:length result))))))
 
-(defn- paredit-fn [command-key] #(pc/paredit command-key %1 %2))
+(defn- paredit-fn [command-key & options] #(apply pc/paredit command-key %1 %2 options))
 
 (defn forward-slurp [_ event] 
   (apply-paredit-command (editor event) 
@@ -98,9 +104,10 @@
   (apply-paredit-selection-command (editor event)
                                    :paredit-expand-up))
 (defn indent-selection [_ event]
-  (apply-paredit-selection-command (editor event) 
-                                   :paredit-indent-line
-                                   :force-two-space-indent true))
+  (apply-paredit-command 
+    (editor event) 
+    (paredit-fn :paredit-indent :force-two-space-indent true)))
+
 (defn toggle-structural-edition-mode [_ event]
   (.toggleStructuralEditionMode (editor event)))
 
