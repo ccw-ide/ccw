@@ -112,7 +112,8 @@
 (def open-anon-arg "%")
 (def open-keyword #":{1,2}")
 (def open-discard "#_")
-(def whitespace #"(?:,|\s)+")
+(def whitespace #"(?:[,\s]+)")
+;(def whitespace #"(?:[, \t\r]+|\n[, \t]+)") ca casse quelques tests ... 
 (def open-comment #"(?:\#\!|;)")
 (def open-reader-literal #"#(?![\(\^\"\{\'\_\!])")
 (def open-char "\\")

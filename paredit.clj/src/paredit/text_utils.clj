@@ -1,4 +1,5 @@
 (ns paredit.text-utils
+  (:refer-clojure :exclude [repeat])
   (:use clojure.test)
   (:use [clojure.core.incubator :only [-?>]]))
 
@@ -122,6 +123,25 @@
     {:offset n-common-start
      :length (- (count before) n-common-start n-common-end)
      :text (subs after n-common-start (- (count after) n-common-end))}))
+
+(defn repeat 
+  "create a String made of n character c"
+  [n c] 
+  (apply str (clojure.core/repeat n c)))
+
+(defn adjust-padding 
+  "If delta is positive, add character c delta times at the end of s.
+   If delta is negative, remove the delta last characters of c or return empty string."
+  [s delta c]
+  (if (pos? delta)
+    (str s (repeat delta \space))
+    (subs s 0 (max 0 (+ (count s) delta)))))
+
+(defn col 
+  "Return the column number (starting at 0) for offset in text s" 
+  [s offset]
+  (- offset (line-start s offset)))
+
 
 (deftest line-stop-tests
   (are [expected s o] (= expected (line-stop s o))

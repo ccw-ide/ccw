@@ -8,6 +8,7 @@
   (:use [clojure.core.incubator :only [-?>]])
   (:require [clojure.zip :as zip])
   (:require [paredit.static-analysis :as st])
+  (:require [paredit.tests.utils :as u])
   (:use paredit.loc-utils))
 
 (def ^:dynamic *spy?* (atom false))
@@ -24,40 +25,6 @@
 (defmacro spy 
   ([expr] (spy* "" expr))
   ([msg expr] (spy* msg expr)))
-
-(defn tree 
-  "creates parse-tree"
-  [text]
-  (-> text
-    paredit.parser/parse 
-    (paredit.loc-utils/parsed-root-loc true)
-    (clojure.zip/node)))
-
-(defn clean-tree 
-  "more human readable parse tree"
-  [tree]
-  (cond
-    (string? tree) tree
-    :else (-> tree 
-            (dissoc :build-id :count :content-cumulative-count :abstract-node :broken?)
-            (update-in [:content] #(map clean-tree %)))))
-
-(defn text-spec-to-text 
-  "Converts a text spec to text map" 
-  [^String text-spec]
-  (let [offset (.indexOf text-spec "|")
-        second-pipe (dec (.indexOf text-spec "|" (inc offset)))]  
-    {:text (str/replace text-spec "|" "")
-     :offset offset
-     :length (if (> second-pipe 0) (- second-pipe offset) 0)}))
-
-(defn text-to-text-spec
-  "Converts a text map to text spec"
-  [text]
-  (let [spec (t/str-insert (:text text) (:offset text) "|")
-        spec (if (zero? (:length text)) spec (t/str-insert spec (+ 1 (:offset text) (:length text)) "|"))]
-    spec))
-
 
 #_(deftest normalized-selection-tests
   (are [text offset length expected-offset expected-length]
@@ -100,12 +67,12 @@
   (testing (str title-prefix " " (second command) " (\"" (first command) "\")")
     (doseq [[input expected] (get command 2)]
       (spy "++++++++++++++++++++")
-      (spy (text-spec-to-text input))
-      (let [{text :text :as t} (text-spec-to-text input)
+      (spy (u/spec->text input))
+      (let [{text :text :as t} (u/spec->text input)
             buffer (edit-buffer nil 0 -1 text)
             parse-tree (buffer-parse-tree buffer :for-test)]
         (is (= expected
-               (text-to-text-spec (paredit (second command) 
+               (u/text->spec (paredit (second command) 
                                            {:parse-tree parse-tree, 
                                             :buffer buffer} 
                                            t))))))))
@@ -119,8 +86,8 @@
 
 #_(deftest spec-text-tests
   (are [spec text] (and 
-                     (= text (text-spec-to-text spec))
-                     (= spec (text-to-text-spec text)))
+                     (= text (u/spec->text spec))
+                     (= spec (u/text->spec text)))
     "foo |bar" {:text "foo bar" :offset 4 :length 0}
     "|" {:text "" :offset 0 :length 0}
     "|foo" {:text "foo" :offset 0 :length 0}
@@ -242,7 +209,7 @@
 
 (deftest static-analysis-tests
   (are [text]
-       (= "foo" (-?> text tree (st/find-namespace)))
+       (= "foo" (-?> text u/tree (st/find-namespace)))
     "(ns foo)"
     ";some comment\n(ns foo)"
     "#!nasty comment\n(ns foo)"
@@ -293,6 +260,19 @@
   "(a)\n;foo\n\n^:true b" 9 "(a)"
   "(a)\n;foo\n\n^:true b" 10 "^:true b"
   "(a)\n;foo\n\n^:true b" 17 "^:true b"))
+
+(deftest col-tests
+  (are 
+    [text-spec expected-col] 
+    (let [{:keys [text offset]} (u/spec->text text-spec)]
+      (is (= expected-col (t/col text offset))))
+    "|foo" 0
+    "f|oo" 1
+    "foo|" 3
+    "foo|\n" 3
+    "foo\n|" 0
+    "foo\n \n|" 0
+    "foo\n \n |" 1))
 
 (defn pts []
   #_(normalized-selection-tests)

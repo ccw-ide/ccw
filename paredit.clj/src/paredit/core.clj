@@ -431,24 +431,25 @@
 (defmethod paredit
   :paredit-raise-sexp
   [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
-  (with-important-memoized (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
-    (let [[l r] (normalized-selection rloc offset length)]
-      (if-not (and
-                (sel-match-normalized? offset length [l r]) 
-                (= offset (start-offset (parse-node l))))
-        t
-        (let  
-          [to-raise-offset (start-offset l)
-           to-raise-length (- (if r (end-offset r) (end-offset (parse-node l))) (start-offset l))
-           to-raise-text (.substring text to-raise-offset (+ to-raise-offset to-raise-length))
-           l (if-let [nl (z/up (parse-node l))] nl l)
-           replace-offset (start-offset l)
-           replace-length (- (end-offset l) replace-offset)]
-          (-> t (assoc-in [:text] (t/str-replace text replace-offset replace-length to-raise-text))
-            (assoc-in [:offset] replace-offset)
-            (assoc-in [:length] (count to-raise-text))
-            (update-in [:modifs] conj {:offset replace-offset :length replace-length :text to-raise-text})))))
-    t)))
+  (with-important-memoized 
+    (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
+      (let [[l r] (normalized-selection rloc offset length)]
+        (if-not (and
+                  (sel-match-normalized? offset length [l r]) 
+                  (= offset (start-offset (parse-node l))))
+          t
+          (let  
+            [to-raise-offset (start-offset l)
+             to-raise-length (- (if r (end-offset r) (end-offset (parse-node l))) (start-offset l))
+             to-raise-text (.substring text to-raise-offset (+ to-raise-offset to-raise-length))
+             l (if-let [nl (z/up (parse-node l))] nl l)
+             replace-offset (start-offset l)
+             replace-length (- (end-offset l) replace-offset)]
+            (-> t (assoc-in [:text] (t/str-replace text replace-offset replace-length to-raise-text))
+              (assoc-in [:offset] replace-offset)
+              (assoc-in [:length] (count to-raise-text))
+              (update-in [:modifs] conj {:offset replace-offset :length replace-length :text to-raise-text})))))
+      t)))
 
 (defmethod paredit
   :paredit-split-sexp
@@ -490,24 +491,24 @@
     (if (not= 0 length)
       t
       (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
-          (let [[l _] (normalized-selection rloc offset length)
-                lf (first (remove #(= :whitespace (loc-tag %)) (previous-leaves l)))
-                rf (first (remove #(= :whitespace (loc-tag %)) (cons l (next-leaves l))))]
-            (if (or (nil? lf) (nil? rf) (start-punct? lf) (end-punct? rf))
-              t
-              (let [ln (parse-node lf)
-                    rn (parse-node rf)] 
-                (if-not (and
-                          (= (loc-tag ln) (loc-tag rn)))
-                  t
-                  (let [replace-offset (- (end-offset ln) (if-let [punct ^String (*tag-closing-brackets* (loc-tag ln))] (.length punct) 0))
-                        replace-length (- (+ (start-offset rn) (if-let [punct ^String (*tag-closing-brackets* (loc-tag rn))] (.length punct) 0)) replace-offset)
-                        replace-text   (if ((conj *atom* :string) (loc-tag ln)) "" " ")
-                        new-offset (if (= offset (start-offset rn)) (+ replace-offset (.length replace-text)) replace-offset)]
-                    (-> t (assoc-in [:text] (t/str-replace text replace-offset replace-length replace-text))
-                      (assoc-in [:offset] new-offset)
-                      (update-in [:modifs] conj {:offset replace-offset :length replace-length :text replace-text})))))))
-          t))))
+        (let [[l _] (normalized-selection rloc offset length)
+              lf (first (remove #(= :whitespace (loc-tag %)) (previous-leaves l)))
+              rf (first (remove #(= :whitespace (loc-tag %)) (cons l (next-leaves l))))]
+          (if (or (nil? lf) (nil? rf) (start-punct? lf) (end-punct? rf))
+            t
+            (let [ln (parse-node lf)
+                  rn (parse-node rf)] 
+              (if-not (and
+                        (= (loc-tag ln) (loc-tag rn)))
+                t
+                (let [replace-offset (- (end-offset ln) (if-let [punct ^String (*tag-closing-brackets* (loc-tag ln))] (.length punct) 0))
+                      replace-length (- (+ (start-offset rn) (if-let [punct ^String (*tag-closing-brackets* (loc-tag rn))] (.length punct) 0)) replace-offset)
+                      replace-text   (if ((conj *atom* :string) (loc-tag ln)) "" " ")
+                      new-offset (if (= offset (start-offset rn)) (+ replace-offset (.length replace-text)) replace-offset)]
+                  (-> t (assoc-in [:text] (t/str-replace text replace-offset replace-length replace-text))
+                    (assoc-in [:offset] new-offset)
+                    (update-in [:modifs] conj {:offset replace-offset :length replace-length :text replace-text})))))))
+        t))))
 
 (defn wrap-with-balanced
   [parsed [^String o c] {:keys [^String text offset length] :as t}]

@@ -1,13 +1,13 @@
 (ns ccw.editors.clojure.PareditAutoEditStrategyImpl
   (:use [paredit [core :only [paredit]]])
-  (:use [clojure.core.incubator :only [-?>]])  
+  (:use [clojure.core.incubator :only [-?>]])
+  (:require [ccw.editors.clojure.paredit-auto-edit-support :as support])  
   (:import
     [org.eclipse.jface.text IAutoEditStrategy
                             IDocument
                             DocumentCommand]
     [org.eclipse.jface.preference IPreferenceStore]
-    [ccw.editors.clojure IClojureEditor PareditAutoEditStrategy])
-  (:require [ccw.core.trace :as trace]))
+    [ccw.editors.clojure IClojureEditor PareditAutoEditStrategy]))
    
 #_(set! *warn-on-reflection* true)
 
@@ -89,7 +89,7 @@
       (.getBoolean (ccw-prefs) (*configuration-based-commands* par-command))
     :else 
       true))
-
+        
 (defn customizeDocumentCommand 
   [^PareditAutoEditStrategy this, #^IDocument document, #^DocumentCommand command]
   (let [^IClojureEditor editor (-> this .state deref :editor)]
@@ -109,22 +109,5 @@
                             par-command
                             (.getParseState editor)
                             par-text
-                            (paredit-options par-command)))
-            ]
-        (when (and result (not= :ko (-> result :parser-state)))
-          (if-let [modif (-?> result :modifs first)]
-            (do
-              (set! (.offset command) (-> result :modifs first :offset))
-              (set! (.length command) (-> result :modifs first :length))
-              (set! (.text command) (-> result :modifs first :text))
-              (doseq [{:keys [offset length text]} (rest (-> result :modifs))]
-                (.addCommand command offset length text nil)))
-            (do
-              (set! (.offset command) (:offset result))
-              (set! (.length command) 0)
-              (set! (.text command) "")
-              (set! (.doit command) false)))
-          (set! (.shiftsCaret command) false)
-          (set! (.caretOffset command) (:offset result))
-          (when-not (zero? (:length result)) ;;; WHY when-not zero? 
-            (.selectAndReveal editor (:offset result) (:length result))))))))
+                            (paredit-options par-command)))]
+        (support/apply-modif! editor command result)))))

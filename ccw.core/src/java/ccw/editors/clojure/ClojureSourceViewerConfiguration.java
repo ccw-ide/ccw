@@ -185,7 +185,8 @@ public class ClojureSourceViewerConfiguration extends
 			ISourceViewer sourceViewer, final String contentType) {
 		
 		return new IAutoEditStrategy[] { 
-				new PareditAutoEditStrategy(editor, fPreferenceStore) };
+				new PareditAutoEditStrategy(editor, fPreferenceStore),
+			    new PareditAutoAdjustWhitespaceStrategy(editor, fPreferenceStore)};
 	}
 	
 	@Override
