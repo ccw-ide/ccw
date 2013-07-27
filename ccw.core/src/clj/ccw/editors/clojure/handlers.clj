@@ -11,8 +11,8 @@
 
 (ns ccw.editors.clojure.handlers
   (:require [paredit.core :as pc]
-            [ccw.editors.clojure.clojure-hyperlink-detector :as hlu]
-            [ccw.editors.clojure.PareditAutoEditStrategyImpl :as pimpl]) ; hlu as HyperLinkUtil
+            [ccw.editors.clojure.clojure-hyperlink-detector :as hlu] ; hlu as HyperLinkUtil
+            [ccw.editors.clojure.PareditAutoEditStrategyImpl :as pimpl]) 
   (:use [clojure.core.incubator :only [-?>]])  
   (:import
     [org.eclipse.ui.handlers HandlerUtil]
@@ -64,7 +64,7 @@
         (.replace document offset length text)
         (.selectAndReveal editor (:offset result) (:length result))))))
 
-(defn- paredit-fn [command-key & options] #(apply pc/paredit command-key %1 %2 options))
+(defn- paredit-fn [command-key options] #(apply pc/paredit command-key %1 %2 options))
 
 (defn forward-slurp [_ event] 
   (apply-paredit-command (editor event) 
@@ -106,7 +106,7 @@
 (defn indent-selection [_ event]
   (apply-paredit-command 
     (editor event) 
-    (paredit-fn :paredit-indent :force-two-space-indent true)))
+    (paredit-fn :paredit-indent (pimpl/paredit-options :paredit-indent))))
 
 (defn toggle-structural-edition-mode [_ event]
   (.toggleStructuralEditionMode (editor event)))

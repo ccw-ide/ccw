@@ -41,7 +41,8 @@
   command-preferences
   "map of command to map of keyword -> associated global preference key"
   {:paredit-newline {:force-two-spaces-indent ccw.preferences.PreferenceConstants/FORCE_TWO_SPACES_INDENT}
-   :paredit-indent-line {:force-two-spaces-indent ccw.preferences.PreferenceConstants/FORCE_TWO_SPACES_INDENT}})
+   :paredit-indent-line {:force-two-spaces-indent ccw.preferences.PreferenceConstants/FORCE_TWO_SPACES_INDENT}
+   :paredit-indent {:force-two-spaces-indent ccw.preferences.PreferenceConstants/FORCE_TWO_SPACES_INDENT}})
 
 (def 
   ^:dynamic *configuration-based-commands*
