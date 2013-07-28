@@ -83,7 +83,9 @@
         locs (take-while continue-search (iterate next-node-loc loc))]
     (first (remove lu/whitespace? locs))))
 
-(defn noop-diff? [diff]
+(defn empty-diff?
+  "Is the text diff empty (nothing replaced and nothing added)?" 
+  [diff]
   (and (zero? (:length diff))
        (zero? (count (:text diff)))))
 
@@ -100,55 +102,57 @@
 (defn customizeDocumentCommand 
   "Work only if no command has been added via (.addCommand)"
   [^PareditAutoAdjustWhitespaceStrategy this, #^IDocument document, #^DocumentCommand command]
-  (let [^IClojureEditor editor (-> this .state deref :editor)
-        {:keys [parse-tree buffer]} (.getParseState editor)
-        text-before (lu/node-text parse-tree)
-        ;_ (println "text-before:" (str "'" text-before "'"))
-        parse-tree (-> buffer
-                     (p/edit-buffer (.offset command) (.length command) (.text command))
-                     (p/buffer-parse-tree 0))
-        text (lu/node-text parse-tree)
-        ;_ (println "text:" (str "'" text "'"))
-        offset (+ (.offset command) (count (.text command)))
-        offset-before (+ (.offset command) (.length command))
-        col (tu/col text offset)
-        delta (- col
-                 (tu/col text-before offset-before))
-       ; _ (println "delta:" delta)
-        rloc (lu/parsed-root-loc parse-tree)
-        loc (lu/loc-for-offset rloc offset)
-       ; _ (if loc (println "loc for offset:" 
-       ;                    (pr-str (clean-tree (zip/node loc)))))
-        loc (if (or 
-                  (= (lu/start-offset loc) offset)
-                  (whitespace-end-of-line? text offset))
-              loc
-              (next-node-loc loc))
-        loc (find-loc-to-shift loc)
-        ;_ (when-not loc (println "no loc found"))
-        ]
-    (when  loc
-      (let [col (- (lu/loc-col loc) delta)
-         ;   _ (println "final loc node:" (pr-str (clean-tree (zip/node loc))))
-         ;   _ (println "col" col)
-         ;   _ (println "(lu/loc-col loc)" (lu/loc-col loc))
-            [shifted-loc _] (lu/propagate-delta loc col delta)
-            shifted-text (lu/node-text (zip/root shifted-loc))
-            ;_ (println "shifted-text:" (with-out-str (pr shifted-text)))
-            ;_ (println "text        :" (with-out-str (pr text)))
-            loc-diff (tu/text-diff text shifted-text)
-            ;_ (println "loc-diff" (with-out-str (pr loc-diff)))
-            diff (update-in 
-                   loc-diff
-                   [:offset] + (.length command) (- (count (.text command))))
-            ;_ (println "diff" (with-out-str (pr diff)))
-            ]
-        (when-not (noop-diff? loc-diff)
-          (.addCommand command 
-            (:offset diff)
-            (:length diff)
-            (:text diff)
-            nil)
-          (set! (.shiftsCaret command) false)
-          (set! (.caretOffset command) offset))))))
+  (when (and (.doit command)
+             (not (.isInEscapeSequence editor)))
+    (let [^IClojureEditor editor (-> this .state deref :editor)
+          {:keys [parse-tree buffer]} (.getParseState editor)
+          text-before (lu/node-text parse-tree)
+          ;_ (println "text-before:" (str "'" text-before "'"))
+          parse-tree (-> buffer
+                       (p/edit-buffer (.offset command) (.length command) (.text command))
+                       (p/buffer-parse-tree 0))
+          text (lu/node-text parse-tree)
+          ;_ (println "text:" (str "'" text "'"))
+          offset (+ (.offset command) (count (.text command)))
+          offset-before (+ (.offset command) (.length command))
+          col (tu/col text offset)
+          delta (- col
+                   (tu/col text-before offset-before))
+        ; _ (println "delta:" delta)
+         rloc (lu/parsed-root-loc parse-tree)
+         loc (lu/loc-for-offset rloc offset)
+        ; _ (if loc (println "loc for offset:" 
+        ;                    (pr-str (clean-tree (zip/node loc)))))
+         loc (if (or 
+                   (= (lu/start-offset loc) offset)
+                   (whitespace-end-of-line? text offset))
+               loc
+               (next-node-loc loc))
+         loc (find-loc-to-shift loc)
+         ;_ (when-not loc (println "no loc found"))
+         ]
+      (when  loc
+        (let [col (- (lu/loc-col loc) delta)
+           ;   _ (println "final loc node:" (pr-str (clean-tree (zip/node loc))))
+           ;   _ (println "col" col)
+           ;   _ (println "(lu/loc-col loc)" (lu/loc-col loc))
+              [shifted-loc _] (lu/propagate-delta loc col delta)
+              shifted-text (lu/node-text (zip/root shifted-loc))
+              ;_ (println "shifted-text:" (with-out-str (pr shifted-text)))
+              ;_ (println "text        :" (with-out-str (pr text)))
+              loc-diff (tu/text-diff text shifted-text)
+              ;_ (println "loc-diff" (with-out-str (pr loc-diff)))
+              diff (update-in 
+                     loc-diff
+                     [:offset] + (.length command) (- (count (.text command))))
+              ;_ (println "diff" (with-out-str (pr diff)))
+              ]
+          (when-not (empty-diff? loc-diff)
+            (.addCommand command 
+              (:offset diff)
+              (:length diff)
+              (:text diff)
+              nil)
+            (set! (.shiftsCaret command) false)
+            (set! (.caretOffset command) offset)))))))
 
