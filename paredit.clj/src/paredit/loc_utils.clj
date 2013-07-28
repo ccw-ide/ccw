@@ -265,11 +265,8 @@
    cases in your code, but that's the way things are currently
    implemented, sorry."
   [loc]
-  (and loc
-       (or
-         ;(root? (z/prev loc))
-         (after-comment? loc)
-         (whitespace-newline? loc))))
+  (and loc (or (after-comment? loc)
+               (whitespace-newline? loc))))
 
 (defn shift-nl-whitespace 
   "Loc is at a line start. Add delta (may be negative) 
