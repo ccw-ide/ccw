@@ -39,6 +39,8 @@
     "(foo|;bar\n\n baz)" false
     "(foo;bar\n|\n baz)" true ; remember, comments "own" newlines
     "(foo;bar\n\n |baz)" false ; remember, comments "own" newlines
+    
+    ";\n|foo" true
     ))
 
 (deftest shift-nl-whitespace-tests
@@ -82,6 +84,8 @@
     "foo;comment\n|  \n bar"  0 "foo;comment\n  \n bar"
     "foo;comment\n|  \n bar" -1 "foo;comment\n  \nbar"
     "foo;comment\n|  \n bar" -2 "foo;comment\n  \nbar"
+    
+    ";\n(|\n )" -1 ";\n(\n)" 
     ))
 
 (deftest propagate-delta-tests
@@ -113,5 +117,8 @@
 
     " |\n(\na)" 0 1 " \n(\na)"     
     
+    ";\n|(\n )" 1 -1 ";\n(\n)"  
+    
+    ";|\na" 0 1 ";\na" 
     ))
 

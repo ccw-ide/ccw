@@ -291,45 +291,43 @@
          :content [(t/repeat delta \space)]})
       loc)))
 
+(defn line-start-col 
+  "For loc l, representing a whitespace start of a line, at which col
+   does l 'start' (e.g. does not have only whitespaces)?" 
+  [l]
+  (let [text (loc-text l)]
+    (if (.contains text "\n")
+      (- (count text)
+         (inc (.lastIndexOf text "\n")))
+      (count text))))
+
 (defn propagate-delta [loc col delta]
-  (if (newline? loc)
+  (if (or (comment? loc) (whitespace-newline? loc))
     [loc :stop]
     (let [depth (count (z/path loc))
-        ;_ (println "depth" depth)
-        [loc st] (loop [l loc]
-;                   (println "l node:" (pr-str (paredit.tests.utils/clean-tree (z/node l))))
-;                   (println "(count (z/path l))" (count (z/path l)))
-;                   (println "(newline? l)" (newline? l))
-                   (if (> depth (count (z/path l)))
-                     [l :continue]
-                     (let [[l st] (cond 
-                                    (newline? l)
-                                      (if (whitespace? l)
-                                        (let [blanks (let [text (loc-text l)]
-                                                       (if (.contains text "\n")
-                                                         (- (count text)
-                                                            (inc (.lastIndexOf text "\n")))
-                                                         (count text)))]
-                                          (if (<= col blanks)
-                                            [(shift-nl-whitespace l delta) :continue]
-                                            [l :stop]))
-                                        ; l is not whitespace
-                                        (if (and (zero? col) (pos? delta))
-                                          [(shift-nl-whitespace l delta) :continue]
-                                          [l :stop]))
-                                    :else
-                                      [l :continue])]
-                       (cond
-                         (= :stop st)             [l :stop]
-                         (nil? (z/next l))     [l :continue]
-                         (z/end? (z/next l)) [l :stop]
-                         :else                    (recur (z/next l))))))]
-    (if (= :stop st)
-      [loc :stop]
-      (if-let [next-loc (if-let [p (z/up loc)] (z/right p))]
-        (recur next-loc
-               (loc-col next-loc) ; FIXME may not work if :cumulated-count is not correct 
-               ; OR MAY RETURN old col
-               delta)
-        [loc :stop])))))
+          [loc st] (loop [l loc]
+                     (if (> depth (count (z/path l)))
+                       [l :continue]
+                       (let [[l st] 
+                             (cond 
+                               (newline? l)
+                                 (if (and (whitespace? l)
+                                          (> col (line-start-col l)))
+                                   [l :stop]
+                                   [(shift-nl-whitespace l delta) :continue])
+                               :else
+                                 [l :continue])]
+                         (cond
+                           (= :stop st)        [l :stop]
+                           (nil? (z/next l))   [l :continue]
+                           (z/end? (z/next l)) [l :stop]
+                           :else               (recur (z/next l))))))]
+      (if (= :stop st)
+        [loc :stop]
+        (if-let [next-loc (if-let [p (z/up loc)] (z/right p))]
+          (recur next-loc
+                 (loc-col next-loc) ; FIXME may not work if :cumulated-count is not correct 
+                 ; OR MAY RETURN old col
+                 delta)
+          [loc :stop])))))
         
