@@ -135,6 +135,7 @@ public class PreferenceConstants {
 	
     public static final String CCW_PREFERENCE_PREFIX = "ccw.preferences"; //$NON-NLS-1$
     
+    
     public static final String CCW_GENERAL_AUTOMATIC_NATURE_ADDITION = CCW_PREFERENCE_PREFIX + ".automatic_nature_addition";
     
     public static final String CCW_GENERAL_AUTO_RELOAD_ON_STARTUP_SAVE = CCW_PREFERENCE_PREFIX + ".auto_reload_on_startup_save";
@@ -147,6 +148,8 @@ public class PreferenceConstants {
 	public static final String USE_TAB_FOR_REINDENTING_LINE = CCW_PREFERENCE_PREFIX + ".use_tab_for_reindenting_line"; //$NON-NLS-1$
 	
 	public static final String FORCE_TWO_SPACES_INDENT = CCW_PREFERENCE_PREFIX + ".force_two_spaces_indent"; //$NON-NLS-1$
+
+	public static final String EXPERIMENTAL_AUTOSHIFT_ENABLED = CCW_PREFERENCE_PREFIX + ".experimental.editor.autoshift_enabled";
 	
 	public static final String EDITOR_COLORING_PREFIX = "editor_color"; //$NON-NLS-1$
 	

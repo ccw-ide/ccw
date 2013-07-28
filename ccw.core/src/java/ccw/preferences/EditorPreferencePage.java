@@ -30,6 +30,12 @@ public class EditorPreferencePage extends FieldEditorPreferencePage implements
     }
     
     public void createFieldEditors() {
+    	addField(
+        		new BooleanFieldEditor(
+        			ccw.preferences.PreferenceConstants.EXPERIMENTAL_AUTOSHIFT_ENABLED,
+        			"EXPERIMENTAL - Editor text Autoshift ('fix indentation as you type')",
+        			getFieldEditorParent()));
+        	
         addField(
             new BooleanFieldEditor(
                 PreferenceConstants.EDITOR_MATCHING_BRACKETS,

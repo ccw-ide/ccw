@@ -12,7 +12,8 @@
                             IDocument
                             DocumentCommand]
     [org.eclipse.jface.preference IPreferenceStore]
-    [ccw.editors.clojure IClojureEditor PareditAutoAdjustWhitespaceStrategy]))
+    [ccw.editors.clojure IClojureEditor PareditAutoAdjustWhitespaceStrategy]
+    [ccw.preferences PreferenceConstants]))
    
 #_(set! *warn-on-reflection* true)
 
@@ -93,42 +94,43 @@
 (defn customizeDocumentCommand 
   "Work only if no command has been added via (.addCommand)"
   [^PareditAutoAdjustWhitespaceStrategy this, #^IDocument document, #^DocumentCommand command]
-  (when (and (.doit command)
-             (not (.isInEscapeSequence editor)))
-    (let [^IClojureEditor editor (-> this .state deref :editor)
-          {:keys [parse-tree buffer]} (.getParseState editor)
-          text-before (lu/node-text parse-tree)
-          parse-tree (-> buffer
-                       (p/edit-buffer (.offset command) (.length command) (.text command))
-                       (p/buffer-parse-tree 0))
-          text (lu/node-text parse-tree)
-          offset (+ (.offset command) (count (.text command)))
-          offset-before (+ (.offset command) (.length command))
-          col (tu/col text offset)
-          delta (- col
-                   (tu/col text-before offset-before))
-         rloc (lu/parsed-root-loc parse-tree)
-         loc (lu/loc-for-offset rloc offset)
-         loc (if (or 
-                   (= (lu/start-offset loc) offset)
-                   (whitespace-end-of-line? text offset))
-               loc
-               (next-node-loc loc))
-         loc (find-loc-to-shift loc)]
-      (when  loc
-        (let [col (- (lu/loc-col loc) delta)
-              [shifted-loc _] (lu/propagate-delta loc col delta)
-              shifted-text (lu/node-text (zip/root shifted-loc))
-              loc-diff (tu/text-diff text shifted-text)
-              diff (update-in 
-                     loc-diff
-                     [:offset] + (.length command) (- (count (.text command))))]
-          (when-not (empty-diff? loc-diff)
-            (.addCommand command 
-              (:offset diff)
-              (:length diff)
-              (:text diff)
-              nil)
-            (set! (.shiftsCaret command) false)
-            (set! (.caretOffset command) offset)))))))
+   (let [^IClojureEditor editor (-> this .state deref :editor)] 
+     (when (and (.doit command)
+               (not (.isInEscapeSequence editor))
+               (support/boolean-ccw-pref PreferenceConstants/EXPERIMENTAL_AUTOSHIFT_ENABLED))
+      (let [{:keys [parse-tree buffer]} (.getParseState editor)
+            text-before (lu/node-text parse-tree)
+            parse-tree (-> buffer
+                         (p/edit-buffer (.offset command) (.length command) (.text command))
+                         (p/buffer-parse-tree 0))
+            text (lu/node-text parse-tree)
+            offset (+ (.offset command) (count (.text command)))
+            offset-before (+ (.offset command) (.length command))
+            col (tu/col text offset)
+            delta (- col
+                     (tu/col text-before offset-before))
+           rloc (lu/parsed-root-loc parse-tree)
+           loc (lu/loc-for-offset rloc offset)
+           loc (if (or 
+                     (= (lu/start-offset loc) offset)
+                     (whitespace-end-of-line? text offset))
+                 loc
+                 (next-node-loc loc))
+           loc (find-loc-to-shift loc)]
+        (when  loc
+          (let [col (- (lu/loc-col loc) delta)
+                [shifted-loc _] (lu/propagate-delta loc col delta)
+                shifted-text (lu/node-text (zip/root shifted-loc))
+                loc-diff (tu/text-diff text shifted-text)
+                diff (update-in 
+                       loc-diff
+                       [:offset] + (.length command) (- (count (.text command))))]
+            (when-not (empty-diff? loc-diff)
+              (.addCommand command 
+                (:offset diff)
+                (:length diff)
+                (:text diff)
+                nil)
+              (set! (.shiftsCaret command) false)
+              (set! (.caretOffset command) offset))))))))
 
