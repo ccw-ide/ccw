@@ -6,13 +6,9 @@
     [org.eclipse.jface.text IAutoEditStrategy
                             IDocument
                             DocumentCommand]
-    [org.eclipse.jface.preference IPreferenceStore]
     [ccw.editors.clojure IClojureEditor PareditAutoEditStrategy]))
    
 #_(set! *warn-on-reflection* true)
-
-(defn init
-  [editor preference-store] (ref {:editor editor :prefs-store preference-store}))   
 
 ; TODO move this into paredit itself ...
 ;  each command : trigger-str  [:paredit-command-name only-one-char-command?]
@@ -70,13 +66,9 @@
                 :offset (:offset command) 
                 :length (:length command)}]))
 
-(defn- ccw-prefs
-  ^IPreferenceStore []
-  (.getCombinedPreferenceStore (ccw.CCWPlugin/getDefault)))
-
 (defn paredit-options [command]
   (when-let [options-prefs (command-preferences command)]
-    (mapcat (fn [[k pref]] [k (.getBoolean (ccw-prefs) pref)]) 
+    (mapcat (fn [[k pref]] [k (support/boolean-ccw-pref pref)]) 
             options-prefs)))
 
 (defn do-command?
@@ -86,7 +78,7 @@
     (*strict-commands* par-command)
       (.isStructuralEditingEnabled editor)
     (*configuration-based-commands* par-command) ; works because I know no value can be nil in *configuration-based-commands*
-      (.getBoolean (ccw-prefs) (*configuration-based-commands* par-command))
+      (support/boolean-ccw-pref (*configuration-based-commands* par-command))
     :else 
       true))
         

@@ -16,9 +16,6 @@
    
 #_(set! *warn-on-reflection* true)
 
-(defn init
-  [editor preference-store] (ref {:editor editor :prefs-store preference-store}))
-
 ; TODO l'offset fonctionne pas si plusieurs niveaux d'indentation
 ; TODO backspace ne fonctionne pas devant une form top level
 

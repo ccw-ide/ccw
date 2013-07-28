@@ -10,6 +10,11 @@ import ccw.util.ClojureInvoker;
 import clojure.lang.Ref;
 
 public class PareditAutoEditStrategy implements IAutoEditStrategy {
+
+	private final ClojureInvoker pareditAutoEditSupport = ClojureInvoker.newInvoker(
+            CCWPlugin.getDefault(),
+            "ccw.editors.clojure.paredit-auto-edit-support");
+	
 	private final ClojureInvoker pareditAutoEditStrategyImpl = ClojureInvoker.newInvoker(
             CCWPlugin.getDefault(),
             "ccw.editors.clojure.PareditAutoEditStrategyImpl");
@@ -17,7 +22,7 @@ public class PareditAutoEditStrategy implements IAutoEditStrategy {
 	public final Ref state;
 	
 	public PareditAutoEditStrategy(IClojureEditor editor, IPreferenceStore prefs) {
-		state = (Ref) pareditAutoEditStrategyImpl._("init", editor, prefs);
+		state = (Ref) pareditAutoEditSupport._("init", editor, prefs);
 	}
 	
 	public void customizeDocumentCommand(IDocument document,

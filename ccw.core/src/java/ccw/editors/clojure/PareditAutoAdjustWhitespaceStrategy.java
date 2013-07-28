@@ -10,6 +10,11 @@ import ccw.util.ClojureInvoker;
 import clojure.lang.Ref;
 
 public class PareditAutoAdjustWhitespaceStrategy implements IAutoEditStrategy {
+
+	private final ClojureInvoker pareditAutoEditSupport = ClojureInvoker.newInvoker(
+            CCWPlugin.getDefault(),
+            "ccw.editors.clojure.paredit-auto-edit-support");
+	
 	private final ClojureInvoker pareditAutoAdjustWhitespacetrategyImpl = ClojureInvoker.newInvoker(
             CCWPlugin.getDefault(),
             "ccw.editors.clojure.PareditAutoAdjustWhitespaceStrategyImpl");
@@ -17,7 +22,7 @@ public class PareditAutoAdjustWhitespaceStrategy implements IAutoEditStrategy {
 	public final Ref state;
 	
 	public PareditAutoAdjustWhitespaceStrategy(IClojureEditor editor, IPreferenceStore prefs) {
-		state = (Ref) pareditAutoAdjustWhitespacetrategyImpl._("init", editor, prefs);
+		state = (Ref) pareditAutoEditSupport._("init", editor, prefs);
 	}
 	
 	public void customizeDocumentCommand(IDocument document,
