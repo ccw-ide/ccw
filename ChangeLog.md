@@ -33,7 +33,41 @@ For more information on the available Software Update Sites and their retention 
 - Reindent Selection has been implemented. Trigger it via Ctrl+I on Windows/Linux, Cmd+I on OSX.
 
 - AutoShift: while you type, the code on the following lines which depends upon the code on the current line is shifted to the right or to the left. More spaces/less spaces are added/removed automatically.
+  - For instance, if you have the following manually indented code (note that the call to the 'cond macro is indented 2 extra spaces to the right):
+``` clojure
+(defn foo [bar baz]
+    (cond
+      cond1
+        expr1
+      cond2
+        expr2
+      :else
+        default-expr))
+```
+  - You can fix the whole indentation by either placing the cursor anywhere in the 'cond line and typing Tab, or in front of `(cond` and typing Backspace 2 times:
 
+``` clojure
+(defn foo [bar baz]
+  (cond
+    cond1
+      expr1
+    cond2
+      expr2
+    :else
+      default-expr))
+```
+  - Before the AutoShift feature, you would either have to indent each line manually, or select the whole cond and type `Ctrl+i` (OS X: `Cmd+i`), but you would have lose the specific indentation of the cond conditions/expressions:
+
+``` clojure
+(defn foo [bar baz]
+  (cond
+    cond1
+    expr1
+    cond2
+    expr2
+    :else
+    default-expr))
+```
 - More intuitive Ctrl+Enter: hitting Ctrl+Enter when the cursor is located at the top level selects the preceding top level form to be sent to the REPL. Only when the cursor is right in front of a top level form will it be selected instead of the previous one. (Fix Issue #580)
 
 e.g. if the caret is materialized with the symbol |:
