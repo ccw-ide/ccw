@@ -30,7 +30,7 @@ For more information on the available Software Update Sites and their retention 
 
 ### Editor
 
-- Reindent Selection has been implemented. Trigger it via Ctrl+I on Windows/Linux, Cmd+I on OSX.
+- Reindent Selection has been implemented. Trigger it via `Ctrl+i` on Windows/Linux, `Cmd+i` on OSX.
 
 - AutoShift: while you type, the code on the following lines which depends upon the code on the current line is shifted to the right or to the left. More spaces/less spaces are added/removed automatically.
   - For instance, if you have the following manually indented code (note that the call to the `cond` macro is indented 2 extra spaces to the right):
@@ -45,7 +45,7 @@ For more information on the available Software Update Sites and their retention 
       :else
         default-expr))
 ```
-  - You can fix the whole indentation by either placing the cursor anywhere in the 'cond line and typing Tab, or in front of `(cond` and typing Backspace 2 times:
+  - You can fix the whole indentation by either placing the cursor anywhere in the `(cond` line and typing Tab, or in front of `(cond` and typing Backspace 2 times:
 
 ``` clojure
 (defn foo [bar baz]
