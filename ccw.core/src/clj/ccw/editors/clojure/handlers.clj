@@ -64,7 +64,9 @@
         (.replace document offset length text)
         (.selectAndReveal editor (:offset result) (:length result))))))
 
-(defn- paredit-fn [command-key options] #(apply pc/paredit command-key %1 %2 options))
+(defn- paredit-fn 
+  ([command-key] (paredit-fn command-key nil))
+  ([command-key options] #(apply pc/paredit command-key %1 %2 options)))
 
 (defn forward-slurp [_ event] 
   (apply-paredit-command (editor event) 
