@@ -91,6 +91,40 @@ See the Keybindings documentation for Slurp / Barf : https://code.google.com/p/c
 
 - Fixed wrong keybinding for switching Rainbow Parens: "Cmd+( R" instead of "Cmd+(+R" (replace Cmd by Ctrl for Windows/Linux ; space indicates that you first type Cmd+(, then type R)
 
+- Changed "toggle line comments" behaviour: before, if the selection had both commented and uncommented lines, it was an ambiguous case resolved by just doing nothing. Now, it is resolved by counting the number of commented and uncommented lines. If the number of uncommented lines in the selection is equal or greater than the number of commented lines, then those uncommented lines are commented. If the number of commented lines is greater than the number of uncommented lines, those commented lines are uncommented.
+
+Calling "toggle lines comments" on the following code selection:
+
+``` clojure
+;(defn foo [....])
+(defn bar [....])
+(defn baz [....])
+```
+
+will result in:
+
+``` clojure
+;(defn foo [....])
+;(defn bar [....])
+;(defn baz [....])
+```
+
+But calling "toggle lines comments" on this code selection:
+
+``` clojure
+;(defn foo [....])
+(defn bar [....])
+;(defn baz [....])
+```
+
+will result in:
+
+``` clojure
+(defn foo [....])
+(defn bar [....])
+(defn baz [....])
+```
+
 - Experimental Feature: enabling auto-reevaluation of last command typed in the REPL, after a successful evaluation from the Editor
   - when the "repeat last expression" REPL command is active
   - when the user sends a form tom evaluate to the REPL

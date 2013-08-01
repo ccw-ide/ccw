@@ -796,8 +796,16 @@
                  "a\n;|b\n;c|\nd" "a\n|b\nc|\nd",
                  "a\n;|b"         "a\n|b"
                  "a\n|;b"         "a\n|b"
-                 ; ambiguous cases
-                 ";|a\nb|"        ";|a\nb|"
+                 
+                 ; same amount of commented / uncommented => comment
+                 ";|a\nb|"        ";|a\n;b|"
+                 
+                 ; more commented than uncommented => uncomment
+                 ";f|oo\nbar\n;baz|" "f|oo\nbar\nbaz|"
+                 
+                 ; more uncommented than commented => comment
+                 ";f|oo\nbar\nbaz|" ";f|oo\n;bar\n;baz|"
+                 
                  }]
 
     ]

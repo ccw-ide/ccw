@@ -725,14 +725,24 @@
 
 (def ^:dynamic lines-comment-prefix ";")
 
-(defn inc-lines-comments [lines]
-  (map #(str lines-comment-prefix %) lines))
+(defn inc-line-comment [line] (str lines-comment-prefix line))
+(defn inc-lines-comments [lines] (map inc-line-comment lines))
 
-(defn dec-lines-comments [lines]
-  (map #(.substring % (count lines-comment-prefix)) lines))
+(defn dec-line-comment [line] (.substring line (count lines-comment-prefix)))
+(defn dec-lines-comments [lines] (map dec-line-comment lines))
 
-(defn line-start-comment? [line]
-  (.startsWith line lines-comment-prefix))
+(defn line-start-comment? [line] (.startsWith line lines-comment-prefix))
+
+(defn line-toggle-comment [line]
+  ((if (line-start-comment? line) dec-line-comment inc-line-comment)
+    line))
+
+(defn line-toggle-comments [lines]
+  (let [cnt (count lines)
+        commented-lines (count (filter line-start-comment? lines))]
+    (if (<= commented-lines (- cnt commented-lines))
+      (map #(if (line-start-comment? %) % (inc-line-comment %)) lines)
+      (map #(if (line-start-comment? %) (dec-line-comment %) %) lines))))
 
 (defmethod paredit
   :paredit-inc-line-comment
@@ -747,12 +757,7 @@
 (defmethod paredit
   :paredit-toggle-line-comment
   [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
-  (update-lines t 
-    (fn [lines]
-      (condp every? lines
-        line-start-comment? (dec-lines-comments lines)
-        (complement line-start-comment?) (inc-lines-comments lines)
-        lines))))
+  (update-lines t line-toggle-comments))
 
 (defn escape-string-content
   "Meant to escape text to be pasted into a String literal.
