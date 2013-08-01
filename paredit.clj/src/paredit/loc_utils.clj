@@ -314,7 +314,9 @@
 (defn path-count [loc] 
   (count (z/path loc)))
 
-(defn propagate-delta [loc col delta]
+(defn propagate-delta 
+  ([loc col delta] (propagate-delta loc col delta nil))
+  ([loc col delta stop-depth]
 ;  (println "propagate-delta loc:" (str "'" (loc-text loc) "'"))
 ;  (println "col:" col)
 ;  (println "delta:" delta)
@@ -329,33 +331,38 @@
 ;                     (println "path-count:" (path-count l))
                      (if (> depth (path-count l))
                        (do 
-;                         (println "continue") 
+                         ;                         (println "continue") 
                          [l :continue])
                        (let [[l st] 
                              (cond 
                                (newline? l)
-                                 (if (and (whitespace? l)
-                                          (> col (line-start-col l)))
-                                   [l :stop]
-                                   [(shift-nl-whitespace l delta) :continue])
+                               (if (and (whitespace? l)
+                                        (> col (line-start-col l)))
+                                 [l :stop]
+                                 [(shift-nl-whitespace l delta) :continue])
                                :else
-                                 [l :continue])]
+                               [l :continue])]
                          (cond
                            (= :stop st)        [l :stop]
+                           ;                           (nil? (next-node-loc l)) [l :continue]
                            (nil? (z/next l))   [l :continue]
                            (z/end? (z/next l)) [l :stop]
-                           :else               (recur (z/next l))))))]
+                           (and stop-depth (>= stop-depth (path-count (z/next l)))) [l :stop]
+                           :else               (recur (z/next l))
+                           ;                           :else               (recur (next-node-loc l))
+                           ))))]
       (if (= :stop st)
         (do 
 ;          (println "stop") 
           [loc :stop])
-        (if-let [next-loc (next-node-loc loc) #_(if-let [p (z/up loc)] (z/right p))]
+        (if-let [next-loc loc #_(next-node-loc loc) #_(if-let [p (z/up loc)] (z/right p))]
           (recur next-loc
                  (loc-col next-loc)
-                 delta)
+                 delta
+                 stop-depth)
           (do 
 ;            (println "stop stop; next-loc is nil")
-            [loc :stop]))))))
+            [loc :stop])))))))
 
 (defn find-loc-to-shift
   "Starting with loc, find to the right, and to the right of parent node, etc.
@@ -430,7 +437,7 @@
 ;  (println "modif:" (pr-str modif))
   (let [text-before (node-text parse-tree)
 ;        _ (println "text-before:" (str "'" text-before "'"))
-        _ (println "modif:" (pr-str modif))
+;        _ (println "modif:" (pr-str modif))
         parse-tree (-> buffer
                      (edit-buffer (:offset modif) (:length modif) (:text modif))
                      (buffer-parse-tree 0))
@@ -457,8 +464,8 @@
         loc (find-loc-to-shift loc)
         ]
     (when loc
-;      (println "loc node:" (str "'" (loc-text loc) "'"))
+      (println "loc node:" (str "'" (loc-text loc) "'"))
       (let [col (- (loc-col loc) delta)
 ;            _ (println "col" col)
-            [shifted-loc _] (propagate-delta loc col delta)]
+            [shifted-loc _] (propagate-delta loc col delta (path-count loc))]
         shifted-loc))))

@@ -128,6 +128,8 @@
 
     "( |a) (b\n      c)" 1 1 "( a) (b\n       c)" 
 
+    "( |a)\nb\nc" 1 1 "( a)\nb\nc"   
+
     ))
 
 (deftest col-shift-tests 
@@ -189,4 +191,6 @@
      "|a\nb" ";" nil
 
      "(|a) (b\n      c)"   " "   "(a|) (b\n       c)" 
+     
+     "(|a)\nb\nc"   " "   nil
      ))
