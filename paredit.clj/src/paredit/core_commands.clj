@@ -474,14 +474,15 @@
      ;           ("(a (b c| d e) f)"
      ;            "(a b c f)"))
      ["M-r"       :paredit-raise-sexp
-                {"(dynamic-wind in (lambda () |body|) out)" "(dynamic-wind in |body| out)"
-                 "(dynamic-wind in |body| out)" "|body|"
-                 "(foo bar|)" "(foo bar|)"
+                {
                  "(foo |bar)" "|bar|"
-                 "(foo |(bar))" "|(bar)|"
+                 "(foo bar|)" "(foo bar|)"
+                 "(dynamic-wind in (lambda () |body|) out)" "(dynamic-wind in |body| out)"
+                 "(dynamic-wind in |body| out)" "|body|"
                  "(foo |(bar]|)" "(foo |(bar]|)"
                  "(foo |(bar])|" "(foo |(bar])|"
                  "(|foo|)" "|foo|"
+                 "(foo |(bar))" "|(bar)|"
                  }]
      ]
     ["Barfage & Slurpage"

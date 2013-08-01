@@ -409,3 +409,42 @@
                    [:offset] + (:length modif) (- (count (:text modif))))]
         (when-not (empty-diff? diff)
           {:modifs [diff] :offset offset :length 0})))))
+
+(defn paredit-col-shift 
+  "the difference is that the col is known, and we have to merge the deltas"
+  [{:keys [parse-tree buffer]} modif offset-before offset]
+;  (println "modif:" (pr-str modif))
+  (let [text-before (node-text parse-tree)
+;        _ (println "text-before:" (str "'" text-before "'"))
+        _ (println "modif:" (pr-str modif))
+        parse-tree (-> buffer
+                     (edit-buffer (:offset modif) (:length modif) (:text modif))
+                     (buffer-parse-tree 0))
+        text (node-text parse-tree)
+;        _ (println "text:" (str "'" text "'"))
+;        _ (println "offset:" offset)
+;        _ (println "offset-before:" offset-before)
+        col (t/col text offset)
+;        _ (println "col:" col)
+        col-before (t/col text-before offset-before)
+;        _ (println "col-before:" col-before)
+        delta (- col col-before)
+;        _ (println "delta:" delta)
+        rloc (parsed-root-loc parse-tree)
+        loc (loc-for-offset rloc offset)
+;        _ (println "loc node:" (str "'" (loc-text loc) "'"))
+        loc (if (or 
+                  (= (start-offset loc) offset)
+                  (whitespace-end-of-line? text offset)
+                  (= :comment (loc-tag loc)))
+              loc
+              (next-node-loc loc))
+;        _ (println "loc node:" (str "'" (loc-text loc) "'"))
+        loc (find-loc-to-shift loc)
+        ]
+    (when loc
+;      (println "loc node:" (str "'" (loc-text loc) "'"))
+      (let [col (- (loc-col loc) delta)
+;            _ (println "col" col)
+            [shifted-loc _] (propagate-delta loc col delta)]
+        shifted-loc))))

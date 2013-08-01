@@ -10,7 +10,8 @@
   (:require [paredit.text-utils :as t])
   (:require [clojure.zip :as z])
   (:require [clojure.string :as s])
-  (:use paredit.loc-utils)) ; TODO avoir un require :as l
+  ;(:use paredit.loc-utils)
+  (:require [paredit.loc-utils :as l :refer :all])) ; TODO avoir un require :as l
 
 #_(set! *warn-on-reflection* true)
 ;;; adaptable paredit configuration
@@ -444,11 +445,25 @@
              to-raise-text (.substring text to-raise-offset (+ to-raise-offset to-raise-length))
              l (if-let [nl (z/up (parse-node l))] nl l)
              replace-offset (start-offset l)
-             replace-length (- (end-offset l) replace-offset)]
-            (-> t (assoc-in [:text] (t/str-replace text replace-offset replace-length to-raise-text))
-              (assoc-in [:offset] replace-offset)
-              (assoc-in [:length] (count to-raise-text))
-              (update-in [:modifs] conj {:offset replace-offset :length replace-length :text to-raise-text})))))
+             replace-length (- (end-offset l) replace-offset)
+             new-t (-> t (assoc-in [:text] (t/str-replace text replace-offset replace-length to-raise-text))
+                     (assoc-in [:offset] replace-offset)
+                     (assoc-in [:length] (count to-raise-text))
+                     (update-in [:modifs] conj {:offset replace-offset :length replace-length :text to-raise-text}))
+;                _ (println "new-t:" (pr-str new-t))
+             shifted-loc (l/paredit-col-shift {:parse-tree parse-tree
+                                               :buffer buffer}
+                                              (-> new-t :modifs (nth 0))
+                                              to-raise-offset
+                                              replace-offset)
+;             _ (println "shifted-loc:" (str "'" (loc-text shifted-loc) "'"))
+             shifted-text (node-text (z/root shifted-loc))
+             diff (t/text-diff text shifted-text)]
+            {:text shifted-text
+             :offset replace-offset
+             :length (+ (:length new-t) (- (count shifted-text)
+                                          (count (:text new-t))))
+             :modifs [diff]})))
       t)))
 
 (defmethod paredit
