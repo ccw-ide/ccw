@@ -723,9 +723,16 @@
      :length (+ length length-shift)
      :modifs [{:text new-lines-text :offset lines-start :length (.length lines-text)}]}))
 
-(def inc-lines-comments (partial map (partial str ";")))
-(def dec-lines-comments (partial map #(.substring % 1)))
-(defn line-start-comment? [s] (.startsWith s ";"))
+(def ^:dynamic lines-comment-prefix ";")
+
+(defn inc-lines-comments [lines]
+  (map #(str lines-comment-prefix %) lines))
+
+(defn dec-lines-comments [lines]
+  (map #(.substring % (count lines-comment-prefix)) lines))
+
+(defn line-start-comment? [line]
+  (.startsWith line lines-comment-prefix))
 
 (defmethod paredit
   :paredit-inc-line-comment
