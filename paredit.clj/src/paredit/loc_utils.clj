@@ -299,16 +299,38 @@
          (inc (.lastIndexOf text "\n")))
       (count text))))
 
+(defn next-node-loc
+  "Get the loc for the node on the right, or if at the end of the parent,
+   on the right of the parent. Skips punct nodes. Return nil if at the far end."
+  [loc]
+  (when loc
+    (if-let [r (z/right loc)]
+      (if (punct-loc? r)
+        (recur r)
+        r)
+      (when-let [p (z/up loc)]
+        (recur p)))))
+
 (defn path-count [loc] 
   (count (z/path loc)))
 
 (defn propagate-delta [loc col delta]
+;  (println "propagate-delta loc:" (str "'" (loc-text loc) "'"))
+;  (println "col:" col)
+;  (println "delta:" delta)
   (if (or (comment? loc) (whitespace-newline? loc))
-    [loc :stop]
+    (do 
+;      (println "stop") 
+      [loc :stop])
     (let [depth (path-count loc)
+;          _ (println "depth:" depth)
           [loc st] (loop [l loc]
+;                     (println "loop, l text:" (str "'" (loc-text l) "'"))
+;                     (println "path-count:" (path-count l))
                      (if (> depth (path-count l))
-                       [l :continue]
+                       (do 
+;                         (println "continue") 
+                         [l :continue])
                        (let [[l st] 
                              (cond 
                                (newline? l)
@@ -324,24 +346,16 @@
                            (z/end? (z/next l)) [l :stop]
                            :else               (recur (z/next l))))))]
       (if (= :stop st)
-        [loc :stop]
-        (if-let [next-loc (if-let [p (z/up loc)] (z/right p))]
+        (do 
+;          (println "stop") 
+          [loc :stop])
+        (if-let [next-loc (next-node-loc loc) #_(if-let [p (z/up loc)] (z/right p))]
           (recur next-loc
-                 (loc-col next-loc) ; FIXME may not work if :cumulated-count is not correct 
-                 ; OR MAY RETURN old col
+                 (loc-col next-loc)
                  delta)
-          [loc :stop])))))
-
-(defn next-node-loc
-  "Get the loc for the node on the right, or if at the end of the parent,
-   on the right of the parent. Skips punct nodes. Return nil if at the far end."
-  [loc]
-  (if-let [r (z/right loc)]
-    (if (punct-loc? r)
-      (recur r)
-      r)
-    (when-let [p (z/up loc)]
-      (recur p))))
+          (do 
+;            (println "stop stop; next-loc is nil")
+            [loc :stop]))))))
 
 (defn find-loc-to-shift
   "Starting with loc, find to the right, and to the right of parent node, etc.
