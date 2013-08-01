@@ -123,13 +123,16 @@
     ";|\na" 0 1 ";\na" 
     
     ";|a\nb" 0 1 ";a\nb"
+    
+    "( |)\n()" 1 1 "( )\n()" 
+
     ))
 
 (deftest col-shift-tests 
   (are [spec-before inserted-text spec-after] ; set spec-after to nil if no shift intended
                                               ; set spec-after to modif to spec-before
-                                              ; because eclipse expects non-overlapping modifs
-                                              ; of the initial text
+                                       ; because eclipse expects non-overlapping modifs
+                                ; of the initial text
     
     (let [{:keys [text offset length]} (u/spec->text spec-before)
           buffer (edit-buffer nil 0 0 text)
@@ -179,6 +182,8 @@
     
      "|\na"   ";"   nil 
     
+     "(|)\n()" " " nil 
+
      "|a\nb" ";" nil
 
-      ))
+     ))

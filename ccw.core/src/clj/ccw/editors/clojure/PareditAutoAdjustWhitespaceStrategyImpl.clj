@@ -15,6 +15,7 @@
     [ccw.editors.clojure IClojureEditor PareditAutoAdjustWhitespaceStrategy]
     [ccw.preferences PreferenceConstants]))
    
+
 #_(set! *warn-on-reflection* true)
 
 (defn customizeDocumentCommand 
