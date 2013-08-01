@@ -17,6 +17,12 @@
   ([pref-key] (boolean-ccw-pref (ccw-prefs) pref-key))
   ([ccw-prefs pref-key] (.getBoolean ccw-prefs pref-key)))
 
+(defn add-command! [command modif]
+  (.addCommand command (:offset modif)
+                       (:length modif)
+                       (:text modif)
+                       nil))
+
 (defn apply-modif! 
   "Apply modification in result to command for editor."
   [^IClojureEditor editor ^DocumentCommand command result]
@@ -26,8 +32,8 @@
         (set! (.offset command) (-> result :modifs first :offset))
         (set! (.length command) (-> result :modifs first :length))
         (set! (.text command) (-> result :modifs first :text))
-        (doseq [{:keys [offset length text]} (rest (-> result :modifs))]
-          (.addCommand command offset length text nil)))
+        (doseq [modif (rest (-> result :modifs))]
+          (add-command! command modif)))
       (do
         (set! (.offset command) (:offset result))
         (set! (.length command) 0)

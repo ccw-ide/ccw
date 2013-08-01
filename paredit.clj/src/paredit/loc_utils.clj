@@ -1,7 +1,8 @@
 (ns paredit.loc-utils
   (:use paredit.parser)
   (:require [clojure.zip :as z])
-  (:require [paredit.text-utils :as t]))
+  (:require [paredit.text-utils :as t])
+  (:require [clojure.string :as s]))
 
 #_(set! *warn-on-reflection* true)
 (defn xml-vzip
@@ -298,12 +299,15 @@
          (inc (.lastIndexOf text "\n")))
       (count text))))
 
+(defn path-count [loc] 
+  (count (z/path loc)))
+
 (defn propagate-delta [loc col delta]
   (if (or (comment? loc) (whitespace-newline? loc))
     [loc :stop]
-    (let [depth (count (z/path loc))
+    (let [depth (path-count loc)
           [loc st] (loop [l loc]
-                     (if (> depth (count (z/path l)))
+                     (if (> depth (path-count l))
                        [l :continue]
                        (let [[l st] 
                              (cond 
@@ -327,4 +331,62 @@
                  ; OR MAY RETURN old col
                  delta)
           [loc :stop])))))
-        
+
+(defn next-node-loc
+  "Get the loc for the node on the right, or if at the end of the parent,
+   on the right of the parent. Skips punct nodes. Return nil if at the far end."
+  [loc]
+  (if-let [r (z/right loc)]
+    (if (punct-loc? r)
+      (recur r)
+      r)
+    (when-let [p (z/up loc)]
+      (recur p))))
+
+(defn find-loc-to-shift
+  "Starting with loc, find to the right, and to the right of parent node, etc.
+   a non-whitespace loc. If a newline is found before, return nil."
+  [loc]
+  (let [continue-search (fn [loc] (and loc (not (whitespace-newline? loc))))
+        locs (take-while continue-search (iterate next-node-loc loc))]
+    (first (remove whitespace? locs))))
+
+(defn empty-diff?
+  "Is the text diff empty (nothing replaced and nothing added)?" 
+  [diff]
+  (and (zero? (:length diff))
+       (zero? (count (:text diff)))))
+
+(defn whitespace-end-of-line?
+  "For text s, starting at offset, is the remaining of the
+   line only made of whitespace?"
+  [s offset]
+  (let [eol-offset (t/line-stop s offset)
+        eol (subs s offset eol-offset)]
+    (s/blank? eol)))
+
+(defn col-shift 
+  [{:keys [parse-tree buffer]} modif]
+  (let [text-before (node-text parse-tree)
+        parse-tree (-> buffer
+                     (edit-buffer (:offset modif) (:length modif) (:text modif))
+                     (buffer-parse-tree 0))
+        text (node-text parse-tree)
+        offset (+ (:offset modif) (count (:text modif)))
+        offset-before (+ (:offset modif) (:length modif))
+        col (t/col text offset)
+        delta (- col
+                 (t/col text-before offset-before))
+        rloc (parsed-root-loc parse-tree)
+        loc (loc-for-offset rloc offset)
+        loc (find-loc-to-shift loc)]
+    (when  loc
+      (let [col (- (loc-col loc) delta)
+            [shifted-loc _] (propagate-delta loc col delta)
+            shifted-text (node-text (z/root shifted-loc))
+            loc-diff (t/text-diff text shifted-text)
+            diff (update-in 
+                   loc-diff
+                   [:offset] + (:length modif) (- (count (:text modif))))]
+        (when-not (empty-diff? diff)
+          {:modifs [diff] :offset offset :length 0})))))
