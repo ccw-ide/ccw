@@ -388,48 +388,49 @@
 
 (defn col-shift 
   [{:keys [parse-tree buffer]} modif]
-;  (println "modif:" (pr-str modif))
+  (println "modif:" (pr-str modif))
   (let [text-before (node-text parse-tree)
-;        _ (println "text-before:" (str "'" text-before "'"))
+        _ (println "text-before:" (str "'" text-before "'"))
         parse-tree (-> buffer
                      (edit-buffer (:offset modif) (:length modif) (:text modif))
                      (buffer-parse-tree 0))
         text (node-text parse-tree)
-;        _ (println "text:" (str "'" text "'"))
+        _ (println "text:" (str "'" text "'"))
         offset (+ (:offset modif) (count (:text modif)))
-;        _ (println "offset:" offset)
+        _ (println "offset:" offset)
         offset-before (+ (:offset modif) (:length modif))
-;        _ (println "offset-before:" offset-before)
+        _ (println "offset-before:" offset-before)
         col (t/col text offset)
-;        _ (println "col:" col)
+        _ (println "col:" col)
         col-before (t/col text-before offset-before)
-;        _ (println "col-before:" col-before)
+        _ (println "col-before:" col-before)
         delta (- col col-before)
-;        _ (println "delta:" delta)
+        _ (println "delta:" delta)
         rloc (parsed-root-loc parse-tree)
         loc (loc-for-offset rloc offset)
-;        _ (println "loc node:" (str "'" (loc-text loc) "'"))
+        _ (println "loc node:" (str "'" (loc-text loc) "'"))
         loc (if (or 
                   (= (start-offset loc) offset)
                   (whitespace-end-of-line? text offset)
                   (= :comment (loc-tag loc)))
               loc
               (next-node-loc loc))
-;        _ (println "loc node:" (str "'" (loc-text loc) "'"))
+        _ (println "loc node:" (str "'" (loc-text loc) "'"))
         loc (find-loc-to-shift loc)
         ]
     (when loc
-;      (println "loc node:" (str "'" (loc-text loc) "'"))
+      (println "loc node:" (str "'" (loc-text loc) "'"))
       (let [col (- (loc-col loc) delta)
-;            _ (println "col" col)
-            [shifted-loc _] (propagate-delta loc col delta)
-            shifted-text (node-text (z/root shifted-loc))
-            loc-diff (t/text-diff text shifted-text)
-            diff (update-in 
-                   loc-diff
-                   [:offset] + (:length modif) (- (count (:text modif))))]
-        (when-not (empty-diff? diff)
-          {:modifs [diff] :offset offset :length 0})))))
+            _ (println "col" col)]
+        (when-not (neg? col)
+          (let [[shifted-loc _] (propagate-delta loc col delta)
+                shifted-text (node-text (z/root shifted-loc))
+                loc-diff (t/text-diff text shifted-text)
+                diff (update-in 
+                       loc-diff
+                       [:offset] + (:length modif) (- (count (:text modif))))] 
+            (when-not (empty-diff? diff)
+             {:modifs [diff] :offset offset :length 0})))))))
 
 (defn paredit-col-shift 
   "the difference is that the col is known, and we have to merge the deltas"
@@ -467,5 +468,7 @@
       (println "loc node:" (str "'" (loc-text loc) "'"))
       (let [col (- (loc-col loc) delta)
 ;            _ (println "col" col)
-            [shifted-loc _] (propagate-delta loc col delta (path-count loc))]
-        shifted-loc))))
+            ]
+        (when-not (neg? col)
+          (let [[shifted-loc _] (propagate-delta loc col delta (path-count loc))]
+            shifted-loc))))))
