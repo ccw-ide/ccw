@@ -112,8 +112,9 @@
 (def open-anon-arg "%")
 (def open-keyword #":{1,2}")
 (def open-discard "#_")
-(def whitespace #"(?:[,\s]+)")
+;(def whitespace #"(?:[,\s]+)")
 ;(def whitespace #"(?:[, \t\r]+|\n[, \t]+)") ca casse quelques tests ... 
+(def whitespace #"(?:[, \t]+|\r?\n)")
 (def open-comment #"(?:\#\!|;)")
 (def open-reader-literal #"#(?![\(\^\"\{\'\_\!])")
 (def open-char "\\")
@@ -415,7 +416,7 @@
     :anon-arg (p/unspaced open-anon-arg #"(?:[0-9|\&])?+")
     :char (p/unspaced open-char #"(?:newline|space|tab|backspace|formfeed|return|u[0-9|a-f|A-F]{4}|o[0-3]?+[0-7]{1,2}|.)")
     :whitespace whitespace
-    :comment #{(p/unspaced open-comment #"[^\n]*\n?")} 
+    :comment #{(p/unspaced open-comment #"[^\n]*")} 
     :discard [open-discard :expr]
     ))
 
