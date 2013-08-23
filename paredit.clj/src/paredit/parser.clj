@@ -100,7 +100,7 @@
 (def open-set "#{")
 (def open-quote \')
 (def open-meta "^")
-(def open-deref \@)         ;"#(?:[\{\(\'\^\"\_\!])" 
+(def open-deref \@)
 (def open-syntax-quote \`)
 (def open-fn "#(")
 (def open-var "#'")
@@ -112,8 +112,6 @@
 (def open-anon-arg "%")
 (def open-keyword #":{1,2}")
 (def open-discard "#_")
-;(def whitespace #"(?:[,\s]+)")
-;(def whitespace #"(?:[, \t\r]+|\n[, \t]+)") ca casse quelques tests ... 
 (def whitespace #"(?:[, \t]+|\r?\n)")
 (def open-comment #"(?:\#\!|;)")
 (def open-reader-literal #"#(?![\(\^\"\{\'\_\!])")
@@ -160,7 +158,6 @@
          :broken? (or (#{::unexpected :chimera} t)
                       (some #{::unexpected :chimera} (cons t (map :tag parse-tree-children)))
                       false)
-         ;:tokens (tokens t parse-tree-children count)
          }))))
 
 (defn node-count [abstract-node]
@@ -193,8 +190,6 @@
           (mapcat identity (view-children-seq tokens-view (next abstract-children)))))
 
 (defn- tokens [t abstract-children count] 
-  ;(println "type: " (type abstract-children))
-  ;(println "abstract-children:" abstract-children)
   (cond
     (= :whitespace t) (token :whitespace count)
     (= :space t) (token :whitespace count) ; TODO one of this and the above is irrelevant. Which one ?
@@ -203,23 +198,13 @@
     (= :map t) (balanced :open :close-map abstract-children)
     (= :set t) (balanced :open :close-set abstract-children)
     (= :quote t) (unbalanced :open abstract-children)
-    ;(= :meta t) (unbalanced :open abstract-children)
     (#{:meta :deprecated-meta} t)
       (let [[meta & rest] abstract-children]
         (concat (token :meta (node-count meta))
                 (mapcat identity (view-children-seq tokens-view rest)))) 
     (= :reader-literal t) (let [body (peek abstract-children)]
                             (concat (token :reader-literal (- count (node-count body)))
-                                    (body tokens-view)
-                                    ;(mapcat identity (view-children-seq tokens-view (pop abstract-children)))
-                                    ))
-    #_(let [abstract-children (mapcat identity abstract-children)]
-                  ;(print "(tokens) (:meta) abstract-children:") (prn abstract-children)
-                  ;(print "(get abstract-children 0):") (prn (first abstract-children))
-                  ;(print "(get abstract-children 1):") (prn (second abstract-children))
-                  (concat (token :meta (+ (token-length (first abstract-children))
-                                          (token-length (second abstract-children)))) 
-                          (next (next abstract-children))))
+                                    (body tokens-view)))
     (= :deref t) (unbalanced :open-deref abstract-children)
     (= :syntax-quote t) (unbalanced :open abstract-children) 
     (= :var t) (unbalanced :open-var abstract-children)
@@ -251,23 +236,10 @@
     :else (token :unexpected count)))
 
 (defn tokens-view
-  ([abstract-leaf s] (do ;(print "(tokens-view) abstract-leaf:") (prn (list s)) 
-                       (throw (RuntimeException. (str "argh: s='" s "'"))) (token :unexpected (.length ^String s))))
+  ([abstract-leaf s] 
+    (throw (RuntimeException. (str "argh: s='" s "'"))))
   ([abstract-node t abstract-children]
-    ;(print "(tokens-view) abstract-children:") (prn abstract-children)
     (tokens t abstract-children (node-count abstract-node))))
-
-#_(defn hippie-view
-  ([abstract-leaf s] nil)
-  ([abstract-node t abstract-children]
-    (letfn [(proposals [abstract-node pos]
-              (let [t (-> (abstract-node parse-tree-view) :content (get pos))]
-                #{t (str ":" t)}))]
-      (cond
-        (= :symbol t) (proposals abstract-node 0) 
-        (= :keyword t) (proposals abstract-node 1)
-        :else (let [child-views (map #(% hippie-view) abstract-children)]
-                (reduce into #{} child-views))))))
 
 (defn- proposals [abstract-node pos]
   (-> (abstract-node parse-tree-view) :content (get pos)))
@@ -288,35 +260,6 @@
       (= :keyword t) #{(str ":" (proposals abstract-node 1))}
       :else (let [child-views (map #(% hippie-keyword-view) abstract-children)]
               (reduce into #{} child-views)))))
-
-#_(defn nesting-level-view
-  [abstract-node t abstract-children]
-  (fn [context] 
-    (if (get nesting-tags t)
-      (inc context)
-      context)))
-
-#_(defn enhanced-tokens-view
-  [abstract-node t abstract-children]
-  (fn [context]
-    (let [new-context ((abstract-node nesting-level-view) context)
-          context-change (not= context new-context)]
-      (concat (command :nest-level new-context)
-              ((chilren-views abstract-children enhanced-tokens-view) new-context)
-              (command :nest-level context)))
-    (tokens t parse-tree-children)))
-
-#_(defn coarse-damage-view
-  [abstract-node t abstract-children]
-  (let [parse-tree-node (abstract-node parse-tree-view)
-        _               (do (println "parse-tree-node: ") parse-tree-node)
-        node-build-id (:build-id parse-tree-node)
-        offsets (mapcat (fn [child offset]
-                          (when (= node-build-id (:build-id child))
-                            [offset (+ offset (:count child))]))
-                        (:content parse-tree-node)
-                        (:content-cumulative-count parse-tree-node))]
-    (when (seq offsets) [(first offsets) (last offsets)])))
 
 (defn make-leaf [s]
   (memoized-fn abstract-leaf
@@ -373,8 +316,6 @@
                [open-map :expr* eof]
                [open-fn :expr* eof]
                [open-set :expr* eof]
-               ;(p/unspaced open-string #"(?:\\.|[^\\\"])++(?!\")" :? eof)
-               ;(p/unspaced open-regex #"(?:\\.|[^\\\"])++(?!\")" :? eof)
                [open-quote eof]
                [open-deref eof]
                [open-syntax-quote eof]
@@ -407,7 +348,6 @@
     :reader-literal-prefix (p/unspaced open-reader-literal :symbol)
     :reader-literal [:reader-literal-prefix :expr]
     :symbol
-;      #"(?:[\-\+](?![0-9])[^\^\(^\[^\#^\{^\\^\"^\~^\%^\:^\,^\s^\;^\@^\`^\)^\]^\}]*)|(?:[^\^\(\[^\#\{\\\"\~\%\:\,\s\;\'\@\`\)\]\}\-\+;0-9][^\^\(\[\#\{\\\"\~\%\:\,\s\;\@\`\)\]\}]*|#(?![\{\(\'\^\"\_\!])[^\^\(\[\#\{\\\"\~\%\:\,\s\;\'\@\`\)\]\}]*)#?"
       #"(?:(?:[\-\+](?![0-9])[^\^\(^\[^\#^\{^\\^\"^\~^\%^\:^\,^\s^\;^\@^\`^\)^\]^\}]*)|(?:[^\^\(\[^\#\{\\\"\~\%\:\,\s\;\'\@\`\)\]\}\-\+;0-9][^\^\(\[\#\{\\\"\~\%\:\,\s\;\@\`\)\]\}]*))#?"
     :keyword (p/unspaced open-keyword #"[^\(\[\{\'\^\@\`\~\"\\\,\s\;\)\]\}]*"); factorize with symbol
     :int #"(?:[-+]?(?:0(?!\.)|[1-9][0-9]*+(?!\.)|0[xX][0-9A-Fa-f]+(?!\.)|0[0-7]+(?!\.)|[1-9][0-9]?[rR][0-9A-Za-z]+(?!\.)|0[0-9]+(?!\.))(?!/))"
