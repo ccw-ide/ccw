@@ -1,13 +1,13 @@
-(defproject org.lpetit/paredit.clj "0.20.0-SNAPSHOT"
+(defproject org.lpetit/paredit.clj "0.19.3"
   :description "paredit in clojure, tailored for clojure"
   :license {:name "Eclipse Public License - v 1.0"
             :url "http://www.eclipse.org/legal/epl-v10.html"
             :distribution :repo
             :comments "same as Clojure"}
-  :dependencies [[org.clojure/clojure           "1.5.1"]
-                 [org.clojure/core.incubator "0.1.1"]
-                 [org.lpetit/net.cgrand.parsley "0.0.12.STABLE001"]
-                 [org.lpetit/net.cgrand.regex   "0.0.4.STABLE001"]]
+  :dependencies [[org.clojure/clojure "1.5.1"]
+                 [org.clojure/clojure-contrib "1.2.0"]
+                 [org.clojure/core.incubator "0.1.0"]
+                 [net.cgrand/parsley "0.9.2"]]
   :warn-on-reflection true)
   #_:manifest #_{"Project-awesome-level" "super-great"
              ;; function values will be called with the project as an argument.
