@@ -277,7 +277,6 @@ public class REPLView extends ViewPart implements IAdaptable {
         }
     }
 
-
     /** 
      * BE CAREFUL: this is a blocking method, waiting for the full 
      * nrepl response to come back !
