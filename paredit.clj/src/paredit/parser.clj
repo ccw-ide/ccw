@@ -144,21 +144,28 @@
 
 (def ^:dynamic *build-id*)
 
+(defn make-parse-tree-node
+  [t children-vec]
+  (let [[combined count] (children-info children-vec)]
+    {:tag t
+     :content children-vec
+     :build-id *build-id*
+     :count count
+     :content-cumulative-count combined
+     :broken? (or (#{::unexpected :chimera} t)
+                  (some #{::unexpected :chimera} (cons t (map :tag children-vec)))
+                  false)
+     }))
+
 (defn parse-tree-view 
   ([abstract-leaf s] s) 
   ([abstract-node t abstract-children]
-    (let [parse-tree-children  (view-children-vec parse-tree-view abstract-children)]
-      (let [[combined count] (children-info parse-tree-children)]
-        {:tag t
-         :content parse-tree-children
-         :build-id *build-id*
-         :count count
-         :content-cumulative-count combined
-         :abstract-node abstract-node
-         :broken? (or (#{::unexpected :chimera} t)
-                      (some #{::unexpected :chimera} (cons t (map :tag parse-tree-children)))
-                      false)
-         }))))
+    (let [parse-tree-children-vec (view-children-vec parse-tree-view abstract-children)]
+      (assoc 
+        (make-parse-tree-node t parse-tree-children-vec)
+        :abstract-node abstract-node
+        ; :build-id *build-id*
+        ))))
 
 (defn node-count [abstract-node]
   (let [ptv (abstract-node parse-tree-view)]

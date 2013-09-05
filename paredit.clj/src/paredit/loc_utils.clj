@@ -13,7 +13,11 @@
     (z/zipper (complement string?) 
             :content
             (fn [node children]
-              (assoc node :content children))
+              (make-parse-tree-node 
+                (:tag node)
+                (vec children))
+              ;(assoc node :content children)
+              )
             root))
 
 (defn split [cs idx]
@@ -118,6 +122,13 @@
           (recur (z/prev loc) (+ col (loc-count loc))))
       :else
         (recur (z/prev loc) col))))
+
+(defn loc-end-col [loc]
+  (let [loc-text (loc-text loc)
+        last-nl-idx (.lastIndexOf loc-text "\n")]
+    (if (neg? last-nl-idx)
+      (+ (loc-col loc) (count loc-text))
+      (- (count loc-text) (inc last-nl-idx)))))
   
 (defn loc-parse-node [loc] ; wrong name, and also, will return (foo) if located at ( or at ) ... so definitely wrong name ...
   (if (string? (z/node loc))
@@ -229,79 +240,59 @@
       #(= :root (loc-tag (z/up %)))
       (iterate z/up loc))))
 
-(defn comment? 
-  "Is loc at a comment node?"
-  [loc] (and loc (= :comment (:tag (z/node loc)))))
-
-(defn after-comment?
-  "Is loc at a node following a comment node?"
-  [loc] (comment? (z/left loc)))
-
-(defn whitespace? 
-  "Is loc at a :whitespace node?"
-  [loc]
-  (and loc (= :whitespace (:tag (z/node loc)))))
-
-(defn contains-newline?
-  "Does loc text contain at least one \newline char?"
-  [loc]
-  (.contains (loc-text loc) "\n"))
-
-(defn whitespace-newline?
-  "Is loc a newline with withespace AND containing newline char?"
-  [loc]
-  (and (whitespace? loc) (contains-newline? loc)))
-
 (defn root? 
   "Is loc the root?"
   [loc] (and loc (nil? (z/up loc))))
 
+(defn loc-tag? 
+  "Is loc's :tag tag?"
+  [loc tag] (and loc (= tag (:tag (z/node loc)))))
+
+(defn comment? 
+  "Is loc at a comment node?"
+  [loc] (loc-tag? loc :comment))
+
+(defn whitespace? 
+  "Is loc at a :whitespace node? (including nodes for which newline? returns true"
+  [loc] (loc-tag? loc :whitespace))
+
 (defn newline? 
-  "Is loc the start of a newline?
-   Can be:
-   - a :whitespace loc containing an \n
-   - a :whitespace loc containing no \n (after a :comment)
-   - any other loc starting the line, after a :comment
-   This can get tricky, you'll have to consider the 3
-   cases in your code, but that's the way things are currently
-   implemented, sorry."
-  [loc]
-  (and loc (or (after-comment? loc)
-               (whitespace-newline? loc))))
+  "Is loc at a newline node? (a :whitespace node which is a newline)"
+  [loc] (and (whitespace? loc)
+             (= "\n" (loc-text loc))))
+
+(defn single-line-whitespace?
+  "Is loc a whitespace but not a newline?"
+  [loc] (and (whitespace? loc)
+             (not= "\n" (loc-text loc))))
+
+(defn starts-line?
+  "Is loc at the start of a newline? (at the start of the document, or after a newline)"
+  [loc] (or (newline? (z/left loc))
+            (and (not (root? loc))
+                 (root? (z/prev loc)))))
+
+(defn indent-whitespace?
+  "Is loc at a :whitespace node at the start of a line? (an"
+  [loc] (and (single-line-whitespace? loc)
+             (starts-line? loc)))
 
 (defn shift-nl-whitespace 
-  "Loc is at a line start. Add delta (may be negative) 
-   whitespaces to it."
+  "Loc is at a line start. Add delta (may be negative) spaces before it."
   [loc delta]
-  (if (whitespace? loc)
-    (z/replace 
-      loc
-      (assoc-in (z/node loc)
-                [:content]
-                [(let [text (loc-text loc)
-                       prefix (subs text 0 (inc (.lastIndexOf text "\n")))
-                       rest   (subs text (count prefix))]
-                   (str prefix (t/adjust-padding rest delta \space)))]))
-    (if (pos? delta)
-      (z/insert-left 
+  {:pre [(starts-line? loc)]}
+  (if (single-line-whitespace? loc)
+    (let [adjusted-space (t/adjust-padding (loc-text loc) delta \space)]
+      (if (= adjusted-space (loc-text loc))
         loc
-        {:tag :whitespace
-         :content [(t/repeat delta \space)]})
+        (z/replace loc (make-parse-tree-node :whitespace [adjusted-space]))))
+    (if (pos? delta)
+      (z/insert-left loc (make-parse-tree-node :whitespace [(t/repeat delta \space)]))
       loc)))
-
-(defn line-start-col 
-  "For loc l, representing a whitespace start of a line, at which col
-   does l 'start' (e.g. does not have only whitespaces)?" 
-  [l]
-  (let [text (loc-text l)]
-    (if (.contains text "\n")
-      (- (count text)
-         (inc (.lastIndexOf text "\n")))
-      (count text))))
 
 (defn next-node-loc
   "Get the loc for the node on the right, or if at the end of the parent,
-   on the right of the parent. Skips punct nodes. Return nil if at the far end."
+   to the right of the parent. Skips punct nodes. Return nil if at the far end."
   [loc]
   (when loc
     (if-let [r (z/right loc)]
@@ -314,61 +305,56 @@
 (defn path-count [loc] 
   (count (z/path loc)))
 
+(defn next-start-line
+  "Return the start-line following loc, or nil if none"
+  [loc]
+  (when-first [nl-leaf (filter (comp starts-line? z/up) (rest (next-leaves loc)))]
+    (z/up nl-leaf)))
+
+(defn shift-all-loc 
+  "Shift all lines of loc of delta.
+   Return [root-loc true] if all lines (including last one) of loc were shifted
+   Return [root-loc false] if not all lines (and thus not last one) of loc were shifted.
+   If the loc happened to not span several lines, return [root-loc true]"
+  [loc col delta]
+  (loop [prev-loc loc]
+    (let [loc (next-start-line prev-loc)]
+      (cond 
+        (nil? loc) [(root-loc prev-loc) true]
+        
+        (newline? loc) (recur loc)
+        
+        (and (whitespace? loc) (newline? (z/right loc)))
+          (recur (z/right loc))
+        
+        (or (and (whitespace? loc) (<= col (count (loc-text loc))))
+            (zero? col))
+          (let [sloc (shift-nl-whitespace loc delta)]
+            (if (= sloc loc) 
+              [(root-loc loc) false]
+              (recur sloc)))
+        
+        :else [(root-loc loc) false]))))
+
 (defn propagate-delta 
-  ([loc col delta] (propagate-delta loc col delta nil))
-  ([loc col delta stop-depth]
-;  (println "propagate-delta loc:" (str "'" (loc-text loc) "'"))
-;  (println "col:" col)
-;  (println "delta:" delta)
-  (if (or (comment? loc) (whitespace-newline? loc))
-    (do 
-;      (println "stop") 
-      [loc :stop])
-    (let [depth (path-count loc)
-;          _ (println "depth:" depth)
-          [loc st] (loop [l loc]
-;                     (println "loop, l text:" (str "'" (loc-text l) "'"))
-;                     (println "path-count:" (path-count l))
-                     (if (> depth (path-count l))
-                       (do 
-                         ;                         (println "continue") 
-                         [l :continue])
-                       (let [[l st] 
-                             (cond 
-                               (newline? l)
-                               (if (and (whitespace? l)
-                                        (> col (line-start-col l)))
-                                 [l :stop]
-                                 [(shift-nl-whitespace l delta) :continue])
-                               :else
-                               [l :continue])]
-                         (cond
-                           (= :stop st)        [l :stop]
-                           ;                           (nil? (next-node-loc l)) [l :continue]
-                           (nil? (z/next l))   [l :continue]
-                           (z/end? (z/next l)) [l :stop]
-                           (and stop-depth (>= stop-depth (path-count (z/next l)))) [l :stop]
-                           :else               (recur (z/next l))
-                           ;                           :else               (recur (next-node-loc l))
-                           ))))]
-      (if (= :stop st)
-        (do 
-;          (println "stop") 
-          [loc :stop])
-        (if-let [next-loc loc #_(next-node-loc loc) #_(if-let [p (z/up loc)] (z/right p))]
-          (recur next-loc
-                 (loc-col next-loc)
-                 delta
-                 stop-depth)
-          (do 
-;            (println "stop stop; next-loc is nil")
-            [loc :stop])))))))
+  [loc col delta]
+  (if (z/end? (z/next loc))
+    [loc :stop]
+    (let [loc-idx (count (z/lefts loc))
+          re-rooted-parent-loc (if (loc-tag? loc :root) loc (->> loc z/up z/node xml-vzip))
+          re-rooted-parent-loc (z/down re-rooted-parent-loc)
+          re-rooted-loc (nth (iterate z/right re-rooted-parent-loc) loc-idx)
+          [sloc continue?] (shift-all-loc re-rooted-loc col delta)
+          loc (z/replace (z/up loc) (z/node (root-loc sloc)))]
+      (if-let [next-loc (and continue? (next-node-loc loc))]
+        (recur next-loc (loc-end-col loc) delta)
+        [loc :stop]))))
 
 (defn find-loc-to-shift
   "Starting with loc, find to the right, and to the right of parent node, etc.
    a non-whitespace loc. If a newline is found before, return nil."
   [loc]
-  (let [continue-search (fn [loc] (and loc (not (whitespace-newline? loc))))
+  (let [continue-search (fn [loc] (and loc (not (newline? loc))))
         locs (take-while continue-search (iterate next-node-loc loc))]
     (first (remove whitespace? locs))))
 
@@ -388,41 +374,28 @@
 
 (defn col-shift 
   [{:keys [parse-tree buffer]} modif]
-  (println "modif:" (pr-str modif))
   (let [text-before (node-text parse-tree)
-        _ (println "text-before:" (str "'" text-before "'"))
         parse-tree (-> buffer
                      (edit-buffer (:offset modif) (:length modif) (:text modif))
                      (buffer-parse-tree 0))
         text (node-text parse-tree)
-        _ (println "text:" (str "'" text "'"))
         offset (+ (:offset modif) (count (:text modif)))
-        _ (println "offset:" offset)
         offset-before (+ (:offset modif) (:length modif))
-        _ (println "offset-before:" offset-before)
         col (t/col text offset)
-        _ (println "col:" col)
         col-before (t/col text-before offset-before)
-        _ (println "col-before:" col-before)
         delta (- col col-before)
-        _ (println "delta:" delta)
         rloc (parsed-root-loc parse-tree)
         loc (loc-for-offset rloc offset)
-        _ (println "loc node:" (str "'" (loc-text loc) "'"))
         loc (if (or 
                   (= (start-offset loc) offset)
                   (whitespace-end-of-line? text offset)
                   (= :comment (loc-tag loc)))
               loc
               (next-node-loc loc))
-        _ (println "loc node:" (str "'" (loc-text loc) "'"))
-        loc (find-loc-to-shift loc)
-        ]
+        loc (find-loc-to-shift loc)]
     (when loc
-      (println "loc node:" (str "'" (loc-text loc) "'"))
-      (let [col (- (loc-col loc) delta)
-            _ (println "col" col)]
-        (when-not (neg? col)
+      (let [col (- (loc-col loc) delta)]
+        (when-not (or (neg? col) (< col col-before))
           (let [[shifted-loc _] (propagate-delta loc col delta)
                 shifted-text (node-text (z/root shifted-loc))
                 loc-diff (t/text-diff text shifted-text)
@@ -432,43 +405,49 @@
             (when-not (empty-diff? diff)
              {:modifs [diff] :offset offset :length 0})))))))
 
+
 (defn paredit-col-shift 
-  "the difference is that the col is known, and we have to merge the deltas"
+  "differences with col-shift:
+   - the col is known, and we have to merge the deltas
+   - we return a loc, not a text modif"
   [{:keys [parse-tree buffer]} modif offset-before offset]
-;  (println "modif:" (pr-str modif))
   (let [text-before (node-text parse-tree)
-;        _ (println "text-before:" (str "'" text-before "'"))
-;        _ (println "modif:" (pr-str modif))
         parse-tree (-> buffer
                      (edit-buffer (:offset modif) (:length modif) (:text modif))
                      (buffer-parse-tree 0))
         text (node-text parse-tree)
-;        _ (println "text:" (str "'" text "'"))
-;        _ (println "offset:" offset)
-;        _ (println "offset-before:" offset-before)
         col (t/col text offset)
-;        _ (println "col:" col)
         col-before (t/col text-before offset-before)
-;        _ (println "col-before:" col-before)
         delta (- col col-before)
-;        _ (println "delta:" delta)
         rloc (parsed-root-loc parse-tree)
         loc (loc-for-offset rloc offset)
-;        _ (println "loc node:" (str "'" (loc-text loc) "'"))
         loc (if (or 
                   (= (start-offset loc) offset)
                   (whitespace-end-of-line? text offset)
                   (= :comment (loc-tag loc)))
               loc
               (next-node-loc loc))
-;        _ (println "loc node:" (str "'" (loc-text loc) "'"))
-        loc (find-loc-to-shift loc)
-        ]
+        loc (find-loc-to-shift loc)]
     (when loc
-      (println "loc node:" (str "'" (loc-text loc) "'"))
-      (let [col (- (loc-col loc) delta)
-;            _ (println "col" col)
-            ]
-        (when-not (neg? col)
-          (let [[shifted-loc _] (propagate-delta loc col delta (path-count loc))]
+      (let [col (- (loc-col loc) delta)]
+        (when-not (or (neg? col) (< col col-before))
+          (let [[shifted-loc _] (propagate-delta 
+                                  loc
+                                  col
+                                  delta)]
             shifted-loc))))))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

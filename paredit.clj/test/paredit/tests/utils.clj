@@ -3,7 +3,8 @@
   (:require [paredit.loc-utils :as l])
   (:require [paredit.text-utils :as t])
   (:require [clojure.string :as s])
-  (:require [clojure.zip :as z]))
+  (:require [clojure.zip :as z])
+  (:require [clojure.pprint :refer (pprint)]))
 
 (defn tree 
   "creates parse-tree"
@@ -18,9 +19,16 @@
   [tree]
   (cond
     (string? tree) tree
-    :else (-> tree 
-            (select-keys [:tag :content])
-            (update-in [:content] #(map clean-tree %)))))
+    :else 
+      (apply vector (:tag tree) (map clean-tree (:content tree)))
+    #_(let [tree (-> tree 
+                       (select-keys [:tag :content])
+                       (update-in [:content] #(map clean-tree %)))])))
+
+(defn print-tree [t]
+  (pprint (if (string? t) 
+            (-> t tree clean-tree)
+            (-> t clean-tree))))
 
 (defn spec->text 
   "Converts a text spec: \"a |bit| of text\"
