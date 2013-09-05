@@ -450,32 +450,26 @@
                      (assoc-in [:offset] replace-offset)
                      (assoc-in [:length] (count to-raise-text))
                      (update-in [:modifs] conj {:offset replace-offset :length replace-length :text to-raise-text}))
-;                _ (println "new-t:" (pr-str new-t))
              shifted-loc (l/paredit-col-shift {:parse-tree parse-tree
                                                :buffer buffer}
                                               (-> new-t :modifs (nth 0))
                                               to-raise-offset
                                               replace-offset)
-;             _ (println "shifted-loc:" (str "'" (loc-text shifted-loc) "'"))
              shifted-parse-tree (z/root shifted-loc)
              shifted-text (node-text shifted-parse-tree)
              diff (t/text-diff text shifted-text)
-;             _ (println "diff:" (pr-str diff))
              shifted-buffer (edit-buffer buffer (:offset diff) (:length diff) (:text diff))
              shifted-parse-tree (buffer-parse-tree shifted-buffer 0)
              ddiff (nth (:modifs (l/col-shift {:parse-tree parse-tree
                                  :buffer buffer} 
                                 diff)) 0)
-;             _ (println "ddiff:" (pr-str ddiff))
-;             _ (println "text:" (str "'" text "'"))
              final-text (if-not ddiff
                           shifted-text
                           (-> text 
                             (t/str-replace (:offset ddiff) (:length ddiff) (:text ddiff))
                             (t/str-replace (:offset diff) (:length diff) (:text diff)))) 
-;             _ (println "final text:" (str "'" final-text "'"))
              ]
-            {:text final-text #_shifted-text
+            {:text final-text
              :offset replace-offset
              :length (+ (:length new-t) (- (count shifted-text)
                                            (count (:text new-t))))
