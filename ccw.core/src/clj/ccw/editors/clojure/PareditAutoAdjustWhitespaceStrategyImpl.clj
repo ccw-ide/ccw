@@ -21,8 +21,9 @@
 (defn customizeDocumentCommand 
   "Work only if no command has been added via (.addCommand)"
   [^PareditAutoAdjustWhitespaceStrategy this, #^IDocument document, #^DocumentCommand command]
-   (let [^IClojureEditor editor (-> this .state deref :editor)] 
-     (when (and (.doit command)
+  (let [^IClojureEditor editor (-> this .state deref :editor)
+        prev-caret-offset (.caretOffset command)]
+    (when (and (.doit command)
                (not (.isInEscapeSequence editor))
                (support/boolean-ccw-pref PreferenceConstants/EXPERIMENTAL_AUTOSHIFT_ENABLED))
       (when-let [{[modif] :modifs offset :offset} 
@@ -32,5 +33,10 @@
                                 :text   (.text command)})]
         (support/add-command! command modif) 
         (set! (.shiftsCaret command) false)
-        (set! (.caretOffset command) offset)))))
+        (set! (.caretOffset command) 
+              ;; if prev-caret-offset not set, then no paredit command has been
+              ;; applied => let the offset be what AutoAdjust strategy devised
+              (if (= -1 prev-caret-offset)
+                offset
+                prev-caret-offset))))))
 
