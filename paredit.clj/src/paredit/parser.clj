@@ -5,6 +5,7 @@
   (:use paredit.regex-utils)
 	(:require [clojure.zip :as zip])
   (:require [net.cgrand.parsley :as p])
+  (:require [net.cgrand.parsley.functional-trees :as pf])
   (:require [net.cgrand.parsley.lrplus :as lr+])
   (:require [clojure.string :as str]))
 
@@ -285,8 +286,8 @@
   (p/parser {:root-tag :root
            :main :expr*
            :space (p/unspaced gspaces :*)
-           :make-node make-node
-           :make-leaf make-leaf
+           :make-node pf/fnode
+           :make-leaf pf/fleaf
            :make-unexpected make-unexpected
            }
     :expr- #{
