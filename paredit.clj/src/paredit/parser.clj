@@ -420,7 +420,7 @@
            :make-unexpected make-unexpected
           })
 
-(def sexpr (apply p/parser opt-n sexpr-grammar))
+(def sexp (apply p/parser opt-n sexpr-grammar))
 
 (defn edit-buffer [buffer offset len text]
   ;(println (str "------- edit buffer:" " offset=" offset ", len=" len ", text='" text "'"))

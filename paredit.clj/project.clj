@@ -1,4 +1,4 @@
-(defproject org.lpetit/paredit.clj "0.20.0-SNAPSHOT"
+(defproject org.lpetit/paredit.clj "0.20.1-SNAPSHOT"
   :description "paredit in clojure, tailored for clojure"
   :license {:name "Eclipse Public License - v 1.0"
             :url "http://www.eclipse.org/legal/epl-v10.html"
