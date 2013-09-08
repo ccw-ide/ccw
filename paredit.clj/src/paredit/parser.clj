@@ -5,7 +5,7 @@
   (:use paredit.regex-utils)
 	(:require [clojure.zip :as zip])
   (:require [net.cgrand.parsley :as p])
-  (:require [net.cgrand.parsley.functional-trees :as pf])
+  (:require [net.cgrand.parsley.functional-trees :as f])
   (:require [net.cgrand.parsley.lrplus :as lr+])
   (:require [clojure.string :as str]))
 
@@ -331,14 +331,7 @@
 (defn- make-unexpected [s]
   (make-node ::unexpected [(make-leaf s)]))
 
-(def sexp
-  (p/parser {:root-tag :root
-           :main :expr*
-           :space (p/unspaced gspaces :*)
-           :make-node pf/fnode
-           :make-leaf pf/fleaf
-           :make-unexpected make-unexpected
-           }
+(def sexpr-grammar [                
     :expr- #{
              :list
              :vector
@@ -407,7 +400,6 @@
     :reader-literal-prefix (p/unspaced open-reader-literal :symbol)
     :reader-literal [:reader-literal-prefix :expr]
     :symbol
-;      #"(?:[\-\+](?![0-9])[^\^\(^\[^\#^\{^\\^\"^\~^\%^\:^\,^\s^\;^\@^\`^\)^\]^\}]*)|(?:[^\^\(\[^\#\{\\\"\~\%\:\,\s\;\'\@\`\)\]\}\-\+;0-9][^\^\(\[\#\{\\\"\~\%\:\,\s\;\@\`\)\]\}]*|#(?![\{\(\'\^\"\_\!])[^\^\(\[\#\{\\\"\~\%\:\,\s\;\'\@\`\)\]\}]*)#?"
       #"(?:(?:[\-\+](?![0-9])[^\^\(^\[^\#^\{^\\^\"^\~^\%^\:^\,^\s^\;^\@^\`^\)^\]^\}]*)|(?:[^\^\(\[^\#\{\\\"\~\%\:\,\s\;\'\@\`\)\]\}\-\+;0-9][^\^\(\[\#\{\\\"\~\%\:\,\s\;\@\`\)\]\}]*))#?"
     :keyword (p/unspaced open-keyword #"[^\(\[\{\'\^\@\`\~\"\\\,\s\;\)\]\}]*"); factorize with symbol
     :int #"(?:[-+]?(?:0(?!\.)|[1-9][0-9]*+(?!\.)|0[xX][0-9A-Fa-f]+(?!\.)|0[0-7]+(?!\.)|[1-9][0-9]?[rR][0-9A-Za-z]+(?!\.)|0[0-9]+(?!\.))(?!/))"
@@ -417,8 +409,18 @@
     :char (p/unspaced open-char #"(?:newline|space|tab|backspace|formfeed|return|u[0-9|a-f|A-F]{4}|o[0-3]?+[0-7]{1,2}|.)")
     :whitespace whitespace
     :comment #{(p/unspaced open-comment #"[^\n]*\n?")} 
-    :discard [open-discard :expr]
-    ))
+    :discard [open-discard :expr]])
+
+(def opt-n {
+           :root-tag :root
+           :main :expr*
+           :space (p/unspaced gspaces :*)
+           :make-node make-node
+           :make-leaf make-leaf
+           :make-unexpected make-unexpected
+          })
+
+(def sexpr (apply p/parser opt-n sexpr-grammar))
 
 (defn edit-buffer [buffer offset len text]
   ;(println (str "------- edit buffer:" " offset=" offset ", len=" len ", text='" text "'"))
