@@ -8,11 +8,11 @@ paredit in clojure, tailored for clojure
         <dependency>
                 <groupId>org.lpetit</groupId>
                 <artifactId>paredit.clj</artifactId>
-                <version>0.13.0.STABLE001</version>
+                <version>0.19.3</version>
         </dependency>
 
 ##lein/cake:
-        [org.lpetit/paredit.clj "0.13.0.STABLE001"]
+        [org.lpetit/paredit.clj "0.19.3"]
 
 # Dependencies
 
