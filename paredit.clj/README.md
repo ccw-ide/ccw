@@ -16,14 +16,14 @@ paredit in clojure, tailored for clojure
 
 # Dependencies
 
-* Clojure 1.2
+* Clojure 1.5.1
 * Clojure contrib 1.2
-* 0.0.9.STABLE001 of Laurent's fork of Christophe Grand's parsley 
+* Parsley 0.9.2
 
 # Design notes
 ##A central multimethod paredit.core/paredit, whose signature is:
 
-        ([:paredit-command parsetree {:keys [:text :offset :length]})
+        ([:paredit-command {:parse-tree parsetree} {:keys [:text :offset :length]})
 
 * :paredit-command is one of the currently accepted commands, see the content of the var paredit.core-commands/*paredit-commands* for the whole list
 * parsetree is the result of applying paredit.parser/parse to :text's value
@@ -58,9 +58,9 @@ to list children of a parsetree node. parsetree terminals are always java.lang.S
         user=>(def parse-tree (paredit.parser/parse "(foo bar)"))
         #'user/parse-tree
 ## "raise sexp" example        
-        user=>(paredit.core/paredit :paredit-raise-sexp parse-tree {:text "(foo bar)" :offset 5 :length 0}) ; Let's raise "bar" over "(foo bar)"
+        user=>(paredit.core/paredit :paredit-raise-sexp {:parse-tree parse-tree} {:text "(foo bar)" :offset 5 :length 0}) ; Let's raise "bar" over "(foo bar)"
         {:modifs ({:offset 0, :length 9, :text "bar"}), :text "bar", :offset 0, :length 0}
 Note that the result provides the fully replaced text, while you also have a list of deltas to apply to the original text if this better suits your needs        
 ## "split expression" example        
-        user=>(paredit.core/paredit :paredit-split-sexp parse-tree {:text "(foo bar)" :offset 5 :length 0}) ; Let's raise "bar" over "(foo bar)"
+        user=>(paredit.core/paredit :paredit-split-sexp {:parse-tree parse-tree} {:text "(foo bar)" :offset 5 :length 0}) ; Let's raise "bar" over "(foo bar)"
         {:modifs ({:offset 4, :length 1, :text ") ("}), :text "(foo) (bar)", :offset 5, :length 0}      
