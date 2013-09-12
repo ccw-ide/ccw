@@ -138,12 +138,12 @@
         (let [up-locs (take-while identity (iterate z/up offset-loc))
               match (some #(when (= c (peek (:content (z/node %)))) %) up-locs)]
           (if match
-            (let [last-loc (-> match z/down z/rightmost z/left)
-                  nb-delete (if (= :whitespace (loc-tag last-loc)) 
-                              (loc-count last-loc)
-                              0)
-                  t (if (> nb-delete 0) 
-                      (t/delete t (start-offset last-loc) nb-delete)
+            (let [c-loc (-> match z/down z/rightmost)
+                  nb-delete (reduce #(+ %1 (loc-count %2)) 0
+                                    (->> (rlefts c-loc)
+                                      (take-while #(= :whitespace (loc-tag %)))))
+                  t (if (> nb-delete 0)
+                      (t/delete t (- (start-offset c-loc) nb-delete) nb-delete)
                       t)] ; z/left because there is the closing node
               (-> t (t/set-offset (- (end-offset match) nb-delete))))
             (if (or (:broken? parsed)

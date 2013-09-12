@@ -244,6 +244,7 @@
 	                 "foo \\|" "foo \\)|"
                   "\"Blah blah (boo hoo|)| blah blah\"" "\"Blah blah (boo hoo)| blah blah\""
                   "foo |bar" "foo |bar"
+                  "(foo\n | )" "(foo)|"
                   ; tests with the new :chimera
                    "({foo |bar])" "({foo )|bar])"
                    "({[foo |bar)})" "({[foo )|bar)})"
