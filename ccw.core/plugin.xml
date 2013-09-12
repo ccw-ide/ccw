@@ -615,6 +615,7 @@
             platform="carbon">
       </key>
 
+      <!-- For AZERTY layout -->
       <key
             commandId="ccw.ui.edit.text.clojure.forward-slurp"
             contextId="ccw.ui.clojureEditorScope"
@@ -627,7 +628,21 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+) S">
       </key>
+      <!-- For QWERTY layout -->
+      <key
+            commandId="ccw.ui.edit.text.clojure.forward-slurp"
+            contextId="ccw.ui.clojureEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+0 ARROW_LEFT">
+      </key>
+      <key
+            commandId="ccw.ui.edit.text.clojure.forward-slurp"
+            contextId="ccw.ui.clojureEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+0 S">
+      </key>
 
+      <!-- For AZERTY layout -->
       <key
             commandId="ccw.ui.edit.text.clojure.backward-slurp"
             contextId="ccw.ui.clojureEditorScope"
@@ -640,7 +655,21 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+( S">
       </key>
+      <!-- For QWERTY layout -->
+      <key
+            commandId="ccw.ui.edit.text.clojure.backward-slurp"
+            contextId="ccw.ui.clojureEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+9 ARROW_RIGHT">
+      </key>
+      <key
+            commandId="ccw.ui.edit.text.clojure.backward-slurp"
+            contextId="ccw.ui.clojureEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+9 S">
+      </key>
 
+      <!-- For AZERTY layout -->
       <key
             commandId="ccw.ui.edit.text.clojure.forward-barf"
             contextId="ccw.ui.clojureEditorScope"
@@ -654,6 +683,21 @@
             sequence="M1+) B">
       </key>
 
+      <!-- For QWERTY layout -->
+      <key
+            commandId="ccw.ui.edit.text.clojure.forward-barf"
+            contextId="ccw.ui.clojureEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+0 ARROW_RIGHT">
+      </key>
+      <key
+            commandId="ccw.ui.edit.text.clojure.forward-barf"
+            contextId="ccw.ui.clojureEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+0 B">
+      </key>
+
+      <!-- For AZERTY layout -->
       <key
             commandId="ccw.ui.edit.text.clojure.backward-barf"
             contextId="ccw.ui.clojureEditorScope"
@@ -665,6 +709,20 @@
             contextId="ccw.ui.clojureEditorScope"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+( B">
+      </key>
+
+      <!-- For QWERTY layout -->
+      <key
+            commandId="ccw.ui.edit.text.clojure.backward-barf"
+            contextId="ccw.ui.clojureEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+9 ARROW_LEFT">
+      </key>
+      <key
+            commandId="ccw.ui.edit.text.clojure.backward-barf"
+            contextId="ccw.ui.clojureEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+9 B">
       </key>
 
       <key
