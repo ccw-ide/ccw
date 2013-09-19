@@ -20,10 +20,7 @@
   (cond
     (string? tree) tree
     :else 
-      (apply vector (:tag tree) (map clean-tree (:content tree)))
-    #_(let [tree (-> tree 
-                       (select-keys [:tag :content])
-                       (update-in [:content] #(map clean-tree %)))])))
+      (apply vector (:tag tree) (map clean-tree (:content tree)))))
 
 (defn print-tree [t]
   (pprint (if (string? t) 

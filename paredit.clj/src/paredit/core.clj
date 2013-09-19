@@ -1,7 +1,3 @@
-; todo 
-; done 1. emit text deltas, not plain text replacement (or IDEs will not like it)
-; done 2. have a story for invalid parsetrees : just do nothing : currently = paredit deactivated if error from start-of-file to area of paredit's work
-
 (ns paredit.core
   (:use [paredit.parser :exclude [pts]])
   (:use clojure.set)
@@ -10,8 +6,7 @@
   (:require [paredit.text-utils :as t])
   (:require [clojure.zip :as z])
   (:require [clojure.string :as s])
-  ;(:use paredit.loc-utils)
-  (:require [paredit.loc-utils :as l :refer :all])) ; TODO avoir un require :as l
+  (:require [paredit.loc-utils :as l :refer :all]))
 
 #_(set! *warn-on-reflection* true)
 ;;; adaptable paredit configuration
@@ -250,24 +245,17 @@
        (if parse-tree
          (let [offset (dec offset)
                offset-loc (-> parse-tree parsed-root-loc (loc-for-offset offset))
-               ;_ (println "offset-loc:" (z/node offset-loc))
                handled-forms *brackets-tags*
-               in-handled-form (handled-forms (loc-tag offset-loc))
-               ;_ (println "in-handled-form:" in-handled-form)
-               ]
+               in-handled-form (handled-forms (loc-tag offset-loc))]
            (cond 
              (and in-handled-form (<= (start-offset offset-loc) offset (+ (start-offset offset-loc) (dec (-> offset-loc z/down loc-count)))))
                (if (> (-> offset-loc z/node :content count) 2)
                  t     ; don't move
-                 (do ;(println "delete the form:" (start-offset offset-loc) (loc-count offset-loc))
-                   (-> t ; delete the form 
-                     (t/delete (start-offset offset-loc) (loc-count offset-loc))
-                     (t/shift-offset (- (-> offset-loc z/down loc-count))))))
+                 (-> t ; delete the form 
+                   (t/delete (start-offset offset-loc) (loc-count offset-loc))
+                   (t/shift-offset (- (-> offset-loc z/down loc-count)))))
              (and in-handled-form (= offset (dec (end-offset offset-loc))))
-               (do
-                 ;(println "final t:") 
-                 ;(println (start-offset offset-loc) (loc-count offset-loc))
-                 (t/shift-offset t -1))
+               (t/shift-offset t -1)
              :else
                (-> t (t/delete offset 1) (t/shift-offset -1))))
          (-> t (t/delete offset 1) (t/shift-offset -1))))))
@@ -365,25 +353,16 @@
 
 (defn children-then-punct-sel [parent l r]
   (let [pl (-> parent z/down z/right)
-        pr (-> pl z/rightmost z/left)
-        ;_ (println (z/node pl))
-        ;_ (println (z/node pr))
-        ]
+        pr (-> pl z/rightmost z/left)]
     (cond
       (or
         (<= (count (z/children parent)) 2) ; TODO if we had :punct nodes, we could just check
                                            ; if only :punct nodes are present ...
         (and (= l pl) (= r pr)))
-        (do 
-          ;(println "already has children, lets expand to parent")
-          [(start-offset parent) (end-offset parent)])
+        [(start-offset parent) (end-offset parent)]
       :else
-        (do 
-          ;(println "not all children selected, lets expand to all children but punct")
-          [(start-offset pl) (end-offset pr)])
-      
-      ))
-  )
+        [(start-offset pl) (end-offset pr)])))
+
 (def ^:dynamic *selection-strategy* {:list children-then-punct-sel
                            :vector children-then-punct-sel
                            :map children-then-punct-sel

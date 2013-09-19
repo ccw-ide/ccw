@@ -10,33 +10,36 @@
   given a root element"
   {:added "1.0"}
   [root]
-    (z/zipper (complement string?) 
-            :content
+  (z/zipper (complement string?) 
+            (fn [node] (or (:content node) []))
             (fn [node children]
               (make-parse-tree-node 
                 (:tag node)
-                (vec children))
-              ;(assoc node :content children)
-              )
+                (vec children)))
             root))
-
-(defn split [cs idx]
-  (when cs
-    [(subvec cs 0 idx) (cs idx) (subvec cs (inc idx))]))
 
 (defn vdown
   "Returns the loc of the child at index idx of the node at this loc, or
-  nil if no children"
+  nil if no children.
+  Node children MUST be vectors for vdown to work. And in this case,
+  getting the loc of the idx'st child will be done in constant time."
   {:added "1.0"}
   [loc idx]
-    (when (z/branch? loc)
-      (let [[node path] loc
-            [l c r :as cs] (split (z/children loc) idx)]
-        (when cs
+    (letfn [(split [cs idx] ; cs must be a non-empty vector 
+              (when cs
+                [(subvec cs 0 idx) (cs idx) (subvec cs (inc idx))]))]
+      
+      (when (and (z/branch? loc) 
+                 (seq (z/children loc)))
+        (let [[node path] loc
+              [l c r] (split (z/children loc) idx)]
           (with-meta [c {:l l
                          :pnodes (if path (conj (:pnodes path) node) [node]) 
                          :ppath path 
-                         :r r}] (meta loc))))))
+                         :r (seq r) ;; This call to seq is very important,
+                                    ;; :r is meant to contain a seq, 
+                                    ;; and thus must be nil if empty 
+                        }] (meta loc))))))
 
 (defn ^:dynamic node-text [n]
   (if (string? n)
@@ -177,16 +180,15 @@
                   ; no loc found (end of text, will return root-loc instead)
                   (let [last-leave (last 
                                      (take-while 
-                                       #(and (z/branch? %) (z/children %))
+                                       #(and (z/branch? %) (seq (z/children %)))
                                        (iterate (comp z/rightmost z/down) 
                                                 (z/rightmost loc))))]
                     [last-leave 0])                  
-                  
                   [(vdown loc start) (- offset (-> loc z/node :content-cumulative-count (get start)))])
                 (let [n (int (+ start (quot (- end start) 2)))
                       n-offset (-> loc z/node :content-cumulative-count (get n))
                       n-node (-> loc z/node :content (get n))
-                      n-count (if (string? n-node) (count n-node) (or (:count n-node) 0))] 
+                      n-count (if (string? n-node) (count n-node) (or (:count n-node) 0))]
                   (cond
                     (< offset n-offset)
                       (recur start (dec n))
@@ -194,7 +196,9 @@
                       [(vdown loc n) (- offset n-offset)]
                     :else
                       (recur (inc n) end)))))]
-      (if (zero? offset) cloc (recur cloc offset)))))
+      (if (zero? offset) 
+        cloc
+        (recur cloc offset)))))
 
 (defn ^:dynamic leave-for-offset
   [loc offset]
@@ -294,7 +298,7 @@
   "Get the loc for the node on the right, or if at the end of the parent,
    to the right of the parent. Skips punct nodes. Return nil if at the far end."
   [loc]
-  (when loc
+  (when (and loc (not (z/end? loc)))
     (if-let [r (z/right loc)]
       (if (punct-loc? r)
         (recur r)
@@ -345,7 +349,10 @@
           re-rooted-parent-loc (z/down re-rooted-parent-loc)
           re-rooted-loc (nth (iterate z/right re-rooted-parent-loc) loc-idx)
           [sloc continue?] (shift-all-loc re-rooted-loc col delta)
-          loc (z/replace (z/up loc) (z/node (root-loc sloc)))]
+          loc (z/replace 
+                (z/up loc)
+                (z/node
+                  (root-loc sloc)))]
       (if-let [next-loc (and continue? (next-node-loc loc))]
         (recur next-loc (loc-end-col loc) delta)
         [loc :stop]))))
@@ -431,23 +438,5 @@
     (when loc
       (let [col (- (loc-col loc) delta)]
         (when-not (or (neg? col) (< col col-before))
-          (let [[shifted-loc _] (propagate-delta 
-                                  loc
-                                  col
-                                  delta)]
+          (let [[shifted-loc _] (propagate-delta loc col delta)]
             shifted-loc))))))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -6,89 +6,6 @@
   (:require [paredit.parser :refer [parse edit-buffer buffer-parse-tree]])
   (:require [paredit.loc-utils :as l]))
 
-#_(deftest newline?-tests
-  (are 
-    [spec expected]
-    (is (= expected (let [{:keys [text offset]} (u/spec->text spec)
-                          loc (-> text 
-                                   parse
-                                   l/parsed-root-loc
-                                   (l/loc-for-offset offset))]
-                      (l/newline? loc))))
-    "|foo\nbar" false ; it's not a newline in the sense
-                      ; that's it's not a new line following another one
-    "foo|\nbar" true
-    "foo\n|bar" false
-
-    "foo| \n bar" true
-    "foo\n |bar" false
-
-    "(|foo\nbar)" false
-    "(foo|\nbar)" true
-    "(foo\n|bar)" false
-    
-    "(|foo;bar\nbaz)" false
-    "(foo|;bar\nbaz)" false
-    "(foo;bar\n|baz)" true ; remember, comments "own" newlines
-
-    "(|foo;bar\n baz)" false
-    "(foo|;bar\n baz)" false
-    "(foo;bar\n| baz)" true ; remember, comments "own" newlines
-    "(foo;bar\n |baz)" false ; remember, comments "own" newlines
-
-    "(|foo;bar\n\n baz)" false
-    "(foo|;bar\n\n baz)" false
-    "(foo;bar\n|\n baz)" true ; remember, comments "own" newlines
-    "(foo;bar\n\n |baz)" false ; remember, comments "own" newlines
-    
-    ";\n|foo" true
-    ))
-
-#_(deftest shift-nl-whitespace-tests
-  (are [spec delta expected]
-    
-    (is (= expected (let [{:keys [text offset]} (u/spec->text spec)
-                          actual (-> text 
-                                   parse
-                                   l/parsed-root-loc
-                                   (l/loc-for-offset offset)
-                                   (l/shift-nl-whitespace delta)
-                                   z/root
-                                   l/node-text)]
-                      actual)))
-    
-    "foo|\nbar"  2 "foo\n  bar"
-    "foo|\nbar"  1 "foo\n bar"
-    "foo|\nbar"  0 "foo\nbar"
-    "foo|\nbar" -1 "foo\nbar"
-    "foo|\nbar" -2 "foo\nbar"
-    
-    "foo;comment\n|  bar"  2 "foo;comment\n    bar"
-    "foo;comment\n|  bar"  1 "foo;comment\n   bar"
-    "foo;comment\n|  bar"  0 "foo;comment\n  bar"
-    "foo;comment\n|  bar" -1 "foo;comment\n bar"
-    "foo;comment\n|  bar" -2 "foo;comment\nbar"
-    "foo;comment\n|  bar" -3 "foo;comment\nbar"
-    
-    "foo;comment\n|bar"  2 "foo;comment\n  bar"
-    "foo;comment\n|bar"  1 "foo;comment\n bar"
-    "foo;comment\n|bar"  0 "foo;comment\nbar"
-    "foo;comment\n|bar" -1 "foo;comment\nbar"
-    
-    "foo;comment\n|\nbar"  2 "foo;comment\n\n  bar"
-    "foo;comment\n|\nbar"  1 "foo;comment\n\n bar"
-    "foo;comment\n|\nbar"  0 "foo;comment\n\nbar"
-    "foo;comment\n|\nbar" -1 "foo;comment\n\nbar"
-    
-    "foo;comment\n|  \n bar"  2 "foo;comment\n  \n   bar"
-    "foo;comment\n|  \n bar"  1 "foo;comment\n  \n  bar"
-    "foo;comment\n|  \n bar"  0 "foo;comment\n  \n bar"
-    "foo;comment\n|  \n bar" -1 "foo;comment\n  \nbar"
-    "foo;comment\n|  \n bar" -2 "foo;comment\n  \nbar"
-    
-    ";\n(|\n )" -1 ";\n(\n)" 
-    ))
-
 (deftest propagate-delta-tests
   (are [spec col delta expected]
     
@@ -130,8 +47,8 @@
 (deftest col-shift-tests 
 (are [spec-before inserted-text spec-after] ; set spec-after to nil if no shift intended
                                             ; set spec-after to modif to spec-before
-                                     ; because eclipse expects non-overlapping modifs
-                              ; of the initial text
+                                            ; because eclipse expects non-overlapping modifs
+                                            ; of the initial text
     
   (let [{:keys [text offset length]} (u/spec->text spec-before)
         buffer (edit-buffer nil 0 0 text)
@@ -173,7 +90,7 @@
      " |\n b"   "a"   nil
     
      " |\n b\n c"   " " nil
-; FAIL     "|(\n) b\n  c"   " "   "(|\n ) b\n   c"
+     "|(\n) b\n  c"   " "   "(|\n ) b\n   c"
 
      "|\n(\na)"  " " nil     
     
@@ -192,4 +109,6 @@
      "(\n  a)|\n|"  ""   nil
      
      "(\n  a)|b|" "" nil
+     
+     "( |(a\n    b)\n  c)"   " "   "( (|a\n     b)\n  c)"
      ))

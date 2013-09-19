@@ -206,337 +206,335 @@
   ^:dynamic *paredit-commands*
   [
     ["Basic Insertion Commands"
-	    ["("         :paredit-open-round
-	                {"(a b |c d)"
-	                 "(a b (|) c d)"
-	                 "(foo \"bar |baz\" quux)" "(foo \"bar (|baz\" quux)"
-                  }
-	                {"(a b|c d)" "(a b (|) c d)"
-	                 "(|)" "((|))"
-	                 "|" "(|)"
-	                 "a|" "a (|)"
-	                 "(a |,b)" "(a (|),b)"
-	                 "(a,| b)" "(a, (|) b)"
-	                 "(a,|b)" "(a, (|) b)"
-	                 "(a,|)" "(a, (|))"
-                   "\\| " "\\(| "
-	                 "~|" "~(|)"
-	                 "~@|" "~@(|)"
-	                 "\\\\| " "\\\\ (|) "
-                  "#\"|foo\"" "#\"(|foo\""
-                  "#\"f|oo\"" "#\"f(|oo\""
-                  }]
-	    [")"         :paredit-close-round
-	                {"(a |b)" "(a b)|"
-	                 "(a |b) cd" "(a b)| cd"
-	                 "(a |b ) cd" "(a b)| cd"
-	                 "(a b |c [])" "(a b c [])|"
-                   "(a b c [|] )" "(a b c [])|"
-	                 "(a b |c   )" "(a b c)|"
-                   "( a,  b |[a b ]   )" "( a,  b [a b ])|"
-                   "( a,  b [|a b ]   )" "( a,  b [a b ])|"
-                   "[ a,  b (|a b )   ]" "[ a,  b (a b)|   ]"
-	                 "(a b |c ,  )" "(a b c)|"
-	                 "(a b| [d e]" "(a b)| [d e]"
-	                 "; Hello,| world!"  "; Hello,)| world!"
-	                 "(  \"Hello,| world!\" foo )" "(  \"Hello,)| world!\" foo )"
-	                 "  \"Hello,| world!" "  \"Hello,)| world!"
-	                 "foo \\|" "foo \\)|"
-                  "\"Blah blah (boo hoo|)| blah blah\"" "\"Blah blah (boo hoo)| blah blah\""
-                  "foo |bar" "foo |bar"
-                  "(foo\n | )" "(foo)|"
+	   ["("         :paredit-open-round
+	               {"(a b |c d)"
+	                "(a b (|) c d)"
+	                "(foo \"bar |baz\" quux)" "(foo \"bar (|baz\" quux)"
+                 }
+	               {"(a b|c d)" "(a b (|) c d)"
+	                "(|)" "((|))"
+	                "|" "(|)"
+	                "a|" "a (|)"
+	                "(a |,b)" "(a (|),b)"
+	                "(a,| b)" "(a, (|) b)"
+	                "(a,|b)" "(a, (|) b)"
+	                "(a,|)" "(a, (|))"
+                  "\\| " "\\(| "
+	                "~|" "~(|)"
+	                "~@|" "~@(|)"
+	                "\\\\| " "\\\\ (|) "
+                 "#\"|foo\"" "#\"(|foo\""
+                 "#\"f|oo\"" "#\"f(|oo\""
+                 }]
+	   [")"         :paredit-close-round
+	               {"(a |b)" "(a b)|"
+	                "(a |b) cd" "(a b)| cd"
+	                "(a |b ) cd" "(a b)| cd"
+	                "(a b |c [])" "(a b c [])|"
+                  "(a b c [|] )" "(a b c [])|"
+	                "(a b |c   )" "(a b c)|"
+                  "( a,  b |[a b ]   )" "( a,  b [a b ])|"
+                  "( a,  b [|a b ]   )" "( a,  b [a b ])|"
+                  "[ a,  b (|a b )   ]" "[ a,  b (a b)|   ]"
+	                "(a b |c ,  )" "(a b c)|"
+	                "(a b| [d e]" "(a b)| [d e]"
+	                "; Hello,| world!"  "; Hello,)| world!"
+	                "(  \"Hello,| world!\" foo )" "(  \"Hello,)| world!\" foo )"
+	                "  \"Hello,| world!" "  \"Hello,)| world!"
+	                "foo \\|" "foo \\)|"
+                 "\"Blah blah (boo hoo|)| blah blah\"" "\"Blah blah (boo hoo)| blah blah\""
+                 "foo |bar" "foo |bar"
+                 "(foo\n | )" "(foo)|"
+                 ; tests with the new :chimera
+                  "({foo |bar])" "({foo )|bar])"
+                  "({[foo |bar)})" "({[foo )|bar)})"
+                 }]
+	   #_["M-)"       :paredit-close-round-and-newline
+	               {"(defun f (x|  ))"
+	                "(defun f (x)\n  |)"
+	                "; (Foo.|"
+	                "; (Foo.)|"}]
+     ["["         :paredit-open-square
+                {"(a b |c d)"  "(a b [|] c d)"
+                 "(foo \"bar |baz\" quux)" "(foo \"bar [|baz\" quux)"
+                 }
+                 {"(a b|c d)" "(a b [|] c d)"
+                  "(|)" "([|])"
+                  "|" "[|]"
+                  "a|" "a [|]"
+                  "(a |,b)" "(a [|],b)"
+                  "(a,| b)" "(a, [|] b)"
+                  "(a,|b)" "(a, [|] b)"
+                  "(a,|)" "(a, [|])"
+                  "\\| " "\\[| "
+                  "\\\\| " "\\\\ [|] "}]
+     ["]"         :paredit-close-square
+                 {"(define-key keymap [frob|  ] 'frobnicate)"
+                  "(define-key keymap [frob]| 'frobnicate)"
+                  "; [Bar.|" "; [Bar.]|"
+                  "  \"Hello,| world!\" foo" "  \"Hello,]| world!\" foo"
+                  "  \"Hello,| world!" "  \"Hello,]| world!"
+                  "foo \\|" "foo \\]|"
                   ; tests with the new :chimera
-                   "({foo |bar])" "({foo )|bar])"
-                   "({[foo |bar)})" "({[foo )|bar)})"
+                  "({[foo |bar)})" "({[foo ]|bar)})"
+                  "[foo (bar [baz {bleh |blah}))]" "[foo (bar [baz {bleh blah}))]|"
                   }]
-	    #_["M-)"       :paredit-close-round-and-newline
-	                {"(defun f (x|  ))"
-	                 "(defun f (x)\n  |)"
-	                 "; (Foo.|"
-	                 "; (Foo.)|"}]
-      ["["         :paredit-open-square
-                 {"(a b |c d)"  "(a b [|] c d)"
-                  "(foo \"bar |baz\" quux)" "(foo \"bar [|baz\" quux)"
-                  }
-                  {"(a b|c d)" "(a b [|] c d)"
-                   "(|)" "([|])"
-                   "|" "[|]"
-                   "a|" "a [|]"
-                   "(a |,b)" "(a [|],b)"
-                   "(a,| b)" "(a, [|] b)"
-                   "(a,|b)" "(a, [|] b)"
-                   "(a,|)" "(a, [|])"
-                   "\\| " "\\[| "
-                   "\\\\| " "\\\\ [|] "}]
-      ["]"         :paredit-close-square
-                  {"(define-key keymap [frob|  ] 'frobnicate)"
-                   "(define-key keymap [frob]| 'frobnicate)"
-                   "; [Bar.|" "; [Bar.]|"
-                   "  \"Hello,| world!\" foo" "  \"Hello,]| world!\" foo"
-                   "  \"Hello,| world!" "  \"Hello,]| world!"
-                   "foo \\|" "foo \\]|"
-                   ; tests with the new :chimera
-                   "({[foo |bar)})" "({[foo ]|bar)})"
-                   "[foo (bar [baz {bleh |blah}))]" "[foo (bar [baz {bleh blah}))]|"
-                   }]
-      ["{"         :paredit-open-curly
-                 {"(a b |c d)"  "(a b {|} c d)"
-                  "(foo \"bar |baz\" quux)" "(foo \"bar {|baz\" quux)"
-                  }
-                  {"(a b|c d)" "(a b {|} c d)"
-                   "(|)" "({|})"
-                   "|" "{|}"
-                   "a|" "a {|}"
-                   "#|" "#{|}" ; specific to clojure sets
-                   "(a |,b)" "(a {|},b)"
-                   "(a,| b)" "(a, {|} b)"
-                   "(a,|b)" "(a, {|} b)"
-                   "(a,|)" "(a, {|})"
-                   "\\| " "\\{| "
-                   "\\\\| " "\\\\ {|} "
-                   }]
-      ["}"         :paredit-close-curly
-                  {"{a b |c   }" "{a b c}|"
-                   "; Hello,| world!"
-                   "; Hello,}| world!"
-                   "  \"Hello,| world!\" foo" "  \"Hello,}| world!\" foo"
-                   "  \"Hello,| world!" "  \"Hello,}| world!"
-                   "foo \\|" "foo \\}|"
-                   "({(foo |bar}))}" "({(foo bar}))}|"
-                   }]
-      ["\""        :paredit-doublequote
-                  { "(frob grovel |full lexical)" "(frob grovel \"|\" full lexical)",
-                   "(frob grovel \"|\" full lexical)" "(frob grovel \"\"| full lexical)",
-                   "(foo \"bar |baz\" quux)" "(foo \"bar \\\"|baz\" quux)",
-                   ";|ab" ";\"|ab",
-                   "(frob grovel \"foo \\|bar\" full lexical)"
-                     "(frob grovel \"foo \\\"|bar\" full lexical)",
-                   "(frob grovel \"foo \\\\|bar\" full lexical)"
-                     "(frob grovel \"foo \\\\\\\"|bar\" full lexical)",
-                   "\"fo\\\"o\" \"b|ar\"" "\"fo\\\"o\" \"b\\\"|ar\"",
-                     "\"\\\\\" \"b|ar\"" "\"\\\\\" \"b\\\"|ar\"",
-                   "\"\\\\\\\"|a\"" "\"\\\\\\\"\\\"|a\"",
-                   "\"fo|o\"" "\"fo\\\"|o\"",
-                   "#\"fo|o\"" "#\"fo\\\"|o\"",
+     ["{"         :paredit-open-curly
+                {"(a b |c d)"  "(a b {|} c d)"
+                 "(foo \"bar |baz\" quux)" "(foo \"bar {|baz\" quux)"
+                 }
+                 {"(a b|c d)" "(a b {|} c d)"
+                  "(|)" "({|})"
+                  "|" "{|}"
+                  "a|" "a {|}"
+                  "#|" "#{|}" ; specific to clojure sets
+                  "(a |,b)" "(a {|},b)"
+                  "(a,| b)" "(a, {|} b)"
+                  "(a,|b)" "(a, {|} b)"
+                  "(a,|)" "(a, {|})"
+                  "\\| " "\\{| "
+                  "\\\\| " "\\\\ {|} "
+                  }]
+     ["}"         :paredit-close-curly
+                 {"{a b |c   }" "{a b c}|"
+                  "; Hello,| world!"
+                  "; Hello,}| world!"
+                  "  \"Hello,| world!\" foo" "  \"Hello,}| world!\" foo"
+                  "  \"Hello,| world!" "  \"Hello,}| world!"
+                  "foo \\|" "foo \\}|"
+                  "({(foo |bar}))}" "({(foo bar}))}|"
+                  }]
+     ["\""        :paredit-doublequote
+                 { "(frob grovel |full lexical)" "(frob grovel \"|\" full lexical)",
+                  "(frob grovel \"|\" full lexical)" "(frob grovel \"\"| full lexical)",
+                  "(foo \"bar |baz\" quux)" "(foo \"bar \\\"|baz\" quux)",
+                  ";|ab" ";\"|ab",
+                  "(frob grovel \"foo \\|bar\" full lexical)"
+                    "(frob grovel \"foo \\\"|bar\" full lexical)",
+                  "(frob grovel \"foo \\\\|bar\" full lexical)"
+                    "(frob grovel \"foo \\\\\\\"|bar\" full lexical)",
+                  "\"fo\\\"o\" \"b|ar\"" "\"fo\\\"o\" \"b\\\"|ar\"",
+                    "\"\\\\\" \"b|ar\"" "\"\\\\\" \"b\\\"|ar\"",
+                  "\"\\\\\\\"|a\"" "\"\\\\\\\"\\\"|a\"",
+                  "\"fo|o\"" "\"fo\\\"|o\"",
+                  "#\"fo|o\"" "#\"fo\\\"|o\"",
 
-                   "#|" "#\"|\"" ; specific to clojure regexs
-                   "foo |bar| baz" "foo \"|bar|\" baz"
-                   }]
+                  "#|" "#\"|\"" ; specific to clojure regexs
+                  "foo |bar| baz" "foo \"|bar|\" baz"
+                  }]
     ]
     ["Deleting & Killing"
-      ["Del"     :paredit-forward-delete
-                {"(quu|x \"zot\")" "(quu| \"zot\")",
-                 "(quux |\"zot\")" "(quux \"|zot\")",
-                 "(quux \"|zot\")" "(quux \"|ot\")",
-                 "(foo |(a) bar)" "(foo (|a) bar)"
-                 "(foo (|a) bar)" "(foo (|) bar)"
-                 "(foo (|) bar)" "(foo | bar)"
-                 "(foo [|] bar)" "(foo | bar)"
-                 "(foo {|} bar)" "(foo | bar)"
-                 "(foo \"|\" bar)" "(foo | bar)"
-                 "(foo (a|) bar)" "(foo (a|) bar)"
-                 "(foo [a|] bar)" "(foo [a|] bar)"
-                 "(foo {a|} bar)" "(foo {a|} bar)"
+     ["Del"     :paredit-forward-delete
+               {"(quu|x \"zot\")" "(quu| \"zot\")",
+                "(quux |\"zot\")" "(quux \"|zot\")",
+                "(quux \"|zot\")" "(quux \"|ot\")",
+                "(foo |(a) bar)" "(foo (|a) bar)"
+                "(foo (|a) bar)" "(foo (|) bar)"
+                "(foo (|) bar)" "(foo | bar)"
+                "(foo [|] bar)" "(foo | bar)"
+                "(foo {|} bar)" "(foo | bar)"
+                "(foo \"|\" bar)" "(foo | bar)"
+                "(foo (a|) bar)" "(foo (a|) bar)"
+                "(foo [a|] bar)" "(foo [a|] bar)"
+                "(foo {a|} bar)" "(foo {a|} bar)"
 
-                 "(foo #{|} bar)" "(foo | bar)"
-                 "(foo #{a|} bar)" "(foo #{a|} bar)"
-                 "(foo #{a |d} bar)" "(foo #{a |} bar)"
-                 "(|#{foo bar})" "(#{|foo bar})"
+                "(foo #{|} bar)" "(foo | bar)"
+                "(foo #{a|} bar)" "(foo #{a|} bar)"
+                "(foo #{a |d} bar)" "(foo #{a |} bar)"
+                "(|#{foo bar})" "(#{|foo bar})"
 
-                 "(foo #(|) bar)" "(foo | bar)"
-                 "(foo #(a|) bar)" "(foo #(a|) bar)"
-                 "(foo #(a |d) bar)" "(foo #(a |) bar)"
-                 "(|#(foo bar))" "(#(|foo bar))"
+                "(foo #(|) bar)" "(foo | bar)"
+                "(foo #(a|) bar)" "(foo #(a|) bar)"
+                "(foo #(a |d) bar)" "(foo #(a |) bar)"
+                "(|#(foo bar))" "(#(|foo bar))"
 
-                 "(foo #\"|\" bar)" "(foo | bar)"
-                 "(foo #\"a|\" bar)" "(foo #\"a|\" bar)"
-                 "(foo #\"a |d\" bar)" "(foo #\"a |\" bar)"
-                 "(|#\"foo bar\")" "(#\"|foo bar\")"
+                "(foo #\"|\" bar)" "(foo | bar)"
+                "(foo #\"a|\" bar)" "(foo #\"a|\" bar)"
+                "(foo #\"a |d\" bar)" "(foo #\"a |\" bar)"
+                "(|#\"foo bar\")" "(#\"|foo bar\")"
 
-                 "(foo \"a|\" bar)" "(foo \"a|\" bar)"
-                 "(|(foo bar))" "((|foo bar))"
-                 "(|[foo bar])" "([|foo bar])"
-                 "(|{foo bar})" "({|foo bar})"
+                "(foo \"a|\" bar)" "(foo \"a|\" bar)"
+                "(|(foo bar))" "((|foo bar))"
+                "(|[foo bar])" "([|foo bar])"
+                "(|{foo bar})" "({|foo bar})"
 
-                 "|" "|"
+                "|" "|"
                  
-                 "^java.util.List |(.add \"test\")" "^java.util.List (|.add \"test\")"
-                 "^java.util.List (|)" "^java.util.List |"
-                 "|^java.util.List (.add \"test\")" "^|java.util.List (.add \"test\")"
-                 }]
-      ["BackDel" :paredit-backward-delete
-                {
-                 "(\"zot\" q|uux)" "(\"zot\" |uux)",
-                 "(\"zot\"| quux)" "(\"zot|\" quux)",
-                 "(\"zot|\" quux)" "(\"zo|\" quux)",
+                "^java.util.List |(.add \"test\")" "^java.util.List (|.add \"test\")"
+                "^java.util.List (|)" "^java.util.List |"
+                "|^java.util.List (.add \"test\")" "^|java.util.List (.add \"test\")"
+                }]
+     ["BackDel" :paredit-backward-delete
+               {
+                "(\"zot\" q|uux)" "(\"zot\" |uux)",
+                "(\"zot\"| quux)" "(\"zot|\" quux)",
+                "(\"zot|\" quux)" "(\"zo|\" quux)",
 
-                 "(#\"zot\"| quux)" "(#\"zot|\" quux)",
-                 "(#\"zot|\" quux)" "(#\"zo|\" quux)",
+                "(#\"zot\"| quux)" "(#\"zot|\" quux)",
+                "(#\"zot|\" quux)" "(#\"zo|\" quux)",
 
-                 "(foo (|) bar)" "(foo | bar)",
-                 "(foo #(|) bar)" "(foo | bar)",
-                 "(foo #{|} bar)" "(foo | bar)",
+                "(foo (|) bar)" "(foo | bar)",
+                "(foo #(|) bar)" "(foo | bar)",
+                "(foo #{|} bar)" "(foo | bar)",
 
-                 "(foo bar)|" "(foo bar|)",
-                 "(foo bar|)" "(foo ba|)",
+                "(foo bar)|" "(foo bar|)",
+                "(foo bar|)" "(foo ba|)",
 
-                 "|" "|"
+                "|" "|"
 
-                 "\"\"|" "\"|\""
-                 "\"|\"" "|"
-                 "#\"\"|" "#\"|\""
-                 "#\"|\"" "|"
+                "\"\"|" "\"|\""
+                "\"|\"" "|"
+                "#\"\"|" "#\"|\""
+                "#\"|\"" "|"
 
-                 "#(foo bar)|" "#(foo bar|)",
-                 "#(foo bar|)" "#(foo ba|)",
-                 "#{foo bar}|" "#{foo bar|}",
-                 "#{foo bar|}" "#{foo ba|}",
-                 "#(|)" "|",
-                 "#{|}" "|"
-                 }]
-      ;#_["C-k"     :paredit-kill
-      ;          {"(foo bar)|     ; Useless comment!"
-      ;           "(foo bar)|",
-      ;          "(|foo bar)     ; Useful comment!"
-      ;           "(|)     ; Useful comment!",
-      ;          "|(foo bar)     ; Useless line!"
-      ;           "|",
-      ;          "(foo \"|bar baz\"\n     quux)"
-      ;           "(foo \"|\"\n     quux)"}]
-      ]
+                "#(foo bar)|" "#(foo bar|)",
+                "#(foo bar|)" "#(foo ba|)",
+                "#{foo bar}|" "#{foo bar|}",
+                "#{foo bar|}" "#{foo ba|}",
+                "#(|)" "|",
+                "#{|}" "|"
+                }]
+     ;#_["C-k"     :paredit-kill
+     ;          {"(foo bar)|     ; Useless comment!"
+     ;           "(foo bar)|",
+     ;          "(|foo bar)     ; Useful comment!"
+     ;           "(|)     ; Useful comment!",
+     ;          "|(foo bar)     ; Useless line!"
+     ;           "|",
+     ;          "(foo \"|bar baz\"\n     quux)"
+     ;           "(foo \"|\"\n     quux)"}]
+     ]
 
     ["Depth-Changing Commands"
-     ["M-("       :paredit-wrap-round
-      {; not used yet "(foo |bar baz)" "(foo (|bar) baz)",
-       ";hel|lo" ";hel(|lo",
-       "a |\"hi\"" "a (|\"hi\")",
-       "a |\"hi\"|" "a (|\"hi\"|)",
-       "foo |bar| foo" "foo (|bar|) foo",
-       "foo |bar baz| foo" "foo (|bar baz|) foo",
-       "foo (|bar| baz) foo" "foo ((|bar|) baz) foo"
-       "foo (|bar baz|) foo" "foo ((|bar baz|)) foo"
-       "foo |(bar| baz) foo" "foo |(bar| baz) foo"
-       "foo (bar| baz)| foo" "foo (bar| baz)| foo"
-       "foo |(bar baz)| foo" "foo (|(bar baz)|) foo"
-       "foo |(bar\n;comment\n baz)| foo" "foo (|(bar\n;comment\n baz)|) foo"
-       "foo |bar ba|z foo" "foo |bar ba|z foo",
-       "foo \"|bar ba|z\" foo" "foo \"(|z\" foo",
-       "foo |\"bar ba|z\" foo" "foo |\"bar ba|z\" foo",
-       "foo |bar|" "foo (|bar|)"
-       "foo |(bar)|" "foo (|(bar)|)"
-       "bar |`foo| baz" "bar (|`foo|) baz"
-       "foo |bar| baz\n" "foo (|bar|) baz\n"
-       "foo |bar baz|\n" "foo (|bar baz|)\n"
-       "foo |bar baz\n|" "foo (|bar baz\n|)"
-       "|a `b|" "(|a `b|)"
-       "|a 'b|" "(|a 'b|)"
+    ["M-("       :paredit-wrap-round
+     {; not used yet "(foo |bar baz)" "(foo (|bar) baz)",
+      ";hel|lo" ";hel(|lo",
+      "a |\"hi\"" "a (|\"hi\")",
+      "a |\"hi\"|" "a (|\"hi\"|)",
+      "foo |bar| foo" "foo (|bar|) foo",
+      "foo |bar baz| foo" "foo (|bar baz|) foo",
+      "foo (|bar| baz) foo" "foo ((|bar|) baz) foo"
+      "foo (|bar baz|) foo" "foo ((|bar baz|)) foo"
+      "foo |(bar| baz) foo" "foo |(bar| baz) foo"
+      "foo (bar| baz)| foo" "foo (bar| baz)| foo"
+      "foo |(bar baz)| foo" "foo (|(bar baz)|) foo"
+      "foo |(bar\n;comment\n baz)| foo" "foo (|(bar\n;comment\n baz)|) foo"
+      "foo |bar ba|z foo" "foo |bar ba|z foo",
+      "foo \"|bar ba|z\" foo" "foo \"(|z\" foo",
+      "foo |\"bar ba|z\" foo" "foo |\"bar ba|z\" foo",
+      "foo |bar|" "foo (|bar|)"
+      "foo |(bar)|" "foo (|(bar)|)"
+      "bar |`foo| baz" "bar (|`foo|) baz"
+      "foo |bar| baz\n" "foo (|bar|) baz\n"
+      "foo |bar baz|\n" "foo (|bar baz|)\n"
+      "foo |bar baz\n|" "foo (|bar baz\n|)"
+      "|a `b|" "(|a `b|)"
+      "|a 'b|" "(|a 'b|)"
 
-       }]
-     [""       :paredit-wrap-quote
-      {"(foo |bar baz)" "(foo '|bar baz)",
-       ";hel|lo" ";hel'|lo",
-       "a |\"hi\"" "a '|\"hi\"",
-       "a |\"hi\"|" "a '|\"hi\"|",
-       "foo |bar| foo" "foo '|bar| foo",
-       "foo |bar baz| foo" "foo '|bar baz| foo",
-       "foo '|bar| baz foo" "foo ''|bar| baz foo"
-       ; this one fails "foo '|bar baz| foo" "foo ''|bar baz| foo"
-       "(defn foo [] |)" "(defn foo [] '|)"
-       "|" "'|"
-       "(|" "('|"
-       "((|))" "(('|))"
-       "|   \nfoo" "'|   \nfoo"
-       }]
-     ["M-s"       :paredit-splice-sexp
-               {"(foo (bar| baz) quux)" "(foo bar| baz quux)"
-                "(foo (b|ar baz) quux)" "(foo b|ar baz quux)"
-                "(bar| baz)" "bar| baz"
-                "(bar | baz)" "bar | baz"
-                "(foo (ba|r) baz)" "(foo ba|r baz)"
-                "(foo \"bar|\" baz)" "(foo bar| baz)"
-                "(foo \"ba|r\" baz)" "(foo ba|r baz)"
-                "(foo (|) baz)" "(foo | baz)"
-                "(foo (bar|) baz)" "(foo bar| baz)"
-                "(foo {bar|} baz)" "(foo bar| baz)"
-                "(foo {ba|r} baz)" "(foo ba|r baz)"
-                "(|)" "|"
-                "(foo [ba|r] baz)" "(foo ba|r baz)"
-                "(foo (bar| blah) baz)" "(foo bar| blah baz)"
-                "(foo {bar| blah} baz)" "(foo bar| blah baz)"
-                "(foo {ba|r blah} baz)" "(foo ba|r blah baz)"
-                "(foo [ba|r blah] baz)" "(foo ba|r blah baz)"
+      }]
+    [""       :paredit-wrap-quote
+     {"(foo |bar baz)" "(foo '|bar baz)",
+      ";hel|lo" ";hel'|lo",
+      "a |\"hi\"" "a '|\"hi\"",
+      "a |\"hi\"|" "a '|\"hi\"|",
+      "foo |bar| foo" "foo '|bar| foo",
+      "foo |bar baz| foo" "foo '|bar baz| foo",
+      "foo '|bar| baz foo" "foo ''|bar| baz foo"
+      ; this one fails "foo '|bar baz| foo" "foo ''|bar baz| foo"
+      "(defn foo [] |)" "(defn foo [] '|)"
+      "|" "'|"
+      "(|" "('|"
+      "((|))" "(('|))"
+      "|   \nfoo" "'|   \nfoo"
+      }]
+    ["M-s"       :paredit-splice-sexp
+              {"(foo (bar| baz) quux)" "(foo bar| baz quux)"
+               "(foo (b|ar baz) quux)" "(foo b|ar baz quux)"
+               "(bar| baz)" "bar| baz"
+               "(bar | baz)" "bar | baz"
+               "(foo (ba|r) baz)" "(foo ba|r baz)"
+               "(foo \"bar|\" baz)" "(foo bar| baz)"
+               "(foo \"ba|r\" baz)" "(foo ba|r baz)"
+               "(foo (|) baz)" "(foo | baz)"
+               "(foo (bar|) baz)" "(foo bar| baz)"
+               "(foo {bar|} baz)" "(foo bar| baz)"
+               "(foo {ba|r} baz)" "(foo ba|r baz)"
+               "(|)" "|"
+               "(foo [ba|r] baz)" "(foo ba|r baz)"
+               "(foo (bar| blah) baz)" "(foo bar| blah baz)"
+               "(foo {bar| blah} baz)" "(foo bar| blah baz)"
+               "(foo {ba|r blah} baz)" "(foo ba|r blah baz)"
+               "(foo [ba|r blah] baz)" "(foo ba|r blah baz)"
+               }]
+    ;[("M-<up>" "ESC <up>")
+    ;           paredit-splice-sexp-killing-backward
+    ;           ("(foo (let ((x 5)) |(sqrt n)) bar)"
+    ;            "(foo (sqrt n) bar)")]
+    ;(("M-<down>" "ESC <down>")
+    ;           paredit-splice-sexp-killing-forward
+    ;           ("(a (b c| d e) f)"
+    ;            "(a b c f)"))
+    ["M-r"       :paredit-raise-sexp
+               {
+                "(foo |bar)" "|bar|"
+                "(foo bar|)" "(foo bar|)"
+                "(dynamic-wind in (lambda () |body|) out)" "(dynamic-wind in |body| out)"
+                "(dynamic-wind in |body| out)" "|body|"
+                "(foo |(bar]|)" "(foo |(bar]|)"
+                "(foo |(bar])|" "(foo |(bar])|"
+                "(|foo|)" "|foo|"
+                "(foo |(bar))" "|(bar)|"
                 }]
-     ;[("M-<up>" "ESC <up>")
-     ;           paredit-splice-sexp-killing-backward
-     ;           ("(foo (let ((x 5)) |(sqrt n)) bar)"
-     ;            "(foo (sqrt n) bar)")]
-     ;(("M-<down>" "ESC <down>")
-     ;           paredit-splice-sexp-killing-forward
-     ;           ("(a (b c| d e) f)"
-     ;            "(a b c f)"))
-     ["M-r"       :paredit-raise-sexp
-                {
-                 "(foo |bar)" "|bar|"
-                 "(foo bar|)" "(foo bar|)"
-                 "(dynamic-wind in (lambda () |body|) out)" "(dynamic-wind in |body| out)"
-                 "(dynamic-wind in |body| out)" "|body|"
-                 "(foo |(bar]|)" "(foo |(bar]|)"
-                 "(foo |(bar])|" "(foo |(bar])|"
-                 "(|foo|)" "|foo|"
-                 "(foo |(bar))" "|(bar)|"
-                 }]
-     ]
+    ]
     ["Barfage & Slurpage"
-     ["C-)" :paredit-forward-slurp-sexp
-      {"(foo (bar |baz) quux zot)" "(foo (bar |baz quux) zot)"
-       "(a b ((c| d)) e f)" "(a b ((c| d) e) f)"
-       "(a b ((c| d) ) e f)" "(a b ((c| d)  e) f)"
-       "(a b ((c| d) );;a\n e f)" "(a b ((c| d) ;;a\n e) f)"
-       "#{:a| :b} :c" "#{:a| :b :c}"
-       "(let [a 1 b 2]|)\n(do blah)" "(let [a 1 b 2]|\n(do blah))"
-       "[[:a| :b] :c]" "[[:a| :b :c]]"
-       "(foo (\"ba|r\" baz) quux zot)" "(foo (\"ba|r baz\") quux zot)"}]
-     ["C-(" :paredit-backward-slurp-sexp
-      {"(foo bar (baz| quux) zot)"
-       "(foo (bar baz| quux) zot)"
-       "(a b ((c| d)) e f)"
-       "(a (b (c| d)) e f)"
-       "(foo (baz \"ba|r\") quux zot)"
-       "(foo (\"baz ba|r\") quux zot)"}]
-     ["C-}" :paredit-forward-barf-sexp
-      {"(foo (bar |baz quux) zot)"
-       "(foo (bar |baz) quux zot)"
-       "(foo (baz \"ba|r\") quux zot)"
-       "(foo (baz \"ba|r\") quux zot)"}]
-     ["C-{" :paredit-backward-barf-sexp
-      {"(foo (bar baz |quux) zot)"
-       "(foo bar (baz |quux) zot)"
-       "(foo (baz \"ba|r\") quux zot)"
-       "(foo (baz \"ba|r\") quux zot)"}]]
-
-
+    ["C-)" :paredit-forward-slurp-sexp
+     {"(foo (bar |baz) quux zot)" "(foo (bar |baz quux) zot)"
+      "(a b ((c| d)) e f)" "(a b ((c| d) e) f)"
+      "(a b ((c| d) ) e f)" "(a b ((c| d)  e) f)"
+      "(a b ((c| d) );;a\n e f)" "(a b ((c| d) ;;a\n e) f)"
+      "#{:a| :b} :c" "#{:a| :b :c}"
+      "(let [a 1 b 2]|)\n(do blah)" "(let [a 1 b 2]|\n(do blah))"
+      "[[:a| :b] :c]" "[[:a| :b :c]]"
+      "(foo (\"ba|r\" baz) quux zot)" "(foo (\"ba|r baz\") quux zot)"}]
+    ["C-(" :paredit-backward-slurp-sexp
+     {"(foo bar (baz| quux) zot)"
+      "(foo (bar baz| quux) zot)"
+      "(a b ((c| d)) e f)"
+      "(a (b (c| d)) e f)"
+      "(foo (baz \"ba|r\") quux zot)"
+      "(foo (\"baz ba|r\") quux zot)"}]
+    ["C-}" :paredit-forward-barf-sexp
+     {"(foo (bar |baz quux) zot)"
+      "(foo (bar |baz) quux zot)"
+      "(foo (baz \"ba|r\") quux zot)"
+      "(foo (baz \"ba|r\") quux zot)"}]
+    ["C-{" :paredit-backward-barf-sexp
+     {"(foo (bar baz |quux) zot)"
+      "(foo bar (baz |quux) zot)"
+      "(foo (baz \"ba|r\") quux zot)"
+      "(foo (baz \"ba|r\") quux zot)"}]]
 
     ["Selection"
-     ["Shift+Alt+Left" :paredit-expand-left
-                {
-                 "foo bar| baz" "foo |bar| baz"
-                 "foo bar |baz" "foo bar| |baz"
-                 "foo ba|r baz" "foo |bar| baz"
-                 "foo1 bar b|a|z" "foo1 bar |baz|"
-                 "foo2 bar ba|z|" "foo2 bar |baz|"
-                 "foo3 bar |baz|" "foo3 bar| baz|"
-                 "foo bar| baz|" "foo |bar baz|"
-                 "foo |bar baz|" "foo| bar baz|"
-                 "|(foo bar baz)|" "|(foo bar baz)|"
-                 ;;not-yet "|fo|o bar baz" "|foo bar baz|"
-                 ;;not-yet "|foo| bar baz" "|foo bar baz|"
-                 ;;not-yet "|foo |bar baz" "|foo bar baz|"
-                 ;;not-yet "|foo b|ar baz" "|foo bar baz|"
-                 "foo (bar| baz)" "foo (|bar| baz)"
-                 "foo b|ar| baz" "foo |bar| baz"
-                 "foo1 (|bar| baz)" "foo1 |(bar baz)|"
-                 "foo \"bar |baz\"" "foo |\"bar baz\"|"
-                 "foo;ba|r\nbaz" "foo|;bar|\nbaz"
+    ["Shift+Alt+Left" :paredit-expand-left
+               {
+                "foo bar| baz" "foo |bar| baz"
+                "foo bar |baz" "foo bar| |baz"
+                "foo ba|r baz" "foo |bar| baz"
+                "foo1 bar b|a|z" "foo1 bar |baz|"
+                "foo2 bar ba|z|" "foo2 bar |baz|"
+                "foo3 bar |baz|" "foo3 bar| baz|"
+                "foo bar| baz|" "foo |bar baz|"
+                "foo |bar baz|" "foo| bar baz|"
+                "|(foo bar baz)|" "|(foo bar baz)|"
+                ;;not-yet "|fo|o bar baz" "|foo bar baz|"
+                ;;not-yet "|foo| bar baz" "|foo bar baz|"
+                ;;not-yet "|foo |bar baz" "|foo bar baz|"
+                ;;not-yet "|foo b|ar baz" "|foo bar baz|"
+                "foo (bar| baz)" "foo (|bar| baz)"
+                "foo b|ar| baz" "foo |bar| baz"
+                "foo1 (|bar| baz)" "foo1 |(bar baz)|"
+                "foo \"bar |baz\"" "foo |\"bar baz\"|"
+                "foo;ba|r\nbaz" "foo|;bar|\nbaz"
                  "foo (bar [ba|z] |foo)" "foo (bar |[baz] |foo)"
                  "foo (bar [ba|z]) (foo [bar (b|az)])" "foo |(bar [baz]) (foo [bar (baz)])|"
                  "foo |(bar [baz (b|am)])" "foo |(bar [baz (bam)])|"
@@ -546,94 +544,95 @@
                  ;with :chimera
                  "(foo bar|]" "(foo |bar|]"
                  }]
-     ["Shift+Alt+Right" :paredit-expand-right
-                {
-                 "foo bar| baz" "foo bar| |baz"
-                 "foo4 bar |baz" "foo4 bar |baz|"
-                 "foo ba|r baz" "foo |bar| baz"
-                 "foo5 bar b|a|z" "foo5 bar |baz|"
-                 "foo6 bar ba|z|" "foo6 bar |baz|"
-                 ;;not-yet "foo bar |baz|" "|foo bar baz|"
-                 ;;not-yet "foo bar| baz|" "|foo bar baz|"
-                 ;;not-yet "foo |bar baz|" "|foo bar baz|"
-                 "|foo bar baz" "|foo| bar baz";;
-                 "|f|oo bar baz" "|foo| bar baz"
-                 "|foo| bar baz" "|foo |bar baz"
-                 "|foo |bar baz" "|foo bar| baz"
-                 "|foo b|ar baz" "|foo bar| baz"
-                 "foo (bar| baz)" "foo (bar| |baz)"
-                 "foo (bar |baz)" "foo (bar |baz|)"
-                 "foo b|ar| baz" "foo |bar| baz"
-                 "foo2 (bar baz|)" "foo2 |(bar baz)|"
-                 "foo3 (bar |baz|)" "foo3 |(bar baz)|"
-                 "foo \"bar |baz\"" "foo \"|bar baz|\""
-                 "foo \"|bar baz|\"" "foo |\"bar baz\"|"
-                 "foo;ba|r\nbaz" "foo|;bar|\nbaz"
-                 "foo (bar [ba|z] |foo)" "foo (bar |[baz] |foo)"
-                 "foo (bar [ba|z]) (foo [bar (b|az)])" "foo |(bar [baz]) (foo [bar (baz)])|"
-                 "foo |(bar [baz (b|am)])" "foo |(bar [baz (bam)])|"
-                 ;with :chimera
-                 "(foo |bar]" "(foo |bar|]"
-                 }]
-     ["Shift+Alt+Up" :paredit-expand-up
-                {
-                 "abc defgh|i " "abc |defghi| "
-                 "|abc| defghi " "|abc defghi |"
-                 "foo bar| baz" "|foo bar baz|"
-                 "foo bar |baz" "|foo bar baz|"
-                 "foo ba|r baz" "foo |bar| baz"
-                 "foo7 bar b|a|z" "foo7 bar |baz|"
-                 "foo8 bar ba|z|" "foo8 bar |baz|"
-                 "foo9 bar |baz|" "|foo9 bar baz|"
-                 "foo bar| baz|" "|foo bar baz|"
-                 "foo |bar baz|" "|foo bar baz|"
-                 "|foo bar baz" "|foo bar baz|"
-                 "|f|oo bar baz" "|foo| bar baz"
-                 "|foo| bar baz" "|foo bar baz|"
-                 "|foo |bar baz" "|foo bar baz|"
-                 "|foo b|ar baz" "|foo bar| baz"
-                 "foo4 (bar| baz)" "foo4 (|bar baz|)"
-                 "foo4 (|bar baz|)" "foo4 |(bar baz)|"
-                 "foo5 (bar |baz)" "foo5 (|bar baz|)"
-                 "foo5 (|bar baz|)" "foo5 |(bar baz)|"
-                 "foo b|ar| baz" "foo |bar| baz"
-                 "foo6 (bar baz|)" "foo6 (|bar baz|)"
-                 "foo6 (|bar baz|)" "foo6 |(bar baz)|"
-                 "foo7 (bar |baz|)" "foo7 (|bar baz|)"
-                 "foo7 (|bar baz|)" "foo7 |(bar baz)|"
-                 "foo \"bar |baz\"" "foo \"|bar baz|\""
-                 "foo \"|bar baz|\"" "foo |\"bar baz\"|"
-                 "foo;ba|r\nbaz" "foo|;bar|\nbaz"
-                 "foo (bar [ba|z] |foo)" "foo (bar |[baz] |foo)"
-                 "foo (bar [ba|z]) (foo [bar (b|az)])" "foo |(bar [baz]) (foo [bar (baz)])|"
-                 "foo |(bar [baz (b|am)])" "foo |(bar [baz (bam)])|"
-                 "foo ([|bar])" "foo ([|bar|])"
-                 "foo ([b|ar])" "foo ([|bar|])"
-                 "foo ([b|a|r])" "foo ([|bar|])"
-                 "foo ([|bar|])" "foo (|[bar]|)"
-                 "foo (|[bar]|)" "foo |([bar])|"
-                 "(^foo |baz|)" "(|^foo baz|)"
-                 "(^fo|o baz)" "(^|foo| baz)"
-                 ; DOES NOT WORK YET "(^|foo| baz)" "(|^foo| baz)"
+    ["Shift+Alt+Right" :paredit-expand-right
+               {
+                "foo bar| baz" "foo bar| |baz"
+                "foo4 bar |baz" "foo4 bar |baz|"
+                "foo ba|r baz" "foo |bar| baz"
+                "foo5 bar b|a|z" "foo5 bar |baz|"
+                "foo6 bar ba|z|" "foo6 bar |baz|"
+                ;;not-yet "foo bar |baz|" "|foo bar baz|"
+                ;;not-yet "foo bar| baz|" "|foo bar baz|"
+                ;;not-yet "foo |bar baz|" "|foo bar baz|"
+                "|foo bar baz" "|foo| bar baz";;
+                "|f|oo bar baz" "|foo| bar baz"
+                "|foo| bar baz" "|foo |bar baz"
+                "|foo |bar baz" "|foo bar| baz"
+                "|foo b|ar baz" "|foo bar| baz"
+                "foo (bar| baz)" "foo (bar| |baz)"
+                "foo (bar |baz)" "foo (bar |baz|)"
+                "foo b|ar| baz" "foo |bar| baz"
+                "foo2 (bar baz|)" "foo2 |(bar baz)|"
+                "foo3 (bar |baz|)" "foo3 |(bar baz)|"
+                "foo \"bar |baz\"" "foo \"|bar baz|\""
+                "foo \"|bar baz|\"" "foo |\"bar baz\"|"
+                "foo;ba|r\nbaz" "foo|;bar|\nbaz"
+                "foo (bar [ba|z] |foo)" "foo (bar |[baz] |foo)"
+                "foo (bar [ba|z]) (foo [bar (b|az)])" "foo |(bar [baz]) (foo [bar (baz)])|"
+                "foo |(bar [baz (b|am)])" "foo |(bar [baz (bam)])|"
+                ;with :chimera
+                "(foo |bar]" "(foo |bar|]"
+                }]
+    ["Shift+Alt+Up" :paredit-expand-up
+               {
+                "abc defgh|i " "abc |defghi| "
+                "|abc| defghi " "|abc defghi |"
+                "foo bar| baz" "|foo bar baz|"
+                "foo bar |baz" "|foo bar baz|"
+                "foo ba|r baz" "foo |bar| baz"
+                "foo7 bar b|a|z" "foo7 bar |baz|"
+                "foo8 bar ba|z|" "foo8 bar |baz|"
+                "foo9 bar |baz|" "|foo9 bar baz|"
+                "foo bar| baz|" "|foo bar baz|"
+                "foo |bar baz|" "|foo bar baz|"
+                "|foo bar baz" "|foo bar baz|"
+                "|f|oo bar baz" "|foo| bar baz"
+                "|foo| bar baz" "|foo bar baz|"
+                "|foo |bar baz" "|foo bar baz|"
+                "|foo b|ar baz" "|foo bar| baz"
+                "foo4 (bar| baz)" "foo4 (|bar baz|)"
+                "foo4 (|bar baz|)" "foo4 |(bar baz)|"
+                "foo5 (bar |baz)" "foo5 (|bar baz|)"
+                "foo5 (|bar baz|)" "foo5 |(bar baz)|"
+                "foo b|ar| baz" "foo |bar| baz"
+                "foo6 (bar baz|)" "foo6 (|bar baz|)"
+                "foo6 (|bar baz|)" "foo6 |(bar baz)|"
+                "foo7 (bar |baz|)" "foo7 (|bar baz|)"
+                "foo7 (|bar baz|)" "foo7 |(bar baz)|"
+                "foo \"bar |baz\"" "foo \"|bar baz|\""
+                "foo \"|bar baz|\"" "foo |\"bar baz\"|"
+                "foo;ba|r\nbaz" "foo|;bar|\nbaz"
+                "foo (bar [ba|z] |foo)" "foo (bar |[baz] |foo)"
+                "foo (bar [ba|z]) (foo [bar (b|az)])" "foo |(bar [baz]) (foo [bar (baz)])|"
+                "foo |(bar [baz (b|am)])" "foo |(bar [baz (bam)])|"
+                "foo ([|bar])" "foo ([|bar|])"
+                "foo ([b|ar])" "foo ([|bar|])"
+                "foo ([b|a|r])" "foo ([|bar|])"
+                "foo ([|bar|])" "foo (|[bar]|)"
+                "foo (|[bar]|)" "foo |([bar])|"
+                "(^foo |baz|)" "(|^foo baz|)"
+                "(^fo|o baz)" "(^|foo| baz)"
+                ; DOES NOT WORK YET "(^|foo| baz)" "(|^foo| baz)"
 
-                 "(foo #bar.ba|z [quux])" "(foo #|bar.baz| [quux])"
-                 "(foo #|bar.baz| [quux])" "(foo |#bar.baz| [quux])"
-                 "(foo |#bar.baz| [quux])" "(foo |#bar.baz [quux]|)"
+                "(foo #bar.ba|z [quux])" "(foo #|bar.baz| [quux])"
+                "(foo #|bar.baz| [quux])" "(foo |#bar.baz| [quux])"
+                "(foo |#bar.baz| [quux])" "(foo |#bar.baz [quux]|)"
 
-                 ;with :chimera
-                 "(foo |bar]" "|(foo bar]|"
-                 "(foo |{bar)]" "|(foo {bar)]|"
-                 }]
-     ]
+                ;with :chimera
+                "(foo |bar]" "|(foo bar]|"
+                "(foo |{bar)]" "|(foo {bar)]|"
+                }]
+    ]
     ["Miscellaneous"
-      ["Tab"     :paredit-indent-line
-                {"[a\n|b]"  "[a\n |b]"
-                 "([a1\n|b])"  "([a1\n  |b])"
-                 "([a1b\n  |b])" "([a1b\n  |b])"
-                 "(a\n |)" "(a\n  |)"
-                 "(a b c\nd| e)" "(a b c\n   d| e)"
-                 "|(toto)" "|(toto)"
-                 "(a\n  ;sdfdf\n  |b)" "(a\n  ;sdfdf\n  |b)"
+     ["Tab"     :paredit-indent-line
+              {
+               "[a\n|b]"  "[a\n |b]"
+               "([a1\n|b])"  "([a1\n  |b])"
+               "([a1b\n  |b])" "([a1b\n  |b])"
+               "(a\n |)" "(a\n  |)"
+               "(a b c\nd| e)" "(a b c\n   d| e)"
+               "|(toto)" "|(toto)"
+               "(a\n  ;sdfdf\n  |b)" "(a\n  ;sdfdf\n  |b)"
                  "[a\n \"b\n |\"]" "[a\n \"b\n |\"]"
                  "[a\n|\"a\"]" "[a\n |\"a\"]"
                  "(a\n\t|b)" "(a\n  |b)"
@@ -668,6 +667,7 @@
                  ; with chimera
                  "(a\n|(])" "(a\n  |(])"
                  "(a\n|" "(a\n  |"
+                 
                  "(a\n|]" "(a\n  |]"
                  " #(a\n|]" " #(a\n    |]"
                  "(ab\n|cd|def)" "(ab\n  |cd|def)"
@@ -675,6 +675,7 @@
                  "|  " "|"
                  "  |  " "|"
                  "   |" "|"
+                 
                  "(if toto\n|titi)" "(if toto\n  |titi)"
                  "(my-fn toto\n|titi)" "(my-fn toto\n       |titi)"
                  "(letfn []\n|quux)" "(letfn []\n  |quux)"
@@ -687,128 +688,127 @@
                  " (proxy [Foo] []\n     (foo []\n|bar))" " (proxy [Foo] []\n     (foo []\n       |bar))"
                  ;; future auto reindent children "(my-fn foo\n | baz\n  | baz)" "(my-fn foo\n       |baz\n       baz)"
                  }]
-      ["Tab"     :paredit-indent-selection
-                {
-                 "(if toto\n|t|iti)" "(if toto\n  |titi)"
-                 " (foo\n      b|ar\n ba|z\nqux)" " (foo\n   b|ar\n   baz\nqux)"
-                 " (foo\n      b|ar\n baz\nq|ux)" " (foo\n   b|ar\n   baz\n   qux)"
-                 " (foo\n      b|ar\n baz\nqux\n\nq|ix)" " (foo\n   b|ar\n   baz\n   qux\n   \n   qix)"
-                 " |a\na|b" "|a\nab"
-                 }]
-      [#"C-j"     :paredit-newline
-                {"(ab|cd)" "(ab\n  |cd)"
-                 ;"(ab|ce)\r\n" "(ab\r\n  |ce)\r\n"
-                 "(ab|     cd)" "(ab\n  |cd)"
-                 "   a|" "   a\n   |"
-                 "(ab|cd|ef)" "(ab\n  |ef)"
-                 ;"foo (let [n (frobbotz)] |(display (+ n 1)\nport))\n        bar"
-                 ;(str "foo (let [n (frobbotz)]"
-                 ;   "\n      |(display (+ n 1)"
-                 ;   "\n        port))\n        bar")
-                 }]
-      ["M-S"    :paredit-split-sexp
-                {"(hello  |  world)" "(hello)| (world)",
-                 "\"Hello, |world!\"" "\"Hello, \"| \"world!\"",
-                 "(hel|lo)" "(hel)| (lo)",
-                 "[hello |world]" "[hello]| [world]",
-                 "{hello brave |new world}" "{hello brave}| {new world}",
-                 "{|}" "{}| {}"
-                 "(foo|)" "(foo)| ()"
-                 "({|})" "({}| {})"
-                 "(defn hello |[world])" "(defn hello)| ([world])"
-                 }]
-      ["M-J"    :paredit-join-sexps
-                {"(hello)| (world)" "(hello| world)",
-                 "\"Hello, \"| \"world!\"" "\"Hello, |world!\"",
-                 "hello-\n|  world" "hello-|world"
-                 "({:foo :bar}| {:baz :fooz})" "({:foo :bar| :baz :fooz})"
-                 "({:foo :bar} |{:baz :fooz})" "({:foo :bar |:baz :fooz})"
-                 "({:foo :bar} {|:baz :fooz})" "({:foo :bar} {|:baz :fooz})"
-                 "({:baz :fooz|} {:foo :bar})" "({:baz :fooz|} {:foo :bar})"
-                 }]
-      [""    :paredit-inc-line-comment
-                {
-                 "|"            ";|",
-                 "|\n"          ";|\n",
-                 "|\r\n"        ";|\r\n",
-                 "\n|"          "\n;|",
-                 "\r\n|"        "\r\n;|",
-                 "|\n|"         "|;\n|",
-                 "|\r\n|"       "|;\r\n|",
-                 "|\n\n|"       "|;\n;\n|",
-                 "|\r\n\r\n|"   "|;\r\n;\r\n|",
-                 "|\n\r\n|"     "|;\n;\r\n|",
-                 "|a"           ";|a",
-                 "a\n|b\nc|\nd" "a\n|;b\n;c|\nd",
-                 "a\nb\nc|d"    "a\nb\n;c|d",
-                 "hel|lo"       ";hel|lo",
-                 "h|el|lo"      ";h|el|lo"
-                 }]
-      [""    :paredit-dec-line-comment
-                {
-                 ";hel|lo"         "hel|lo",
-                 ";h|el|lo"        "h|el|lo",
-                 ";a|b"             "a|b",
-                 ";|\n"           "|\n",
-                 ";|\r\n"         "|\r\n",
-                 "\n;|"           "\n|",
-                 "\r\n;|"         "\r\n|",
-                 ";|\n;|"         "|\n|",
-                 ";|\r\n;|"       "|\r\n|",
-                 ";|\n;\n;|"      "|\n\n|",
-                 ";|\r\n;\r\n;|"  "|\r\n\r\n|",
-                 ";|\n;\r\n;|"    "|\n\r\n|",
-                 ";|a"            "|a",
-                 "a\n;|b\n;c|\nd" "a\n|b\nc|\nd",
-                 "a\n;|b"         "a\n|b"
-                 "a\n|;b"         "a\n|b"
-                 }]
-      [""    :paredit-toggle-line-comment
-                {
-                 ; same as inc-line in non ambiguous cases
-                 "|"            ";|",
-                 "|\n"          ";|\n",
-                 "|\r\n"        ";|\r\n",
-                 "\n|"          "\n;|",
-                 "\r\n|"        "\r\n;|",
-                 "|\n|"         "|;\n|",
-                 "|\r\n|"       "|;\r\n|",
-                 "|\n\n|"       "|;\n;\n|",
-                 "|\r\n\r\n|"   "|;\r\n;\r\n|",
-                 "|\n\r\n|"     "|;\n;\r\n|",
-                 "|a"           ";|a",
-                 "a\n|b\nc|\nd" "a\n|;b\n;c|\nd",
-                 "a\nb\nc|d"    "a\nb\n;c|d",
-                 "hel|lo"       ";hel|lo",
-                 "h|el|lo"      ";h|el|lo"
-                 ; same as dec-line in non ambiguous cases
-                 ";hel|lo"         "hel|lo",
-                 ";h|el|lo"        "h|el|lo",
-                 ";a|b"             "a|b",
-                 ";|\n"           "|\n",
-                 ";|\r\n"         "|\r\n",
-                 "\n;|"           "\n|",
-                 "\r\n;|"         "\r\n|",
-                 ";|\n;|"         "|\n|",
-                 ";|\r\n;|"       "|\r\n|",
-                 ";|\n;\n;|"      "|\n\n|",
-                 ";|\r\n;\r\n;|"  "|\r\n\r\n|",
-                 ";|\n;\r\n;|"    "|\n\r\n|",
-                 ";|a"            "|a",
-                 "a\n;|b\n;c|\nd" "a\n|b\nc|\nd",
-                 "a\n;|b"         "a\n|b"
-                 "a\n|;b"         "a\n|b"
+     ["Tab"     :paredit-indent-selection
+               {
+                "(if toto\n|t|iti)" "(if toto\n  |titi)"
+                " (foo\n      b|ar\n ba|z\nqux)" " (foo\n   b|ar\n   baz\nqux)"
+                " (foo\n      b|ar\n baz\nq|ux)" " (foo\n   b|ar\n   baz\n   qux)"
+                " (foo\n      b|ar\n baz\nqux\n\nq|ix)" " (foo\n   b|ar\n   baz\n   qux\n   \n   qix)"
+                " |a\na|b" "|a\nab"
+                }]
+     [#"C-j"     :paredit-newline
+               {"(ab|cd)" "(ab\n  |cd)"
+                ;"(ab|ce)\r\n" "(ab\r\n  |ce)\r\n"
+                "(ab|     cd)" "(ab\n  |cd)"
+                "   a|" "   a\n   |"
+                "(ab|cd|ef)" "(ab\n  |ef)"
+                ;"foo (let [n (frobbotz)] |(display (+ n 1)\nport))\n        bar"
+                ;(str "foo (let [n (frobbotz)]"
+                ;   "\n      |(display (+ n 1)"
+                ;   "\n        port))\n        bar")
+                }]
+     ["M-S"    :paredit-split-sexp
+               {"(hello  |  world)" "(hello)| (world)",
+                "\"Hello, |world!\"" "\"Hello, \"| \"world!\"",
+                "(hel|lo)" "(hel)| (lo)",
+                "[hello |world]" "[hello]| [world]",
+                "{hello brave |new world}" "{hello brave}| {new world}",
+                "{|}" "{}| {}"
+                "(foo|)" "(foo)| ()"
+                "({|})" "({}| {})"
+                "(defn hello |[world])" "(defn hello)| ([world])"
+                }]
+     ["M-J"    :paredit-join-sexps
+               {"(hello)| (world)" "(hello| world)",
+                "\"Hello, \"| \"world!\"" "\"Hello, |world!\"",
+                "hello-\n|  world" "hello-|world"
+                "({:foo :bar}| {:baz :fooz})" "({:foo :bar| :baz :fooz})"
+                "({:foo :bar} |{:baz :fooz})" "({:foo :bar |:baz :fooz})"
+                "({:foo :bar} {|:baz :fooz})" "({:foo :bar} {|:baz :fooz})"
+                "({:baz :fooz|} {:foo :bar})" "({:baz :fooz|} {:foo :bar})"
+                }]
+     [""    :paredit-inc-line-comment
+               {
+                "|"            ";|",
+                "|\n"          ";|\n",
+                "|\r\n"        ";|\r\n",
+                "\n|"          "\n;|",
+                "\r\n|"        "\r\n;|",
+                "|\n|"         "|;\n|",
+                "|\r\n|"       "|;\r\n|",
+                "|\n\n|"       "|;\n;\n|",
+                "|\r\n\r\n|"   "|;\r\n;\r\n|",
+                "|\n\r\n|"     "|;\n;\r\n|",
+                "|a"           ";|a",
+                "a\n|b\nc|\nd" "a\n|;b\n;c|\nd",
+                "a\nb\nc|d"    "a\nb\n;c|d",
+                "hel|lo"       ";hel|lo",
+                "h|el|lo"      ";h|el|lo"
+                }]
+     [""    :paredit-dec-line-comment
+               {
+                ";hel|lo"         "hel|lo",
+                ";h|el|lo"        "h|el|lo",
+                ";a|b"             "a|b",
+                ";|\n"           "|\n",
+                ";|\r\n"         "|\r\n",
+                "\n;|"           "\n|",
+                "\r\n;|"         "\r\n|",
+                ";|\n;|"         "|\n|",
+                ";|\r\n;|"       "|\r\n|",
+                ";|\n;\n;|"      "|\n\n|",
+                ";|\r\n;\r\n;|"  "|\r\n\r\n|",
+                ";|\n;\r\n;|"    "|\n\r\n|",
+                ";|a"            "|a",
+                "a\n;|b\n;c|\nd" "a\n|b\nc|\nd",
+                "a\n;|b"         "a\n|b"
+                "a\n|;b"         "a\n|b"
+                }]
+     [""    :paredit-toggle-line-comment
+               {
+                ; same as inc-line in non ambiguous cases
+                "|"            ";|",
+                "|\n"          ";|\n",
+                "|\r\n"        ";|\r\n",
+                "\n|"          "\n;|",
+                "\r\n|"        "\r\n;|",
+                "|\n|"         "|;\n|",
+                "|\r\n|"       "|;\r\n|",
+                "|\n\n|"       "|;\n;\n|",
+                "|\r\n\r\n|"   "|;\r\n;\r\n|",
+                "|\n\r\n|"     "|;\n;\r\n|",
+                "|a"           ";|a",
+                "a\n|b\nc|\nd" "a\n|;b\n;c|\nd",
+                "a\nb\nc|d"    "a\nb\n;c|d",
+                "hel|lo"       ";hel|lo",
+                "h|el|lo"      ";h|el|lo"
+                ; same as dec-line in non ambiguous cases
+                ";hel|lo"         "hel|lo",
+                ";h|el|lo"        "h|el|lo",
+                ";a|b"             "a|b",
+                ";|\n"           "|\n",
+                ";|\r\n"         "|\r\n",
+                "\n;|"           "\n|",
+                "\r\n;|"         "\r\n|",
+                ";|\n;|"         "|\n|",
+                ";|\r\n;|"       "|\r\n|",
+                ";|\n;\n;|"      "|\n\n|",
+                ";|\r\n;\r\n;|"  "|\r\n\r\n|",
+                ";|\n;\r\n;|"    "|\n\r\n|",
+                ";|a"            "|a",
+                "a\n;|b\n;c|\nd" "a\n|b\nc|\nd",
+                "a\n;|b"         "a\n|b"
+                "a\n|;b"         "a\n|b"
                  
-                 ; same amount of commented / uncommented => comment
-                 ";|a\nb|"        ";|a\n;b|"
+                ; same amount of commented / uncommented => comment
+                ";|a\nb|"        ";|a\n;b|"
                  
-                 ; more commented than uncommented => uncomment
-                 ";f|oo\nbar\n;baz|" "f|oo\nbar\nbaz|"
+                ; more commented than uncommented => uncomment
+                ";f|oo\nbar\n;baz|" "f|oo\nbar\nbaz|"
                  
-                 ; more uncommented than commented => comment
-                 ";f|oo\nbar\nbaz|" ";f|oo\n;bar\n;baz|"
+                ; more uncommented than commented => comment
+                ";f|oo\nbar\nbaz|" ";f|oo\n;bar\n;baz|"
                  
-                 }]
-
+                }]
     ]
   ])

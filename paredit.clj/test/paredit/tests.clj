@@ -26,31 +26,6 @@
   ([expr] (spy* "" expr))
   ([msg expr] (spy* msg expr)))
 
-#_(deftest normalized-selection-tests
-  (are [text offset length expected-offset expected-length]
-    (= [expected-offset expected-length] (-?> (parse text) (parsed-root-loc true) (normalized-selection offset length) (text-selection)))
-    "foo bar baz" 4 0 4 0
-    "foo bar baz" 4 3 4 3
-    "foo bar baz" 4 6 4 7
-    "foo bar baz" 4 7 4 7 
-    "foo (bar baz)" 5 3 5 3 
-    "foo (bar baz)" 5 4 5 4 
-    "foo (bar baz)" 5 5 5 7 
-    "foo (bar baz)" 5 7 5 7 
-    "foo (bar baz)" 4 0 4 0
-    "foo bar (baz) foo" 4 9 4 9
-    "foo bar (baz) foo" 4 10 4 10
-    "foo bar (baz) foo" 4 11 4 13 ;
-    "foo (bar baz) foo" 4 2 4 9
-    "foo bar" 2 5 0 7
-    "foo (bar baz)" 4 9 4 9
-    "foo (bar baz)" 4 4 4 9
-    "foo (bar baz)" 9 4 4 9 
-    "foo (bar baz)" 0 0 0 0
-    "(foo bar)" 8 0 8 0
-    "foo (bar baz)" 12 1 4 9 
-    ))
-
 (deftest unescape-string-content-tests
   (are [unescaped expected-escaped]
     (= expected-escaped (escape-string-content unescaped))
@@ -66,7 +41,6 @@
 (defn test-command [title-prefix command]
   (testing (str title-prefix " " (second command) " (\"" (first command) "\")")
     (doseq [[input expected] (get command 2)]
-      (spy "++++++++++++++++++++")
       (spy (u/spec->text input))
       (let [{text :text :as t} (u/spec->text input)
             buffer (edit-buffer nil 0 -1 text)
@@ -84,62 +58,8 @@
         (test-command "public documentation of paredit command" command)
         (test-command "additional non regression tests of paredit command " (assoc command 2 (get command 3)))))))
 
-#_(deftest spec-text-tests
-  (are [spec text] (and 
-                     (= text (u/spec->text spec))
-                     (= spec (u/text->spec text)))
-    "foo |bar" {:text "foo bar" :offset 4 :length 0}
-    "|" {:text "" :offset 0 :length 0}
-    "|foo" {:text "foo" :offset 0 :length 0}
-    "foo|" {:text "foo" :offset 3 :length 0}
-    "foo |bar| foo" {:text "foo bar foo" :offset 4 :length 3}))
-
-#_(deftest loc-for-offset-tests
-  (are [text offset expected-tag] (= expected-tag (-?> (parse text) (parsed-root-loc true) (loc-for-offset offset) (zip/node) :tag))
-    "foo (bar baz) baz" 12 :list ;nil
-    "foo (bar baz) baz" 4 :list ;nil
-    "foo (bar baz) baz" 5 :atom ;nil
-    "hello" 0 :atom
-    "hello" 1 :atom
-    "hello" 5 nil ;:root
-    "a b" 0 :atom
-    "a b" 1 :whitespace
-    "a b" 2 :atom
-    "foo \"bar\" foo" 3 :whitespace
-    "foo \"bar\" foo" 4 :string))
-
-#_(deftest leave-for-offset-tests
-  (are [text offset expected-tag ?expected-node]
-    (let [l (-?> (parse text) (parsed-root-loc true) (leave-for-offset offset))] 
-      (and
-        (= expected-tag (loc-tag l))
-        (or (nil? ?expected-node) (= ?expected-node (zip/node l)))))
-    "foo (bar baz) baz" 12 :list ")"
-    "hello" 0 :atom nil
-    "hello" 1 :atom nil
-    "hello" 5 :root nil
-    "a b" 0 :atom nil
-    "a b" 1 :whitespace nil
-    "a b" 2 :atom nil
-    "foo \"bar\" foo" 3 :whitespace nil
-    "foo \"bar\" foo" 4 :string nil
-    ))
-
 (deftest parser-tests
   (is (not= nil (sexp ":"))))
-
-#_(deftest loc-containing-offset-tests
-  (are [text offset expected-tag] (= expected-tag (-?> (parse text) (parsed-root-loc true) (loc-containing-offset offset) (zip/node) :tag))
-    "hello" 1 :atom
-    "foo bar" 3 :root
-    "foo bar" 4 :root
-    "hello" 5 :root
-    "a b" 0 :root
-    "a b" 1 :root
-    "a b" 2 :root
-    "foo \"bar\" foo" 3 :root
-    "foo \"bar\" foo" 4 :root
-    ))
 
 (defn parsetree-to-string [parsetree]
   (->> parsetree 
@@ -203,9 +123,7 @@
        "#foo bar" :reader-literal
        "#foo.bar baz" :reader-literal
        "#foo.bar []" :reader-literal
-       "#foo 5" :reader-literal
-    )
-  )
+       "#foo 5" :reader-literal))
 
 (deftest static-analysis-tests
   (are [text]
@@ -219,8 +137,7 @@
     "(ns ^{:author \"Laurent Petit\"} foo)"
     "^:foo (ns ^:foo foo)"
     "^:foo (ns ^:foo ^{:author \"Laurent Petit\"} foo)"
-    "^{:a :b};sdf\n^:bar ^:foo (ns ^:foo ^{:author ;comment\n\"Laurent Petit\"}\n;foo\n#_bleh foo)"
-    ))
+    "^{:a :b};sdf\n^:bar ^:foo (ns ^:foo ^{:author ;comment\n\"Laurent Petit\"}\n;foo\n#_bleh foo)"))
 
 (deftest code-forms-tests
   (are [before after]
@@ -248,7 +165,7 @@
                        parsed-root-loc
                        (st/top-level-code-form offset)
                        loc-text))
-       "(a)" 0 "(a)"
+  "(a)" 0 "(a)"
   "(a)" 1 "(a)"
   "(a)" 2 "(a)"
   "(a)" 3 "(a)"
@@ -275,22 +192,15 @@
     "foo\n \n |" 1))
 
 (defn pts []
-  #_(normalized-selection-tests)
   (t/line-stop-tests)
-  #_(spec-text-tests)
   (paredit-tests)
   (parser-tests)
   (parsetree-tests)
   (unescape-string-content-tests)
-  (static-analysis-tests)
-  ;;;;;;;#_(loc-for-offset-tests)
-  #_(leave-for-offset-tests)
-  #_(loc-containing-offset-tests))
+  (static-analysis-tests))
 
 (def ^{:dynamic true
        :doc 
           "defines a text, with :offset being the cursor position,
            and :length being a possible selection (may be negative)"}
-
-
       *text* (atom {:text "" :offset 0 :length 0}))
