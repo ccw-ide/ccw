@@ -316,15 +316,12 @@
     (z/up nl-leaf)))
 
 (defn shift-all-loc 
-  "Shift all lines of loc of delta.
-   Return [root-loc true] if all lines (including last one) of loc were shifted
-   Return [root-loc false] if not all lines (and thus not last one) of loc were shifted.
-   If the loc happened to not span several lines, return [root-loc true]"
+  "Shift all lines of loc of delta."
   [loc col delta]
   (loop [prev-loc loc]
     (let [loc (next-start-line prev-loc)]
       (cond 
-        (nil? loc) [(root-loc prev-loc) true]
+        (nil? loc) (root-loc prev-loc)
         
         (newline? loc) (recur loc)
         
@@ -335,27 +332,26 @@
             (zero? col))
           (let [sloc (shift-nl-whitespace loc delta)]
             (if (= sloc loc) 
-              [(root-loc loc) false]
+              (root-loc loc)
               (recur sloc)))
         
-        :else [(root-loc loc) false]))))
+        :else (root-loc loc)))))
 
+(defn single-line-loc? [loc] (= -1 (.indexOf (loc-text loc) "\n")))
 (defn propagate-delta 
   [loc col delta]
   (if (z/end? (z/next loc))
-    [loc :stop]
-    (let [loc-idx (count (z/lefts loc))
-          re-rooted-parent-loc (if (loc-tag? loc :root) loc (->> loc z/up z/node xml-vzip))
-          re-rooted-parent-loc (z/down re-rooted-parent-loc)
-          re-rooted-loc (nth (iterate z/right re-rooted-parent-loc) loc-idx)
-          [sloc continue?] (shift-all-loc re-rooted-loc col delta)
-          loc (z/replace 
-                (z/up loc)
-                (z/node
-                  (root-loc sloc)))]
-      (if-let [next-loc (and continue? (next-node-loc loc))]
+    (root-loc loc)
+    (let [re-rooted-loc (if (loc-tag? loc :root) loc (->> loc z/node xml-vzip))
+          loc-end-col-before (loc-end-col re-rooted-loc)
+          sloc (shift-all-loc re-rooted-loc col delta)
+          loc-end-col-after (loc-end-col sloc)
+          loc (z/replace loc (z/node sloc))]
+      (if-let [next-loc (and (or (not= loc-end-col-before loc-end-col-after)
+                                 (single-line-loc? sloc))
+                             (next-node-loc loc))]
         (recur next-loc (loc-end-col loc) delta)
-        [loc :stop]))))
+        (root-loc loc)))))
 
 (defn find-loc-to-shift
   "Starting with loc, find to the right, and to the right of parent node, etc.
@@ -403,7 +399,7 @@
     (when loc
       (let [col (- (loc-col loc) delta)]
         (when-not (or (neg? col) (< col col-before))
-          (let [[shifted-loc _] (propagate-delta loc col delta)
+          (let [shifted-loc (propagate-delta loc col delta)
                 shifted-text (node-text (z/root shifted-loc))
                 loc-diff (t/text-diff text shifted-text)
                 diff (update-in 
@@ -438,5 +434,4 @@
     (when loc
       (let [col (- (loc-col loc) delta)]
         (when-not (or (neg? col) (< col col-before))
-          (let [[shifted-loc _] (propagate-delta loc col delta)]
-            shifted-loc))))))
+          (propagate-delta loc col delta))))))
