@@ -410,7 +410,7 @@
 
 (defmethod paredit
   :paredit-raise-sexp
-  [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
+  [cmd {:keys #{parse-tree buffer} :as parse-state} {:keys [^String text offset length] :as t}]
   (with-important-memoized 
     (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
       (let [[l r] (normalized-selection rloc offset length)]
@@ -428,31 +428,12 @@
              new-t (-> t (assoc-in [:text] (t/str-replace text replace-offset replace-length to-raise-text))
                      (assoc-in [:offset] replace-offset)
                      (assoc-in [:length] (count to-raise-text))
-                     (update-in [:modifs] conj {:offset replace-offset :length replace-length :text to-raise-text}))
-             shifted-loc (l/paredit-col-shift {:parse-tree parse-tree
-                                               :buffer buffer}
-                                              (-> new-t :modifs (nth 0))
-                                              to-raise-offset
-                                              replace-offset)
-             shifted-parse-tree (z/root shifted-loc)
-             shifted-text (node-text shifted-parse-tree)
-             diff (t/text-diff text shifted-text)
-             shifted-buffer (edit-buffer buffer (:offset diff) (:length diff) (:text diff))
-             shifted-parse-tree (buffer-parse-tree shifted-buffer 0)
-             ddiff (nth (:modifs (l/col-shift {:parse-tree parse-tree
-                                 :buffer buffer} 
-                                diff)) 0)
-             final-text (if-not ddiff
-                          shifted-text
-                          (-> text 
-                            (t/str-replace (:offset ddiff) (:length ddiff) (:text ddiff))
-                            (t/str-replace (:offset diff) (:length diff) (:text diff)))) 
-             ]
-            {:text final-text
-             :offset replace-offset
-             :length (+ (:length new-t) (- (count shifted-text)
-                                           (count (:text new-t))))
-             :modifs [(t/text-diff text final-text)]})))
+                     (update-in [:modifs] conj {:offset replace-offset :length replace-length :text to-raise-text}))]
+            (if-let [new-t (l/col-shift parse-state (-> new-t :modifs first) to-raise-offset replace-offset)]
+              (-> new-t
+                (assoc-in [:length] (count to-raise-text))
+                (assoc-in [:offset] replace-offset))
+              new-t))))
       t)))
 
 (defmethod paredit

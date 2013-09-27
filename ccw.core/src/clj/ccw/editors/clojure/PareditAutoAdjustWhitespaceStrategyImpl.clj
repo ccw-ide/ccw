@@ -31,10 +31,9 @@
                                {:offset (.offset command)
                                 :length (.length command) 
                                 :text   (.text command)})]
-        (support/add-command! command modif)
-        ;; if prev-caret-offset not set, then no paredit command has been
-        ;; applied => force the offset be what AutoAdjust strategy computed
-        (when-not (pos? prev-caret-offset)
-          (set! (.shiftsCaret command) false)
-          (set! (.caretOffset command) offset))))))
+        (set! (.offset command) (-> modif :offset))
+        (set! (.length command) (-> modif :length))
+        (set! (.text command) (-> modif :text))
+        (set! (.shiftsCaret command) false)
+        (set! (.caretOffset command) offset)))))
 
