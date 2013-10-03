@@ -125,6 +125,16 @@ will result in:
 (defn baz [....])
 ```
 
+- Auto indentation of a cond form changed : (Fixes #592)
+``` clojure 
+;; from 
+(cond test1 expr1
+  test2 expr2)
+;; to
+(cond test1 expr1
+      test2 expr2)
+```
+
 - Experimental Feature: enabling auto-reevaluation of last command typed in the REPL, after a successful evaluation from the Editor
   - when the "repeat last expression" REPL command is active
   - when the user sends a form tom evaluate to the REPL
