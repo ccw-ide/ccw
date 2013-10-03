@@ -3,10 +3,10 @@
 ### TODO
 
 - Autoshift:
-  - extract logic from Eclipse, add tests
-  - make it work with raise over, etc.
-  - make it work with cut/copy/paste
-  - document
+DONE  - extract logic from Eclipse, add tests
+DELAYED  - make it work with raise over, etc.
+DELAYED  - make it work with cut/copy/paste
+DONE  - document
   - release
 
 - Make the pull requests test mechanism work
