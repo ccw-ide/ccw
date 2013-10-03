@@ -375,36 +375,6 @@
         eol (subs s offset eol-offset)]
     (s/blank? eol)))
 
-#_(defn col-shift 
-   [{:keys [parse-tree buffer]} modif]
-   (let [text-before (node-text parse-tree)
-         parse-tree (-> buffer
-                      (edit-buffer (:offset modif) (:length modif) (:text modif))
-                      (buffer-parse-tree 0))
-         text (node-text parse-tree)
-         offset (+ (:offset modif) (count (:text modif)))
-         offset-before (+ (:offset modif) (:length modif))
-         col (t/col text offset)
-         col-before (t/col text-before offset-before)
-         delta (- col col-before)
-         rloc (parsed-root-loc parse-tree)
-         loc (loc-for-offset rloc offset)
-         loc (if (or 
-                   (= (start-offset loc) offset)
-                   (whitespace-end-of-line? text offset)
-                   (= :comment (loc-tag loc)))
-               loc
-               (next-node-loc loc))
-         loc (find-loc-to-shift loc)]
-     (when loc
-       (let [col (- (loc-col loc) delta)]
-         (when-not (or (neg? col) (< col col-before))
-           (let [shifted-loc (propagate-delta loc col delta)
-                 shifted-text (node-text (z/root shifted-loc))
-                 diff (t/text-diff text-before shifted-text)] 
-             (when-not (empty-diff? diff)
-               {:modifs [diff] :offset offset :length 0 :text shifted-text})))))))
-
 (defn col-shift 
   ([{:keys [parse-tree buffer] :as st} modif] (col-shift st modif nil nil))
   ([{:keys [parse-tree buffer]} modif offset-before offset]
@@ -432,6 +402,9 @@
           (when-not (or (neg? col) (< col col-before))
             (let [shifted-loc (propagate-delta loc col delta)
                   shifted-text (node-text (z/root shifted-loc))
-                  diff (t/text-diff text-before shifted-text)] 
+                  diff (t/text-diff text-before shifted-text)]
+              ;(println "text before:" text-before)
+              ;(println "shifted-text:" shifted-text)
+              ;(println "diff:" diff)
               (when-not (empty-diff? diff)
-                {:modifs [diff] :offset offset :length 0  :text shifted-text}))))))))
+                {:modifs [diff] :offset offset :length 0 :text shifted-text}))))))))

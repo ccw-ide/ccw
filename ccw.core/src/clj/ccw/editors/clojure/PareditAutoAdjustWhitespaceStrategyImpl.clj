@@ -31,9 +31,11 @@
                                {:offset (.offset command)
                                 :length (.length command) 
                                 :text   (.text command)})]
+;        (println "{[modif] :modifs offset :offset}:" {[modif] :modifs offset :offset})
         (set! (.offset command) (-> modif :offset))
         (set! (.length command) (-> modif :length))
         (set! (.text command) (-> modif :text))
-        (set! (.shiftsCaret command) false)
-        (set! (.caretOffset command) offset)))))
+        (when (neg? prev-caret-offset)
+          (set! (.shiftsCaret command) false)
+        (set! (.caretOffset command) offset))))))
 
