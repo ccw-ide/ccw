@@ -7,8 +7,8 @@
 - `0.20.0` introduces **no breaking change**
 - New Software Update Site `http://updatesite.ccw-ide.org/stable`
 - Editor: new awesome `autoshift` feature, slurp/barf paredit commands support
-- Miscellaneous changes to fix stability issues
-
+- Lots of changes to fix stability concerns and various issues
+- 
 ### Build Process totally rewritten
 
 For people wanting to build Counterclockwise from scratch, or to work with Counterclockwise.
