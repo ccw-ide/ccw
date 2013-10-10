@@ -8,7 +8,6 @@ env:
     - secure: "YDLYUZiLuoNCRpdIMxycacPOyJkIw/lfycpEiIfoyuVQCTf0Sig/KZpjDyHj\nlU8gPqwYewp//lTyczuJIFq8IOghO3QejGaqlNGNLOmFPIsfdThMGOYn9IOJ\nkqO4enPLfxjnEAxvcKQDboUrCETjsimCvMccgIZDcvlQ6iFAdzA="
   matrix:
     - ECLIPSE_TARGET=kepler
-    - ECLIPSE_TARGET=indigo
 install: true
 before_script:
   - "export DISPLAY=:99.0"
