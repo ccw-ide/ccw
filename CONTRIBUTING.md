@@ -14,19 +14,20 @@ This page explains how to install a development environment for hacking on CCW.
 
 ### Compile / Test / Package
 
-- cd into `ccw folder`
+```sh
+$ git clone https://github.com/laurentpetit/ccw
+$ cd ccw
 
-        cd ccw
+# To clean + compile + unit test + integration test + build updatesite 
+# + build Windows / Linux / OS X standalone products:
+ccw$ mvn clean install
 
-- To clean + compile + unit tests + integration tests + build updatesite + build win/lin/osx products:
+# Same as above, but skipping launching tests:
+ccw$ mvn clean install -DskipTests
 
-        mvn clean verify
-
-- To only launch tests
-
-        mvn clean test
-
-Tip: you can add the `-DskipTests` option to avoid launching the tests
+# To only launch tests
+ccw$ mvn clean test
+```
 
 ## Developing within Eclipse
 
@@ -38,17 +39,17 @@ Tip: you can add the `-DskipTests` option to avoid launching the tests
 - cd into `ccw` and invoke `mvn clean install`
   - This will install all CCW dependencies in folder `ccw.core/lib/`
   - The operation must be be repeated after each update of ccw.core dependencies
-- Set the Eclipse Target Platform for your tests to Indigo by selecting the provided one in `ccw/ccw.target.e37`:
+- Set the Eclipse Target Platform for your tests to Kepler by selecting the provided one in `ccw/ccw.target.e43`:
   - Go to Window > Preferences > Plug-in Development > Target Platform
-  - Check the target platform named `ccw.target.e37`, Click Finish
+  - Check the target platform named `ccw.target.e43`, Click Finish
 
 ### Run from the Eclipse Development Environment
 
-Select one of the 3 resources in your Eclispe workspace, depending on what you intend to do, and then invoke the "Debug > Debug as" contextual menu on them:
+The following launch configuration files automatically install themselves in the "Run/Debug" Toolbar items as Shortcuts:
 
-- to debug the plugin: "ccw.core/Counterclockwise Plugin.launch"
-- to debug the product: "ccw.core/Counterclockwise Product.launch"
-- to launch the Junit (SWTBot) tests: "ccw.core.test/Counterclockwise Product Tests.launch" (some tests don't pass as of july 1st, 2013)
+- `Counterclockwise Plugin` for Debugging the Plugin by launching it in the current PDE Target (shortcut for `ccw.core/Counterclockwise Plugin.launch`)
+- `Counterclockwise Product` for Debugging the Standalone Product (shortcut for `ccw.core/Counterclockwise Product.launch`)
+- `Counterclockwise Product Tests` for Launching the JUnit (SWTBot) tests (some tests don't pass in this mode) (shortcut for `ccw.core.test/Counterclockwise Product Tests.launch`)
 
 ### Install your development version in your Eclipse Environment
 
@@ -57,27 +58,15 @@ Select one of the 3 resources in your Eclispe workspace, depending on what you i
 
 ## Manage Version Numbers
 
-Use the script `script/set-version.sh` as such:
+The script `script/set-version.sh` updates POMs, MANIFESTs and feature.xml:
 
-```
+```sh
 # If you want to set version to 0.20.0-SNAPSHOT
-cd ccw
-script/set-version.sh 0.20.0-SNAPSHOT
-mvn org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=0.20.0-SNAPSHOT
+$ cd ccw
+ccw$ script/set-version.sh 0.20.0-SNAPSHOT
 ```
 
-This is just a shortcut for the following maven goal:
-
-```
-# If you want to set version to 0.20.0-SNAPSHOT
-cd ccw
-mvn org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=0.20.0-SNAPSHOT
-```
-
-
-This updates POMs, MANIFESTs and feature.xml
-
-## Add clojure.test based tests
+## Adding clojure.test based tests
 
 - Add the test namespace in `ccw.core.test/src/clj` using the usual namespace structure for folders
 - Add the namespace to the list of namespaces to be tested in the java file `ccw.core.test/src/java/ccw/core/ClojureTests.java`
