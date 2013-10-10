@@ -7,12 +7,12 @@
   <parent>
     <groupId>ccw</groupId>
     <artifactId>parent</artifactId>
-    <version>0.20.0.STABLE001</version>
+    <version>0.20.1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   
   <groupId>ccw</groupId>
   <artifactId>ccw.branding</artifactId>
-  <version>0.20.0.STABLE001</version>
+  <version>0.20.1-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
 </project>

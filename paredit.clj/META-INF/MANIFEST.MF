@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Paredit.clj
 Bundle-SymbolicName: paredit.clj;singleton:=true
-Bundle-Version: 0.20.0.STABLE001
+Bundle-Version: 0.20.1.qualifier
 Bundle-ClassPath: .,
  classes/
 Bundle-ActivationPolicy: lazy
