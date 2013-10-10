@@ -10,16 +10,16 @@ DONE  - document
   - release
 
 - Make the pull requests test mechanism work
-- Change build/product target from Juno to Kepler. Don't change the default deployed product yet.
-- Bring in changes pushed by Gunnar:
-  - Gunnar Volkel: Removes namespace switching comments from REPL history 6da6cb73
-  - Gunnar Volkel: Adds preferences for REPL history 39dbf2508e
-  - Gunnar Volkel: Input modification resets history search => 02d4cb6c5
-- Bring the www.ccw-ide.org web site to life (1 landing page, 1 installation page)
-- Have a Welcome Page: 
-  - for the Project Homepage on the Internet, 
-  - for Donations
-- Enable in-tycho test compilation of Clojure namespaces to check that at least they AOT-compile correctly
+DONE - Change build/product target from Juno to Kepler. Don't change the default deployed product yet.
+DELAYED - Bring in changes pushed by Gunnar:
+DELAYED   - Gunnar Volkel: Removes namespace switching comments from REPL history 6da6cb73
+DELAYED   - Gunnar Volkel: Adds preferences for REPL history 39dbf2508e
+DELAYED   - Gunnar Volkel: Input modification resets history search => 02d4cb6c5
+DELAYED - Bring the www.ccw-ide.org web site to life (1 landing page, 1 installation page)
+DELAYED - Have a Welcome Page: 
+DELAYED  - for the Project Homepage on the Internet, 
+DELAYED  - for Donations
+DELAYED - Enable in-tycho test compilation of Clojure namespaces to check that at least they AOT-compile correctly
 
 ### DONE
 

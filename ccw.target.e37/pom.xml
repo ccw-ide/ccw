@@ -21,7 +21,7 @@
   <parent>
     <groupId>ccw</groupId>
     <artifactId>parent</artifactId>
-    <version>0.20.0-SNAPSHOT</version>
+    <version>0.20.0.STABLE001</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>ccw.target.e37</artifactId>
