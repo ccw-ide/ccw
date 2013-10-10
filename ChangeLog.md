@@ -1,4 +1,13 @@
-## Changes between Counterclockwise 0.12.3 and ...
+## Changes between Counterclockwise 0.12.3 and 0.20.0
+
+`0.20.0` released on October 10, 2013
+
+### TL;DR
+
+- `0.20.0` introduces **no breaking change**
+- New Software Update Site `http://updatesite.ccw-ide.org/stable`
+- Editor: new awesome `autoshift` feature, slurp/barf paredit commands support
+- Miscellaneous changes to fix stability issues
 
 ### Build Process totally rewritten
 
