@@ -16,10 +16,7 @@
   
   <modules>
     <module>ccw.target.e37</module>
-    <module>ccw.target.e42</module>
-    <!--
-    <module>ccw.parent</module>
-    -->
+    <module>ccw.target.e43</module>
     <module>ccw.branding</module>
     <module>paredit.clj</module>
     <module>ccw.core</module>
@@ -37,18 +34,8 @@
           <name>!env.ECLIPSE_TARGET</name>
         </property>
       </activation>
-      <!-- configure p2 repository to resolve against -->
-      <!--
-      <repositories>
-        <repository>
-          <id>indigo</id>
-          <layout>p2</layout>
-          <url>http://download.eclipse.org/eclipse/updates/3.7</url>
-        </repository>
-      </repositories>
-      -->
       <properties>
-        <target-platform>e37</target-platform>
+        <target-platform>e43</target-platform>
       </properties>
     </profile>
     <profile>
@@ -59,40 +46,20 @@
           <value>indigo</value>
         </property>
       </activation>
-      <!-- configure p2 repository to resolve against -->
-      <!--
-      <repositories>
-        <repository>
-          <id>indigo</id>
-          <layout>p2</layout>
-          <url>http://download.eclipse.org/eclipse/updates/3.7</url>
-        </repository>
-      </repositories>
-      -->
       <properties>
         <target-platform>e37</target-platform>
       </properties>
     </profile>
     <profile>
-      <id>juno</id>
+      <id>kepler</id>
       <activation>
         <property>
           <name>env.ECLIPSE_TARGET</name>
-          <value>juno</value>
+          <value>kepler</value>
         </property>
       </activation>
-      <!-- configure p2 repository to resolve against -->
-       <!--
-      <repositories>
-        <repository>
-          <id>juno</id>
-          <layout>p2</layout>
-          <url>http://download.eclipse.org/eclipse/updates/4.2</url>
-        </repository>
-      </repositories>
-      -->
       <properties>
-        <target-platform>e42</target-platform>
+        <target-platform>e43</target-platform>
       </properties>
     </profile>
   </profiles>
@@ -102,13 +69,6 @@
       <id>clojars.org</id>
       <url>http://clojars.org/repo</url>
     </repository>
-    <!--
-    <repository>
-      <id>swtbot</id>
-      <layout>p2</layout>
-      <url>http://download.eclipse.org/technology/swtbot/releases/latest</url>
-    </repository>
-    -->
   </repositories>
   
   <build>

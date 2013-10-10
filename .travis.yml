@@ -8,7 +8,7 @@ env:
     - secure: "ngfDTSbLJ9suMJ+hUJws7wKbP184+Poyd09Rc3MEdpD8oq2mW8+XYi1bjmnA\n04bxqQ+hnLCdxjVqaXjp7nMB8pCHxWaraoOyU1uJJxFSNO1y1f2k09eAexA+\nLN4fXIU8HjPLvXz2u8oZITYCWKuCyAIuiFus7N9RZ+Kk/mYE0lg="
     - secure: "YDLYUZiLuoNCRpdIMxycacPOyJkIw/lfycpEiIfoyuVQCTf0Sig/KZpjDyHj\nlU8gPqwYewp//lTyczuJIFq8IOghO3QejGaqlNGNLOmFPIsfdThMGOYn9IOJ\nkqO4enPLfxjnEAxvcKQDboUrCETjsimCvMccgIZDcvlQ6iFAdzA="
   matrix:
-    - ECLIPSE_TARGET=juno
+    - ECLIPSE_TARGET=kepler
     - ECLIPSE_TARGET=indigo
 install: true
 before_script:
@@ -22,6 +22,6 @@ before_script:
   - export QUALIFIER=${TRAVIS_BRANCH}-travis$(printf "%0*d" 6 ${TRAVIS_BUILD_NUMBER})-git${TRAVIS_COMMIT}
 script: mvn clean install --batch-mode -e -DforceContextQualifier=${QUALIFIER}
 after_success: 
-  - test ${ECLIPSE_TARGET} = "indigo" && test ${TRAVIS_JDK_VERSION} = "openjdk7" && chmod 777 ./scripts/travis-deploy.sh && ./scripts/travis-deploy.sh
+  - test ${ECLIPSE_TARGET} = "kepler" && test ${TRAVIS_JDK_VERSION} = "openjdk7" && chmod 777 ./scripts/travis-deploy.sh && ./scripts/travis-deploy.sh
 after_failure:
   - chmod 777 ./scripts/travis-test-report.sh && ./scripts/travis-test-report.sh
