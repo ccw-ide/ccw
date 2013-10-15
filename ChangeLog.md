@@ -90,7 +90,6 @@ For more information on the available Software Update Sites and their retention 
 (defn foo [] ...)|
 (defn bar [] ....)
 ;; => foo's declaration will be sent to the REPL
-
 (defn baz [] ...)
 |(defn qix [] ...)
 ;; => qix's declaration will be sent to the REPL
