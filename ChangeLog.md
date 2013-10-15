@@ -137,7 +137,7 @@ For more information on the available Software Update Sites and their retention 
 
 - Auto indentation of a cond form changed : (Fixes #592)
 
-  ``` clojure 
+  ```clojure 
   ;; from 
   (cond test1 expr1
     test2 expr2)
