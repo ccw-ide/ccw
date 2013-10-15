@@ -8,7 +8,7 @@
 - New Software Update Site `http://updatesite.ccw-ide.org/stable`
 - Editor: new awesome `autoshift` feature, slurp/barf paredit commands support
 - Lots of changes to fix stability concerns and various issues
-- 
+
 ### Build Process totally rewritten
 
 For people wanting to build Counterclockwise from scratch, or to work with Counterclockwise.
