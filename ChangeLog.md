@@ -17,15 +17,15 @@ The Build Process now uses [Maven](http://maven.apache.org) + [Tycho](http://www
 
 - It is now fully automated, from fetching Eclipse or non Eclipse dependencies, to building an update site for the codebase, to building Standalone Counterclockwise products for the codebase.
 
-In a nutshell:
+  In a nutshell:
 
-``` 
+  ``` 
 git clone https://github.com/laurentpetit/ccw
 cd ccw
 mvn verify
 cd ccw.product/target/products # the products for Windows / Linux / OS X
 cd ../../../ccw.updatesite/target/repository # the Software Update Site 
-```
+  ```
 
 For more information on installing a full-fledged dev environment, see the Wiki Page [How To Build](https://code.google.com/p/counterclockwise/wiki/HowToBuild)
 
@@ -42,9 +42,10 @@ For more information on the available Software Update Sites and their retention 
 - Reindent Selection has been implemented. Trigger it via `Ctrl+i` on Windows/Linux, `Cmd+i` on OSX.
 
 - AutoShift: while you type, the code on the following lines which depends upon the code on the current line is shifted to the right or to the left. More spaces/less spaces are added/removed automatically.
+
   - For instance, if you have the following manually indented code (note that the call to the `cond` macro is indented 2 extra spaces to the right):
 
-``` clojure
+   ``` clojure
 (defn foo [bar baz]
     (cond
       cond1
@@ -53,10 +54,11 @@ For more information on the available Software Update Sites and their retention 
         expr2
       :else
         default-expr))
-```
+   ```
+
   - You can fix the whole indentation by either placing the cursor anywhere in the `(cond` line and typing Tab, or in front of `(cond` and typing Backspace 2 times:
 
-``` clojure
+   ``` clojure
 (defn foo [bar baz]
   (cond
     cond1
@@ -65,11 +67,11 @@ For more information on the available Software Update Sites and their retention 
       expr2
     :else
       default-expr))
-```
+   ```
 
   - Before the AutoShift feature, you would either have to indent each line manually, or select the whole `(cond..)` form and type `Ctrl+i` (OS X: `Cmd+i`), but you would have lost the specific indentation of the conditions/expressions:
 
-``` clojure
+   ``` clojure
 (defn foo [bar baz]
   (cond
     cond1
@@ -78,13 +80,13 @@ For more information on the available Software Update Sites and their retention 
     expr2
     :else
     default-expr))
-```
+   ```
 
 - More intuitive `Ctrl+Enter`: hitting Ctrl+Enter when the cursor is located at the top level selects the preceding top level form to be sent to the REPL. Only when the cursor is right in front of a top level form will it be selected instead of the previous one. (Fix Issue #580)
 
-e.g. if the caret is materialized with the symbol |:
+   e.g. if the caret is materialized with the symbol |:
 
-``` clojure
+   ``` clojure
 (defn foo [] ...)|
 (defn bar [] ....)
 ;; => foo's declaration will be sent to the REPL
@@ -92,57 +94,58 @@ e.g. if the caret is materialized with the symbol |:
 (defn baz [] ...)
 |(defn qix [] ...)
 ;; => qix's declaration will be sent to the REPL
-```
+   ```
 
 - Addition of 2 important paredit/structural manipulation features: slurp and barf, backward and forward. (Fixes Issue #486: Add support for barfage and slurpage)
 
-See the Keybindings documentation for Slurp / Barf : https://code.google.com/p/counterclockwise/wiki/EditorKeyBindingsFeatures
+  See the Keybindings documentation for Slurp / Barf : https://code.google.com/p/counterclockwise/wiki/EditorKeyBindingsFeatures
 
 - Fixed wrong keybinding for switching Rainbow Parens: "Cmd+( R" instead of "Cmd+(+R" (replace Cmd by Ctrl for Windows/Linux ; space indicates that you first type Cmd+(, then type R)
 
 - Changed "toggle line comments" behaviour: before, if the selection had both commented and uncommented lines, it was an ambiguous case resolved by just doing nothing. Now, it is resolved by counting the number of commented and uncommented lines. If the number of uncommented lines in the selection is equal or greater than the number of commented lines, then those uncommented lines are commented. If the number of commented lines is greater than the number of uncommented lines, those commented lines are uncommented.
 
-Calling "toggle lines comments" on the following code selection:
+  Calling "toggle lines comments" on the following code selection:
 
-``` clojure
+  ``` clojure
 ;(defn foo [....])
 (defn bar [....])
 (defn baz [....])
-```
+  ```
 
-will result in:
+  will result in:
 
-``` clojure
+  ``` clojure
 ;(defn foo [....])
 ;(defn bar [....])
 ;(defn baz [....])
-```
+  ```
 
-But calling "toggle lines comments" on this code selection:
+  But calling "toggle lines comments" on this code selection:
 
-``` clojure
+  ``` clojure
 ;(defn foo [....])
 (defn bar [....])
 ;(defn baz [....])
-```
+  ```
 
-will result in:
+  will result in:
 
-``` clojure
+  ``` clojure
 (defn foo [....])
 (defn bar [....])
 (defn baz [....])
-```
+  ```
 
 - Auto indentation of a cond form changed : (Fixes #592)
-``` clojure 
+
+  ``` clojure 
 ;; from 
 (cond test1 expr1
   test2 expr2)
 ;; to
 (cond test1 expr1
       test2 expr2)
-```
+  ```
 
 - Experimental Feature: enabling auto-reevaluation of last command typed in the REPL, after a successful evaluation from the Editor
   - when the "repeat last expression" REPL command is active
@@ -151,6 +154,7 @@ will result in:
   - then the last expression evaluated from the REPL input is evaluated agai
 
 A common usecase for this is while you're defining a function in the Editor and you want to repeat the same test expression again and again until it passes. The workflow then becomes:
+
 - define the function in the editor, eval via Cmd+Enter
 - switch to the REPL, enter a test expression, send the test expression via Cmd+Enter
 - Click on the "Repeat last evaluation ..." button in the REPL
