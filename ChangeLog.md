@@ -43,43 +43,43 @@ For more information on the available Software Update Sites and their retention 
 
 - AutoShift: while you type, the code on the following lines which depends upon the code on the current line is shifted to the right or to the left. More spaces/less spaces are added/removed automatically.
 
-  - For instance, if you have the following manually indented code (note that the call to the `cond` macro is indented 2 extra spaces to the right):
+  - For instance, if you have the following manually indented code (note that the call to the `cond` macro is indented 4 extra spaces to the right):
 
    ``` clojure
-(defn foo [bar baz]
-    (cond
-      cond1
-        expr1
-      cond2
-        expr2
-      :else
-        default-expr))
+   (defn foo [bar baz]
+         (cond
+           cond1
+             expr1
+           cond2
+             expr2
+           :else
+             default-expr))
    ```
 
   - You can fix the whole indentation by either placing the cursor anywhere in the `(cond` line and typing Tab, or in front of `(cond` and typing Backspace 2 times:
 
    ``` clojure
-(defn foo [bar baz]
-  (cond
-    cond1
-      expr1
-    cond2
-      expr2
-    :else
-      default-expr))
+   (defn foo [bar baz]
+     (cond
+       cond1
+         expr1
+       cond2
+         expr2
+       :else
+         default-expr))
    ```
 
   - Before the AutoShift feature, you would either have to indent each line manually, or select the whole `(cond..)` form and type `Ctrl+i` (OS X: `Cmd+i`), but you would have lost the specific indentation of the conditions/expressions:
 
    ``` clojure
-(defn foo [bar baz]
-  (cond
-    cond1
-    expr1
-    cond2
-    expr2
-    :else
-    default-expr))
+   (defn foo [bar baz]
+     (cond
+       cond1
+       expr1
+       cond2
+       expr2
+       :else
+       default-expr))
    ```
 
 - More intuitive `Ctrl+Enter`: hitting Ctrl+Enter when the cursor is located at the top level selects the preceding top level form to be sent to the REPL. Only when the cursor is right in front of a top level form will it be selected instead of the previous one. (Fix Issue #580)
@@ -87,12 +87,12 @@ For more information on the available Software Update Sites and their retention 
    e.g. if the caret is materialized with the symbol |:
 
    ``` clojure
-(defn foo [] ...)|
-(defn bar [] ....)
-;; => foo's declaration will be sent to the REPL
-(defn baz [] ...)
-|(defn qix [] ...)
-;; => qix's declaration will be sent to the REPL
+   (defn foo [] ...)|
+   (defn bar [] ....)
+   ;; => foo's declaration will be sent to the REPL
+   (defn baz [] ...)
+   |(defn qix [] ...)
+   ;; => qix's declaration will be sent to the REPL
    ```
 
 - Addition of 2 important paredit/structural manipulation features: slurp and barf, backward and forward. (Fixes Issue #486: Add support for barfage and slurpage)
@@ -106,44 +106,44 @@ For more information on the available Software Update Sites and their retention 
   Calling "toggle lines comments" on the following code selection:
 
   ``` clojure
-;(defn foo [....])
-(defn bar [....])
-(defn baz [....])
+  ;(defn foo [....])
+  (defn bar [....])
+  (defn baz [....])
   ```
 
   will result in:
 
   ``` clojure
-;(defn foo [....])
-;(defn bar [....])
-;(defn baz [....])
+  ;(defn foo [....])
+  ;(defn bar [....])
+  ;(defn baz [....])
   ```
 
   But calling "toggle lines comments" on this code selection:
 
   ``` clojure
-;(defn foo [....])
-(defn bar [....])
-;(defn baz [....])
+  ;(defn foo [....])
+  (defn bar [....])
+  ;(defn baz [....])
   ```
 
   will result in:
 
   ``` clojure
-(defn foo [....])
-(defn bar [....])
-(defn baz [....])
+  (defn foo [....])
+  (defn bar [....])
+  (defn baz [....])
   ```
 
 - Auto indentation of a cond form changed : (Fixes #592)
 
   ``` clojure 
-;; from 
-(cond test1 expr1
-  test2 expr2)
-;; to
-(cond test1 expr1
-      test2 expr2)
+  ;; from 
+  (cond test1 expr1
+    test2 expr2)
+  ;; to
+  (cond test1 expr1
+        test2 expr2)
   ```
 
 - Experimental Feature: enabling auto-reevaluation of last command typed in the REPL, after a successful evaluation from the Editor
