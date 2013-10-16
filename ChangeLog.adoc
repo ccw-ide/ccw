@@ -1,7 +1,6 @@
 = Counterclockwise ChangeLog 
-:toc:
 :sectanchors:
-:sectlinks:
+:source-highlighter: highlightjs
 
 == Changes between Counterclockwise 0.12.3 and 0.20.0
 
@@ -49,47 +48,51 @@ For more information on the available Software Update Sites and their retention 
 
 ** For instance, if you have the following manually indented code (note that the call to the `cond` macro is indented 4 extra spaces to the right):
 +
-  (defn foo [bar baz]
-         (cond
-           cond1
-             expr1
-           cond2
-             expr2
-           :else
-             default-expr))
+[source,clojure]
+(defn foo [bar baz]
+       (cond
+         cond1
+           expr1
+         cond2
+           expr2
+         :else
+           default-expr))
 
--- You can fix the whole indentation by either placing the cursor anywhere in the `(cond` line and typing Tab, or in front of `(cond` and typing Backspace 2 times:
+** You can fix the whole indentation by either placing the cursor anywhere in the `(cond` line and typing Tab, or in front of `(cond` and typing Backspace 2 times:
 +
-   (defn foo [bar baz]
-     (cond
-       cond1
-         expr1
-       cond2
-         expr2
-       :else
-         default-expr))
+[source,clojure]
+(defn foo [bar baz]
+  (cond
+    cond1
+      expr1
+    cond2
+      expr2
+    :else
+      default-expr))
 
--- Before the AutoShift feature, you would either have to indent each line manually, or select the whole `(cond..)` form and type `Ctrl+i` (OS X: `Cmd+i`), but you would have lost the specific indentation of the conditions/expressions:
+** Before the AutoShift feature, you would either have to indent each line manually, or select the whole `(cond..)` form and type `Ctrl+i` (OS X: `Cmd+i`), but you would have lost the specific indentation of the conditions/expressions:
 +
-   (defn foo [bar baz]
-     (cond
-       cond1
-       expr1
-       cond2
-       expr2
-       :else
-       default-expr))
+[source,clojure]
+(defn foo [bar baz]
+  (cond
+    cond1
+    expr1
+    cond2
+    expr2
+    :else
+    default-expr))
 
 - More intuitive `Ctrl+Enter`: hitting Ctrl+Enter when the cursor is located at the top level selects the preceding top level form to be sent to the REPL. Only when the cursor is right in front of a top level form will it be selected instead of the previous one. (Fix Issue #580)
 +
 e.g. if the caret is materialized with the symbol |:
-
-   (defn foo [] ...)|
-   (defn bar [] ....)
-   ;; => foo's declaration will be sent to the REPL
-   (defn baz [] ...)
-   |(defn qix [] ...)
-   ;; => qix's declaration will be sent to the REPL
++
+[source,clojure]
+(defn foo [] ...)|
+(defn bar [] ....)
+;; => foo's declaration will be sent to the REPL
+(defn baz [] ...)
+|(defn qix [] ...)
+;; => qix's declaration will be sent to the REPL
 
 - Addition of 2 important paredit/structural manipulation features: slurp and barf, backward and forward. (Fixes Issue #486: Add support for barfage and slurpage)
 +
@@ -100,37 +103,42 @@ See the Keybindings documentation for Slurp / Barf : https://code.google.com/p/c
 - Changed "toggle line comments" behaviour: before, if the selection had both commented and uncommented lines, it was an ambiguous case resolved by just doing nothing. Now, it is resolved by counting the number of commented and uncommented lines. If the number of uncommented lines in the selection is equal or greater than the number of commented lines, then those uncommented lines are commented. If the number of commented lines is greater than the number of uncommented lines, those commented lines are uncommented.
 +
 Calling "toggle lines comments" on the following code selection:
-
-  ;(defn foo [....])
-  (defn bar [....])
-  (defn baz [....])
++
+[source,clojure]
+;(defn foo [....])
+(defn bar [....])
+(defn baz [....])
 +
 will result in:
 +
-  ;(defn foo [....])
-  ;(defn bar [....])
-  ;(defn baz [....])
+[source,clojure]
+;(defn foo [....])
+;(defn bar [....])
+;(defn baz [....])
 +
 But calling "toggle lines comments" on this code selection:
-
-  ;(defn foo [....])
-  (defn bar [....])
-  ;(defn baz [....])
+[source,clojure]
+;(defn foo [....])
+(defn bar [....])
+;(defn baz [....])
 +
 will result in:
+[source,clojure]
+(defn foo [....])
+(defn bar [....])
+(defn baz [....])
 
-  (defn foo [....])
-  (defn bar [....])
-  (defn baz [....])
-
-- Auto indentation of a cond form changed : (Fixes #592)
+- Auto indentation of a cond form changed: (Fixes #592)
 +
-  ;; from 
-  (cond test1 expr1
-    test2 expr2)
-  ;; to
-  (cond test1 expr1
-        test2 expr2)
+[source,clojure]
+----
+;; from 
+(cond test1 expr1
+  test2 expr2)
+;; to
+(cond test1 expr1
+      test2 expr2)
+----
 
 - Experimental Feature: enabling auto-reevaluation of last command typed in the REPL, after a successful evaluation from the Editor
 * when the "repeat last expression" REPL command is active
