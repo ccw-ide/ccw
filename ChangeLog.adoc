@@ -47,7 +47,7 @@ For more information on the available Software Update Sites and their retention 
 
 - AutoShift: while you type, the code on the following lines which depends upon the code on the current line is shifted to the right or to the left. More spaces/less spaces are added/removed automatically.
 
--- For instance, if you have the following manually indented code (note that the call to the `cond` macro is indented 4 extra spaces to the right):
+** For instance, if you have the following manually indented code (note that the call to the `cond` macro is indented 4 extra spaces to the right):
 +
   (defn foo [bar baz]
          (cond
@@ -133,10 +133,10 @@ will result in:
         test2 expr2)
 
 - Experimental Feature: enabling auto-reevaluation of last command typed in the REPL, after a successful evaluation from the Editor
--- when the "repeat last expression" REPL command is active
--- when the user sends a form tom evaluate to the REPL
--- if the form evaluated without error
--- then the last expression evaluated from the REPL input is evaluated agai
+* when the "repeat last expression" REPL command is active
+* when the user sends a form tom evaluate to the REPL
+* if the form evaluated without error
+* then the last expression evaluated from the REPL input is evaluated agai
 
 A common usecase for this is while you're defining a function in the Editor and you want to repeat the same test expression again and again until it passes. The workflow then becomes:
 
