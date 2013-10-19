@@ -1,0 +1,334 @@
+Counterclockwise User Guide
+===========================
+Laurent Petit <laurent.petit@gmail.com>
+:toc:
+:toclevels: 0
+:sectlinks:
+:sectanchors:
+:highlight: highlightjs
+:experimental:
+
+Counterclockwise User Documentation +
+All things listed here should work.
+
+= What is Counterclockwise ?
+
+Counterclockwise is best described as an Integrated Development Environment for the http://www.clojure.org[Clojure] language. +
+It is an extension of the popular http://www.eclipse.org[Eclipse IDE].
+
+Goals of Counterclockwise:
+
+- be as easy as possible for Clojure beginners
+- integrate nicely into the Eclipse IDE
+
+Counterclockwise bundles everything for hacking Clojure Code:
+
+- Wizards for creating / importing existing Clojure projects from scratch or from Leiningen project definitions
+- Clojure Editor with advanced editing features
+- Starting Clojure REPLs, interacting between Clojure Editors and Clojure REPLs 
+- Tight integration with Leiningen
+
+
+= Install Counterclockwise
+
+- No Eclipse? <<install-as-standalone-product,Install as a Standalone Product>>
+
+//
+
+- or <<install-as-plugin,Install as an Eclipse Plugin>> into in existing Eclipse
+
+[[install-as-standalone-product]]
+== Install as a Standalone Product
+=== TL;DR
+
+[cols="1,6"]
+|===
+| 1. Download
+| http://updatesite.ccw-ide.org/stable/[Windows 32 Bits] / http://updatesite.ccw-ide.org/stable/[Windows 64 Bits] +
+http://updatesite.ccw-ide.org/stable/[Linux 32 Bits] / http://updatesite.ccw-ide.org/stable/[Linux 64 Bits] +
+http://updatesite.ccw-ide.org/stable/[OS X 64 Bits]
+
+| 2. Unzip
+| Create a directory named Counterclockwise, unzip the download archive `inside` this directory
+
+| 3. Start
+| Launch the `Counterclockwise` executable for your platform, located inside the `Counterclockwise` directory
+|===
+
+=== Pre-requisites
+* Java Virtual Machine (JVM) 7 installed and setup in the Operating System's PATH
+
+[[install-as-plugin]]
+== Install as an Eclipse Plugin
+
+=== TL;DR
+
+- via the Eclipse Marketplace Client: search for `Counterclockwise`
+- via the Eclipse Software Update Site: http://updatesite.ccw-ide.org/stable
+
+=== Pre-requisites
+* Java Virtual Machine (JVM) 7 running Eclipse
+* Eclipse 4.3 (Kepler) or Eclipse 3.7 (Indigo)
+** any packaging including JDT (Java Development Tools) will do:  "Eclipse SDK" package, "Eclipse for Java Developers" package, "Eclipse for Java EE Developers" package, etc.
+
+There is a central place for the installation guides of all clojure IDEs.
+
+// TODO reincorporate here, and just provide a link in the dev.clojure.org Getting Started page
+You will find Counterclockwise's one at http://dev.clojure.org/display/doc/Getting+Started+with+Eclipse+and+Counterclockwise
+
+=== Check Counterclockwise installation
+
+- Select menu:Help[About Eclipse > Plugin details] (on OS X: menu:Eclipse[About Eclipse])
+- Click on plugin id column to sort by alphabetical ascending plugin id order. You should see, among other things, plugins `ccw.branding`, `ccw.core`, `paredit.clj`
+
+[[enable-clojure]]
+= Enable Clojure (Leiningen batteries included)
+
+No matter where you're coming from, there's a quick path towards enabling Clojure support for your project:
+
+== Create a new project
+
+Use the wizard named `Clojure Project`.
+
+// TODO footnotes, or rather section notes
+- Open menu:File[New > Clojure Project]  *(`**`)*
+// TODO image
+** In the first page of the wizard, choose a project name (and location if you don't like the default one)
+- "Leiningen template to use" field:
+** By default it uses the "default" template
+** You can change it to use another lein-newnew template released somewhere in a maven repository (generally in clojars) *(`*`)*
+
+Press the btn:[Finish] button, that's all. You have a fully working Leiningen project with its Java Build path (aka class path) managed by Counterclockwise.
+
+// TODO check if the following about lein-newnew still holds
+[NOTE]
+====
+*(`*`)* Lein2's Lein-newnew plugin allows you to create new leiningen projects from "project templates". +
+To find the list of currently available project templates, you can ask clojars for "lein-template" artifacts : https://clojars.org/search?q=lein-template
+====
+
+[NOTE]
+====
+*(`**`)*
+If you don't see the menu:File[New > Clojure Project] menu entry:
+  * check that you're in the "Java" or "Plugin Development" Perspective ( menu:Window[Open Perspective > ...] )
+  * If you still don't see the command, then Reset your Perspective ( menu:Window[Reset Perspective ...])
+====
+
+
+== Open a non-Eclipse project present in the filesystem
+
+You have in your disk this wonderful project cloned from Github, which is managed by Leiningen, since it has a `project.clj` file in its root folder.
+
+If you can see a `.project` file in its root directory:
+
+- Import it as a "general" project via the menu:File[Import > Existing project into Workspace] Wizard.
+
+If you don't have a `.project` file in the root directory:
+
+- Create a new project via menu:File[New > General > Project] (After entering the name of your project, uncheck the `Use default location` checkbox, and check btn:[Browse] to find your project folder on the file system)
++
+Once referenced as an Eclipse project, you should see it in the `Package Explorer View`
+
+- Open the contextual menu of your project, select menu:Configure[Convert to Leiningen Project]
+
+
+== Add Clojure support to a Leiningen projet present in your Eclipse Workspace
+
+You already have the project referenced in Eclipse, it has a project.clj file and you want its class path to be managed by Counterclockwise:
+
+- Open the contextual menu of your project, select menu:Configure[Convert to Leiningen Project]
+
+== Add Clojure support to a non-Leiningen project present in your Eclipse Workspace
+
+Either:
+
+- manage to get somehow the Clojure jar in your project's `Java build path` settings (e.g. manually, or via some maven/gradle/whatever tool integrated with Eclipse) => the project will automatically be recognized as a Clojure Project
+
+INFO: You can check the project has been recognized as a Clojure project via the presence of a menu:Clojure menu entry in the project's contextual menu.
+
+
+= Leiningen Support
+
+To ensure Eclipse recognize your project as a Leiningen Project, see the previous <<enable-clojure>> section.
+
+Leiningen Support provides you with the following features:
+
+- A new node named "Leiningen dependencies" inside your project in the `Package Explorer View`
+** This is an addition to the classpath containing all dependencies (including transitive ones) declared in `project.clj` (a `Classpath Container` in Eclipse terminology):
+** It is automatically updated when changes in `project.clj` are detected (your changes, or changes you get by refreshing the project, merging from Git, etc.)
+** New dependencies are automatically downloaded from remote repositories (no need to call `lein deps`)
+
+- The source paths for the project's class path have been adjusted, taking into account the contents of `project.clj`'s `:source-paths`, `:java-source-paths`, `:resources-paths`, etc.
+
+- A new menu:Leiningen entry in the contextual menu of your project, with commands:
+** menu:Reset the project configuration : recreates from scratch the class path (`Java build path` in Eclipse terminology) of your project from `project.clj`'s content. Useful if you've messed up with the class path manually.
+** menu:[Update dependencies] : Forces the "Leiningen dependencies" Classpath container to refresh itself (only, the other Classpath entries are not reset)
+
+Of course, when you have an active REPL, and once a namespace from a dependency's jar has been loaded in the REPL, you can open vars from this namespace as usual, via kbd:[F3], kbd:[Ctrl + Click] / kbd:[Cmd + Click] in the REPL or from the editor, and also by double-clicking on the var from the Namespace Browser.
+
+NOTE: Native deps are also correctly supported. Meaning you can start hacking with Overtone or Quil and their Sound / OpenGL supports right now!!!
+
+
+= Clojure Support
+
+Clojure Support (aka `Clojure Nature` in Eclipse terminology) is automatic. +
+It is triggered by the presence of the `clojure.core` namespace in the classpath.
+
+It is possible, though, to fall back to a manual mode if this automatic feature does not work well in your configuration:
+
+- you can disable it from the menu:Clojure[General > Automatic detection of Clojure project] command in Eclipse Preferences.footnoteref:[preferences,Windows > Preferences on Linux and Windows, Eclipse > Preferences... on OS X]
+- you can then enable Clojure support manually for a particular project via the menu:Configure[Convert to Clojure project] command in project contextual menu.
+- once Clojure Support is added, a new menu:Clojure submenu appears in the project's contextual menu.
+- to manually remove Clojure support, please use the menu:Clojure[Remove Clojure Support] command in the project's contextual menu.
+
+
+= Evaluate Clojure code
+
+== From a specific clojure file
+
+- Select the file
+// TODO fix @cgrand reported bug: this action should create a new JVM if the file is not in any exising repl's classpath
+- Select menu:Run as clojure[] in its contextual menu
+
+Note: a REPL will also be created. By default, if the selected file contains a `(ns)` call, the name of its namespace will be used. You can disable this behavior via the menu:Clojure[General > Automatic namespace load on start and on save] checkbox in the Eclipse Preference.footnoteref:[preferences]
+
+== Launch a REPL for the project ==
+- Select your project in the `Package Explorer View`
+** in the project's contextual menu : menu:Run as ...[Run configurations > Clojure > New]
+** Press btn:[Run]
+
+[NOTE]
+====
+- A java process is started in the background, and a `Console View` is created in Eclipse for you to interact with it (view input/output, terminate the process, etc.)
+- A nRepl server is automatically launched is the java process, and a `REPL View` is created in Eclipse for you to interact with the nRepl server.
+====
+
+IMPORTANT: YOU MUST HIT kbd:[Ctrl + Enter] (kbd:[Cmd + Enter] on OS X) to send the expression for evaluation.
+
+NOTE: It is possible to configure which files should be automatically loaded on project java process startup.
+
+
+== Namespace Browser View
+
+The `Namespace Browser View` displays all symbols of all namespaces of the active REPL.footnote:[active-repl,The active REPL is the last REPL you interacted with]. +
+It allows you to jump to the definition of symbols in the relevant files (including inside jars): just double-click on the symbol name in the `Namespace Browser View`.
+
+[NOTE]
+====
+- If you let the mouse hover a node in the browser, you will have the documentation, if available.
+- You can filter the `Namespace Browser View`'s tree to more easily find a symbol. +
+Just type a regexp in the menu:[Find :] text zone at the top of the `Namespace Browser View`. It will filter the tree for those symbols matching the regex (also when the symbol documentation matches the regex).
+====
+
+- To see the `Namespace Browser View`, you either 
+** select it via the menu:Window[Show View > Other > Counterclockwise Views > Namespace Browser] menu
+** open the java perspective.
++
+The `Namespace Browser View` should be stacked behind the `Outline View` (if you are in the `Java Perspective`.footnoteref:[perspective,In Eclipse a Perspective is a named layout of Views. You can switch Perspectives while working, depending on the task at hand. Eclipse offers a Java Perspective and a Java Debugging Perspective among others] and don't see the `Namespace Browser View`, you may reset the `Java Perspective`.footnoteref[perspective] to its default value via the menu:Window[Reset Perspective ...] menu, or find it manually via the menu:Window[Show View > Namespace Browser] menu)
+
+
+== How does it work ?
+
+When you have launched the REPL, Counterclockwise has embedded "server code" in the launched clojure environment. This server code is contacted by Counterclockwise to give information on the running clojure environment. The `Namespace Browser` feature uses this server to provide you with the most possible up to date information on Clojure Namespaces and their contents.
+
+= Debug Clojure code
+
+// TODO put images of the bug / running man icons instead of mentioning them
+- Use the Eclipse Debugger Runner instead of the standard Runner (menu:[Debug as...] menu instead of menu:[Run as...] menu (the `bug` icon instead of the `running man` icon).
+
+- You place Breakpoints in Clojure Editors by double-clicking on the column located to the left of the text.
+
+= Edit Clojure code
+
+== Create a new Clojure file
+
+Clojure files must be located in java source directories.
+
+// TODO links to clojure, clojurescript and edn websites
+The Clojure Editor is automatically launched when double-clickin on `.clj` (Clojure), `.cljs` (ClojureScript) and `.edn` (EDN) files.
+
+WARNING: If you place Clojure files outside of a java source directory, you will not be able to load it via the REPL, select it as an automatically loaded file in the launcher customization wizard ...
+
+- To create a Clojure file/namespace, invoke the menu:File[New > New Clojure file] menu entry.
+
+// TODO simplify this in the future: typing tests.clojure should automatically create the missing packages. Invoking from a certain package should automatically add the namespace in the Wizard)
+- Inside a java source directory, follow the classical Clojure conventions to place your files, according to the namespace it belongs to. (e.g. you want to create namespace 'tests.clojure.first , then create java package "tests.clojure", and create clojure file first.clj in it.
+
+
+== Clojure Editor Features
+
+=== Syntax higlighting
+
+- Rainbow parenthesis (different colors for different nesting levels)
+- Higlights as an error closing parens/brackets which have no corresponding opening ones
+
+NOTE: You can customize Syntax Highlighting via the menu:Clojure[Colors and Fonts] Eclipse Preferences.footnoteref[preferences]
+
+=== Code Completion
+
+Code Completion is automatically suggested as you type.
+
+Counterclockwise does suggestions for Clojure namespaces and symbols.
+
+Code Completion is really powerful, because it features "fuzzy completion". +
+Examples:
+- if you type `defm`, then `defmacro` will match
+- if you type `dmcro`, `defmacro` will also match
+- if you type `c.c/dmcro`, `defmacro` will match, and chances are you'll get a shortest liste of suggestions as well
+
+[NOTE]
+====
+You can prevent automatic suggestion of completions via the menu:Clojure[Editor > Auto Activate code Completion] Eclipse Preference.footnoteref[preferences] +
+You would then activate Code Completion suggestions by typing kbd:[Ctrl + Space] (Windows / Linux) / kbd:[Cmd + Space] (OS X)
+====
+
+// TODO: see in what respect the following section still holds. Should we remove the section from the doc? Plan to re-add the feature in a future release?
+=== Errors reporting
+
+_to be confirmed_
+
+In conjunction with auto-compile functionality, compilation problems are reported as problem markers : you see a summary of the problems in the problems view, you see the files that have problems in the package explorer, you see the problems at the correct line in the corresponding editor, you can jump to the editor at the correct line by double clicking on the problem in the problems view.
+
+=== Keyboard Shortcuts
+
+The Editor is really keyboard commands friendly. 
+// TODO inter-file link
+See the list of Keyboard Bindings: EditorKeyBindingsFeatures
+
+=== Interaction with a launched REPL
+
+// TODO
+See this page: EditorKeyBindingsFeatures
+
+= Auto-build feature
+
+// TODO the sentence is badly written
+Once you have started a REPL for your project, and when the menu:Project[Build automatically] menu entry is selected, Eclipse will use a background connection to this REPL to automatically compile and evaluate the files you edit.
+
+= Package your work
+
+// TODO consider packaging Fat Jar with the Standalone Package
+// TODO change to explain how to do this with Leiningen
+== Distribute as a jar
+
+// TODO find the right menu labels
+- Use the Eclipse menu:File[Export as Jar] Wizard
+
+== Create a "fat" executable jar with all dependencies packaged into
+
+There's a community contributed Eclipse Plugin for this task, called `Flat Jar`.
+
+Install the Fat Jar plugin 
+
+- updatesite: http://kurucz-grafika.de/fatjar/
+
+Once installed, to create an executable jar, open the contextual menu of the project, and select the Fat jar menu entry.
+
+NOTE: The only trick is that if the class you want as the Main class is generated in the classes folder (e.g. a gen-class), then Fat Jar will not suggest it in the list of candidates, but you can still type its fully qualified named instead of triggering the candidates list.
+
+If you also save the configuration via the corresponding button, it wil then be easy to invoke the same jar build later again.
+
+Please refer to the http://fjep.sourceforge.net[Fat Jar plugin homepage] for more detail
+
+NOTE: There is also an out-of-the-box "create Executable Jar" feature in Eclipse, but we encountered problems with it when the main class is not located in the source folders of the project, as is the case when you generate the main class from a clojure namespace.
