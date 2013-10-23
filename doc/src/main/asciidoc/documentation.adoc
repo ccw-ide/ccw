@@ -39,7 +39,6 @@ Counterclockwise bundles everything for hacking Clojure Code:
 
 [[install-as-standalone-product]]
 == Install as a Standalone Product
-=== TL;DR
 
 [cols="1,6"]
 |===
@@ -58,6 +57,9 @@ http://updatesite.ccw-ide.org/stable/[OS X 64 Bits]
 === Pre-requisites
 * Java Virtual Machine (JVM) 7 installed and setup in the Operating System's PATH
 
+You may now want to <<configure,configure Counterclockwise for your specific environment>>
+
+
 [[install-as-plugin]]
 == Install as an Eclipse Plugin
 
@@ -75,6 +77,25 @@ There is a central place for the installation guides of all clojure IDEs.
 
 // TODO reincorporate here, and just provide a link in the dev.clojure.org Getting Started page
 You will find Counterclockwise's one at http://dev.clojure.org/display/doc/Getting+Started+with+Eclipse+and+Counterclockwise
+
+You may now want to <<configure,configure Counterclockwise for your specific environment>>
+
+[[configure]]
+== Configure Counterclockwise
+
+=== Proxy Settings
+
+Currently Counterclockwise does not use the menu:Window[Preferences > General >Network Connections] Proxy Preference for use with the embedded Leiningen.
+
+So to make it use a proxy, you'll have to create the appropriate environment variable(s) and make them available when you start the Counterclockwise / Eclipse executable.
+
+- `http_proxy`: URL of an HTTP proxy. e.g. `http_proxy=http://username:password@proxy:port` (see [Leiningen HTTP Proxies])
+- `https_proxy`: URL of an HTTPS proxy. e.g. `http://username:password@proxy:port`
+- `http_no_proxy`: list of hosts for which the proxy just declared should be bypassed. e.g. `http_no_proxy="*.example1.com|*.example2.com|*.example3.com"`
+
+See the https://github.com/technomancy/leiningen/wiki/HTTP-Proxies[Leiningen HTTP Proxies] page for more detail.
+
+
 
 === Check Counterclockwise installation
 
