@@ -31,32 +31,28 @@
                                   :length length})]
       (is (= expected-text-after text-after)))
     
-      ; this is a little weird: the caret is placed to the final 
-      ; position in the text, but the text represents only the 
-      ; modif for shifting the rest
-    
        "|\nb" "a" nil
-       "| |a\n b" "" nil
+       "| |a\n b" "" "|a\n b"
     
-       "|a\nb"  " "  nil
-       "(|foo\nbar)"  " "  nil
-       "(|foo\n bar)"  " "  nil
-       "(|foo\n  bar)"  " "  nil
-       "(|foo\n\n  bar)"   " "   nil
-       "(|foo\n \n  bar)"   " "   nil
+       "|a\nb"  " "  " |a\nb"
+       "(|foo\nbar)"  " "  "( |foo\nbar)"
+       "(|foo\n bar)"  " "  "( |foo\n bar)"
+       "(|foo\n  bar)"  " "  "( |foo\n  bar)"
+       "(|foo\n\n  bar)"   " "   "( |foo\n\n  bar)"
+       "(|foo\n \n  bar)"   " "   "( |foo\n \n  bar)"
 
-       "(|foo\n\n  (bar\n    baz))"  " " nil
+       "(|foo\n\n  (bar\n    baz))"  " " "( |foo\n\n  (bar\n    baz))"
 
-       "| |a\n b"   ""   nil
+       "| |a\n b"   ""   "|a\n b"
      
-       " |\n b"   "a"   nil
+       " |\n b"   "a"   nil;" a|\n b"
     
-       " |\n b\n c"   " " nil
-       "|(\n) b\n  c"   " "   nil
+       " |\n b\n c"   " " nil;"  |\n b\n c"
+       "|(\n) b\n  c"   " "   " |(\n) b\n  c"
 
        "|\n(\na)"  " " nil     
     
-       ";\n| |(\n )"   ""   ";\n| (\n)"  
+       ";\n| |(\n )"   ""   ";\n|(\n)"  
     
        "|\na"   ";"   nil 
     
@@ -64,13 +60,13 @@
 
        "|a\nb" ";" nil
 
-       "(|a) (b\n      c)"   " "   "(a|) (b\n       c)" 
+       "(|a) (b\n      c)"   " "   "( |a) (b\n       c)" 
      
-       "(|a)\nb\nc"   " "   nil
+       "(|a)\nb\nc"   " "   "( |a)\nb\nc"
      
        "(\n  a)|\n|"  ""   nil
      
        "(\n  a)|b|" "" nil
      
-       "( |(a\n    b)\n  c)"   " "   "( (|a\n     b)\n  c)"
+       "( |(a\n    b)\n  c)"   " "   "(  |(a\n     b)\n  c)"
        ))
