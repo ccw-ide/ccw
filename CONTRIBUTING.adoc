@@ -1,20 +1,26 @@
-# How to build the CCW plugin in Eclipse.
+= How to build the CCW plugin in Eclipse.
+Laurent Petit <laurent dot petit at gmail dot com>
+:source-highlighter: coderay
+:experimental:
+:toc: 
+:toc-title!:
+:toclevels: 2
 
 This page explains how to install a development environment for hacking on CCW.
 
-## Prerequisites
+== Prerequisites
  
 - Java 7
 - Eclipse Standard 4.3.1 (aka Kepler) http://eclipse.org/downloads/packages/eclipse-standard-431/keplersr1
 - Install maven 3.1.1 from the command line:
-  - download from http://mirrors.linsrv.net/apache/maven/maven-3/3.1.1/binaries/apache-maven-3.1.1-bin.zip
-  - unzip somewhere, e.g. /path/to/maven, create an environment variable M2_HOME=/path/to/maven, add $M2_HOME/bin to your path
+** download from http://mirrors.linsrv.net/apache/maven/maven-3/3.1.1/binaries/apache-maven-3.1.1-bin.zip
+** unzip somewhere, e.g. `/path/to/maven`, create an environment variable `M2_HOME=/path/to/maven`, add `$M2_HOME/bin` to your path
 
-## Command Line (maven based) Environment
+== Command Line (maven based) Environment
 
-### Compile / Test / Package
+=== Compile / Test / Package
 
-```sh
+----
 $ git clone https://github.com/laurentpetit/ccw
 $ cd ccw
 
@@ -27,23 +33,23 @@ ccw$ mvn clean install -DskipTests
 
 # To only launch tests
 ccw$ mvn clean test
-```
+----
 
-## Developing within Eclipse
+== Developing within Eclipse
 
-### Install Eclipse Development Environment
+=== Install Eclipse Development Environment
 
 - Clone CCW Repository 
-  - https://github.com/laurentpetit/ccw
+** https://github.com/laurentpetit/ccw
 - In Eclipse, import the repository projects (`ccw/ccw.branding`, `ccw/ccw.core`, `ccw/ccw.core.test`, `ccw/ccw.parent`, `ccw/ccw.product`, `ccw/ccw.target.e37`, `ccw/ccw.target.e42`, `ccw/ccw.updatesite`, `ccw/paredit.clj`)
 - cd into `ccw` and invoke `mvn clean install`
-  - This will install all CCW dependencies in folder `ccw.core/lib/`
-  - The operation must be be repeated after each update of ccw.core dependencies
+** This will install all CCW dependencies in folder `ccw.core/lib/`
+** The operation must be be repeated after each update of `ccw.core` dependencies
 - Set the Eclipse Target Platform for your tests to Kepler by selecting the provided one in `ccw/ccw.target.e43`:
-  - Go to Window > Preferences > Plug-in Development > Target Platform
-  - Check the target platform named `ccw.target.e43`, Click Finish
+** Go to Window > Preferences > Plug-in Development > Target Platform
+** Check the target platform named `ccw.target.e43`, Click Finish
 
-### Run from the Eclipse Development Environment
+=== Run from the Eclipse Development Environment
 
 The following launch configuration files automatically install themselves in the "Run/Debug" Toolbar items as Shortcuts:
 
@@ -51,30 +57,31 @@ The following launch configuration files automatically install themselves in the
 - `Counterclockwise Product` for Debugging the Standalone Product (shortcut for `ccw.core/Counterclockwise Product.launch`)
 - `Counterclockwise Product Tests` for Launching the JUnit (SWTBot) tests (some tests don't pass in this mode) (shortcut for `ccw.core.test/Counterclockwise Product Tests.launch`)
 
-### Install your development version in your Eclipse Environment
+=== Install your development version in your Eclipse Environment
 
 - You need to build from the command line. E.G. via `mvn install` from the `ccw` directory.
 - The Software Update Site zip is at location `ccw/ccw.updatesite/target/ccw.updatesite-<version>.zip`
 
-## Manage Version Numbers
+== Manage Version Numbers
 
-The script `script/set-version.sh` updates POMs, MANIFESTs and feature.xml:
+The script `script/set-version.sh` updates `POMs`, `MANIFESTs` and `feature.xml` :
 
-```sh
+----
 # If you want to set version to 0.20.0-SNAPSHOT
 $ cd ccw
 ccw$ script/set-version.sh 0.20.0-SNAPSHOT
-```
+----
 
-## Adding clojure.test based tests
+== Adding clojure.test based tests
 
 - Add the test namespace in `ccw.core.test/src/clj` using the usual namespace structure for folders
 - Add the namespace to the list of namespaces to be tested in the java file `ccw.core.test/src/java/ccw/core/ClojureTests.java`
 
 
-## References
+== References
 
-- http://software.2206966.n2.nabble.com/Good-solution-for-non-osgi-jars-td5098103.html : original idea for using maven-dependency-plugin to copy deps into lib/
+- http://software.2206966.n2.nabble.com/Good-solution-for-non-osgi-jars-td5098103.html : original idea for using maven-dependency-plugin to copy deps into `lib/`
 - https://github.com/reficio/p2-maven-plugin : easy to grok tutorial for beginning with maven tycho
-- https://maven.apache.org/plugins/maven-dependency-plugin/copy-mojo.html : maven dependency:copy reference
-- https://maven.apache.org/plugins/maven-dependency-plugin/unpack-dependencies-mojo.html : maven dependency:unpack-dependencies reference
+- https://maven.apache.org/plugins/maven-dependency-plugin/copy-mojo.html : maven `dependency:copy` reference
+- https://maven.apache.org/plugins/maven-dependency-plugin/unpack-dependencies-mojo.html : maven `dependency:unpack-dependencies` reference
+

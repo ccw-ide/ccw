@@ -10,6 +10,7 @@ PRODUCTS_DIR="${TRAVIS_BUILD_DIR}/ccw.product/target/products"
 
 
 ## Push the p2 repository for the build <branch>-<travisbuild>-<gitSha1>
+## and also the documentation files
 ftp -pn ${FTP_HOST} <<EOF
 quote USER ${FTP_USER}
 quote PASS ${FTP_PASSWORD}
@@ -34,12 +35,18 @@ lcd ..
 cd ..
 put artifacts.jar
 put content.jar
+lcd ${TRAVIS_BUILD_DIR}/doc/target/html
+mkdir doc
+cd doc
+mput * 
 quit
 EOF
 
 test $? || ( echo "FTP Push for build ${UPDATESITE} failed with error code $?" ; exit $? )
 
 wget http://updatesite.ccw-ide.org/branch/${TRAVIS_BRANCH}/${UPDATESITE}/content.jar || ( echo "Test that FTP Push for build ${UPDATESITE} worked failed: was unable to fetch http://updatesite.ccw-ide.org/branch/${TRAVIS_BRANCH}/${UPDATESITE}/content.jar" ; exit 1 )
+
+wget http://updatesite.ccw-ide.org/branch/${TRAVIS_BRANCH}/${UPDATESITE}/doc/documentation.html || ( echo "Test that FTP Push for build ${UPDATESITE} worked failed: was unable to fetch http://updatesite.ccw-ide.org/branch/${TRAVIS_BRANCH}/${UPDATESITE}/doc/documentation.html" ; exit 1 )
 
 ## UPDATE The branch p2 repository by referencing this build's p2 repository
 

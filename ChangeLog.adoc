@@ -1,6 +1,12 @@
 = Counterclockwise ChangeLog 
+Laurent Petit <laurent dot petit at gmail dot com>
 :sectanchors:
-:source-highlighter: highlightjs
+:sectlinks:
+:source-highlighter: coderay
+:experimental:
+:toc: 
+:toc-title!:
+:toclevels: 1
 
 == Changes between Counterclockwise 0.12.3 and 0.20.0
 
@@ -42,11 +48,13 @@ For more information on the available Software Update Sites and their retention 
 
 === Editor
 
-- Reindent Selection has been implemented. Trigger it via `Ctrl+i` on Windows/Linux, `Cmd+i` on OSX.
+==== Reindent Selection
+Reindent Selection has been implemented. Trigger it via `Ctrl+i` on Windows/Linux, `Cmd+i` on OSX.
 
-- AutoShift: while you type, the code on the following lines which depends upon the code on the current line is shifted to the right or to the left. More spaces/less spaces are added/removed automatically.
+==== Autoshift
+While you type, the code on the following lines which depends upon the code on the current line is shifted to the right or to the left. More spaces/less spaces are added/removed automatically.
 
-** For instance, if you have the following manually indented code (note that the call to the `cond` macro is indented 4 extra spaces to the right):
+* For instance, if you have the following manually indented code (note that the call to the `cond` macro is indented 4 extra spaces to the right):
 +
 [source,clojure]
 (defn foo [bar baz]
@@ -58,7 +66,7 @@ For more information on the available Software Update Sites and their retention 
          :else
            default-expr))
 
-** You can fix the whole indentation by either placing the cursor anywhere in the `(cond` line and typing Tab, or in front of `(cond` and typing Backspace 2 times:
+* You can fix the whole indentation by either placing the cursor anywhere in the `(cond` line and typing Tab, or in front of `(cond` and typing Backspace 2 times:
 +
 [source,clojure]
 (defn foo [bar baz]
@@ -70,9 +78,10 @@ For more information on the available Software Update Sites and their retention 
     :else
       default-expr))
 
-** Before the AutoShift feature, you would either have to indent each line manually, or select the whole `(cond..)` form and type `Ctrl+i` (OS X: `Cmd+i`), but you would have lost the specific indentation of the conditions/expressions:
+* Before the AutoShift feature, you would either have to indent each line manually, or select the whole `(cond..)` form and type `Ctrl+i` (OS X: `Cmd+i`), but you would have lost the specific indentation of the conditions/expressions:
 +
 [source,clojure]
+----
 (defn foo [bar baz]
   (cond
     cond1
@@ -81,20 +90,25 @@ For more information on the available Software Update Sites and their retention 
     expr2
     :else
     default-expr))
+----
 
-- More intuitive `Ctrl+Enter`: hitting Ctrl+Enter when the cursor is located at the top level selects the preceding top level form to be sent to the REPL. Only when the cursor is right in front of a top level form will it be selected instead of the previous one. (Fix Issue #580)
-+
-e.g. if the caret is materialized with the symbol |:
-+
+==== More intuitive Ctrl+Enter
+Hitting kbd:[Ctrl+Enter] when the cursor is located at the top level selects the preceding top level form to be sent to the REPL. Only when the cursor is right in front of a top level form will it be selected instead of the previous one. (Fix Issue #580)
+
+e.g. if the caret is materialized with the symbol `|`:
+
 [source,clojure]
+----
 (defn foo [] ...)|
 (defn bar [] ....)
 ;; => foo's declaration will be sent to the REPL
 (defn baz [] ...)
 |(defn qix [] ...)
 ;; => qix's declaration will be sent to the REPL
+----
 
-- Addition of 2 important paredit/structural manipulation features: slurp and barf, backward and forward. (Fixes Issue #486: Add support for barfage and slurpage)
+==== Slurp / Barf
+Slurp and Barf, 2 important paredit/structural manipulation features, have been added to the Editor. (Fixes Issue #486: Add support for barfage and slurpage)
 +
 See the Keybindings documentation for Slurp / Barf : https://code.google.com/p/counterclockwise/wiki/EditorKeyBindingsFeatures
 
@@ -105,28 +119,36 @@ See the Keybindings documentation for Slurp / Barf : https://code.google.com/p/c
 Calling "toggle lines comments" on the following code selection:
 +
 [source,clojure]
+----
 ;(defn foo [....])
 (defn bar [....])
 (defn baz [....])
+----
 +
 will result in:
 +
 [source,clojure]
+----
 ;(defn foo [....])
 ;(defn bar [....])
 ;(defn baz [....])
+----
 +
 But calling "toggle lines comments" on this code selection:
 [source,clojure]
+----
 ;(defn foo [....])
 (defn bar [....])
 ;(defn baz [....])
+----
 +
 will result in:
 [source,clojure]
+----
 (defn foo [....])
 (defn bar [....])
 (defn baz [....])
+----
 
 - Auto indentation of a cond form changed: (Fixes #592)
 +
@@ -144,14 +166,14 @@ will result in:
 * when the "repeat last expression" REPL command is active
 * when the user sends a form tom evaluate to the REPL
 * if the form evaluated without error
-* then the last expression evaluated from the REPL input is evaluated agai
-
+* then the last expression evaluated from the REPL input is evaluated again
++
 A common usecase for this is while you're defining a function in the Editor and you want to repeat the same test expression again and again until it passes. The workflow then becomes:
-
-- define the function in the editor, eval via Cmd+Enter
-- switch to the REPL, enter a test expression, send the test expression via Cmd+Enter
-- Click on the "Repeat last evaluation ..." button in the REPL
-- switch to the editor, modify the function, eval via Cmd+Enter ... when the eval succeeds, the last expression entered in the REPl is reevaluated ... repeat ...
++
+** define the function in the editor, eval via Cmd+Enter
+** switch to the REPL, enter a test expression, send the test expression via Cmd+Enter
+** Click on the "Repeat last evaluation ..." button in the REPL
+** switch to the editor, modify the function, eval via Cmd+Enter ... when the eval succeeds, the last expression entered in the REPl is reevaluated ... repeat ...
 
 
 === Repl 
