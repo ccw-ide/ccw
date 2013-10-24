@@ -1,0 +1,18 @@
+Counterclockwise Documentation Site
+===================================
+Laurent Petit <laurent.petit@gmail.com>
+:highlight: highlightjs
+:experimental:
+
+Welcome to Counterclockwise's Documentation Site.
+
+== User Documentation
+
+*Where's a comprehensive documentation of Counterclockwise?* Follow link:documentation.html[Counterclockwise User Documentation].
+
+*What's new?* Follow link:ChangeLog.html[ChangeLog of Counterclockwise Versions] to know everything.
+
+== Developer Documentation
+
+*Want to contribute to the development of Counterclockwise?* Start here for link:CONTRIBUTING.html[Installing an Environment to develop Counterclockwise itself].
+
