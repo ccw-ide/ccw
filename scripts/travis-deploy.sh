@@ -39,6 +39,10 @@ lcd ${TRAVIS_BUILD_DIR}/doc/target/html
 mkdir doc
 cd doc
 mput * 
+cd ${FTP_UPDATESITE_ROOT}/${TRAVIS_BRANCH}
+mkdir doc
+cd doc
+mput *
 quit
 EOF
 
