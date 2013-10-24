@@ -24,6 +24,7 @@
     <module>ccw.feature</module>
     <module>ccw.updatesite</module>
     <module>ccw.product</module>
+    <module>doc</module>
   </modules>
 
   <profiles>
