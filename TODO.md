@@ -6,8 +6,8 @@
 DONE  - extract logic from Eclipse, add tests
 DELAYED  - make it work with raise over, etc.
 DELAYED  - make it work with cut/copy/paste
-DONE  - document
-  - release
+- document
+- release
 
 - Make the pull requests test mechanism work
 DONE - Change build/product target from Juno to Kepler. Don't change the default deployed product yet.
