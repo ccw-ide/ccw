@@ -18,7 +18,7 @@ before_script:
   - metacity --sm-disable --replace &
   - sleep 5 # give xvfb some time to start
   - export QUALIFIER=${TRAVIS_BRANCH}-travis$(printf "%0*d" 6 ${TRAVIS_BUILD_NUMBER})-git${TRAVIS_COMMIT}
-script: mvn clean install --batch-mode -e -DforceContextQualifier=${QUALIFIER}
+script: mvn clean verify --batch-mode -e -DforceContextQualifier=${QUALIFIER}
 after_success: 
   - test ${ECLIPSE_TARGET} = "kepler" && chmod 777 ./scripts/travis-deploy.sh && ./scripts/travis-deploy.sh
 after_failure:
