@@ -13,7 +13,7 @@
   	<extensionContent id="ccw-doc" style="css/ccw.css" name="Counterclockwise Documentation" path="overview/@">
 		<group style-id="content-group" id="ccw-doc-group">
        		<link label="Counterclockwise Documentation" 
-       		      url="https://code.google.com/p/counterclockwise/wiki/Documentation" 
+       		      url="http://doc.ccw-ide.org/" 
        		      id="ccw-doc-link"
        		      style-id="content-link">
           		<text>Consult the Counterclockwise online documentation</text>
