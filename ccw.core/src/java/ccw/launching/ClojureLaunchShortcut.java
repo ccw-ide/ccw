@@ -152,11 +152,16 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     	return ret[0];
     }
     
+    private boolean useLeiningenLaunchConfiguration(IProject project) throws CoreException {
+    	return false;
+    	//return project.hasNature(CCWPlugin.LEININGEN_NATURE_ID);
+    }
+    
     protected void launchProject(IProject project, IFile[] filesToLaunch, String mode) {
         try {
         	ILaunchConfiguration config = findLaunchConfiguration(project);
     		if (config == null) {
-    			if (project.hasNature(CCWPlugin.LEININGEN_NATURE_ID)) {
+    			if (useLeiningenLaunchConfiguration(project)) {
             		config = createLeiningenLaunchConfiguration(project);
     			} else {
             		config = createConfiguration(project, null);
@@ -167,7 +172,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
             	ILaunchConfigurationWorkingCopy runnableConfiguration =
             	    config.copy(config.getName() + " #" + incTempLaunchCount(project.getName()));
             	try {
-            		if (project.hasNature(CCWPlugin.LEININGEN_NATURE_ID)) {
+            		if (useLeiningenLaunchConfiguration(project)) {
             			// Nothing special
             		} else {
             			LaunchUtils.setFilesToLaunchString(runnableConfiguration, Arrays.asList(filesToLaunch));
@@ -220,9 +225,11 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
                 if (config.getAttribute(ATTR_MAIN_TYPE_NAME, "").startsWith("clojure.")
                 		&& config.getAttribute(ATTR_PROJECT_NAME, "").equals(project.getName())
                 		&& !config.getAttribute(ILaunchManager.ATTR_PRIVATE, false)) {
-                	if ( 	(isLeinProject && ClojureLaunchDelegate.isLeiningenConfiguration(config))
-                			||
-                			(!isLeinProject && !ClojureLaunchDelegate.isLeiningenConfiguration(config)) ) {
+                	if ( 	true
+                			//(isLeinProject && ClojureLaunchDelegate.isLeiningenConfiguration(config))
+                			//||
+                			//(!isLeinProject && !ClojureLaunchDelegate.isLeiningenConfiguration(config)) 
+                			) {
                 		candidateConfigs.add(config);
                 	}
                 }

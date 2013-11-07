@@ -269,7 +269,8 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
     }
 	
 	public static boolean isLeiningenConfiguration(ILaunchConfiguration configuration) throws CoreException {
-		return configuration.getAttribute(LaunchUtils.ATTR_LEININGEN_CONFIGURATION, false);
+		return false;
+		//return configuration.getAttribute(LaunchUtils.ATTR_LEININGEN_CONFIGURATION, false);
 	}
 	
 	public static boolean isAutoReloadEnabled (ILaunch launch) {
