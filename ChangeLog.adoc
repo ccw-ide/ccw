@@ -8,6 +8,23 @@ Laurent Petit <laurent dot petit at gmail dot com>
 :toc-title!:
 :toclevels: 1
 
+== Changes between Counterclockwise 0.20.0 and 0.21.0
+
+`0.21.0` not released yet
+
+=== Bug fix 
+
+- Explicitly ask the user for confirmation before launching a second process for the same project
+
+=== Leiningen based Launcher
+
+The code is there, but desactivated at the moment
+
+=== General purpose Leiningen task invoker
+
+Addition of a new command, kbd:[Alt+L L] for launching a popup allowing to enter an arbitry leiningen command
+
+
 == Changes between Counterclockwise 0.12.3 and 0.20.0
 
 `0.20.0` released on October 10, 2013
