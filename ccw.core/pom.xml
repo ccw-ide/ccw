@@ -18,6 +18,7 @@
 
   <properties>
     <nrepl.version>0.2.1</nrepl.version>
+    <leiningen.version>2.1.2</leiningen.version>
   </properties>
 
 	<!-- These are ignored by Tycho
@@ -41,7 +42,7 @@
         <dependency>
             <groupId>leiningen</groupId>
             <artifactId>leiningen</artifactId>
-            <version>2.1.2</version>
+            <version>${leiningen.version}</version>
         </dependency>
         <dependency>
             <groupId>org.clojure</groupId>
@@ -90,24 +91,26 @@
                 <excludeArtifactIds>paredit.clj,ccw.feature,ccw.branding,ccw.core</excludeArtifactIds>
               </configuration>
             </execution>
+            <!--
             <execution>
               <id>copy-nrepl</id>
               <phase>initialize</phase>
               <goals>
                 <goal>copy</goal>
-            </goals>
-             <configuration>
-               <artifactItems>
-                 <artifact-item>
-                   <groupId>org.clojure</groupId>
-                   <artifactId>tools.nrepl</artifactId>
-                   <version>${nrepl.version}</version>
-                   <outputDirectory>${project.basedir}</outputDirectory>
-                 </artifact-item>
-               </artifactItems>
-               <useBaseVersion>true</useBaseVersion>
-             </configuration>
-           </execution>
+              </goals>
+              <configuration>
+                <artifactItems>
+                  <artifact-item>
+                    <groupId>org.clojure</groupId>
+                    <artifactId>tools.nrepl</artifactId>
+                    <version>${nrepl.version}</version>
+                    <outputDirectory>${project.basedir}</outputDirectory>
+                  </artifact-item>
+                </artifactItems>
+                <useBaseVersion>false</useBaseVersion>
+              </configuration>
+            </execution>
+            -->
          </executions>
        </plugin>
         <plugin>
@@ -129,12 +132,14 @@
                       <include>**/*</include>
                     </includes>
                   </fileset>
+                  <!--
                   <fileset>
                     <directory>.</directory>
                     <includes>
-                      <include>tools.nrepl-*.jar</include>
+                      <include>tools.nrepl.jar</include>
                     </includes>
                   </fileset>
+                  -->
                 </filesets>
               </configuration>
             </execution>

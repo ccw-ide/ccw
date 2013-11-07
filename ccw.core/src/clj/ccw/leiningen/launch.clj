@@ -15,7 +15,7 @@
      :java/classpath         [{:entry-type :archive
                                :path (or 
                                        leiningen-standalone-path
-                                       (e/get-file-inside-plugin "ccw.core" "leiningen-standalone")) }
+                                       (e/get-file-inside-plugin "ccw.core" "leiningen-standalone.jar")) }
                               {:entry-type :jre-container
                                :name launch/default-jre-container-name}]
      :java/default-classpath false
@@ -31,6 +31,7 @@
 (defn lein 
   "project can be nil"
   [project command & {:keys [leiningen-standalone-path] :as rest}]
+  (println (lein-launch-configuration project command rest))
   (launch/run (lein-launch-configuration project command rest)))
   
 (comment 
