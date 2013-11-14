@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -192,8 +193,12 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
         BundleUtils.requireAndGetVar(CCWPlugin.getDefault().getBundle().getSymbolicName(), "clojure.tools.nrepl.ack/reset-ack-port!").invoke();
         try {
             Var.pushThreadBindings(RT.map(currentLaunch, launch));
+            
             super.launch(configuration, mode, launch, (monitor == null || !isLaunchREPL(configuration)) ?
                     monitor : new REPLViewLaunchMonitor(monitor, launch, true));
+            for(IProcess p: launch.getProcesses()) {
+            	System.out.println("Launched process with command line: " + p.getAttribute(IProcess.ATTR_CMDLINE));
+            }
         } finally {
             Var.popThreadBindings();
         }
@@ -320,6 +325,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
         if (clojureProject.getJavaProject().findElement(new Path("clojure/tools/nrepl")) == null) {
             try {
                 File ccwPluginDir = FileLocator.getBundleFile(CCWPlugin.getDefault().getBundle());
+                System.out.println("ccwPluginDir: " + ccwPluginDir);
                 // this should *always* be a file, *unless* the user is getting nREPL from a clone of its
                 // project, in which case we need to reach into that project's directory...
                 ArrayList replAdditions = new ArrayList();
@@ -330,7 +336,13 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
                     //replAdditions.add(new File(repllib, "target/classes").getAbsolutePath());
                 	
                 	// Hack, until the project is launched via leiningen instead
-                	replAdditions.add(new File(ccwPluginDir, "lib/tools.nrepl.jar").getAbsolutePath());
+                	File nreplFile = new File(ccwPluginDir, "lib/tools.nrepl.jar");
+					String nreplPath = nreplFile.getAbsolutePath();
+					if (!nreplFile.exists()) {
+						throw new WorkbenchException("nreplFile not found: " + nreplFile);
+					}
+                	System.out.println("nreplPath for classpath:" + nreplPath);
+                	replAdditions.add(nreplPath);
                 }
                 
                 CCWPlugin.log("Adding to project's classpath to support nREPL: " + replAdditions);
@@ -339,6 +351,8 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
             } catch (IOException e) {
                 throw new WorkbenchException("Failed to find nrepl library", e);
             }
+        } else {
+        	System.out.println("Found package clojure.tools.nrepl in the project classpath, won't try to add ccw's nrepl to it then");
         }
         
         return classpath.toArray(new String[classpath.size()]);

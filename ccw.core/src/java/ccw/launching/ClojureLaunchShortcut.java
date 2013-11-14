@@ -118,20 +118,19 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     protected void launchProjectCheckRunning(IProject project, IFile[] filesToLaunch, String mode) {
     	String projectName = project.getName();
     	List<ILaunch> running = findRunningLaunchesForProject(projectName);
+    	System.out.println("found " + running.size() + " running launches");
     	
-    	if (running.size() == 0) {
+    	if (running.size() == 0 
+    			||
+    	        userConfirmsNewLaunch(project, running.size())) {
     		launchProject(project, filesToLaunch, mode);
     	} else {
-    		if (userConfirmsNewLaunch(project, running.size())) {
-    			launchProject(project, filesToLaunch, mode);
-    		} else {
-    			IViewPart replView = CCWPlugin.getDefault().getProjectREPL(project);
-    			if (replView != null) {
-    				replView.getViewSite().getPage().activate(replView);
-    			} else {
-    				System.out.println("Should not be there: because in the normal course of things, a Launch does not survive its REPLView");
-    			}
-    		}
+			IViewPart replView = CCWPlugin.getDefault().getProjectREPL(project);
+			if (replView != null) {
+				replView.getViewSite().getPage().activate(replView);
+			} else {
+				System.out.println("Should not be there: because in the normal course of things, a Launch does not survive its REPLView");
+			}
     	}
     }    
     
@@ -164,6 +163,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     			if (useLeiningenLaunchConfiguration(project)) {
             		config = createLeiningenLaunchConfiguration(project);
     			} else {
+    				System.out.println("creating basic configuration (no lein configuration)");
             		config = createConfiguration(project, null);
     			}
         	}

@@ -79,42 +79,82 @@ public class Tracer implements ITracer {
     }
     
     public void trace(String traceOption, Object... message) {
+    	if (debugTrace != null)
+        debugTrace.trace("/" + traceOption, buildMessage(message));
+    	System.out.println(traceOption + ": " + buildMessage(message));
         if (isEnabled(traceOption)) {
             debugTrace.trace("/" + traceOption, buildMessage(message));
         }
     }
 
     public void trace(String traceOption, Throwable throwable, Object... message) {
+    	if (debugTrace != null)
+        debugTrace.trace("/" + traceOption, buildMessage(message), throwable);
+    	System.out.println(traceOption + ": " + buildMessage(message) + ". Exception: " + throwable.getMessage());
+    	throwable.printStackTrace();
         if (isEnabled(traceOption)) {
             debugTrace.trace("/" + traceOption, buildMessage(message), throwable);
         }
     }
 
     public void traceDumpStack(String traceOption) {
+    	if (debugTrace != null)
+        debugTrace.traceDumpStack("/" + traceOption);
+        System.out.println("trace dump stack: " + traceOption);
         if (isEnabled(traceOption)) {
             debugTrace.traceDumpStack("/" + traceOption);
         }
     }
 
     public void traceEntry(String traceOption) {
+    	if (debugTrace != null)
+    	debugTrace.traceEntry("/" + traceOption);
+    	System.out.println("trace entry: " + traceOption);
         if (isEnabled(traceOption)) {
             debugTrace.traceEntry("/" + traceOption);
         }
     }
 
     public void traceEntry(String traceOption, Object... arguments) {
+    	if (debugTrace != null)
+    	debugTrace.traceEntry("/" + traceOption, arguments);
+    	System.out.print("trace entry: " + traceOption);
+    	if (arguments != null) {
+    		System.out.print("[");
+    		boolean isFirst = true;
+    		for (Object o: arguments) {
+    			System.out.println(o);
+    			if (isFirst) {
+    				isFirst = false;
+    			} else {
+    				System.out.println(", ");
+    			}
+    		}
+    		System.out.print("]");
+    	}
+    	System.out.println();
         if (isEnabled(traceOption)) {
             debugTrace.traceEntry("/" + traceOption, arguments);
         }
     }
 
     public void traceExit(String traceOption) {
+    	if (debugTrace != null)
+    	debugTrace.traceExit("/" + traceOption);
+    	System.out.println("trace exit: " + traceOption);
         if (isEnabled(traceOption)) {
             debugTrace.traceExit("/" + traceOption);
         }
     }
 
     public void traceExit(String traceOption, Object returnValue) {
+    	if (debugTrace != null)
+        debugTrace.traceExit("/" + traceOption, returnValue);
+    	System.out.print("trace entry: " + traceOption);
+    	if (returnValue != null) {
+    		System.out.print("[" + returnValue + "]");
+    	}
+    	System.out.println();
         if (isEnabled(traceOption)) {
             debugTrace.traceExit("/" + traceOption, returnValue);
         }
