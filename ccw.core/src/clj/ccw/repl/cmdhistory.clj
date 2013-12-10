@@ -1,6 +1,6 @@
 (ns ccw.repl.cmdhistory
   (:use [clojure.core.incubator :only [-?>]])
-  (:require [ccw.util.edn :refer [read-vector]])
+  (:require [ccw.edn :refer [read-vector]])
   (:import
     ccw.CCWPlugin
     org.eclipse.core.runtime.jobs.Job

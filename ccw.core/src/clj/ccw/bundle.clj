@@ -1,4 +1,4 @@
-(ns ccw.util.bundle
+(ns ccw.bundle
   (:refer-clojure :exclude [< > =])
   (:import org.eclipse.core.runtime.CoreException
            org.eclipse.core.runtime.IStatus
@@ -123,7 +123,7 @@
                    :content [menu-contribution]})]
     (add-contribution! ext-str bundle)))
 
-;(ccw.util.bundle/add-contribution! 
+;(ccw.bundle/add-contribution! 
 ;     "
 ;   <plugin>
 ;      <extension
@@ -141,7 +141,7 @@
 ;   "
 ;     b)
 
-;(ccw.util.bundle/add-contribution! 
+;(ccw.bundle/add-contribution! 
 ;     "
 ;   <plugin>
 ;      <extension
@@ -159,7 +159,7 @@
 
 
 
-;(ccw.util.bundle/add-contribution! 
+;(ccw.bundle/add-contribution! 
 ;     "
 ;   <plugin>
 ;      <extension
@@ -197,7 +197,7 @@
 
 
       
-;(ccw.util.bundle/add-contribution! 
+;(ccw.bundle/add-contribution! 
 ;     "
 ;<plugin>
 ;<extension

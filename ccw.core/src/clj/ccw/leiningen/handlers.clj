@@ -3,7 +3,7 @@
             [ccw.leiningen.nature              :as n]
             [ccw.leiningen.generic-launch      :as launch]
             [clojure.string                    :as str]
-            [ccw.util.eclipse                  :as e]
+            [ccw.eclipse                       :as e]
             [clojure.java.io                   :as io])
   (:import [org.eclipse.core.runtime       CoreException
                                            IPath
@@ -37,7 +37,8 @@
         part (e/active-part event)]
     (cond
       (e/project part) (e/project part)
-      (instance? IStructuredSelection sel)
+      (and (instance? IStructuredSelection sel)
+           (-> ^IStructuredSelection sel .getFirstElement))
         ;; TODO consider giving the user a hint for why the expected command did not work
         (-> ^IStructuredSelection sel .getFirstElement e/resource .getProject e/project)
       :else (if-let [editor (e/active-editor event)]

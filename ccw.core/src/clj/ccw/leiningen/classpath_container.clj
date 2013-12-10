@@ -6,8 +6,8 @@
             [leiningen.core.classpath :as cp]
             [cemerick.pomegranate.aether :as aether]
             [clojure.string :as str]
-            [ccw.util.eclipse :as e]
-            [ccw.util.jdt :as jdt]
+            [ccw.eclipse :as e]
+            [ccw.jdt :as jdt]
             [clojure.java.io :as io]
             [ccw.leiningen.util :as u])
   (:import [org.eclipse.core.runtime CoreException
@@ -134,7 +134,7 @@
     IResource/DEPTH_ONE ; DEPTH_ONE so that we also remove markers from project.clj
     ))
 
-; TODO generalize on the plugin, and then extract into ccw.util.eclipse
+; TODO generalize on the plugin, and then extract into ccw.eclipse
 (defn- state-file 
   "Return the state file, if it exists, or nil"
   [project state-name]

@@ -1,5 +1,5 @@
 (ns ^{:doc "Eclipse interop utilities"}
-     ccw.util.eclipse
+     ccw.eclipse
   (:require [clojure.java.io :as io])
   (:use [clojure.core.incubator :only [-?> -?>>]])
   (:import [org.eclipse.core.resources IResource
@@ -185,7 +185,7 @@
 (defn project-close [p] (.close (project p) nil))
 (defn project-open [p] (.open (project p) nil))
 (defn project-open? [p] (.isOpen (project p)))
-(defn projects-referencing [p] (into [] (.getReferecingProjects (project p))))
+(defn projects-referencing [p] (into [] (.getReferencingProjects (project p))))
 (defn projects-referenced-by [p] (into [] (.getReferencedProjects (project p))))
 (defn project-folder [p child-folder-name] (.getFolder (project p) child-folder-name))
 (defn project-file [p child-file-name] (.getFile (project p) child-file-name))
@@ -444,14 +444,16 @@
 (defn define-handler! [hspec]
   (let [hdl-service (service (workbench) :handlers)
         id (name (:command-id hspec))
-        prev-handler-activation (@global-handlers id)
-        handler-activation (define-handler!* hspec)]
+        prev-handler-activation (@global-handlers id)]
     (when prev-handler-activation
+      (println "deactivating previous handler")
       (.deactivateHandler hdl-service prev-handler-activation))
-    (swap! global-handlers assoc id handler-activation)))
+    (let [handler-activation (define-handler!* hspec)]
+      (println "registering new handler")
+      (swap! global-handlers assoc id handler-activation))))
 
 (def default-category
-  {:id :ccw.util.eclipse.default-category,
+  {:id :ccw.eclipse.default-category,
    :name "Default Category (CCW)",
    :description "Default Category (CCW)"})
 
@@ -603,7 +605,7 @@
       k
     :else 
       (org.eclipse.jface.bindings.keys.KeyBinding.
-        (ccw.util.eclipse/key-sequence key-sequence)
+        (ccw.eclipse/key-sequence key-sequence)
         (parameterized-command command)
         (when scheme-id (name scheme-id))
         (name context-id)

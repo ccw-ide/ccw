@@ -93,7 +93,7 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 	private final ClojureInvoker docUtils = 
 			ClojureInvoker.newInvoker(
 					CCWPlugin.getDefault(), 
-					"ccw.util.doc-utils");
+					"ccw.core.doc-utils");
 	
 	private static final String VAR_DOC_INFO = "var-doc-info-text";
 	

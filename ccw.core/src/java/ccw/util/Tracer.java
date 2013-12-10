@@ -18,9 +18,9 @@ public class Tracer implements ITracer {
     
     private final String bundleSymbolicName;
 
-    private final YmlPluginDebugOptionsListener traceOptionsListener = new YmlPluginDebugOptionsListener();
+    private final PluginDebugOptionsListener traceOptionsListener = new PluginDebugOptionsListener();
     
-    private class YmlPluginDebugOptionsListener implements DebugOptionsListener {
+    private class PluginDebugOptionsListener implements DebugOptionsListener {
         public void optionsChanged(DebugOptions options) {
             if (options.isDebugEnabled()) {
                 debugTrace = options.newDebugTrace(bundleSymbolicName, Tracer.class);

@@ -1,6 +1,6 @@
 (ns ccw.core.trace
-  (:require ccw.util.trace))
+  (:require ccw.trace))
 
-(ccw.util.trace/mk-trace-macros
+(ccw.trace/mk-trace-macros
   (.getBundle (ccw.CCWPlugin/getDefault))
   (ccw.CCWPlugin/getTracer))

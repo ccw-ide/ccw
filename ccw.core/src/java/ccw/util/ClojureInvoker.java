@@ -1,6 +1,7 @@
 package ccw.util;
 
 import org.eclipse.core.runtime.Plugin;
+import org.osgi.framework.Bundle;
 
 import ccw.CCWPlugin;
 import ccw.util.osgi.ClojureOSGi;
@@ -11,6 +12,10 @@ public class ClojureInvoker {
 	
 	public ClojureInvoker(String namespace) {
 		this.namespace = namespace;
+	}
+
+	public Object _(final String varName) {
+		return ClojureUtils.invoke(namespace, varName);
 	}
 
 	public Object _(final String varName, final Object arg1) {
@@ -34,17 +39,20 @@ public class ClojureInvoker {
 	}
 	
 	public static ClojureInvoker newInvoker(Plugin plugin, final String namespace) {
+		return newInvoker(plugin.getBundle(), namespace);
+	}
+	public static ClojureInvoker newInvoker(Bundle bundle, final String namespace) {
 		try {
-			ClojureOSGi.require(plugin.getBundle(), namespace);
+			ClojureOSGi.require(bundle, namespace);
 			return new ClojureInvoker(namespace);
 		} catch (Exception e) {
 			CCWPlugin.logError("Exception while calling newInvoker(" 
-					+ plugin.getBundle().getSymbolicName() 
+					+ bundle.getSymbolicName() 
 					+ ", " + namespace + ")"
 				, e);
 			throw new RuntimeException(
 					"Exception while calling newInvoker(" 
-							+ plugin.getBundle().getSymbolicName() 
+							+ bundle.getSymbolicName() 
 							+ ", " + namespace + ")",
 			        e);
 		}

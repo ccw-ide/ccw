@@ -10,8 +10,8 @@
 ;*******************************************************************************/
 (ns ccw.clojure-project-nature
   (:require [clojure.java.io :as io]
-            [ccw.util.jdt :as jdt]
-            [ccw.util.eclipse :as e])
+            [ccw.jdt         :as jdt]
+            [ccw.eclipse     :as e])
   (:import
     [ccw CCWPlugin ClojureCore]
     [java.io IOException File]

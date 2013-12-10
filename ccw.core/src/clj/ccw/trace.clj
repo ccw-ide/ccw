@@ -1,4 +1,4 @@
-(ns ccw.util.trace
+(ns ccw.trace
   (:require [clojure.java.io :as io])
   (:import [java.util Properties]))
 

@@ -5,7 +5,7 @@
             [paredit.parser :as p]
             [paredit.loc-utils :as lu]
             [clojure.zip :as z]
-            [ccw.util.doc-utils :as doc]
+            [ccw.core.doc-utils :as doc]
             [ccw.debug.serverrepl :as serverrepl]
             [ccw.core.trace :as trace]
             [ccw.editors.clojure.editor-common :as common])

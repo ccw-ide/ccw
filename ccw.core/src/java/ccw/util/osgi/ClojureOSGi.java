@@ -1,5 +1,9 @@
 package ccw.util.osgi;
 
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.List;
+
 import org.osgi.framework.Bundle;
 
 import ccw.CCWPlugin;
@@ -15,9 +19,6 @@ public class ClojureOSGi {
 	private synchronized static void initialize() {
 		if (initialized) return;
 		
-		System.out.println("ClojureOSGi: Static initialization, loading clojure.core");
-		System.out.flush();
-		CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI, "ClojureOSGi: Static initialization, loading clojure.core");
 		CCWPlugin plugin = CCWPlugin.getDefault();
 		if (plugin == null) {
 			System.out.println("======= ClojureOSGi.initialize will fail because ccw.core plugin not activated yet");
@@ -28,25 +29,29 @@ public class ClojureOSGi {
 		try {
 			Thread.currentThread().setContextClassLoader(loader);
 			Class.forName("clojure.lang.RT", true, loader); // very important, uses the right classloader
+			CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI, "namespace clojure.core loaded");
+			initialized = true;
 		} catch (Exception e) {
 			throw new RuntimeException(
-					"ClojureOSGi: Static initialization, Exception while loading clojure.core", e);
+					"Exception while loading namespace clojure.core", e);
 		} finally {
 			Thread.currentThread().setContextClassLoader(saved);
 		}
-		System.out.println("ClojureOSGi: Static initialization, clojure.core loaded");
-		System.out.flush();
-		CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI, "ClojureOSGi: Static initialization, clojure.core loaded");
 		
-		initialized = true;
 	}
 	public synchronized static Object withBundle(Bundle aBundle, RunnableWithException aCode)
+			throws RuntimeException {
+		return withBundle(aBundle, aCode, null);
+	}
+	
+	public synchronized static Object withBundle(Bundle aBundle, RunnableWithException aCode, List<URL> additionalURLs)
 			throws RuntimeException {
 		
 		initialize();
 		
-		CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI, "ClojureOSGi.withBundle(" + aBundle.getSymbolicName() + ")");
-		ClassLoader loader = new BundleClassLoader(aBundle);
+		ClassLoader bundleLoader = new BundleClassLoader(aBundle);
+		final URL[] urls = (additionalURLs == null) ? new URL[] {} : additionalURLs.toArray(new URL[additionalURLs.size()]);
+		URLClassLoader loader = new URLClassLoader(urls, bundleLoader);
 		IPersistentMap bindings = RT.map(Compiler.LOADER, loader);
 
 		boolean pushed = true;
@@ -66,14 +71,11 @@ public class ClojureOSGi {
 			return aCode.run();
 			
 		} catch (Exception e) {
-			CCWPlugin.logError(
-					"Exception while calling withBundle(" 
-							+ aBundle.getSymbolicName() + ", aCode)"
-					, e);
-			throw new RuntimeException(
-					"Exception while calling withBundle(" 
-							+ aBundle.getSymbolicName() + ", aCode)",
-					e);
+			String msg = "Exception while executing code from bundle " 
+					+ aBundle.getSymbolicName();
+			CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI, e,
+					msg);
+			throw new RuntimeException(msg, e);
 		} finally {
 			if (pushed)
 				Var.popThreadBindings();
@@ -83,19 +85,17 @@ public class ClojureOSGi {
 	}
 
 	public synchronized static void require(final Bundle bundle, final String namespace) {
-		System.out.println("ClojureOSGi.require(" + bundle.getSymbolicName() + ", " 
-				+ namespace + ")");
 		ClojureOSGi.withBundle(bundle, new RunnableWithException() {
 			@Override
 			public Object run() throws Exception {
 				try {
-					CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI, "ClojureOSGi.require(" + bundle.getSymbolicName() + ", " + namespace + ") - START");
 					RT.var("clojure.core", "require").invoke(Symbol.intern(namespace));
-					CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI, "ClojureOSGi.require(" + bundle.getSymbolicName() + ", " + namespace + ") - DONE");
+					CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI, "Namespace " + namespace + " loaded from bundle " + bundle.getSymbolicName());
 					return null;
 				} catch (Exception e) {
-					CCWPlugin.logError("ClojureOSGi.require(" + bundle.getSymbolicName() + ", " + namespace + ") - ERROR", e);
-					throw e;
+					String msg = "Exception loading namespace " + namespace + " from bundle " + bundle.getSymbolicName();
+					CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI, e, msg);
+					throw new RuntimeException(msg, e);
 				}
 			}
 		});

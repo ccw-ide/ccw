@@ -59,7 +59,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     private static final Map<String, Long> tempLaunchCounters = new HashMap<String, Long>();
     
     private ClojureInvoker leiningenConfiguration = ClojureInvoker.newInvoker(CCWPlugin.getDefault(), "ccw.leiningen.launch");
-    private ClojureInvoker launch = ClojureInvoker.newInvoker(CCWPlugin.getDefault(), "ccw.util.launch");
+    private ClojureInvoker launch = ClojureInvoker.newInvoker(CCWPlugin.getDefault(), "ccw.launch");
     
     private static int incTempLaunchCount (String projectName) {
         synchronized (tempLaunchCounters) {

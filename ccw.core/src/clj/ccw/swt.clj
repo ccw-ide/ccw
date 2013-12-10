@@ -1,6 +1,4 @@
-(ns ccw.util.swt)
-
-(ccw.util.bundle/set-bundle-classloader! "ccw.core")
+(ns ccw.swt)
 
 (import 'org.eclipse.swt.SWT)
 (import 'org.eclipse.swt.layout.FormAttachment)
@@ -104,7 +102,7 @@
 
 (defn display [] (Display/getCurrent))
 
-;;; RECOPIE DE ccw.util.eclipse TODO fusionner
+;;; RECOPIE DE ccw.eclipse TODO fusionner
 (defn active-shell []
   (-> (org.eclipse.swt.widgets.Display/getDefault)
     .getActiveShell))

@@ -1,4 +1,4 @@
-(ns ccw.util.edn
+(ns ccw.edn
   (:require [clojure.edn :as edn]))
 
 (defn read-vector

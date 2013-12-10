@@ -1,6 +1,6 @@
 (ns ccw.leiningen.wizard
   (:require [ccw.leiningen.util :as u]
-            [ccw.util.eclipse :as e]
+            [ccw.eclipse :as e]
             [ccw.leiningen.nature :as n]
             [ccw.leiningen.handlers :as handlers]
             [clojure.java.io :as io])

@@ -1,6 +1,6 @@
-(ns ccw.util.jdt
+(ns ccw.jdt
   (:use [clojure.core.incubator :only [-?> -?>>]])
-  (:require [ccw.util.eclipse :as e])
+  (:require [ccw.eclipse :as e])
   (:import [org.eclipse.jdt.core JavaCore
                                  IClasspathAttribute
                                  IClasspathEntry
@@ -9,7 +9,7 @@
            [org.eclipse.core.resources IResource]
            [org.eclipse.core.runtime IPath]))
 
-(println "ccw.util.jdt load starts")
+(println "ccw.jdt load starts")
 
 (def optional         (IClasspathAttribute/OPTIONAL))
 (def javadoc-location (IClasspathAttribute/JAVADOC_LOCATION_ATTRIBUTE_NAME))
@@ -104,4 +104,4 @@
 (defn conj-entries! [java-project entries] 
   (update-entries! java-project entries false))
 
-(println "ccw.util.jdt namespace loaded")
+(println "ccw.jdt namespace loaded")

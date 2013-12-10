@@ -1,9 +1,8 @@
 (ns ccw.leiningen.generic-launch
   (:require [clojure.string :as str]
             [ccw.leiningen.launch :as launch]
-            
-            [ccw.util.swt :as swt]
-            [ccw.util.eclipse :as e])
+            [ccw.swt :as swt]
+            [ccw.eclipse :as e])
   (:import [org.eclipse.swt SWT]
            [org.eclipse.swt.widgets Text]))
 
@@ -34,8 +33,8 @@
   (swt/ui display
     (let [dialog	 (doto (swt/new-shell display
                                        SWT/ON_TOP
-                                       SWT/TITLE
-                                       SWT/CLOSE
+                                       ;SWT/TITLE
+                                       ;SWT/CLOSE
                                        SWT/APPLICATION_MODAL)
                     (.setText "Leiningen command line")
                     (.setLayout (swt/form-layout :spacing 0
@@ -53,7 +52,7 @@
           prompt (str (if project (.getName project) no-project) " $ lein ")
           command-input (doto (Text. dialog 0)
                           (.setText (str prompt "<task>"))
-                          (.setToolTipText "Click Enter to execute, Click Esc to cancel")
+                          (.setToolTipText "Click Enter to execute the command\nClick Esc to cancel/close")
                           (.setLayoutData (swt/form-data :width 400)))
           _ (doto command-input
               (.setSelection 

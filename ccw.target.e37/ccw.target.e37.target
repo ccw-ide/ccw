@@ -8,7 +8,7 @@
 <repository location="http://download.eclipse.org/eclipse/updates/3.7"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="com.github.eclipsecolortheme.feature.feature.group" version="0.12.0.201207240713"/>
+<unit id="com.github.eclipsecolortheme.feature.feature.group" version="0.13.0.201311210852"/>
 <repository location="http://eclipse-color-theme.github.io/update/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">

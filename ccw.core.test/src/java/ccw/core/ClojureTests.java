@@ -19,7 +19,7 @@ public class ClojureTests extends ClojureTest {
 	
 	public ClojureTests() {
 		
-		namespaces.add("ccw.util.edn-test");
+		namespaces.add("ccw.edn-test");
 		
 		requireNamespaces(namespaces);
 	}

@@ -334,6 +334,25 @@ Once you have started a REPL for your project, and when the menu:Project[Build a
 
 // TODO consider packaging Fat Jar with the Standalone Package
 // TODO change to explain how to do this with Leiningen
+
+== Leiningen Support
+
+=== Generic Command launcher
+
+It is possible to invoke arbitrary leiningen command, as if done from the command line, via the kbd:[Alt+L L] keyboard shortcut.
+
+If called from a place in Eclipse where it's possible to infer a `current` project (e.g. if called from the context of a clojure editor), the command will be issued from the project folder, and the popup will show the project name at the start of the line, before the `$`.
+
+  my-project $ lein <task>
+
+If called from a place in Eclipse where no project has been inferred from the current context, then the command is initialized to work outside any project folder.
+
+  <noproject> $ lein <task>
+
+The text `<task>` is already selected in the text input, ready to be replaced by the real command you want to invoke. Replace the text with the command, `uberjar` or `do clean, uberjar` for instance, then hit kbd:[Enter]. 
+
+Wait for a second, and see the `Console View` show the progress of the process' output. You can also interact with the process input stream by typing inside the `Console View`.
+
 == Distribute as a jar
 
 // TODO find the right menu labels

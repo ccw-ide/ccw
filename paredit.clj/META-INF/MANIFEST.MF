@@ -4,9 +4,9 @@ Bundle-Name: Paredit.clj
 Bundle-SymbolicName: paredit.clj;singleton:=true
 Bundle-Version: 0.20.1.qualifier
 Bundle-ClassPath: .,
+ src/,
  classes/
-Bundle-ActivationPolicy: lazy
-Bundle-Vendor: Laurent Petit
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-Vendor: Counterclockwise team
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: paredit
-
+Eclipse-BundleShape: dir

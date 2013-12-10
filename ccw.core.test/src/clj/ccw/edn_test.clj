@@ -1,6 +1,6 @@
-(ns ccw.util.edn-test
+(ns ccw.edn-test
   (:require [clojure.test :refer [deftest testing is]]
-            [ccw.util.edn :refer :all]))
+            [ccw.edn :refer :all]))
 
 (deftest test-read-vector
   (testing "read-vector"

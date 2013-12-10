@@ -1,5 +1,5 @@
-(ns ccw.util.launch
-  (:require [ccw.util.eclipse :as e])
+(ns ccw.launch
+  (:require [ccw.eclipse :as e])
   (:import [org.eclipse.jdt.launching JavaRuntime
                                       IVMInstallType
                                       IRuntimeClasspathEntry
@@ -104,9 +104,9 @@
   "For the given attribute, compute the value to use to create the Launch configuration
    instance given the value configuration."
   (fn [attribute value-configuration] attribute)
-  :default :ccw.util.launch/default-dispatch-value)
+  :default ::default-dispatch-value)
 
-(defmethod compute-value :ccw.util.launch/default-dispatch-value
+(defmethod compute-value ::default-dispatch-value
   [_ value-configuration] value-configuration)
 
 (defmethod compute-value :java/classpath

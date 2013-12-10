@@ -1,5 +1,5 @@
 (ns ccw.leiningen.classpath-container-ui
-  (:require [ccw.util.jdt :as jdt]
+  (:require [ccw.jdt :as jdt]
             [ccw.leiningen.classpath-container :as cpc])
   (:import [org.eclipse.jdt.ui.wizards IClasspathContainerPage]
            [org.eclipse.jface.wizard WizardPage]

@@ -5,7 +5,7 @@
   (:require [ccw.core.trace :as trace]
             [paredit.loc-utils :as lu]
             [ccw.editors.clojure.editor-common :as common]
-            [ccw.util.doc-utils :as doc-utils]))
+            [ccw.core.doc-utils :as doc-utils]))
    
 (defn hover-info
   "Return the documentation hover text to be displayed at offset offset for 

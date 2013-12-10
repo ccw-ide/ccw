@@ -1,11 +1,11 @@
 (ns ccw.leiningen.nature
   (:require [ccw.leiningen.classpath-container :as cpc]
             [clojure.string                    :as str]
-            [ccw.util.eclipse                  :as e]
-            [ccw.util.jdt                      :as jdt]
+            [ccw.eclipse                       :as e]
+            [ccw.jdt                           :as jdt]
             [clojure.java.io                   :as io]
             [ccw.leiningen.util                :as u]
-            [ccw.util.bundle                   :as b])
+            [ccw.bundle                        :as b])
   (:import 
     [org.eclipse.core.resources     IProjectNature IProjectDescription
                                     IWorkspaceRoot]

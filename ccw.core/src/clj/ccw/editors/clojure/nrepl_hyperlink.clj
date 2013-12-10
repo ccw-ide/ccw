@@ -1,5 +1,5 @@
 (ns ccw.editors.clojure.nrepl-hyperlink
-  (:require [ccw.util.string :as s])
+  (:require [ccw.string :as s])
   (:use [clojure.test])
   (:import [org.eclipse.ui.console PatternMatchEvent TextConsole]))
 

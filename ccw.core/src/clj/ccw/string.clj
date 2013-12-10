@@ -1,5 +1,5 @@
 (ns ^{:doc "String manipulation utilities"}
-     ccw.util.string
+     ccw.string
   (:refer-clojure :exclude [replace take drop])
   (:require [clojure.string :as s]))
 

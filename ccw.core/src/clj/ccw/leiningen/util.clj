@@ -1,6 +1,6 @@
 (ns ccw.leiningen.util
   (:use [clojure.core.incubator :only [-?> -?>>]])
-  (:require [ccw.util.eclipse :as e]
+  (:require [ccw.eclipse :as e]
             [leiningen.core.eval :as eval]
             [leiningen.core.utils :as utils]
             [leiningen.core.classpath :as classpath]
@@ -95,7 +95,7 @@
     .toOSString))
 
 (defn lein-project
-  "Given a project (anything that coerces to ccw.util.eclipse/IProjectCoercion),
+  "Given a project (anything that coerces to ccw.eclipse/IProjectCoercion),
    analyze its project.clj file and return the project map.
    If static-loading? is true, does not dynamically load plugins, middlewares, etc.
    (e.g. does not call leiningen.core.project/init-project).

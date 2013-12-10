@@ -1,4 +1,4 @@
-(ns ccw.util.factories
+(ns ccw.core.factories
   (:import [clojure.lang Reflector]))
 
 (defn handler-factory 

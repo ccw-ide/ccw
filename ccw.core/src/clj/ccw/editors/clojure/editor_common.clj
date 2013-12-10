@@ -5,11 +5,10 @@
             [paredit.parser :as p]
             [paredit.loc-utils :as lu]
             [clojure.zip :as z]
-            [ccw.util.doc-utils :as doc]
+            [ccw.core.doc-utils :as doc]
             [ccw.debug.serverrepl :as serverrepl]
             [ccw.core.trace :as trace]
-            [ccw.editors.clojure.editor-support :as editor]
-            [ccw.util.doc-utils :as doc-utils])
+            [ccw.editors.clojure.editor-support :as editor])
   (:use [clojure.core.incubator :only [-?>]])
   (:import [org.eclipse.jface.viewers StyledString
                                       StyledString$Styler]
@@ -94,4 +93,4 @@
     (format "%s: %s\n%s" 
       callee-name
       (or (:arglists callee-metadata) "")
-      (doc-utils/slim-doc (:doc callee-metadata)))))
+      (doc/slim-doc (:doc callee-metadata)))))

@@ -1,4 +1,4 @@
-(ns ccw.util.doc-utils
+(ns ccw.core.doc-utils
   (:require [clojure.string :as str]))
 
 ;	potential documentation tags:

@@ -32,7 +32,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.workbench.texteditor
 Bundle-ClassPath: .,
  src/clj/,
- classes/,
  lib/aether-api.jar,
  lib/aether-connector-file.jar,
  lib/aether-connector-wagon.jar,
@@ -111,7 +110,6 @@ Bundle-ClassPath: .,
  lib/cljunit.jar
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Vendor: Counterclockwise team
-Bundle-ActivationPolicy: lazy
 Eclipse-BundleShape: dir
 Export-Package: ccw,
  ccw.builder,
@@ -126,7 +124,6 @@ Export-Package: ccw,
  ccw.preferences,
  ccw.repl,
  ccw.util,
- ccw.util.eclipse,
  ccw.util.osgi,
  ccw.wizards
 

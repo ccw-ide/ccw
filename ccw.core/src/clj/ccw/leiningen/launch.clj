@@ -1,6 +1,6 @@
 (ns ccw.leiningen.launch
-  (:require [ccw.util.launch :as launch]
-            [ccw.util.eclipse :as e]))
+  (:require [ccw.launch      :as launch]
+            [ccw.eclipse     :as e]))
 
 (defn lein-launch-configuration 
   "project can be nil"

@@ -1918,7 +1918,7 @@
               class="ccw.util.GenericExecutableExtension">
            <parameter
                  name="factory"
-                 value="ccw.util.factories/handler-factory">
+                 value="ccw.core.factories/handler-factory">
            </parameter>
            <parameter
                  name="handler"
@@ -1957,7 +1957,7 @@
               class="ccw.util.GenericExecutableExtension">
            <parameter
                  name="factory"
-                 value="ccw.util.factories/handler-factory">
+                 value="ccw.core.factories/handler-factory">
            </parameter>
            <parameter
                  name="handler"
@@ -1996,7 +1996,7 @@
               class="ccw.util.GenericExecutableExtension">
            <parameter
                  name="factory"
-                 value="ccw.util.factories/handler-factory">
+                 value="ccw.core.factories/handler-factory">
            </parameter>
            <parameter
                  name="handler"
@@ -2035,7 +2035,7 @@
               class="ccw.util.GenericExecutableExtension">
            <parameter
                  name="factory"
-                 value="ccw.util.factories/handler-factory">
+                 value="ccw.core.factories/handler-factory">
            </parameter>
            <parameter
                  name="handler"
@@ -2074,7 +2074,7 @@
               class="ccw.util.GenericExecutableExtension">
            <parameter
                  name="factory"
-                 value="ccw.util.factories/handler-factory">
+                 value="ccw.core.factories/handler-factory">
            </parameter>
            <parameter
                  name="handler"
@@ -2113,7 +2113,7 @@
               class="ccw.util.GenericExecutableExtension">
            <parameter
                  name="factory"
-                 value="ccw.util.factories/handler-factory">
+                 value="ccw.core.factories/handler-factory">
            </parameter>
            <parameter
                  name="handler"
@@ -2151,7 +2151,7 @@
               class="ccw.util.GenericExecutableExtension">
            <parameter
                  name="factory"
-                 value="ccw.util.factories/handler-factory">
+                 value="ccw.core.factories/handler-factory">
            </parameter>
            <parameter
                  name="handler"
@@ -2189,7 +2189,7 @@
               class="ccw.util.GenericExecutableExtension">
            <parameter
                  name="factory"
-                 value="ccw.util.factories/handler-factory">
+                 value="ccw.core.factories/handler-factory">
            </parameter>
            <parameter
                  name="handler"
@@ -2227,7 +2227,7 @@
               class="ccw.util.GenericExecutableExtension">
            <parameter
                  name="factory"
-                 value="ccw.util.factories/handler-factory">
+                 value="ccw.core.factories/handler-factory">
            </parameter>
            <parameter
                  name="handler"
@@ -2265,7 +2265,7 @@
               class="ccw.util.GenericExecutableExtension">
            <parameter
                  name="factory"
-                 value="ccw.util.factories/handler-factory">
+                 value="ccw.core.factories/handler-factory">
            </parameter>
            <parameter
                  name="handler"
@@ -2303,7 +2303,7 @@
               class="ccw.util.GenericExecutableExtension">
            <parameter
                  name="factory"
-                 value="ccw.util.factories/handler-factory">
+                 value="ccw.core.factories/handler-factory">
            </parameter>
            <parameter
                  name="handler"
@@ -2341,7 +2341,7 @@
               class="ccw.util.GenericExecutableExtension">
            <parameter
                  name="factory"
-                 value="ccw.util.factories/handler-factory">
+                 value="ccw.core.factories/handler-factory">
            </parameter>
            <parameter
                  name="handler"
@@ -2379,7 +2379,7 @@
               class="ccw.util.GenericExecutableExtension">
            <parameter
                  name="factory"
-                 value="ccw.util.factories/handler-factory">
+                 value="ccw.core.factories/handler-factory">
            </parameter>
            <parameter
                  name="handler"
@@ -2417,7 +2417,7 @@
               class="ccw.util.GenericExecutableExtension">
            <parameter
                  name="factory"
-                 value="ccw.util.factories/handler-factory">
+                 value="ccw.core.factories/handler-factory">
            </parameter>
            <parameter
                  name="handler"
@@ -2456,7 +2456,7 @@
               class="ccw.util.GenericExecutableExtension">
            <parameter
                  name="factory"
-                 value="ccw.util.factories/handler-factory">
+                 value="ccw.core.factories/handler-factory">
            </parameter>
            <parameter
                  name="handler"
@@ -2495,7 +2495,7 @@
               class="ccw.util.GenericExecutableExtension">
            <parameter
                  name="factory"
-                 value="ccw.util.factories/handler-factory">
+                 value="ccw.core.factories/handler-factory">
            </parameter>
            <parameter
                  name="handler"
@@ -2533,7 +2533,7 @@
               class="ccw.util.GenericExecutableExtension">
            <parameter
                  name="factory"
-                 value="ccw.util.factories/handler-factory">
+                 value="ccw.core.factories/handler-factory">
            </parameter>
            <parameter
                  name="handler"
@@ -2571,7 +2571,7 @@
               class="ccw.util.GenericExecutableExtension">
            <parameter
                  name="factory"
-                 value="ccw.util.factories/handler-factory">
+                 value="ccw.core.factories/handler-factory">
            </parameter>
            <parameter
                  name="handler"
@@ -2609,7 +2609,7 @@
               class="ccw.util.GenericExecutableExtension">
            <parameter
                  name="factory"
-                 value="ccw.util.factories/handler-factory">
+                 value="ccw.core.factories/handler-factory">
            </parameter>
            <parameter
                  name="handler"
@@ -2647,7 +2647,7 @@
               class="ccw.util.GenericExecutableExtension">
            <parameter
                  name="factory"
-                 value="ccw.util.factories/handler-factory">
+                 value="ccw.core.factories/handler-factory">
            </parameter>
            <parameter
                  name="handler"
@@ -2685,7 +2685,7 @@
               class="ccw.util.GenericExecutableExtension">
            <parameter
                  name="factory"
-                 value="ccw.util.factories/handler-factory">
+                 value="ccw.core.factories/handler-factory">
            </parameter>
            <parameter
                  name="handler"
@@ -2723,7 +2723,7 @@
               class="ccw.util.GenericExecutableExtension">
            <parameter
                  name="factory"
-                 value="ccw.util.factories/handler-factory">
+                 value="ccw.core.factories/handler-factory">
            </parameter>
            <parameter
                  name="handler"
@@ -2854,7 +2854,7 @@
             class="ccw.util.GenericExecutableExtension">
          <parameter
                name="factory"
-               value="ccw.util.factories/handler-factory">
+               value="ccw.core.factories/handler-factory">
          </parameter>
          <parameter
                name="handler"
@@ -2883,7 +2883,7 @@
             class="ccw.util.GenericExecutableExtension">
          <parameter
                name="factory"
-               value="ccw.util.factories/handler-factory">
+               value="ccw.core.factories/handler-factory">
          </parameter>
          <parameter
                name="handler"
@@ -2953,7 +2953,7 @@
             class="ccw.util.GenericExecutableExtension">
          <parameter
                name="factory"
-               value="ccw.util.factories/handler-factory">
+               value="ccw.core.factories/handler-factory">
          </parameter>
          <parameter
                name="handler"
@@ -2982,7 +2982,7 @@
             class="ccw.util.GenericExecutableExtension">
          <parameter
                name="factory"
-               value="ccw.util.factories/handler-factory">
+               value="ccw.core.factories/handler-factory">
          </parameter>
          <parameter
                name="handler"
