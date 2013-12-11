@@ -58,11 +58,17 @@
          version="0.0.0"/>
 
    <plugin
+         id="ccw.core.e4"
+         download-size="0"
+         install-size="0"
+         fragment="true"
+         version="0.0.0"/>
+
+   <plugin
          id="paredit.clj"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         fragment="true"
-         unpack="false"/>
+         fragment="true"/>
 
 </feature>
