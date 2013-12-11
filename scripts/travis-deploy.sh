@@ -9,7 +9,7 @@ UPDATESITE=${QUALIFIER}
 PRODUCTS_DIR="${TRAVIS_BUILD_DIR}/ccw.product/target/products"
 
 
-## Push the p2 repository for the build <branch>-<travisbuild>-<gitSha1>
+## Push the p2 repository for the build <travisbuild>-<branch>-<gitSha1>
 ## and also the documentation files
 ftp -pn ${FTP_HOST} <<EOF
 quote USER ${FTP_USER}
