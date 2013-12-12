@@ -23,7 +23,7 @@
                    (update-in [:tags]
                               (fnil conj #{})
                               "ccw"))]
-       (println "spec#:" spec#)
+       ;(println "spec#:" spec#)
        (m/merge-command! @m/app spec#))))
 
 ;;; TODO register for deletion in  m/*elements* (a set)
@@ -42,7 +42,7 @@
                    (update-in [:tags]
                               (fnil conj #{})
                               "ccw"))]
-        (println "spec#:" spec#)
+        ;(println "spec#:" spec#)
        (m/merge-handler! @m/app spec#)))))
 
 ;; TODO support options !!!
@@ -101,5 +101,5 @@
                    (update-in [:tags]
                               (fnil conj #{})
                               "ccw"))]
-     (println "spec#:" spec#)
+     ;(println "spec#:" spec#)
      (m/merge-key-binding! @m/app spec#)))
