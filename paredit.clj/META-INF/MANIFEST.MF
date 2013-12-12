@@ -10,3 +10,4 @@ Bundle-Vendor: Counterclockwise team
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: paredit
 Eclipse-BundleShape: dir
+Bundle-ActivationPolicy: lazy

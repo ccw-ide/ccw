@@ -126,4 +126,5 @@ Export-Package: ccw,
  ccw.util,
  ccw.util.osgi,
  ccw.wizards
+Bundle-ActivationPolicy: lazy
 
