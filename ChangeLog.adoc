@@ -58,6 +58,19 @@ git clone https://gist.github.com/laurentpetit/7909761 ~/.ccw/lein-popup
 # Restart your Eclipse or reload the Users plugins via kbd:[Alt+U S] if you have installed the 'Reload User plugins' user plugin.
 ----
 
+=== CCW/Standalone
+
+Moar sensible default preferences:
+
+- Editors
+** line numbers displayed in the margin
+** 80 chars column displayed
+** tabs automatically replaced by spaces when typing
+- Worskpace
+** automatic refresh of the Workspace resources without asking the user
+
+Fix of an issue with the pre-referenced software update sites (was still pointing to Indigo instead of Kepler)
+
 
 == Changes between Counterclockwise 0.12.3 and 0.20.0
 
