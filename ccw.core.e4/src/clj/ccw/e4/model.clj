@@ -598,11 +598,9 @@
 
 (defn find-binding-table 
   [app context]
-  (println "find-binding-table:" context)
   (let [context (if (string? context)
                   (find-app-binding-context app context)
                   context)]
-    (println "context: " context)
     (first (filter #(= context (binding-context %)) (binding-tables app)))))
 
 (defn key-binding=spec? 
@@ -615,7 +613,6 @@
 (defn find-key-binding
   "Find Model Key binding based on its fields"
   [app spec]
-  (println "find-key-binding spec:" spec)
   (when-let [b-table (find-binding-table app (:context spec))]
     (first (filter #(key-binding=spec? % spec) (bindings b-table)))))
 
@@ -648,8 +645,6 @@
   "Add the handler to the Application Model. Return the application"
   [application handler]
   (let [hdls (handlers application)]
-    (println "hdl(0):" (type (first hdls)))
-    (println "type(handler):" (type handler))
     (.add hdls 0 handler)
     application))
 
@@ -733,10 +728,7 @@
    data of e"
   [e spec]
   (let [td (transient-data e)]
-    (println "td:" td)
-    (println "(type td):" (type td))
     (doseq [[k v] (:transient-data spec)]
-      (println "[k v]:" k v)
       (.put td k v))))
 
 (def default-cmd-spec
@@ -814,7 +806,6 @@
 
 (defn find-or-create-binding-table 
   [app context]
-  (println "-=-=-=-=-=-=-= context:" context)
   (if-let [bt (find-binding-table app context)]
     bt
     (let [bt (create-binding-table)]
@@ -828,9 +819,8 @@
   (let [bt (find-or-create-binding-table app context)]
     (.add (bindings bt) 0 kb)))
   
-;; TODO how/where to use :scheme ?
+;; how/where to use :scheme ?
 (defn merge-key-binding!
-  "TODO"
   [app spec]
   (let [cmd (if (string? (:command spec))
               (find-command app (:command spec))
