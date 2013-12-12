@@ -6,7 +6,7 @@ Laurent Petit <laurent dot petit at gmail dot com>
 :experimental:
 :toc: 
 :toc-title!:
-:toclevels: 1
+:toclevels: 0
 
 == Changes between Counterclockwise 0.20.0 and 0.21.0
 
@@ -16,13 +16,47 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 - Explicitly ask the user for confirmation before launching a second process for the same project
 
+=== User plugins
+
+It is possible to contribute Counterclockwise User Plugins inside folder `~/.ccw`. +
+This will be a way both:
+- for users to contribute / experiment more easily to Counterclockwise
+- for the Counterclockwise team to provide beta features for rapid user feedback
+
+INFO: a User Plugin is dynamic. To remove it, just remove it.
+
+A whole new section of the documentation has been added concerning User plugins. See http://doc.ccw-ide.org/documentation.html#_user_plugins for the full story.
+
+WARNING: Works only with Eclipse 4 and CCW/Standalone.
+
+=== Experimental User Plugin: Reload User plugins plugin
+
+Clone the following Gist https://gist.github.com/laurentpetit/7924786
+
+[source,bash]
+git clone https://gist.github.com/laurentpetit/7924786
+# Restart your Eclipse
+
+And then you can reload user plugins via kbd:[Alt+U S] Keyboard Shortcut.
+
 === Leiningen based Launcher
 
-The code is there, but desactivated at the moment
+The code is there, but not active at the moment (needs more love / hammock)
 
 === General purpose Leiningen task invoker
 
-Addition of a new command, kbd:[Alt+L L] for launching a popup allowing to enter an arbitry leiningen command
+WARNING: Eclipse 4 and CCW/Standalone only
+
+Addition of a new command, kbd:[Alt+L L] for launching a popup allowing to enter an arbitry leiningen command.
+
+Since this is still an experimental feature, it is only accessible via a User Plugin atm. +
+Clone the following Gist into your `~/.ccw/` folder to get it: https://gist.github.com/laurentpetit/7909761
+
+[source,bash]
+----
+git clone https://gist.github.com/laurentpetit/7909761 ~/.ccw/lein-popup
+# Restart your Eclipse or reload the Users plugins via kbd:[Alt+U S] if you have installed the 'Reload User plugins' user plugin.
+----
 
 
 == Changes between Counterclockwise 0.12.3 and 0.20.0

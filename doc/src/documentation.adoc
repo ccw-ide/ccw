@@ -375,3 +375,123 @@ If you also save the configuration via the corresponding button, it wil then be 
 Please refer to the http://fjep.sourceforge.net[Fat Jar plugin homepage] for more detail
 
 NOTE: There is also an out-of-the-box "create Executable Jar" feature in Eclipse, but we encountered problems with it when the main class is not located in the source folders of the project, as is the case when you generate the main class from a clojure namespace.
+
+= User Plugins
+
+WARNING: This feature only works with Counterclockwise Standalone or Counterclockwise installed as a plugin on an Eclipse 4 installation.
+
+It is possible to extend Counterclockwise / Eclipse yourself using the Clojure programming language.
+
+Contributions must be placed in `.clj` files inside your `~/.ccw/` folder.
+
+Content in `~/.ccw/` folder is processed as such:
+
+- Folder and subfolders are scanned breadth-first for the presence of `.clj` files
+- Everytime a folder contains a `.clj` file, it is considered a 'plugin' folder.
+** a plugin folder cannot contain nested plugin folders, only top-level scripts and non-top-level namespaces.
+- Plugin folders are processed in no specific order (plugins must be independent)
+- Processing a plugin folder consists of 
+** placing the folder inside Counterclockwise's classpath (so that you can use/require namespaces provided by the plugin)
+** launching all the `.clj` files located at the root of the plugin, one after the other, in no particular order
+- If a plugin has several scripts, one script failing does not prevent other scripts to execute
+- A plugin failing to load does not prevent other plugins to load
+- All contributions made by plugins to Eclipse (e.g. new commands) are managed by Counterclockwise: should the user plugin be removed, the contributions would be cleaned up automatically the next time the plugins folder is scanned.
+
+The idea behind this layout is that users will share plugins via git repositories, and each plugin can directly be cloned into its own directory inside `~/.ccw/`.
+
+INFO: a User Plugin is dynamic. To remove it, just delete its folder inside `~/.ccw/`.
+
+== Examples
+
+=== Example 1: Hello World - single script file
+
+.~/.ccw/hello_world.clj
+[source,clojure]
+----
+(ns hello-world
+  (:require [ccw.e4.dsl  :refer :all]
+            [ccw.eclipse :as e]))
+
+(def msg  
+  "This popup provided to you from a user script")
+
+(defn greet [context]                                ; <1>
+  (e/info-dialog "Hello world" msg))
+
+(defcommand greeter "Hello from CCW")                ; <2>
+(defhandler greeter greet)
+(defkeybinding greeter "Ctrl+Alt+Y")
+----
+<1> `greet` is the function that implements the command behavior, it takes a `context` argument which in real-world situations can be used to gather contextualized information concerning the execution (what's the current editor/view, the current selection, gather a preference value by key, etc.)
+<2> `defcommand`, `defhandler` and `defkeybinding` are macros from namespace `ccw.e4.dsl`. They dynamically contribute to the Eclipse Application Model. Those contributions are tagged specifically so that it is easy to manage them from CCW (automatic removal, for instance, should you remove the plugin, or update the command name, etc.)
+
+NOTE: The script is placed directly inside `~/.ccw/` to demonstrate how easy it is to start contributing. In real world situations you will probably create one folder per plugin.
+
+=== Example 2: Hello World - script file and companion namespaces
+
+Here the Hello World user plugin is placed in its own subdirectory. +
+This also demonstrates how to split a plugin into script + companion namespaces.
+
+.~/.ccw/hello-world/hello_world.clj
+[source,clojure]
+----
+(ns hello-world
+  (:require [ccw.e4.dsl :refer :all]
+            [user.greet :as g]))
+
+(defn greet [context] (g/greet-popup))
+
+(defcommand greeter "Hello from CCW")
+(defhandler greeter greet)
+(defkeybinding greeter "Ctrl+Alt+Y")
+----
+
+.~/.ccw/hello-world/user/greet.clj
+[source,clojure]
+----
+(ns user.greet
+  (:require [ccw.eclipse :as e]
+            [user.util :refer (text)]))
+
+(defn greet-popup []
+  (e/info-dialog "Hello world" (text)))
+----
+
+.~/.ccw/hello-world/user/util.clj
+[source,clojure]
+----
+(ns user.util)
+
+(defn text [] "This popup provided to you from a user script")
+----
+
+WARNING: the `hello-world` subdirectory will only be recognized as a plugin if there is no `.clj` file inside `~/.ccw/`
+
+=== Example 3: Dynamic Reload of User Plugins
+
+A somewhat meta example, which shows that User plugins have access to Counterclockwise Internals. +
+This plugin adds a command that calls Counterclockwise's `start-user-plugins` function to dynamically reload user plugins without the necessity to restart the IDE.
+
+.~/.ccw/plugin-additions/reload.clj
+[source,clojure]
+----
+(ns reload
+  (:require [ccw.e4.dsl :refer :all]
+            [ccw.eclipse :as e]
+            [ccw.core.user-plugins :as p]))
+ 
+(defn reload [context]
+  (try
+    (p/start-user-plugins)
+    (e/error-dialog "User plugins"
+      "User plugins have been restarted successfully!")
+    (catch Exception e
+      (e/error-dialog"User plugins" (str
+        "An error occured while starting User plugins: \n"
+        (.getMessage e))))))
+ 
+(defcommand start-user-plugins "Start/restart user plugins")
+(defhandler start-user-plugins reload)
+(defkeybinding start-user-plugins "Alt+U S")
+----
+
