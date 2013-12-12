@@ -2,7 +2,6 @@
 
 ### TODO
 
-* Eclipse4ModelProcessor: pre-check in Java to see if there's a populated ~./ccw folder if not: don't trigger early startup of Clojure, so that users don't pay for what they don't need.
 - Autoshift:
 DONE  - extract logic from Eclipse, add tests
 DELAYED  - make it work with raise over, etc.

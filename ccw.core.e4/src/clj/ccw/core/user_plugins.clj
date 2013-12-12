@@ -36,21 +36,35 @@
     m/find-handlers-by-tags m/handlers
     app load-key))
 
-#_(defn clean-key-bindings!
-   "Find all key-bindings with tag 'ccw', and remove all those that
+(defn clean-key-bindings!
+  "Find all key-bindings with tag 'ccw', and remove all those that
    dont have 'ccw/load-key' transient key with value load-key."
-   [app load-key]
-   (clean-type-elements!
-     m/find-handlers-by-tags m/handlers
-     app load-key))
+  [app load-key]
+  (doseq [binding-table (m/binding-tables app)
+          :let [key-bindings (m/bindings binding-table)]]
+    (let [to-remove (doall (for [key-binding key-bindings
+                                 :let [tags (m/tags key-binding)]]
+                             (when (and 
+                                     (.contains tags "ccw")
+                                     (not= (get tags "ccw/load-key") load-key))
+                               key-binding)))]
+      (doseq [key-binding to-remove]
+        (.remove key-bindings key-binding)))))
 
-#_(defn clean-elements!
-   "Find all elements with tag 'ccw', and remove all those that don't
+(defn clean-elements!
+ "Find all elements with tag 'ccw', and remove all those that don't
    have 'ccw/load-key' transient key with value load-key"
-   [app load-key]
-   (clean-type-elements!
-     m/find-elements-by-tags
-     ))
+ [app load-key]
+ (let [model-service (m/context-key app :model-service)
+       elts (.findElements model-service
+              app
+              nil ; don't find by id
+              nil ; don't find a specific subclass of MUIElement
+              ["ccw"])]
+   (doseq [e elts
+           :let [tags (m/tags e)]]
+     (when-not (= (get tags "ccw/load-key") load-key)
+       (-> e .getParent .getChildren (.remove e))))))
 
 (defn clean-model!
   "Find all elements with tag 'ccw', and remove all those that
@@ -58,8 +72,8 @@
   [app load-key]
   (clean-commands! app load-key)
   (clean-handlers! app load-key)
-  #_(clean-key-bindings! app load-key)
-  #_(clean-elements! app load-key))
+  (clean-key-bindings! app load-key)
+  (clean-elements! app load-key))
 
 (defn with-bundle [bundle urls f]
   (ccw.util.osgi.ClojureOSGi/withBundle 
