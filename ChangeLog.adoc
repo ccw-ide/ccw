@@ -39,6 +39,10 @@ git clone https://gist.github.com/laurentpetit/7924786
 
 And then you can reload user plugins via kbd:[Alt+U S] Keyboard Shortcut.
 
+=== Editor
+
+"Load File" action now works for editors opened via menu:File[Open File...] (aka arbitrary file on the filesystem, not necessarily living inside a project inside the Eclipse Workspace)
+
 === Leiningen based Launcher
 
 The code is there, but not active at the moment (needs more love / hammock)

@@ -10,19 +10,22 @@
  *******************************************************************************/
 package ccw.editors.clojure;
 
+import org.apache.commons.io.FilenameUtils;
+import org.eclipse.core.filesystem.URIUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jface.action.Action;
+import org.eclipse.ui.ide.FileStoreEditorInput;
 
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.ClojureProject;
 import ccw.TraceOptions;
 import ccw.launching.ClojureLaunchShortcut;
-import ccw.nature.ClojureNaturePropertyTest;
 import ccw.repl.Actions;
 import ccw.repl.REPLView;
 import ccw.util.ClojureInvoker;
@@ -45,38 +48,21 @@ public class LoadFileAction extends Action {
 
 	public void run() {
         final IFile editorFile = (IFile) editor.getEditorInput().getAdapter(IFile.class);
-        if (editorFile == null) {
+
+        final String filePath = computeFilePath(editorFile);
+        final String fileName = FilenameUtils.getName(filePath);
+
+        if (filePath == null) {
         	editor.setStatusLineErrorMessage("Unable to create a Clojure Application for this editor's content");
         	return;
         }
         
-        if (!ClojureNaturePropertyTest.hasClojureNature(editorFile)) {
-        	editor.setStatusLineErrorMessage(
-        			"Cannot invoke command " 
-        			+ ClojureEditorMessages.LoadFileAction_label
-        			+ " because the current file does not belong to a project "
-        			+ " for which Clojure support has been enabled.");
-        	return;
-        }
-        
-        ClojureProject proj = ClojureCore.getClojureProject(editor.getProject());
-        String tempSourcePath = null;
-        final String filePath = editorFile.getLocation().toOSString();
-        if (proj != null) {
-            for (IFolder f : proj.sourceFolders()) {
-                if (f.getProjectRelativePath().isPrefixOf(editorFile.getProjectRelativePath())) {
-                	tempSourcePath = editorFile.getProjectRelativePath().makeRelativeTo(f.getProjectRelativePath()).toOSString();
-                    break;
-                }
-            }
-        }
-        if (tempSourcePath == null) tempSourcePath = filePath;
-        final String sourcePath = tempSourcePath;
+        final String sourcePath = computeSourcePath(editorFile, filePath);
 
         final REPLView repl = REPLView.activeREPL.get();
         if (repl != null && !repl.isDisposed())  {
-    		evaluateFileText(repl, editor.getDocument().get(), filePath, sourcePath, editorFile.getName());
-        } else {
+    		evaluateFileText(repl, editor.getDocument().get(), filePath, sourcePath, fileName);
+        } else if (editorFile != null) {
     		CCWPlugin.getTracer().trace(TraceOptions.LAUNCHER, "No active REPL found (",
     				(repl == null) ? "active repl is null" : "active repl is disposed", 
     				"), so launching a new one");
@@ -88,7 +74,7 @@ public class LoadFileAction extends Action {
 		        		public void run() {
 				        	REPLView repl = CCWPlugin.getDefault().getProjectREPL(project);
 				        	if (repl != null && !repl.isDisposed()) {
-				        		evaluateFileText(repl, editor.getDocument().get(), filePath, sourcePath, editorFile.getName());
+				        		evaluateFileText(repl, editor.getDocument().get(), filePath, sourcePath, fileName);
 				        		SwitchNamespaceAction.run(repl, editor, false);
 				        	} else {
 				        		CCWPlugin.logError("Could not start a REPL for loading file " + filePath);
@@ -97,7 +83,46 @@ public class LoadFileAction extends Action {
 		        	});
 				}
 			}).start();
+        } else {
+        	editor.setStatusLineErrorMessage("Cannot start a REPL for loading " + fileName);
         }
+	}
+
+	private String computeFilePath(final IFile editorFile) {
+		String filePath;
+		if (editorFile != null) {
+        	filePath = editorFile.getLocation().toOSString();
+        } else {
+        	FileStoreEditorInput fei = (FileStoreEditorInput) editor.getEditorInput();
+        	IPath path = URIUtil.toPath(fei.getURI());
+        	if (path != null) {
+        		filePath = path.toOSString();
+        	} else {
+        		filePath = null;
+        	}
+        }
+		return filePath;
+	}
+
+	private String computeSourcePath(final IFile editorFile, String filePath) {
+		String sourcePath;
+		if (editorFile != null) {
+	        ClojureProject proj = ClojureCore.getClojureProject(editor.getProject());
+	        String tempSourcePath = null;
+	        if (proj != null) {
+	            for (IFolder f : proj.sourceFolders()) {
+	                if (f.getProjectRelativePath().isPrefixOf(editorFile.getProjectRelativePath())) {
+	                	tempSourcePath = editorFile.getProjectRelativePath().makeRelativeTo(f.getProjectRelativePath()).toOSString();
+	                    break;
+	                }
+	            }
+	        }
+	        sourcePath = tempSourcePath != null ? tempSourcePath : filePath;
+        } else { // (filesystemFile != null)
+        	// We cannot determine the source path, so let it be the full path
+        	sourcePath = filePath;
+        }
+		return sourcePath;
 	}
 	
 	private void evaluateFileText(REPLView repl, String text, String filePath, String sourcePath, String fileName) {
