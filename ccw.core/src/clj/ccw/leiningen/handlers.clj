@@ -119,9 +119,9 @@
         (.beginTask monitor 
           (str legend)
           1)
-        (n/set-description! 
+        (e/project-desc! 
           project
-          (apply n/add-natures! (n/description project) natures))
+          (apply e/add-desc-natures! (e/project-desc project) natures))
         (.worked monitor 1)
         (.done monitor)
         ;(println "add-natures: background job stopped for natures:" (seq natures))

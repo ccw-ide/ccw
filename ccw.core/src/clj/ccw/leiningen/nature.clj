@@ -7,7 +7,7 @@
             [ccw.leiningen.util                :as u]
             [ccw.bundle                        :as b])
   (:import 
-    [org.eclipse.core.resources     IProjectNature IProjectDescription
+    [org.eclipse.core.resources     IProjectNature
                                     IWorkspaceRoot]
     [org.eclipse.core.runtime       CoreException
                                     IPath
@@ -41,71 +41,6 @@
 (def logger (Logger. (ccw.CCWPlugin/PLUGIN_ID)))
 
 ;; TODO copie de ccw.core, exporter dans ccw.util
-
-(defn description [^IProject project] (.getDescription project))
-
-(defn alter-builders!
-  [^IProjectDescription desc f & args]
-  (let [spec (.getBuildSpec desc)
-        new-spec (apply f spec args)]
-    (doto desc
-      (.setBuildSpec (into-array new-spec)))))
-
-(defn builder [^IProjectDescription desc builder-id]
-  (doto (.newCommand desc)
-    (.setBuilderName builder-id)))
-
-(defn- add-builder!
-  [desc builder-id]
-  (alter-builders! desc #(cons (builder desc builder-id) %)))
-
-(defn remove-builder!
-  [desc builder-id]
-  (alter-builders! desc (partial remove #(= builder-id (.getBuilderName %)))))
-
-(defn set-description! 
-  ([^IProject proj desc] (set-description! proj desc nil))
-  ([^IProject proj desc progress-monitor]
-    (println "proj:" proj)
-    (println "desc:" desc)
-    (.setDescription
-      proj
-      desc
-      progress-monitor)))
-
-(defn has-builder? [^IProjectDescription desc builder-id]
-  (let [spec (.getBuildSpec desc)]
-    (some #(= builder-id (.getBuilderName %)) spec)))
-
-(defn has-nature? 
-  "Returns the fact that project has nature-id declared. Not the fact that the
-   nature is currently activated (which may not be the case if there's a consistency
-   problem).
-   Pre-requisite: project exists and is open"
-  [^IProject project nature-id]
-  {:pre [(.isOpen project)]}
-  (.hasNature project nature-id))
-
-(defn set-natures! [^IProjectDescription desc natures]
-  (println "natures:" natures)
-  (doto desc
-    (.setNatureIds (into-array String natures))))
-
-(defn add-natures! [^IProjectDescription desc & nature-ids]
-  (let [natures         (.getNatureIds desc)
-        _ (println "old natures:" natures)
-        missing-natures (remove (set natures) nature-ids)
-        _ (println "missing natures:" natures)
-        new-natures     (concat natures missing-natures)
-        _ (println "new-natures:" new-natures)]
-    (set-natures! desc new-natures)))
-
-(defn remove-nature! [^IProjectDescription desc nature-id]
-  (let [natures (.getNatureIds desc)]
-    (when-not (some #{nature-id} natures)
-      (let [new-natures (remove #{nature-id} natures)
-            new-natures (into [] natures)]
-        (set-natures! desc new-natures)))))
 
 (defn jvm-entry
   "Returns the Classpath Entry for the found JVM, or nil if none found"
@@ -249,20 +184,20 @@
         (e/run-in-background
           (fn [progress-monitor]
             (let [proj (.getProject this)
-                  desc (description proj)
+                  desc (e/project-desc proj)
                   java-proj (JavaCore/create proj)]
-              (when-not (has-builder? desc LeiningenBuilder/ID)
-                (set-description! proj (add-builder! desc LeiningenBuilder/ID)))
+              (when-not (e/desc-has-builder? desc LeiningenBuilder/ID)
+                (e/project-desc! proj (e/add-desc-builder! desc LeiningenBuilder/ID)))
               (reset-project-build-path java-proj true progress-monitor)))))
       (deconfigure
         [this]
         (e/run-in-background
           (fn [progress-monitor]
             (let [proj      (.getProject this)
-                  desc      (description proj)
+                  desc      (e/project-desc proj)
                   java-proj (JavaCore/create proj)]
-              (when (has-builder? desc LeiningenBuilder/ID)
-                (set-description! proj (remove-builder! desc LeiningenBuilder/ID)))
+              (when (e/desc-has-builder? desc LeiningenBuilder/ID)
+                (e/project-desc! proj (e/remove-desc-builder! desc LeiningenBuilder/ID)))
               (when-let [cont (cpc/has-lein-container? java-proj)]
                 (let [raw-classpath (.getRawClasspath java-proj)
                       raw-classpath (remove #{cont} raw-classpath)]

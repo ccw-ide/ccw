@@ -24,9 +24,3 @@
   "Return the absolute path (filesystem/OS dependent) of f"
   [f] (and f (.getAbsolutePath f)))
 
-(defn plugins-root-dir 
-  "Return the user plugins dir (`~/.ccw/`) if it exists and is a directory.
-   Or return nil."
-  []
-  (directory? (io/file (System/getProperty "user.home")
-                       ".ccw")))

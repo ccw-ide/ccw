@@ -4,6 +4,7 @@
   (:use [clojure.core.incubator :only [-?> -?>>]])
   (:import [org.eclipse.core.resources IResource
                                        IProject
+                                       IProjectDescription
                                        ResourcesPlugin
                                        IWorkspaceRunnable
                                        IWorkspace
@@ -182,6 +183,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; IProjects
 (defn project-name [p] (.getName (project p)))
+(defn project-exists [p] (and p (.exists (project p))))
 (defn project-close [p] (.close (project p) nil))
 (defn project-open [p] (.open (project p) nil))
 (defn project-open? [p] (.isOpen (project p)))
@@ -189,8 +191,100 @@
 (defn projects-referenced-by [p] (into [] (.getReferencedProjects (project p))))
 (defn project-folder [p child-folder-name] (.getFolder (project p) child-folder-name))
 (defn project-file [p child-file-name] (.getFile (project p) child-file-name))
-(defn project-create [p] (.create (project p) nil))
 (defn projects [] (into [] (.getProjects (workspace-root))))
+
+(defn new-project-desc
+  "Initialize a new project description with proj-name for the project name.
+   Use as an argument to project-create"
+  ([proj-name] (new-project-desc (workspace) proj-name))
+  ([w proj-name] (.newProjectDescription w proj-name)))
+
+(defn validate-project-location
+  "proj-location must be an absolute path on the filesystem.
+   Return nil if ok, an error message otherwise."
+  [proj-location]
+  (let [status (.validateProjectLocation (workspace)
+              	   nil (path proj-location))]
+    (when-not (.isOK status) (.getMessage status))))
+
+(defn desc-location! [desc loc]
+  (doto desc 
+    (.setLocation (path loc))))
+
+(defn -project-create
+  "Create project with name proj-name and optional description proj-desc"
+  ([proj-name] (-project-create proj-name nil))
+  ([proj-name proj-desc]
+    (doto (project proj-name)
+      (.create proj-desc nil))))
+
+(defn project-create
+  "Create project with name proj-name and location proj-location.
+   If proj-location is not set, create project in default workspace
+   location."
+  ([proj-name] (-project-create proj-name))
+  ([proj-name proj-location]
+    (let [desc (new-project-desc proj-name)
+          desc (desc-location! desc proj-location)]
+      (-project-create proj-name desc))))
+
+(defn project-desc
+  "Return the project description"
+  [^IProject proj]
+  (.getDescription proj))
+
+(defn project-desc!
+  ([^IProject proj desc] (project-desc! proj desc nil))
+  ([^IProject proj desc progress-monitor]
+    (.setDescription proj desc progress-monitor)))
+
+(defn- update-desc-builders!
+  [^IProjectDescription desc f & args]
+  (let [spec     (.getBuildSpec desc)
+        new-spec (apply f spec args)]
+    (doto desc
+      (.setBuildSpec (into-array new-spec)))))
+
+(defn desc-builder [^IProjectDescription desc builder-name]
+  (doto (.newCommand desc)
+    (.setBuilderName builder-name)))
+
+(defn add-desc-builder!
+  [desc builder-name]
+  (update-desc-builders! desc #(cons (desc-builder desc builder-name) %)))
+
+(defn remove-desc-builder!
+  [desc builder-name]
+  (update-desc-builders! desc (partial remove #(= builder-name (.getBuilderName %)))))
+
+(defn desc-has-builder? [^IProjectDescription desc builder-name]
+  (let [spec (.getBuildSpec desc)]
+    (some #(= builder-name (.getBuilderName %)) spec)))
+
+(defn project-has-nature? 
+  "Returns the fact that project has nature-id declared. Not the fact that the
+   nature is currently activated (which may not be the case if there's a consistency
+   problem).
+   Pre-requisite: project exists and is open"
+  [^IProject proj nature-id]
+  {:pre [(.isOpen proj)]}
+  (.hasNature proj nature-id))
+
+(defn desc-natures! [^IProjectDescription desc natures]
+  (doto desc (.setNatureIds (into-array String natures))))
+
+(defn add-desc-natures! [^IProjectDescription desc & nature-ids]
+  (let [natures         (.getNatureIds desc)
+        missing-natures (remove (set natures) nature-ids)
+        new-natures     (concat natures missing-natures)]
+    (desc-natures! desc new-natures)))
+
+(defn remove-desc-nature! [^IProjectDescription desc nature-id]
+  (let [natures (.getNatureIds desc)]
+    (when-not (some #{nature-id} natures)
+      (let [new-natures (remove #{nature-id} natures)
+            new-natures (into [] natures)]
+        (desc-natures! desc new-natures)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Long-running tasks, background tasks, Workspace Resources related tasks
@@ -401,6 +495,25 @@
       (let [shell (or shell (active-shell))]
         (org.eclipse.jface.dialogs.MessageDialog/openQuestion
           shell title message)))))
+
+(defn input-dialog 
+  "validator is a fn taking the String to validate and returning
+   either nil if no error, or the error message if error"
+  ([title message initial-value] (input-dialog title message initial-value nil))
+  ([title message initial-value validator] (input-dialog nil title message initial-value validator))
+  ([shell title message initial-value validator]
+    (ui
+      (let [shell (or shell (active-shell))
+            d     (org.eclipse.jface.dialogs.InputDialog.
+                    shell
+                    title
+                    message
+                    initial-value 
+                    (when validator
+                      (reify org.eclipse.jface.dialogs.IInputValidator
+                        (isValid [this new-text] (validator new-text)))))]
+        (.open d)
+        (.getValue d)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Platform utilities
