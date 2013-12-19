@@ -48,6 +48,7 @@ import ccw.ClojureCore;
 import ccw.ClojureProject;
 import ccw.repl.REPLView;
 import ccw.util.BundleUtils;
+import ccw.util.ClojureInvoker;
 import ccw.util.DisplayUtil;
 import clojure.lang.RT;
 import clojure.lang.Var;
@@ -56,6 +57,7 @@ import clojure.tools.nrepl.Connection;
 public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 
     private static Var currentLaunch = Var.create().setDynamic(true);
+    private final ClojureInvoker coreLaunch = ClojureInvoker.newInvoker(CCWPlugin.getDefault(), "ccw.core.launch");
     private static IConsole lastConsoleOpened;
     
     static {
@@ -114,6 +116,8 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
                         CCWPlugin.logError("Waiting for new REPL process ack timed out");
                         return done(monitor, new Status(IStatus.ERROR, CCWPlugin.PLUGIN_ID, "Waiting for new REPL process ack timed out"));
                     }
+                    
+                    coreLaunch._("on-nrepl-server-instanciated", port, LaunchUtils.getProjectName(launch));
                     
                     // The syncExec is necessary to ensure the launch does not return
                     // until either the repl is launched, either it failed
