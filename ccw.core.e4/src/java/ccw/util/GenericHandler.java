@@ -4,6 +4,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 
+import ccw.CCWPlugin;
+import ccw.util.osgi.ClojureOSGi;
+import ccw.util.osgi.RunnableWithException;
 import clojure.lang.Var;
 
 /**
@@ -39,11 +42,17 @@ public class GenericHandler {
 	}
 	
 	@Execute()
-	public void execute(IEclipseContext context) throws CoreException {
+	public void execute(final IEclipseContext context) throws CoreException {
 		if (var == null) {
 		    var = BundleUtils.requireAndGetVar("ccw.core", varName);
 		}
-		var.invoke(context);
+		ClojureOSGi.withBundle(CCWPlugin.getDefault().getBundle(),
+				new RunnableWithException() {
+					@Override public Object run() throws Exception {
+						var.invoke(context);
+						return null;
+					}
+				});
 	}
 	
 }

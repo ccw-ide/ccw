@@ -556,11 +556,17 @@ public final class ClojureCore {
 		return false;
     }
 
+    /**
+     * If line == -1 => goto last line
+     */
 	public static void gotoEditorLine(Object editor, int line) {
 		if (ITextEditor.class.isInstance(editor)) {
 			ITextEditor textEditor = (ITextEditor) editor;
 			IRegion lineRegion;
 			try {
+				if (line == -1) {
+					line = textEditor.getDocumentProvider().getDocument(textEditor.getEditorInput()).getNumberOfLines();
+				}
 				lineRegion = textEditor.getDocumentProvider().getDocument(textEditor.getEditorInput()).getLineInformation(line - 1);
 				textEditor.selectAndReveal(lineRegion.getOffset(), lineRegion.getLength());
 			} catch (BadLocationException e) {

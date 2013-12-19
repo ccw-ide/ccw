@@ -53,14 +53,26 @@
   "Return the Eclipse Workspace" ^IWorkspace []
   (ResourcesPlugin/getWorkspace))
 
-(defn workbench 
-  "Return the Eclipse Workbench" ^IWorkbench []
-  (PlatformUI/getWorkbench))
 
 (defn workspace-root 
   "Return the Eclipse Workspace root"
   ^IWorkspaceRoot []
   (.getRoot (workspace)))
+
+(defn workbench 
+  "Return the Eclipse Workbench" []
+  (PlatformUI/getWorkbench))
+
+(defn workbench-window
+  "Return the Active workbench window" 
+  ([] (workbench-window (workbench)))
+  ([workbench] (.getActiveWorkbenchWindow workbench)))
+
+(defn workbench-page
+  "Return the Active workbench page" 
+  ([] (workbench-page (workbench-window)))
+  ([workbench-window] (.getActivePage workbench-window)))
+
 
 (defprotocol IProjectCoercion
   (project ^org.eclipse.core.resources.IProject [this] "Coerce this into an IProject"))
@@ -153,6 +165,28 @@
   File
   (path [f] (Path. (.getAbsolutePath f))))
 
+
+ (def ^:private resource-refresh-depth
+   {IResource/DEPTH_ZERO     IResource/DEPTH_ZERO
+    IResource/DEPTH_ONE      IResource/DEPTH_ONE
+    IResource/DEPTH_INFINITE IResource/DEPTH_INFINITE
+    :zero IResource/DEPTH_ZERO
+    :one  IResource/DEPTH_ONE
+    :infinite IResource/DEPTH_INFINITE})
+ 
+ (defn refresh-resource
+   "Synchronize the resource with the filesystem.
+    r: the resource to refresh (an IResourceCoercion)
+    keyword-based options:
+    :depth :zero (refresh only the resource), 
+           :one  (refresh resource and immediate children), 
+        or :infinite (refresh resource and recursively)
+           defaults to :infinite
+    :monitor an IProgressMonitor, defaults to nil"
+   [r & {:keys [depth monitor] :or {depth :infinite} :as options}]
+   (.refreshLocal r (resource-refresh-depth depth) monitor))
+
+
 (defn plugin-state-location 
   "Return the plugin's state location as a path representing 
    an absolute filesystem path."
@@ -180,6 +214,14 @@
         (CCWPlugin/logError (str "Unable to find " plugin-name " plugin. This is probably a regression."))
         nil))))
 
+(def ^:private
+  resource-type {IResource/FOLDER  IResource/FOLDER
+                 IResource/PROJECT IResource/PROJECT
+                 IResource/FILE    IResource/FILE
+                 :folder  IResource/FOLDER
+                 :project IResource/PROJECT
+                 :file    IResource/FILE})
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; IProjects
 (defn project-name [p] (.getName (project p)))
@@ -192,12 +234,35 @@
 (defn project-folder [p child-folder-name] (.getFolder (project p) child-folder-name))
 (defn project-file [p child-file-name] (.getFile (project p) child-file-name))
 (defn projects [] (into [] (.getProjects (workspace-root))))
+(defn project-members [p] (and p (.members (project p))))
+
+(defn resource-of-type? [r type] 
+  (let [r (resource r)
+        type (resource-type type)]
+    (and r (= type (.getType r)) r)))
+
+
+(defn worskpace-file? [r] (resource-of-type? r :file))
+(defn workspace-folder? [r] (resource-of-type? r :folder))
+(defn workspace-project? [r] (resource-of-type? r :project))
+
+(defn file-extension [r] (and r (.getFileExtension r)))
 
 (defn new-project-desc
   "Initialize a new project description with proj-name for the project name.
    Use as an argument to project-create"
   ([proj-name] (new-project-desc (workspace) proj-name))
   ([w proj-name] (.newProjectDescription w proj-name)))
+
+
+
+(defn validate-name-as-resource-type
+  "Delagates to Eclipse the validation of n as a valid resource name
+   of type type (type being :folder, :project or :file).
+   Return nil if ok, an error message otherwise."
+  [proj-name type]
+  (let [status (.validateName (workspace) proj-name (resource-type type))]
+    (when-not (.isOK status) (.getMessage status))))
 
 (defn validate-project-location
   "proj-location must be an absolute path on the filesystem.
@@ -285,6 +350,35 @@
       (let [new-natures (remove #{nature-id} natures)
             new-natures (into [] natures)]
         (desc-natures! desc new-natures)))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Editor helper functions
+;; 
+
+(defn open-workspace-file
+  "Eclipse 4 - only.
+   Opens a workspace file with the default editor.
+   workbench-page is the workbench page to open.
+   f is an IFile, or something that can be coerced to an IFile.
+   Return the Editor object (IEditorPart)"
+  ([f] (open-workspace-file (workbench-page) f))
+  ([workbench-page f]
+    (org.eclipse.ui.ide.IDE/openEditor
+      workbench-page
+      (resource f)
+      true ; activate the editor
+      true ; attempt to resolve the content type for this file
+      )))
+
+;; TODO open-filesystem-file
+
+(defn goto-editor-line
+  "Given an Editor object, goto the specified line.
+   If line is -1, goto last line"
+  [editor line]
+  (ccw.ClojureCore/gotoEditorLine editor line))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Long-running tasks, background tasks, Workspace Resources related tasks

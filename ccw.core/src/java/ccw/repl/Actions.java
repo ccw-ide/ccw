@@ -38,6 +38,10 @@ public class Actions {
         }
     }
     
+    public static void connectToEclipseNREPL() throws ExecutionException {
+    	new ConnectToEclipseNREPL().execute(null);
+    }
+    
     public static class ConnectToEclipseNREPL extends AbstractHandler {
 		public Object execute(ExecutionEvent event) throws ExecutionException {
             try {
