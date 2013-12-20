@@ -12,6 +12,10 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 `0.21.0` not released yet
 
+=== nREPL Version Update
+
+The embedded nREPL client in Counterclockwise, and which is also used to serve as nREPL client when the project does not declare a dependency on nREPL (the majority of the cases) has been upgraded from version `0.2.1` to `0.2.3`. 
+
 === Bug fix 
 
 - Explicitly ask the user for confirmation before launching a second process for the same project
