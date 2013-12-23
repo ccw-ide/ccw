@@ -68,6 +68,10 @@ git clone https://gist.github.com/laurentpetit/7909761 ~/.ccw/lein-popup
 
 === CCW/Standalone
 
+Increased the MaxPermSize value from 128Mb to 256Mb, since there has been reports that 128Mb weren't enough, e.g. when invoking the `New Clojure Project` Wizard.
+
+Fix of an issue with the pre-referenced software update sites (was still pointing to Indigo instead of Kepler)
+
 Moar sensible default preferences:
 
 - Editors
@@ -77,7 +81,6 @@ Moar sensible default preferences:
 - Worskpace
 ** automatic refresh of the Workspace resources without asking the user
 
-Fix of an issue with the pre-referenced software update sites (was still pointing to Indigo instead of Kepler)
 
 
 == Changes between Counterclockwise 0.12.3 and 0.20.0

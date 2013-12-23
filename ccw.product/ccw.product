@@ -22,7 +22,7 @@ Apache Software Foundation http://www.apache.org/
    </configIni>
 
    <launcherArgs>
-      <vmArgs>-XX:MaxPermSize=128m -Xms40m -Xmx512m</vmArgs>
+      <vmArgs>-XX:MaxPermSize=256m -Xms40m -Xmx512m</vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts</vmArgsMac>
    </launcherArgs>
 
