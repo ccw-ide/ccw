@@ -22,8 +22,8 @@ import org.eclipse.swt.graphics.RGB;
 
 import ccw.CCWPlugin;
 import ccw.repl.REPLView;
+import ccw.repl.SafeConnection;
 import clojure.lang.Keyword;
-import clojure.tools.nrepl.Connection;
 import clojure.tools.nrepl.Connection.Response;
 
 public class RunTestsAction extends Action {
@@ -51,11 +51,11 @@ public class RunTestsAction extends Action {
         try {
             String lib = editor.findDeclaringNamespace();
             REPLView replView = editor.getCorrespondingREPL();
-            Connection repl = replView.getToolingConnection();
-            Response compilationResult = repl.send("op", "eval", "code", CompileLibAction.compileLibCommand(lib));
+            SafeConnection replConnection = replView.getSafeToolingConnection();
+            Response compilationResult = replConnection.send(15000, "op", "eval", "code", CompileLibAction.compileLibCommand(lib));
             refreshCompilationResults();
             if (new Long(0).equals(((Map)compilationResult.values().get(0)).get("response-type"))) {
-                runTests(lib, repl);
+                runTests(lib, replConnection);
             } else {
                 editor.setStatusLineErrorMessage(ClojureEditorMessages.Compilation_failed);
                 setReplBackgroundColor(colorRegistry.get(FAILED_TESTS_COLOR_KEY));
@@ -65,8 +65,8 @@ public class RunTestsAction extends Action {
         }
     }
 
-    private void runTests(String lib, Connection repl) throws Exception {
-        Response results = repl.send("op", "eval", "code", runTestsCommand(lib));
+    private void runTests(String lib, SafeConnection repl) throws Exception {
+        Response results = repl.send(15000, "op", "eval", "code", runTestsCommand(lib));
         if (((String)results.combinedResponse().get(Keyword.intern("out"))).contains(":fail 0, :error 0")) {
             editor.setStatusLineErrorMessage(ClojureEditorMessages.Tests_passed);
             setReplBackgroundColor(colorRegistry.get(PASSED_TESTS_COLOR_KEY));

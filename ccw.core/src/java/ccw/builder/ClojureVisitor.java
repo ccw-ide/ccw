@@ -31,6 +31,8 @@ import org.eclipse.ui.texteditor.MarkerUtilities;
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.editors.clojure.CompileLibAction;
+import ccw.repl.IConnectionClient;
+import ccw.repl.SafeConnection;
 import clojure.tools.nrepl.Connection;
 import clojure.tools.nrepl.Connection.Response;
 
@@ -41,14 +43,14 @@ public class ClojureVisitor implements IResourceVisitor {
 	private Map<IFolder, IFolder> srcFolders;
 	
 	private final List<String> clojureLibs = new ArrayList<String>();
-	private final Connection repl;
+	private final SafeConnection replConnection;
 	
 	public ClojureVisitor() {
-		repl = null;
+		replConnection = null;
 	}
 	
-	public ClojureVisitor (Connection repl) {
-		this.repl = repl;
+	public ClojureVisitor (SafeConnection repl) {
+		this.replConnection = repl;
 	}
 	public void visit (Map<IFolder, IFolder> srcFolders) throws CoreException {
 		this.srcFolders = new HashMap<IFolder, IFolder>(srcFolders);
@@ -56,49 +58,53 @@ public class ClojureVisitor implements IResourceVisitor {
         	setSrcFolder(srcFolderEntry);
             srcFolderEntry.getKey().accept(this);
         }
-		if (repl != null) {
+		if (replConnection != null) {
 		    try {
-    			for (String maybeLibName: clojureLibs) {
-//    				System.out.println("compiling:'" + maybeLibName + "'");
-    				String compileLibCommand = CompileLibAction.compileLibCommand(maybeLibName);
-//    				System.out.println("Sending command: '" + compileLibCommand + "'");
-					Response res = repl.send("op", "eval", "code", compileLibCommand);
-//					System.out.println("compilation response: '" + res + "'");
-					if (res.values().isEmpty()) {
-//						System.out.println(("oops, weird error when compiling '" + maybeLibName + "'"));
-					} else {
-	    				Object result = res.values().get(0);
-//	    				System.out.println("ClojureVisitor: " + result);
-	                    if (result instanceof Map) {
-	                    	Map resultMap = (Map) result;
-	                        Collection<Map> response = (Collection<Map>)resultMap.get("response");
-	                        if (response != null) {
-	                            Map<?,?> errorMap = (Map<?,?>) response.iterator().next();
-	                            if (errorMap != null) {
-	                                String message = (String) errorMap.get("message");
-	                                if (message != null) {
-//	                                    System.out.println("error message:" + message);
-	                                    Matcher matcher = ERROR_MESSAGE_PATTERN.matcher(message);
-	                                    if (matcher.matches()) {
-//	                                        System.out.println("match found for message:'" + message + "'");
-	                                        String messageBody = matcher.group(MESSAGE_GROUP);
-	                                        String filename = matcher.group(FILENAME_GROUP);
-	                                        String lineStr = matcher.group(LINE_GROUP);
-//	                                        System.out.println("message:" + messageBody);
-//	                                        System.out.println("file:" + filename);
-//	                                        System.out.println("line:" + lineStr);
-	                                        if (!NO_SOURCE_FILE.equals(filename)) {
-	                                            createMarker(filename, Integer.parseInt(lineStr), messageBody);
-	                                        }
-	                                    } else {
-//	                                        System.out.println("no match found for message:'" + message + "'");
-	                                    }
-	                                }
-	                            }
-	                        }
-	                    }
-					}
-    			}
+		    	replConnection.withConnection(new IConnectionClient() {
+					@Override public <T> T withConnection(Connection c) {
+		    			for (String maybeLibName: clojureLibs) {
+//		    				System.out.println("compiling:'" + maybeLibName + "'");
+		    				String compileLibCommand = CompileLibAction.compileLibCommand(maybeLibName);
+//		    				System.out.println("Sending command: '" + compileLibCommand + "'");
+							Response res = c.send("op", "eval", "code", compileLibCommand);
+//							System.out.println("compilation response: '" + res + "'");
+							if (res.values().isEmpty()) {
+//								System.out.println(("oops, weird error when compiling '" + maybeLibName + "'"));
+							} else {
+			    				Object result = res.values().get(0);
+//			    				System.out.println("ClojureVisitor: " + result);
+			                    if (result instanceof Map) {
+			                    	Map resultMap = (Map) result;
+			                        Collection<Map> response = (Collection<Map>)resultMap.get("response");
+			                        if (response != null) {
+			                            Map<?,?> errorMap = (Map<?,?>) response.iterator().next();
+			                            if (errorMap != null) {
+			                                String message = (String) errorMap.get("message");
+			                                if (message != null) {
+//			                                    System.out.println("error message:" + message);
+			                                    Matcher matcher = ERROR_MESSAGE_PATTERN.matcher(message);
+			                                    if (matcher.matches()) {
+//			                                        System.out.println("match found for message:'" + message + "'");
+			                                        String messageBody = matcher.group(MESSAGE_GROUP);
+			                                        String filename = matcher.group(FILENAME_GROUP);
+			                                        String lineStr = matcher.group(LINE_GROUP);
+//			                                        System.out.println("message:" + messageBody);
+//			                                        System.out.println("file:" + filename);
+//			                                        System.out.println("line:" + lineStr);
+			                                        if (!NO_SOURCE_FILE.equals(filename)) {
+			                                            createMarker(filename, Integer.parseInt(lineStr), messageBody);
+			                                        }
+			                                    } else {
+//			                                        System.out.println("no match found for message:'" + message + "'");
+			                                    }
+			                                }
+			                            }
+			                        }
+			                    }
+							}
+		    			}
+		    			return null;
+					}}, 20000);
 		    } catch (Exception e) {
 		        throw new WorkbenchException(
 		        		String.format("Could not visit: %s.\nDid you kill the project's JVM during the build?", clojureLibs), e);

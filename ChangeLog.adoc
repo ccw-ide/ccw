@@ -20,6 +20,17 @@ The embedded nREPL client in Counterclockwise, and which is also used to serve a
 
 - Explicitly ask the user for confirmation before launching a second process for the same project
 
+=== Editor responsiveness
+
+Timeouts have been added for all Counterclockwise interactions with the nREPL connection of a REPL View. +
+Nothing should prevent the user to type in an Editor. Counterclockwise should gracefully downgrade its features instead. This is a step in this direction.
+
+- Code completion: 1 second timeout. If timeout occurs twice for a given REPL, it won't be used anymore (only static code completion will take place).
+- Text Hover: 1 second timeout.
+- Hyperlink Detection: 1 second timeout.
+- Namespace Browser: 15 seconds timeout.
+- REPL: 15 seconds timeout at some initialization usage of the nrepl client
+
 === New Clojure Project Wizard ===
 
 The Wizard has been modified to simplify the understanding of its fields. Especially, the "Use default location" field has been replaced with a "Create project folder in:" field, and its meaning has changed from "ask the user for the project's folder on the filesystem" to "ask the user for the project's parent folder on the filesystem (assuming that the project folder will be the project name)". This is wayyy more intuitive.

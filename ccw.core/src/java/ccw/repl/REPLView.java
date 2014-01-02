@@ -106,8 +106,6 @@ public class REPLView extends ViewPart implements IAdaptable {
     public static final String VIEW_ID = "ccw.view.repl";
     public static final AtomicReference<REPLView> activeREPL = new AtomicReference();
 
-//		        	core._("require",  Symbol.intern("cemerick.drawbridge.client"));
-
     /**
      * This misery around secondary IDs is due to the fact that:
      * eclipse really, really wants views to be pre-defined; while you can have a view type that
@@ -168,7 +166,7 @@ public class REPLView extends ViewPart implements IAdaptable {
     };
         
     private Connection interactive;
-    private Connection toolConnection;
+    private SafeConnection safeToolConnection;
     
     private IConsole console;
     private ILaunch launch;
@@ -187,6 +185,10 @@ public class REPLView extends ViewPart implements IAdaptable {
     }
     public IFn getHistoryActionFn() {
     	return this.historyActionFn;
+    }
+    
+    public SafeConnection getSafeToolingConnection() {
+    	return safeToolConnection;
     }
     
     private SourceViewerDecorationSupport fSourceViewerDecorationSupport;
@@ -338,7 +340,7 @@ public class REPLView extends ViewPart implements IAdaptable {
     
     public void closeConnections () throws Exception {
         if (interactive != null) interactive.close();
-        if (toolConnection != null) toolConnection.close();
+        if (safeToolConnection != null) safeToolConnection.close();
     }
     
     public void reconnect () throws Exception {
@@ -351,7 +353,10 @@ public class REPLView extends ViewPart implements IAdaptable {
         // TODO waaaay better to put a dropdown namespace chooser in the view's toolbar,
         // and this would just change its selection
     	currentNamespace = ns;
-        setPartName(String.format("REPL @ %s (%s)", interactive.url, currentNamespace));
+    	DisplayUtil.asyncExec(new Runnable() {
+			@Override public void run() {
+				setPartName(String.format("REPL @ %s (%s)", interactive.url, currentNamespace));
+			}});
     }
     
     public String getCurrentNamespace () {
@@ -368,11 +373,16 @@ public class REPLView extends ViewPart implements IAdaptable {
         try {
             // TODO - don't need multiple connections anymore, just separate sessions will do.
             interactive = new Connection(url);
-            toolConnection = new Connection(url);
+            safeToolConnection = new SafeConnection(new Connection(url));
             setCurrentNamespace(currentNamespace);
             prepareView();
-            logPanel.append(";; Clojure " + toolConnection.send("op", "eval", "code", "(clojure-version)").values().get(0) + "\n");
-            NamespaceBrowser.setREPLConnection(toolConnection);
+            final Object clojureVersion = safeToolConnection.send(15000, "op", "eval", "code", "(clojure-version)").values().get(0);
+            DisplayUtil.asyncExec(new Runnable() {
+				@Override public void run() {
+					logPanel.append(";; Clojure " + clojureVersion + "\n");
+				}
+			});
+            NamespaceBrowser.setREPLConnection(safeToolConnection);
             return true;
         } catch (ConnectException e) {
             closeView();
@@ -386,9 +396,9 @@ public class REPLView extends ViewPart implements IAdaptable {
         return connect(url, null, null, makeActiveREPL);
     }
     
-    public static REPLView connect (String url, IConsole console, ILaunch launch, boolean makeActiveREPL) throws Exception {
+    public static REPLView connect (final String url, IConsole console, ILaunch launch, final boolean makeActiveREPL) throws Exception {
         String secondaryId;
-        REPLView repl = (REPLView)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(
+        final REPLView repl = (REPLView)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(
                 VIEW_ID
                 ,secondaryId = getSecondaryId()
                 ,IWorkbenchPage.VIEW_ACTIVATE
@@ -397,6 +407,7 @@ public class REPLView extends ViewPart implements IAdaptable {
         repl.console = console;
         repl.showConsoleAction.setEnabled(console != null);
         repl.launch = launch;
+
         if (repl.configure(url)) {
         	if (makeActiveREPL) {
         		REPLView.activeREPL.set(repl);
@@ -411,29 +422,30 @@ public class REPLView extends ViewPart implements IAdaptable {
         return interactive;
     }
     
-    public Connection getToolingConnection () {
-        return toolConnection;
-    }
-    
     public String getSessionId () {
         return sessionId;
     }
     
     public Set<String> getAvailableOperations () throws IllegalStateException {
         if (describeInfo == null) {
-            Response r = toolConnection.send("op", "describe");
-            // working around the fact that nREPL < 0.2.0-beta9 does *not* send a
-            // :done status when an operation is unknown!
-            // TODO remove this and just check r.statuses() after we can assume usage
-            // of later versions of nREPL
-            Object status = ((Map<String, String>)r.seq().first()).get(Keyword.intern("status"));
-            if (clojure.lang.Util.equals(status, "unknown-op") || (status instanceof Collection &&
-                    ((Collection)status).contains("error"))) {
-                CCWPlugin.logError("Invalid response to \"describe\" request");
-                describeInfo = new HashMap();
-            } else {
-                describeInfo = r.combinedResponse();
-            }
+        	try {
+	            Response r = safeToolConnection.send(10000, "op", "describe");
+	            // working around the fact that nREPL < 0.2.0-beta9 does *not* send a
+	            // :done status when an operation is unknown!
+	            // TODO remove this and just check r.statuses() after we can assume usage
+	            // of later versions of nREPL
+	            Object status = ((Map<String, String>)r.seq().first()).get(Keyword.intern("status"));
+	            if (clojure.lang.Util.equals(status, "unknown-op") || (status instanceof Collection &&
+	                    ((Collection)status).contains("error"))) {
+	                CCWPlugin.logError("Invalid response to \"describe\" request");
+	                describeInfo = new HashMap();
+	            } else {
+	                describeInfo = r.combinedResponse();
+	            }
+        	} catch (Exception e) {
+        		CCWPlugin.logError("Error while trying to obtain nrepl available operations", e);
+        		describeInfo = new HashMap();
+        	}
         }
         
         Map<String, Object> ops = (Map<String, Object>)describeInfo.get("ops");
@@ -489,9 +501,9 @@ public class REPLView extends ViewPart implements IAdaptable {
 					}
 				}) {
         	public REPLView getCorrespondingREPL() { return REPLView.this; };
-            private Connection getCorrespondingREPLConnection () {
+            private SafeConnection getCorrespondingREPLConnection () {
                 // we'll be connected by the time this is called
-                return toolConnection;
+                return safeToolConnection;
             }
             public void setStatusLineErrorMessage(String msg) {
             	if (msg != null) {
@@ -587,9 +599,7 @@ public class REPLView extends ViewPart implements IAdaptable {
         viewer.propertyChange(null);
         
         viewerWidget.addFocusListener(new NamespaceRefreshFocusListener());
-        //viewerWidget.addFocusListener(new ViewContextActivationListener());
         logPanel.addFocusListener(new NamespaceRefreshFocusListener());
-        //logPanel.addFocusListener(new ViewContextActivationListener());
         
         split.setWeights(new int[] {100, 75});
         
@@ -981,7 +991,7 @@ public class REPLView extends ViewPart implements IAdaptable {
         		fSourceViewerDecorationSupport);
         try {
             if (interactive != null) interactive.close();
-            if (toolConnection != null) toolConnection.close();
+            if (safeToolConnection != null) safeToolConnection.close();
             
             if (launch != null && launch.canTerminate()) {
             	try {
@@ -1011,7 +1021,7 @@ public class REPLView extends ViewPart implements IAdaptable {
         public void focusGained(FocusEvent e) {
         	getTracer().trace(TraceOptions.REPL_FOCUS, "focus gained, marking repl as active");
             activeREPL.set(REPLView.this);
-            NamespaceBrowser.setREPLConnection(toolConnection);
+            NamespaceBrowser.setREPLConnection(safeToolConnection);
         }
 
         public void focusLost(FocusEvent e) {}

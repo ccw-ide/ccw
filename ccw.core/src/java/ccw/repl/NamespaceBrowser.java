@@ -55,7 +55,6 @@ import ccw.util.ClojureDocUtils;
 import ccw.util.ClojureInvoker;
 import ccw.util.DisplayUtil;
 import clojure.lang.Keyword;
-import clojure.tools.nrepl.Connection;
 import clojure.tools.nrepl.Connection.Response;
 
 public class NamespaceBrowser extends ViewPart implements ISelectionProvider, ISelectionChangedListener {
@@ -332,9 +331,9 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 	}
 
 	@SuppressWarnings("unchecked")
-    private Map<String, List<String>> getRemoteNsTree (Connection repl) {
+    private Map<String, List<String>> getRemoteNsTree (SafeConnection repl) {
 		try {
-		    Response res = repl.send("op", "eval", "code", "(ccw.debug.serverrepl/namespaces-info)");
+		    Response res = repl.send(10000, "op", "eval", "code", "(ccw.debug.serverrepl/namespaces-info)");
             List<Object> values = res.values();
             if (values.isEmpty()) {
             	return null;
@@ -347,7 +346,7 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
         }
 	}
 
-	public void reset (final Connection repl) {
+	public void reset (final SafeConnection repl) {
 		Job job = new Job("Namespace browser tree refresh") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -489,7 +488,7 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 		}
 	}
 
-	public static void setREPLConnection (final Connection repl) {
+	public static void setREPLConnection (final SafeConnection repl) {
 	    if (repl != null)
 	        DisplayUtil.asyncExec(new Runnable() {
 	            public void run() {
@@ -497,7 +496,7 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 	            }});
 	}
 	
-	private static void inUIThreadSetREPLConnection (Connection repl) {
+	private static void inUIThreadSetREPLConnection (SafeConnection repl) {
 		IWorkbenchWindow activeWorkbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		if (activeWorkbenchWindow == null ) {
 			CCWPlugin.getTracer().trace(TraceOptions.REPL, "activeWorkbenchWindow is null");
@@ -522,7 +521,7 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 		co.reset(repl);
 	}
 
-    private static void ensureNSUtilsIntalled (Connection repl) {
+    private static void ensureNSUtilsIntalled (SafeConnection repl) {
         
         // from the ConsolePageParticipant
         // TODO this *looks* like a no-op, but the comments seem to imply that a "full load" of the project's clojure

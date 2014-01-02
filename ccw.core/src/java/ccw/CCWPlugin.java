@@ -50,6 +50,7 @@ import ccw.nature.AutomaticNatureAdder;
 import ccw.preferences.PreferenceConstants;
 import ccw.preferences.SyntaxColoringHelper;
 import ccw.repl.REPLView;
+import ccw.repl.SafeConnection;
 import ccw.util.BundleUtils;
 import ccw.util.DisplayUtil;
 import ccw.util.ITracer;
@@ -57,7 +58,6 @@ import ccw.util.NullTracer;
 import ccw.util.Tracer;
 import clojure.lang.Keyword;
 import clojure.lang.Var;
-import clojure.tools.nrepl.Connection;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -370,9 +370,9 @@ public class CCWPlugin extends AbstractUIPlugin {
         return ret[0];
     }
     
-    public Connection getProjectREPLConnection (IProject project) {
+    public SafeConnection getProjectREPLSafeConnection (IProject project) {
         REPLView repl = getProjectREPL(project);
-        return repl == null ? null : repl.getToolingConnection();
+        return repl == null ? null : repl.getSafeToolingConnection();
     }
 	
 	private IScanContext scanContext;

@@ -186,19 +186,42 @@
           namespace
           completion-limit))
 
+(def timed-out-safe-connections 
+  "Keeps the timed out safe-connections in a map of [safe-connection nb-timeouts]"
+  (atom {}))
+
+(defn send-message
+  "Sends message and keep tracks of safe-connections that have timeouts.
+   When a safe-connection has had 2 timeouts, stop trying to use
+   it and return nil."
+  [safe-connection command timeout]
+  (let [nb-timeouts (@timed-out-safe-connections safe-connection 0)]
+    (when (< nb-timeouts 3)
+      (try
+        (common/send-message safe-connection command :timeout timeout)
+        (catch java.util.concurrent.TimeoutException e
+          (swap! timed-out-safe-connections update-in [safe-connection] (fnil inc 0)))))))
+
 (defn find-var-metadata
   [current-namespace ^IClojureEditor editor var]
   (when-let [repl (.getCorrespondingREPL editor)]
-    (let [connection (.getToolingConnection repl)
+    (let [safe-connection (.getSafeToolingConnection repl)
           command (format (str "(ccw.debug.serverrepl/var-info "
                                  "(clojure.core/ns-resolve "
                                    "(clojure.core/the-ns '%s) '%s))")
                           current-namespace
                           var)
-          response (common/send-message connection command)]
+          response (send-message safe-connection command 1000)]
       ;(println "response:" response)
       (first response))))
 
+;; TODO encadrer les appels externes avec un timeout
+;; si le timeout est depasse, ejecter la repl correspondante
+;; TODO faire aussi pour la recherche de documentation, etc... lister tout
+;; pour le code completion, un timeout > 1s est deja enorme
+;; A terme: decoupler la recuperation des infos et leur exploitation
+;; - un dictionnaire de suggestions mis à jour en batch à des points clés (interactions avec repl)
+;; - interrogation du dictionnaire en usage courant (tant pis si pas a jour)
 (defn find-suggestions
   "For the given prefix, inside the current editor and in the current namespace,
    query the remote REPL for code completions list"
@@ -207,9 +230,9 @@
     (nil? namespace) []
     (s/blank? prefix) []
     :else (when-let [repl (.getCorrespondingREPL editor)]
-            (let [connection (.getToolingConnection repl)
+            (let [safe-connection (.getSafeToolingConnection repl)
                   command (complete-command current-namespace prefix false)
-                  response (common/send-message connection command)]
+                  response (send-message safe-connection command 1000)]
               (first response)))))
 
 (defn context-info-data

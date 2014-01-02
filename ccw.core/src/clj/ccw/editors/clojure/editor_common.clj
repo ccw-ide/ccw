@@ -37,23 +37,25 @@
   "Send the command over the nrepl connection. This version is \"bare\", ie it
    calls into the REPL without timeout protection. If you want to protect the 
    IDE to freeze if e.g. the REPL never times out, call send-message instead."
-  [^Connection connection command]
+  [^Connection safe-connection command]
   (try
-    (-> (.client connection)
+    (-> safe-connection 
+      .getUnsafeConnection
+      .client
       (repl/message {"op"   "eval"
                      "code" command})
       repl/response-values)
     (catch Exception e
-      (ccw.CCWPlugin/logError (str "exception while sending command " command " to connection " connection) e)
+      (ccw.CCWPlugin/logError (str "exception while sending command " command " to connection " (.getUnsafeConnection safe-connection)) e)
       nil)))
 
 (defn send-message 
   "Same as send-message*, but guarded by a client timeout
    so that Eclipse cannot hang forever.
    timeout in milliseconds"
-  [connection command & {:keys [timeout] :or {timeout 4000}}]
+  [safe-connection command & {:keys [timeout] :or {timeout 4000}}]
   (let [timeout-val (Object.)
-        secure-call (future (send-message* connection command))
+        secure-call (future (send-message* safe-connection command))
         result (deref secure-call timeout timeout-val)]
     (if (not= result timeout-val)
       result
@@ -74,7 +76,7 @@
    CURRENTLY works for namespace vars, and namespaces."
   [current-namespace ^IClojureEditor editor var]
   (when-let [repl (.getCorrespondingREPL editor)]
-    (let [connection (.getToolingConnection repl)
+    (let [safe-connection (.getSafeToolingConnection repl)
           command (format (str "(ccw.debug.serverrepl/var-info "
                                "  (or (try (clojure.core/ns-resolve "
                                "             (clojure.core/the-ns '%s) '%s)"
@@ -83,7 +85,8 @@
                                "        (catch Exception e nil))))")
                           current-namespace
                           var var)
-          response (send-message connection command)]
+          response (send-message safe-connection command
+                                 :timeout 1000)]
       (first response))))
 
 (defn context-message

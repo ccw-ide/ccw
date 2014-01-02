@@ -16,7 +16,8 @@
                          ClojureEditorMessages
                          IHyperlinkConstants
                          AbstractHyperlinkDetector]
-    [ccw                 ClojureCore]))
+    [ccw                 ClojureCore]
+    [ccw.repl IConnectionClient]))
 
 (def ID (IHyperlinkConstants/ClojureHyperlinkDetector_ID)) 
 (def TARGET_ID (IHyperlinkConstants/ClojureHyperlinkDetector_TARGET_ID))  
@@ -30,12 +31,18 @@
         declaring-ns (.findDeclaringNamespace editor)
         command (String/format "(ccw.debug.serverrepl/find-symbol \"%s\" \"%s\" \"%s\")"
                   (into-array Object [s declaring-ns n]))
-        client (-?> editor .getCorrespondingREPL .getToolingConnection .client)]
-    (if-not client
+        safeConnection (-?> editor .getCorrespondingREPL .getSafeToolingConnection)]
+    
+    (if-not safeConnection
       (do
         (.setStatusLineErrorMessage editor ClojureEditorMessages/You_need_a_running_repl)
         nil)
-      (let [[ [file ^String line _ ns] ] (repl/response-values (repl/message client {:op :eval :code command}))]
+      (let [[ [file ^String line _ ns] ] (.withConnection safeConnection
+                                           (reify IConnectionClient
+                                             (withConnection [this connection]
+                                               (let [client (.client connection)]
+                                                 (repl/response-values (repl/message client {:op :eval :code command})))))
+                                           1000)]
         (if (and file line ns)
           {"file" file
            "line" (Integer/valueOf line)

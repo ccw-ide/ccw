@@ -144,7 +144,7 @@ public class ClojureBuilder extends IncrementalProjectBuilder {
         deleteMarkers(project);
         
         
-        ClojureVisitor visitor = new ClojureVisitor(repl.getToolingConnection());
+        ClojureVisitor visitor = new ClojureVisitor(repl.getSafeToolingConnection());
         visitor.visit(getSrcFolders(project));
         
         getClassesFolder(project).refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 0));
