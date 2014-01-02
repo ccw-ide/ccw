@@ -35,7 +35,7 @@ Counterclockwise bundles everything for hacking Clojure Code:
 
 //
 
-- or <<install-as-plugin,Install as an Eclipse Plugin>> into in existing Eclipse
+- or <<install-as-plugin,Install as an Eclipse Plugin>> into an existing Eclipse
 
 [[install-as-standalone-product]]
 == Install as a Standalone Product
