@@ -44,7 +44,6 @@ public final class WizardNewLeiningenProjectTemplatePage extends WizardPage {
 			                                         CCWPlugin.getDefault(),
 			                                         "ccw.leiningen.wizard");
 
-
 	private final NewLeiningenProjectWizard containingWizard;
 	
 	private static final int SIZING_TEXT_FIELD_WIDTH = 250;
@@ -59,8 +58,14 @@ public final class WizardNewLeiningenProjectTemplatePage extends WizardPage {
 	
 	private Listener templateNameModifyListener = new Listener() {
 		public void handleEvent(Event e) {
-			boolean valid = validatePage();
-			setPageComplete(valid);
+			// If .getText() is never called, then if the user
+			// presses Enter after having typed the template name,
+			// you have the surprise to see the text in the template
+			// Text shrink by one character (its righmost character
+			// disappears !!)
+			templateNameText.getText();
+			
+			setPageComplete(validatePage());
 		}
 	};
 
@@ -202,10 +207,9 @@ public final class WizardNewLeiningenProjectTemplatePage extends WizardPage {
 
     public String getSafeProjectFieldValue() {
         if (projectNameText == null) {
-			return "";
+			return ""; //$NON-NLS-1$
 		}
-
-        return getProjectNameFieldValue();
+        return projectNameText.getText().trim();
     }
     
 	public String getProjectName() {
@@ -222,19 +226,6 @@ public final class WizardNewLeiningenProjectTemplatePage extends WizardPage {
 		}
 	}
 	
-    /**
-     * Returns the value of the project name field
-     * with leading and trailing spaces removed.
-     * @return the project name in the field
-     */
-    private String getProjectNameFieldValue() {
-        if (projectNameText == null) {
-			return ""; //$NON-NLS-1$
-		}
-
-        return projectNameText.getText().trim();
-    }
-
     private Listener nameModifyListener = new Listener() {
         public void handleEvent(Event e) {
             setPageComplete(validatePage());
@@ -271,16 +262,16 @@ public final class WizardNewLeiningenProjectTemplatePage extends WizardPage {
     }
 
 	public Composite createLeinTemplateGroup(Composite parent) {
-		Composite projectGroup = new Composite(parent, SWT.NONE);
+		Composite leinTemplateGroup = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		layout.numColumns = 2;
-		projectGroup.setLayout(layout);
+		leinTemplateGroup.setLayout(layout);
 
-		Label projectLabel = new Label(projectGroup, SWT.NONE);
+		Label projectLabel = new Label(leinTemplateGroup, SWT.NONE);
 		projectLabel.setText("Leiningen template:");
 		projectLabel.setFont(parent.getFont());
 
-		templateNameText = new Text(projectGroup, SWT.BORDER);
+		templateNameText = new Text(leinTemplateGroup, SWT.BORDER);
 		GridData data = new GridData(GridData.FILL_HORIZONTAL);
 		data.widthHint = SIZING_TEXT_FIELD_WIDTH;
 		templateNameText.setLayoutData(data);
@@ -292,7 +283,7 @@ public final class WizardNewLeiningenProjectTemplatePage extends WizardPage {
 		
 		templateNameText.addListener(SWT.Modify, templateNameModifyListener);
 		
-		return projectGroup;
+		return leinTemplateGroup;
 	}
 
 	/**
@@ -300,13 +291,13 @@ public final class WizardNewLeiningenProjectTemplatePage extends WizardPage {
 	 *         default value if empty
 	 */
 	public String computeTemplateName() {
-		String fieldValue = getTemplateNameFieldValue();
+		String fieldValue = getSafeTemplateNameFieldValue();
 		
-		if (fieldValue == null || fieldValue.equals("")) {
+		if (fieldValue == null || fieldValue.trim().equals("")) {
 			return initialTemplateNameTextValue;
+		} else {
+			return fieldValue.trim();
 		}
-
-		return fieldValue;
 	}
 
 	/**
@@ -315,12 +306,12 @@ public final class WizardNewLeiningenProjectTemplatePage extends WizardPage {
 	 * 
 	 * @return the project name in the field
 	 */
-	private String getTemplateNameFieldValue() {
+	private String getSafeTemplateNameFieldValue() {
 		if (templateNameText == null) {
 			return ""; //$NON-NLS-1$
+		} else {
+			return templateNameText.getText();
 		}
-
-		return templateNameText.getText().trim();
 	}
 
 	protected boolean validatePage() {
