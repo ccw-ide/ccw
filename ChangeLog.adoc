@@ -85,6 +85,8 @@ git clone https://gist.github.com/laurentpetit/7909761 ~/.ccw/lein-popup
 
 === CCW/Standalone
 
+Changed the URL for downloading the stable standalone versions: http://standalone.ccw-ide.org/
+
 Increased the MaxPermSize value from 128Mb to 256Mb, since there has been reports that 128Mb weren't enough, e.g. when invoking the `New Clojure Project` Wizard.
 
 Fix of an issue with the pre-referenced software update sites (was still pointing to Indigo instead of Kepler)
