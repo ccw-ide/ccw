@@ -117,8 +117,8 @@ Use the wizard named `Clojure Project`.
 // TODO footnotes, or rather section notes
 - Open menu:File[New > Clojure Project]  *(`**`)*
 // TODO image
-** In the first page of the wizard, choose a project name (and location if you don't like the default one)
-- "Leiningen template to use" field:
+** In the wizard, choose a project name (the project folder will be named after the project name),  and a location for where to create the project folder (if you don't like the default one)
+- "Leiningen template" field:
 ** By default it uses the "default" template
 ** You can change it to use another lein-newnew template released somewhere in a maven repository (generally in clojars) *(`*`)*
 
@@ -135,8 +135,8 @@ To find the list of currently available project templates, you can ask clojars f
 ====
 *(`**`)*
 If you don't see the menu:File[New > Clojure Project] menu entry:
-  * check that you're in the "Java" or "Plugin Development" Perspective ( menu:Window[Open Perspective > ...] )
-  * If you still don't see the command, then Reset your Perspective ( menu:Window[Reset Perspective ...])
+** check that you're in the "Java" or "Plugin Development" Perspective ( menu:Window[Open Perspective > ...] )
+** If you still don't see the command, then Reset your Perspective ( menu:Window[Reset Perspective ...])
 ====
 
 

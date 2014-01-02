@@ -1,30 +1,42 @@
 package ccw.leiningen;
 
+import java.io.File;
+import java.net.URI;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.util.BidiUtils;
+import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.ide.IDEWorkbenchMessages;
 import org.eclipse.ui.internal.ide.IDEWorkbenchPlugin;
-import org.eclipse.ui.internal.ide.dialogs.ProjectContentsLocationArea;
-import org.eclipse.ui.internal.ide.dialogs.ProjectContentsLocationArea.IErrorMessageReporter;
+import org.eclipse.ui.internal.ide.IIDEHelpContextIds;
 
 import ccw.CCWPlugin;
 import ccw.util.ClojureInvoker;
 
-public final class WizardNewLeiningenProjectTemplatePage extends
-		WizardNewProjectCreationPage {
+public final class WizardNewLeiningenProjectTemplatePage extends WizardPage {
 	
 	private static final String checkProjectName = "check-project-name";
 
@@ -33,13 +45,18 @@ public final class WizardNewLeiningenProjectTemplatePage extends
 			                                         "ccw.leiningen.wizard");
 
 
-	private final NewLeiningenProjectWizard newLeiningenProjectWizard;
-	// constants
+	private final NewLeiningenProjectWizard containingWizard;
+	
 	private static final int SIZING_TEXT_FIELD_WIDTH = 250;
-	// initial value stores
-	private String initialTemplateFieldValue = "default";
-	// widgets
-	Text templateNameField;
+
+    private Text projectNameText;
+	
+	private Button defaultLocationCheckbox;
+	private Text locationText;
+
+	private Text templateNameText;
+	private String initialTemplateNameTextValue = "default";
+	
 	private Listener templateNameModifyListener = new Listener() {
 		public void handleEvent(Event e) {
 			boolean valid = validatePage();
@@ -50,216 +67,149 @@ public final class WizardNewLeiningenProjectTemplatePage extends
 	public WizardNewLeiningenProjectTemplatePage(
 			NewLeiningenProjectWizard newLeiningenProjectWizard, String pageName) {
 		super(pageName);
-		this.newLeiningenProjectWizard = newLeiningenProjectWizard;
+		this.containingWizard = newLeiningenProjectWizard;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.ui.dialogs.WizardNewProjectCreationPage#createControl(org
-	 * .eclipse.swt.widgets.Composite)
-	 */
 	public void createControl(Composite parent) {
-		super.createControl(parent);
+        Composite composite = new Composite(parent, SWT.NULL);
+        
+        initializeDialogUnits(parent);
 
-		createLeinTemplateGroup((Composite) getControl());
+        PlatformUI.getWorkbench().getHelpSystem().setHelp(composite,
+                IIDEHelpContextIds.NEW_PROJECT_WIZARD_PAGE);
 
-		// locationArea is only instanciated for reusing validation code
-		{
-			Composite hidden = new Composite((Composite) getControl(), SWT.NONE);
-			locationArea = new ProjectContentsLocationArea(getErrorReporter(), hidden);
-			hidden.setVisible(false); // Hide the double entry composite
-		}
+        FormLayout layout = new FormLayout();
+		composite.setLayout(layout);
+        
+        composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		createWorkingSetGroup((Composite) getControl(),
-				this.newLeiningenProjectWizard.getSelection(),
-				new String[] { "org.eclipse.ui.resourceWorkingSetPage" }); //$NON-NLS-1$
+        Composite projectGroup = createProjectNameGroup(composite);
+        FormData projectLayoutData = new FormData();
+		projectGroup.setLayoutData(projectLayoutData);
+		
+		Composite createInGroup = createCreateInGroup(composite);
+
+		FormData createInLayoutData = new FormData();
+		createInLayoutData.top = new FormAttachment(projectGroup);
+		createInLayoutData.left = new FormAttachment(0, 0);
+		createInLayoutData.right = new FormAttachment(100, 0);
+		createInGroup.setLayoutData(createInLayoutData);
+		
+        Composite leinTemplateGroup = createLeinTemplateGroup(composite);
+        FormData leinTemplateLayoutData = new FormData();
+        leinTemplateLayoutData.top = new FormAttachment(createInGroup);
+        leinTemplateLayoutData.left = new FormAttachment(0, 0);
+        leinTemplateLayoutData.right = new FormAttachment(100, 0);
+        leinTemplateGroup.setLayoutData(leinTemplateLayoutData);
+        
+        setPageComplete(validatePage());
+        
+        // Show description on opening
+        setErrorMessage(null);
+        setMessage(null);
+        
+        setControl(composite);
+
 		Dialog.applyDialogFont(getControl());
 	}
 	
-    /**
-	 * Get an error reporter for the receiver.
-	 * @return IErrorMessageReporter
-	 */
-	private IErrorMessageReporter getErrorReporter() {
-		return new IErrorMessageReporter(){
-			/* (non-Javadoc)
-			 * @see org.eclipse.ui.internal.ide.dialogs.ProjectContentsLocationArea.IErrorMessageReporter#reportError(java.lang.String)
-			 */
-			public void reportError(String errorMessage, boolean infoOnly) {
-				if (infoOnly) {
-					setMessage(errorMessage, IStatus.INFO);
-					setErrorMessage(null);
+    private Composite createCreateInGroup(Composite parent) {
+    	Composite composite = new Composite(parent, SWT.NONE);
+    	FormLayout layout = new FormLayout();
+    	layout.marginWidth = 5;
+    	layout.marginHeight = 10;
+    	layout.spacing = 5;
+    	composite.setLayout(layout);
+    	
+    	Label label = new Label(composite, SWT.NONE);
+    	label.setText("Create in:");
+    	FormData labelData = new FormData();
+    	label.setLayoutData(labelData);
+    	
+    	defaultLocationCheckbox = new Button(composite, SWT.CHECK);
+    	defaultLocationCheckbox.setText("default location");
+    	defaultLocationCheckbox.setSelection(true);
+    	FormData defaultLocationCheckboxData = new FormData();
+    	defaultLocationCheckboxData.left = new FormAttachment(label);
+    	defaultLocationCheckboxData.top = new FormAttachment(label, 0, SWT.CENTER);
+    	defaultLocationCheckbox.setLayoutData(defaultLocationCheckboxData);
+    	
+    	locationText = new Text(composite, SWT.BORDER);
+    	FormData locationData = new FormData();
+    	locationData.top = new FormAttachment(defaultLocationCheckbox);
+    	locationData.left = new FormAttachment(defaultLocationCheckbox, 0, SWT.LEFT);
+    	locationText.setLayoutData(locationData);
+    	locationText.setText(getDefaultParentLocation());
+    	locationText.setFont(parent.getFont());
+    	locationText.setToolTipText("Location in which the project directory will be created");
+    	locationText.setEnabled(false);
+    	
+    	locationText.addModifyListener(new ModifyListener() {
+			@Override public void modifyText(ModifyEvent e) {
+				setPageComplete(validatePage());
+			}
+		});
+    	
+    	final Button browse = new Button(composite, SWT.PUSH);
+    	FormData browseData = new FormData();
+    	browseData.top = new FormAttachment(locationText, 0, SWT.CENTER);
+    	browseData.right = new FormAttachment(100, 0);
+    	browse.setLayoutData(browseData);
+    	browse.setText("Browse ...");
+    	browse.setFont(parent.getFont());
+    	browse.setEnabled(false);
+    	browse.setToolTipText("Click to open a popup for choosing the location the project directory will be created in");
+    	
+    	locationData.right = new FormAttachment(browse);
+    	
+    	defaultLocationCheckbox.addSelectionListener(new SelectionListener() {
+			@Override public void widgetSelected(SelectionEvent e) {
+				locationText.setEnabled(!defaultLocationCheckbox.getSelection());
+				browse.setEnabled(!defaultLocationCheckbox.getSelection());
+				if (defaultLocationCheckbox.getSelection()) {
+					locationText.setText(getDefaultParentLocation());
 				}
-				else
-					setErrorMessage(errorMessage);
-				boolean valid = errorMessage == null;
-				if(valid) {
-					valid = validatePage();
+				setPageComplete(validatePage());
+			}
+			@Override public void widgetDefaultSelected(SelectionEvent e) {
+				widgetSelected(e);
+			}
+		});
+    	
+    	browse.addSelectionListener(new SelectionListener() {
+			@Override public void widgetSelected(SelectionEvent e) {
+				DirectoryDialog dialog = new DirectoryDialog(browse.getShell(), SWT.NONE);
+				dialog.setText("Choose Project parent directory");
+				dialog.setMessage("Select a parent directory within with the project's directory will be created");
+				dialog.setFilterPath(locationText.getText());
+				String result = dialog.open();
+				if (result != null) {
+					locationText.setText(result);
+					setPageComplete(validatePage());
 				}
-				
-				setPageComplete(valid);
 			}
-		};
-	}
-
-
-	/**
-	 * (non-Javadoc) Method declared on IDialogPage.
-	 */
-	public void createLeinTemplateGroup(Composite parent) {
-		// project specification group
-		Composite projectGroup = new Composite(parent, SWT.NONE);
-		GridLayout layout = new GridLayout();
-		layout.numColumns = 2;
-		projectGroup.setLayout(layout);
-		GridData projectGroupLayoutData = new GridData(GridData.FILL_HORIZONTAL);
-		projectGroupLayoutData.grabExcessVerticalSpace = true;
-		projectGroup.setLayoutData(projectGroupLayoutData);
-
-		// new template label
-		Label projectLabel = new Label(projectGroup, SWT.NONE);
-		projectLabel.setText("Leiningen Template to use:" /*
-														 * IDEWorkbenchMessages.
-														 * WizardNewProjectCreationPage_nameLabel
-														 */);
-		projectLabel.setFont(parent.getFont());
-
-		// new template name entry field
-		templateNameField = new Text(projectGroup, SWT.BORDER);
-		GridData data = projectGroupLayoutData;
-		data.widthHint = SIZING_TEXT_FIELD_WIDTH;
-		templateNameField.setLayoutData(data);
-		templateNameField.setFont(parent.getFont());
-
-		// Set the initial value first before listener
-		// to avoid handling an event during the creation.
-		if (initialTemplateFieldValue != null) {
-			templateNameField.setText(initialTemplateFieldValue);
-		}
-		templateNameField.addListener(SWT.Modify, templateNameModifyListener);
-	}
-
-	/**
-	 * Returns the current project name as entered by the user, or its
-	 * anticipated initial value.
-	 * 
-	 * @return the project name, its anticipated initial value, or
-	 *         <code>null</code> if no project name is known
-	 */
-	public String getTemplateName() {
-		if (templateNameField == null) {
-			return initialTemplateFieldValue;
-		}
-
-		return getTemplateNameFieldValue();
-	}
-
-	/**
-	 * Returns the value of the project name field with leading and trailing
-	 * spaces removed.
-	 * 
-	 * @return the project name in the field
-	 */
-	private String getTemplateNameFieldValue() {
-		if (templateNameField == null) {
-			return ""; //$NON-NLS-1$
-		}
-
-		return templateNameField.getText().trim();
-	}
-
-	/**
-	 * Sets the initial project name that this page will use when created. The
-	 * name is ignored if the createControl(Composite) method has already been
-	 * called. Leading and trailing spaces in the name are ignored. Providing
-	 * the name of an existing project will not necessarily cause the wizard to
-	 * warn the user. Callers of this method should first check if the project
-	 * name passed already exists in the workspace.
-	 * 
-	 * @param name
-	 *            initial project name for this page
-	 * 
-	 * @see IWorkspace#validateName(String, int)
-	 * 
-	 */
-	public void setInitialDefaultTemplate(String name) {
-		if (name == null) {
-			initialTemplateFieldValue = null;
-		} else {
-			initialTemplateFieldValue = name.trim();
-		}
-	}
-
-	@Override
-	protected boolean validatePage() {
-		if (superValidatePage()) {
-			String mess = (String) wizard._(checkProjectName, getProjectName());
-			if (mess != null) {
-				setMessage(mess, ERROR);
-				return false;
+			@Override public void widgetDefaultSelected(SelectionEvent e) {
+				widgetSelected(e);
 			}
-			
-			String templateFieldContents = getTemplateNameFieldValue();
-			if (templateFieldContents.equals("")) { //$NON-NLS-1$
-				//setErrorMessage("The Leiningen template name cannot be empty");
-				setMessage("The Leiningen template name cannot be empty", ERROR);
-				return false;
-			}
-			if (this.getProjectName().endsWith("jure")) {
-				setMessage("'" + getProjectName() + "'" + " is a discouraged project name (ends with \"jure\")", WARNING);
-			}
-			return true;
-		} else {
-			return false;
-		}
+		});
+    	
+		return composite;
 	}
-	
-	private ProjectContentsLocationArea locationArea;
-	
-	/* Copied from parent class */
-    protected boolean superValidatePage() {
-        IWorkspace workspace = IDEWorkbenchPlugin.getPluginWorkspace();
-
-        String projectFieldContents = getProjectName();
-        if (projectFieldContents.equals("")) { //$NON-NLS-1$
-            setErrorMessage(null);
-            setMessage(IDEWorkbenchMessages.WizardNewProjectCreationPage_projectNameEmpty);
-            return false;
-        }
-
-        IStatus nameStatus = workspace.validateName(projectFieldContents,
-                IResource.PROJECT);
-        if (!nameStatus.isOK()) {
-            setErrorMessage(nameStatus.getMessage());
-            return false;
-        }
-
-        IProject handle = getProjectHandle();
-        if (handle.exists()) {
-            setErrorMessage(IDEWorkbenchMessages.WizardNewProjectCreationPage_projectExistsMessage);
-            return false;
-        }
-                
-        IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(
-				getProjectName());
-		locationArea.setExistingProject(project);
-		
-		String validLocationMessage = locationArea.checkValidLocation();
-		if (validLocationMessage != null) { // there is no destination location given
-			setErrorMessage(validLocationMessage);
-			return false;
-		}
-
-        setErrorMessage(null);
-        setMessage(null);
-        return true;
+    
+    private String getDefaultParentLocation() {
+    	return ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString();
     }
-	
-	@Override
+
+    public String getSafeProjectFieldValue() {
+        if (projectNameText == null) {
+			return "";
+		}
+
+        return getProjectNameFieldValue();
+    }
+    
 	public String getProjectName() {
-		String name = super.getProjectName();
+		String name = getSafeProjectFieldValue();
 		if (name.contains("/")) {
 			String[] parts = name.split("/");
 			if (parts.length < 2) {
@@ -272,11 +222,247 @@ public final class WizardNewLeiningenProjectTemplatePage extends
 		}
 	}
 	
+    /**
+     * Returns the value of the project name field
+     * with leading and trailing spaces removed.
+     * @return the project name in the field
+     */
+    private String getProjectNameFieldValue() {
+        if (projectNameText == null) {
+			return ""; //$NON-NLS-1$
+		}
+
+        return projectNameText.getText().trim();
+    }
+
+    private Listener nameModifyListener = new Listener() {
+        public void handleEvent(Event e) {
+            setPageComplete(validatePage());
+        }
+    };
+
+    /**
+     * Creates the project name specification controls.
+     * @param parent the parent composite
+     */
+    private final Composite createProjectNameGroup(Composite parent) {
+        // project specification group
+        Composite projectGroup = new Composite(parent, SWT.NONE);
+        GridLayout layout = new GridLayout();
+        layout.numColumns = 2;
+        projectGroup.setLayout(layout);
+
+        // new project label
+        Label projectLabel = new Label(projectGroup, SWT.NONE);
+        projectLabel.setText(IDEWorkbenchMessages.WizardNewProjectCreationPage_nameLabel);
+        projectLabel.setFont(parent.getFont());
+
+        // new project name entry field
+        projectNameText = new Text(projectGroup, SWT.BORDER);
+        GridData data = new GridData(GridData.FILL_HORIZONTAL);
+        data.widthHint = SIZING_TEXT_FIELD_WIDTH;
+        projectNameText.setLayoutData(data);
+        projectNameText.setFont(parent.getFont());
+
+        projectNameText.addListener(SWT.Modify, nameModifyListener);
+        BidiUtils.applyBidiProcessing(projectNameText, BidiUtils.BTD_DEFAULT);
+        
+        return projectGroup;
+    }
+
+	public Composite createLeinTemplateGroup(Composite parent) {
+		Composite projectGroup = new Composite(parent, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		layout.numColumns = 2;
+		projectGroup.setLayout(layout);
+
+		Label projectLabel = new Label(projectGroup, SWT.NONE);
+		projectLabel.setText("Leiningen template:");
+		projectLabel.setFont(parent.getFont());
+
+		templateNameText = new Text(projectGroup, SWT.BORDER);
+		GridData data = new GridData(GridData.FILL_HORIZONTAL);
+		data.widthHint = SIZING_TEXT_FIELD_WIDTH;
+		templateNameText.setLayoutData(data);
+		templateNameText.setFont(parent.getFont());
+
+		if (initialTemplateNameTextValue != null) {
+			templateNameText.setText(initialTemplateNameTextValue);
+		}
+		
+		templateNameText.addListener(SWT.Modify, templateNameModifyListener);
+		
+		return projectGroup;
+	}
+
+	/**
+	 * @return the template name to use, potentially initialized to its
+	 *         default value if empty
+	 */
+	public String computeTemplateName() {
+		String fieldValue = getTemplateNameFieldValue();
+		
+		if (fieldValue == null || fieldValue.equals("")) {
+			return initialTemplateNameTextValue;
+		}
+
+		return fieldValue;
+	}
+
+	/**
+	 * Returns the value of the project name field with leading and trailing
+	 * spaces removed.
+	 * 
+	 * @return the project name in the field
+	 */
+	private String getTemplateNameFieldValue() {
+		if (templateNameText == null) {
+			return ""; //$NON-NLS-1$
+		}
+
+		return templateNameText.getText().trim();
+	}
+
+	protected boolean validatePage() {
+        IWorkspace workspace = IDEWorkbenchPlugin.getPluginWorkspace();
+
+        String projectFieldContents = getProjectName();
+        if (projectFieldContents.trim().equals("")) { //$NON-NLS-1$
+            setErrorMessage(null);
+            setMessage(IDEWorkbenchMessages.WizardNewProjectCreationPage_projectNameEmpty);
+            return false;
+        }
+
+        IStatus nameStatus = workspace.validateName(projectFieldContents,
+                IResource.PROJECT);
+        if (!nameStatus.isOK()) {
+            setErrorMessage(nameStatus.getMessage());
+            return false;
+        }
+
+        IProject projectHandle = getProjectHandle();
+        if (projectHandle.exists()) {
+            setErrorMessage("A project with name '" + projectFieldContents + "' already exists in the workspace.");
+            return false;
+        }
+        
+		String validLocationMessage = checkValidLocation(
+				projectHandle, 
+				this.defaultLocationCheckbox.getSelection(),
+				this.locationText.getText(),
+				getProjectName());
+		if (validLocationMessage != null) {
+			setErrorMessage(validLocationMessage);
+			return false;
+		}
+
+		String mess = (String) wizard._(checkProjectName, getProjectName());
+		if (mess != null) {
+			setErrorMessage(mess);
+			return false;
+		}
+		
+		setErrorMessage(null);
+		if (this.getProjectName().endsWith("jure")) {
+			setMessage("'" + getProjectName() + "'" + " is a discouraged project name (ends with \"jure\")", WARNING);
+		} else {
+			setMessage(null);
+		}
+		
+		return true;
+	}
+	
+    /**
+	 * Creates a project resource handle for the current project name field
+	 * value. The project handle is created relative to the workspace root.
+	 * <p>
+	 * This method does not create the project resource; this is the
+	 * responsibility of <code>IProject::create</code> invoked by the new
+	 * project resource wizard.
+	 * </p>
+	 * 
+	 * @return the new project resource handle
+	 */
+    public IProject getProjectHandle() {
+        return ResourcesPlugin.getWorkspace().getRoot().getProject(
+                getProjectName());
+    }
+
+    /**
+	 * Check if the entry in the widget location is valid. If it is valid return
+	 * null. Otherwise return a string that indicates the problem.
+	 * 
+	 * @see Copied from ProjectContentsLocationArea
+	 * 
+	 * @return String
+	 */
+	public String checkValidLocation(IProject project, boolean isDefaultParentLocation, String projectParentLocation, String projectFolderName) {
+
+		if (projectParentLocation == null || projectParentLocation.trim().equals("")) {
+			return "A location to create the project folder in must be specified";
+		}
+		File parentFolder = new File(projectParentLocation);
+		
+		if (!parentFolder.exists()) {
+			return "Parent folder '" + projectParentLocation + "' does not exist";
+		}
+		
+		File file = new File(parentFolder, projectFolderName);
+		URI uri = file.toURI();
+		if (uri == null) {
+			return IDEWorkbenchMessages.ProjectLocationSelectionDialog_locationError;
+		}
+		
+		if (file.exists()) {
+			return "Cannot create a project at an existing location (" + file.getAbsolutePath() + ")";
+		}
+
+		IStatus locationStatus = ResourcesPlugin.getWorkspace()
+				.validateProjectLocationURI(project,
+						// We need to test parent location with default parent location to prevent false positives
+						(isDefaultParentLocation || projectParentLocation.equals(getDefaultParentLocation())) 
+						? null 
+					    : uri);
+
+		if (!locationStatus.isOK()) {
+			return locationStatus.getMessage();
+		}
+
+		return null;
+	}
+	
 	/**
 	 * @return the raw entered project name, e.g. for Leiningen it can contain
 	 *         a groupId, as in my.groupId/myArtifactId
 	 */
 	public String getLeiningenProjectName() {
-		return super.getProjectName();
+		return getSafeProjectFieldValue();
 	}
+	
+    /**
+     * Returns the useDefaults.
+     * @return boolean
+     */
+    public boolean useDefaultProjectParentLocation() {
+    	return defaultLocationCheckbox.getSelection();
+    }
+    
+    /**
+     * The specific location for the project folder, or null if default location
+     */
+    public URI getLocationURI() {
+    	if (defaultLocationCheckbox.getSelection()) {
+    		return null;
+    	} else {
+    		String parentDir = locationText.getText();
+    		String projectFolder = getProjectName();
+    		return new File(parentDir, projectFolder).toURI();
+    	}
+    }
+
+    @Override
+    public boolean isPageComplete() {
+    	// TODO Auto-generated method stub
+    	return super.isPageComplete();
+    }
 }

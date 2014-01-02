@@ -58,7 +58,6 @@ import org.eclipse.ui.activities.IActivityManager;
 import org.eclipse.ui.activities.IIdentifier;
 import org.eclipse.ui.activities.IWorkbenchActivitySupport;
 import org.eclipse.ui.activities.WorkbenchActivityHelper;
-import org.eclipse.ui.dialogs.WizardNewProjectReferencePage;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.ide.undo.CreateProjectOperation;
 import org.eclipse.ui.ide.undo.WorkspaceUndoUtil;
@@ -118,8 +117,6 @@ public class NewLeiningenProjectWizard extends BasicNewResourceWizard
 	
 	private WizardNewLeiningenProjectTemplatePage mainPage;
 
-	private WizardNewProjectReferencePage referencePage;
-
 	// cache of newly-created project
 	private IProject newProject;
 
@@ -155,28 +152,13 @@ public class NewLeiningenProjectWizard extends BasicNewResourceWizard
 		setDialogSettings(section);
 	}
 
-	/*
-	 * (non-Javadoc) Method declared on IWizard.
-	 */
 	public void addPages() {
 		super.addPages();
 
 		mainPage = new WizardNewLeiningenProjectTemplatePage(this, "basicNewProjectPage"); 
 
-		//mainPage.setTitle(ResourceMessages.NewProject_title);
-		//mainPage.setDescription(ResourceMessages.NewProject_description);
 		this.addPage(mainPage);
 
-		// only add page if there are already projects in the workspace
-		if (ResourcesPlugin.getWorkspace().getRoot().getProjects().length > 0) {
-			referencePage = new WizardNewProjectReferencePage(
-					"basicReferenceProjectPage");//$NON-NLS-1$
-			referencePage.setTitle(ResourceMessages.NewProject_referenceTitle);
-			referencePage
-					.setDescription(ResourceMessages.NewProject_referenceDescription);
-			this.addPage(referencePage);
-		}
-		
 		doLeinAddPagesPost();
 	}
 	
@@ -213,23 +195,12 @@ public class NewLeiningenProjectWizard extends BasicNewResourceWizard
 		final IProject newProjectHandle = mainPage.getProjectHandle();
 
 		// get a project descriptor
-		URI location = null;
-		if (!mainPage.useDefaults()) {
-			location = mainPage.getLocationURI();
-		}
+		URI location = mainPage.getLocationURI();
 
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		final IProjectDescription description = workspace
 				.newProjectDescription(newProjectHandle.getName());
 		description.setLocationURI(location);
-
-		// update the referenced project if provided
-		if (referencePage != null) {
-			IProject[] refProjects = referencePage.getReferencedProjects();
-			if (refProjects.length > 0) {
-				description.setReferencedProjects(refProjects);
-			}
-		}
 
 		// create the new project operation
 		IRunnableWithProgress op = new IRunnableWithProgress() {
@@ -308,27 +279,18 @@ public class NewLeiningenProjectWizard extends BasicNewResourceWizard
 		return newProject;
 	}
 
-	/*
-	 * (non-Javadoc) Method declared on IWorkbenchWizard.
-	 */
 	public void init(IWorkbench workbench, IStructuredSelection currentSelection) {
 		super.init(workbench, currentSelection);
 		setNeedsProgressMonitor(true);
 		setWindowTitle(ResourceMessages.NewProject_windowTitle);
 	}
 
-	/*
-	 * (non-Javadoc) Method declared on BasicNewResourceWizard.
-	 */
 	protected void initializeDefaultPageImageDescriptor() {
 		ImageDescriptor desc = IDEWorkbenchPlugin
 				.getIDEImageDescriptor("wizban/newprj_wiz.png");//$NON-NLS-1$
 		setDefaultPageImageDescriptor(desc);
 	}
 
-	/*
-	 * (non-Javadoc) Opens a new window with a particular perspective and input.
-	 */
 	private static void openInNewWindow(IPerspectiveDescriptor desc) {
 
 		// Open the page.
@@ -360,10 +322,7 @@ public class NewLeiningenProjectWizard extends BasicNewResourceWizard
 			wizard._(performFinish,
 					 mainPage.getLeiningenProjectName(),
 					 project,
-					 mainPage.getTemplateName()
-						//,
-						//project.getLocation().toFile()
-					 );
+					 mainPage.computeTemplateName());
 			return true;
 		} catch (Exception e) {
 			CCWPlugin.logError("Exception while creating new project " + project.getName(), e);
@@ -378,12 +337,15 @@ public class NewLeiningenProjectWizard extends BasicNewResourceWizard
 			return false;
 		}
 		
-		IWorkingSet[] workingSets = mainPage.getSelectedWorkingSets();
-		getWorkbench()
-				.getWorkingSetManager()
-				.addToWorkingSets(
-						newProject,
-				workingSets);
+		// Add project to current WorkingSet
+		IWorkingSet[] workingSets = getWorkbench().getWorkingSetManager().getWorkingSets();
+		if (workingSets != null && workingSets.length > 0) {
+			getWorkbench()
+					.getWorkingSetManager()
+					.addToWorkingSets(
+							newProject,
+					workingSets);
+		}
         
 		updatePerspective();
 		selectAndReveal(newProject);
@@ -391,9 +353,6 @@ public class NewLeiningenProjectWizard extends BasicNewResourceWizard
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc) Replaces the current perspective with the new one.
-	 */
 	private static void replaceCurrentPerspective(IPerspectiveDescriptor persp) {
 
 		// Get the active page.

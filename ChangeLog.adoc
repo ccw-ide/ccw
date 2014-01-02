@@ -20,6 +20,12 @@ The embedded nREPL client in Counterclockwise, and which is also used to serve a
 
 - Explicitly ask the user for confirmation before launching a second process for the same project
 
+=== New Clojure Project Wizard ===
+
+The Wizard has been modified to simplify the understanding of its fields. Especially, the "Use default location" field has been replaced with a "Create project folder in:" field, and its meaning has changed from "ask the user for the project's folder on the filesystem" to "ask the user for the project's parent folder on the filesystem (assuming that the project folder will be the project name)". This is wayyy more intuitive.
+
+The "Working Sets" section of the Wizard has been removed. Instead, the newly created project is automatically added to the currently active Working Sets.
+
 === User plugins
 
 It is possible to contribute Counterclockwise User Plugins inside folder `~/.ccw`. +
