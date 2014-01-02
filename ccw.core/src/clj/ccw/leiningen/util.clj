@@ -150,13 +150,23 @@
                `(-> '~p
                   (leiningen.core.project/add-profiles
                     '{:user 
-                      ~'{:plugins [[lein-newnew "0.3.3"]]}})
+                      ~'{:plugins [[lein-newnew "0.3.5"]]}})
                   (leiningen.core.project/merge-profiles 
                     [:user])))))]
     (eval-in-project 
       :project-less
       `(do
          (require 'leiningen.new)
+         (try
+           (alter-var-root 
+             (resolve 'leiningen.core.main/abort)
+             (fn [_#] (fn [& args#] (throw (RuntimeException. (apply print-str args#))))))
+           (catch Exception e#))
+         (try
+           (alter-var-root 
+             (resolve 'leiningen.core/abort)
+             (fn [_#] (fn [& args#] (throw (RuntimeException. (apply print-str args#))))))
+           (catch Exception e#))
          (binding [leiningen.new.templates/*dir* ~location]
            (apply (leiningen.new/resolve-template '~template) 
                   '~name 

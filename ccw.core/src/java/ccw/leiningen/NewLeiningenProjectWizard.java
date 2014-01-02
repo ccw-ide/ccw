@@ -325,7 +325,13 @@ public class NewLeiningenProjectWizard extends BasicNewResourceWizard
 					 mainPage.computeTemplateName());
 			return true;
 		} catch (Exception e) {
-			CCWPlugin.logError("Exception while creating new project " + project.getName(), e);
+			CCWPlugin.logError("Error while creating new project " + project.getName(), e);
+			Throwable t = e;
+			while (t.getCause() != null) t = t.getCause();
+			ErrorDialog.openError(getShell(), 
+					"Exception while creating new project", 
+					t.getMessage(),
+					CCWPlugin.createErrorStatus("Exception while creating new project", t));
 			return false;
 		}
 	}
