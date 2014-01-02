@@ -57,7 +57,8 @@ http://standalone.ccw-ide.org/ccw-macosx.cocoa.x86_64.zip[OS X 64 Bits]
 === Pre-requisites
 * Java Virtual Machine (JVM) 7 installed and setup in the Operating System's PATH
 
-You may now want to <<configure,configure Counterclockwise for your specific environment>>
+You may now want to <<configure,configure Counterclockwise for your specific environment>> +
+or directly <<test-install,test your installation>>
 
 
 [[install-as-plugin]]
@@ -73,17 +74,13 @@ You may now want to <<configure,configure Counterclockwise for your specific env
 * Eclipse 4.3 (Kepler) or Eclipse 3.7 (Indigo)
 ** any packaging including JDT (Java Development Tools) will do:  "Eclipse SDK" package, "Eclipse for Java Developers" package, "Eclipse for Java EE Developers" package, etc.
 
-There is a central place for the installation guides of all clojure IDEs.
-
-// TODO reincorporate here, and just provide a link in the dev.clojure.org Getting Started page
-You will find Counterclockwise's one at http://dev.clojure.org/display/doc/Getting+Started+with+Eclipse+and+Counterclockwise
-
-You may now want to <<configure,configure Counterclockwise for your specific environment>>
+You may now want to <<configure,configure Counterclockwise for your specific environment>> +
+or directly <<test-install,test your installation>>
 
 [[configure]]
 == Configure Counterclockwise
 
-=== Proxy Settings
+=== Proxy Settings (optional)
 
 Currently Counterclockwise does not use the menu:Window[Preferences > General >Network Connections] Proxy Preference for use with the embedded Leiningen.
 
@@ -99,11 +96,30 @@ e.g. `http_no_proxy="*.example1.com|*.example2.com|*.example3.com"`
 See the https://github.com/technomancy/leiningen/wiki/HTTP-Proxies[Leiningen HTTP Proxies] page for more detail.
 
 
+[[test-install]]
+== Test a Counterclockwise install
 
-=== Check Counterclockwise installation
+Create and run a simple Clojure project ("Hello Betty")
 
-- Select menu:Help[About Eclipse > Plugin details] (on OS X: menu:Eclipse[About Eclipse])
-- Click on plugin id column to sort by alphabetical ascending plugin id order. You should see, among other things, plugins `ccw.branding`, `ccw.core`, `paredit.clj`
+- Open the Java perspective
+** menu:Window[Open Perspective > Java] '''(a perspective is a predefined layout of views, suitable for a particular type of development)'''
+- Create a Clojure project 
+** Menu menu:File[New > Clojure Project], name it `myproject`
+** The project is created using the `default` Leiningen Template, which creates a Clojure project with a predefined `myproject.core` namespace in `src/myproject/core.clj`
+- Add a function definition to `myproject.core`: 
+** Open `src/myproject/core.clj`, add the following at the end: `(defn hello [who] (str "Hello " who " !"))`, save the file
+- Run the project: 
+** With file `src/myproject/core.clj` open, Hit kbd:[Ctrl+Alt+S] (kbd:[Cmd+Alt+S] on OSX). This sends the whole file's code to the REPL (and also takes care of starting a REPL for the project if none is currently started)
+- Switch to the REPL in the namespace of your file: 
+** Hit kbd:[Ctrl+Alt+N] (kbd:[Cmd+Alt+N] on OSX). Alternatively, just click on the bottom of the REPL inside the "text input area"
+- Call your function (Hit kbd:[Enter] to send the expression if the cursor is at the end, or hit kbd:[Ctrl+Enter] / kbd:[Cmd+Enter] if the cursor is not at the end of the text):
+
+[source,clojure]
+----
+> 1:1 helloworld=> (hello "Betty") [Ctrl+Enter]
+> "Hello Betty !"
+----
+
 
 [[enable-clojure]]
 = Enable Clojure (Leiningen batteries included)
