@@ -40,8 +40,8 @@
       (and (instance? IStructuredSelection sel)
            (-> ^IStructuredSelection sel .getFirstElement))
         ;; TODO consider giving the user a hint for why the expected command did not work
-        (-> ^IStructuredSelection sel .getFirstElement e/resource .getProject e/project)
-      :else (if-let [editor (e/active-editor event)]
+        (some-> ^IStructuredSelection sel .getFirstElement e/resource .getProject e/project)
+      :else (when-let [editor (e/active-editor event)]
               (e/project editor)))))
 
 (defn event->java-project
@@ -75,7 +75,7 @@
   [handler event]
   (println "update-dependencies")
   (if-let [project (event->project event)]
-    (launch/generic-launch project)
+    (launch/generic-launch (when (e/project-open? project) project))
     (println "unable to launch leiningen - no project found")))
 
 (defn leiningen-enabled-project-factory 

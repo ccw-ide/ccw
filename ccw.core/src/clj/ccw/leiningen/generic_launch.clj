@@ -50,8 +50,9 @@
                     (set! (.doit e) false)))))
           no-project "<no project>"
           prompt (str (if project (.getName project) no-project) " $ lein ")
+          default-text (str prompt "<task>")
           command-input (doto (Text. dialog 0)
-                          (.setText (str prompt "<task>"))
+                          (.setText default-text)
                           (.setToolTipText "Click Enter to execute the command\nClick Esc to cancel/close")
                           (.setLayoutData (swt/form-data :width 400)))
           _ (doto command-input
@@ -60,7 +61,8 @@
                 (count (.getText command-input)))
               (.addKeyListener
                 (swt/key-listener e
-                  (when (= \return (.character e))
+                  (when (and (= \return (.character e))
+                             (not= default-text (.getText command-input))) ; prevent double-press issue
                     (run-lein project no-project (.getText command-input))
                     (.close dialog)))))
           cursor (.getCursorLocation display)]
