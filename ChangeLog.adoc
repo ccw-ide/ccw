@@ -70,18 +70,11 @@ The code is there, but not active at the moment (needs more love / hammock)
 
 === General purpose Leiningen task invoker
 
-WARNING: Eclipse 4 and CCW/Standalone only
-
 Addition of a new command, kbd:[Alt+L L] for launching a popup allowing to enter an arbitry leiningen command.
 
-Since this is still an experimental feature, it is only accessible via a User Plugin atm. +
-Clone the following Gist into your `~/.ccw/` folder to get it: https://gist.github.com/laurentpetit/7909761
+It allows you to launch arbitrary leiningen tasks from within Eclipse.
 
-[source,bash]
-----
-git clone https://gist.github.com/laurentpetit/7909761 ~/.ccw/lein-popup
-# Restart your Eclipse or reload the Users plugins via kbd:[Alt+U S] if you have installed the 'Reload User plugins' user plugin.
-----
+See Documentation: http://doc.ccw-ide.org/documentation.html#_generic_command_launcher
 
 === CCW/Standalone
 
