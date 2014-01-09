@@ -83,11 +83,11 @@
     urls))
 
 (defn plugin-folder? [d]
-  (some #(and f/file? (.endsWith (.getName %) ".clj"))
+  (some #(and (f/file? %) (.endsWith (.getName %) ".clj"))
         (.listFiles (io/file d))))
 
 (defn user-plugins [d]
-  (if (plugin-folder? d)
+  (if (and d (plugin-folder? d))
     [d]
     (mapcat user-plugins 
             (filter f/directory?
@@ -118,11 +118,12 @@
   "Return the user plugins dir (`~/.ccw/`) if it exists and is a directory.
    Or return nil."
   []
-  (f/directory? (io/file (System/getProperty "user.home")
-                         ".ccw")))
+  (when-let [d (f/directory? (io/file (System/getProperty "user.home")
+                                      ".ccw"))]
+    d))
 
 (defn start-user-plugins []
-  (when-let [user-plugins (user-plugins (plugins-root-dir))]
+  (when-let [user-plugins (some-> (plugins-root-dir) user-plugins)]
     (binding [dsl/*load-key* (str (java.util.UUID/randomUUID))]
       (try
         (doseq [p user-plugins]
