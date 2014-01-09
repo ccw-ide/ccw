@@ -10,15 +10,21 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 == Changes between Counterclockwise 0.20.0 and 0.21.0
 
-`0.21.0` not released yet
+`0.21.0` released on January 9, 2014
 
-=== nREPL Version Update
+=== General purpose Leiningen task invoker
 
-The embedded nREPL client in Counterclockwise, and which is also used to serve as nREPL client when the project does not declare a dependency on nREPL (the majority of the cases) has been upgraded from version `0.2.1` to `0.2.3`. 
+Addition of a new command, kbd:[Alt+L L] for launching a popup allowing to enter an arbitry leiningen command.
 
-=== Bug fix 
+It allows you to launch arbitrary leiningen tasks from within Eclipse.
 
-- Explicitly ask the user for confirmation before launching a second process for the same project
+See Documentation: http://doc.ccw-ide.org/documentation.html#_generic_command_launcher
+
+=== New Clojure Project Wizard ===
+
+The Wizard has been modified to simplify the understanding of its fields. Especially, the "Use default location" field has been replaced with a "Create project folder in:" field, and its meaning has changed from "ask the user for the project's folder on the filesystem" to "ask the user for the project's parent folder on the filesystem (assuming that the project folder will be the project name)". This is wayyy more intuitive.
+
+The "Working Sets" section of the Wizard has been removed. Instead, the newly created project is automatically added to the currently active Working Sets.
 
 === Editor responsiveness
 
@@ -31,11 +37,9 @@ Nothing should prevent the user to type in an Editor. Counterclockwise should gr
 - Namespace Browser: 15 seconds timeout.
 - REPL: 15 seconds timeout at some initialization usage of the nrepl client
 
-=== New Clojure Project Wizard ===
+=== "Load File" in Editor
 
-The Wizard has been modified to simplify the understanding of its fields. Especially, the "Use default location" field has been replaced with a "Create project folder in:" field, and its meaning has changed from "ask the user for the project's folder on the filesystem" to "ask the user for the project's parent folder on the filesystem (assuming that the project folder will be the project name)". This is wayyy more intuitive.
-
-The "Working Sets" section of the Wizard has been removed. Instead, the newly created project is automatically added to the currently active Working Sets.
+"Load File" action now works for editors opened via menu:File[Open File...] (aka arbitrary file on the filesystem, not necessarily living inside a project inside the Eclipse Workspace)
 
 === User plugins
 
@@ -50,31 +54,31 @@ A whole new section of the documentation has been added concerning User plugins.
 
 WARNING: Works only with Eclipse 4 and CCW/Standalone.
 
-=== Experimental User Plugin: Reload User plugins plugin
+=== Experimental User Plugin: "Plugin additions"
 
-Clone the following Gist https://gist.github.com/laurentpetit/7924786
+This plugin adds commands for managing User Plugins (sorry, it's a little bit `meta`):
+
+- kbd:[Alt+U S] - re[S]tart user plugins (will reload all user plugins code)
+- kbd:[Alt+U N] - create a [N]ew user plugin (will prompt you for a plugin name, create the plugin folder/file, a project in the workspace, and open a repl connection to your Eclipse instance)
+- kbd:[Alt+U I] - Import all user plugins present in `~/.ccw` as projects in workspace
+
+The plugin is available as a Gist, you can examine its content here https://gist.github.com/laurentpetit/7924786 and then clone its repository https://gist.github.com/7924786.git in `~/.ccw/plugin-additions`
 
 [source,bash]
-git clone https://gist.github.com/laurentpetit/7924786
+git clone https://gist.github.com/7924786.git ~/.ccw/plugin-additions
 # Restart your Eclipse
 
-And then you can reload user plugins via kbd:[Alt+U S] Keyboard Shortcut.
+=== nREPL Version Update
 
-=== Editor
+The embedded nREPL client in Counterclockwise, and which is also used to serve as nREPL client when the project does not declare a dependency on nREPL (the majority of the cases) has been upgraded from version `0.2.1` to `0.2.3`. 
 
-"Load File" action now works for editors opened via menu:File[Open File...] (aka arbitrary file on the filesystem, not necessarily living inside a project inside the Eclipse Workspace)
+=== Bug fix 
+
+- Explicitly ask the user for confirmation before launching a second process for the same project
 
 === Leiningen based Launcher
 
 The code is there, but not active at the moment (needs more love / hammock)
-
-=== General purpose Leiningen task invoker
-
-Addition of a new command, kbd:[Alt+L L] for launching a popup allowing to enter an arbitry leiningen command.
-
-It allows you to launch arbitrary leiningen tasks from within Eclipse.
-
-See Documentation: http://doc.ccw-ide.org/documentation.html#_generic_command_launcher
 
 === CCW/Standalone
 
@@ -92,7 +96,6 @@ Moar sensible default preferences:
 ** tabs automatically replaced by spaces when typing
 - Worskpace
 ** automatic refresh of the Workspace resources without asking the user
-
 
 
 == Changes between Counterclockwise 0.12.3 and 0.20.0
