@@ -68,7 +68,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/stencil.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/tools.cli.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/tools.macro.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/tools.nrepl.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/tools.nrepl.jar" sourcepath="/Users/laurentpetit/.m2/repository/org/clojure/tools.nrepl/0.2.3/tools.nrepl-0.2.3-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/useful.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/versioneer.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/wagon-http-shared4.jar"/>

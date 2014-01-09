@@ -8,14 +8,12 @@
   <parent>
     <groupId>ccw</groupId>
     <artifactId>parent</artifactId>
-    <version>0.20.1-SNAPSHOT</version>
+    <version>0.21.0.STABLE001</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <groupId>ccw</groupId>
   <artifactId>ccw.feature</artifactId>
-  <version>0.20.1-SNAPSHOT</version>
-
   <packaging>eclipse-feature</packaging>
 
 </project>

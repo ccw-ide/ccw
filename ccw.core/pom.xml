@@ -7,13 +7,12 @@
   <parent>
     <groupId>ccw</groupId>
     <artifactId>parent</artifactId>
-    <version>0.20.1-SNAPSHOT</version>
+    <version>0.21.0.STABLE001</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   
   <groupId>ccw</groupId>
   <artifactId>ccw.core</artifactId>
-  <version>0.20.1-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
 
   <properties>
@@ -32,7 +31,7 @@
         <dependency>
             <groupId>org.clojure</groupId>
             <artifactId>clojure</artifactId>
-            <version>1.5.1</version>
+            <version>1.6.0-master-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.clojure</groupId>
