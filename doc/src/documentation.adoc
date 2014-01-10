@@ -192,7 +192,9 @@ INFO: You can check the project has been recognized as a Clojure project via the
 
 To ensure Eclipse recognize your project as a Leiningen Project, see the previous <<enable-clojure>> section.
 
-Leiningen Support provides you with the following features:
+== Project classpath management
+
+Eclipse has its own way of managing the Classpath, and so does Leiningen. Counterclockwise reconciles the two:
 
 - A new node named "Leiningen dependencies" inside your project in the `Package Explorer View`
 ** This is an addition to the classpath containing all dependencies (including transitive ones) declared in `project.clj` (a `Classpath Container` in Eclipse terminology):
@@ -209,6 +211,23 @@ Of course, when you have an active REPL, and once a namespace from a dependency'
 
 NOTE: Native deps are also correctly supported. Meaning you can start hacking with Overtone or Quil and their Sound / OpenGL supports right now!!!
 
+[[lein-generic-launcher]]
+== Generic Command launcher
+
+It is possible to invoke arbitrary leiningen command, as if done from the command line, via the kbd:[Alt+L L] keyboard shortcut.
+
+If called from a place in Eclipse where it's possible to infer a `current` project (e.g. if called from the context of a clojure editor), the command will be issued from the project folder, and the popup will show the project name at the start of the line, before the `$`.
+
+  my-project $ lein <task>
+
+If called from a place in Eclipse where no project has been inferred from the current context, then the command is initialized to work outside any project folder.
+
+  <noproject> $ lein <task>
+
+The text `<task>` is already selected in the text input, ready to be replaced by the real command you want to invoke. Replace the text with the command, `uberjar` or `do clean, uberjar` for instance, then hit kbd:[Enter]. 
+
+Wait for a second, and see the `Console View` show the progress of the process' output. You can also interact with the process input stream by typing inside the `Console View`.
+
 == Keyboard Shortcuts for Leiningen Commands 
 
 === Starting a Headless Leiningen REPL
@@ -218,6 +237,15 @@ kbd:[Alt+L H] is a shortcut for launching a headless leiningen REPL. It is simil
 === Resetting the Project Classpath
 
 kbd:[Alt+L R] resets the project classpath, using Leiningen to compute the classpath.
+
+=== Updating the Project Dependencies
+
+kbd:[Alt+L U] is a shortcut for updating the project dependencies in the classpath, using Leiningen
+
+=== Leiningen general purpose prompt
+
+kbd:[Alt+L G]  is a shortcut for opening a popup allowing you to invoke any leiningen command. More detail in the <<lein-generic-launcher>> section.
+
 
 
 = Clojure Support
@@ -360,24 +388,6 @@ Once you have started a REPL for your project, and when the menu:Project[Build a
 
 // TODO consider packaging Fat Jar with the Standalone Package
 // TODO change to explain how to do this with Leiningen
-
-== Leiningen Support
-
-=== Generic Command launcher
-
-It is possible to invoke arbitrary leiningen command, as if done from the command line, via the kbd:[Alt+L L] keyboard shortcut.
-
-If called from a place in Eclipse where it's possible to infer a `current` project (e.g. if called from the context of a clojure editor), the command will be issued from the project folder, and the popup will show the project name at the start of the line, before the `$`.
-
-  my-project $ lein <task>
-
-If called from a place in Eclipse where no project has been inferred from the current context, then the command is initialized to work outside any project folder.
-
-  <noproject> $ lein <task>
-
-The text `<task>` is already selected in the text input, ready to be replaced by the real command you want to invoke. Replace the text with the command, `uberjar` or `do clean, uberjar` for instance, then hit kbd:[Enter]. 
-
-Wait for a second, and see the `Console View` show the progress of the process' output. You can also interact with the process input stream by typing inside the `Console View`.
 
 == Distribute as a jar
 

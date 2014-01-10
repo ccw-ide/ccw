@@ -25,10 +25,11 @@ Before:
   nREPL server started on port 61149 on host 127.0.0.1
 
 After:
+
   nREPL server started on port 61149 on host 127.0.0.1 - nrepl://127.0.0.1:61149
 
-This nREPL URL is automatically converted to an hyperlink in the Console View. 
-'''And even more: the first time a nREPL link appears in a Console View, Counterclockwise automatically opens a REPL View for it!'''
+This nREPL URL is automatically converted to an hyperlink in the Console View. +
+And even more: the first time a nREPL link appears in a Console View, Counterclockwise automatically opens a REPL View for it!
 
 === Shortcut for starting a Headless Leiningen REPL
 
@@ -52,7 +53,7 @@ Counterclockwise will create 2 source path entries:
 - one for `resources/public`, 
 - and one for `resources`, with an exclusion filter for its `public` subfolder
 
-==== Missing source paths are not signaled as errors anymore
+==== Missing source paths are not reported as errors anymore
 All paths are marked as 'optional' so that if folders for these paths are missing, no exception is reported by Eclipse.
 
 
