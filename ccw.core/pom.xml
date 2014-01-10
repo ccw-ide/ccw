@@ -17,7 +17,7 @@
 
   <properties>
     <nrepl.version>0.2.3</nrepl.version>
-    <leiningen.version>2.1.2</leiningen.version>
+    <leiningen.version>2.3.4</leiningen.version>
   </properties>
 
 	<!-- These are ignored by Tycho

@@ -12,6 +12,22 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 `0.22.0` not released yet
 
+=== Leiningen Upgrade
+
+The embedded Leiningen has been upgraded from version `2.1.2` to a patched `2.3.4`.
+
+The patch applied to `2.3.4` relates to the `lein repl` task: in addition to displaying a human readable info about the nREPL server's port & host, it appends a nREPL URL.
+
+Before:
+
+  nREPL server started on port 61149 on host 127.0.0.1
+
+After:
+  nREPL server started on port 61149 on host 127.0.0.1 - nrepl://127.0.0.1:61149
+
+This nREPL URL is automatically converted to an hyperlink in the Console View. +
+This greatly eases the opening of a Console View after having launched a headless lein repl via kbd:[Alt+L L] ( `your-project $ lein repl :headless` )
+
 == Changes between Counterclockwise 0.20.0 and 0.21.0
 
 `0.21.0` released on January 9, 2014

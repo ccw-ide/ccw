@@ -107,7 +107,9 @@ Bundle-ClassPath: .,
  lib/wagon-http.jar,
  lib/wagon-provider-api.jar,
  lib/junit.jar,
- lib/cljunit.jar
+ lib/cljunit.jar,
+ lib/hamcrest-core.jar,
+ lib/pedantic.jar
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Vendor: Counterclockwise team
 Eclipse-BundleShape: dir

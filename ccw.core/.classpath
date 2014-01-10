@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="lib/hamcrest-core.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/pedantic.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/aether-api.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/aether-connector-file.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/aether-connector-wagon.jar"/>
