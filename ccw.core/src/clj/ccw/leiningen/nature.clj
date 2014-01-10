@@ -62,13 +62,8 @@
 
 (defn lein-raw-source-folders [lein-proj]
   (concat (:source-paths lein-proj)
-          (:java-source-paths lein-proj)))
-
-(defn lein-raw-optional-source-folders [lein-proj]
-  (println "lein-raw-optional-source-folders:"
-           (concat (:test-paths lein-proj)
-                   (:resource-paths lein-proj)))
-  (concat (:test-paths lein-proj)
+          (:java-source-paths lein-proj)
+          (:test-paths lein-proj)
           (:resource-paths lein-proj)))
 
 (defn lein-raw-compile-folder [lein-proj] (:compile-path lein-proj))
@@ -79,9 +74,6 @@
 (defn lein-source-folders [lein-proj]
   (map path-to-folder (lein-raw-source-folders lein-proj)))
 
-(defn lein-optional-source-folders [lein-proj]
-  (map path-to-folder (lein-raw-optional-source-folders lein-proj)))
-
 (defn lein-compile-folder [lein-proj]
   (-> lein-proj lein-raw-compile-folder path-to-folder))
 
@@ -91,43 +83,29 @@
 
 (defn lein-entries
   "Computes the build path as per leiningen project.clj.
-   - java source folders are added from defaults or :source, :java-source, :test, :resources Leiningen entries
+   - java source folders are added from defaults or :source-paths, :java-source-paths, :test-paths, :resource-paths Leiningen entries
    - a classes folder is added which represents the target clojure AOT compilation folder, as per leiningen default \"classes\" folder or via :compile-path entry
    - TODO if a JVM version is specified in Lein, pick a matching version in the Eclipse defined. Pick the default one if does not match.
      - or if no JVM version specified in Lein, pick the default one
    - Install a Leiningen Classpath Container" 
   [java-proj]
   (let [lein-proj        (u/lein-project (e/project java-proj) :enhance-fn #(do (println %) (dissoc % :hooks)))
-        _ (println "lein-proj: " lein-proj)
-        
+        ;_ (println "lein-proj: " lein-proj)
         jvm-entry        (jvm-entry-or-default java-proj)
-        
-        source-entries   (map #(jdt/source-entry {:path %}) 
-                              (lein-source-folders lein-proj))
-        _ (println "(lein-source-folders lein-proj): " (lein-source-folders lein-proj))
-        _ (println "source-entries: " source-entries)
-
-        ;; TODO remove this hack once CCW 0.8.0 has been delivered with the Builder correction for missing source folders
-        optional-entry-start-version (b/version :major 0 :minor 8 :micro 0 :qualifier "201204121312")
-        ccw-version (or (ccw-bundle-version) (b/version :major 9999 :minor 9999 :micro 9999))
-        optional-entries? (b/> ccw-version optional-entry-start-version)
-        
-        _ (println "will handle optional entries: " optional-entries?)
-        _ (println "resource-folders:" (lein-optional-source-folders lein-proj))
-        ; TODO remove the folder check, and add the optional extra attribute
-        resource-entries (if optional-entries?
-                           (->> lein-proj
-                             lein-optional-source-folders
-                             (map #(jdt/source-entry {:path %, 
-                                                    :extra-attributes {jdt/optional "true"}})))
-                           (->> lein-proj
-                             lein-optional-source-folders
-                             (filter #(.exists ^File %))
-                             (map #(jdt/source-entry {:path %}))))
-        _ (println "resource entries:" resource-entries)
+        source-folders   (concat (lein-source-folders lein-proj))
+        ;_ (println "source folders:" source-folders)
+        source-entries   (map (fn [path] 
+                                (jdt/source-entry 
+                                  {:path path,
+                                   :exclusion-patterns (->> source-folders
+                                                         (remove #{path})
+                                                         (filter (partial e/path-is-prefix-of path))
+                                                         (map (partial (comp e/path-add-trailing-separator e/path-subtract) path))) 
+                                   :extra-attributes {jdt/optional "true"}}))
+                              source-folders)
+        ;_ (println "source entries:" source-entries)        
         compile-entry    (jdt/library-entry {:path (lein-compile-folder lein-proj)
-                                           :extra-attributes {jdt/optional "true"}})
-
+                                             :extra-attributes {jdt/optional "true"}})
         lein-container   (cpc/get-lein-container java-proj)
         _                (cpc/set-classpath-container
                            java-proj
@@ -142,7 +120,6 @@
                             :is-exported true})]
     (concat [jvm-entry]
             source-entries
-            resource-entries
             [compile-entry]
             [container-entry])))
 
@@ -157,6 +134,7 @@
   [java-proj overwrite? & [monitor]]
   (let [monitor (or monitor (e/null-progress-monitor))
         lein-entries (lein-entries java-proj)
+        ;_ (println "++++" lein-entries)
         existing-entries (if overwrite? () (seq (.getRawClasspath java-proj)))
         new-entries (remove (set existing-entries) lein-entries)
         entries (concat existing-entries new-entries)]

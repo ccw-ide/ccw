@@ -73,7 +73,7 @@
    In both cases, the found project must be open, and with the Leiningen nature
    enabled."
   [handler event]
-  (println "update-dependencies")
+  ;(println "update-dependencies")
   (if-let [project (event->project event)]
     (launch/generic-launch (when (e/project-open? project) project))
     (println "unable to launch leiningen - no project found")))

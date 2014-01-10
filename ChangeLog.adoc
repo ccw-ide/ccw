@@ -28,6 +28,24 @@ After:
 This nREPL URL is automatically converted to an hyperlink in the Console View. +
 This greatly eases the opening of a Console View after having launched a headless lein repl via kbd:[Alt+L L] ( `your-project $ lein repl :headless` )
 
+=== Leiningen classpath more permissive
+
+Resolving leiningen classpath is now more permissive
+
+==== Overlapping source paths are allowed
+Overlapping `:source-paths`, `:resource-paths`,  `:test-paths` and/or `:java-source-paths` are accepted.
+Counterclockwise resolves the conflict by adding the required exclusions to its source classpath entries.
+
+For instance, if you have declared (explicitly or implicitly) both `resources`  and `resources/public` as resource paths,
+Counterclockwise will create 2 source path entries: 
+
+- one for `resources/public`, 
+- and one for `resources`, with an exclusion filter for its `public` subfolder
+
+==== Missing source paths are not signaled as errors anymore
+All paths are marked as 'optional' so that if folders for these paths are missing, no exception is reported by Eclipse.
+
+
 == Changes between Counterclockwise 0.20.0 and 0.21.0
 
 `0.21.0` released on January 9, 2014

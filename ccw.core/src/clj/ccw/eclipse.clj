@@ -223,6 +223,25 @@
                  :file    IResource/FILE})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; IPaths
+
+(defn path-is-prefix-of 
+  "Return truthy (p1) if p1 is a prefix of p2"
+  [p1 p2]
+  (when (.isPrefixOf (path p1) (path p2)) 
+    p1))
+
+(defn path-subtract
+  "Return the portion of path 2 which is relative to path p1, aka \"p1 - p2\""
+  [p1 p2]
+  (.makeRelativeTo (path p2) (path p1)))
+
+(defn path-add-trailing-separator
+  "Add a trailing separator to the path represented by p. Return a IPath"
+  [p]
+  (.addTrailingSeparator (path p)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; IProjects
 (defn project-name [p] (.getName (project p)))
 (defn project-exists [p] (and p (.exists (project p))))

@@ -118,7 +118,7 @@
   [project-name lein-project]
   (let [dependencies (resolve-dependencies project-name :dependencies lein-project)
         default-native-platform-path (u/lein-native-platform-path lein-project)]
-    (println "default-native-platform-path:" default-native-platform-path)
+    ;(println "default-native-platform-path:" default-native-platform-path)
     (->> dependencies
       (filter #(re-find #"\.(jar|zip)$" (.getName ^File %)))
       (sort-by #(.getName ^File %))
