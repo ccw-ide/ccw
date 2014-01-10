@@ -1,29 +1,41 @@
 (ns ccw.editors.clojure.nrepl-hyperlink
-  (:require [ccw.string :as s])
+  (:require [ccw.string :as s]
+            [ccw.eclipse :as e])
   (:use [clojure.test])
   (:import [org.eclipse.ui.console PatternMatchEvent TextConsole]))
 
 ;; TODO share it with editor hyperlink
 (def ^:private pattern #"nrepl://([^':',' ']+):(\d+)")
 
-(defn match-found [^PatternMatchEvent event ^TextConsole console]
+(defn match-found 
+  "state contains the console instance, and a set of seen nrepl links.
+   This allows to e.g. only process nrepl links opening once, even if 
+   match-found is called several times on the same text."
+  [^PatternMatchEvent event ^TextConsole {:keys [console nrepl-urls] :as state}]
   (let [offset (.getOffset event)
         length (.getLength event)
         document (.getDocument console)
         s (.get document offset length)
         [[url]] (re-seq pattern s)
+        open-repl-view #(ccw.repl.REPLView/connect url true)
         hyperlink (reify org.eclipse.ui.console.IHyperlink
-                    (linkActivated [this] (ccw.repl.REPLView/connect url true))
+                    (linkActivated [this] (open-repl-view))
                     (linkExited [this])
                     (linkEntered [this]))]
-    (.addHyperlink console hyperlink offset length)))
+    (.addHyperlink console hyperlink offset length)
+    (when-not (nrepl-urls url) 
+      (e/ui (open-repl-view)))
+    (update-in state [:nrepl-urls] conj url)))
 
 (defn make []
   (let [state (atom nil)]
     (reify org.eclipse.ui.console.IPatternMatchListenerDelegate
-      (connect [this console]  (dosync (reset! state console)))
+      (connect [this console]  (reset! state {:console console
+                                              :nrepl-urls #{}}))
       (disconnect [this]       (reset! state nil))
-      (matchFound [this event] (match-found event @state)))))
+      (matchFound [this event] 
+        (swap! state (partial match-found event))
+        nil))))
 
 (defn factory "plugin.xml hook" [ _ ] (make))
 

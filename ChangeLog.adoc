@@ -16,7 +16,9 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 The embedded Leiningen has been upgraded from version `2.1.2` to a patched `2.3.4`.
 
-The patch applied to `2.3.4` relates to the `lein repl` task: in addition to displaying a human readable info about the nREPL server's port & host, it appends a nREPL URL.
+=== Automatic opening of REPL Views
+
+The patch applied to Leiningen `2.3.4` relates to the `lein repl` task: in addition to displaying a human readable info about the nREPL server's port & host, it appends a nREPL URL.
 
 Before:
 
@@ -25,8 +27,8 @@ Before:
 After:
   nREPL server started on port 61149 on host 127.0.0.1 - nrepl://127.0.0.1:61149
 
-This nREPL URL is automatically converted to an hyperlink in the Console View. +
-This greatly eases the opening of a Console View after having launched a headless lein repl via kbd:[Alt+L L] ( `your-project $ lein repl :headless` )
+This nREPL URL is automatically converted to an hyperlink in the Console View. 
+'''And even more: the first time a nREPL link appears in a Console View, Counterclockwise automatically opens a REPL View for it!'''
 
 === Leiningen classpath more permissive
 
