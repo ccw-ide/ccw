@@ -30,6 +30,10 @@ After:
 This nREPL URL is automatically converted to an hyperlink in the Console View. 
 '''And even more: the first time a nREPL link appears in a Console View, Counterclockwise automatically opens a REPL View for it!'''
 
+=== Shortcut for starting a Headless Leiningen REPL
+
+kbd:[Alt+L H] is a shortcut for launching a headless leiningen REPL. It is similar to doing kbd:[Alt+L L] + typing `your-project $ lein repl :headless`.
+
 === Leiningen classpath more permissive
 
 Resolving leiningen classpath is now more permissive

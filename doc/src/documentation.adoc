@@ -209,6 +209,12 @@ Of course, when you have an active REPL, and once a namespace from a dependency'
 
 NOTE: Native deps are also correctly supported. Meaning you can start hacking with Overtone or Quil and their Sound / OpenGL supports right now!!!
 
+== Keyboard Shortcuts for Leiningen Commands 
+
+=== Starting a Headless Leiningen REPL
+
+kbd:[Alt+L H] is a shortcut for launching a headless leiningen REPL. It is similar to doing kbd:[Alt+L L] + typing `your-project $ lein repl :headless`.
+
 
 = Clojure Support
 

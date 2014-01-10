@@ -1,7 +1,8 @@
 (ns ccw.leiningen.handlers
   (:require [ccw.leiningen.classpath-container :as cpc]
             [ccw.leiningen.nature              :as n]
-            [ccw.leiningen.generic-launch      :as launch]
+            [ccw.leiningen.launch              :as launch]
+            [ccw.leiningen.generic-launch      :as glaunch]
             [clojure.string                    :as str]
             [ccw.eclipse                       :as e]
             [clojure.java.io                   :as io])
@@ -75,8 +76,18 @@
   [handler event]
   ;(println "update-dependencies")
   (if-let [project (event->project event)]
-    (launch/generic-launch (when (e/project-open? project) project))
+    (glaunch/generic-launch (when (e/project-open? project) project))
     (println "unable to launch leiningen - no project found")))
+
+(defn launch-headless-repl
+  "Same pre-requisites as generic-launch concerning the detection of the project"
+  [handler event]
+  (println "launch-headless-repl")
+  (if-let [project-name (some-> event event->project e/project-open? e/project-name)]
+    (launch/lein
+      project-name "repl :headless"
+      :launch-name (str project-name " lein repl"))
+    (e/info-dialog "Headless REPL Launch" "No project found in the current context")))
 
 (defn leiningen-enabled-project-factory 
   "Creates a PropertyTester. It will try to derive the IProject from the

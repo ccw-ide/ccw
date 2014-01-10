@@ -2830,6 +2830,12 @@
          id="ccw.leiningen.command.generic-launch"
          name="%ccw.leiningen.command.generic-launch.name">
    </command>
+   <command
+         categoryId="ccw.leiningen.category"
+         description="%ccw.leiningen.command.launch-headless-repl.description"
+         id="ccw.leiningen.command.launch-headless-repl"
+         name="%ccw.leiningen.command.launch-headless-repl.name">
+   </command>
 </extension>
 <extension
       point="org.eclipse.ui.bindings">
@@ -2844,6 +2850,12 @@
          contextId="org.eclipse.ui.contexts.window"
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
          sequence="M3+L U">
+   </key>
+   <key
+         commandId="ccw.leiningen.command.launch-headless-repl"
+         contextId="org.eclipse.ui.contexts.window"
+         schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+         sequence="M3+L H">
    </key>
 </extension>
 <extension
@@ -2990,6 +3002,20 @@
          </parameter>
       </class>
    </handler>
+   <handler
+         commandId="ccw.leiningen.command.launch-headless-repl">
+      <class
+            class="ccw.util.GenericExecutableExtension">
+         <parameter
+               name="factory"
+               value="ccw.core.factories/handler-factory">
+         </parameter>
+         <parameter
+               name="handler"
+               value="ccw.leiningen.handlers/launch-headless-repl">
+         </parameter>
+      </class>
+   </handler>
 </extension>
 <extension
       id="ccw.leiningen.nature"
@@ -3031,13 +3057,24 @@
             icon="leiningen16x16.png"
             id="ccw.leiningen.project.menu"
             label="%ccw.leiningen.popup.menu.label"
-            mnemonic="L">
+            mnemonic="L"
+            sibling_order="&lt;command&#x0A;               commandId=&quot;ccw.leiningen.command.launch-headless-repl&quot;&#x0A;               label=&quot;%ccw.leiningen.command.launch-headless-repl.name&quot;&#x0A;               mnemonic=&quot;H&quot;&#x0A;               style=&quot;push&quot;&#x0A;               tooltip=&quot;Launch a Headless REPL for the project through Leiningen&quot;&gt;&#x0A;            &lt;visibleWhen&#x0A;                  checkEnabled=&quot;true&quot;&gt;&#x0A;            &lt;/visibleWhen&gt;&#x0A;         &lt;/command&gt;">
+         <command
+               commandId="ccw.leiningen.command.launch-headless-repl"
+               label="%ccw.leiningen.command.launch-headless-repl.name"
+               mnemonic="H"
+               style="push"
+               tooltip="%ccw.leiningen.command.launch-headless-repl.description">
+            <visibleWhen
+                  checkEnabled="true">
+            </visibleWhen>
+         </command>
          <command
                commandId="ccw.leiningen.command.generic-launch"
                label="%ccw.leiningen.command.generic-launch.name"
                mnemonic="L"
                style="push"
-               tooltip="Launch a popup to run arbitrary Leiningen command">
+               tooltip="%ccw.leiningen.command.generic-launch.description">
             <visibleWhen
                   checkEnabled="true">
             </visibleWhen>

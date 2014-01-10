@@ -90,6 +90,9 @@
   Object
   (project [o] (adapter o IProject))
   
+  IProject
+  (project [o] o)
+  
   clojure.lang.Symbol
   (project [s] (project (name s)))
   
@@ -243,17 +246,42 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; IProjects
-(defn project-name [p] (.getName (project p)))
-(defn project-exists [p] (and p (.exists (project p))))
-(defn project-close [p] (.close (project p) nil))
-(defn project-open [p] (.open (project p) nil))
-(defn project-open? [p] (.isOpen (project p)))
-(defn projects-referencing [p] (into [] (.getReferencingProjects (project p))))
-(defn projects-referenced-by [p] (into [] (.getReferencedProjects (project p))))
-(defn project-folder [p child-folder-name] (.getFolder (project p) child-folder-name))
-(defn project-file [p child-file-name] (.getFile (project p) child-file-name))
-(defn projects [] (into [] (.getProjects (workspace-root))))
-(defn project-members [p] (and p (.members (project p))))
+(defn project-name [p] 
+  (when-let [p (project p)] (.getName p)))
+
+(defn project-exists [p] 
+  (when-let [p (project p)] (and (.exists p) p)))
+
+(defn project-close [p] 
+  (when-let [p (project p)] (.close p nil) p))
+
+(defn project-open [p] 
+  (when-let [p (project p)] (.open p nil) p))
+
+(defn project-open? [p] 
+  (when-let [p (project p)] (and (.isOpen p) p)))
+
+(defn projects-referencing [p] 
+  (when-let [p (project p)]
+    (into [] (.getReferencingProjects p))))
+
+(defn projects-referenced-by [p] 
+  (when-let [p (project p)]
+    (into [] (.getReferencedProjects p))))
+
+(defn project-folder [p child-folder-name]
+  (when-let [p (project p)]
+    (.getFolder p child-folder-name)))
+
+(defn project-file [p child-file-name] 
+  (when-let [p (project p)]
+    (.getFile p child-file-name)))
+
+(defn projects [] 
+  (into [] (.getProjects (workspace-root))))
+
+(defn project-members [p] 
+  (when-let [p (project p)] (.members p)))
 
 (defn resource-of-type? [r type] 
   (let [r (resource r)

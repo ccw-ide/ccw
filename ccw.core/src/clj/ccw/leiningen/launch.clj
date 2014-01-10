@@ -6,10 +6,11 @@
   "project can be nil"
   ([project command] 
     (lein-launch-configuration project command nil))
-  ([project command {:keys [leiningen-standalone-path] :as options}]
+  ([project command {:keys [leiningen-standalone-path launch-name] :as options}]
     {
      :private                true
      :launch-in-background   false
+     :name                   launch-name
      
      :java/project-name      (and project (e/project-name project))
      :java/classpath         [{:entry-type :archive
@@ -30,7 +31,7 @@
 
 (defn lein 
   "project can be nil"
-  [project command & {:keys [leiningen-standalone-path] :as rest}]
+  [project command & {:keys [leiningen-standalone-path launch-name] :as rest}]
   (println (lein-launch-configuration project command rest))
   (launch/run (lein-launch-configuration project command rest)))
   
