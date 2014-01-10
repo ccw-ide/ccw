@@ -2857,6 +2857,12 @@
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
          sequence="M3+L H">
    </key>
+   <key
+         commandId="ccw.leiningen.command.reset-project-classpath"
+         contextId="org.eclipse.ui.contexts.window"
+         schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+         sequence="M3+L R">
+   </key>
 </extension>
 <extension
       point="org.eclipse.ui.handlers">

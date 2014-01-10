@@ -34,6 +34,10 @@ This nREPL URL is automatically converted to an hyperlink in the Console View.
 
 kbd:[Alt+L H] is a shortcut for launching a headless leiningen REPL. It is similar to doing kbd:[Alt+L L] + typing `your-project $ lein repl :headless`.
 
+=== Shortcut for resetting the Project Classpath
+
+kbd:[Alt+L R] resets the project classpath, using Leiningen to compute the classpath.
+
 === Leiningen classpath more permissive
 
 Resolving leiningen classpath is now more permissive

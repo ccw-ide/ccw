@@ -215,6 +215,10 @@ NOTE: Native deps are also correctly supported. Meaning you can start hacking wi
 
 kbd:[Alt+L H] is a shortcut for launching a headless leiningen REPL. It is similar to doing kbd:[Alt+L L] + typing `your-project $ lein repl :headless`.
 
+=== Resetting the Project Classpath
+
+kbd:[Alt+L R] resets the project classpath, using Leiningen to compute the classpath.
+
 
 = Clojure Support
 
