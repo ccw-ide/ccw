@@ -10,7 +10,7 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 == Changes between Counterclockwise 0.21.0 and 0.22.0
 
-`0.22.0` not released yet
+`0.22.0` released on January 10, 2014
 
 === Leiningen Upgrade
 

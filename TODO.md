@@ -2,6 +2,19 @@
 
 ### TODO
 
+DONE- Automatically open nrepl links that appear in Console Views (and a switch to preven this behaviour)
+DONE- Handle source path exclusions so that it's possible to do weird things in project.clj (nesting source paths, etc.)
+- Have hyperlink & doc work even if there's no project attached to the active REPL (try to resolve in the project of the current file)
+- Have Stacktrace links in stacktraces work (again) for clojure links
+- Static analysis based on heuristics for clojure projects
+- Have Java completion, etc. work again
+- Investigate the Debug Area
+- Create Alt+L R for starting a new lein repl :headless command
+- Have the REPL View become visually inactive when the connection is closed
+- History of commands in the Generic Lein Launcher
+- New Clojure Project Wizard: helper for lein templates
+- Generic Lein Launcher: helper for discovering and typing project tasks (would be the start of the disconnected infrastructure)
+
 - Autoshift:
 DONE  - extract logic from Eclipse, add tests
 DELAYED  - make it work with raise over, etc.

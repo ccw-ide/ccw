@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="Counterclockwise" uid="ccw" id="ccw.branding.ccw" application="org.eclipse.ui.ide.workbench" version="0.22.0.qualifier" useFeatures="true" includeLaunchers="true">
+<product name="Counterclockwise" uid="ccw" id="ccw.branding.ccw" application="org.eclipse.ui.ide.workbench" version="0.22.0" useFeatures="true" includeLaunchers="true">
 
    <aboutInfo>
       <image path="/ccw.branding/images/ccw-250x250.png"/>
@@ -252,7 +252,7 @@ litigation.
    </plugins>
 
    <features>
-      <feature id="ccw.feature" version="0.22.0.qualifier"/>
+      <feature id="ccw.feature" version="0.22.0"/>
       <feature id="org.eclipse.rcp"/>
       <feature id="org.eclipse.platform"/>
       <feature id="org.eclipse.help"/>
