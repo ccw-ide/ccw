@@ -5,6 +5,7 @@
 DONE- Automatically open nrepl links that appear in Console Views (and a switch to preven this behaviour)
 DONE- Handle source path exclusions so that it's possible to do weird things in project.clj (nesting source paths, etc.)
 DONE - Create Alt+L R for starting a new lein repl :headless command
+- bug : Alt+L R does not work
 - Have the new clojure project remember the location status from opening to opening
 - Have hyperlink & doc work even if there's no project attached to the active REPL (try to resolve in the project of the current file)
 - Have Stacktrace links in stacktraces work (again) for clojure links

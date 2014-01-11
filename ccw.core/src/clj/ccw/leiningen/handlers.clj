@@ -77,7 +77,7 @@
   ;(println "update-dependencies")
   (if-let [project (event->project event)]
     (glaunch/generic-launch (when (e/project-open? project) project))
-    (println "unable to launch leiningen - no project found")))
+    (e/info-dialog "Leiningen Prompt" "unable to launch leiningen - no project found")))
 
 (defn launch-headless-repl
   "Same pre-requisites as generic-launch concerning the detection of the project"
@@ -87,7 +87,7 @@
     (launch/lein
       project-name "repl :headless"
       :launch-name (str project-name " lein repl"))
-    (e/info-dialog "Headless REPL Launch" "No project found in the current context")))
+    (e/info-dialog "Headless REPL Launch" "Sorry, no project found in the current context")))
 
 (defn leiningen-enabled-project-factory 
   "Creates a PropertyTester. It will try to derive the IProject from the
@@ -144,7 +144,8 @@
    - The event's selection has size one, and is an open project
    - The project does not already have the leiningen nature"
   ([handler event]
-    (add-leiningen-nature (e/project event)))
+    (when-let [project (e/project event)]
+      (add-leiningen-nature project)))
   ([^IProject project]
     (add-natures 
       project
@@ -157,9 +158,11 @@
       (n/reset-project-build-path java-project overwrite? monitor))))
 
 (defn reset-project-build-path [handler event]
-  (upgrade-project-build-path (event->java-project event) true))
+  (when-let [java-project (event->java-project event)]
+    (upgrade-project-build-path java-project true)))
 
 (defn update-project-build-path [handler event]
-  (upgrade-project-build-path (event->java-project event) false))
+  (when-let [java-project (event->java-project event)]
+    (upgrade-project-build-path java-project false)))
 
 (println "ccw.leiningen.handlers namespace loaded")

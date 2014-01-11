@@ -2879,6 +2879,7 @@
                value="ccw.leiningen.handlers/update-dependencies">
          </parameter>
       </class>
+      <!--
       <activeWhen>
          <or>
             <iterate
@@ -2894,6 +2895,7 @@
             </iterate>
          </or>
       </activeWhen>
+      -->
    </handler>
    <handler
          commandId="ccw.leiningen.command.add-leiningen-nature">
@@ -2978,13 +2980,14 @@
                value="ccw.leiningen.handlers/reset-project-build-path">
          </parameter>
       </class>
+      <!--
       <activeWhen>
          <or>
             <iterate
                   ifEmpty="false"
                   operator="and">
                <adapt
-                     type="org.eclipse.core.resources.IResource">
+                     type="org.eclipse.core.resources.IProject">
                 <test
                       property="org.eclipse.core.resources.projectNature"
                       value="ccw.leiningen.nature">
@@ -2993,6 +2996,22 @@
             </iterate>
          </or>
       </activeWhen>
+      <enabledWhen>
+         <or>
+            <iterate
+                  ifEmpty="false"
+                  operator="and">
+               <adapt
+                     type="org.eclipse.core.resources.IProject">
+                <test
+                      property="org.eclipse.core.resources.projectNature"
+                      value="ccw.leiningen.nature">
+                </test>
+               </adapt>
+            </iterate>
+         </or>
+      </enabledWhen>
+      -->
    </handler>
    <handler
          commandId="ccw.leiningen.command.generic-launch">
