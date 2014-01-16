@@ -15,7 +15,6 @@
   </properties>
   
   <modules>
-    <module>ccw.target.e37</module>
     <module>ccw.target.e43</module>
     <module>ccw.branding</module>
     <module>paredit.clj</module>
@@ -38,18 +37,6 @@
       </activation>
       <properties>
         <target-platform>e43</target-platform>
-      </properties>
-    </profile>
-    <profile>
-      <id>indigo</id>
-      <activation>
-        <property>
-          <name>env.ECLIPSE_TARGET</name>
-          <value>indigo</value>
-        </property>
-      </activation>
-      <properties>
-        <target-platform>e37</target-platform>
       </properties>
     </profile>
     <profile>

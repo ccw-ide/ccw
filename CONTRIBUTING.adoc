@@ -41,7 +41,7 @@ ccw$ mvn clean test
 
 - Clone CCW Repository 
 ** https://github.com/laurentpetit/ccw
-- In Eclipse, import the repository projects (`ccw/ccw.branding`, `ccw/ccw.core`, `ccw/ccw.core.test`, `ccw/ccw.parent`, `ccw/ccw.product`, `ccw/ccw.target.e37`, `ccw/ccw.target.e42`, `ccw/ccw.updatesite`, `ccw/paredit.clj`)
+- In Eclipse, import the repository projects (`ccw/ccw.branding`, `ccw/ccw.core`, `ccw/ccw.core.test`, `ccw/ccw.parent`, `ccw/ccw.product`, `ccw/ccw.target.e42`, `ccw/ccw.updatesite`, `ccw/paredit.clj`)
 - cd into `ccw` and invoke `mvn clean install`
 ** This will install all CCW dependencies in folder `ccw.core/lib/`
 ** The operation must be be repeated after each update of `ccw.core` dependencies
