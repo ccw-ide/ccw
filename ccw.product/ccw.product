@@ -252,7 +252,6 @@ litigation.
    </plugins>
 
    <features>
-      <feature id="ccw.feature" version="0.22.0"/>
       <feature id="org.eclipse.rcp"/>
       <feature id="org.eclipse.platform"/>
       <feature id="org.eclipse.help"/>
@@ -261,7 +260,6 @@ litigation.
       <feature id="org.eclipse.equinox.p2.user.ui"/>
       <feature id="org.eclipse.equinox.p2.extras.feature"/>
       <feature id="org.eclipse.jdt"/>
-      <feature id="org.eclipse.egit"/>
       <feature id="org.eclipse.m2e.feature"/>
       <feature id="org.eclipse.wst.web_ui.feature"/>
       <feature id="com.github.eclipsecolortheme.feature"/>

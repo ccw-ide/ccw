@@ -3,3 +3,8 @@ org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(type:0,location:http${#5
 org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(type:0,location:http${#58}//eclipse-color-theme.github.io/update/,name:Eclipse Color Theme);\
 org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(type:0,location:http${#58}//download.eclipse.org/releases/kepler/,name:Eclipse Kepler Release);\
 org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(type:0,location:http${#58}//download.eclipse.org/eclipse/updates/4.3/,name:Eclipse Kepler Updates);
+
+requires.1.name = ccw.feature.feature.group
+#requires.1.range = [0.0.1, 1000.0.0)
+requires.2.name = org.eclipse.egit
+
