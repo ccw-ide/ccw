@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: CCW Tests
 Bundle-SymbolicName: ccw.core.test
-Bundle-Version: 0.22.0
+Bundle-Version: 0.23.0.qualifier
 Fragment-Host: ccw.core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.eclipse.swtbot.eclipse.finder;bundle-version="2.1.0",
