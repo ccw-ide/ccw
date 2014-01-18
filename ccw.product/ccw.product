@@ -6,7 +6,7 @@
    <aboutInfo>
       <image path="/ccw.branding/images/ccw-250x250.png"/>
       <text>
-         Counterclockwise IDE
+         Counterclockwise IDE Version %%VERSION%%
 
 Counterclockwise is an Integrated Development Environment helping develop solutions with Clojure.
 
@@ -42,6 +42,7 @@ Apache Software Foundation http://www.apache.org/
          <bmp/>
       </win>
    </launcher>
+
 
    <vm>
    </vm>

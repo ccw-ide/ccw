@@ -3,3 +3,5 @@
 /*.jar
 /*.tgz
 /*.zip
+/about.mappings
+/plugin.xml

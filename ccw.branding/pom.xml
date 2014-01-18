@@ -29,7 +29,8 @@
                        <goal>replace</goal>
                    </goals>                   
                    <configuration>
-                       <file>${basedir}/about.mappings</file>
+                       <file>${basedir}/about.mappings.template</file>
+                       <outputFile>${basedir}/about.mappings</outputFile>
                    </configuration>
                </execution>
                <execution>
@@ -39,7 +40,8 @@
                        <goal>replace</goal>
                    </goals>                   
                    <configuration>
-                       <file>${basedir}/plugin.properties</file>
+                       <file>${basedir}/plugin.xml.template</file>
+                       <outputFile>${basedir}/plugin.xml</outputFile>
                    </configuration>
                </execution>
            </executions>
