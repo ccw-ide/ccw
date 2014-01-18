@@ -14,4 +14,45 @@
   <groupId>ccw</groupId>
   <artifactId>ccw.branding</artifactId>
   <packaging>eclipse-plugin</packaging>
+
+  <build>
+    <plugins>
+       <plugin>
+           <groupId>com.google.code.maven-replacer-plugin</groupId>
+           <artifactId>replacer</artifactId>
+           <version>1.5.2</version>
+           <executions>
+               <execution>
+                   <id>about-substitution</id>
+                   <phase>initialize</phase>
+                   <goals>
+                       <goal>replace</goal>
+                   </goals>                   
+                   <configuration>
+                       <file>${basedir}/about.mappings</file>
+                   </configuration>
+               </execution>
+               <execution>
+                   <id>plugin-substitution</id>
+                   <phase>initialize</phase>
+                   <goals>
+                       <goal>replace</goal>
+                   </goals>                   
+                   <configuration>
+                       <file>${basedir}/plugin.properties</file>
+                   </configuration>
+               </execution>
+           </executions>
+           <configuration>
+               <replacements>
+                   <replacement>
+                       <token>%%VERSION%%</token>
+                       <value>${project.version}</value>
+                   </replacement>         
+               </replacements>
+           </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
 </project>

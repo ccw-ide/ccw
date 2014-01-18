@@ -1,6 +1,13 @@
 ## Product
 
 ### TODO
+- Enhance the product
+** upgrade of CCW without having to upgrade the whole product
+** p2 repository of the product published ? (for whole product upgrades?)
+** Version displayed in Eclipse About
+** zip with root folder including the version number
+** documentation mentioning version number for installation
+** zip file names with version numbers
 
 DONE- Automatically open nrepl links that appear in Console Views (and a switch to preven this behaviour)
 DONE- Handle source path exclusions so that it's possible to do weird things in project.clj (nesting source paths, etc.)

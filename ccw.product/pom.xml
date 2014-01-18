@@ -369,9 +369,9 @@
                      <id>ccw</id>
                      <rootFolder>counterclockwise</rootFolder>
                      <rootFolders>
-                       <macosx>counterclockwise-${version}.app</macosx>
-                       <win32>counterclockwise-${version}</win32>
-                       <linux>counterclockwise-${version}</linux>
+                       <macosx>counterclockwise-${project.version}.app</macosx>
+                       <win32>counterclockwise-${project.version}</win32>
+                       <linux>counterclockwise-${project.version}</linux>
                      </rootFolders>
                    </product>
                  </products>

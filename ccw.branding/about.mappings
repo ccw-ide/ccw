@@ -4,7 +4,4 @@
 # This file does not need to be translated.
 # Can be used as {0}, {1}, ... in about.properties, currently none
 #
-# 0=
-# 1=
-# 2=
-# 3=
+0=%%VERSION%%
