@@ -43,9 +43,9 @@ Counterclockwise bundles everything for hacking Clojure Code:
 [cols="1,6"]
 |===
 | 1. Download
-| http://standalone.ccw-ide.org/ccw-win32.win32.x86.zip[Windows 32 Bits] / http://standalone.ccw-ide.org/ccw-win32.win32.x86_64.zip[Windows 64 Bits] +
-http://standalone.ccw-ide.org/ccw-linux.gtk.x86.zip[Linux 32 Bits] / http://standalone.ccw-ide.org/ccw-linux.gtk.x86_64.zip[Linux 64 Bits] +
-http://standalone.ccw-ide.org/ccw-macosx.cocoa.x86_64.zip[OS X 64 Bits]
+| http://standalone.ccw-ide.org/ccw-win32.win32.x86.zip[Windows 32 Bits %%VERSION%%] / http://standalone.ccw-ide.org/ccw-win32.win32.x86_64.zip[Windows 64 Bits %%VERSION%%] +
+http://standalone.ccw-ide.org/ccw-linux.gtk.x86.zip[Linux 32 Bits %%VERSION%%] / http://standalone.ccw-ide.org/ccw-linux.gtk.x86_64.zip[Linux 64 Bits %%VERSION%%] +
+http://standalone.ccw-ide.org/ccw-macosx.cocoa.x86_64.zip[OS X 64 Bits %%VERSION%%]
 
 | 2. Unzip
 | Create a directory named Counterclockwise, unzip the download archive `inside` this directory

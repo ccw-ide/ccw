@@ -82,6 +82,25 @@
         </execution>
       </executions>
     </plugin>
+       <plugin>
+           <groupId>com.google.code.maven-replacer-plugin</groupId>
+           <artifactId>replacer</artifactId>
+           <version>1.5.2</version>
+           <executions>
+               <execution>
+                   <id>version-substitution</id>
+                   <phase>process-resources</phase>
+                   <goals>
+                       <goal>replace</goal>
+                   </goals>                   
+               </execution>
+           </executions>
+           <configuration>
+                           <file>${basedir}/target/html/documentation.html</file>
+                       <token>%%VERSION%%</token>
+                       <value>${project.version}</value>
+           </configuration>
+      </plugin>
 <!--
     <plugin>
         <groupId>com.agilejava.docbkx</groupId>
