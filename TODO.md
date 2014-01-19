@@ -3,9 +3,9 @@
 ### TODO
 - Enhance the product
 ** [x] upgrade of CCW without having to upgrade the whole product
-** p2 repository of the product published ? (for whole product upgrades?)
+** [-] p2 repository of the product published ? (for whole product upgrades?)
 ** [x] Version displayed in Eclipse About
-** zip with root folder including the version number
+** [-] zip with root folder including the version number
 ** [x] documentation mentioning version number for installation
 ** [x] zip file names with version numbers
 
