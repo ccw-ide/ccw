@@ -12,6 +12,8 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 `0.23.0` not yet released
 
+Fixes the compatibility problems with Eclipse Indigo!
+
 == Counterclockwise/Standalone
 
 - It is now possible to use the usual Software Update Site to upgrade a Counterclockwise/Standalone install with new versions of Counterclockwise.

@@ -1,6 +1,7 @@
 ## Product
 
 ### TODO
+- [ ] make CCW work with Indigo again
 - Enhance the product
 ** [x] upgrade of CCW without having to upgrade the whole product
 ** [-] p2 repository of the product published ? (for whole product upgrades?)

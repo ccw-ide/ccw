@@ -9,7 +9,6 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.util.BidiUtils;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -256,7 +255,7 @@ public final class WizardNewLeiningenProjectTemplatePage extends WizardPage {
         projectNameText.setFont(parent.getFont());
 
         projectNameText.addListener(SWT.Modify, nameModifyListener);
-        BidiUtils.applyBidiProcessing(projectNameText, BidiUtils.BTD_DEFAULT);
+        // Not working with Indigo BidiUtils.applyBidiProcessing(projectNameText, BidiUtils.BTD_DEFAULT);
         
         return projectGroup;
     }
