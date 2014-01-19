@@ -118,7 +118,8 @@ quit
 EOF
 
 # iterate over the products to push in parallel
-PRODUCTS="ccw-linux.gtk.x86.zip ccw-linux.gtk.x86_64.zip ccw-macosx.cocoa.x86_64.zip ccw-win32.win32.x86.zip ccw-win32.win32.x86_64.zip"
+cd ${PRODUCTS_DIR}
+PRODUCTS="`ls $.zip`"
 for PRODUCT in ${PRODUCTS}
 do
 # Push CCW products files via FTP
