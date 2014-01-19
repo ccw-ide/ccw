@@ -36,8 +36,6 @@ cd ..
 put artifacts.jar
 put content.jar
 lcd ${TRAVIS_BUILD_DIR}/doc/target/html
-mkdir doc
-cd doc
 mput * 
 cd ${FTP_UPDATESITE_ROOT}/${TRAVIS_BRANCH}
 mkdir doc
@@ -50,7 +48,7 @@ test $? || ( echo "FTP Push for build ${UPDATESITE} failed with error code $?" ;
 
 wget http://updatesite.ccw-ide.org/branch/${TRAVIS_BRANCH}/${UPDATESITE}/content.jar || ( echo "Test that FTP Push for build ${UPDATESITE} worked failed: was unable to fetch http://updatesite.ccw-ide.org/branch/${TRAVIS_BRANCH}/${UPDATESITE}/content.jar" ; exit 1 )
 
-wget http://updatesite.ccw-ide.org/branch/${TRAVIS_BRANCH}/${UPDATESITE}/doc/documentation.html || ( echo "Test that FTP Push for build ${UPDATESITE} worked failed: was unable to fetch http://updatesite.ccw-ide.org/branch/${TRAVIS_BRANCH}/${UPDATESITE}/doc/documentation.html" ; exit 1 )
+wget http://updatesite.ccw-ide.org/branch/${TRAVIS_BRANCH}/${UPDATESITE}/documentation.html || ( echo "Test that FTP Push for build ${UPDATESITE} worked failed: was unable to fetch http://updatesite.ccw-ide.org/branch/${TRAVIS_BRANCH}/${UPDATESITE}/documentation.html" ; exit 1 )
 
 ## UPDATE The branch p2 repository by referencing this build's p2 repository
 
