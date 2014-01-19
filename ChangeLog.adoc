@@ -16,10 +16,13 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 - It is now possible to use the usual Software Update Site to upgrade a Counterclockwise/Standalone install with new versions of Counterclockwise.
 - The version is now displayed in the Counterclockwise About Dialog.
+- The Products zips filenames now contain the version
 
 == Documentation
 
-- The documentation now mentions its associated Counterclockwise version number in the `Install` section.
+=== Installation section
+
+- now mentions the Counterclockwise version number (in the text, and the corresponding links)
 
 == Changes between Counterclockwise 0.21.0 and 0.22.0
 

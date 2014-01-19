@@ -7,7 +7,7 @@
 ** [x] Version displayed in Eclipse About
 ** zip with root folder including the version number
 ** [x] documentation mentioning version number for installation
-** zip file names with version numbers
+** [x] zip file names with version numbers
 
 DONE- Automatically open nrepl links that appear in Console Views (and a switch to preven this behaviour)
 DONE- Handle source path exclusions so that it's possible to do weird things in project.clj (nesting source paths, etc.)
