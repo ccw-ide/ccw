@@ -2,8 +2,8 @@
 <?pde version="3.8"?><target name="ccw.target.e43" sequenceNumber="17">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="false" type="InstallableUnit">
-<unit id="org.eclipse.swtbot.eclipse.feature.group" version="2.1.1.201307101628"/>
-<unit id="org.eclipse.swtbot.ide.feature.group" version="2.1.1.201307101628"/>
+<unit id="org.eclipse.swtbot.eclipse.feature.group" version="2.2.0.201401081015"/>
+<unit id="org.eclipse.swtbot.ide.feature.group" version="2.2.0.201401081015"/>
 <repository location="http://download.eclipse.org/technology/swtbot/releases/latest"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="false" type="InstallableUnit">
