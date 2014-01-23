@@ -10,7 +10,7 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 == Changes between Counterclockwise 0.22.0 and 0.23.0
 
-`0.23.0` not yet released
+`0.23.0` released on January 23, 2014
 
 Fixes the compatibility problems with Eclipse Indigo!
 
