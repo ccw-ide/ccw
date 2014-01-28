@@ -52,7 +52,19 @@
                 <version>${tycho-version}</version>
               </plugin>
               <goal>materialize-products</goal>
-              <configuration/>
+              <configuration>
+                 <products>
+                   <product>
+                     <id>ccw</id>
+                     <rootFolder>counterclockwise</rootFolder>
+                     <rootFolders>
+                       <macosx>counterclockwise-${project.version}.app</macosx>
+                       <win32>counterclockwise-${project.version}</win32>
+                       <linux>counterclockwise-${project.version}</linux>
+                     </rootFolders>
+                   </product>
+                 </products>
+              </configuration>
             </configuration>
           </execution>
           <execution>
@@ -69,7 +81,7 @@
               </plugin>
               <goal>eclipse-run</goal>
               <configuration>
-                <appArgLine>-consoleLog -application org.eclipse.equinox.p2.director -nosplash -repository "${project.baseUri}/../ccw.updatesite/target/repository" -destination "${project.build.directory}/products/ccw/win32/win32/x86" -installIUs ${ccw.feature}</appArgLine>
+                <appArgLine>-consoleLog -application org.eclipse.equinox.p2.director -nosplash -repository "${project.baseUri}/../ccw.updatesite/target/repository" -destination "${project.build.directory}/products/ccw/win32/win32/x86/counterclockwise-${project.version}" -installIUs ${ccw.feature}</appArgLine>
                 <repositories>
                   <repository>
                     <id>kepler</id>
@@ -128,7 +140,7 @@
               </plugin>
               <goal>eclipse-run</goal>
               <configuration>
-                <appArgLine>-consoleLog -application org.eclipse.equinox.p2.director -nosplash -repository "${project.baseUri}/../ccw.updatesite/target/repository" -destination "${project.build.directory}/products/ccw/win32/win32/x86_64" -installIUs ${ccw.feature}</appArgLine>
+                <appArgLine>-consoleLog -application org.eclipse.equinox.p2.director -nosplash -repository "${project.baseUri}/../ccw.updatesite/target/repository" -destination "${project.build.directory}/products/ccw/win32/win32/x86_64/counterclockwise-${project.version}" -installIUs ${ccw.feature}</appArgLine>
                 <repositories>
                   <repository>
                     <id>kepler</id>
@@ -187,7 +199,7 @@
               </plugin>
               <goal>eclipse-run</goal>
               <configuration>
-                <appArgLine>-consoleLog -application org.eclipse.equinox.p2.director -nosplash -repository "${project.baseUri}/../ccw.updatesite/target/repository" -destination "${project.build.directory}/products/ccw/linux/gtk/x86" -installIUs ${ccw.feature}</appArgLine>
+                <appArgLine>-consoleLog -application org.eclipse.equinox.p2.director -nosplash -repository "${project.baseUri}/../ccw.updatesite/target/repository" -destination "${project.build.directory}/products/ccw/linux/gtk/x86/counterclockwise-${project.version}" -installIUs ${ccw.feature}</appArgLine>
                 <repositories>
                   <repository>
                     <id>kepler</id>
@@ -246,7 +258,7 @@
               </plugin>
               <goal>eclipse-run</goal>
               <configuration>
-                <appArgLine>-consoleLog -application org.eclipse.equinox.p2.director -nosplash -repository "${project.baseUri}/../ccw.updatesite/target/repository" -destination "${project.build.directory}/products/ccw/linux/gtk/x86_64" -installIUs ${ccw.feature}</appArgLine>
+                <appArgLine>-consoleLog -application org.eclipse.equinox.p2.director -nosplash -repository "${project.baseUri}/../ccw.updatesite/target/repository" -destination "${project.build.directory}/products/ccw/linux/gtk/x86_64/counterclockwise-${project.version}" -installIUs ${ccw.feature}</appArgLine>
                 <repositories>
                   <repository>
                     <id>kepler</id>
@@ -305,7 +317,7 @@
               </plugin>
               <goal>eclipse-run</goal>
               <configuration>
-                <appArgLine>-consoleLog -application org.eclipse.equinox.p2.director -nosplash -repository "${project.baseUri}/../ccw.updatesite/target/repository" -destination "${project.build.directory}/products/ccw/macosx/cocoa/x86_64" -installIUs ${ccw.feature}</appArgLine>
+                <appArgLine>-consoleLog -application org.eclipse.equinox.p2.director -nosplash -repository "${project.baseUri}/../ccw.updatesite/target/repository" -destination "${project.build.directory}/products/ccw/macosx/cocoa/x86_64/counterclockwise-${project.version}.app" -installIUs ${ccw.feature}</appArgLine>
                 <repositories>
                   <repository>
                     <id>kepler</id>

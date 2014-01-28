@@ -8,6 +8,15 @@ Laurent Petit <laurent dot petit at gmail dot com>
 :toc-title!:
 :toclevels: 0
 
+== Changes between Counterclockwise 0.23.0 and 0.24.0
+
+`0.23.0` released on TBD
+
+== Counterclockwise/Standalone
+
+- For Linux/Windows, the zip now contains a root folder named counterclockwise-<version>
+- For OS X, the zip now contains a root folder named counterclockwise-<version>.app ; it is thus recognized as an OS X Application folder
+
 == Changes between Counterclockwise 0.22.0 and 0.23.0
 
 `0.23.0` released on January 23, 2014
