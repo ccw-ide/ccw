@@ -253,6 +253,7 @@ litigation.
    </plugins>
 
    <features>
+      <feature id="ccw.feature"/>
       <feature id="org.eclipse.egit"/>
       <feature id="org.eclipse.rcp"/>
       <feature id="org.eclipse.platform"/>

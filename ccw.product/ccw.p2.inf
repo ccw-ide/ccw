@@ -4,5 +4,59 @@ org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(type:0,location:http${#5
 org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(type:0,location:http${#58}//download.eclipse.org/releases/kepler/,name:Eclipse Kepler Release);\
 org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(type:0,location:http${#58}//download.eclipse.org/eclipse/updates/4.3/,name:Eclipse Kepler Updates);
 
+requires.1.namespace = org.eclipse.equinox.p2.iu
 requires.1.name = ccw.feature.feature.group
+requires.1.range = 0.23.0
+
+requires..namespace = org.eclipse.equinox.p2.iu
+requires..name = org.eclipse.egit.feature.group
+requires..range = 0.0.1 
+
+requires..namespace = org.eclipse.equinox.p2.iu
+requires..name = org.eclipse.rcp.feature.group
+requires..range = 0.0.1 
+
+requires..namespace = org.eclipse.equinox.p2.iu
+requires..name = org.eclipse.platform.feature.group
+requires..range = 0.0.1 
+
+requires..namespace = org.eclipse.equinox.p2.iu
+requires..name = org.eclipse.help.feature.group
+requires..range = 0.0.1
+
+requires..namespace = org.eclipse.equinox.p2.iu
+requires..name = org.eclipse.equinox.p2.core.feature.feature.group
+requires..range = 0.0.1
+
+requires..namespace = org.eclipse.equinox.p2.iu
+requires..name = org.eclipse.equinox.p2.rcp.feature.feature.group
+requires..range = 0.0.1
+
+requires..namespace = org.eclipse.equinox.p2.iu
+requires..name = org.eclipse.equinox.p2.user.ui.feature.group
+requires..range = 0.0.1
+
+requires..namespace = org.eclipse.equinox.p2.iu
+requires..name = org.eclipse.equinox.p2.extras.feature.feature.group
+requires..range = 0.0.1
+
+requires..namespace = org.eclipse.equinox.p2.iu
+requires..name = org.eclipse.jdt.feature.group
+requires..range = 0.0.1
+
+requires..namespace = org.eclipse.equinox.p2.iu
+requires..name = org.eclipse.m2e.feature.feature.group
+requires..range = 0.0.1
+
+requires..namespace = org.eclipse.equinox.p2.iu
+requires..name = org.eclipse.wst.web_ui.feature.feature.group
+requires..range = 0.0.1
+
+requires..namespace = org.eclipse.equinox.p2.iu
+requires..name = com.github.eclipsecolortheme.feature.feature.group
+requires..range = 0.0.1
+
+requires..namespace = org.eclipse.equinox.p2.iu
+requires..name = org.eclipse.pde.feature.group
+requires..range = 0.0.1
 
