@@ -26,10 +26,11 @@
 ;    a classpath variable with an optional extension
 ;    a system library (also known as a classpath container, which is a related group of archives, such as the jars associated with a JDK)
 
-(defn- archive-entry 
-  "Given an archive (jar/zip) IPathCoercible, return a JDT classpath entry"
-  [archive-path]
-  (doto (JavaRuntime/newArchiveRuntimeClasspathEntry (e/path archive-path))
+(defn- lib-entry 
+  "Given a lib - archive (jar/zip) or absolute path - any IPathCoercible -,
+   return a JDT classpath entry"
+  [lib-path]
+  (doto (JavaRuntime/newArchiveRuntimeClasspathEntry (e/path lib-path))
     (.setClasspathProperty IRuntimeClasspathEntry/USER_CLASSES)))
 
 (defn- jre-container-entry 
@@ -43,9 +44,9 @@
   "For the given entry-type, create a JDT classpath entry"
   (fn [entry-type entry-params] entry-type))
 
-(defmethod classpath-entry :archive
+(defmethod classpath-entry :lib
   [entry-type entry-params]
-  (archive-entry (:path entry-params)))
+  (lib-entry (:path entry-params)))
 
 (defmethod classpath-entry :jre-container
   [entry-type entry-params]

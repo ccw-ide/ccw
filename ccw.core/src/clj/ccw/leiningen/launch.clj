@@ -13,7 +13,7 @@
      :name                   launch-name
      
      :java/project-name      (and project (e/project-name project))
-     :java/classpath         [{:entry-type :archive
+     :java/classpath         [{:entry-type :lib
                                :path (or 
                                        leiningen-standalone-path
                                        (e/get-file-inside-plugin "ccw.core" "leiningen-standalone.jar")) }
