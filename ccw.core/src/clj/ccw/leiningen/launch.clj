@@ -17,6 +17,8 @@
                                :path (or 
                                        leiningen-standalone-path
                                        (e/get-file-inside-plugin "ccw.core" "leiningen-standalone.jar")) }
+                              {:entry-type :lib
+                               :path (e/get-file-inside-plugin "ccw.core" "lein")}
                               {:entry-type :jre-container
                                :name launch/default-jre-container-name}]
      :java/default-classpath false
@@ -26,7 +28,7 @@
                                   ;; " -Dleiningen.original.pwd=\"/Users/laurentpetit/tmp\""
                                   )
      :java/main-type-name    "clojure.main"
-     :java/program-arguments (str "-m leiningen.core.main " command)
+     :java/program-arguments (str "-m ccw.leiningen.main " command)
      }))
 
 (defn lein 
