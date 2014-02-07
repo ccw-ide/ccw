@@ -1,4 +1,9 @@
 ## Product
+- [.] PR for Leiningen for abort/exit + issues on the github repositories that have issues with changing the "Suppressed exit" message ( https://github.com/search?p=1&q=%22Suppressed+exit%22&ref=searchresults&type=Code )
+- [X] Finish the commit with adding *exit-...* and changing for ex-info/ex-data
+- [ ] Fix the issue with the product not running anymore !!!
+- [ ] Address Mark Engelbert concern on having the same behavior for lein / non lein startupts ( changing the namespace, closing the REPL implying terminating the process, etc. )
+
 
 ### TODO
 - [x] make CCW work with Indigo again

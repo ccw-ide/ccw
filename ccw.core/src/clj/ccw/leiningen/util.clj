@@ -51,8 +51,17 @@
         classes-dir (fn [d] (let [manifest (io/file d "META-INF" "MANIFEST.MF")]
                                (and (.exists manifest)
                                     (.isFile manifest))))
-        libs (->> leiningen-core file-seq (filter #(or (jar %) (classes-dir %))))]
-    (apply c/classlojure libs)))
+        libs (->> leiningen-core file-seq (filter #(or (jar %) (classes-dir %))))
+        env (apply c/classlojure libs)]
+    (c/eval-in env '(do
+                      (clojure.core/require 'leiningen.core.main)
+                      (clojure.core/in-ns 'leiningen.core.main)
+                      (clojure.core/println "*exit-process?*" leiningen.core.main/*exit-process?*)
+                      (clojure.core/alter-var-root
+                        (clojure.core/resolve '*exit-process?*)
+                        (constantly false))
+                      (clojure.core/println "*exit-process?*" leiningen.core.main/*exit-process?*)))
+    env))
 
 (defonce ^{:doc 
            "Ref of map of \"project-name\" -> delay of classlojure environment.
@@ -158,15 +167,10 @@
       `(do
          (require 'leiningen.new)
          (try
-           (alter-var-root 
-             (resolve 'leiningen.core.main/abort)
-             (fn [_#] (fn [& args#] (throw (RuntimeException. (apply print-str args#))))))
-           (catch Exception e#))
-         (try
-           (alter-var-root 
-             (resolve 'leiningen.core/abort)
-             (fn [_#] (fn [& args#] (throw (RuntimeException. (apply print-str args#))))))
-           (catch Exception e#))
+          (alter-var-root 
+            (resolve 'leiningen.core.main/abort)
+            (fn [_#] (fn [& args#] (throw (ex-info (apply print-str args#) {})))))
+          (catch Exception e#))
          (binding [leiningen.new.templates/*dir* ~location]
            (apply (leiningen.new/resolve-template '~template) 
                   '~name 
