@@ -17,6 +17,10 @@ Laurent Petit <laurent dot petit at gmail dot com>
 - For Linux/Windows, the zip now contains a root folder named counterclockwise-<version>
 - For OS X, the zip now contains a root folder named counterclockwise-<version>.app ; it is thus recognized as an OS X Application folder
 
+== Generic Leiningen Launcher
+
+- Ensure all JVMs created by Leiningen are killed when the main process is killed via the Console "Terminate" button.
+
 == Changes between Counterclockwise 0.22.0 and 0.23.0
 
 `0.23.0` released on January 23, 2014
