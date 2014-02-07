@@ -44,8 +44,7 @@ Apache Software Foundation http://www.apache.org/
    </launcher>
 
 
-   <vm>
-   </vm>
+   <vm/>
 
    <license>
         <url>http://www.eclipse.org/legal/epl-v10.html</url>
@@ -249,8 +248,7 @@ litigation.
          </text>
    </license>
 
-   <plugins>
-   </plugins>
+   <plugins/>
 
    <features>
       <feature id="ccw.feature"/>

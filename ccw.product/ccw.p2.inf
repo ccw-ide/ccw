@@ -13,34 +13,6 @@ requires..name = org.eclipse.egit.feature.group
 requires..range = 0.0.1 
 
 requires..namespace = org.eclipse.equinox.p2.iu
-requires..name = org.eclipse.rcp.feature.group
-requires..range = 0.0.1 
-
-requires..namespace = org.eclipse.equinox.p2.iu
-requires..name = org.eclipse.platform.feature.group
-requires..range = 0.0.1 
-
-requires..namespace = org.eclipse.equinox.p2.iu
-requires..name = org.eclipse.help.feature.group
-requires..range = 0.0.1
-
-requires..namespace = org.eclipse.equinox.p2.iu
-requires..name = org.eclipse.equinox.p2.core.feature.feature.group
-requires..range = 0.0.1
-
-requires..namespace = org.eclipse.equinox.p2.iu
-requires..name = org.eclipse.equinox.p2.rcp.feature.feature.group
-requires..range = 0.0.1
-
-requires..namespace = org.eclipse.equinox.p2.iu
-requires..name = org.eclipse.equinox.p2.user.ui.feature.group
-requires..range = 0.0.1
-
-requires..namespace = org.eclipse.equinox.p2.iu
-requires..name = org.eclipse.equinox.p2.extras.feature.feature.group
-requires..range = 0.0.1
-
-requires..namespace = org.eclipse.equinox.p2.iu
 requires..name = org.eclipse.jdt.feature.group
 requires..range = 0.0.1
 
@@ -58,5 +30,33 @@ requires..range = 0.0.1
 
 requires..namespace = org.eclipse.equinox.p2.iu
 requires..name = org.eclipse.pde.feature.group
+requires..range = 0.0.1
+
+requires..namespace = org.eclipse.equinox.p2.iu
+requires..name = org.eclipse.help.feature.group
+requires..range = 0.0.1
+
+requires..namespace = org.eclipse.equinox.p2.iu
+requires..name = org.eclipse.rcp.feature.group
+requires..range = 0.0.1 
+
+requires..namespace = org.eclipse.equinox.p2.iu
+requires..name = org.eclipse.platform.feature.group
+requires..range = 0.0.1 
+
+requires..namespace = org.eclipse.equinox.p2.iu
+requires..name = org.eclipse.equinox.p2.core.feature.feature.group
+requires..range = 0.0.1
+
+requires..namespace = org.eclipse.equinox.p2.iu
+requires..name = org.eclipse.equinox.p2.rcp.feature.feature.group
+requires..range = 0.0.1
+
+requires..namespace = org.eclipse.equinox.p2.iu
+requires..name = org.eclipse.equinox.p2.user.ui.feature.group
+requires..range = 0.0.1
+
+requires..namespace = org.eclipse.equinox.p2.iu
+requires..name = org.eclipse.equinox.p2.extras.feature.feature.group
 requires..range = 0.0.1
 
