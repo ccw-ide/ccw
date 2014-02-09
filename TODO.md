@@ -1,7 +1,7 @@
 ## Product
 - [X] PR for Leiningen for abort/exit + issues on the github repositories that have issues with changing the "Suppressed exit" message ( https://github.com/search?p=1&q=%22Suppressed+exit%22&ref=searchresults&type=Code )
 - [X] Finish the commit with adding *exit-...* and changing for ex-info/ex-data
-- [X] Fix the issue with the product not running anymore !!!
+- [.] Fix the issue with the product not running anymore !!!
 - [.] Handle projects with :lein-pedantic :abort when refreshing dependencies => Show the error properly (see https://github.com/cursiveclojure/cursive/issues/122#issuecomment-29259144 for how Cursive Clojure does this)
 - [ ] Address Mark Engelbert concern on having the same behavior for lein / non lein startupts ( changing the namespace, closing the REPL implying terminating the process, etc. )
 
