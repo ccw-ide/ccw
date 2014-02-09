@@ -56,7 +56,7 @@ requires..namespace = org.eclipse.equinox.p2.iu
 requires..name = org.eclipse.equinox.p2.user.ui.feature.group
 requires..range = 0.0.1
 
-requires..namespace = org.eclipse.equinox.p2.iu
-requires..name = org.eclipse.equinox.p2.extras.feature.feature.group
-requires..range = 0.0.1
+#requires..namespace = org.eclipse.equinox.p2.iu
+#requires..name = org.eclipse.equinox.p2.extras.feature.feature.group
+#requires..range = 0.0.1
 
