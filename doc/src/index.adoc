@@ -6,6 +6,13 @@ Laurent Petit <laurent.petit@gmail.com>
 
 Welcome to Counterclockwise's Documentation Site.
 
+== Install
+
+
+You don't have Eclipse and want to get up and running quickly? Download the *Standalone Product (batteries included)*, Follow link:documentation.html#install-as-standalone-product[Install Counterclockwise as a standalone product]
+
+You have Eclipse and want to install Counterclockwise as an *Eclipse plugin*, Follow link:documentation.html#install-as-plugin[Install Counterclockwise as a plugin]
+
 == User Documentation
 
 *Where's a comprehensive documentation of Counterclockwise?* Follow link:documentation.html[Counterclockwise User Documentation].
