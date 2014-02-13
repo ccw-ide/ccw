@@ -9,6 +9,13 @@ env:
   matrix:
     - ECLIPSE_TARGET=kepler
 install: true
+# Cache stuff disabled: not available yet on travis.org (only travis.com)
+#cache:
+#  # Travis network-local APT cache
+#  apt: true
+#  # Maven local repository cache
+#  directories:
+#    - ${HOME}/.m2
 before_install:
   # Maven 3.1.1
   - wget http://www.us.apache.org/dist/maven/maven-3/3.1.1/binaries/apache-maven-3.1.1-bin.tar.gz
