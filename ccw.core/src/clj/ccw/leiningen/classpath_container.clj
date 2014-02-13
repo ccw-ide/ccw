@@ -261,8 +261,8 @@
   [exc java-project]
   (if-not exc
     [(e/resource java-project) "unknown problem (missing exception)"]
-    (let [exc (if (check-class java.lang.reflect.InvocationTargetException exc) (.getCause exc) exc)
-          exc (if (check-class clojure.lang.ExceptionInfo exc) (.getCause exc) exc)]
+    (let [exc (if (check-class java.lang.reflect.InvocationTargetException exc) (or (.getCause exc) exc) exc)
+          exc (if (check-class clojure.lang.ExceptionInfo exc) (or (.getCause exc) exc) exc)]
       (cond
         (check-class DependencyResolutionException exc)
           (dependency-resolution-message exc java-project)
