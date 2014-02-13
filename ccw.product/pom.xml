@@ -66,7 +66,6 @@
               </configuration>
             </configuration>
           </execution>
-<!--
           <execution>
             <id>install-win32-win32-x86-ccw</id>
             <phase>package</phase>
@@ -303,7 +302,6 @@
               </configuration>
             </configuration>
           </execution>
--->
           <execution>
             <id>install-macosx-cocoa-x86_64-ccw</id>
             <phase>package</phase>
@@ -408,7 +406,6 @@
                     <target name="rename archives with version numbers">
                         <move file="${basedir}/target/products/ccw-macosx.cocoa.x86_64.zip" 
                               tofile="${basedir}/target/products/ccw-${project.version}-macosx.cocoa.x86_64.zip" />
-<!--
                         <move file="${basedir}/target/products/ccw-linux.gtk.x86.zip" 
                               tofile="${basedir}/target/products/ccw-${project.version}-linux.gtk.x86.zip" />
                         <move file="${basedir}/target/products/ccw-linux.gtk.x86_64.zip" 
@@ -417,7 +414,6 @@
                               tofile="${basedir}/target/products/ccw-${project.version}-win32.win32.x86.zip" />
                         <move file="${basedir}/target/products/ccw-win32.win32.x86_64.zip" 
                               tofile="${basedir}/target/products/ccw-${project.version}-win32.win32.x86_64.zip" />
--->
                     </target>
                 </configuration>
             </configuration>
