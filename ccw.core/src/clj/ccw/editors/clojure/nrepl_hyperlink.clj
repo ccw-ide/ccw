@@ -17,7 +17,7 @@
         document (.getDocument console)
         s (.get document offset length)
         [[url]] (re-seq pattern s)
-        open-repl-view #(ccw.repl.REPLView/connect url true)
+        open-repl-view #(ccw.repl.REPLView/connect url console (some-> console .getProcess .getLaunch) true)
         hyperlink (reify org.eclipse.ui.console.IHyperlink
                     (linkActivated [this] (open-repl-view))
                     (linkExited [this])
