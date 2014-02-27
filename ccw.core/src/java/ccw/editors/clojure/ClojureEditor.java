@@ -283,7 +283,7 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 		action = new Action() {
 			@Override
 			public void run() {
-				new ClojureLaunchShortcut().launch(ClojureEditor.this, ILaunchManager.RUN_MODE);
+				new ClojureLaunchShortcut().launch(ClojureEditor.this, ILaunchManager.DEBUG_MODE);
 			};
 		};
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.LAUNCH_REPL);

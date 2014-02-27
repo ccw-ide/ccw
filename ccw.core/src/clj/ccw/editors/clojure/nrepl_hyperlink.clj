@@ -23,8 +23,8 @@
                     (linkExited [this])
                     (linkEntered [this]))]
     (.addHyperlink console hyperlink offset length)
-    (when-not (nrepl-urls url) 
-      (e/ui (open-repl-view)))
+    #_(when-not (nrepl-urls url) 
+       (e/ui (open-repl-view)))
     (update-in state [:nrepl-urls] conj url)))
 
 (defn make []

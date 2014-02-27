@@ -16,6 +16,7 @@
                                      FileLocator
                                      IAdaptable]
            [org.eclipse.jdt.core IJavaProject]
+           [org.eclipse.debug.core ILaunchConfiguration ILaunch]
            [org.eclipse.ui.handlers HandlerUtil]
            [org.eclipse.ui IEditorPart
                            PlatformUI
@@ -26,7 +27,8 @@
            [org.eclipse.ui.actions WorkspaceModifyDelegatingOperation]
            [java.io File IOException]
            [ccw CCWPlugin]
-           [ccw.util PlatformUtil DisplayUtil]))
+           [ccw.util PlatformUtil DisplayUtil]
+           [ccw.launching LaunchUtils]))
 
 (defn adapter
   "Invokes Eclipse Platform machinery to try by all means to adapt object to 
@@ -115,7 +117,13 @@
   (project [this] (project (resource this)))
   
   ExecutionEvent
-  (project [this] (project (resource this))))
+  (project [this] (project (resource this)))
+  
+  ILaunchConfiguration
+  (project [^ILaunchConfiguration l] (LaunchUtils/getProject l))
+  
+  ILaunch
+  (project [^ILaunch l] (LaunchUtils/getProject l)))
 
 (extend-protocol IResourceCoercion
   nil

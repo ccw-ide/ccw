@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -107,7 +108,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 				    
 					monitor.beginTask("Waiting for new REPL process to be ready...", IProgressMonitor.UNKNOWN);
 
-                    final Number port = (Number)Connection.find("clojure.tools.nrepl.ack", "wait-for-ack").invoke(60000);
+                    final Number port = (Number)Connection.find("clojure.tools.nrepl.ack", "wait-for-ack").invoke(300000);
                     cancelOrAck.countDown();
 
                     if (monitor.isCanceled()) {
@@ -238,12 +239,21 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 	
 	@Override
 	public String getProgramArguments(ILaunchConfiguration configuration) throws CoreException {
+		String superProgramArguments = super.getProgramArguments(configuration);
 		if (isLeiningenConfiguration(configuration)) {
-			// Leiningen configuration does not need (yet) program arguments tweaks
-			return super.getProgramArguments(configuration);
+			List<IFile> filesToLaunch = LaunchUtils.getFilesToLaunchList(configuration);
+			if (filesToLaunch.size() > 0) {
+				int headlessReplOffset = superProgramArguments.indexOf("repl :headless");
+				String arguments = superProgramArguments.substring(0, headlessReplOffset) +
+						" " + createFileLoadInjections(filesToLaunch) +
+						" -- " + superProgramArguments.substring(headlessReplOffset);
+				return arguments;
+			} else {
+				return superProgramArguments;
+			}
 		}
 		
-		String userProgramArguments = super.getProgramArguments(configuration);
+		String userProgramArguments = superProgramArguments;
 
 		if (isLaunchREPL(configuration)) {
 			String filesToLaunchArguments = LaunchUtils.getFilesToLaunchAsCommandLineList(configuration, false);
@@ -273,13 +283,28 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 		}
 	}
 	
+	private String createFileLoadInjections(List<IFile> filesToLaunch) {
+		
+		assert filesToLaunch.size() > 0;
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append(" update-in :injections conj \"");
+		for (IFile file: filesToLaunch) {
+			// We use load so that the right info are compiled for use with breakpoints in a debugger
+			String path = ClojureCore.getAsRootClasspathRelativePath(file);
+			int offset = path.lastIndexOf(".clj");
+			sb.append("(try (load \\\"" + path.substring(0, offset) + "\\\") (catch Exception e (.printStackTrace e)))");
+		}
+		sb.append("\" ");
+		return sb.toString();
+	}
+
 	private static boolean isLaunchREPL(ILaunchConfiguration configuration) throws CoreException {
         return configuration.getAttribute(LaunchUtils.ATTR_CLOJURE_START_REPL, true);
     }
 	
 	public static boolean isLeiningenConfiguration(ILaunchConfiguration configuration) throws CoreException {
-		return false;
-		//return configuration.getAttribute(LaunchUtils.ATTR_LEININGEN_CONFIGURATION, false);
+		return configuration.getAttribute(LaunchUtils.ATTR_LEININGEN_CONFIGURATION, false);
 	}
 	
 	public static boolean isAutoReloadEnabled (ILaunch launch) {

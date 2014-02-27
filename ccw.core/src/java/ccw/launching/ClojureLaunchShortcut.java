@@ -42,15 +42,15 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
-import org.eclipse.ui.part.FileEditorInput;
 
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
+import ccw.editors.clojure.ClojureEditor;
+import ccw.editors.clojure.LoadFileAction;
 import ccw.util.ClojureInvoker;
 import ccw.util.DisplayUtil;
 import clojure.lang.Keyword;
@@ -72,12 +72,9 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     
     @Override
     public void launch(IEditorPart editor, String mode) {
-        IEditorInput input = editor.getEditorInput();
-        if (input instanceof FileEditorInput) {
-            FileEditorInput fei = (FileEditorInput) input;
-            launchProjectCheckRunning(fei.getFile().getProject(), new IFile[] { fei
-                    .getFile() }, mode);
-        }
+    	if (editor instanceof ClojureEditor) {
+    		LoadFileAction.run((ClojureEditor) editor, mode);
+    	}
     }
 
     @Override
@@ -152,17 +149,17 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     }
     
     private boolean useLeiningenLaunchConfiguration(IProject project) throws CoreException {
-    	return false;
-    	//return project.hasNature(CCWPlugin.LEININGEN_NATURE_ID);
+    	return project.hasNature(CCWPlugin.LEININGEN_NATURE_ID);
     }
     
     protected void launchProject(IProject project, IFile[] filesToLaunch, String mode) {
         try {
-        	ILaunchConfiguration config = findLaunchConfiguration(project);
-    		if (config == null) {
-    			if (useLeiningenLaunchConfiguration(project)) {
-            		config = createLeiningenLaunchConfiguration(project);
-    			} else {
+        	ILaunchConfiguration config;
+			if (useLeiningenLaunchConfiguration(project)) {
+        		config = createLeiningenLaunchConfiguration(project, (mode!= null && mode.equals(ILaunchManager.DEBUG_MODE)));
+			} else {
+				config = findLaunchConfiguration(project);
+				if (config == null) {
     				System.out.println("creating basic configuration (no lein configuration)");
             		config = createConfiguration(project, null);
     			}
@@ -172,11 +169,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
             	ILaunchConfigurationWorkingCopy runnableConfiguration =
             	    config.copy(config.getName() + " #" + incTempLaunchCount(project.getName()));
             	try {
-            		if (useLeiningenLaunchConfiguration(project)) {
-            			// Nothing special
-            		} else {
-            			LaunchUtils.setFilesToLaunchString(runnableConfiguration, Arrays.asList(filesToLaunch));
-            		}
+        			LaunchUtils.setFilesToLaunchString(runnableConfiguration, Arrays.asList(filesToLaunch));
 	            	if (filesToLaunch.length > 0) {
 	            		runnableConfiguration.setAttribute(LaunchUtils.ATTR_NS_TO_START_IN, ClojureCore.findMaybeLibNamespace(filesToLaunch[0]));
 	            	}
@@ -191,22 +184,26 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
         }
     }
     
-    private ILaunchConfiguration createLeiningenLaunchConfiguration(IProject project) {
-		clojure.lang.IPersistentMap configMap = 
+    private ILaunchConfiguration createLeiningenLaunchConfiguration(IProject project, boolean createInDebugMode) {
+    	String command = " update-in :dependencies conj \"[ccw/ccw.server \\\"0.1.0\\\"]\" -- update-in :injections conj \"(require 'ccw.debug.serverrepl)\" -- repl :headless ";
+        if (createInDebugMode) {
+        	command = " update-in :jvm-opts concat \"[\\\"-Xdebug\\\" \\\"-Xrunjdwp:transport=dt_socket,server=y,suspend=n\\\"]\" -- "
+        				+ command;
+        }
+        
+    	clojure.lang.IPersistentMap configMap = 
 				(clojure.lang.IPersistentMap) 
 				leiningenConfiguration._("lein-launch-configuration",
 			    project,	
-			    "update-in :dependencies conj \"[ccw/ccw.server \\\"0.1.0\\\"]\" -- update-in :injections conj \"(require 'ccw.debug.serverrepl)\" -- repl :headless");
+			    command);
 		configMap = configMap.assoc(Keyword.intern("type-id"), Keyword.intern("ccw"));
-		configMap = configMap.assoc(Keyword.intern("name"), project.getName() + " Leiningen");
+		configMap = configMap.assoc(Keyword.intern("name"), project.getName() + " Leiningen VM");
 		configMap = configMap.assoc(LaunchUtils.ATTR_CLOJURE_START_REPL, true);
 		configMap = configMap.assoc(LaunchUtils.ATTR_LEININGEN_CONFIGURATION, true);
-		configMap = configMap.assoc(Keyword.intern("private"), false);
-		configMap = configMap.assoc(Keyword.intern("launch-in-background"), false);
+		configMap = configMap.assoc(Keyword.intern("private"), true);
 		
 		return (ILaunchConfiguration) 
-				launch._("launch-configuration",
-				    configMap);
+				launch._("launch-configuration", configMap);
     }
 
 	private ILaunchConfiguration findLaunchConfiguration(IProject project) throws CoreException {

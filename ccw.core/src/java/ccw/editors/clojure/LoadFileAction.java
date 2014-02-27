@@ -33,7 +33,7 @@ import ccw.util.DisplayUtil;
 
 public class LoadFileAction extends Action {
 
-	private ClojureInvoker nreplHelpers = ClojureInvoker.newInvoker(CCWPlugin.getDefault(), "clojure.tools.nrepl.helpers");
+	private static ClojureInvoker nreplHelpers = ClojureInvoker.newInvoker(CCWPlugin.getDefault(), "clojure.tools.nrepl.helpers");
 	
 	public final static String ID = "LoadFileAction"; //$NON-NLS-1$
 	
@@ -47,9 +47,17 @@ public class LoadFileAction extends Action {
 	}
 
 	public void run() {
+		run(editor, ILaunchManager.DEBUG_MODE);
+	}
+	
+	/**
+	 * @param editor the clojure editor
+	 * @param mode the "run" or "debug" launch mode
+	 */
+	public static void run(final ClojureEditor editor, final String mode) {
         final IFile editorFile = (IFile) editor.getEditorInput().getAdapter(IFile.class);
 
-        final String filePath = computeFilePath(editorFile);
+        final String filePath = computeFilePath(editor, editorFile);
         final String fileName = FilenameUtils.getName(filePath);
 
         if (filePath == null) {
@@ -57,11 +65,12 @@ public class LoadFileAction extends Action {
         	return;
         }
         
-        final String sourcePath = computeSourcePath(editorFile, filePath);
+        final String sourcePath = computeSourcePath(editor, editorFile, filePath);
 
         final REPLView repl = REPLView.activeREPL.get();
         if (repl != null && !repl.isDisposed())  {
     		evaluateFileText(repl, editor.getDocument().get(), filePath, sourcePath, fileName);
+    		// FIXME: normal that we switch in namespace if start (if no repl), and not if not start ... ?
         } else if (editorFile != null) {
     		CCWPlugin.getTracer().trace(TraceOptions.LAUNCHER, "No active REPL found (",
     				(repl == null) ? "active repl is null" : "active repl is disposed", 
@@ -69,7 +78,7 @@ public class LoadFileAction extends Action {
         	new Thread(new Runnable() {
 				public void run() {
 		        	final IProject project = editorFile.getProject();
-		        	new ClojureLaunchShortcut().launchProject(project, ILaunchManager.RUN_MODE);
+		        	new ClojureLaunchShortcut().launchProject(project, mode);
 		        	DisplayUtil.asyncExec(new Runnable() {
 		        		public void run() {
 				        	REPLView repl = CCWPlugin.getDefault().getProjectREPL(project);
@@ -88,7 +97,7 @@ public class LoadFileAction extends Action {
         }
 	}
 
-	private String computeFilePath(final IFile editorFile) {
+	private static String computeFilePath(final ClojureEditor editor, final IFile editorFile) {
 		String filePath;
 		if (editorFile != null) {
         	filePath = editorFile.getLocation().toOSString();
@@ -104,7 +113,8 @@ public class LoadFileAction extends Action {
 		return filePath;
 	}
 
-	private String computeSourcePath(final IFile editorFile, String filePath) {
+	// FIXME similar code in ClojureCore for finding classpath root related path
+	private static String computeSourcePath(final ClojureEditor editor, final IFile editorFile, String filePath) {
 		String sourcePath;
 		if (editorFile != null) {
 	        ClojureProject proj = ClojureCore.getClojureProject(editor.getProject());
@@ -125,7 +135,7 @@ public class LoadFileAction extends Action {
 		return sourcePath;
 	}
 	
-	private void evaluateFileText(REPLView repl, String text, String filePath, String sourcePath, String fileName) {
+	private static void evaluateFileText(REPLView repl, String text, String filePath, String sourcePath, String fileName) {
         try {
             if (repl.getAvailableOperations().contains("load-file")) {
                 repl.getConnection().sendSession(repl.getSessionId(),

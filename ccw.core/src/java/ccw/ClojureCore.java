@@ -507,6 +507,27 @@ public final class ClojureCore {
 		}
 		return null;
     }
+    
+    /**
+     * @return starting with a leading slash "/", the root classpath relative
+     *         path of this file
+     */
+    public static String getAsRootClasspathRelativePath(IFile file) {
+    	try {
+    		IJavaProject jProject = JavaCore.create(file.getProject());
+    		IPackageFragmentRoot[] froots = jProject.getAllPackageFragmentRoots();
+    		for (IPackageFragmentRoot froot: froots) {
+    			if (froot.getPath().isPrefixOf(file.getFullPath())) {
+    				String ret = "/" + file.getFullPath().makeRelativeTo(froot.getPath()).toString();
+    				return ret;
+    			}
+    		}
+		} catch (JavaModelException e) {
+			CCWPlugin.logError("unable to determine the fragment root of the file " + file, e);
+		}
+		return null;
+    }
+    
     /**
      * @see <code>findMaybeLibNamespace(IFile file)</code>
      */

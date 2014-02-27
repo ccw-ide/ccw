@@ -35,6 +35,22 @@
  	  	  </or>
 		</enablement>
     </consolePatternMatchListener>
+    <consolePatternMatchListener
+       id="ccw.editors.clojure.debugProcessHyperlink"
+       regex="Listening for transport dt_socket at address: \d+">
+        <class class="ccw.util.GenericExecutableExtension">
+           <parameter
+                 name="factory"
+                 value="ccw.editors.clojure.debug-hyperlink/factory">
+           </parameter>
+        </class>
+        <enablement>
+          <or>
+            <test property="org.eclipse.ui.console.consoleTypeTest" value="javaStackTraceConsole"/>
+            <test property="org.eclipse.debug.ui.processTypeTest" value="java"/>
+          </or>
+        </enablement>
+    </consolePatternMatchListener>
  </extension>
 	
    

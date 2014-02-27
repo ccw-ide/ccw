@@ -23,13 +23,9 @@
                                :name launch/default-jre-container-name}]
      :java/default-classpath false
      :java/vm-arguments      (str " -Dfile.encoding=UTF-8"
-                                  " -Dmaven.wagon.http.ssl.easy=false"
-                                  ;; TODO see if we can safely remove this argument 
-                                  ;; " -Dleiningen.original.pwd=\"/Users/laurentpetit/tmp\""
-                                  )
+                                  " -Dmaven.wagon.http.ssl.easy=false")
      :java/main-type-name    "clojure.main"
-     :java/program-arguments (str "-m ccw.leiningen.main " command)
-     }))
+     :java/program-arguments (str "-m ccw.leiningen.main " command)}))
 
 (defn lein 
   "project can be nil"

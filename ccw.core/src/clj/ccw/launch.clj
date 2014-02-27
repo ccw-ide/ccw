@@ -64,7 +64,14 @@
   {:ccw 
      "ccw.launching.clojure"
    :java 
-     IJavaLaunchConfigurationConstants/ID_JAVA_APPLICATION})
+     IJavaLaunchConfigurationConstants/ID_JAVA_APPLICATION
+   :remote-java
+     IJavaLaunchConfigurationConstants/ID_REMOTE_JAVA_APPLICATION})
+
+(def vm-connector
+  "Identifiers for socket attaching and socket listening connectors"
+  {:socket-attach-vm-connector IJavaLaunchConfigurationConstants/ID_SOCKET_ATTACH_VM_CONNECTOR
+   :socket-listen-vm-connector IJavaLaunchConfigurationConstants/ID_SOCKET_LISTEN_VM_CONNECTOR})
 
 (def attrs-map
   "Launch configuration pre-existing attributes."
@@ -83,6 +90,10 @@
    :java/classpath IJavaLaunchConfigurationConstants/ATTR_CLASSPATH
    :java/default-classpath IJavaLaunchConfigurationConstants/ATTR_DEFAULT_CLASSPATH
    :java/project-name IJavaLaunchConfigurationConstants/ATTR_PROJECT_NAME
+
+   ;; specific for remote java
+   :java/vm-connector IJavaLaunchConfigurationConstants/ATTR_VM_CONNECTOR
+   :java/connect-map IJavaLaunchConfigurationConstants/ATTR_CONNECT_MAP
    })
 
 #_(defn default-jre "Default JRE installed in workbench" [] (JavaRuntime/getDefaultVMInstall))
