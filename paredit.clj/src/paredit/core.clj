@@ -273,7 +273,7 @@
       (.startsWith name "def")
       (.startsWith name "with")
       (.startsWith name "let")
-    (lisp-forms s))))
+      (lisp-forms s))))
 
 
 (defn inline-implementation? 
