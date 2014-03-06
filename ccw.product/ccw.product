@@ -253,7 +253,7 @@ litigation.
    <features>
       <feature id="ccw.feature" installMode="root"/>
       <feature id="org.eclipse.egit" installMode="root"/>
-      <feature id="org.eclipse.rcp" installMode="root"/>
+      <feature id="org.eclipse.rcp"/>
       <feature id="org.eclipse.platform" installMode="root"/>
       <feature id="org.eclipse.help" installMode="root"/>
       <feature id="org.eclipse.equinox.p2.core.feature" installMode="root"/>
