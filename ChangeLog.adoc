@@ -12,14 +12,24 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 `0.23.0` released on TBD
 
-== Counterclockwise/Standalone
+=== REPL launcher revisited
+
+The command "Headless Leiningen REPL" introduced in a recent release works well, so it has been set as the default behaviour for starting a new REPL for Leiningen projects.
+
+This means that for Leiningen projects, kbd:[Ctrl+Alt S] (resp. kbd:[Cmd+Alt S] for OSX), or 'Run/Debug as Clojure Application' will truly use Leiningen under the hood to start a headless REPL for the project.
+
+Also now by default, keyboard shortcut kbd:[Ctrl+Alt S] starts the project in debug mode and automatically connects Eclipse to the projects JVM debugger.
+
+=== Generic Leiningen Launcher
+
+- Ensure all JVMs created by Leiningen are killed when the main process is killed via the Console "Terminate" button.
+- "Headless Leiningen REPL" command kbd:[Alt+L H] has been removed now that it is the default behaviour for starting Leiningen projects
+
+=== Counterclockwise/Standalone
 
 - For Linux/Windows, the zip now contains a root folder named counterclockwise-<version>
 - For OS X, the zip now contains a root folder named counterclockwise-<version>.app ; it is thus recognized as an OS X Application folder
 
-== Generic Leiningen Launcher
-
-- Ensure all JVMs created by Leiningen are killed when the main process is killed via the Console "Terminate" button.
 
 == Changes between Counterclockwise 0.22.0 and 0.23.0
 
@@ -27,17 +37,18 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 Fixes the compatibility problems with Eclipse Indigo!
 
-== Counterclockwise/Standalone
+=== Counterclockwise/Standalone
 
 - It is now possible to use the usual Software Update Site to upgrade a Counterclockwise/Standalone install with new versions of Counterclockwise.
 - The version is now displayed in the Counterclockwise About Dialog.
 - The Products zips filenames now contain the version
 
-== Documentation
+=== Documentation
 
-=== Installation section
+==== Installation section
 
 - now mentions the Counterclockwise version number (in the text, and the corresponding links)
+
 
 == Changes between Counterclockwise 0.21.0 and 0.22.0
 

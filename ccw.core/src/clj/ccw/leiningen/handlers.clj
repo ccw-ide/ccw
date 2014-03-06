@@ -79,15 +79,6 @@
     (glaunch/generic-launch (when (e/project-open? project) project))
     (e/info-dialog "Leiningen Prompt" "unable to launch leiningen - no project found")))
 
-(defn launch-headless-repl
-  "Same pre-requisites as generic-launch concerning the detection of the project"
-  [handler event]
-  (println "launch-headless-repl")
-  (if-let [project-name (some-> event event->project e/project-open? e/project-name)]
-    (launch/lein
-      project-name "repl :headless"
-      :launch-name (str project-name " lein repl"))
-    (e/info-dialog "Headless REPL Launch" "Sorry, no project found in the current context")))
 
 (defn leiningen-enabled-project-factory 
   "Creates a PropertyTester. It will try to derive the IProject from the
