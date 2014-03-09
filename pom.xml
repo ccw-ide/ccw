@@ -11,7 +11,7 @@
   <packaging>pom</packaging>
 
   <properties>
-    <tycho-version>0.20.0-SNAPSHOT</tycho-version>
+    <tycho-version>0.20.0</tycho-version>
   </properties>
   
   <modules>
@@ -66,6 +66,10 @@
     <pluginRepository>
       <id>tycho-snapshots</id>
       <url>https://oss.sonatype.org/content/groups/public/</url>
+    </pluginRepository>
+    <pluginRepository>
+      <id>tycho-staged</id>
+      <url>https://oss.sonatype.org/content/repositories/orgeclipsetycho-1007/</url>
     </pluginRepository>
   </pluginRepositories> 
 
