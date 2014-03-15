@@ -264,7 +264,6 @@ litigation.
       <feature id="org.eclipse.m2e.feature" installMode="root"/>
       <feature id="org.eclipse.wst.web_ui.feature" installMode="root"/>
       <feature id="com.github.eclipsecolortheme.feature" installMode="root"/>
-      <feature id="org.eclipse.pde" installMode="root"/>
        <!-- Try this eclipseuitheme option 
       <feature id="com.github.eclipseuitheme.themes.feature" installMode="root"/>
       -->
