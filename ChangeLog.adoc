@@ -27,8 +27,8 @@ Also now by default, keyboard shortcut kbd:[Ctrl+Alt S] starts the project in de
 
 === Counterclockwise/Standalone
 
-- For Linux/Windows, the zip now contains a root folder named counterclockwise-<version>
-- For OS X, the zip now contains a root folder named counterclockwise-<version>.app ; it is thus recognized as an OS X Application folder
+- For Linux/Windows, the zip now contains a root folder named Counterclockwise-<version>
+- For OS X, the zip now contains a root folder named Counterclockwise-<version>.app ; it is thus recognized as an OS X Application folder
 
 
 == Changes between Counterclockwise 0.22.0 and 0.23.0

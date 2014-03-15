@@ -63,11 +63,10 @@
                  <products>
                    <product>
                      <id>ccw</id>
-                     <rootFolder>counterclockwise</rootFolder>
                      <rootFolders>
-                       <macosx>counterclockwise-${project.version}.app</macosx>
-                       <win32>counterclockwise-${project.version}</win32>
-                       <linux>counterclockwise-${project.version}</linux>
+                       <macosx>Counterclockwise-${project.version}.app</macosx>
+                       <win32>Counterclockwise-${project.version}</win32>
+                       <linux>Counterclockwise-${project.version}</linux>
                      </rootFolders>
                    </product>
                  </products>
@@ -90,15 +89,15 @@
                 <configuration>
                     <target name="rename archives with version numbers">
                         <copy file="${basedir}/target/products/ccw-macosx.cocoa.x86_64.zip" 
-                              tofile="${basedir}/target/products/ccw-${project.version}-macosx.cocoa.x86_64.zip" />
+                              tofile="${basedir}/target/products/Counterclockwise-${project.version}-macosx.cocoa.x86_64.zip" />
                         <copy file="${basedir}/target/products/ccw-linux.gtk.x86.zip" 
-                              tofile="${basedir}/target/products/ccw-${project.version}-linux.gtk.x86.zip" />
+                              tofile="${basedir}/target/products/Counterclockwise-${project.version}-linux.gtk.x86.zip" />
                         <copy file="${basedir}/target/products/ccw-linux.gtk.x86_64.zip" 
-                              tofile="${basedir}/target/products/ccw-${project.version}-linux.gtk.x86_64.zip" />
+                              tofile="${basedir}/target/products/Counterclockwise-${project.version}-linux.gtk.x86_64.zip" />
                         <copy file="${basedir}/target/products/ccw-win32.win32.x86.zip" 
-                              tofile="${basedir}/target/products/ccw-${project.version}-win32.win32.x86.zip" />
+                              tofile="${basedir}/target/products/Counterclockwise-${project.version}-win32.win32.x86.zip" />
                         <copy file="${basedir}/target/products/ccw-win32.win32.x86_64.zip" 
-                              tofile="${basedir}/target/products/ccw-${project.version}-win32.win32.x86_64.zip" />
+                              tofile="${basedir}/target/products/Counterclockwise-${project.version}-win32.win32.x86_64.zip" />
                     </target>
                 </configuration>
             </configuration>

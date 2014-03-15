@@ -45,15 +45,15 @@ Current Version is %%VERSION%%
 [cols="1,6"]
 |===
 | 1. Download
-| link:products/ccw-%%VERSION%%-win32.win32.x86.zip[Windows 32 Bits] / link:products/ccw-%%VERSION%%-win32.win32.x86_64.zip[Windows 64 Bits] +
-link:products/ccw-%%VERSION%%-linux.gtk.x86.zip[Linux 32 Bits] / link:products/ccw-%%VERSION%%-linux.gtk.x86_64.zip[Linux 64 Bits] +
-link:products/ccw-%%VERSION%%-macosx.cocoa.x86_64.zip[OS X 64 Bits]
+| link:products/Counterclockwise-%%VERSION%%-win32.win32.x86.zip[Windows 32 Bits] / link:products/Counterclockwise-%%VERSION%%-win32.win32.x86_64.zip[Windows 64 Bits] +
+link:products/Counterclockwise-%%VERSION%%-linux.gtk.x86.zip[Linux 32 Bits] / link:products/Counterclockwise-%%VERSION%%-linux.gtk.x86_64.zip[Linux 64 Bits] +
+link:products/Counterclockwise-%%VERSION%%-macosx.cocoa.x86_64.zip[OS X 64 Bits]
 
 | 2. Unzip
-| Create a directory named Counterclockwise, unzip the download archive `inside` this directory
+| This will create a `Counterclockwise-%%VERSION%%` directory (application directory for OS X)
 
 | 3. Start
-| Launch the `Counterclockwise` executable for your platform, located inside the `Counterclockwise` directory
+| Launch the `Counterclockwise` executable for your platform, located inside the `Counterclockwise-%%VERSION%%` directory
 |===
 
 === Pre-requisites
