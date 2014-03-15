@@ -3,7 +3,7 @@
 sudo apt-get install -qq ftp
 
 FTP_UPDATESITE_ROOT=/www/updatesite/branch
-BUILD_DIR="${TRAVIS_BUILD_DIR}/ccw.updatesite/target/repository"
+REPOSITORY_DIR="${TRAVIS_BUILD_DIR}/ccw.product/target/repository"
 UPDATESITE=${QUALIFIER}
 
 PRODUCTS_DIR="${TRAVIS_BUILD_DIR}/ccw.product/target/products"
@@ -16,7 +16,7 @@ quote USER ${FTP_USER}
 quote PASS ${FTP_PASSWORD}
 bin
 prompt off
-lcd ${BUILD_DIR}
+lcd ${REPOSITORY_DIR}
 cd ${FTP_UPDATESITE_ROOT}
 mkdir ${TRAVIS_BRANCH}
 cd ${TRAVIS_BRANCH}
@@ -25,6 +25,11 @@ cd ${UPDATESITE}
 lcd features
 mkdir features
 cd features
+mput *
+lcd ../binary
+cd ..
+mkdir binary
+cd binary
 mput *
 lcd ../plugins
 cd ..
