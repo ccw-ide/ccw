@@ -4,9 +4,9 @@ instructions.configure=\
 org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(type:0,location:http${#58}//updatesite.ccw-ide.org/stable/,name:Counterclockwise);\
 org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(type:1,location:http${#58}//updatesite.ccw-ide.org/stable/,name:Counterclockwise);\
 org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(type:0,location:http${#58}//eclipse-color-theme.github.io/update/,name:Eclipse Color Theme);\
-org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(type:1,location:http${#58}//eclipse-color-theme.github.io/update/,name:Eclipse Color Theme);\
-org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(type:0,location:http${#58}//download.eclipse.org/releases/kepler/,name:Eclipse Kepler Release);\
-org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(type:1,location:http${#58}//download.eclipse.org/releases/kepler/,name:Eclipse Kepler Release);\
-org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(type:0,location:http${#58}//download.eclipse.org/eclipse/updates/4.3/,name:Eclipse Kepler Updates);\
-org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(type:1,location:http${#58}//download.eclipse.org/eclipse/updates/4.3/,name:Eclipse Kepler Updates);
+org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(type:1,location:http${#58}//eclipse-color-theme.github.io/update/,name:Eclipse Color Theme);
+#org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(type:0,location:http${#58}//download.eclipse.org/releases/kepler/,name:Eclipse Kepler Release);\
+#org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(type:1,location:http${#58}//download.eclipse.org/releases/kepler/,name:Eclipse Kepler Release);\
+#org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(type:0,location:http${#58}//download.eclipse.org/eclipse/updates/4.3/,name:Eclipse Kepler Updates);\
+#org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(type:1,location:http${#58}//download.eclipse.org/eclipse/updates/4.3/,name:Eclipse Kepler Updates);
 
