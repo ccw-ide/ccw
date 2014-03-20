@@ -20,9 +20,7 @@
     <module>paredit.clj</module>
     <module>ccw.core</module>
     <module>ccw.core.e4</module>
-    <!--
     <module>ccw.core.test</module>
-    -->
     <module>ccw.feature</module>
     <module>ccw.product</module>
     <module>doc</module>
