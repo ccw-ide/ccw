@@ -34,7 +34,7 @@ Apache Software Foundation http://www.apache.org/
       startupMessageRect="7,490,500,25"
       startupForegroundColor="1C0F3C" />
    <launcher name="Counterclockwise">
-      <linux icon="images/ccw-48x48.xpm"/>
+      <linux icon="images/ccw-48x48.xpm"/> <!-- why 48x48, shouldn't it be 256x256 as for vogella's -->
       <macosx icon="images/ccw.icns"/>
       <solaris/>
       <win useIco="true">
@@ -252,7 +252,7 @@ litigation.
 
    <features>
       <feature id="ccw.feature" installMode="root"/>
-      <feature id="org.eclipse.egit"/>
+      <feature id="org.eclipse.egit" installMode="root"/>
       <feature id="org.eclipse.rcp"/>
       <feature id="org.eclipse.platform"/>
       <feature id="org.eclipse.help"/>
