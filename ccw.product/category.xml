@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <description url="http://updatesite.ccw-ide.org/stable/">
+      Counterclockwise Update Site. Counterclockwise, available as an Eclipse feature or a Standalone Product, adds support for the development of Clojure code.
+   </description>
+   <feature url="http://updatesite.ccw-ide.org/stable/" id="ccw.feature" version="0.0.0">
+      <category name="Clojure Programming"/>
+   </feature>
+   <category-def name="Clojure Programming" label="Clojure Programming">
+      <description>
+         Clojure Programming tools and environments
+      </description>
+   </category-def>
+</site>
