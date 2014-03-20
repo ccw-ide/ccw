@@ -10,7 +10,7 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 == Changes between Counterclockwise 0.23.0 and 0.24.0
 
-`0.23.0` released on TBD
+`0.24.0` released on March 20, 20144
 
 === REPL launcher revisited
 
