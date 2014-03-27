@@ -152,11 +152,14 @@ public class REPLView extends ViewPart implements IAdaptable {
     // 2. Even if (1) were fixed/changed, it's not clear to me how to "partition" an IDocument, or compose IDocuments
     //     so that we can have one range that is still *highlighted* for clojure content (and not editable),
     //     and another range that is editable and has full paredit, code completion, etc.
-    StyledText logPanel;
+    public StyledText logPanel;
     /** record for colors used in logPanel */
     public final ClojureSourceViewer.EditorColors logPanelEditorColors = new ClojureSourceViewer.EditorColors();
-    private ClojureSourceViewer viewer;
+    
+    public ClojureSourceViewer viewer;
+    
     public StyledText viewerWidget; // public only to simplify interop with helpers impl'd in Clojure
+    
     private ClojureSourceViewerConfiguration viewerConfig;
     
     private final IPropertyChangeListener fontChangeListener = new IPropertyChangeListener() {
