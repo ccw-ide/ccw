@@ -28,7 +28,9 @@
 ;}
 
  (def ^:private start-states #{(Bundle/STARTING) (Bundle/ACTIVE)})
- 
+ (defn available? [bundle]
+  (and bundle (start-states (.getState bundle))))
+
  (defn bundle 
    "Return the bundle object associated with the bundle-symbolic-name (a String)"
    ^Bundle [bundle-symbolic-name]
@@ -65,7 +67,7 @@
    ;; TODO: not good??, maybe we will not catch the right bundle (the same the OSGi framework would use ...)
    (try 
      (let [b (bundle bundle-symbolic-name)]
-       (when-not (start-states (.getState b))
+       (when-not (available? b)
          (.start b))
        b)
      (catch BundleException e
