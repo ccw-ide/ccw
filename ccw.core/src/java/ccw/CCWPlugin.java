@@ -14,6 +14,7 @@ package ccw;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.ArrayList;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
@@ -338,8 +339,8 @@ public class CCWPlugin extends AbstractUIPlugin {
 		return (Boolean.parseBoolean(launch.getAttribute(LaunchUtils.ATTR_IS_AUTO_RELOAD_ENABLED)));
 	}
     
-    public REPLView getProjectREPL (final IProject project) {
-    	final REPLView[] ret = new REPLView[1];
+    public static REPLView[] getREPLViews() {
+    	final ArrayList<REPLView> ret = new ArrayList<REPLView>(5);
     	
     	DisplayUtil.syncExec(new Runnable() {
 			public void run() {
@@ -350,15 +351,7 @@ public class CCWPlugin extends AbstractUIPlugin {
 		                for (IViewReference r : page.getViewReferences()) {
 		                    IViewPart v = r.getView(false);
 		                    if (REPLView.class.isInstance(v)) {
-		                        REPLView replView = (REPLView)v;
-		                        ILaunch launch = replView.getLaunch();
-		                        if (launch!=null && !launch.isTerminated()) {
-		                            String launchProject = LaunchUtils.getProjectName(launch);
-		                            if (launchProject != null && launchProject.equals(project.getName())) {
-		                            	ret[0] = replView;
-		                                return;
-		                            }
-		                        }
+		                        ret.add((REPLView) v);
 		                    }
 		                }
 		            }
@@ -366,7 +359,23 @@ public class CCWPlugin extends AbstractUIPlugin {
 			}
 		});
         
-        return ret[0];
+        return ret.toArray(new REPLView[ret.size()]);
+    }
+
+    public static REPLView getProjectREPL (final IProject project) {
+    	REPLView[] repls = getREPLViews();
+    	
+    	for (REPLView replView : repls) {
+            ILaunch launch = replView.getLaunch();
+            if (launch!=null && !launch.isTerminated()) {
+                String launchProject = LaunchUtils.getProjectName(launch);
+                if (launchProject != null && launchProject.equals(project.getName())) {
+                	return replView;
+                }
+            }
+        };
+        
+        return null;
     }
     
     public SafeConnection getProjectREPLSafeConnection (IProject project) {
