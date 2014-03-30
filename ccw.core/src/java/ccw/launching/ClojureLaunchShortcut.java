@@ -202,6 +202,12 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
 		configMap = configMap.assoc(LaunchUtils.ATTR_LEININGEN_CONFIGURATION, true);
 		configMap = configMap.assoc(Keyword.intern("private"), true);
 		
+		// Add LEIN_REPL_ACK_PORT as an additional environment variable
+		final Map<String, String> additionalEnvVariables = new HashMap<String, String>();
+		additionalEnvVariables.put("LEIN_REPL_ACK_PORT", Integer.toString(CCWPlugin.getDefault().getREPLServerPort(), 10));
+		configMap = configMap.assoc(Keyword.intern("environment-variables"), additionalEnvVariables);
+		configMap = configMap.assoc(Keyword.intern("append-environment-variables"), true);
+		
 		return (ILaunchConfiguration) 
 				launch._("launch-configuration", configMap);
     }

@@ -17,7 +17,6 @@ import java.net.ServerSocket;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunch;
@@ -106,7 +105,7 @@ public class CCWPlugin extends AbstractUIPlugin {
 			return NullTracer.INSTANCE;
 	}
     
-    public synchronized void startREPLServer() throws CoreException {
+    public synchronized void startREPLServer() {
     	if (ackREPLServer == null) {
 	        try {
 	        	// TODO use ClojureOSGi.withBundle instead
@@ -121,12 +120,12 @@ public class CCWPlugin extends AbstractUIPlugin {
 	            CCWPlugin.log("Started ccw nREPL server: nrepl://127.0.0.1:" + ackREPLServer.getLocalPort());
 	        } catch (Exception e) {
 	            CCWPlugin.logError("Could not start plugin-hosted REPL server", e);
-	            throw new CoreException(createErrorStatus("Could not start plugin-hosted REPL server", e));
+	            throw new RuntimeException("Could not start plugin-hosted REPL server", e);
 	        }
     	}
     }
     
-    public int getREPLServerPort() throws CoreException {
+    public int getREPLServerPort() {
     	if (ackREPLServer == null) {
     		startREPLServer();
     	}
@@ -154,7 +153,7 @@ public class CCWPlugin extends AbstractUIPlugin {
 			        if (System.getProperty("ccw.autostartnrepl") != null) {
 			        	try {
 							startREPLServer();
-						} catch (CoreException e) {
+						} catch (Exception e) {
 							e.printStackTrace();
 						}
 			        }

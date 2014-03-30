@@ -10,6 +10,7 @@
     {
      :private                true
      :launch-in-background   false
+     :append-environment-variables true
      :name                   launch-name
      
      :java/project-name      (and project (e/project-name project))

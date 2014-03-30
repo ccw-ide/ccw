@@ -8,13 +8,15 @@ Laurent Petit <laurent dot petit at gmail dot com>
 :toc-title!:
 :toclevels: 0
 
-== Changes between Counterclockwise 0.24.0 and 0.25.0
+== Changes between Counterclockwise 0.24.0 and 0.24.1
 
-`0.25.0` released on xxxx 20144
+`0.24.1` released on March 30, 2014
+
+Bug Fix: The System environment was not correctly passed to the launched project process, causing all sorts of trouble (X Window session not found, java.io.tmpdir not set correctly, etc.)
 
 == Changes between Counterclockwise 0.23.0 and 0.24.0
 
-`0.24.0` released on March 20, 20144
+`0.24.0` released on March 20, 2014
 
 === REPL launcher revisited
 

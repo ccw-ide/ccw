@@ -80,6 +80,7 @@
    :launch-in-background IDebugUIConstants/ATTR_LAUNCH_IN_BACKGROUND
    
    :environment-variables ILaunchManager/ATTR_ENVIRONMENT_VARIABLES
+   :append-environment-variables ILaunchManager/ATTR_APPEND_ENVIRONMENT_VARIABLES
    
    :java/vm-install-type IJavaLaunchConfigurationConstants/ATTR_VM_INSTALL_TYPE
    :java/vm-install-name IJavaLaunchConfigurationConstants/ATTR_VM_INSTALL_NAME

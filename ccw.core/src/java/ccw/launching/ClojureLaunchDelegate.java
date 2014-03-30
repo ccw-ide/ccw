@@ -219,25 +219,6 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 	}
 	
 	@Override
-	public String[] getEnvironment(ILaunchConfiguration configuration)
-			throws CoreException {
-		String[] ret;
-		String[] superEnv = super.getEnvironment(configuration);
-		if (isLeiningenConfiguration(configuration)) {
-			if (superEnv != null) {
-				ret = new String[superEnv.length + 1];
-				System.arraycopy(superEnv, 0, ret, 1, superEnv.length);
-			} else {
-				ret = new String[1];
-			}
-			ret[0] = "LEIN_REPL_ACK_PORT" + "=" + CCWPlugin.getDefault().getREPLServerPort();
-		} else {
-			ret = superEnv;
-		}
-		return ret;
-	}
-	
-	@Override
 	public String getProgramArguments(ILaunchConfiguration configuration) throws CoreException {
 		String superProgramArguments = super.getProgramArguments(configuration);
 		if (isLeiningenConfiguration(configuration)) {
