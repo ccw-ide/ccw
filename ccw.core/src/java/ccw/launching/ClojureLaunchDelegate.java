@@ -71,7 +71,8 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
     }
     
     private class REPLViewLaunchMonitor extends ProgressMonitorWrapper {
-        private ILaunch launch;
+        private static final int REPL_START_TIMEOUT_MS = 600000;
+		private ILaunch launch;
         private final boolean makeActiveREPL;
         
         private REPLViewLaunchMonitor (IProgressMonitor m, ILaunch launch, boolean makeActiveREPL) {
@@ -108,7 +109,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 				    
 					monitor.beginTask("Waiting for new REPL process to be ready...", IProgressMonitor.UNKNOWN);
 
-                    final Number port = (Number)Connection.find("clojure.tools.nrepl.ack", "wait-for-ack").invoke(300000);
+                    final Number port = (Number)Connection.find("clojure.tools.nrepl.ack", "wait-for-ack").invoke(REPL_START_TIMEOUT_MS);
                     cancelOrAck.countDown();
 
                     if (monitor.isCanceled()) {
