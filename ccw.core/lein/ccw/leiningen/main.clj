@@ -39,9 +39,15 @@
       
 (defmethod leiningen.core.eval/eval-in :subprocess 
   [project form]
+  (println "Leiningen (not project) JVM java.io.tmpdir:" (System/getProperty "java.io.tmpdir"))
+  (println "Project Shell Command:" (leiningen.core.eval/shell-command project form))
+  (println "all Leiningen (not project) JVM envs:" (System/getenv))
+  (println " all Leiningen (not project) JVM properties:" (System/getProperties))
   (let [port (start-socket-server)
         enhanced-form (list 'do (socket-client-form port) form)]
     (original-eval-in-subprocess project enhanced-form)))
+
+
 
 (defn -main [& raw-args]
   (apply leiningen.core.main/-main raw-args))
