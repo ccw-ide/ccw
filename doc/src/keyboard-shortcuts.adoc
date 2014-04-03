@@ -1,0 +1,89 @@
+= Editor Keyboard Shortcuts
+Laurent Petit <laurent.petit@gmail.com>
+:sectanchors:
+:sectlinks:
+:source-highlighter: coderay
+:experimental:
+:toc: 
+:toc-title!:
+:toclevels: 5
+
+== Edit modes
+
+=== Conventions
+
+- `(foo |bar)` represents the text `(foo bar)` with the cursor before the `b`
+- `(foo |bar|)` represents the text `(foo bar)` with the text `bar` selected
+
+=== Switching between Strict and non-Strict modes
+
+- kbd:[Alt + D]: switch between modes
+- kbd:[Esc]: force the next keystroke to be passed as is to the editor buffer, without `Counterclockwise` interfering. After the keystroke. This can help in situations where you don't understand why or don't want Counterclockwise to do some unhelpful behaviour.
+
+=== Default Structural Editing mode
+
+The commands available in the default mode do not interfere with the usage of the editor: the editor will still work as a user used to a straight text editor would assume.
+
+==== Auto-indentation
+The editor automatically indents a new line to the right column.
+
+[cols="1,1,3", options="header"]
+|===
+|Win/Linux
+|OS X
+|Examples
+
+|kbd:[Enter]
+|kbd:[Enter]
+|
+
+|===
+
+==== Expand Selection Up
+Expands selection to the enclosing form.
+
+[cols="1,1,3", options="header"]
+|===
+|Win/Linux
+|OS X
+|Examples (repeated invocations)
+
+|kbd:[Shift + Alt + Up]
+|kbd:[Shift + Cmd + Up]
+|`(foo [bar b\|ar])` => `(foo [bar \|baz\|])` => `(foo [\|bar baz\|])` => `(foo \|[bar baz]\|)` => `(\|foo [bar baz]\|)`
+|===
+
+==== Expand Selection Left
+Expand selection to the left sibling (or if no sibling form on the left, to the enclosing form).
+
+[cols="1,1,3", options="header"]
+|===
+|Win/Linux
+|OS X
+|Examples (repeated invocations)
+
+|kbd:[Shift + Alt + Left]
+|kbd:[Shift + Cmd + Left]
+|`(foo b\|ar bar)` => `(foo \|bar\| baz)` => `(foo\| bar\| baz)` => `(\|foo bar\| baz)` => `(\|foo bar baz\|)` => `\|(foo bar baz)\|`
+|===
+
+==== Expand Selection Right
+Expand selection to the right sibling (or if no sibling form on the right, to the enclosing form).
+
+[cols="1,1,3", options="header"]
+|===
+|Win/Linux
+|OS X
+|Examples (repeated invocations)
+
+|kbd:[Shift + Alt + Right]
+|kbd:[Shift + Cmd + Right]
+|`(foo b\|ar bar)` => `(foo \|bar\| baz)` => `(foo \|bar \|baz)` => `(foo \|bar baz\|)` => `(\|foo bar baz)\|` => `\|(foo bar baz)\|`
+|===
+
+=== Strict Structural Editing Mode (paredit-style)
+
+== Interaction with the REPL
+
+... TODO ... see here for now: https://code.google.com/p/counterclockwise/wiki/EditorKeyBindingsFeatures
+

@@ -373,13 +373,11 @@ In conjunction with auto-compile functionality, compilation problems are reporte
 === Keyboard Shortcuts
 
 The Editor is really keyboard commands friendly. 
-// TODO inter-file link
-See the list of Keyboard Bindings: EditorKeyBindingsFeatures
+See the list of Keyboard Bindings: link:keyboard-shortcuts.html[List of Keyboard Shortcuts]
 
 === Interaction with a launched REPL
 
-// TODO
-See this page: EditorKeyBindingsFeatures
+You'll find the commands for interacting with a REPL from an Editor in the link:keyboard-shortcuts.html[Keyboard Shortcuts] page
 
 = Auto-build feature
 
