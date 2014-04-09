@@ -59,16 +59,19 @@
 
 (defn log
   [^ccw.repl.REPLView repl-view ^StyledText log ^String s type]
+  ;; We don't log values if it has already been pprinted by the back-end
   (ui-sync
     (let [charcnt (.getCharCount log)
           [log-style highlight-background] (get log-styles type [default-log-style nil])
-          linecnt (.getLineCount log)]
-      (.append log s)
-      (when-not (re-find #"(\n|\r)$" s) (.append log "\n"))
+           linecnt (.getLineCount log)
+           new-content (if (re-find #"(\n|\r)$" s) s (str s \newline))]
+      ; Add styles before adding text to the log panel
+      (let [style (log-style charcnt (.length new-content))]
+        (-> repl-view .logPanelStyleCache (.setStyleRange style)))
+      (.append log new-content)
       (doto log
         cursor-at-end
-        .showSelection
-        (.setStyleRange (log-style charcnt (- (.getCharCount log) charcnt))))
+        .showSelection)
       (when highlight-background
         (.setLineBackground log (dec linecnt) (- (.getLineCount log) linecnt)
           (ccw.CCWPlugin/getColor
