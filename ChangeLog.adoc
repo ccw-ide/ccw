@@ -8,6 +8,17 @@ Laurent Petit <laurent dot petit at gmail dot com>
 :toc-title!:
 :toclevels: 0
 
+== Changes between Counterclockwise 0.24.1 and 0.24.2
+
+`0.24.2` released on April , 2014
+
+=== Bug fixes
+==== Namespace code being loaded twice at startup
+
+When CCW launches a REPL for a Leiningen project, it uses `lein repl :headless`. This leiningen task will, by default, try to load the namespace declared via the `[:main]`path in project.clj map (if no other namespace has been explicitly defined by the user via the `[:repl-options :init-ns] path). This magical side-effect is undesirable as default behavior, and can cause the namespace code to be loaded twice if the REPL is invoked via its source code editor. This can be problematic for certain codebases.
+
+CCW fixes this by dissocing the :main key in the project.clj map used to start the nrepl :headless server.
+
 == Changes between Counterclockwise 0.24.0 and 0.24.1
 
 `0.24.1` released on March 30, 2014

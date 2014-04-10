@@ -185,7 +185,19 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     }
     
     private ILaunchConfiguration createLeiningenLaunchConfiguration(IProject project, boolean createInDebugMode) {
-    	String command = " update-in :dependencies conj \"[ccw/ccw.server \\\"0.1.0\\\"]\" -- update-in :injections conj \"(require 'ccw.debug.serverrepl)\" -- repl :headless ";
+    	String command = 
+    			// Adding ccw/ccw.server for enabling ccw custom code completion, etc.
+    			" update-in :dependencies conj \"[ccw/ccw.server \\\"0.1.0\\\"]\" "
+    			+ "-- update-in :injections conj \"(require 'ccw.debug.serverrepl)\" "
+
+    			// Starting repl :headless ; removing :main attribute because
+    			// it is causing problems: "leiningen repl :headless" defaults
+    			// to automatically requiring the namespace symbol found in the
+    			// [:main] project.clj key if there's no namespace symbol defined in the
+    			// the [:repl-options :init-ns] project.clj key.
+    			+ "-- update-in : dissoc :main " // here ':' refers to project.clj's root
+    			+ "-- repl :headless ";
+    	
         if (createInDebugMode) {
         	command = " update-in :jvm-opts concat \"[\\\"-Xdebug\\\" \\\"-Xrunjdwp:transport=dt_socket,server=y,suspend=n\\\"]\" -- "
         				+ command;
