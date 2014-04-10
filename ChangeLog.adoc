@@ -19,6 +19,15 @@ When CCW launches a REPL for a Leiningen project, it uses `lein repl :headless`.
 
 CCW fixes this by dissocing the :main key in the project.clj map used to start the nrepl :headless server.
 
+=== Enhancements
+
+==== Preference for controlling run/debug default launch mode
+
+Since version `0.24.0`, commands indirectly loading a REPL automatically (e.g. invoking `load file in Clojure REPL` when there is no active REPL) invoke the launcher in `Debug` mode (allowing to put breakpoints in the code for instance).
+
+This behavior can be changed globally via a new preference: `Clojure` > `General` > `Launch REPLs in Debug mode` (thus checked by default)
+
+
 == Changes between Counterclockwise 0.24.0 and 0.24.1
 
 `0.24.1` released on March 30, 2014

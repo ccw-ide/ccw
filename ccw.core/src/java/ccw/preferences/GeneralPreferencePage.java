@@ -45,6 +45,13 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements
                 	ccw.preferences.PreferenceConstants.CCW_GENERAL_AUTO_RELOAD_ON_STARTUP_SAVE,
                     Messages.ClojureGeneralPreferencePage_auto_reload_on_startup_save,
                     getFieldEditorParent()));
+
+        addField(
+                new BooleanFieldEditor(
+                	ccw.preferences.PreferenceConstants.CCW_GENERAL_LAUNCH_REPLS_IN_DEBUG_MODE,
+                    Messages.ClojureGeneralPreferencePage_launch_repls_in_debug_mode,
+                    getFieldEditorParent()));
+
     }
 
     public void init(IWorkbench workbench) {

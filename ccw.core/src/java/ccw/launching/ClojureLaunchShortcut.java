@@ -38,6 +38,7 @@ import org.eclipse.jdt.internal.debug.ui.JDIDebugUIPlugin;
 import org.eclipse.jdt.internal.debug.ui.launcher.LauncherMessages;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
@@ -51,6 +52,7 @@ import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.editors.clojure.ClojureEditor;
 import ccw.editors.clojure.LoadFileAction;
+import ccw.preferences.PreferenceConstants;
 import ccw.util.ClojureInvoker;
 import ccw.util.DisplayUtil;
 import clojure.lang.Keyword;
@@ -100,8 +102,17 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
         }
     }
     
-    public void launchProject(IProject project, String mode) {
-    	launchProjectCheckRunning(project, new IFile[] {}, mode);
+    /**
+     * @param mode if null, then global preferences run mode will be selected
+     */
+    public void launchProject(IProject project, String runMode) {
+    	runMode = (runMode!=null) ? runMode : getDefaultRunMode();
+    	launchProjectCheckRunning(project, new IFile[] {}, runMode);
+    }
+    
+    private static String getDefaultRunMode() {
+		boolean defaultIsDebugMode = getPreferences().getBoolean(PreferenceConstants.CCW_GENERAL_LAUNCH_REPLS_IN_DEBUG_MODE);
+		return defaultIsDebugMode ? ILaunchManager.DEBUG_MODE : ILaunchManager.RUN_MODE;
     }
     
     /**
@@ -113,6 +124,8 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
      * @param mode
      */
     protected void launchProjectCheckRunning(IProject project, IFile[] filesToLaunch, String mode) {
+    	assert mode != null;
+    	
     	String projectName = project.getName();
     	List<ILaunch> running = findRunningLaunchesForProject(projectName);
     	System.out.println("found " + running.size() + " running launches");
@@ -321,5 +334,9 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
 			}
 		});
     	return ret.get();
+    }
+
+    private static IPreferenceStore getPreferences() {
+    	return  CCWPlugin.getDefault().getCombinedPreferenceStore();
     }
 }

@@ -140,6 +140,7 @@ public class Messages extends NLS {
     public static String ClojureGeneralPreferencePage_Description;
     public static String ClojureGeneralPreferencePage_automatic_nature_addition;
     public static String ClojureGeneralPreferencePage_auto_reload_on_startup_save;
+    public static String ClojureGeneralPreferencePage_launch_repls_in_debug_mode;
 
     static {
         // initialize resource bundle

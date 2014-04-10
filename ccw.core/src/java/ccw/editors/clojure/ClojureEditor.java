@@ -13,7 +13,6 @@ package ccw.editors.clojure;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.action.Action;
@@ -283,7 +282,10 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 		action = new Action() {
 			@Override
 			public void run() {
-				new ClojureLaunchShortcut().launch(ClojureEditor.this, ILaunchManager.DEBUG_MODE);
+				// is this code dead?
+				new ClojureLaunchShortcut().launch(
+						ClojureEditor.this, 
+						null /* default run mode*/);
 			};
 		};
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.LAUNCH_REPL);

@@ -17,7 +17,6 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jface.action.Action;
 import org.eclipse.ui.ide.FileStoreEditorInput;
 
@@ -47,7 +46,7 @@ public class LoadFileAction extends Action {
 	}
 
 	public void run() {
-		run(editor, ILaunchManager.DEBUG_MODE);
+		run(editor, null /* default run mode */);
 	}
 	
 	/**

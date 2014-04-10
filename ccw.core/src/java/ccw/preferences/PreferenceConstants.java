@@ -140,7 +140,9 @@ public class PreferenceConstants {
     
     public static final String CCW_GENERAL_AUTO_RELOAD_ON_STARTUP_SAVE = CCW_PREFERENCE_PREFIX + ".auto_reload_on_startup_save";
     
-	public static final String SWITCH_TO_NS_ON_REPL_STARTUP = CCW_PREFERENCE_PREFIX + ".switch_to_ns_on_repl_startup"; //$NON-NLS-1$
+    public static final String CCW_GENERAL_LAUNCH_REPLS_IN_DEBUG_MODE = CCW_PREFERENCE_PREFIX + ".automatic_launch_repls_in_debug_mode";
+
+    public static final String SWITCH_TO_NS_ON_REPL_STARTUP = CCW_PREFERENCE_PREFIX + ".switch_to_ns_on_repl_startup"; //$NON-NLS-1$
 
 	public static final String USE_STRICT_STRUCTURAL_EDITING_MODE_BY_DEFAULT = CCW_PREFERENCE_PREFIX + ".use_strict_structural_editing_mode_by_default"; //$NON-NLS-1$
 	public static final String SHOW_RAINBOW_PARENS_BY_DEFAULT = CCW_PREFERENCE_PREFIX + ".show_rainbow_parens_by_default"; //$NON-NLS-1$
