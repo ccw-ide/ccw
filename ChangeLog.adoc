@@ -10,7 +10,7 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 == Changes between Counterclockwise 0.24.1 and 0.24.2
 
-`0.24.2` released on April , 2014
+`0.24.2` released on April 11, 2014
 
 === Bug fixes
 ==== Namespace code being loaded twice at startup
