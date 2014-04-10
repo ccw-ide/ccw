@@ -114,6 +114,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	    store.setDefault(PreferenceConstants.CCW_GENERAL_AUTOMATIC_NATURE_ADDITION, true);
 	    store.setDefault(PreferenceConstants.CCW_GENERAL_AUTO_RELOAD_ON_STARTUP_SAVE, false);
 	    store.setDefault(PreferenceConstants.CCW_GENERAL_LAUNCH_REPLS_IN_DEBUG_MODE, true);
+	    store.setDefault(PreferenceConstants.CCW_GENERAL_USE_LEININGEN_LAUNCHER, true);
 	    
 	    store.setDefault(org.eclipse.jdt.ui.PreferenceConstants.EDITOR_MATCHING_BRACKETS, true);
 	    store.setDefault(org.eclipse.jdt.ui.PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR, 

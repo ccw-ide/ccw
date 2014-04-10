@@ -142,6 +142,9 @@ public class PreferenceConstants {
     
     public static final String CCW_GENERAL_LAUNCH_REPLS_IN_DEBUG_MODE = CCW_PREFERENCE_PREFIX + ".automatic_launch_repls_in_debug_mode";
 
+    /** Will leiningen projects be launched via the leiningen launcher? (or the default java launcher?) */
+    public static final String CCW_GENERAL_USE_LEININGEN_LAUNCHER = CCW_PREFERENCE_PREFIX + ".use_leiningen_launcher";
+
     public static final String SWITCH_TO_NS_ON_REPL_STARTUP = CCW_PREFERENCE_PREFIX + ".switch_to_ns_on_repl_startup"; //$NON-NLS-1$
 
 	public static final String USE_STRICT_STRUCTURAL_EDITING_MODE_BY_DEFAULT = CCW_PREFERENCE_PREFIX + ".use_strict_structural_editing_mode_by_default"; //$NON-NLS-1$

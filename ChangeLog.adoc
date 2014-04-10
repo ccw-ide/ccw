@@ -27,6 +27,19 @@ Since version `0.24.0`, commands indirectly loading a REPL automatically (e.g. i
 
 This behavior can be changed globally via a new preference: `Clojure` > `General` > `Launch REPLs in Debug mode` (thus checked by default)
 
+==== Preference for allowing Leiningen projects to be launched as regular java projects
+
+Preference `Clojure` > `General` > `Launch Leiningen projects with Leiningen (uncheck to launch them via default java launcher)` has been added.
+
+By default, Leiningen projects will be launched by invoking `leiningen repl :headless`. By unchecking this preference, Leiningen projects will be launched as would regular java projects detected as Clojure project (the behavior before 0.24.0).
+
+Motivation: some users have reported real blocking issues which cannot be addressed in this release:
+
+- Eclipse crashes under some circumstances (will be addressed soon)
+- Leiningen launcher way longer to start than default java launcher, and for projects requiring repeated restarts, this is a no-no. This second point may be addressed by leveraging the `trampoline` behavior of Leiningen.
+
+When both of these issues are addressed, removing this Preference from the GUI may be considered.
+
 
 == Changes between Counterclockwise 0.24.0 and 0.24.1
 

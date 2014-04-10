@@ -106,8 +106,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
      * @param mode if null, then global preferences run mode will be selected
      */
     public void launchProject(IProject project, String runMode) {
-    	runMode = (runMode!=null) ? runMode : getDefaultRunMode();
-    	launchProjectCheckRunning(project, new IFile[] {}, runMode);
+    	launchProjectCheckRunning(project, new IFile[] {}, getRunMode(runMode));
     }
     
     private static String getDefaultRunMode() {
@@ -162,14 +161,15 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     }
     
     private boolean useLeiningenLaunchConfiguration(IProject project) throws CoreException {
-    	return project.hasNature(CCWPlugin.LEININGEN_NATURE_ID);
+    	return project.hasNature(CCWPlugin.LEININGEN_NATURE_ID) && getPreferences().getBoolean(PreferenceConstants.CCW_GENERAL_USE_LEININGEN_LAUNCHER);
     }
     
     protected void launchProject(IProject project, IFile[] filesToLaunch, String mode) {
+    	mode = getRunMode(mode);
         try {
         	ILaunchConfiguration config;
 			if (useLeiningenLaunchConfiguration(project)) {
-        		config = createLeiningenLaunchConfiguration(project, (mode!= null && mode.equals(ILaunchManager.DEBUG_MODE)));
+        		config = createLeiningenLaunchConfiguration(project, mode.equals(ILaunchManager.DEBUG_MODE));
 			} else {
 				config = findLaunchConfiguration(project);
 				if (config == null) {
@@ -196,7 +196,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
             throw new RuntimeException(e);
         }
     }
-    
+
     private ILaunchConfiguration createLeiningenLaunchConfiguration(IProject project, boolean createInDebugMode) {
     	String command = 
     			// Adding ccw/ccw.server for enabling ccw custom code completion, etc.
@@ -244,7 +244,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
         
         List<ILaunchConfiguration> candidateConfigs = Collections.EMPTY_LIST;
         
-        boolean isLeinProject = project.hasNature(CCWPlugin.LEININGEN_NATURE_ID);
+        //boolean isLeinProject = project.hasNature(CCWPlugin.LEININGEN_NATURE_ID);
         
         try {
             ILaunchConfiguration[] configs = DebugPlugin.getDefault().getLaunchManager().getLaunchConfigurations(type);
@@ -335,6 +335,14 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
 		});
     	return ret.get();
     }
+
+    /**
+     * @return the run mode, getting the default run mode if <code>mode</code>
+     *         is null.
+     */
+	private String getRunMode(String mode) {
+		return (mode!=null) ? mode : getDefaultRunMode();
+	}
 
     private static IPreferenceStore getPreferences() {
     	return  CCWPlugin.getDefault().getCombinedPreferenceStore();

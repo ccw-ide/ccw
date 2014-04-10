@@ -52,6 +52,12 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements
                     Messages.ClojureGeneralPreferencePage_launch_repls_in_debug_mode,
                     getFieldEditorParent()));
 
+        addField(
+                new BooleanFieldEditor(
+                	ccw.preferences.PreferenceConstants.CCW_GENERAL_USE_LEININGEN_LAUNCHER,
+                    Messages.ClojureGeneralPreferencePage_use_leiningen_launcher,
+                    getFieldEditorParent()));
+
     }
 
     public void init(IWorkbench workbench) {
