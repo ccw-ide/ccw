@@ -20,7 +20,11 @@
     [ccw.editors.clojure IClojureEditor
                             SourceRange]))
    
-(defn- editor [event] (PlatformUtil/getAdapter (HandlerUtil/getActivePart event) IClojureEditor))
+(defn
+  editor
+  "Return the Clojure editor, if any, associated with the event."
+  [event] 
+  (PlatformUtil/getAdapter (HandlerUtil/getActivePart event) IClojureEditor))
 
 (defn ignoring-selection-changes [editor f]
   (try       (-> editor .getSelectionHistory .ignoreSelectionChanges)
