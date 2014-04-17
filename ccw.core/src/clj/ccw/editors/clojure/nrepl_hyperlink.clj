@@ -7,6 +7,17 @@
 ;; TODO share it with editor hyperlink
 (def ^:private pattern #"nrepl://([^':',' ']+):(\d+)")
 
+(defn deliver-url
+  "Deliver the port to every waiter behind the repl-port-promise (if any)."
+  [name port]
+  (if-let [repl-url-promise (.get (ccw.launching.ClojureLaunchShortcut/launchNameREPLURLPromise) name)]
+    (deliver repl-url-promise port)))
+
+(defn console-name
+  "Approximation of console/process identity with console's launch configuration name"
+  [console]
+  (some-> console .getProcess .getLaunch .getLaunchConfiguration .getName))
+
 (defn match-found 
   "state contains the console instance, and a set of seen nrepl links.
    This allows to e.g. only process nrepl links opening once, even if 
@@ -23,16 +34,25 @@
                     (linkExited [this])
                     (linkEntered [this]))]
     (.addHyperlink console hyperlink offset length)
-    #_(when-not (nrepl-urls url) 
-       (e/ui (open-repl-view)))
+    (when-not (nrepl-urls url)
+      (deliver-url (console-name console) url))
     (update-in state [:nrepl-urls] conj url)))
 
 (defn make []
   (let [state (atom nil)]
     (reify org.eclipse.ui.console.IPatternMatchListenerDelegate
-      (connect [this console]  (reset! state {:console console
-                                              :nrepl-urls #{}}))
-      (disconnect [this]       (reset! state nil))
+      (connect [this console]
+        (reset! state {:console console
+                       :nrepl-urls #{}}))
+      (disconnect [this]
+        ;; remove the repl url promise since the console / process is stopped
+        (println "not removed: " (ccw.launching.ClojureLaunchShortcut/launchNameREPLURLPromise))
+        (println "removing console name" (console-name (:console @state)))
+        (.remove 
+          (ccw.launching.ClojureLaunchShortcut/launchNameREPLURLPromise) 
+          (console-name (:console @state)))
+        (println "removed: " (ccw.launching.ClojureLaunchShortcut/launchNameREPLURLPromise))
+        (reset! state nil))
       (matchFound [this event] 
         (swap! state (partial match-found event))
         nil))))

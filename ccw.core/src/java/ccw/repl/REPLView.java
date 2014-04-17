@@ -981,7 +981,7 @@ public class REPLView extends ViewPart implements IAdaptable {
 		}
 		return fSourceViewerDecorationSupport;
 	}
-
+	
     @Override
     public void dispose() {
         super.dispose();

@@ -80,7 +80,7 @@ public class LoadFileAction extends Action {
 		        	new ClojureLaunchShortcut().launchProject(project, mode);
 		        	DisplayUtil.asyncExec(new Runnable() {
 		        		public void run() {
-				        	REPLView repl = CCWPlugin.getDefault().getProjectREPL(project);
+				        	REPLView repl = CCWPlugin.getProjectREPL(project);
 				        	if (repl != null && !repl.isDisposed()) {
 				        		evaluateFileText(repl, editor.getDocument().get(), filePath, sourcePath, fileName);
 				        		SwitchNamespaceAction.run(repl, editor, false);

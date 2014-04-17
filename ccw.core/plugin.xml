@@ -21,7 +21,7 @@
     </consolePatternMatchListener>
     <consolePatternMatchListener
        id="ccw.editors.clojure.nREPLHyperlink"
-       regex="nrepl://[^':',' ']+:\d+">
+       regex="nrepl://[^':',' ']+:\d+\s*">
         <class class="ccw.util.GenericExecutableExtension">
            <parameter
                  name="factory"

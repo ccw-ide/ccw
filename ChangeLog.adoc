@@ -12,6 +12,19 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 `0.25.0` released on April xx, 2014
 
+=== Bug fixes
+
+==== Console View stealing focus from REPL View
+
+With the new Leiningen Launcher, the Console View was systematically stealing focus from the REPL View, because it was (deterministically) outputting the REPL server port after the REPL View was started and focused on.
+
+This improper behavior was a consequence of the use of an acknowledgement socket between the nrepl server and the nrepl client. Leiningen gets the nrepl port after the acknowledgement has been done by the nrepl server library. So it cannot be changed to output the nrepl port before nrepl sends it back via the acknowledgement socket.
+
+The solution which has been retained is to stop using acknowledgement sockets for getting the repl port back. +
+From now on, CCW relies on Leiningen outputting the nrepl port on its stdout (using the nRepl URL format).
+
+To remain compatible with this behavior (and simplify the code internally), the regular Clojure launcher has been enhanced to also output the nrepl URL to stdout.
+
 
 == Changes between Counterclockwise 0.24.1 and 0.24.2
 

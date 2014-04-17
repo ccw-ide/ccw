@@ -18,6 +18,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.core.resources.IFile;
@@ -55,10 +57,22 @@ import ccw.editors.clojure.LoadFileAction;
 import ccw.preferences.PreferenceConstants;
 import ccw.util.ClojureInvoker;
 import ccw.util.DisplayUtil;
+import clojure.lang.IFn;
 import clojure.lang.Keyword;
 
 public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfigurationConstants {
     private static final Map<String, Long> tempLaunchCounters = new HashMap<String, Long>();
+
+    /**
+     * Map of console/process names to promises of their associated nREPL URL.
+     * <p>
+     * Insertion of promises is done at launch time. <br/>
+     * Delivery of promises is done via Consoles PatternMatch listeners. <br/>
+     * Removal of promises is done via disconnect of Consoles Pattern Match listeners
+     * (approximation of process terminated signal).
+     * </p>  
+     */
+    public static final ConcurrentMap<String, Object> launchNameREPLURLPromise = new ConcurrentHashMap<String, Object>();
     
     private ClojureInvoker leiningenConfiguration = ClojureInvoker.newInvoker(CCWPlugin.getDefault(), "ccw.leiningen.launch");
     private ClojureInvoker launch = ClojureInvoker.newInvoker(CCWPlugin.getDefault(), "ccw.launch");
@@ -73,17 +87,21 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     }
     
     @Override
-    public void launch(IEditorPart editor, String mode) {
+    public void launch(final IEditorPart editor, final String mode) {
     	if (editor instanceof ClojureEditor) {
-    		LoadFileAction.run((ClojureEditor) editor, mode);
+    		// a new thread ensures we're not in the UI thread
+    		new Thread(new Runnable() {
+				@Override public void run() {
+					LoadFileAction.run((ClojureEditor) editor, mode);
+				}}).start();
     	}
     }
 
     @Override
-    public void launch(ISelection selection, String mode) {
+    public void launch(ISelection selection, final String mode) {
         if (selection instanceof IStructuredSelection) {
             IStructuredSelection strSel = (IStructuredSelection) selection;
-            List<IFile> files = new ArrayList<IFile>();
+            final List<IFile> files = new ArrayList<IFile>();
             IProject proj = null;
             for (Object o : strSel.toList()) {
                 IResource r = (IResource) Platform.getAdapterManager().getAdapter(o, IResource.class);
@@ -97,7 +115,13 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
                 }
             }
             if (proj != null) {
-                launchProjectCheckRunning(proj, files.toArray(new IFile[] {}), mode);
+            	final IProject theProj = proj;
+            	// a new thread ensures we're not in the UI thread
+            	new Thread(new Runnable() {
+            		@Override public void run() {
+            			launchProjectCheckRunning(theProj, files.toArray(new IFile[] {}), mode);
+            		}
+            	}).start();
             }
         }
     }
@@ -105,8 +129,13 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     /**
      * @param mode if null, then global preferences run mode will be selected
      */
-    public void launchProject(IProject project, String runMode) {
-    	launchProjectCheckRunning(project, new IFile[] {}, getRunMode(runMode));
+    public void launchProject(final IProject project, final String runMode) {
+    	// a new thread ensures we're not in the UI thread
+    	new Thread(new Runnable() {
+    		@Override public void run() {
+    			launchProjectCheckRunning(project, new IFile[] {}, getRunMode(runMode));
+    		}
+    	}).start();
     }
     
     private static String getDefaultRunMode() {
@@ -179,8 +208,10 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
         	}
         		
             if (config != null) {
-            	ILaunchConfigurationWorkingCopy runnableConfiguration =
-            	    config.copy(config.getName() + " #" + incTempLaunchCount(project.getName()));
+            	final String name = config.getName() + " #" + incTempLaunchCount(project.getName());
+            	launchNameREPLURLPromise.put(name, promise());
+				ILaunchConfigurationWorkingCopy runnableConfiguration =
+            	    config.copy(name);
             	try {
         			LaunchUtils.setFilesToLaunchString(runnableConfiguration, Arrays.asList(filesToLaunch));
 	            	if (filesToLaunch.length > 0) {
@@ -195,6 +226,11 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
         } catch (CoreException e) {
             throw new RuntimeException(e);
         }
+    }
+    
+    private Object promise() {
+    	IFn promise = clojure.java.api.Clojure.var("clojure.core", "promise");
+    	return promise.invoke();
     }
 
     private ILaunchConfiguration createLeiningenLaunchConfiguration(IProject project, boolean createInDebugMode) {
@@ -289,7 +325,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
             
             ILaunchConfigurationWorkingCopy wc = type.newInstance(
                     null, DebugPlugin.getDefault().getLaunchManager().
-                        generateUniqueLaunchConfigurationNameFrom(basename));
+                    generateLaunchConfigurationName(basename));
             
             LaunchUtils.setFilesToLaunchString(wc, Arrays.asList(files));
             

@@ -25,13 +25,10 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.ProgressMonitorWrapper;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.IProcess;
@@ -51,9 +48,10 @@ import ccw.repl.REPLView;
 import ccw.util.BundleUtils;
 import ccw.util.ClojureInvoker;
 import ccw.util.DisplayUtil;
+import clojure.java.api.Clojure;
+import clojure.lang.IFn;
 import clojure.lang.RT;
 import clojure.lang.Var;
-import clojure.tools.nrepl.Connection;
 
 public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 
@@ -70,127 +68,140 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
         });
     }
     
-    private class REPLViewLaunchMonitor extends ProgressMonitorWrapper {
-        private static final int REPL_START_TIMEOUT_MS = 600000;
+    private class REPLURLOpener {
+        private static final long REPL_START_TIMEOUT_MS = 600000L;
 		private ILaunch launch;
         private final boolean makeActiveREPL;
         
-        private REPLViewLaunchMonitor (IProgressMonitor m, ILaunch launch, boolean makeActiveREPL) {
-            super(m);
+        private REPLURLOpener (ILaunch launch, boolean makeActiveREPL) {
             this.launch = launch;
             this.makeActiveREPL = makeActiveREPL;
         }
 
         public void done() {
-            super.done();
 
             Job ackJob = new Job("Waiting for new REPL process to be ready...") {
-                private IProgressMonitor monitor;
-                private CountDownLatch cancelOrAck = new CountDownLatch(1);
-                public void canceling () {
-                    if (monitor != null) {
-                        monitor.setCanceled(true);
-                        cancelOrAck.countDown();
-                        try {
-                            launch.terminate();
-                        } catch (DebugException e) {
-                            CCWPlugin.logError(e);
-                        }
-                    }
-                }
-                
-                private IStatus done (IProgressMonitor monitor, IStatus status) {
-                    monitor.done();
-                    return status;
-                }
-                
-				protected IStatus run(final IProgressMonitor monitor) {
-				    this.monitor = monitor;
-				    
-					monitor.beginTask("Waiting for new REPL process to be ready...", IProgressMonitor.UNKNOWN);
-
-                    final Number port = (Number)Connection.find("clojure.tools.nrepl.ack", "wait-for-ack").invoke(REPL_START_TIMEOUT_MS);
-                    cancelOrAck.countDown();
-
-                    if (monitor.isCanceled()) {
-                        return done(monitor, Status.CANCEL_STATUS);
-                    } else if (port == null) {
-                        CCWPlugin.logError("Waiting for new REPL process ack timed out");
-                        return done(monitor, new Status(IStatus.ERROR, CCWPlugin.PLUGIN_ID, "Waiting for new REPL process ack timed out"));
-                    }
-                    
-                    coreLaunch._("on-nrepl-server-instanciated", port, LaunchUtils.getProjectName(launch));
-                    
-                    // The syncExec is necessary to ensure the launch does not return
-                    // until either the repl is launched, either it failed
-		            DisplayUtil.syncExec(new Runnable() {
-		                public void run() {
-		                    
+            protected org.eclipse.core.runtime.IStatus run(final IProgressMonitor monitor) {
+	            final String launchName = launch.getLaunchConfiguration().getName();
+				final Object replURLPromise = ClojureLaunchShortcut.launchNameREPLURLPromise.get(launchName);
+	            
+	            if (replURLPromise==null) {
+	            	CCWPlugin.log("No REPL required for launch " + launchName);
+	            	return Status.OK_STATUS;
+	            } else {
+	            	try {
+	            		final Object cancelObject = new Object();
+	            		
+	            		if (monitor != null) {
+		            		// Thread watching user cancellation requests
+		            		new Thread(new Runnable() {
+								@Override public void run() {
+									IFn realized = Clojure.var("clojure.core", "realized?");
+									while (true) {
+										if ((Boolean) realized.invoke(replURLPromise)) {
+											// repl promise has been delivered
+											return;
+										}
+										if (getResult() != null) {
+											// Job has finished
+											return;
+										}
+										if (monitor.isCanceled()) {
+											IFn deliver = Clojure.var("clojure.core", "deliver");
+											deliver.invoke(replURLPromise, cancelObject);
+											return;
+										}
+										try {
+											Thread.sleep(100);
+										} catch (InterruptedException e) {
+											CCWPlugin.logError("Error in the thread monitoring user cancellation for REPL launch of " + launchName, e);
+											return;
+										}
+									}
+								}}).start();
+	            		}
+	            		
+	            		IFn deref = Clojure.var("clojure.core", "deref");
+	            		Object timeOutObject = new Object();
+		            	Object replURL = (Object) deref.invoke(replURLPromise, REPL_START_TIMEOUT_MS, timeOutObject);
+		            	
+		            	if (replURL == timeOutObject) {
+	                        CCWPlugin.logError("Waiting for new REPL process ack timed out");
+	                        return CCWPlugin.createErrorStatus("Waiting for new REPL process ack timed out");
+		            	} else if (replURL == cancelObject) {
+		            		return Status.CANCEL_STATUS;
+		            	} else if (replURL == null) {
+		            		CCWPlugin.logWarning("REPL url for launch " + launchName + " has not been provided");
+		            		return Status.CANCEL_STATUS;
+		            	} else {
+		            		String url = (String) replURL; 
+		            		coreLaunch._("on-nrepl-server-instanciated", url, LaunchUtils.getProjectName(launch));
+		            		
 		                    // only using a latch because getProject().touch can call done() more than once
 		                    final CountDownLatch projectTouchLatch = new CountDownLatch(1);
 	                    	if (isAutoReloadEnabled(launch) && getProject() != null) {
-                    			try {
+	                			try {
 	                    			getProject().touch(new NullProgressMonitor() {
 	                    				public void done() {
 	                    					projectTouchLatch.countDown();
 	                    				}
 	                    			});
-                    			} catch (CoreException e) {
-                    				final String MSG = "unexpected exception during project refresh for auto-load on startup";
-                    				ErrorDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
-                    						"REPL Connection failure", MSG, e.getStatus());
+	                			} catch (CoreException e) {
+	                				final String MSG = "unexpected exception during project refresh for auto-load on startup";
+	                				ErrorDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+	                						"REPL Connection failure", MSG, e.getStatus());
 	                    		}
 	                    	} else {
 	                    		projectTouchLatch.countDown();
 	                    	}
 	                    	try {
-                                projectTouchLatch.await();
-                            } catch (InterruptedException e) {}
-	                    	connectRepl();
-		                }
-		                private IProject getProject() {
-		            		try {
-		            			return LaunchUtils.getProject(launch);
-		            		} catch (CoreException e) {
-		            			CCWPlugin.logWarning("Unable to get project for launch configuration", e);
-		            			return null;
-		            		}
+	                            projectTouchLatch.await();
+	                        } catch (InterruptedException e) {}
+	                    	connectRepl(url);
+	                    	return Status.OK_STATUS;
 		            	}
-		                private void connectRepl() {
-		                    try {
-		                        REPLView replView = REPLView.connect("nrepl://127.0.0.1:" + port.intValue(), lastConsoleOpened, launch, makeActiveREPL);
-		                        String startingNamespace = REPLViewLaunchMonitor.this.launch.getLaunchConfiguration().getAttribute(LaunchUtils.ATTR_NS_TO_START_IN, "user");
-		                        try {
-		                        	replView.setCurrentNamespace(startingNamespace);
-		                        } catch (Exception e) {
-		                        	CCWPlugin.logError("Could not start REPL in namespace " + startingNamespace, e);
-		                        }
-		                        
-		                    } catch (Exception e) {
-		                        CCWPlugin.logError("Could not connect REPL to local launch", e);
-		                    }
-		                }
-		            });
-		            
-		            return done(monitor, Status.OK_STATUS);
-				}
+	            	} catch (Exception e) {
+	    				CCWPlugin.logError("Exception while launching a Clojure Application", e);
+	    				return CCWPlugin.createErrorStatus("Exception while launching a Clojure Application", e);
+	            	}
+	            }
+            }
             };
             ackJob.setUser(true);
             ackJob.schedule();
-            
-            Thread.yield();
-            
             try {
 				ackJob.join();
 			} catch (InterruptedException e) {
-				CCWPlugin.logError("Exception while launching a Clojure Application", e);
+				CCWPlugin.logError("Failure to connect to REPL", e);
 			}
+        }
+        
+        private IProject getProject() {
+    		try {
+    			return LaunchUtils.getProject(launch);
+    		} catch (CoreException e) {
+    			CCWPlugin.logWarning("Unable to get project for launch configuration", e);
+    			return null;
+    		}
+    	}
+        private void connectRepl(final String replURL) {
+        	DisplayUtil.syncExec(new Runnable() {
+				@Override public void run() {
+					try {
+						REPLView replView = REPLView.connect(replURL, lastConsoleOpened, launch, makeActiveREPL);
+						String startingNamespace = REPLURLOpener.this.launch.getLaunchConfiguration().getAttribute(LaunchUtils.ATTR_NS_TO_START_IN, "user");
+	                	replView.setCurrentNamespace(startingNamespace);
+					} catch (Exception e) {
+						throw new RuntimeException("Could not connect REPL to local launch", e);
+	                }
+				}
+        	});
         }
     }
     
     
     @Override
-    public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor) throws CoreException {
+    public void launch(ILaunchConfiguration configuration, String mode, final ILaunch launch, IProgressMonitor monitor) throws CoreException {
     	LaunchUtils.setProjectName(launch, configuration.getAttribute(LaunchUtils.ATTR_PROJECT_NAME, (String) null));
     	
     	Boolean activateAutoReload = CCWPlugin.isAutoReloadOnStartupSaveEnabled();
@@ -200,10 +211,13 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
         try {
             Var.pushThreadBindings(RT.map(currentLaunch, launch));
             
-            super.launch(configuration, mode, launch, (monitor == null || !isLaunchREPL(configuration)) ?
-                    monitor : new REPLViewLaunchMonitor(monitor, launch, true));
+            super.launch(configuration, mode, launch, monitor);
+            
             for(IProcess p: launch.getProcesses()) {
             	System.out.println("Launched process with command line: " + p.getAttribute(IProcess.ATTR_CMDLINE));
+            }
+            if (isLaunchREPL(configuration)) {
+				new REPLURLOpener(launch, true).done();
             }
         } finally {
             Var.popThreadBindings();
@@ -249,10 +263,11 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 				throw new WorkbenchException("Could not find ccw.debug.serverrepl source file", e);
 			}
 			
+			// Process will print a line with nRepl URL so that the Console
+			// hyperlink listener can automatically open the REPL
 			String nREPLInit = "(require 'clojure.tools.nrepl.server)" + 
-			    // don't want start-server return value printed
-			    String.format("(do (clojure.tools.nrepl.server/start-server :ack-port %s) nil)", CCWPlugin.getDefault().getREPLServerPort());
-			
+			"(do (let [server (clojure.tools.nrepl.server/start-server)] " + 
+				  "(println (str \\\"nREPL server started on port \\\" (:port server) \\\" on host 127.0.0.1 - nrepl://127.0.0.1:\\\" (:port server)))))";
 			String args = String.format("-i \"%s\" -e \"%s\" %s %s", toolingFile, nREPLInit,
 			        filesToLaunchArguments, userProgramArguments);
 			
