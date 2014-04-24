@@ -44,10 +44,12 @@ import org.eclipse.ui.console.IConsoleListener;
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.ClojureProject;
+import ccw.launching.ClojureLaunchShortcut.IWithREPLView;
 import ccw.repl.REPLView;
 import ccw.util.BundleUtils;
 import ccw.util.ClojureInvoker;
 import ccw.util.DisplayUtil;
+import ccw.util.Pair;
 import clojure.java.api.Clojure;
 import clojure.lang.IFn;
 import clojure.lang.RT;
@@ -79,11 +81,11 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
         }
 
         public void done() {
-
             Job ackJob = new Job("Waiting for new REPL process to be ready...") {
             protected org.eclipse.core.runtime.IStatus run(final IProgressMonitor monitor) {
 	            final String launchName = launch.getLaunchConfiguration().getName();
-				final Object replURLPromise = ClojureLaunchShortcut.launchNameREPLURLPromise.get(launchName);
+				final Pair<Object,IWithREPLView> o = ClojureLaunchShortcut.launchNameREPLURLPromiseAndWithREPLView.get(launchName);
+				final Object replURLPromise = o.e1;
 	            
 	            if (replURLPromise==null) {
 	            	CCWPlugin.log("No REPL required for launch " + launchName);
@@ -157,7 +159,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 	                    	try {
 	                            projectTouchLatch.await();
 	                        } catch (InterruptedException e) {}
-	                    	connectRepl(url);
+	                    	syncConnectRepl(url, o.e2);
 	                    	return Status.OK_STATUS;
 		            	}
 	            	} catch (Exception e) {
@@ -184,13 +186,17 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
     			return null;
     		}
     	}
-        private void connectRepl(final String replURL) {
+        private void syncConnectRepl(final String replURL, final IWithREPLView withREPLView) {
         	DisplayUtil.syncExec(new Runnable() {
 				@Override public void run() {
 					try {
 						REPLView replView = REPLView.connect(replURL, lastConsoleOpened, launch, makeActiveREPL);
 						String startingNamespace = REPLURLOpener.this.launch.getLaunchConfiguration().getAttribute(LaunchUtils.ATTR_NS_TO_START_IN, "user");
 	                	replView.setCurrentNamespace(startingNamespace);
+	                	if (withREPLView != null) {
+	                		withREPLView.run(replView);
+	                	}
+	                	replView.setFocus();
 					} catch (Exception e) {
 						throw new RuntimeException("Could not connect REPL to local launch", e);
 	                }

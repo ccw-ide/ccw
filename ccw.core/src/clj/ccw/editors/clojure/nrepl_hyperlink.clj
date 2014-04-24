@@ -10,7 +10,10 @@
 (defn deliver-url
   "Deliver the port to every waiter behind the repl-port-promise (if any)."
   [name port]
-  (if-let [repl-url-promise (.get (ccw.launching.ClojureLaunchShortcut/launchNameREPLURLPromise) name)]
+  (if-let [repl-url-promise (some-> 
+                              (ccw.launching.ClojureLaunchShortcut/launchNameREPLURLPromiseAndWithREPLView)
+                              (.get name)
+                              .e1)]
     (deliver repl-url-promise port)))
 
 (defn console-name
@@ -35,7 +38,11 @@
                     (linkEntered [this]))]
     (.addHyperlink console hyperlink offset length)
     (when-not (nrepl-urls url)
-      (deliver-url (console-name console) url))
+      (e/ui*
+        ; We wait a little bit for the console to finish printing
+        ; (and thus not steal focus from other widgets)
+        (Thread/sleep 100)
+        (deliver-url (console-name console) url)))
     (update-in state [:nrepl-urls] conj url)))
 
 (defn make []
@@ -46,12 +53,9 @@
                        :nrepl-urls #{}}))
       (disconnect [this]
         ;; remove the repl url promise since the console / process is stopped
-        (println "not removed: " (ccw.launching.ClojureLaunchShortcut/launchNameREPLURLPromise))
-        (println "removing console name" (console-name (:console @state)))
         (.remove 
-          (ccw.launching.ClojureLaunchShortcut/launchNameREPLURLPromise) 
+          (ccw.launching.ClojureLaunchShortcut/launchNameREPLURLPromiseAndWithREPLView) 
           (console-name (:console @state)))
-        (println "removed: " (ccw.launching.ClojureLaunchShortcut/launchNameREPLURLPromise))
         (reset! state nil))
       (matchFound [this event] 
         (swap! state (partial match-found event))

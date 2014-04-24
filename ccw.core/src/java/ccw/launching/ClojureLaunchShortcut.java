@@ -55,16 +55,23 @@ import ccw.ClojureCore;
 import ccw.editors.clojure.ClojureEditor;
 import ccw.editors.clojure.LoadFileAction;
 import ccw.preferences.PreferenceConstants;
+import ccw.repl.REPLView;
 import ccw.util.ClojureInvoker;
 import ccw.util.DisplayUtil;
+import ccw.util.Pair;
 import clojure.lang.IFn;
 import clojure.lang.Keyword;
 
 public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfigurationConstants {
     private static final Map<String, Long> tempLaunchCounters = new HashMap<String, Long>();
 
+    public interface IWithREPLView {
+    	void run(REPLView replView);
+    }
+    
     /**
-     * Map of console/process names to promises of their associated nREPL URL.
+     * Map of console/process names to Pair<promise,IWithREPLView> of their associated nREPL URL.
+     * The runnable is code to run after the REPL Client is connected.
      * <p>
      * Insertion of promises is done at launch time. <br/>
      * Delivery of promises is done via Consoles PatternMatch listeners. <br/>
@@ -72,7 +79,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
      * (approximation of process terminated signal).
      * </p>  
      */
-    public static final ConcurrentMap<String, Object> launchNameREPLURLPromise = new ConcurrentHashMap<String, Object>();
+    public static final ConcurrentMap<String, Pair<Object,IWithREPLView>> launchNameREPLURLPromiseAndWithREPLView = new ConcurrentHashMap<String, Pair<Object,IWithREPLView>>();
     
     private ClojureInvoker leiningenConfiguration = ClojureInvoker.newInvoker(CCWPlugin.getDefault(), "ccw.leiningen.launch");
     private ClojureInvoker launch = ClojureInvoker.newInvoker(CCWPlugin.getDefault(), "ccw.launch");
@@ -119,7 +126,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
             	// a new thread ensures we're not in the UI thread
             	new Thread(new Runnable() {
             		@Override public void run() {
-            			launchProjectCheckRunning(theProj, files.toArray(new IFile[] {}), mode);
+            			launchProjectCheckRunning(theProj, files.toArray(new IFile[] {}), mode, null);
             		}
             	}).start();
             }
@@ -129,11 +136,11 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     /**
      * @param mode if null, then global preferences run mode will be selected
      */
-    public void launchProject(final IProject project, final String runMode) {
+    public void launchProject(final IProject project, final String runMode, final IWithREPLView runOnceREPLAvailable) {
     	// a new thread ensures we're not in the UI thread
     	new Thread(new Runnable() {
     		@Override public void run() {
-    			launchProjectCheckRunning(project, new IFile[] {}, getRunMode(runMode));
+    			launchProjectCheckRunning(project, new IFile[] {}, getRunMode(runMode), runOnceREPLAvailable);
     		}
     	}).start();
     }
@@ -151,7 +158,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
      * @param filesToLaunch
      * @param mode
      */
-    protected void launchProjectCheckRunning(IProject project, IFile[] filesToLaunch, String mode) {
+    protected void launchProjectCheckRunning(IProject project, IFile[] filesToLaunch, String mode, IWithREPLView runOnceREPLAvailable) {
     	assert mode != null;
     	
     	String projectName = project.getName();
@@ -161,7 +168,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     	if (running.size() == 0 
     			||
     	        userConfirmsNewLaunch(project, running.size())) {
-    		launchProject(project, filesToLaunch, mode);
+    		launchProject(project, filesToLaunch, mode, runOnceREPLAvailable);
     	} else {
 			IViewPart replView = CCWPlugin.getDefault().getProjectREPL(project);
 			if (replView != null) {
@@ -193,7 +200,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     	return project.hasNature(CCWPlugin.LEININGEN_NATURE_ID) && getPreferences().getBoolean(PreferenceConstants.CCW_GENERAL_USE_LEININGEN_LAUNCHER);
     }
     
-    protected void launchProject(IProject project, IFile[] filesToLaunch, String mode) {
+    protected void launchProject(IProject project, IFile[] filesToLaunch, String mode, IWithREPLView runOnceREPLAvailable) {
     	mode = getRunMode(mode);
         try {
         	ILaunchConfiguration config;
@@ -209,7 +216,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
         		
             if (config != null) {
             	final String name = config.getName() + " #" + incTempLaunchCount(project.getName());
-            	launchNameREPLURLPromise.put(name, promise());
+            	launchNameREPLURLPromiseAndWithREPLView.put(name, new Pair<Object,IWithREPLView>(promise(), runOnceREPLAvailable));
 				ILaunchConfigurationWorkingCopy runnableConfiguration =
             	    config.copy(name);
             	try {

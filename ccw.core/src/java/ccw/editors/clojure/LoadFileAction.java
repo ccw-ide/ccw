@@ -25,10 +25,10 @@ import ccw.ClojureCore;
 import ccw.ClojureProject;
 import ccw.TraceOptions;
 import ccw.launching.ClojureLaunchShortcut;
+import ccw.launching.ClojureLaunchShortcut.IWithREPLView;
 import ccw.repl.Actions;
 import ccw.repl.REPLView;
 import ccw.util.ClojureInvoker;
-import ccw.util.DisplayUtil;
 
 public class LoadFileAction extends Action {
 
@@ -74,23 +74,19 @@ public class LoadFileAction extends Action {
     		CCWPlugin.getTracer().trace(TraceOptions.LAUNCHER, "No active REPL found (",
     				(repl == null) ? "active repl is null" : "active repl is disposed", 
     				"), so launching a new one");
-        	new Thread(new Runnable() {
-				public void run() {
-		        	final IProject project = editorFile.getProject();
-		        	new ClojureLaunchShortcut().launchProject(project, mode);
-		        	DisplayUtil.asyncExec(new Runnable() {
-		        		public void run() {
-				        	REPLView repl = CCWPlugin.getProjectREPL(project);
+        	final IProject project = editorFile.getProject();
+        	new ClojureLaunchShortcut().launchProject(project, mode,
+        			new IWithREPLView() {
+						@Override
+						public void run(final REPLView repl) {
 				        	if (repl != null && !repl.isDisposed()) {
 				        		evaluateFileText(repl, editor.getDocument().get(), filePath, sourcePath, fileName);
 				        		SwitchNamespaceAction.run(repl, editor, false);
 				        	} else {
 				        		CCWPlugin.logError("Could not start a REPL for loading file " + filePath);
 				        	}
-		        		}
-		        	});
-				}
-			}).start();
+						}
+        	});
         } else {
         	editor.setStatusLineErrorMessage("Cannot start a REPL for loading " + fileName);
         }
