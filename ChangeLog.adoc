@@ -11,8 +11,19 @@ Laurent Petit <laurent dot petit at gmail dot com>
 == Changes between Counterclockwise 0.24.2 and 0.25.0
 
 `0.25.0` released on April xx, 2014
+Counterclockwise now uses Clojure 1.6.0 internally instead of 1.6.0-alpha3 before.
+
+=== Launch startup time
+
+The launch startup time of leiningen projects has been slightly improved by using more appropriate JVM flags (inspired by the ones used by the leiningen shell script).
 
 === Bug fixes
+
+==== AOT Compilation very slow, and / or freezing the UI
+
+There was kind of an incompatibility between CCW and Leiningen. In short, CCW uses the `:injections` project key to inject nrepl server code, and this code is also injected by leiningen when AOT compiling in subprocesses. The server code was creating futures, thus preventing the AOT compilation process to shutdown in due time.
+
+The problem of UI freeze has also been globally addressed by improving the launcher code.
 
 ==== Console View stealing focus from REPL View
 
