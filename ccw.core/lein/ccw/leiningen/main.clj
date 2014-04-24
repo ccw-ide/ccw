@@ -5,7 +5,22 @@
    'hooks (not necessarily via robert.hook) even before leiningen.core.main/-main
    has been called."
   (:require [leiningen.core.main]
-            [leiningen.core.eval]))
+            [leiningen.core.eval]
+            [leiningen.compile]))
+
+(def ^:dynamic *in-prep* false)
+
+(alter-var-root
+  #'leiningen.core.eval/run-prep-tasks
+  (fn [old-fn]
+    (fn [project & rest]
+      (binding [*in-prep* true]
+        ;; removing :injections during prep-tasks because
+        ;; it can only cause harm (e.g. start user code launching
+        ;; futures - thus preventing the compilation task to finish, etc.)
+        (let [project (dissoc project :injections)]
+          (apply old-fn project rest))))))
+
 
 (def original-eval-in-subprocess
   (get-method leiningen.core.eval/eval-in :subprocess))
@@ -35,21 +50,17 @@
            in# (.getInputStream socket#)]
        (try 
          (.read in#)
-         (finally (System/exit ~lost-parent-socket-conn-errno))))))
-      
+         (finally 
+           (println "Lost parent connection" ~port)
+           (System/exit ~lost-parent-socket-conn-errno))))))
+
 (defmethod leiningen.core.eval/eval-in :subprocess 
   [project form]
-  ;(println "Leiningen (not project) JVM java.io.tmpdir:" (System/getProperty "java.io.tmpdir"))
-  ;(println "form:")
-  ;(pr form)
-  ;(println "Project Shell Command:" (leiningen.core.eval/shell-command project form))
-  ;(println "all Leiningen (not project) JVM envs:" (System/getenv))
-  ;(println " all Leiningen (not project) JVM properties:" (System/getProperties))
-  (let [port (start-socket-server)
-        enhanced-form (list 'do (socket-client-form port) form)]
-    (original-eval-in-subprocess project enhanced-form)))
-
-
+  (if *in-prep* ;; prep tasks (compilation, etc. are finished)
+    (original-eval-in-subprocess project form)
+    (let [port (start-socket-server)
+          enhanced-form (list 'do (socket-client-form port) form)]
+      (original-eval-in-subprocess project enhanced-form))))
 
 (defn -main [& raw-args]
   (apply leiningen.core.main/-main raw-args))
