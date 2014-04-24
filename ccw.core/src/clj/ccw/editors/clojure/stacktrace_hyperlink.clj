@@ -16,7 +16,8 @@
 
 (defn- find-datas [s]
   {:line (Integer/valueOf ^String (second (re-find #":([0-9]+)" s)))
-   :file (str (s/replace (second (re-find #"at ([\w\.]+)\$" s)) "." "/") ".clj")
+   :file (second (re-find #"\(([^:]+):" s))
+   ;;:file (str (s/replace (second (re-find #"at ([\w\.]+)\$" s)) "." "/") ".clj")
    :ns (s/replace (second (re-find #"at ([\w\.]+)\$" s)) "_" "-")})
 
 (defn- open-file [s]

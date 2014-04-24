@@ -10,7 +10,8 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 == Changes between Counterclockwise 0.24.2 and 0.25.0
 
-`0.25.0` released on April xx, 2014
+`0.25.0` released on April 24, 2014
+
 Counterclockwise now uses Clojure 1.6.0 internally instead of 1.6.0-alpha3 before.
 
 === Launch startup time
@@ -36,6 +37,9 @@ From now on, CCW relies on Leiningen outputting the nrepl port on its stdout (us
 
 To remain compatible with this behavior (and simplify the code internally), the regular Clojure launcher has been enhanced to also output the nrepl URL to stdout.
 
+==== Console stack trace hyperlink
+
+The console stack trace hyperlinks where wrong if the namespace was separate in several files loaded from the main namespace file. Fix Issue 634 - 	Clicking links in stacktraces bring you to the file of the namespace, not the file with the code causing the crash
 
 == Changes between Counterclockwise 0.24.1 and 0.24.2
 
