@@ -151,18 +151,23 @@ public class CCWPlugin extends AbstractUIPlugin {
 					
 					tracer = new Tracer(evt.getBundle().getBundleContext(), TraceOptions.getTraceOptions());
 					
-			        if (System.getProperty("ccw.autostartnrepl") != null) {
-			        	try {
-							startREPLServer();
-						} catch (Exception e) {
-							e.printStackTrace();
+					// We immediately give control back to the OSGi framework application
+					// by starting the code in a new thread
+					new Thread(new Runnable() {
+						@Override public void run() {
+					        if (System.getProperty("ccw.autostartnrepl") != null) {
+					        	try {
+									startREPLServer();
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+					        }
+					        
+					        getNatureAdapter().start();
 						}
-			        }
-			        
-			        getNatureAdapter().start();
-			        
+						
+					}).start();
 				}
-				
 			}
 		});
         

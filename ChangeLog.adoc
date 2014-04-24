@@ -41,6 +41,10 @@ To remain compatible with this behavior (and simplify the code internally), the 
 
 The console stack trace hyperlinks where wrong if the namespace was separate in several files loaded from the main namespace file. Fix Issue 634 - 	Clicking links in stacktraces bring you to the file of the namespace, not the file with the code causing the crash
 
+==== Bad interaction between Counterclockwise and Maven m2e plugin
+
+Counterclockwise `Automatic detection of Clojure projects` and Maven m2e `Update Maven projects on startup` preferences do not play well when both set to true. Counterclockwise code has been carefully audited and updated to prevent IResource locks, but the problem remains anyway. It is strongly suggested to not use m2e `Update Maven projects on startup`. Fixes Issue #633
+
 == Changes between Counterclockwise 0.24.1 and 0.24.2
 
 `0.24.2` released on April 11, 2014
