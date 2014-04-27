@@ -122,7 +122,7 @@ EOF
 
 # iterate over the products to push in parallel
 cd ${PRODUCTS_DIR}
-PRODUCTS="`ls *.zip`"
+PRODUCTS="`ls Counterclockwise*.zip`"
 for PRODUCT in ${PRODUCTS}
 do
 # Push CCW products files via FTP
