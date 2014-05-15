@@ -25,7 +25,7 @@
        :java/default-classpath false
        :java/vm-arguments      (str 
                                  " -client" 
-                                 " -Xbootclasspath/a:" (.toOSString (e/path leiningen-standalone-path)) 
+                                 " -Xbootclasspath/a:" "\"" (.toOSString (e/path leiningen-standalone-path)) "\"" 
                                  " -XX:+TieredCompilation"
                                  " -XX:TieredStopAtLevel=1"
                                  " -Dfile.encoding=UTF-8"

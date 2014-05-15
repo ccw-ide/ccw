@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="ccw.target.e43" sequenceNumber="17">
+<?pde version="3.8"?><target name="ccw.target.e43" sequenceNumber="18">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="false" type="InstallableUnit">
 <unit id="org.eclipse.swtbot.eclipse.feature.group" version="2.2.1.201402241301"/>
@@ -19,7 +19,7 @@
 <repository location="http://download.eclipse.org/releases/kepler/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="false" type="InstallableUnit">
-<unit id="com.github.eclipsecolortheme.feature.feature.group" version="0.13.0.201311210852"/>
+<unit id="com.github.eclipsecolortheme.feature.feature.group" version="0.13.1.201405041302"/>
 <repository location="http://eclipse-color-theme.github.io/update/"/>
 </location>
 </locations>
