@@ -8,6 +8,14 @@ Laurent Petit <laurent dot petit at gmail dot com>
 :toc-title!:
 :toclevels: 0
 
+== Changes between Counterclockwise 0.25.0 and 0.25.1
+
+`0.25.1` released on May xx, 2014
+
+=== Bug fixes
+
+- Error on load file in REPL, due to spaces in path introduced in 0.25.0. Thank you alzadude for the Pull Request!
+
 == Changes between Counterclockwise 0.24.2 and 0.25.0
 
 `0.25.0` released on April 25, 2014
