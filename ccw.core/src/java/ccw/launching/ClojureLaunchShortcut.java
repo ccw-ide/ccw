@@ -95,17 +95,25 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     
     @Override
     public void launch(final IEditorPart editor, final String mode) {
+    	launch(editor, mode, false);
+    }
+    
+    public void launch(final IEditorPart editor, final String mode, final boolean forceLeinLaunchWhenPossible) {
     	if (editor instanceof ClojureEditor) {
     		// a new thread ensures we're not in the UI thread
     		new Thread(new Runnable() {
 				@Override public void run() {
-					LoadFileAction.run((ClojureEditor) editor, mode);
+					LoadFileAction.run((ClojureEditor) editor, mode, forceLeinLaunchWhenPossible);
 				}}).start();
     	}
     }
 
     @Override
     public void launch(ISelection selection, final String mode) {
+    	launch(selection, mode, false);
+    }
+    
+    public void launch(ISelection selection, final String mode, final boolean forceLeinLaunchWhenPossible) {
         if (selection instanceof IStructuredSelection) {
             IStructuredSelection strSel = (IStructuredSelection) selection;
             final List<IFile> files = new ArrayList<IFile>();
@@ -126,7 +134,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
             	// a new thread ensures we're not in the UI thread
             	new Thread(new Runnable() {
             		@Override public void run() {
-            			launchProjectCheckRunning(theProj, files.toArray(new IFile[] {}), mode, null);
+            			launchProjectCheckRunning(theProj, files.toArray(new IFile[] {}), mode, forceLeinLaunchWhenPossible, null);
             		}
             	}).start();
             }
@@ -136,11 +144,11 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     /**
      * @param mode if null, then global preferences run mode will be selected
      */
-    public void launchProject(final IProject project, final String runMode, final IWithREPLView runOnceREPLAvailable) {
+    public void launchProject(final IProject project, final String runMode, final boolean forceLeinLaunchWhenPossible, final IWithREPLView runOnceREPLAvailable) {
     	// a new thread ensures we're not in the UI thread
     	new Thread(new Runnable() {
     		@Override public void run() {
-    			launchProjectCheckRunning(project, new IFile[] {}, getRunMode(runMode), runOnceREPLAvailable);
+    			launchProjectCheckRunning(project, new IFile[] {}, getRunMode(runMode), forceLeinLaunchWhenPossible, runOnceREPLAvailable);
     		}
     	}).start();
     }
@@ -158,7 +166,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
      * @param filesToLaunch
      * @param mode
      */
-    protected void launchProjectCheckRunning(IProject project, IFile[] filesToLaunch, String mode, IWithREPLView runOnceREPLAvailable) {
+    protected void launchProjectCheckRunning(IProject project, IFile[] filesToLaunch, String mode, boolean forceLeinLaunchWhenPossible, IWithREPLView runOnceREPLAvailable) {
     	assert mode != null;
     	
     	String projectName = project.getName();
@@ -168,7 +176,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     	if (running.size() == 0 
     			||
     	        userConfirmsNewLaunch(project, running.size())) {
-    		launchProject(project, filesToLaunch, mode, runOnceREPLAvailable);
+    		launchProject(project, filesToLaunch, mode, forceLeinLaunchWhenPossible, runOnceREPLAvailable);
     	} else {
 			IViewPart replView = CCWPlugin.getDefault().getProjectREPL(project);
 			if (replView != null) {
@@ -196,15 +204,19 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     	return ret[0];
     }
     
-    private boolean useLeiningenLaunchConfiguration(IProject project) throws CoreException {
-    	return project.hasNature(CCWPlugin.LEININGEN_NATURE_ID) && getPreferences().getBoolean(PreferenceConstants.CCW_GENERAL_USE_LEININGEN_LAUNCHER);
+    private boolean useLeiningenLaunchConfiguration(IProject project, 
+    		boolean forceLeinLaunchWhenPossible) throws CoreException {
+    	return project.hasNature(CCWPlugin.LEININGEN_NATURE_ID) && 
+    			(forceLeinLaunchWhenPossible
+    			 ||
+    			 getPreferences().getBoolean(PreferenceConstants.CCW_GENERAL_USE_LEININGEN_LAUNCHER));
     }
     
-    protected void launchProject(IProject project, IFile[] filesToLaunch, String mode, IWithREPLView runOnceREPLAvailable) {
+    protected void launchProject(IProject project, IFile[] filesToLaunch, String mode, boolean forceLeinLaunchWhenPossible, IWithREPLView runOnceREPLAvailable) {
     	mode = getRunMode(mode);
         try {
         	ILaunchConfiguration config;
-			if (useLeiningenLaunchConfiguration(project)) {
+			if (useLeiningenLaunchConfiguration(project, forceLeinLaunchWhenPossible)) {
         		config = createLeiningenLaunchConfiguration(project, mode.equals(ILaunchManager.DEBUG_MODE));
 			} else {
 				config = findLaunchConfiguration(project);

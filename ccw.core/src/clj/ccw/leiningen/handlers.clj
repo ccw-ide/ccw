@@ -23,6 +23,8 @@
            [org.eclipse.jface.text         ITextSelection]
            [org.eclipse.jface.viewers      IStructuredSelection]
            [org.eclipse.core.expressions   PropertyTester]
+           [ccw.editors.clojure            ClojureEditor]
+           [ccw.launching                  ClojureLaunchShortcut]
            [ccw.leiningen                  Messages]
            [ccw.util                       Logger
                                            Logger$Severity]
@@ -79,6 +81,28 @@
     (glaunch/generic-launch (when (e/project-open? project) project))
     (e/info-dialog "Leiningen Prompt" "unable to launch leiningen - no project found")))
 
+(defn launch-headless-repl
+  "Try to start a Leiningen Project. If focus is on a ClojureEditor, then first
+   try to launch from the editor project, else try to launch from the selection."
+  [handler event]
+  (let [editor (e/active-part event)
+        sel (e/current-selection event)]
+    (cond
+     (instance? ccw.editors.clojure.ClojureEditor editor)
+       (future 
+         (-> (ClojureLaunchShortcut.)
+           (.launch editor
+             nil
+             true ;; force launching via leiningen
+             )))
+     :else
+       (future
+         (-> (ClojureLaunchShortcut.) 
+           (.launch 
+             sel
+             nil 
+             true ;; force launching via leiningen
+             ))))))
 
 (defn leiningen-enabled-project-factory 
   "Creates a PropertyTester. It will try to derive the IProject from the

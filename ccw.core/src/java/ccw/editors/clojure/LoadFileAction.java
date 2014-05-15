@@ -46,14 +46,14 @@ public class LoadFileAction extends Action {
 	}
 
 	public void run() {
-		run(editor, null /* default run mode */);
+		run(editor, null /* default run mode */, false);
 	}
 	
 	/**
 	 * @param editor the clojure editor
 	 * @param mode the "run" or "debug" launch mode
 	 */
-	public static void run(final ClojureEditor editor, final String mode) {
+	public static void run(final ClojureEditor editor, final String mode, boolean forceLeinLaunchWhenPossible) {
         final IFile editorFile = (IFile) editor.getEditorInput().getAdapter(IFile.class);
 
         final String filePath = computeFilePath(editor, editorFile);
@@ -76,6 +76,7 @@ public class LoadFileAction extends Action {
     				"), so launching a new one");
         	final IProject project = editorFile.getProject();
         	new ClojureLaunchShortcut().launchProject(project, mode,
+        			forceLeinLaunchWhenPossible,
         			new IWithREPLView() {
 						@Override
 						public void run(final REPLView repl) {
