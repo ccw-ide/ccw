@@ -13,6 +13,7 @@
 
 package ccw.leiningen;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
@@ -196,6 +198,17 @@ public class NewLeiningenProjectWizard extends BasicNewResourceWizard
 
 		// get a project descriptor
 		URI location = mainPage.getLocationURI();
+		
+		// Fix before calling Eclipse CreateProjectOperation:
+		// if the location manually selected by the user matches our project
+		// location (or if she unchecked 'Create in:' and did not change the
+		// default location), we must reset location to null
+		if (location != null) {
+			IPath defaultProjectPath = newProjectHandle.getWorkspace().getRoot().getLocation().append(newProjectHandle.getName());
+			if (location.getPath().equals(defaultProjectPath.toOSString())) {
+				location = null;
+			}
+		}
 
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		final IProjectDescription description = workspace

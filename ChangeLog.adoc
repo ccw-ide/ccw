@@ -15,6 +15,7 @@ Laurent Petit <laurent dot petit at gmail dot com>
 === Bug fixes
 
 - Error on load file in REPL, due to spaces in path introduced in 0.25.0. Thank you alzadude for the Pull Request!
+- Project wizard issue if you (only) unselect the default location checkbox. Fix Issue #637
 
 == Changes between Counterclockwise 0.24.2 and 0.25.0
 
