@@ -22,6 +22,7 @@ Thus the "Headless Leiningen REPL" command has been ressuscited. You can find it
 
 - Error on load file in REPL, due to spaces in path introduced in 0.25.0. Thank you alzadude for the Pull Request!
 - Project wizard issue if you (only) unselect the default location checkbox. Fix Issue #637
+- Code Completion would not succeed sometimes and NullPointerExceptions would be logged instead. Fix Issue #631
 
 == Changes between Counterclockwise 0.24.2 and 0.25.0
 

@@ -331,7 +331,7 @@
                                (adapt-args (serverrepl/textmate-comparator prefix) :completion :completion)
                                #_#(let [comparator (serverrepl/textmate-comparator prefix)]
                                     (comparator (:completion %1) (:completion %2)))
-                               (concat repl-suggestions hippie-suggestions ))]
+                               (concat repl-suggestions hippie-suggestions))]
         (for [{:keys [completion match filter]
                {:keys [arglists ns name added static 
                        type doc line file] 
