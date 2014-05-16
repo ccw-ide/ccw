@@ -16,7 +16,7 @@ Laurent Petit <laurent dot petit at gmail dot com>
 When Preference `Clojure` > `General` > `Launch Leiningen projects with Leiningen` is unchecked, then `Run as` for the project will use the Eclipse Project Settings, not the Leiningen project settings. And Leiningen will not be used to launch the project. +
 But still, users have reported that there is a need for a command for explicitly launching the project via Leiningen.
 
-Thus the "Headless Leiningen REPL" command has been ressuscited. You can find it in the Leiningen contextual menu, or invoke it via the kbd:[Alt+L H] Keyboard Shortcut.
+Thus the "Headless Leiningen REPL" command has been resurrected. You can find it in the Leiningen contextual menu, or invoke it via the kbd:[Alt+L H] Keyboard Shortcut.
 
 === Bug fixes
 
