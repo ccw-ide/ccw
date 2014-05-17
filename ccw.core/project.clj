@@ -9,7 +9,7 @@
                  [org.clojure/core.incubator "0.1.0"]
                  [com.cemerick/drawbridge "0.0.6"]
                  [net.cgrand/parsley "0.9.1"]
-                 [ccw/ccw.server "0.1.0"]
+                 [ccw/ccw.server "0.1.1"]
                  ]
   :source-paths []
   :plugins [[ccw/lein-ccw-deps "0.1.0"]])

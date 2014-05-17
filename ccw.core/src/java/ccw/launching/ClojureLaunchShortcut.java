@@ -255,7 +255,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     private ILaunchConfiguration createLeiningenLaunchConfiguration(IProject project, boolean createInDebugMode) {
     	String command = 
     			// Adding ccw/ccw.server for enabling ccw custom code completion, etc.
-    			" update-in :dependencies conj \"[ccw/ccw.server \\\"0.1.0\\\"]\" "
+    			" update-in :dependencies conj \"[ccw/ccw.server \\\"0.1.1\\\"]\" "
     			+ "-- update-in :injections conj \"(require 'ccw.debug.serverrepl)\" "
 
     			// Starting repl :headless ; removing :main attribute because
