@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Counterclockwise Plugin
 Bundle-SymbolicName: ccw.branding;singleton:=true
-Bundle-Version: 0.25.2.qualifier
+Bundle-Version: 0.25.2.STABLE001
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Counterclockwise team
 Require-Bundle: org.eclipse.help,

@@ -8,9 +8,17 @@ Laurent Petit <laurent dot petit at gmail dot com>
 :toc-title!:
 :toclevels: 0
 
+== Changes between Counterclockwise 0.25.1 and 0.25.2
+
+`0.25.2` released on May 17, 2014
+
+=== Bug fixes
+
+- Upgraded dependency on `ccw.server 0.1.1` which is where the fix for Code Completion not succeeding sometimes is located!
+
 == Changes between Counterclockwise 0.25.0 and 0.25.1
 
-`0.25.1` released on May xx, 2014
+`0.25.1` released on May 17, 2014
 
 === Explicitly running leiningen headless
 When Preference `Clojure` > `General` > `Launch Leiningen projects with Leiningen` is unchecked, then `Run as` for the project will use the Eclipse Project Settings, not the Leiningen project settings. And Leiningen will not be used to launch the project. +
