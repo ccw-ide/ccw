@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Counterclockwise Fragment for Eclipse 4
 Bundle-SymbolicName: ccw.core.e4;singleton:=true
-Bundle-Version: 0.25.1.STABLE001
+Bundle-Version: 0.25.2.qualifier
 Fragment-Host: ccw.core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.eclipse.e4.core.contexts;resolution:=optional,
