@@ -15,6 +15,7 @@ Laurent Petit <laurent dot petit at gmail dot com>
 === Bug fixes
 
 - `New Clojure namespace` wizard now accepts file starting with numbers. Fix Issue #466
+- Upgraded missing dependency on `ccw.server 0.1.1` which is where the fix for Code Completion not succeeding sometimes is located!
 
 == Changes between Counterclockwise 0.25.1 and 0.25.2
 
