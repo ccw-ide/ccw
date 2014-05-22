@@ -16,19 +16,19 @@ public final class PlatformUtil {
 	 * @param adapterType
 	 * @return
 	 */
-	public static Object getAdapter(Object adaptable, Class adapterType) {
+	public static <T> T getAdapter(Object adaptable, Class<T> adapterType) {
 		if (adaptable == null || adapterType == null) {
 			return null;
 		} else if (adapterType.isInstance(adaptable)) {
-			return adaptable;
+			return (T) adaptable;
 		} else {
 			if (adaptable instanceof IAdaptable) {
 				Object ret = ((IAdaptable) adaptable).getAdapter(adapterType);
 				if (ret != null) {
-					return ret;
+					return (T) ret;
 				}
 			}
-			return Platform.getAdapterManager().getAdapter(adaptable, adapterType);
+			return (T) Platform.getAdapterManager().getAdapter(adaptable, adapterType);
 		}
 	}
 }
