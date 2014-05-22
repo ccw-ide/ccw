@@ -260,10 +260,16 @@
                (-> t (t/delete offset 1) (t/shift-offset -1))))
          (-> t (t/delete offset 1) (t/shift-offset -1))))))
 
-(def lisp-forms (into #{} (mapcat (fn [sym] [(str sym) (str "clojure.core/" sym)]) '(let fn binding proxy reify extend extend-protocol extend-type bound-fn 
-                            if if-not if-let when when-not when-let when-first condp case loop dotimes
-                            for while do doto try catch locking dosync doseq dorun doall
-                            -> -?> ->> future ns clojure.core/ns gen-class gen-interface))))
+(def lisp-forms
+  (into #{}
+    (mapcat
+      (fn [sym] [(str sym) (str "clojure.core/" sym)]) 
+      '(let fn binding proxy reify extend extend-protocol extend-type bound-fn 
+         if if-not if-let when when-not when-let when-first condp case loop dotimes
+         for while do doto try catch locking dosync doseq dorun doall
+         -> -?> ->> future ns clojure.core/ns gen-class gen-interface
+         as-> cond-> cond->> some-> some->>))))
+
 (defn lisp-form? 
   "Returns logical true if the String probably names a special form or macro var"
   [^String s]
