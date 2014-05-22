@@ -8,6 +8,14 @@ Laurent Petit <laurent dot petit at gmail dot com>
 :toc-title!:
 :toclevels: 0
 
+== Changes between Counterclockwise 0.25.2 and 0.26.0
+
+`0.26.0` released on May xx, 2014
+
+=== Bug fixes
+
+- `New Clojure namespace` wizard now accepts file starting with numbers. Fix Issue #466
+
 == Changes between Counterclockwise 0.25.1 and 0.25.2
 
 `0.25.2` released on May 17, 2014

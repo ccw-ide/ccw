@@ -229,7 +229,9 @@ public class NewClojureNamespaceWizard extends BasicNewResourceWizard implements
             mainPage.setErrorMessage("Empty file name.");
             return false;
         }
-        if (!Character.isJavaIdentifierStart(name.charAt(0))) {
+        if (!Character.isJavaIdentifierStart(name.charAt(0))
+        		&& !Character.isDigit(name.charAt(0)) // digits accepted
+        		) {
             mainPage.setErrorMessage("Invalid character \'" + name.charAt(0) + "\' at index " + 0
             		+ " for Clojure namespace file \'" + name + "'");
             return false;
