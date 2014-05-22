@@ -2,6 +2,8 @@ package ccw.leiningen;
 
 import java.io.File;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -23,7 +25,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
@@ -289,6 +290,11 @@ public final class WizardNewLeiningenProjectTemplatePage extends WizardPage {
 		
 		templateNameText.addListener(SWT.Modify, templateNameModifyListener);
 		
+		Label emptyLabel = new Label(leinTemplateGroup, SWT.NONE);
+		Label helpLabel = new Label(leinTemplateGroup, SWT.NONE);
+		helpLabel.setText("specify template name. You can use template options, e.g.: luminus +cljs +http-kit");
+		helpLabel.setFont(parent.getFont());
+		
 		return leinTemplateGroup;
 	}
 
@@ -302,7 +308,23 @@ public final class WizardNewLeiningenProjectTemplatePage extends WizardPage {
 		if (fieldValue == null || fieldValue.trim().equals("")) {
 			return initialTemplateNameTextValue;
 		} else {
-			return fieldValue.trim();
+			return fieldValue.trim().split("\\s")[0];
+		}
+	}
+	
+	public List<String> computeTemplateArgs() {
+		String fieldValue = getSafeTemplateNameFieldValue();
+		if (fieldValue == null) {
+			return null;
+		} else {
+			fieldValue = fieldValue.trim();
+			String[] args = fieldValue.split("\\s");
+			List<String> ret = new ArrayList<String>(args.length);
+			// Skip first entry which is the template name
+			for (int i = 1; i < args.length; i++) {
+				ret.add(args[i]);
+			}
+			return ret;
 		}
 	}
 

@@ -13,7 +13,6 @@
 
 package ccw.leiningen;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -335,7 +334,8 @@ public class NewLeiningenProjectWizard extends BasicNewResourceWizard
 			wizard._(performFinish,
 					 mainPage.getLeiningenProjectName(),
 					 project,
-					 mainPage.computeTemplateName());
+					 mainPage.computeTemplateName(),
+					 mainPage.computeTemplateArgs());
 			return true;
 		} catch (Exception e) {
 			CCWPlugin.logError("Error while creating new project " + project.getName(), e);

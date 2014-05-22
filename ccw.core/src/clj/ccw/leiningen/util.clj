@@ -148,7 +148,7 @@
   (when-let [prefix (classpath/get-native-prefix dependency-file)]
     (io/file (:native-path lein-project) prefix)))
 
-(defn lein-new [location template name & args]
+(defn lein-new [location template name args]
   (let [project-map 
          (lein-project 
            :project-less
@@ -171,9 +171,13 @@
             (resolve 'leiningen.core.main/abort)
             (fn [_#] (fn [& args#] (throw (ex-info (apply print-str args#) {})))))
           (catch Exception e#))
-         (binding [leiningen.new.templates/*dir* ~location]
-           (apply (leiningen.new/resolve-template '~template) 
-                  '~name 
-                  '~args))))))
+         (apply leiningen.new/new
+                nil
+                '~template
+                '~name
+                "--to-dir"
+                ~location
+                "--"
+                '~args)))))
 
 (println "util namespace loaded")

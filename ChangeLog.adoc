@@ -12,6 +12,12 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 `0.26.0` released on May xx, 2014
 
+=== Enhancements
+
+==== New Clojure Wizard
+
+The wizard now accepts `lein new` template arguments. Simply put them after the template name.
+
 === Bug fixes
 
 - `New Clojure namespace` wizard now works with fully qualified namespaces, pre-fills the input text with the currently selected package name and creates missing packages on the fly. Fix Issue #468

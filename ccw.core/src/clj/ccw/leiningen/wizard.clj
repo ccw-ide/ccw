@@ -21,12 +21,12 @@
                (catch Exception _)))))
     "Project names must be valid Clojure symbols."))
 
-(defn perform-finish [lein-project-name ^IProject project template-name]
+(defn perform-finish [lein-project-name ^IProject project template-name template-args]
   (let [project-file (-> project .getLocation .toFile)]
     (println "lein-project-name:" lein-project-name
              \newline
              "project-file:" project-file)
-    (u/lein-new (.getAbsolutePath project-file) template-name lein-project-name)
+    (u/lein-new (.getAbsolutePath project-file) template-name lein-project-name template-args)
     (.refreshLocal project (IResource/DEPTH_INFINITE) nil)
     (handlers/add-natures
       project
