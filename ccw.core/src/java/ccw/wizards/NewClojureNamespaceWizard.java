@@ -10,18 +10,24 @@
  *******************************************************************************/
 package ccw.wizards;
 
-import java.io.StringBufferInputStream;
-import java.util.Iterator;
+import java.io.ByteArrayInputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -40,6 +46,9 @@ import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 
 import ccw.CCWPlugin;
+import ccw.ClojureCore;
+import ccw.util.CollectionUtils;
+import ccw.util.PlatformUtil;
 import ccw.util.StringUtils;
 
 public class NewClojureNamespaceWizard extends BasicNewResourceWizard implements INewWizard {
@@ -62,9 +71,9 @@ public class NewClojureNamespaceWizard extends BasicNewResourceWizard implements
             super("New Clojure " + kind());
         }
 
-        IContainer dest = null;
+        IContainer javaSourceFolder;
         Text text;
-        String packageName = "";
+        private String initialPackageName;
 
         public void createControl(Composite parent) {
             Composite topLevel = new Composite(parent, SWT.NONE);
@@ -80,68 +89,83 @@ public class NewClojureNamespaceWizard extends BasicNewResourceWizard implements
             setControl(topLevel);
 
             boolean fail = false;
-            if (getSelection().size() == 1) {
+            if (getSelection().size() > 0) {
                 Object sel = getSelection().getFirstElement();
                 if (sel instanceof IPackageFragmentRoot) {
-                	dest = (IContainer) ((IPackageFragmentRoot)sel).getResource();
-                }
-                else if (sel instanceof IPackageFragment) {
-                    dest = (IContainer)((IPackageFragment)sel).getResource();
-                    packageName = ((IPackageFragment)sel).getElementName();
-                }
-                else {
-                	final String JAVA_SOURCE_ERROR = "Cannot create Clojure namespace outside a java source folder";
-                    CCWPlugin.logError("Wrong selection type: " + sel.getClass() + ". " + JAVA_SOURCE_ERROR);
-                    mainPage.setErrorMessage(JAVA_SOURCE_ERROR);
-                    fail = true;
-                }
-                
-                if (dest != null) {
-                    setDescription("Create new Clojure " + kind(true)
-                            + " in \"" + dest.getFullPath().toString()
-                            + "\" of project \""
-                            + dest.getProject().getName() + "\"");
-                }
-            }
-            else {
-                IProject project = null;
-                for (Iterator i = getSelection().iterator(); i.hasNext();) {
-                    IResource res;
-                    Object e = i.next();
-                    if (e instanceof IResource)
-                        res = (IResource) e;
-                    else if (e instanceof IAdaptable)
-                        res = (IResource) ((IAdaptable) e)
-                                .getAdapter(IResource.class);
-                    else
-                        res = null;
-                    if (res == null)
-                        continue;
-                    if (res.getProject() == null)
-                        continue;
-                    if (project == null)
-                        project = res.getProject();
-                    else {
-                        project = null;
-                        break;
+                	javaSourceFolder = (IContainer) ((IPackageFragmentRoot)sel).getResource();
+                	initialPackageName = "";
+                } else if (sel instanceof IPackageFragment) {
+                    javaSourceFolder = (IContainer) getPackageFragmentRoot((IPackageFragment)sel).getResource();
+                    initialPackageName = ((IPackageFragment)sel).getElementName();
+                } else {
+                	IResource res = PlatformUtil.getAdapter(sel, IResource.class);
+                	if (res.getType() == IResource.FILE) {
+                		res = res.getParent();
+                	}
+                    if (res.getProject() == null) {
+                    	final String JAVA_SOURCE_ERROR = "Cannot create Clojure namespace outside a java source folder";
+                        CCWPlugin.logError("Wrong selection type: " + sel.getClass() + ". " + JAVA_SOURCE_ERROR);
+                        mainPage.setErrorMessage(JAVA_SOURCE_ERROR);
+                        fail = true;
+                    } else {
+                    	IProject project = res.getProject();
+                    	IJavaProject jproject = JavaCore.create(project);
+                    	IPackageFragmentRoot[] roots;
+						try {
+							roots = jproject.getPackageFragmentRoots();
+							IPackageFragmentRoot firstSourceFragmentRoot = null;
+							for (IPackageFragmentRoot r: roots) {
+								if (r.getKind() == IPackageFragmentRoot.K_SOURCE) {
+									// Take the first sourceFolder in the list
+									if (firstSourceFragmentRoot == null) {
+										firstSourceFragmentRoot = r;
+									}
+									IContainer rc = (IContainer) r.getResource();
+									if (rc.getFullPath().isPrefixOf(res.getFullPath())) {
+										javaSourceFolder = rc;
+										initialPackageName = res.getFullPath().makeRelativeTo(rc.getFullPath()).toPortableString();
+										break;
+									}
+								}
+							}
+							if (javaSourceFolder == null) {
+								if (firstSourceFragmentRoot != null) {
+									// selected resource not in a package fragment root, take the first encountered
+									javaSourceFolder = (IContainer) firstSourceFragmentRoot.getResource();
+									initialPackageName = "";
+								}
+								mainPage.setErrorMessage("You must create a java source path before adding namespaces");
+								fail = true;
+							}
+						} catch (JavaModelException e) {
+							CCWPlugin.logError(e);
+							mainPage.setErrorMessage("Error while trying to find a java source folder to create the namespace into.");
+							fail = true;
+						}
                     }
                 }
-                if (project != null) {
-                    dest = project;
-                    setDescription("Create new top-level Clojure " + kind(true) + ".");
+                
+                if (javaSourceFolder != null) {
+                    setDescription("Create new Clojure " + kind(true)
+                            + " in \"" + javaSourceFolder.getFullPath().toString()
+                            + "\" of project \""
+                            + javaSourceFolder.getProject().getName() + "\"");
                 }
-                else if (project == null) {
-                    mainPage.setErrorMessage("Cannot create top-level Clojure "
-                            + kind(true)
-                            + " without project selection.");
-                    fail = true;
-                }
+            } else {
+                mainPage.setErrorMessage("Cannot determine in which project to create Clojure namespace.");
+                fail = true;
             }
+
             if (!fail) {
                 Group group = label(topLevel, kind() + " name:");
                 text = new Text(group, SWT.LEFT + SWT.BORDER);
+                text.setText(ClojureCore.getNamespaceNameFromPackageName(initialPackageName));
                 addToGroup(group, text);
             }
+        }
+        
+        private IPackageFragmentRoot getPackageFragmentRoot(IPackageFragment f) {
+        	return (IPackageFragmentRoot) f.getAncestor(IPackageFragment.PACKAGE_FRAGMENT_ROOT);
         }
     }
 
@@ -210,66 +234,103 @@ public class NewClojureNamespaceWizard extends BasicNewResourceWizard implements
         }
     }
 
-    protected IContainer dest() {
-        return mainPage.dest;
+    /**
+     * 
+     * @param parts the parts. Can be modified if extension is extracted
+     * @return the extension
+     */
+    private String extractExtension(List<String> parts) {
+    	String extension;
+    	final String s = parts.get(parts.size() - 1);
+    	 if (s.equals("clj") || s.equals("cljs")) {
+     		extension = parts.remove(parts.size() - 1);
+    	 } else {
+    		 extension = "clj";
+    	 }
+    	 return extension;
+    }
+
+    private String checkNamespaceSegment(String name) {
+    	if (StringUtils.isBlank(name)) {
+    		return "Empty namespace segment found";
+    	}
+        if (!Character.isJavaIdentifierStart(name.charAt(0))
+        		&& !Character.isDigit(name.charAt(0)) // digits accepted
+        		) {
+            return "Invalid character \'" + name.charAt(0) + "\' at index " + 0
+            		+ " for Clojure namespace file \'" + name + "'";
+        }
+        for (int i = 1; i < name.length(); i++) {
+            if (!Character.isJavaIdentifierPart(name.charAt(i))) {
+                return "Invalid character \'"
+                        + name.charAt(i)
+                        + "\' at index "
+                        + i
+                        + " in namespace segment \'"
+                        + name + "'";
+            }
+        }
+    	return null;
+    }
+    
+    private String checkNamespacename(List<String> parts) {
+    	
+    	if (parts.size() == 0) {
+    		return "Empty namespace name";
+    	}
+    	
+    	for (String part: parts) {
+    		String msg = checkNamespaceSegment(part);
+    		if (!StringUtils.isBlank(msg)) {
+    			return msg;
+    		}
+    	}
+    	return null;
+    }
+    
+    private String mungePart(String p) {
+    	return p.replaceAll("-", "_");  // FIXME should call clojure.core/munge
+    }
+    
+    private List<String> mungeParts(List<String> l) {
+    	List<String> ret = new ArrayList<String>(l.size());
+    	for (String p: l) {
+    		ret.add(mungePart(p));
+    	}
+    	return ret;
     }
 
     /**
      * @see org.eclipse.jface.wizard.IWizard#performFinish()
      */
     public boolean performFinish() {
-        IContainer dest = dest();
-        if (dest == null) {
-            mainPage.setErrorMessage("Must select an existing destination folder.");
-            return false;
-        }
-        String name = name();
-        String suffix = suffix();
-        if (name.length() == 0) {
-            mainPage.setErrorMessage("Empty file name.");
-            return false;
-        }
-        if (!Character.isJavaIdentifierStart(name.charAt(0))
-        		&& !Character.isDigit(name.charAt(0)) // digits accepted
-        		) {
-            mainPage.setErrorMessage("Invalid character \'" + name.charAt(0) + "\' at index " + 0
-            		+ " for Clojure namespace file \'" + name + "'");
-            return false;
-        }
-        for (int i = 1; i < name.length(); i++)
-            if (!Character.isJavaIdentifierPart(name.charAt(i))) {
-                mainPage
-                        .setErrorMessage("Invalid character \'"
-                                + name.charAt(i)
-                                + "\' at index "
-                                + i
-                                + " for Clojure namespace file \'"
-                                + name + "'");
-                return false;
-            }
+    	final String userInput = mainPage.text.getText().trim();
+    	
+    	final List<String> unmungedParts = new ArrayList<String>(Arrays.asList(userInput.split("\\.")));
+    	
+    	final String extension = extractExtension(unmungedParts);
+    	final String namespace = CollectionUtils.join(unmungedParts, ".");
+    	
+    	final List<String> parts = mungeParts(unmungedParts); 
 
-        // check if file already exists.
-        IFile file;
-        if (mainPage.dest instanceof IProject) {
-            file = ((IProject)mainPage.dest).getFile(name + suffix);
-        }
-        else if (mainPage.dest instanceof IFolder) {
-            file = ((IFolder)mainPage.dest).getFile(name + suffix);
-        }
-        else {
-            return false;
+        final String msg = checkNamespacename(parts);
+        if (msg != null) {
+        	mainPage.setErrorMessage(msg);
+        	return false;
         }
         
+        final IPath path = ccw.util.ResourceUtil.createPathFromList(parts).addFileExtension(extension);
+        final IFile file = mainPage.javaSourceFolder.getFile(path);
+
         if (file.exists()) {
-            mainPage.setErrorMessage("File " + file.getName() + " already exists.");
+            mainPage.setErrorMessage("Namespace " + namespace + " already exists.");
             return false;
         }
 
         try {
-        	String namespace = ((StringUtils.isEmpty(mainPage.packageName) ? "" 
-        			: mainPage.packageName + ".") + name).replaceAll("_", "-");
-        	String contents = "(ns " + namespace + ")\n\n";
-            file.create(new StringBufferInputStream(contents), true, null);
+        	final String contents = "(ns " + namespace + ")\n\n";
+        	ccw.util.ResourceUtil.createMissingParentFolders(file);
+            file.create(stringToStream(contents, ResourcesPlugin.getEncoding()), true, null);
             IWorkbenchWindow dw = getWorkbench().getActiveWorkbenchWindow();
             if (dw != null) {
                 IWorkbenchPage page = dw.getActivePage();
@@ -285,6 +346,19 @@ public class NewClojureNamespaceWizard extends BasicNewResourceWizard implements
         }
 
         return true;
+    }
+    
+    private ByteArrayInputStream stringToStream(String s, String encoding) {
+    	try {
+			return new ByteArrayInputStream(s.getBytes(encoding));
+		} catch (UnsupportedEncodingException e) {
+			try {
+				return new ByteArrayInputStream(s.getBytes("UTF-8"));
+			} catch (UnsupportedEncodingException e1) {
+				CCWPlugin.logError("Unable to encode '" + s + "' in UTF-8", e1);
+				return new ByteArrayInputStream(s.getBytes());
+			}
+		}
     }
 
     protected String body() {
