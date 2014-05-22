@@ -240,10 +240,10 @@ public final class ClojureCore {
      * Tries to open a clojure file in an editor
      * @return an editor input if the file has been found, or null
      */
-    private static IEditorInput findEditorInput(IPackageFragment packageFragment, String searchedPackage, String searchedFileName) throws JavaModelException {
+    private static IEditorInput findEditorInput(IPackageFragmentRoot packageFragmentRoot, IPackageFragment packageFragment, String searchedPackage, String searchedFileName) throws JavaModelException {
 			if (packageFragment.exists() 
 					&& packageFragment.getElementName().equals(searchedPackage)) {
-				for (Object njr: packageFragment.getNonJavaResources()) {
+				for (Object njr: packageFragment.isDefaultPackage() ? packageFragmentRoot.getNonJavaResources() : packageFragment.getNonJavaResources()) {
 					if (njr instanceof IJarEntryResource) {
 						IJarEntryResource jer = (IJarEntryResource) njr;
 						if (jer.getName().equals(searchedFileName)) {
@@ -279,7 +279,8 @@ public final class ClojureCore {
     	// Find in package fragment
     	IPackageFragment packageFragment = packageFragmentRoot.getPackageFragment(searchedPackage);
     	
-		IEditorInput editorInput = findEditorInput(packageFragment, 
+		IEditorInput editorInput = findEditorInput(packageFragmentRoot,
+				                                   packageFragment, 
 				                                   searchedPackage, 
 				                                   searchedFileName);
 		if (editorInput != null) {

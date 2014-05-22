@@ -17,6 +17,7 @@ Laurent Petit <laurent dot petit at gmail dot com>
 - `New Clojure namespace` wizard now works with fully qualified namespaces, pre-fills the input text with the currently selected package name and creates missing packages on the fly. Fix Issue #468
 - `New Clojure namespace` wizard now accepts file starting with numbers. Fix Issue #466
 - Correct indenting of new threading macros, as-> cond-> some->. Fix Issue #554
+- `F3 Navigate to Definition` was not working for single segment namespaces. Fix Issue #572 (Thanks isto.nikula for the patch!)
 - Upgraded missing dependency on `ccw.server 0.1.1` which is where the fix for Code Completion not succeeding sometimes is located!
 
 == Changes between Counterclockwise 0.25.1 and 0.25.2
