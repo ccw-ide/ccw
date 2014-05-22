@@ -23,6 +23,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
@@ -239,7 +240,7 @@ public final class WizardNewLeiningenProjectTemplatePage extends WizardPage {
         // project specification group
         Composite projectGroup = new Composite(parent, SWT.NONE);
         GridLayout layout = new GridLayout();
-        layout.numColumns = 2;
+        layout.numColumns = 3;
         projectGroup.setLayout(layout);
 
         // new project label
@@ -256,6 +257,12 @@ public final class WizardNewLeiningenProjectTemplatePage extends WizardPage {
 
         projectNameText.addListener(SWT.Modify, nameModifyListener);
         // Not working with Indigo BidiUtils.applyBidiProcessing(projectNameText, BidiUtils.BTD_DEFAULT);
+        
+        Label hint = new Label(projectGroup, SWT.NONE);
+        hint.setText("e.g. my-project, or com.my-company/my-project");
+        hint.setFont(parent.getFont());
+        //hint.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_GRAY));
+        
         
         return projectGroup;
     }
