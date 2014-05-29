@@ -81,6 +81,7 @@ import ccw.util.ClojureInvoker;
 import ccw.util.DisplayUtil;
 import ccw.util.StringUtils;
 import ccw.util.TextViewerSupport;
+import ccw.util.osgi.ClojureOSGi;
 import clojure.lang.IFn;
 import clojure.lang.ISeq;
 import clojure.lang.Keyword;
@@ -374,6 +375,11 @@ public class REPLView extends ViewPart implements IAdaptable {
     @SuppressWarnings("unchecked")
     public boolean configure (String url) throws Exception {
         try {
+        	// Require the drawbridge client to ensure http:// support is started
+        	if (url.trim().startsWith("http://")) {
+        		ClojureOSGi.require(CCWPlugin.getDefault().getBundle(), "cemerick.drawbridge.client");
+        	}
+        	
             // TODO - don't need multiple connections anymore, just separate sessions will do.
             interactive = new Connection(url);
             safeToolConnection = new SafeConnection(new Connection(url));
