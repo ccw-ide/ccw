@@ -104,7 +104,7 @@
     (repl/message client
       (if (map? expr)
         expr
-        {:op :eval :code expr :ns (.getCurrentNamespace repl-view)}))  
+        {:op "eval" :code expr :ns (.getCurrentNamespace repl-view)}))
     (catch Throwable t
       (CCWPlugin/logError (eval-failure-msg nil expr) t)
       (log repl-view log-component (eval-failure-msg nil expr) :err))))

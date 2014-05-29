@@ -28,6 +28,7 @@ The wizard now accepts `lein new` template arguments. Simply put them after the 
 - `REPL View`: Better handling of cursor movement in output area of REPL. Fix Issue #529
   - You can use arrow keys, copy keys in the REPL output area
   - You can use Tab key to switch to the REPL input area
+- `REPL View` accepts the Drawbridge protocol, thus allowing `http(s)://<server>:<port>/repl` or `http(s)://<user>:<password>@<server>:<port>/repl` URLs. Fix Issue #501
 - `Outline View`: There were unexpected exceptions thrown depending on the content of the Editor. These were due to `java.lang.Comparator` contract violations. Fix Issue #639
 - `Editor`: In strict/paredit mode, forward/backward delete do not prevent to remove `#` in front of `()` or `{}` or `""`. Also, fixed a bug where forward delete allowed to remove `(` or `{` or `"` if there was a leading `#`. Fix Issue #523 
   - Also changed a behavior: the cursor is not stuck, either something is deleted, either the cursors moves forward or backward
