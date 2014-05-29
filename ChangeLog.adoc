@@ -25,6 +25,9 @@ The wizard now accepts `lein new` template arguments. Simply put them after the 
 - Correct indenting of new threading macros, as-> cond-> some->. Fix Issue #554
 - `F3 Navigate to Definition` was not working for single segment namespaces. Fix Issue #572 (Thanks isto.nikula for the patch!)
 - Upgraded missing dependency on `ccw.server 0.1.1` which is where the fix for Code Completion not succeeding sometimes is located!
+- `REPL View`: Better handling of cursor movement in output area of REPL. Fix Issue #529
+  - You can use arrow keys, copy keys in the REPL output area
+  - You can use Tab key to switch to the REPL input area
 - `Outline View`: There were unexpected exceptions thrown depending on the content of the Editor. These were due to `java.lang.Comparator` contract violations. Fix Issue #639
 
 == Changes between Counterclockwise 0.25.1 and 0.25.2

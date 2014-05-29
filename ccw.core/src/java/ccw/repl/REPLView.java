@@ -550,22 +550,7 @@ public class REPLView extends ViewPart implements IAdaptable {
 			}
 		};
 		prefs.addPropertyChangeListener(prefsListener);
-		
-        // push all keyboard input delivered to log panel into input widget
-        logPanel.addListener(SWT.KeyDown, new Listener() {
-            public void handleEvent(Event e) {
-                if (!(e.keyCode == SWT.PAGE_DOWN || e.keyCode == SWT.PAGE_UP)) {
-                    // this prevents focus switch on cut/copy
-                    // no event that would trigger a paste is sent as long as logPanel is uneditable,
-                    // so we can't redirect it :-(
-                    boolean modifier = (e.keyCode & SWT.MODIFIER_MASK) != 0;
-                    if (modifier) return;
-                    viewerWidget.notifyListeners(SWT.KeyDown, e);
-                    viewerWidget.setFocus();
-                }
-            }
-        });
-        
+
         // page up/down in input area should control log
         viewerWidget.setKeyBinding(SWT.PAGE_DOWN, SWT.NULL);
         viewerWidget.setKeyBinding(SWT.PAGE_UP, SWT.NULL);
