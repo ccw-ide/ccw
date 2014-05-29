@@ -221,19 +221,22 @@
          (let [offset-loc (-> parse-tree parsed-root-loc (loc-for-offset offset))
                handled-forms (conj *brackets-tags* :meta)
                in-handled-form (handled-forms (loc-tag offset-loc))
-               open-punct-length #(.length ^String (z/node (first (next-leaves offset-loc))))
-               ]
-           (cond 
-             (and in-handled-form (= offset (start-offset offset-loc)))
-               (t/shift-offset t (open-punct-length))
-             (and in-handled-form (= offset (dec (end-offset offset-loc))))
-               (if (> (-> offset-loc z/node :content count) 2)
-                 t     ; don't move
-                 (-> t ; delete the form 
-                   (t/delete (start-offset offset-loc) (loc-count offset-loc))
-                   (t/shift-offset (- (open-punct-length)))))
-             :else
-               (t/delete t offset 1)))
+               open-punct-length #(.length ^String (z/node (first (next-leaves offset-loc))))]
+           (if-not in-handled-form
+             (t/delete t offset 1)
+             (cond 
+               (= offset (start-offset offset-loc))
+                 (if (< 1 (open-punct-length))
+                   (t/delete t offset 1)
+                   (t/shift-offset t 1))
+               (< 0 (- offset (start-offset offset-loc)) (open-punct-length))
+                 (t/shift-offset t 1)
+               (= offset (dec (end-offset offset-loc)))
+                 (if (> (-> offset-loc z/node :content count) 2)
+                   (t/shift-offset t 1)
+                   (-> t ; delete the form 
+                     (t/delete (start-offset offset-loc) (loc-count offset-loc))
+                     (t/shift-offset (- (open-punct-length))))))))
          (t/delete t offset 1)))))
 
 (defmethod paredit 
@@ -248,9 +251,9 @@
                handled-forms *brackets-tags*
                in-handled-form (handled-forms (loc-tag offset-loc))]
            (cond 
-             (and in-handled-form (<= (start-offset offset-loc) offset (+ (start-offset offset-loc) (dec (-> offset-loc z/down loc-count)))))
+             (and in-handled-form (= offset (+ (start-offset offset-loc) (dec (-> offset-loc z/down loc-count)))))
                (if (> (-> offset-loc z/node :content count) 2)
-                 t     ; don't move
+                 (t/shift-offset t -1)
                  (-> t ; delete the form 
                    (t/delete (start-offset offset-loc) (loc-count offset-loc))
                    (t/shift-offset (- (-> offset-loc z/down loc-count)))))
