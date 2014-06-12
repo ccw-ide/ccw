@@ -21,23 +21,31 @@ install: true
 #  directories:
 #    - ${HOME}/.m2
 before_install:
+  - echo "#-#-#-# BEFORE INSTALL `date`"
+  - echo "#-#-#-# maven version: `mvn -version`"
   # Maven 3.1.1
+  - echo "#-#-#-# DOWNLOAD AND INSTALL MAVEN 3.1.1 - START `date`"
   - wget http://www.us.apache.org/dist/maven/maven-3/3.1.1/binaries/apache-maven-3.1.1-bin.tar.gz
   - tar xvf apache-maven-3.1.1-bin.tar.gz > /dev/null
   - export MVN_HOME=`pwd`/apache-maven-3.1.1
   - export PATH=${MVN_HOME}/bin/:${PATH}
   - mvn --version
+  - echo "#-#-#-# MAVEN 3.1.1 INSTALLED - `date`"
 before_script:
   - "export DISPLAY=:99.0"
+  - echo "#-#-#-# starting xvfb `date`"
   - "sh -e /etc/init.d/xvfb start"
+  - echo "#-#-#- xvfb started `date`"
   - sleep 5 # give xvfb some time to start
+  - echo "#-#-#-# installling metacity `date`"
   - sudo apt-get update
   - sudo apt-get install -qq metacity
   - metacity --sm-disable --replace &
+  - echo "#-#-#-# metacity installed `date`"
   - sleep 5 # give xvfb some time to start
   - export QUALIFIER=CI$(printf "%0*d" 6 ${TRAVIS_BUILD_NUMBER})-${TRAVIS_BRANCH}-git${TRAVIS_COMMIT}
-script: mvn clean verify --batch-mode -e -DforceContextQualifier=${QUALIFIER}
+script: echo "#-#-#-# calling maven `date`" && mvn clean verify --batch-mode -e -DforceContextQualifier=${QUALIFIER}
 after_success: 
-  - test ${ECLIPSE_TARGET} = "kepler" && chmod 777 ./scripts/travis-deploy.sh && ./scripts/travis-deploy.sh
+  - test ${ECLIPSE_TARGET} = "kepler" && echo "#-#-#-#- launching tests `date`" && chmod 777 ./scripts/travis-deploy.sh && (echo "#-#-#-#- deploying `date`";  ./scripts/travis-deploy.sh ; echo "#-#-#-#- deployed `date`")
 after_failure:
   - chmod 777 ./scripts/travis-test-report.sh && ./scripts/travis-test-report.sh
