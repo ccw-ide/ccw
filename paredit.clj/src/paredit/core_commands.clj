@@ -340,7 +340,7 @@
 
                 "(foo #{|} bar)" "(foo | bar)"
                 "(foo #{a|} bar)" "(foo #{a}| bar)"
-                "(foo #{a |d} bar)" "(foo #{a }| bar)"
+                "(foo #{a |d} bar)" "(foo #{a |} bar)"
                 "(|#{foo bar})" "(|{foo bar})"
 
                 "(foo #(|) bar)" "(foo | bar)"
@@ -349,11 +349,11 @@
                 "(|#(foo bar))" "(|(foo bar))"
 
                 "(foo #\"|\" bar)" "(foo | bar)"
-                "(foo #\"a|\" bar)" "(foo #\"a|\" bar)"
+                "(foo #\"a|\" bar)" "(foo #\"a\"| bar)"
                 "(foo #\"a |d\" bar)" "(foo #\"a |\" bar)"
                 "(|#\"foo bar\")" "(|\"foo bar\")"
 
-                "(foo \"a|\" bar)" "(foo \"a|\" bar)"
+                "(foo \"a|\" bar)" "(foo \"a\"| bar)"
                 "(|(foo bar))" "((|foo bar))"
                 "(|[foo bar])" "([|foo bar])"
                 "(|{foo bar})" "({|foo bar})"
