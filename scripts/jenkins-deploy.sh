@@ -1,5 +1,9 @@
 #!/bin/bash
 
+echo ${FTP_HOST}
+echo ${FTP_USER}
+echo ${FTP_PASSWORD}
+
 FTP_UPDATESITE_ROOT=/www/updatesite/branch
 REPOSITORY_DIR="${WORKSPACE}/ccw.product/target/repository"
 UPDATESITE=${QUALIFIER}
