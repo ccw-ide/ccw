@@ -16,24 +16,49 @@ import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import ccw.CCWPlugin;
+import ccw.util.DisplayUtil;
+import clojure.lang.ExceptionInfo;
 
 public class Actions {
     private Actions () {}
     
     public static class Connect extends AbstractHandler {
-        public Object execute (ExecutionEvent event) throws ExecutionException {
+        public Object execute (final ExecutionEvent event) throws ExecutionException {
+        	ConnectDialog dlg = null;
+        	REPLView repl = null;
             try {
                 IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-                ConnectDialog dlg = new ConnectDialog(window.getShell(), CCWPlugin.getDefault().getDialogSettings());
+                dlg = new ConnectDialog(window.getShell(), CCWPlugin.getDefault().getDialogSettings());
                 
-                REPLView repl = null;
                 if (dlg.open() == ConnectDialog.OK) {
                     repl = REPLView.connect(dlg.getURL(), true);
                 }
                 
                 return repl;
             } catch (Exception e) {
-                throw new ExecutionException("Could not connect to repl", e);
+            	final REPLView maybeREPL = repl;
+            	final String title = "REPL Connection error";
+            	if (!(e instanceof ExceptionInfo) && (e.getCause() instanceof ExceptionInfo)) {
+            		e = (ExceptionInfo) e.getCause();
+            	}
+            	final String msg = "Connection to REPL URL " + (dlg == null ? "<unknown>" : dlg.getURL()) + " failed due to " + e.getMessage();
+            	DisplayUtil.asyncExec(new Runnable() {
+					@Override public void run() {
+						MessageDialog.openError(null, title, msg);
+		            	if (maybeREPL != null) {
+		            		try {
+								maybeREPL.closeView();
+							} catch (Exception e) {
+								CCWPlugin.logError("Exception while trying to close bad REPL", e);
+							}
+		            	}
+					}
+				});
+            	if (e instanceof RuntimeException) {
+            		throw (RuntimeException) e;
+            	} else {
+                    throw new ExecutionException(msg, e);
+            	}
             }
         }
     }

@@ -3,7 +3,6 @@ package ccw.repl;
 import static ccw.CCWPlugin.getTracer;
 
 import java.io.IOException;
-import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -14,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
@@ -82,6 +82,7 @@ import ccw.util.DisplayUtil;
 import ccw.util.StringUtils;
 import ccw.util.TextViewerSupport;
 import ccw.util.osgi.ClojureOSGi;
+import clojure.lang.ExceptionInfo;
 import clojure.lang.IFn;
 import clojure.lang.ISeq;
 import clojure.lang.Keyword;
@@ -347,10 +348,10 @@ public class REPLView extends ViewPart implements IAdaptable {
         if (safeToolConnection != null) safeToolConnection.close();
     }
     
-    public void reconnect () throws Exception {
+    public boolean reconnect () throws Exception {
         closeConnections();
         logPanel.append(";; Reconnecting...\n");
-        configure(interactive.url);
+        return configure(interactive.url);
     }
     
     public void setCurrentNamespace (String ns) {
@@ -368,12 +369,13 @@ public class REPLView extends ViewPart implements IAdaptable {
     }
     
     private void prepareView () throws Exception {
-        sessionId = interactive.newSession(null);
+    	// 10s timeout for establishing session (somewhat arbitrary atm)
+        sessionId = SafeConnection.safeNewSession(interactive, 10000);
         evalExpression = (IFn) viewHelpers._("configure-repl-view", this, logPanel, interactive.client, sessionId);
     }
     
     @SuppressWarnings("unchecked")
-    public boolean configure (String url) throws Exception {
+    public boolean configure (final String url) throws Exception {
         try {
         	// Require the drawbridge client to ensure http:// support is started
         	if (url.trim().startsWith("http://")) {
@@ -393,10 +395,27 @@ public class REPLView extends ViewPart implements IAdaptable {
 			});
             NamespaceBrowser.setREPLConnection(safeToolConnection);
             return true;
-        } catch (ConnectException e) {
+        } catch (final Exception e) {
             closeView();
-            MessageDialog.openInformation(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
-                    "Could not connect", String.format("Could not connect to REPL @ %s", url));
+            Exception interestingE = e;
+            if (!(e instanceof ExceptionInfo) && (e.getCause() instanceof ExceptionInfo)) {
+            	interestingE = (ExceptionInfo) e.getCause();
+            }
+            final String title = "REPL Connection error";
+            String eMessage = interestingE.getMessage();
+            if (StringUtils.isBlank(eMessage)) {
+            	if (interestingE instanceof TimeoutException) {
+            		eMessage = "Timeout while waiting for connection";
+            	}
+            }
+            final String msg = "Connection to REPL URL " + (url == null ? "<unknown>" : url) + " failed due to " + eMessage;
+            CCWPlugin.logWarning(msg, e);
+            DisplayUtil.asyncExec(new Runnable() {
+				@Override public void run() {
+					MessageDialog.openInformation(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+							title, msg);
+				}
+            });
             return false;
         }
     }

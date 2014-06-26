@@ -66,4 +66,13 @@ public class SafeConnection {
 	public Connection getUnsafeConnection() {
 		return connection;
 	}
+	
+	public static String safeNewSession(final Connection connection, final long timeoutMillis) throws InterruptedException, ExecutionException, TimeoutException {
+        Future<String> future = toolConnectionExecutor.submit(new Callable<String>() {
+			@Override public String call() throws Exception {
+				return connection.newSession(null);
+			}
+		});
+        return future.get(timeoutMillis, TimeUnit.MILLISECONDS);
+	}
 }
