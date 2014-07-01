@@ -38,6 +38,8 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.LineStyleEvent;
+import org.eclipse.swt.custom.LineStyleListener;
 import org.eclipse.swt.custom.ST;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.StyleRange;
@@ -90,7 +92,7 @@ import clojure.lang.PersistentHashMap;
 import clojure.tools.nrepl.Connection;
 import clojure.tools.nrepl.Connection.Response;
 
-public class REPLView extends ViewPart implements IAdaptable {
+public class REPLView extends ViewPart implements IAdaptable, LineStyleListener {
 
 	private final ClojureInvoker viewHelpers = ClojureInvoker.newInvoker(CCWPlugin.getDefault(), "ccw.repl.view-helpers");
 	
@@ -155,6 +157,8 @@ public class REPLView extends ViewPart implements IAdaptable {
     //     so that we can have one range that is still *highlighted* for clojure content (and not editable),
     //     and another range that is editable and has full paredit, code completion, etc.
     public StyledText logPanel;
+    // Style cache for the log panel
+    public StyleRangeCache logPanelStyleCache;
     /** record for colors used in logPanel */
     public final ClojureSourceViewer.EditorColors logPanelEditorColors = new ClojureSourceViewer.EditorColors();
     
@@ -215,6 +219,7 @@ public class REPLView extends ViewPart implements IAdaptable {
     
     private void resetFont () {
         Font font= JFaceResources.getTextFont();
+        logPanelStyleCache.setFont(font);
         logPanel.setFont(font);
         viewerWidget.setFont(font);
     }
@@ -224,11 +229,12 @@ public class REPLView extends ViewPart implements IAdaptable {
         s.setText(boostIndent.matcher(s.getText()).replaceAll("   ").replaceFirst("^\\s+", "=> "));
         int start = logPanel.getCharCount();
         try {
-            viewHelpers._("log", this, logPanel, s.getText(), inputExprLogType);
+        	// Add styles before adding text to the log panel
             for (StyleRange sr : s.getStyleRanges()) {
                 sr.start += start;
-                logPanel.setStyleRange(sr);
+                logPanelStyleCache.setStyleRange(sr);
             }
+            viewHelpers._("log", this, logPanel, s.getText(), inputExprLogType);
         } catch (Exception e) {
             // should never happen
             CCWPlugin.logError("Could not copy expression to log", e);
@@ -241,7 +247,7 @@ public class REPLView extends ViewPart implements IAdaptable {
     private void evalExpression () {
     	// We remove trailing spaces so that we do not embark extra spaces,
     	// newlines, etc. for example when evaluating after having hit the
-    	// Enter key (which automatically adds a new line
+    	// Enter key (which automatically adds a new line)
     	viewerWidget.setText(removeTrailingSpaces(viewerWidget.getText()));
         evalExpression(viewerWidget.getText(), true, false, false);
         if (viewerWidget.getText().trim().length() > 0) {
@@ -602,6 +608,11 @@ public class REPLView extends ViewPart implements IAdaptable {
 
         installEvalTopLevelSExpressionCommand();
         
+        // Install style listener for log panel
+        logPanelStyleCache = new StyleRangeCache(logPanel.getDisplay());
+        logPanelStyleCache.setFont(logPanel.getFont());
+        logPanel.addLineStyleListener(this);
+        
         /*
          * Need to hook up here to force a re-evaluation of the preferences
          * for the syntax coloring, after the token scanner has been
@@ -724,6 +735,7 @@ public class REPLView extends ViewPart implements IAdaptable {
 		
 		clearLogAction = new Action("Clear REPL log") {
 			public void run() {
+				logPanelStyleCache.reset();
 				logPanel.setText("");
 			}
 		};
@@ -1048,5 +1060,12 @@ public class REPLView extends ViewPart implements IAdaptable {
     		return super.getAdapter(adapter);
     	}
     }
+	@Override
+	public void lineGetStyle(LineStyleEvent event) {
+        if (event == null || event.lineText == null || event.lineText.length() == 0)
+            return;
+        int length = event.lineText.length();
+		event.styles = logPanelStyleCache.getStyleRanges(event.lineOffset, length, true);
+	}
     
 }
