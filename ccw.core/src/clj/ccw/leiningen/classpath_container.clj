@@ -109,7 +109,7 @@
 
 (defn- artifacts-entry
   [dep repositories]
-  (let [main (resolve-artifact dep repositories)
+  (let [main (resolve-artifact (take 2 dep) repositories)
         source (try-resolve-sources-artifact! dep repositories)]
     (if source [(-> main meta :file)
                 (-> source meta :file)]
