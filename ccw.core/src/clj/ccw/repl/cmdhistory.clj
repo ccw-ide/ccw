@@ -3,11 +3,14 @@
   (:require [ccw.edn :refer [read-vector]])
   (:import
     ccw.CCWPlugin
+    ccw.preferences.PreferenceConstants
     org.eclipse.core.runtime.jobs.Job
     org.eclipse.core.resources.IResource
     org.eclipse.core.runtime.IProgressMonitor
     org.osgi.service.prefs.BackingStoreException
-    org.eclipse.core.runtime.preferences.IEclipsePreferences))
+    org.eclipse.core.runtime.preferences.IEclipsePreferences
+    org.eclipse.jface.preference.IPreferenceStore))
+
 
 (def ^{:private true
        :doc "Map between project names and vectors of REPL expressions that have yet to
@@ -20,20 +23,28 @@
 
 (def ^{:private true}
       history-key "cmdhistory")
-(def ^{:doc "Maximum number of retained history entries."}
-      max-history 1000)
 
-(def ^{:private true
-       :doc "Queued commands are persisted to project preferences every _ milliseconds."}
-      persist-schedule-ms 30000)
+(defn ^IPreferenceStore preference-store
+  []
+  (.getCombinedPreferenceStore (CCWPlugin/getDefault)))
+
+(defn max-history
+  "Maximum number of retained history entries."
+  []
+  (.getInt (preference-store) PreferenceConstants/REPL_HISTORY_MAX_SIZE))
+
+(defn- persist-schedule-ms
+  "Queued commands are persisted to project preferences every _ milliseconds."
+  []
+  (.getInt (preference-store) PreferenceConstants/REPL_HISTORY_PERSIST_SCHEDULE))
 
 (defn- ^IEclipsePreferences get-pref-node
-  [project-name]
+  [^String project-name]
   (-?> project-name
     ccw.launching.LaunchUtils/getProject
     org.eclipse.core.resources.ProjectScope.
     (.getNode pref-node-id)
-    (doto .sync)))
+    (doto .sync))) 
 
 (defn- queue-expression
   [project-name expr]
@@ -67,7 +78,7 @@
 
 (defn- save-cmds
   [^IProgressMonitor pm queued-commands]
-  (loop [[[project-name exprs] & rqs :as queued-commands] (seq queued-commands)
+  (loop [[[^String project-name exprs] & rqs :as queued-commands] (seq queued-commands)
          retrying? false]
     (when project-name
       (let [[history] (get-history project-name)
@@ -77,7 +88,7 @@
         (try (doto node
                (.put history-key (->> (reverse exprs)
                                    (concat history)
-                                   (take-last max-history)
+                                   (take-last (max-history))
                                    ; prevent consecutive duplicate expressions
                                    (partition-by identity)
                                    (mapcat (partial take 1))
@@ -101,7 +112,7 @@
 
 (def ^{:private true} save-cmds-job
   (doto (proxy [Job] ["ccw REPL command history persistence"]
-          (run [pm]
+          (run [^IProgressMonitor pm]
             (try
               (.beginTask pm "Persisting REPL histories" IProgressMonitor/UNKNOWN)
               (save-cmds pm (dosync (let [queued (ensure queued-commands)]
@@ -110,10 +121,10 @@
               (.done pm)
               org.eclipse.core.runtime.Status/OK_STATUS
               (finally
-                (.schedule this persist-schedule-ms)))))
+                (.schedule ^Job this (persist-schedule-ms))))))
     (.setSystem true)))
 
 (defn- schedule-job
   []
-  (when (== Job/NONE (.getState save-cmds-job))
-    (.schedule save-cmds-job)))
+  (when (== Job/NONE (.getState ^Job save-cmds-job))
+    (.schedule ^Job save-cmds-job)))
