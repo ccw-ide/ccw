@@ -159,8 +159,13 @@ public class NewClojureNamespaceWizard extends BasicNewResourceWizard implements
             if (!fail) {
                 Group group = label(topLevel, kind() + " name:");
                 text = new Text(group, SWT.LEFT + SWT.BORDER);
-                text.setText(ClojureCore.getNamespaceNameFromPackageName(initialPackageName));
+                String initText = ClojureCore.getNamespaceNameFromPackageName(initialPackageName);
+                if (!StringUtils.isBlank(initText)) {
+                	initText += ".";
+                }
+                text.setText(initText);
                 addToGroup(group, text);
+                text.setSelection(initText.length());
             }
         }
         
