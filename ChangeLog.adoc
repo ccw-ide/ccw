@@ -18,6 +18,12 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 The wizard now accepts `lein new` template arguments. Simply put them after the template name.
 
+==== REPL
+
+- Adds preferences for REPL history - Contributed by Gunnar Völkel
+  - Preference for REPL history size.
+  - Preference for REPL history persistence schedule. 
+
 === Bug fixes
 
 - `New Clojure namespace` wizard now works with fully qualified namespaces, pre-fills the input text with the currently selected package name and creates missing packages on the fly. Fix Issue #468
