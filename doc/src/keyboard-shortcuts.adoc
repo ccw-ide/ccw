@@ -8,7 +8,27 @@ Laurent Petit <laurent.petit@gmail.com>
 :toc-title!:
 :toclevels: 5
 
-== Edit modes
+== Editor general shortcuts
+
+=== Go to symbol definition
+kbd:[F3] will jump to the definition of the symbol where the cursor was. +
+This is a dynamic feature, it requires an active REPL.
+
+=== Open Code Assistant / Code Completion
+By default, code assistant pops up automatically when you are typing. +
+It is however possible to deactivate it via a preference (menu:Clojure[Editor > Auto Activate code Completion]). In this case, you can use the following keyboard shortcut to invoke code assistant:
+
+[cols="1,1", options="header"]
+|===
+|Win/Linux
+|OS X
+
+|kbd:[Ctrl + Space]
+|kbd:[Ctrl + Space]
+|===
+
+
+== Editor modes
 
 === Conventions
 
@@ -25,19 +45,7 @@ Laurent Petit <laurent.petit@gmail.com>
 The commands available in the default mode do not interfere with the usage of the editor: the editor will still work as a user used to a straight text editor would assume.
 
 ==== Auto-indentation
-The editor automatically indents a new line to the right column.
-
-[cols="1,1,3", options="header"]
-|===
-|Win/Linux
-|OS X
-|Examples
-
-|kbd:[Enter]
-|kbd:[Enter]
-|
-
-|===
+kbd:[Enter]: The editor automatically indents a new line to the right column.
 
 ==== Expand Selection Up
 Expands selection to the enclosing form.
@@ -81,9 +89,357 @@ Expand selection to the right sibling (or if no sibling form on the right, to th
 |`(foo b\|ar bar)` => `(foo \|bar\| baz)` => `(foo \|bar \|baz)` => `(foo \|bar baz\|)` => `(\|foo bar baz)\|` => `\|(foo bar baz)\|`
 |===
 
+==== Restore previous Selection
+Restore selection to its state before the previous selection Up/Left/Right command.
+
+[cols="1,1,3", options="header"]
+|===
+|Win/Linux
+|OS X
+|Examples
+
+|kbd:[Shift + Alt + Down]
+|kbd:[Shift + Cmd + Down]
+|`(foo bar\| baz\|)` => kbd:[Shift + Alt + Left] => `(foo \|bar baz\|)` => kbd:[Shift + Alt + Down] => `(foo bar\| baz\|)` 
+|===
+
+==== Go to beginning of top-level form
+Place the cursor in front of the current or previous top-level form.
+
+[cols="1,1", options="header"]
+|===
+|Win/Linux
+|OS X
+
+|kbd:[Ctrl + Alt + A]
+|kbd:[Command + Alt + A]
+|===
+
+
+==== Go to end of top-level form
+Place the cursor behind the current or next top-level form.
+
+[cols="1,1", options="header"]
+|===
+|Win/Linux
+|OS X
+
+|kbd:[Ctrl + Alt + E]
+|kbd:[Command + Alt + E]
+|===
+
+==== Select top-level form
+Select the current or following top-level form
+
+
+[cols="1,1", options="header"]
+|===
+|Win/Linux
+|OS X
+
+|kbd:[Ctrl + Alt + T]
+|kbd:[Command + Alt + T]
+|===
+
+
+==== Raise over parent form
+Raise a form over its parent form (replace parent with current selection). Works with empty selections too.
+
+[cols="1,3", options="header"]
+|===
+|Win/Linux/OS X
+|Examples (repeated invocations)
+
+|kbd:[Alt + R]
+|`(spy \|(+ x y) z\|) blah` => `\|(+ x y) z\| blah` but also: `(spy (+ x y) \|z) blah` => `\|z blah`  
+|===
+
+==== Split 
+Split enclosing form or enclosing String.
+
+[cols="1,3", options="header"]
+|===
+|Win/Linux/OS X
+|Examples (repeated invocations)
+
+|kbd:[Alt + S]
+|`(aaa \|bbb)` => `(aaa)\| (bbb)` but also `"aaa\|bbb"` => `"aaa"| "bbb"`
+|===
+
+==== Join
+Join two sibling forms of same type (when cursor is between the forms)
+
+[cols="1,3", options="header"]
+|===
+|Win/Linux/OS X
+|Examples (repeated invocations)
+
+|kbd:[Alt + J]
+| `"aaa bbb"\| "ccc ddd"` => `"aaa bbb\|ccc ddd"`but also: `[3 4]\| [5 6 7]` => `[3 4| 5 6 7]` 
+|===
+
+==== Splice
+Splice a form into its parent form.
+
+[cols="1,1,3", options="header"]
+|===
+|Win/Linux
+|OS X
+|Examples (repeated invocations)
+
+|
+|kbd:[Ctrl + S]
+| `[foo (ba\|r baz) quux]` => `[foo ba\|r baz quux]` => `foo ba\|r baz quux`
+|===
+
+==== Forward Slurp
+Takes the for on the right of the current form, and moves it inside the form.
+
+[cols="1,1,2", options="header"]
+|===
+|Win/Linux
+|OS X
+|Examples (repeated invocations)
+
+|AZERTY: kbd:[Ctrl + ) + S] or kbd:[Ctrl + ) + Left] QWERTY: kbd:[Ctrl + 0 + S] or kbd:[Ctrl + 0 + Left]
+|AZERTY: kbd:[Cmd + ) + S] or kbd:[Cmd + ) + Left] QWERTY: kbd:[Cmd + 0 + S] or kbd:[Cmd + 0 + Left]
+|`(spy (+ x y) \| ) blah` => `(spy (+ x y) \|blah )`
+|===
+
+==== Backward Slurp
+Takes the form on the left of the current form, and moves it inside the form.
+
+[cols="1,1,2", options="header"]
+|===
+|Win/Linux
+|OS X
+|Examples (repeated invocations)
+
+|AZERTY: kbd:[Ctrl + ( + S] or kbd:[Ctrl + ( + Right] QWERTY: kbd:[Ctrl + 9 + S] or kbd:[Ctrl + 9 + Right]
+|AZERTY: kbd:[Cmd + ( + S] or kbd:[Cmd + ( + Right] QWERTY: kbd:[Cmd + 9 + S] or kbd:[Cmd + 9 + Right]
+|`(spy + ( x\| y)  ) blah` =>  `(spy (+ x\| y)  ) blah`
+|===
+
+==== Backward Barf
+Takes the leftmost form inside the current form, and moves it as the form preceding the current form.
+
+[cols="1,1,2", options="header"]
+|===
+|Win/Linux
+|OS X
+|Examples (repeated invocations)
+
+|AZERTY: kbd:[Ctrl + ( + B] or kbd:[Ctrl + ( + Left] QWERTY: kbd:[Ctrl + 9 + B] or kbd:[Ctrl + 9 + Left]
+|AZERTY: kbd:[Cmd + ( + B] or kbd:[Cmd + ( + Left] QWERTY: kbd:[Cmd + 9 + B] or kbd:[Cmd + 9 + Left]
+|`(spy + ( x\| y)  ) blah` => `(spy + x ( \| y)  ) blah`
+|===
+
+==== Forward Barf
+Takes the rightmiost form in side the current form, and moves it as the form following the current form.
+
+[cols="1,1,2", options="header"]
+|===
+|Win/Linux
+|OS X
+|Examples (repeated invocations)
+
+|AZERTY: kbd:[Ctrl + ) + B] or kbd:[Ctrl + ) + Right] QWERTY: kbd:[Ctrl + 0 + B] or kbd:[Ctrl + 0 + Right]
+|AZERTY: kbd:[Cmd + ) + B] or kbd:[Cmd + ) + Right] QWERTY: kbd:[Cmd + 0 + B] or kbd:[Cmd + 0 + Right]
+|`(spy + ( x\\| y)  ) blah` => `(spy + (x\|) y) blah`
+|===
+
+==== Toggle comments
+Toggle single line comments for selected lines.
+
+[cols="1,3", options="header"]
+|===
+|Win/Linux
+|OS X
+
+|kbd:[Ctrl + Shift + C] alternatively kbd:[Ctl + ;]
+|kbd:[Cmd + Shift + C] alternatively kbd:[Cmd + ;]
+|===
+
 === Strict Structural Editing Mode (paredit-style)
+In addition to the features of the Default Structural Editing mode, this mode does its best to prevent you from breaking the structure of your code.
+
+Note
++++
+You'll only feel "at home" in this mode if you know the following commands
+
+==== Reindend line
+Reindent the line properly
+
+[cols="1", options="header"]
+|===
+|Win/Linux/OS X
+
+|kbd:[Tab]
+|===
+
+==== Wrap
+Wrap the selection (or absence of selection) with parens / square brackets / curly brackets / double quotes.
+
+[cols="1,3", options="header"]
+|===
+|Win/Linux/OS X
+|Examples (repeated invocations)
+
+|kbd:[(]
+|`\|foo\|` => kbd:[(] => `(\|foo)`
+
+|kbd:[{]
+|`\|foo\|` => kbd:[{] => `{\|foo}`
+
+|kbd:[[]
+|`\|foo\|` => kbd:[[] => `[\|foo]`
+
+|kbd:["]
+|`\|foo\|` => kbd:["] => `"\|foo"`
+|===
+
+==== Jump next
+Move the cursor after the nearest paren / square bracket / curly bracket.
+
+[cols="1,3", options="header"]
+|===
+|Win/Linux/OS X
+|Examples (repeated invocations)
+
+|kbd:[)]
+|`(foo ([bar b\|az]))` => `(foo ([bar baz])\|)`
+
+|kbd:[}]
+| `{:a [:b (inc \|c)] :e :f}`=> `{:a [:b (inc c)] :e :f}\|`
+
+|kbd:[\]]
+| `(let [a (inc \|b) c d] blah)` => `(let [a (inc b) c d]\| blah)`
+|===
+
+==== Create empty String literal
+Inside code without selection.
+
+[cols="1,3", options="header"]
+|===
+|Win/Linux/OS X
+|Examples (repeated invocations)
+
+|kbd:["]
+|`foo \|bar` => `foo "\|" bar`
+|===
+
+==== String literal auto-escape
+When already inside a String literal, typing kbd:["] automatically escapes it with a backslash.
+
+[cols="1", options="header"]
+|===
+|Example
+
+|`foo "bar \|baz"` =>    kbd:[\"] => `foo "bar \"\|baz"`
+|===
+
+Note that if the cursor is at the end of the String literal, just before the closing double quote, typing kbd:["] will make the cursor jump outside the String literal. +
+You have thus to manually escape it in at this special cursor position.
+
+==== Delete behaviour
+kbd:[Delete] suppresses chars but jumps over opening and closing parens/square brackets/curly brackets if they are non-empty.+
+will suppress the whole parens/brackets at once if empty and (currently) right before the closing part.
+
+[cols="1", options="header"]
+|===
+|Example (repeated invocations)
+
+|`foo\| (bar) baz` => `foo\|(bar) baz` => `foo(\|bar) baz` => `foo(\|ar) baz` => `foo(\|r) baz` => `foo(\|) baz` => `foo\| baz`
+|===
+
+==== Baskpace behaviour
+kbd:[Backspace] suppresses chars but jumps over closing and opening parens/square brackets/curly brackets if they are non-empty.+
+Will suppress the whole parens/brackets at once if empty and (currently) right after the opening part.
+
+[cols="1", options="header"]
+|===
+|Example (repeated invocations)
+
+|`foo (bar)\| baz` => `foo (bar\|) baz` => `foo (ba\|) baz` => `foo (b\|) baz` => `foo (\|) baz` => `foo \| baz`
+|===
+
 
 == Interaction with the REPL
 
-... TODO ... see here for now: https://code.google.com/p/counterclockwise/wiki/EditorKeyBindingsFeatures
+REPL stands for "Read Eval Print Loop" an is the clojure/lisp equivalent of so called "interactive shells" of dynamic languages.
+
+==== Launch new REPL
+Launch a new REPL and automatically load the edited file into it.
+
+[cols="1,1", options="header"]
+|===
+|Win/Linux
+|OS X
+
+|kbd:[Shift + Alt + X + C]
+|kbd:[Shift + Alt + X + C]
+|===
+
+==== Launch new REPL in debug mode
+Launch a new REPL in debug mode and automatically load the edited file into it.
+
+[cols="1,1", options="header"]
+|===
+|Win/Linux
+|OS X
+
+|kbd:[Shift + Alt + D + C]
+|kbd:[Shift + Alt + D + C]
+|===
+
+==== Evaluate content
+Works from any editor or from the REPL, as long as there is an already open REPL.
+
+[cols="1,1", options="header"]
+|===
+|Win/Linux
+|OS X
+
+|kbd:[Ctrl + Enter]
+|kbd:[Cmd + Enter]
+|===
+
+==== Load editor content in active REPL
+Loads the editors' content into the active REPL, starting a REPL if no active REPL found.
+
+[cols="1,1", options="header"]
+|===
+|Win/Linux
+|OS X
+
+|kbd:[Ctrl + Alt + S]
+|kbd:[Cmd + Alt + S]
+|===
+
+==== Switch to Editor namespace
+Switches the current namespace of the active REPL to that of the current editor.
+
+[cols="1,1", options="header"]
+|===
+|Win/Linux
+|OS X
+
+|kbd:[Ctrl + Alt + N]
+|kbd:[Cmd + Alt + N]
+|===
+
+== Leiningen launcher Shortcuts
+
+=== Leiningen command line
+For most Leiningen projects, using the Eclipse default Clojure launcher will do what you expect, e.g. launching a new VM with an headless nREPL server, and automatically connect a `REPL View` to it.
+
+Nevertheless, should you need to invoke arbitrary Leiningen commands, just type kbd:[Alt + L + L].
+
+=== Reset the Project Classpath computed by Eclipse
+kbd:[Alt + L + R] resets the project classpath, using Leiningen to compute the classpath.
+
+=== Update the Project Dependencies
+kbd:[Alt + L + U] updates the project dependencies in the classpath, using Leiningen.
+
+
 

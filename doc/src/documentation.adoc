@@ -244,11 +244,6 @@ kbd:[Alt+L R] resets the project classpath, using Leiningen to compute the class
 
 kbd:[Alt+L U] is a shortcut for updating the project dependencies in the classpath, using Leiningen
 
-=== Leiningen general purpose prompt
-
-kbd:[Alt+L G]  is a shortcut for opening a popup allowing you to invoke any leiningen command. More detail in the <<lein-generic-launcher>> section.
-
-
 
 = Clojure Support
 

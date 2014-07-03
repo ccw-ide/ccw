@@ -19,6 +19,8 @@ You have Eclipse and want to install Counterclockwise as an *Eclipse plugin*, Fo
 
 *What's new?* Follow link:ChangeLog.html[ChangeLog of Counterclockwise Versions] to know everything.
 
+*Keyboard Shortcut Cheat Sheet* link:keyboard-shortcuts.html[Keyboard Shorcuts]
+
 == Developer Documentation
 
 *Want to contribute to the development of Counterclockwise?* Start here for link:CONTRIBUTING.html[Installing an Environment to develop Counterclockwise itself].
