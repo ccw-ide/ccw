@@ -10,7 +10,7 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 == Changes between Counterclockwise 0.25.2 and 0.26.0
 
-`0.26.0` released on May xx, 2014
+`0.26.0` released on July 10, 2014
 
 === Enhancements
 
