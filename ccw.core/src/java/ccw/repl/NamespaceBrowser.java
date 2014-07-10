@@ -331,47 +331,41 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 	}
 
 	@SuppressWarnings("unchecked")
-    private Map<String, List<String>> getRemoteNsTree (SafeConnection repl) {
-		try {
-		    Response res = repl.send(10000, "op", "eval", "code", "(ccw.debug.serverrepl/namespaces-info)");
-            List<Object> values = res.values();
-            if (values.isEmpty()) {
-            	return null;
-            } else {
-            	return (Map<String, List<String>>)values.get(0);
-            }
-        } catch (Exception e) {
-            System.out.println(e);
-            return null;
+    private Map<String, List<String>> getRemoteNsTree (SafeConnection repl) throws Exception {
+	    Response res = repl.send(10000, "op", "eval", "code", "(ccw.debug.serverrepl/namespaces-info)");
+        List<Object> values = res.values();
+        if (values.isEmpty()) {
+        	return null;
+        } else {
+        	return (Map<String, List<String>>)values.get(0);
         }
 	}
 
 	public void reset (final SafeConnection repl) {
+		if (repl == null) {
+			asyncResetInput(null);
+			return;
+		}
 		Job job = new Job("Namespace browser tree refresh") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				if (treeViewer == null) {
 					return Status.CANCEL_STATUS;
 				}
-
-				Object oldInput = treeViewer.getInput();
-				ensureNSUtilsIntalled(repl);
-				final Object newInput = getRemoteNsTree(repl);
-				if (oldInput != null && oldInput.equals(newInput)) {
-					return Status.CANCEL_STATUS;
+				try {
+					Object oldInput = treeViewer.getInput();
+					final Object newInput = getRemoteNsTree(repl);
+					if (oldInput != null && oldInput.equals(newInput)) {
+						return Status.CANCEL_STATUS;
+					} else {
+						asyncResetInput(null);
+						return Status.OK_STATUS;
+					}
+				} catch (Exception e) {
+					repl.connectionLost();
+					asyncResetInput(null);
+					return Status.OK_STATUS;
 				}
-
-				if (Display.getCurrent() == null) {
-					final Display display = PlatformUI.getWorkbench().getDisplay();
-					display.asyncExec(new Runnable() {
-						public void run() {
-							inUIResetInput(newInput);
-						}
-					});
-				} else {
-					inUIResetInput(newInput);
-				}
-				return Status.OK_STATUS;
 			}
 			@Override
 			public boolean belongsTo(Object family) {
@@ -415,14 +409,18 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 		job.schedule(500);
 	}
 
-	private void inUIResetInput(Object newInput) {
-		ISelection sel = treeViewer.getSelection();
-		TreePath[] expandedTreePaths = treeViewer.getExpandedTreePaths();
+	private void asyncResetInput(final Object newInput) {
+		DisplayUtil.asyncExec(new Runnable() {
+			@Override public void run() {
+				ISelection sel = treeViewer.getSelection();
+				TreePath[] expandedTreePaths = treeViewer.getExpandedTreePaths();
 
-		treeViewer.setInput(newInput);
+				treeViewer.setInput(newInput);
 
-		treeViewer.setExpandedTreePaths(expandedTreePaths);
-		treeViewer.setSelection(sel);
+				treeViewer.setExpandedTreePaths(expandedTreePaths);
+				treeViewer.setSelection(sel);
+			}
+		});
 	}
 
 	public void addSelectionChangedListener(ISelectionChangedListener listener) {
@@ -489,11 +487,11 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 	}
 
 	public static void setREPLConnection (final SafeConnection repl) {
-	    if (repl != null)
-	        DisplayUtil.asyncExec(new Runnable() {
-	            public void run() {
-	                inUIThreadSetREPLConnection(repl);
-	            }});
+        DisplayUtil.asyncExec(new Runnable() {
+            public void run() {
+                inUIThreadSetREPLConnection(repl);
+            }
+        });
 	}
 	
 	private static void inUIThreadSetREPLConnection (SafeConnection repl) {
@@ -521,24 +519,4 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 		co.reset(repl);
 	}
 
-    private static void ensureNSUtilsIntalled (SafeConnection repl) {
-        
-        // from the ConsolePageParticipant
-        // TODO this *looks* like a no-op, but the comments seem to imply that a "full load" of the project's clojure
-        // files should happen in conjunction with initializing the namespace browser; seems like a very unfriendly notion?
-        /*org.eclipse.debug.ui.console.IConsole processConsole = (org.eclipse.debug.ui.console.IConsole) console;
-        // TODO add safeguards: the launch configuration must enable a REPL, and explicit flag (default value from global params) to allow this behaviour
-        // and explicit flag (true by default) to determine the default value for the explicit flag :-)
-        try {
-            IProject project = LaunchUtils.getProject(processConsole.getProcess().getLaunch().getLaunchConfiguration());
-            // Only block the full load of the project's content in the started JVM if it's started with one or more files on the command line
-            if (LaunchUtils.getFilesToLaunchList(processConsole.getProcess().getLaunch().getLaunchConfiguration()).size() == 0) {
-                project.touch(null);
-            }
-        } catch (CoreException e) {
-            CCWPlugin.logError("Unable to auto-compile a project after having launched a configuration "
-                    + "because the project cannot be retrieved!", e);
-        }*/
-    }
-	
 }

@@ -23,6 +23,9 @@ The wizard now accepts `lein new` template arguments. Simply put them after the 
 - Adds preferences for REPL history - Contributed by Gunnar Völkel
   - Preference for REPL history size.
   - Preference for REPL history persistence schedule. 
+- zombie REPLs (when connection is lost)
+  - are automatically disabled (buttons and text grayed, input area non editable)
+  - and won't be used for sending code from editors
 
 === Bug fixes
 

@@ -1,9 +1,8 @@
 package ccw.repl;
 
-import static ccw.CCWPlugin.getTracer;
-
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.SocketException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -80,6 +79,7 @@ import ccw.preferences.PreferenceConstants;
 import ccw.util.ClojureInvoker;
 import ccw.util.DisplayUtil;
 import ccw.util.StringUtils;
+import ccw.util.StyledTextUtil;
 import ccw.util.TextViewerSupport;
 import ccw.util.osgi.ClojureOSGi;
 import clojure.lang.ExceptionInfo;
@@ -90,7 +90,9 @@ import clojure.lang.PersistentHashMap;
 import clojure.tools.nrepl.Connection;
 import clojure.tools.nrepl.Connection.Response;
 
-public class REPLView extends ViewPart implements IAdaptable {
+public class REPLView extends ViewPart implements IAdaptable, SafeConnection.IConnectionLostListener {
+
+	private static final double DISCONNECTED_REPL_FG_TRANSPARENCY_PCT = 0.5;
 
 	private final ClojureInvoker viewHelpers = ClojureInvoker.newInvoker(CCWPlugin.getDefault(), "ccw.repl.view-helpers");
 	
@@ -192,6 +194,69 @@ public class REPLView extends ViewPart implements IAdaptable {
     	return this.historyActionFn;
     }
     
+    private boolean isConnectionLost;
+    
+    private boolean inConnectionLost;
+    @Override
+    public void connectionLost() {
+    	if (inConnectionLost) {
+    		// Prevent infinite loops
+    		return;
+    	}
+    	
+    	inConnectionLost = true;
+    	try {
+	    	if (launch != null && !launch.isTerminated()) {
+	    		// Try to reconnect
+	    		try {
+					reconnect();
+				} catch (Exception e) {
+					e.printStackTrace();
+					markAsLost();
+				}
+	    	} else {
+	    		markAsLost();
+	    	}
+    	} finally {
+    		inConnectionLost = false;
+    	}
+    }
+    
+    public boolean isConnectionLost() {
+    	return isConnectionLost;
+    }
+    
+    private void markAsLost() {
+    	isConnectionLost = true;
+    	try {
+    		closeConnections();
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
+    	
+    	// visual
+    	DisplayUtil.asyncExec(new Runnable() {
+			@Override public void run() {
+				setPartName("REPL disconnected");
+			    autoRepeatLastAction.setEnabled(false);
+			    printErrorAction.setEnabled(false);
+			    interruptAction.setEnabled(false);
+			    reconnectAction.setEnabled(false);
+			    clearLogAction.setEnabled(false);
+			    newSessionAction.setEnabled(false);
+			    showConsoleAction.setEnabled(false);
+				activeREPL.compareAndSet(REPLView.this, null);
+				if (viewerWidget != null && !viewerWidget.isDisposed()) {
+					viewerWidget.setEditable(false);
+					StyledTextUtil.lightenStyledTextColors(viewerWidget, 0.5);
+				}
+				if (logPanel != null && !logPanel.isDisposed()) {
+					StyledTextUtil.lightenStyledTextColors(logPanel, DISCONNECTED_REPL_FG_TRANSPARENCY_PCT);
+				}
+			}
+		});
+    }
+    
     public SafeConnection getSafeToolingConnection() {
     	return safeToolConnection;
     }
@@ -280,6 +345,9 @@ public class REPLView extends ViewPart implements IAdaptable {
                 }
             }
         } catch (Exception e) {
+        	if (e instanceof SocketException) {
+        		connectionLost();
+        	}
             CCWPlugin.logError(e);
         }
     }
@@ -384,7 +452,7 @@ public class REPLView extends ViewPart implements IAdaptable {
         	
             // TODO - don't need multiple connections anymore, just separate sessions will do.
             interactive = new Connection(url);
-            safeToolConnection = new SafeConnection(new Connection(url));
+            safeToolConnection = new SafeConnection(new Connection(url), this);
             setCurrentNamespace(currentNamespace);
             prepareView();
             final Object clojureVersion = safeToolConnection.send(15000, "op", "eval", "code", "(clojure-version)").values().get(0);
@@ -1032,9 +1100,12 @@ public class REPLView extends ViewPart implements IAdaptable {
 
     private final class NamespaceRefreshFocusListener implements FocusListener {
         public void focusGained(FocusEvent e) {
-        	getTracer().trace(TraceOptions.REPL_FOCUS, "focus gained, marking repl as active");
-            activeREPL.set(REPLView.this);
-            NamespaceBrowser.setREPLConnection(safeToolConnection);
+        	if (isConnectionLost) {
+        		NamespaceBrowser.setREPLConnection(null);
+        	} else {
+        		activeREPL.set(REPLView.this);
+        		NamespaceBrowser.setREPLConnection(safeToolConnection);
+        	}
         }
 
         public void focusLost(FocusEvent e) {}

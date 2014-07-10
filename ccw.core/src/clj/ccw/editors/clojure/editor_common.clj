@@ -47,6 +47,8 @@
       repl/response-values)
     (catch Exception e
       (ccw.CCWPlugin/logError (str "exception while sending command " command " to connection " (.getUnsafeConnection safe-connection)) e)
+      (when (instance? java.net.SocketException e)
+        (.connectionLost safe-connection))
       nil)))
 
 (defn send-message 

@@ -23,23 +23,35 @@ public class SafeConnection {
 	private static final ExecutorService toolConnectionExecutor = Executors.newCachedThreadPool();
 
 	private final Connection connection;
+	private final IConnectionLostListener connListener;
 	
-	public SafeConnection(Connection connection) {
+	public interface IConnectionLostListener {
+		void connectionLost();
+	}
+	
+	public SafeConnection(Connection connection, IConnectionLostListener connListener) {
 		this.connection = connection;
+		this.connListener = connListener;
 	}
 	
     public <T> T withConnection(final IConnectionClient client, long timeoutMillis)
-    		throws InterruptedException, java.util.concurrent.ExecutionException, TimeoutException {
+    		throws Exception {
         Future<T> future = toolConnectionExecutor.submit(new Callable<T>() {
 			@Override public T call() throws Exception {
 				return client.withConnection(connection);
 			}
 		});
-        return future.get(timeoutMillis, TimeUnit.MILLISECONDS);
+        try {
+        	T t = future.get(timeoutMillis, TimeUnit.MILLISECONDS);
+        	return t;
+        } catch (Exception e) {
+       		connListener.connectionLost();
+        	throw e;
+        }
     }
     
     public Connection.Response send(long timeoutMillis, final String... args) 
-    		throws InterruptedException, ExecutionException, TimeoutException {
+    		throws Exception {
     	return withConnection(new IConnectionClient() {
 			@Override public Connection.Response withConnection(Connection c) {
 				return c.send(args);
@@ -65,6 +77,10 @@ public class SafeConnection {
 	 */
 	public Connection getUnsafeConnection() {
 		return connection;
+	}
+	
+	public void connectionLost() {
+		connListener.connectionLost();
 	}
 	
 	public static String safeNewSession(final Connection connection, final long timeoutMillis) throws InterruptedException, ExecutionException, TimeoutException {
