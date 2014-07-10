@@ -4,7 +4,7 @@
   <parent>
     <groupId>ccw</groupId>
     <artifactId>parent</artifactId>
-    <version>0.26.0.STABLE001</version>
+    <version>0.26.1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <groupId>ccw</groupId>
