@@ -453,7 +453,7 @@
     (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
       (let [[l r] (normalized-selection rloc offset length)
             parent (cond
-                     (= :string (loc-tag l)) l ; stay at the same level, and let the code take the correct open/close puncts, e.g. \" \"
+                     (and (= :string (loc-tag l)) (> offset (start-offset l))) l ; stay at the same level, and let the code take the correct open/close puncts, e.g. \" \"
                      :else (if-let [nl (z/up (if (start-punct? l) (parse-node l) (parse-leave l)))] nl (parse-leave l)))
             open-punct (*tag-opening-brackets* (loc-tag parent))
             close-punct ^String (*tag-closing-brackets* (loc-tag parent))]

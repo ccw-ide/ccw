@@ -717,6 +717,8 @@
                 "(foo|)" "(foo)|()"
                 "({|})" "({}|{})"
                 "(defn hello ;comment\n |[world])" "(defn hello) ;comment\n |([world])"
+                "(|\"\")" "()|(\"\")"
+                "(\"\"|)" "(\"\")|()"
                 }]
      ["M-J"    :paredit-join-sexps
                {"(hello)| (world)" "(hello| world)",
