@@ -719,6 +719,11 @@
                 "(defn hello ;comment\n |[world])" "(defn hello) ;comment\n |([world])"
                 "(|\"\")" "()|(\"\")"
                 "(\"\"|)" "(\"\")|()"
+                "(;bon|jour\n)" "(;bon|\n ;jour\n)"
+                "(; bon|jour\n)" "(; bon|\n ; jour\n)"
+                "(;; bon|jour\n)" "(;; bon|\n ;; jour\n)"
+                "(|;bonjour\n)" "()|;bonjour\n()" ; looks a bit strange but let's try!
+                "(;bonjour|\n)" "(;bonjour|\n ;\n)"
                 }]
      ["M-J"    :paredit-join-sexps
                {"(hello)| (world)" "(hello| world)",

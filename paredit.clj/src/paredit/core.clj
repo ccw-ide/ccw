@@ -22,7 +22,7 @@
 
 (defmacro with-memoized [func-names & body]
   `(binding [~@(mapcat 
-                 (fn [func-name] [func-name `(memoize ~func-name)]) 
+                 (fn [func-name] [func-name `(memoize ~func-name)])
                  func-names)]
      ~@body))
 
@@ -453,23 +453,29 @@
     (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
       (let [[l r] (normalized-selection rloc offset length)
             parent (cond
-                     (and (= :string (loc-tag l)) (> offset (start-offset l))) l ; stay at the same level, and let the code take the correct open/close puncts, e.g. \" \"
+                     (and (#{:comment :string} (loc-tag l)) (> offset (start-offset l))) l ; stay at the same level, and let the code take the correct open/close puncts, e.g. \" \"
+                     (and (= :whitespace (loc-tag l)) (= offset (start-offset l)) (= :comment (loc-tag (z/left l)))) (z/left l)
                      :else (if-let [nl (z/up (if (start-punct? l) (parse-node l) (parse-leave l)))] nl (parse-leave l)))
-            open-punct (*tag-opening-brackets* (loc-tag parent))
-            close-punct ^String (*tag-closing-brackets* (loc-tag parent))]
+            [open-punct ^String close-punct] (let [tag (loc-tag parent)]
+                                               (case tag
+                                                 :comment [(str "\n" (str/repeat " " (loc-col parent)) ";"
+                                                             (->> parent z/node :content second
+                                                               (re-find #"^;* *"))) ""]
+                                                 ((juxt *tag-opening-brackets* *tag-closing-brackets*) tag)))]
         (if-not close-punct
           t
           (let [[replace-offset replace-length]
-                (if (and
-                      (not= :whitespace (loc-tag l))
-                      (or
-                        (= :string (loc-tag l))
-                        (not (and
-                               (sel-match-normalized? offset length [l r])
-                               (= offset (start-offset (parse-node l)))))))
+                (if (or (= :comment (loc-tag parent))
+                      (and
+                        (not= :whitespace (loc-tag l))
+                        (or
+                          (= :string (loc-tag l))
+                          (not (and
+                                 (sel-match-normalized? offset length [l r])
+                                 (= offset (start-offset (parse-node l))))))))
                   [offset 0]
                   (let [start (or (some #(when-not (#{:whitespace :comment} (loc-tag %)) (end-offset %)) (previous-leaves l)) offset)
-                        end (or (some #(when-not (#{:whitespace :comment} (loc-tag %)) (start-offset %)) (next-leaves l)) 0)]
+                        end (or (some #(when-not (#{:whitespace :comment} (loc-tag %)) (start-offset %)) (next-leaves l)) offset)]
                     [start (- end start)]))
                 replace-text (str close-punct (subs text replace-offset (+ replace-offset replace-length)) open-punct)
                 new-offset (+ offset (.length close-punct))]
