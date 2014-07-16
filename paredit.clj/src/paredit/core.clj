@@ -514,25 +514,20 @@
 
 (defn wrap-with-balanced
   [parsed [^String o c] {:keys [^String text offset length] :as t}]
-  (let [block (constantly t)
-        bypass #(-> t 
-                  (update-in [:text] t/str-replace offset length o)
-                  (update-in [:offset] + (.length o))
-                  (assoc-in [:length] 0)
-                  (update-in [:modifs] conj {:text o :offset offset :length length}))]
-    (if-let [rloc (-?> parsed (parsed-root-loc true))]
-      (let [[left-leave right-leave] (normalized-selection rloc offset length)]
-        (if-not (sel-match-normalized? offset length [left-leave right-leave]) 
-          (if (or (in-code? (loc-containing-offset rloc offset))
-                  (in-code? (loc-containing-offset rloc (+ offset length))))
-            (block)
-            (bypass))
-          (let [text-to-wrap (.substring text (start-offset left-leave) (or (-?> right-leave end-offset) (.length text))) 
-                new-text (str o text-to-wrap c)
-                t (update-in t [:text] t/str-replace (start-offset left-leave) (.length text-to-wrap) new-text)
-                t (assoc-in t [:offset] (inc (start-offset left-leave)))]
-            (update-in t [:modifs] conj {:text new-text :offset (start-offset left-leave) :length (.length text-to-wrap)})))) 
-      (block))))
+  (if-let [rloc (-?> parsed (parsed-root-loc true))]
+    (let [[left-leave right-leave] (normalized-selection rloc offset length)]
+      (if-not (sel-match-normalized? offset length [left-leave right-leave])
+        (if (or (in-code? (loc-containing-offset rloc offset))
+                (in-code? (loc-containing-offset rloc (+ offset length))))
+          nil
+          {:selection [offset offset]
+           :edits [{:text o :offset offset :length 0}]})
+        (let [start (start-offset left-leave)
+              end (or (-?> right-leave end-offset) (.length text))]
+          {:selection [start end]
+           :edits [{:text o :offset start :length 0}
+                   {:text c :offset end :length 0}]})))
+    nil))
 
 (defmethod paredit
   :paredit-wrap-quote
