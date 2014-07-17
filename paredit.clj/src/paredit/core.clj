@@ -226,7 +226,7 @@
               t 
               (conj (into *real-spaces* *open-brackets*) "#")
               (into *extended-spaces* *close-brackets*))
-            (wrap-with-balanced parse-tree [\" \"] t))
+            (wrap-with-balanced parse-tree ["\"" "\""] t))
         (not (#{:string, :string-body
                 :regex :regex-body} (loc-tag offset-loc)))
           (-> t (t/insert (str \")))
