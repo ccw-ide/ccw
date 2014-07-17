@@ -23,7 +23,7 @@
 (defn compare-edits
   "Compare disjoint edits. Edits being assumed disjoint or equal, only their midpoints are compared."
   [a b]
-  (- (+ (:offset a) (:length a)) (+ (:offset b) (:length b))))
+  (- (+ (* 2 (:offset a)) (:length a)) (+ (* 2 (:offset b)) (:length b))))
 
 (defn update-selection [[offset end-offset] edits]
   ;; only insertion edits (whose length is zero) can broaden a selection
