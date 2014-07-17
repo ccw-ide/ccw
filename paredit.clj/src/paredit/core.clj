@@ -546,8 +546,8 @@
         (if (or (in-code? (loc-containing-offset rloc offset))
                 (in-code? (loc-containing-offset rloc (+ offset length))))
           nil
-          {:selection [offset offset]
-           :edits [{:text o :offset offset :length 0}]})
+          {:selection [(+ offset length) (+ offset length)]
+           :edits [{:text o :offset offset :length length}]})
         (let [start (start-offset left-leave)
               end (or (-?> right-leave end-offset) (.length text))]
           {:selection [start end]
