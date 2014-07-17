@@ -2901,7 +2901,6 @@
                value="ccw.leiningen.handlers/update-dependencies">
          </parameter>
       </class>
-      <!--
       <activeWhen>
          <or>
             <iterate
@@ -2915,9 +2914,18 @@
                         </test>
                </adapt>
             </iterate>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
          </or>
       </activeWhen>
-      -->
    </handler>
    <handler
          commandId="ccw.leiningen.command.add-leiningen-nature">
@@ -3002,38 +3010,31 @@
                value="ccw.leiningen.handlers/reset-project-build-path">
          </parameter>
       </class>
-      <!--
       <activeWhen>
          <or>
             <iterate
                   ifEmpty="false"
                   operator="and">
                <adapt
-                     type="org.eclipse.core.resources.IProject">
-                <test
-                      property="org.eclipse.core.resources.projectNature"
-                      value="ccw.leiningen.nature">
-                </test>
+                     type="org.eclipse.core.resources.IResource">
+                  <test
+                              property="org.eclipse.core.resources.projectNature"
+                              value="ccw.leiningen.nature">
+                        </test>
                </adapt>
             </iterate>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
          </or>
       </activeWhen>
-      <enabledWhen>
-         <or>
-            <iterate
-                  ifEmpty="false"
-                  operator="and">
-               <adapt
-                     type="org.eclipse.core.resources.IProject">
-                <test
-                      property="org.eclipse.core.resources.projectNature"
-                      value="ccw.leiningen.nature">
-                </test>
-               </adapt>
-            </iterate>
-         </or>
-      </enabledWhen>
-      -->
    </handler>
    <handler
          commandId="ccw.leiningen.command.generic-launch">
@@ -3048,6 +3049,31 @@
                value="ccw.leiningen.handlers/generic-launch">
          </parameter>
       </class>
+      <activeWhen>
+         <or>
+            <iterate
+                  ifEmpty="false"
+                  operator="and">
+               <adapt
+                     type="org.eclipse.core.resources.IResource">
+                  <test
+                              property="org.eclipse.core.resources.projectNature"
+                              value="ccw.leiningen.nature">
+                        </test>
+               </adapt>
+            </iterate>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+         </or>
+      </activeWhen>
    </handler>
    <handler
          commandId="ccw.leiningen.command.launch-headless-repl">
@@ -3062,6 +3088,31 @@
                value="ccw.leiningen.handlers/launch-headless-repl">
          </parameter>
       </class>
+      <activeWhen>
+         <or>
+            <iterate
+                  ifEmpty="false"
+                  operator="and">
+               <adapt
+                     type="org.eclipse.core.resources.IResource">
+                  <test
+                              property="org.eclipse.core.resources.projectNature"
+                              value="ccw.leiningen.nature">
+                        </test>
+               </adapt>
+            </iterate>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+         </or>
+      </activeWhen>
    </handler>
 </extension>
 <extension
