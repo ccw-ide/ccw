@@ -68,8 +68,8 @@
 
 (defn- library-entry
   "Wrapper for the ccw.leiningen.util/library-entry function"
-  [{:keys [path native-path]}]
-  (let [params {:path path}
+  [{:keys [path native-path source-attachment-path]}]
+  (let [params {:path path :source-attachment-path source-attachment-path}
         params (if native-path
                      (update-in params [:extra-attributes] 
                                 assoc jdt/native-library (jdt/native-library-path native-path))
@@ -82,6 +82,45 @@
   [project-dependencies]
   (let [entry-list (map library-entry project-dependencies)]
     (make-leiningen-classpath-container entry-list)))
+
+;; copied from lein-ubersource
+(defn- find-transitive-deps
+  [deps repositories]
+  (->> (aether/resolve-dependencies
+        :coordinates deps
+        :repositories repositories)
+      keys
+      set))
+
+;; copied from lein-ubersource
+(defn- resolve-artifact
+  [dep repositories]
+  (->> (find-transitive-deps [dep] repositories)
+      (filter #(= % dep))
+      first))
+
+;; copied from lein-ubersource
+(defn- try-resolve-sources-artifact!
+  [dep repositories]
+  (try
+    (resolve-artifact (concat dep [:classifier "sources"]) repositories)
+    (catch DependencyResolutionException ex
+      nil)))
+
+(defn- artifacts-entry
+  [dep repositories]
+  (let [main (resolve-artifact
+               (take 2 dep) ; take only id and version, not optional exclusion sections
+               repositories)
+        source (try-resolve-sources-artifact! dep repositories)]
+    (if source [(-> main meta :file)
+                (-> source meta :file)]
+               nil)))
+
+(defn get-source-map
+  [{:keys [repositories dependencies] :as project} & args]
+  (let [dep (find-transitive-deps dependencies repositories)]
+    (into {} (keep #(artifacts-entry % repositories) dep))))
 
 (defn resolve-dependencies
   "ADAPTED FROM LEININGEN-CORE resolve-dependencies.
@@ -108,22 +147,27 @@
                  (map #(.getAbsolutePath %) ~'dependencies))))]
     (map #(File. ^String %) deps-paths)))
 
-(defn ser-dep [path native-path]
-  {:path (.getAbsolutePath (io/as-file path))
-   :native-path (.getAbsolutePath (io/as-file native-path))})
+(defn ser-dep [path native-path source-attachment-path]
+  (let [s {:path (.getAbsolutePath (io/as-file path))
+           :native-path (.getAbsolutePath (io/as-file native-path))}]
+    (if source-attachment-path
+      (assoc s :source-attachment-path (.getAbsolutePath (io/as-file source-attachment-path)))
+      s)))
 
 (defn get-project-dependencies
   "Return the dependencies sorted alphabetically via their file name.
    Throws Aether exceptions if a problem occured"
   [project-name lein-project]
   (let [dependencies (resolve-dependencies project-name :dependencies lein-project)
-        default-native-platform-path (u/lein-native-platform-path lein-project)]
+        default-native-platform-path (u/lein-native-platform-path lein-project)
+        srcmap (get-source-map lein-project)]
     ;(println "default-native-platform-path:" default-native-platform-path)
     (->> dependencies
       (filter #(re-find #"\.(jar|zip)$" (.getName ^File %)))
       (sort-by #(.getName ^File %))
       (map #(ser-dep %
                      default-native-platform-path
+                     (get srcmap %)
                      #_(or #_(u/lein-native-dependency-path lein-project %) ;; TODO make this work :-(
                          default-native-platform-path))))))
 
@@ -174,7 +218,8 @@
 (defn deser-dep [dep-map]
   (-> dep-map 
     (update-in [:path] #(File. ^String %))
-    (update-in [:native-path] #(File. ^String %))))
+    (update-in [:native-path] #(File. ^String %))
+    (update-in [:source-attachment-path] #(when % (File. ^String %)))))
 
 (defn load-project-dependencies
   "Retrieve from disk (from the Plugin state directory), the deps for the project.

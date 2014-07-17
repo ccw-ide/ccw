@@ -8,9 +8,23 @@ Laurent Petit <laurent dot petit at gmail dot com>
 :toc-title!:
 :toclevels: 0
 
+== Changes between Counterclockwise 0.26.0 and 0.27.0
+
+`0.27.0` released on July 24, 2014
+
+=== Enhancements
+
+==== Dependencies source jars downloaded
+
+If source jars for dependencies are available on the repositories, they are downloaded and set up on the `Leiningen Dependencies` classpath container. (Thank you Zhang Yaokun - aka paxnil on Github - for the pull request!)
+
+=== Bug fixes
+
+- Don't activate Leiningen commands in wrong places in the IDE (e.g. in unrelated contextual menus). Fix Issue #642
+
 == Changes between Counterclockwise 0.25.2 and 0.26.0
 
-`0.26.0` released on May xx, 2014
+`0.26.0` released on July 10, 2014
 
 === Enhancements
 
