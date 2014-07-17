@@ -46,10 +46,12 @@
             buffer (edit-buffer nil 0 -1 text)
             parse-tree (buffer-parse-tree buffer :for-test)]
         (is (= expected
-               (u/text->spec (paredit (second command) 
-                                           {:parse-tree parse-tree, 
-                                            :buffer buffer} 
-                                           t))))))))
+               (u/text+command->spec
+                 t
+                 (paredit (second command)
+                   {:parse-tree parse-tree,
+                    :buffer buffer}
+                   t))))))))
 
 (deftest paredit-tests
   (doseq [group *paredit-commands*]

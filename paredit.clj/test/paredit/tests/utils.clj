@@ -2,6 +2,7 @@
   (:require [paredit.parser :refer [parse]])
   (:require [paredit.loc-utils :as l])
   (:require [paredit.text-utils :as t])
+  (:require [paredit.core :as paredit])
   (:require [clojure.string :as s])
   (:require [clojure.zip :as z])
   (:require [clojure.pprint :refer (pprint)]))
@@ -62,3 +63,21 @@
   (let [spec (t/str-insert (:text text) (:offset text) "|")
         spec (if (zero? (:length text)) spec (t/str-insert spec (+ 1 (:offset text) (:length text)) "|"))]
     spec))
+
+(defn apply-edits [s edits]
+  (reduce (fn [s {:keys [text offset length]}]
+            (t/str-replace s offset length text))
+    s (sort (comp - paredit/compare-edits) edits)))
+
+(defn text+command->spec [{:keys [text] :as t} command]
+  (cond
+    (:selection command)
+    (let [{:keys [selection edits]} command
+          text (apply-edits text edits)
+          [from to] (paredit/update-selection selection edits)]
+      (if (= from to)
+        (str (subs text 0 from) "|" (subs text from))
+        (str (subs text 0 from) "|" (subs text from to) "|" (subs text to))))
+    (nil? command) (text->spec t)
+    :else
+    (do #_(prn 'COMMAND command) #^:legacy (text->spec command))))
