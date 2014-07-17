@@ -409,7 +409,7 @@
     ["M-("       :paredit-wrap-round
      {; not used yet "(foo |bar baz)" "(foo (|bar) baz)",
       ";hel|lo" ";hel(|lo",
-      "a |\"hi\"" "a (|\"hi\")",
+      "a |\"hi\"" "a (|\"hi\"|)",
       "a |\"hi\"|" "a (|\"hi\"|)",
       "foo |bar| foo" "foo (|bar|) foo",
       "foo |bar baz| foo" "foo (|bar baz|) foo",
