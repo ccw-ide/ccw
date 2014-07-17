@@ -20,6 +20,32 @@
 (def ^:dynamic *form-macro-chars* #{(str \#) (str \~) "~@" (str \') (str \`) (str \@) "^" "#'" "#_" "#!"})
 (def ^:dynamic *not-in-code* #{:string :string-body "\"\\" :comment :char :regex :regex-body})
 
+(defn compare-edits
+  "Compare disjoint edits. Edits being assumed disjoint or equal, only their midpoints are compared."
+  [a b]
+  (- (+ (:offset a) (:length a)) (+ (:offset b) (:length b))))
+
+(defn update-selection [[offset end-offset] edits]
+  ;; only insertion edits (whose length is zero) can broaden a selection
+  (let [edits (into (sorted-set-by compare-edits) edits)
+        start {:offset offset :length 0}
+        end {:offset end-offset :length 0}
+        before-sel (subseq edits < start)
+        shift (reduce (fn [shift {:keys [text length]}]
+                        (+ shift (- (count text) length)))
+                0 before-sel)
+        [offset' shift] (if-let [{:keys [text broaden]} (get edits start)]
+                          (let [shift' (+ shift (count text))]
+                            [(+ offset (if broaden shift shift')) shift'])
+                          [(+ offset shift) shift])
+        shift (reduce (fn [shift {:keys [text length]}]
+                        (+ shift (- (count text) length)))
+                shift (subseq edits > start < end))
+        end-offset' (if-let [{:keys [text broaden]} (get edits end)]
+                      (+ end-offset shift (if broaden (count text) 0))
+                      (+ end-offset shift))]
+    [offset' end-offset']))
+
 (defmacro with-memoized [func-names & body]
   `(binding [~@(mapcat 
                  (fn [func-name] [func-name `(memoize ~func-name)])

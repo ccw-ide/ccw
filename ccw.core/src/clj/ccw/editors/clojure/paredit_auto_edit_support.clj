@@ -1,5 +1,6 @@
 (ns ccw.editors.clojure.paredit-auto-edit-support
-  (:use [clojure.core.incubator :only [-?>]])  
+  (:use [clojure.core.incubator :only [-?>]])
+  (:require [paredit.core :as paredit])
   (:import [org.eclipse.jface.text DocumentCommand]
            [org.eclipse.jface.preference IPreferenceStore]
            [ccw.editors.clojure IClojureEditor]))
@@ -38,38 +39,12 @@
     (doseq [{:keys [text offset length]} more-edits]
       (.addCommand command offset length text nil))))
 
-(defn compare-edits
-  "Compare disjoint edits. Edits being assumed disjoint or equal, only their midpoints are compared."
-  [a b]
-  (- (+ (:offset a) (:length a)) (+ (:offset b) (:length b))))
-
-(defn update-selection [[offset end-offset] edits]
-  ;; only insertion edits (whose length is zero) can broaden a selection
-  (let [edits (into (sorted-set-by compare-edits) edits)
-        start {:offset offset :length 0}
-        end {:offset end-offset :length 0}
-        before-sel (subseq edits < start)
-        shift (reduce (fn [shift {:keys [text length]}]
-                        (+ shift (- (count text) length)))
-                0 before-sel)
-        [offset' shift] (if-let [{:keys [text broaden]} (get edits start)]
-                          (let [shift' (+ shift (count text))]
-                            [(+ offset (if broaden shift shift')) shift'])
-                          [(+ offset shift) shift])
-        shift (reduce (fn [shift {:keys [text length]}]
-                        (+ shift (- (count text) length)))
-                shift (subseq edits > start < end))
-        end-offset' (if-let [{:keys [text broaden]} (get edits end)]
-                      (+ end-offset shift (if broaden (count text) 0))
-                      (+ end-offset shift))]
-    [offset' end-offset']))
-
 (defn apply-modif!
   "Apply modification in result to command for editor."
   [^IClojureEditor editor ^DocumentCommand command result]
   (if (:selection result)
     (let [{edits :edits selection :selection} result
-          [caret-offset end-offset] (update-selection selection edits)]
+          [caret-offset end-offset] (paredit/update-selection selection edits)]
       (into-command command edits)
       (set! (.shiftsCaret command) false)
       (set! (.caretOffset command) caret-offset)
