@@ -37,21 +37,22 @@
     "<name attr=\"value\">\"text\"</name>" "<name attr=\\\"value\\\">\\\"text\\\"</name>"
     "\\d"                                  "\\\\d"))
 
+(defn try-command [command-name input]
+  (let [{text :text :as t} (u/spec->text input)
+        buffer (edit-buffer nil 0 -1 text)
+        parse-tree (buffer-parse-tree buffer :for-test)]
+    (u/text+command->spec
+      t
+      (paredit command-name
+        {:parse-tree parse-tree,
+         :buffer buffer}
+        t))))
 
 (defn test-command [title-prefix command]
   (testing (str title-prefix " " (second command) " (\"" (first command) "\")")
     (doseq [[input expected] (get command 2)]
-      (spy (u/spec->text input))
-      (let [{text :text :as t} (u/spec->text input)
-            buffer (edit-buffer nil 0 -1 text)
-            parse-tree (buffer-parse-tree buffer :for-test)]
-        (is (= expected
-               (u/text+command->spec
-                 t
-                 (paredit (second command)
-                   {:parse-tree parse-tree,
-                    :buffer buffer}
-                   t))))))))
+      (is (= expected
+             (try-command (second command) input))))))
 
 (deftest paredit-tests
   (doseq [group *paredit-commands*]
