@@ -540,20 +540,18 @@
 
 (defn wrap-with-balanced
   [parsed [^String o c] {:keys [^String text offset length] :as t}]
-  (if-let [rloc (-?> parsed (parsed-root-loc true))]
+  (when-let [rloc (-?> parsed (parsed-root-loc true))]
     (let [[left-leave right-leave] (normalized-selection rloc offset length)]
       (if-not (sel-match-normalized? offset length [left-leave right-leave])
-        (if (or (in-code? (loc-containing-offset rloc offset))
-                (in-code? (loc-containing-offset rloc (+ offset length))))
-          nil
+        (when-not (or (in-code? (loc-containing-offset rloc offset)) ; should rather check if no code node belongs to the selection etc etc
+                      (in-code? (loc-containing-offset rloc (+ offset length))))
           {:selection [(+ offset length) (+ offset length)]
            :edits [{:text o :offset offset :length length}]})
         (let [start (start-offset left-leave)
               end (or (-?> right-leave end-offset) (.length text))]
           {:selection [start end]
            :edits [{:text o :offset start :length 0}
-                   {:text c :offset end :length 0}]})))
-    nil))
+                   {:text c :offset end :length 0}]})))))
 
 (defmethod paredit
   :paredit-wrap-quote
