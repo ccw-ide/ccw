@@ -7,7 +7,9 @@
            [org.eclipse.debug.ui IDebugUIConstants
                                  DebugUITools]
            [org.eclipse.debug.core ILaunchManager
-                                   DebugPlugin]))
+                                   DebugPlugin
+                                   ILaunchConfiguration]
+           [org.eclipse.debug.core.sourcelookup ISourcePathComputer]))
 
 ;;;; UTILITY FOR JDT
   ;; Specify a classpath. This is more or less easy depending on where it comes from
@@ -95,6 +97,10 @@
    ;; specific for remote java
    :java/vm-connector IJavaLaunchConfigurationConstants/ATTR_VM_CONNECTOR
    :java/connect-map IJavaLaunchConfigurationConstants/ATTR_CONNECT_MAP
+
+   ;; specific for debugging inside source code
+   :source-path-computer-id ISourcePathComputer/ATTR_SOURCE_PATH_COMPUTER_ID
+   :source-locator-id ILaunchConfiguration/ATTR_SOURCE_LOCATOR_ID
    })
 
 #_(defn default-jre "Default JRE installed in workbench" [] (JavaRuntime/getDefaultVMInstall))

@@ -21,6 +21,7 @@ If source jars for dependencies are available on the repositories, they are down
 ==== Debugging Clojure Projects
 
 - It is now possible to add breakpoints on `cljx` files in addition to `cljs` files.
+- Breakpoints open the right files (those in source folders, not in bin/ folder) when leiningen is used to debug the project - i.e. the default behaviour - (was only working when project was started directly by Eclipse)
 
 === Bug fixes
 
