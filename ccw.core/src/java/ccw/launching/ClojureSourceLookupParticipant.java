@@ -50,6 +50,11 @@ public class ClojureSourceLookupParticipant extends
 	private Map<ISourceContainer, ISourceContainer> delegateContainers;
 	
 
+	public void init(ISourceLookupDirector director) {
+		super.init(director);
+		delegateContainers = new HashMap<ISourceContainer, ISourceContainer>();
+	}
+
 	public String getSourceName(Object object) throws CoreException {
 		JavaSourceLookupParticipant javaParticipant = findSiblingJavaParticipant();
 		if (javaParticipant == null) {
@@ -69,11 +74,6 @@ public class ClojureSourceLookupParticipant extends
 			}
 		}
 		return cachedSiblingJavaParticipant;
-	}
-
-	public void init(ISourceLookupDirector director) {
-		super.init(director);
-		delegateContainers = new HashMap<ISourceContainer, ISourceContainer>();
 	}
 
 	protected ISourceContainer getDelegateContainer(ISourceContainer container) {
