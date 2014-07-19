@@ -22,6 +22,7 @@ If source jars for dependencies are available on the repositories, they are down
 
 - It is now possible to add breakpoints on `cljx` files in addition to `cljs` files.
 - Breakpoints open the right files (those in source folders, not in bin/ folder) when leiningen is used to debug the project - i.e. the default behaviour - (was only working when project was started directly by Eclipse)
+- Breakpoints correctly pick the right files, e.g. they do not mess with multiple `core.clj` files in the project classpath. Fixes Issue #273
 
 === Bug fixes
 
