@@ -18,6 +18,10 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 If source jars for dependencies are available on the repositories, they are downloaded and set up on the `Leiningen Dependencies` classpath container. (Thank you Zhang Yaokun - aka paxnil on Github - for the pull request!)
 
+==== Debugging Clojure Projects
+
+- It is now possible to add breakpoints on `cljx` files in addition to `cljs` files.
+
 === Bug fixes
 
 - Don't activate Leiningen commands in wrong places in the IDE (e.g. in unrelated contextual menus). Fix Issue #642
