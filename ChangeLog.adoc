@@ -28,6 +28,8 @@ If source jars for dependencies are available on the repositories, they are down
 
 - Don't activate Leiningen commands in wrong places in the IDE (e.g. in unrelated contextual menus). Fix Issue #642
 
+- One can succesfully Open menu:Window[Preferences > General > Appearance] whereas an error occured previously. Fixes Issue #646. Thank you Andrea Richiardi for filing the Issue and finding the relevant resources which helped me to fix it quickly!)
+
 == Changes between Counterclockwise 0.25.2 and 0.26.0
 
 `0.26.0` released on July 10, 2014
