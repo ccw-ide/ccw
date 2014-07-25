@@ -53,7 +53,7 @@ import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.editors.clojure.ClojureEditor;
-import ccw.editors.clojure.LoadFileAction;
+import ccw.editors.clojure.actions.LoadFileAction;
 import ccw.preferences.PreferenceConstants;
 import ccw.repl.REPLView;
 import ccw.util.ClojureInvoker;

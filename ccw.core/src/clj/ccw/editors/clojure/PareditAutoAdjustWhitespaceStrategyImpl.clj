@@ -12,7 +12,8 @@
                             IDocument
                             DocumentCommand]
     [org.eclipse.jface.preference IPreferenceStore]
-    [ccw.editors.clojure IClojureEditor PareditAutoAdjustWhitespaceStrategy]
+    [ccw.editors.clojure IClojureEditor]
+    [ccw.editors.clojure.strategies PareditAutoAdjustWhitespaceStrategy]
     [ccw.preferences PreferenceConstants]))
    
 

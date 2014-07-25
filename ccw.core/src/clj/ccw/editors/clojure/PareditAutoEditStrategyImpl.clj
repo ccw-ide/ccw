@@ -6,7 +6,8 @@
     [org.eclipse.jface.text IAutoEditStrategy
                             IDocument
                             DocumentCommand]
-    [ccw.editors.clojure IClojureEditor PareditAutoEditStrategy]))
+    [ccw.editors.clojure IClojureEditor]
+    [ccw.editors.clojure.strategies PareditAutoEditStrategy]))
    
 #_(set! *warn-on-reflection* true)
 

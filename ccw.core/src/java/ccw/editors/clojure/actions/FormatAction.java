@@ -8,12 +8,15 @@
  * Contributors: 
  *    Tuomas KARKKAINEN - initial API and implementation
  *******************************************************************************/
-package ccw.editors.clojure;
+package ccw.editors.clojure.actions;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.ISourceViewer;
+
+import ccw.editors.clojure.ClojureEditor;
+import ccw.editors.clojure.ClojureEditorMessages;
 
 public class FormatAction extends Action {
     public final static String ID = "FormatAction"; //$NON-NLS-1$

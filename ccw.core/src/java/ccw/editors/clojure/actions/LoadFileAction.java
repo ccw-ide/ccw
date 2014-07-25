@@ -8,7 +8,7 @@
  * Contributors: 
  *    Laurent PETIT - initial API and implementation
  *******************************************************************************/
-package ccw.editors.clojure;
+package ccw.editors.clojure.actions;
 
 import org.apache.commons.io.FilenameUtils;
 import org.eclipse.core.filesystem.URIUtil;
@@ -24,6 +24,9 @@ import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.ClojureProject;
 import ccw.TraceOptions;
+import ccw.editors.clojure.ClojureEditor;
+import ccw.editors.clojure.ClojureEditorMessages;
+import ccw.editors.clojure.EvaluateTextUtil;
 import ccw.launching.ClojureLaunchShortcut;
 import ccw.launching.ClojureLaunchShortcut.IWithREPLView;
 import ccw.repl.Actions;

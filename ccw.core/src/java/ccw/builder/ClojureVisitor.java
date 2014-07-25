@@ -30,7 +30,7 @@ import org.eclipse.ui.texteditor.MarkerUtilities;
 
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
-import ccw.editors.clojure.CompileLibAction;
+import ccw.editors.clojure.actions.CompileLibAction;
 import ccw.repl.IConnectionClient;
 import ccw.repl.SafeConnection;
 import clojure.tools.nrepl.Connection;
