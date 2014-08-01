@@ -35,15 +35,26 @@
                         (+ shift (- (count text) length)))
                 0 before-sel)
         [offset' shift] (if-let [{:keys [text broaden]} (get edits start)]
-                          (let [shift' (+ shift (count text))]
-                            [(+ offset (if broaden shift shift')) shift'])
+                          (let [shift' (+ shift (count text))
+                                offset (cond
+                                         (not broaden) (+ offset shift')
+                                         (true? broaden) (+ offset shift)
+                                         (neg? broaden) (+ offset shift' broaden)
+                                         :else (+ offset shift broaden))]
+                            [offset shift'])
                           [(+ offset shift) shift])
         shift (reduce (fn [shift {:keys [text length]}]
                         (+ shift (- (count text) length)))
                 shift (subseq edits > start < end))
-        end-offset' (if-let [{:keys [text broaden]} (get edits end)]
-                      (+ end-offset shift (if broaden (count text) 0))
-                      (+ end-offset shift))]
+        end-offset' (if-not (= end-offset offset)
+                      (if-let [{:keys [text broaden]} (get edits end)]
+                        (+ end-offset shift (cond
+                                              (not broaden) 0
+                                              (true? broaden) (count text)
+                                              (pos? broaden) broaden
+                                              (neg? broaden) (+ (count text) broaden)))
+                        (+ end-offset shift))
+                      offset')]
     [offset' end-offset']))
 
 (defmacro with-memoized [func-names & body]
