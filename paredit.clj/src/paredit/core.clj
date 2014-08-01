@@ -487,7 +487,7 @@
   [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
   (with-important-memoized (if (not= 0 length)
     t
-    (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
+    (when-let [rloc (-?> parse-tree (parsed-root-loc true))]
       (let [[l r] (normalized-selection rloc offset length)
             parent (cond
                      (and (#{:comment :string} (loc-tag l)) (> offset (start-offset l))) l ; stay at the same level, and let the code take the correct open/close puncts, e.g. \" \"
@@ -499,8 +499,7 @@
                                                              (->> parent z/node :content second
                                                                (re-find #"^;* *"))) ""]
                                                  ((juxt *tag-opening-brackets* *tag-closing-brackets*) tag)))]
-        (if-not close-punct
-          t
+        (when close-punct
           (let [[replace-offset replace-length]
                 (if (or (= :comment (loc-tag parent))
                       (and
@@ -516,12 +515,9 @@
                     [start (- end start)]))
                 replace-text (str close-punct (subs text replace-offset (+ replace-offset replace-length)) open-punct)
                 new-offset (+ offset (.length close-punct))]
-            (-> t (assoc-in [:text] (t/str-replace text replace-offset replace-length replace-text))
-              (assoc-in [:offset] new-offset)
-              #_#_(assoc-in [:offset] (+ replace-offset (.length close-punct)))
-              (assoc-in [:length] replace-length)
-              (update-in [:modifs] conj {:offset replace-offset :length replace-length :text replace-text})))))
-      t))))
+            {:selection [replace-offset replace-offset]
+             :edits [{:offset replace-offset :length 0 :text replace-text :broaden (- new-offset replace-offset)}
+                     {:offset replace-offset :length replace-length :text ""}]})))))))
 
 (defmethod paredit
   :paredit-join-sexps
