@@ -53,6 +53,14 @@
   (assoc (bean (.getUnSignedSelection editor))
          :text (.get (.getDocument editor))))
 
+(defn ^org.eclipse.text.edits.TextEdit to-text-edit
+  "Creates a TextEdit from a collection of edits."
+  [edits]
+  (let [text-edit (org.eclipse.text.edits.MultiTextEdit.)]
+    (doseq [{:keys [text offset length]} edits]
+      (.addChild text-edit (org.eclipse.text.edits.ReplaceEdit. offset length text)))
+    text-edit))
+
 ;; TODO remove duplication with PareditAutoEditStrategy (or not)
 (defn- apply-paredit-command 
   "f is a function which takes the parse state, and the editor state as a
@@ -62,11 +70,22 @@
    and selection in the :length key"
   [editor f]
   (let [result (f (.getParseState editor) (editor-text editor))]
-    (when-let [modif (-?> result :modifs first)] ;; TODO what if more than one modif in :modifs ?
-      (let [{:keys #{length offset text}} modif
-            document (-> editor .getDocument)]
-        (.replace document offset length text)
-        (.selectAndReveal editor (:offset result) (:length result))))))
+    (if (:selection result)
+      (let [{edits :edits selection :selection} result
+            [caret-offset end-offset] (pc/update-selection selection edits)]
+        (->
+          (.getDocument editor)
+          (org.eclipse.jface.text.RewriteSessionEditProcessor.
+            (to-text-edit edits)
+            (bit-or org.eclipse.text.edits.TextEdit/CREATE_UNDO org.eclipse.text.edits.TextEdit/UPDATE_REGIONS))
+          .performEdits)
+        (.selectAndReveal editor caret-offset (- end-offset caret-offset)))
+      ^:legacy
+      (when-let [modif (-?> result :modifs first)] ;; TODO what if more than one modif in :modifs ?
+        (let [{:keys #{length offset text}} modif
+              document (-> editor .getDocument)]
+          (.replace document offset length text)
+          (.selectAndReveal editor (:offset result) (:length result)))))))
 
 (defn- paredit-fn 
   ([command-key] (paredit-fn command-key nil))
