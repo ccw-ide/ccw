@@ -533,7 +533,7 @@
                 "foo (bar| baz)" "foo (|bar| baz)"
                 "foo b|ar| baz" "foo |bar| baz"
                 "foo1 (|bar| baz)" "foo1 |(bar baz)|"
-                "foo \"bar |baz\"" "foo |\"bar baz\"|"
+                "foo \"bar |baz\"" "foo \"|bar baz|\""
                 "foo;ba|r\nbaz" "foo|;bar|\nbaz"
                  "foo (bar [ba|z] |foo)" "foo (bar |[baz] |foo)"
                  "foo (bar [ba|z]) (foo [bar (b|az)])" "foo |(bar [baz]) (foo [bar (baz)])|"

@@ -119,6 +119,21 @@
               (fn [[l r]] [(z/up l) (z/up r)])
               [left-leave right-leave])))))))
 
+(defn structural-selection
+  [rloc offset length left-biased]
+  (let [[l r] (normalized-selection rloc offset length)
+        l (if (and (zero? length) left-biased)
+            (loop [l l]
+              (if-let [l (when (= offset (start-offset l)) (or (z/left l) (z/up l)))]
+                (recur l)
+                l))
+            l)
+        r (or r l)]
+    (if (or (punct-loc? l) (punct-loc? r))
+      (let [p (z/up l)]
+        [p p])
+      [l r])))
+
 (defn parsed-in-tags? 
   [parsed tags-set]
   (tags-set (-> parsed :parents peek :tag)))
@@ -371,28 +386,22 @@
         length (if (nil? r) 0 (- (end-offset r) offset))]
     [offset length]))
 
-(defn sel-match-normalized? 
-  "Does the selection denoted by offset and length match l (left) and r (right) locs ?"
-  [offset length [l r]]
-  (if (zero? length)
-    (and (nil? r) (= offset (start-offset l)))
-    (and (= offset (start-offset l)) (= (+ offset length) (end-offset r)))))
+(defn locs-to-sel
+  "Returns [offset length] from two locs, the second one being optional."
+  [l r]
+  (let [start (start-offset l)]
+    [start (if r (- (end-offset r) start) 0)]))
 
 (defmethod paredit
   :paredit-expand-left
   [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
   (with-important-memoized (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
-    (let [[l r] (normalized-selection rloc offset length)
-          l (if (sel-match-normalized? offset length [l r])
-              (if-let [nl (z/left l)] nl (if (punct-loc? l) (z/left (z/up l)) (z/up l)))
-              (do
-                [(z/node l) (and r (z/node r))]
-                l))
-          r (if (nil? r) l r)
-          [l r] (normalized-selection rloc (start-offset l) (- (end-offset r) (start-offset l)))]
+    (let [[l r] (structural-selection rloc offset length true)
+          [l r] (if (and (not= [offset length] (locs-to-sel l r)) (pos? offset))
+                  [l r]
+                  (structural-selection rloc (dec offset) (inc length) false))]
       (-> t (assoc-in [:offset] (start-offset l))
-             (assoc-in [:length] (if (nil? r) 0 (- (end-offset r) (start-offset l))))))
-      t)))
+             (assoc-in [:length] (if (nil? r) 0 (- (end-offset r) (start-offset l)))))))))
 
 (defn default-behaviour-sel [parent l r]
   [(start-offset parent) (end-offset parent)])
@@ -422,7 +431,7 @@
   [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
   (with-important-memoized (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
     (let [[l r] (normalized-selection rloc offset length)]
-      (if-not (sel-match-normalized? offset length [l r])
+      (if-not (= [offset length] (locs-to-sel l r))
         (assoc t :offset (start-offset l) 
                  :length (if (nil? r) 0 (- (end-offset r) (start-offset l))))
         (let [parent (if-let [nl (z/up (if (= offset (start-offset (parse-node l)))
@@ -441,7 +450,7 @@
   [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
   (with-important-memoized (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
     (let [[l r] (normalized-selection rloc offset length)]
-      (if-not (sel-match-normalized? offset length [l r])
+      (if-not (= [offset length] (locs-to-sel l r))
         (-> t (assoc-in [:offset] (start-offset l))
           (assoc-in [:length] (if (nil? r) 0 (- (end-offset r) (start-offset l)))))
         (let [r (if (nil? r) 
@@ -460,7 +469,7 @@
   (with-important-memoized 
     (when-let [[l r] (some-> parse-tree (parsed-root-loc true) (normalized-selection offset length))]
       (when (and
-              (sel-match-normalized? offset length [l r]) 
+              (= [offset length] (locs-to-sel l r))
               (= offset (start-offset (parse-node l))))
         (let [r (or r l)
               p (or (z/up (parse-node l)) l)]
@@ -499,7 +508,7 @@
                         (or
                           (= :string (loc-tag l))
                           (not (and
-                                 (sel-match-normalized? offset length [l r])
+                                 (= [offset length] (locs-to-sel l r))
                                  (= offset (start-offset (parse-node l))))))))
                   [offset 0]
                   (let [start (or (some #(when-not (#{:whitespace :comment} (loc-tag %)) (end-offset %)) (previous-leaves l)) offset)
@@ -541,7 +550,7 @@
   [parsed [^String o c] {:keys [^String text offset length] :as t}]
   (when-let [rloc (-?> parsed (parsed-root-loc true))]
     (let [[left-leave right-leave] (normalized-selection rloc offset length)]
-      (if-not (sel-match-normalized? offset length [left-leave right-leave])
+      (if-not (= [offset length] (locs-to-sel left-leave right-leave))
         (when-not (or (in-code? (loc-containing-offset rloc offset)) ; should rather check if no code node belongs to the selection etc etc
                       (in-code? (loc-containing-offset rloc (+ offset length))))
           {:selection [(+ offset length) (+ offset length)]
