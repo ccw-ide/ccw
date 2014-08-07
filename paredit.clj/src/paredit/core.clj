@@ -458,29 +458,20 @@
   :paredit-raise-sexp
   [cmd {:keys #{parse-tree buffer} :as parse-state} {:keys [^String text offset length] :as t}]
   (with-important-memoized 
-    (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
-      (let [[l r] (normalized-selection rloc offset length)]
-        (if-not (and
-                  (sel-match-normalized? offset length [l r]) 
-                  (= offset (start-offset (parse-node l))))
-          t
-          (let  
-            [to-raise-offset (start-offset l)
-             to-raise-length (- (if r (end-offset r) (end-offset (parse-node l))) (start-offset l))
-             to-raise-text (.substring text to-raise-offset (+ to-raise-offset to-raise-length))
-             l (if-let [nl (z/up (parse-node l))] nl l)
-             replace-offset (start-offset l)
-             replace-length (- (end-offset l) replace-offset)
-             new-t (-> t (assoc-in [:text] (t/str-replace text replace-offset replace-length to-raise-text))
-                     (assoc-in [:offset] replace-offset)
-                     (assoc-in [:length] (count to-raise-text))
-                     (update-in [:modifs] conj {:offset replace-offset :length replace-length :text to-raise-text}))]
-            (if-let [new-t (l/col-shift parse-state (-> new-t :modifs first) to-raise-offset replace-offset)]
-              (-> new-t
-                (assoc-in [:length] (count to-raise-text))
-                (assoc-in [:offset] replace-offset))
-              new-t))))
-      t)))
+    (when-let [[l r] (some-> parse-tree (parsed-root-loc true) (normalized-selection offset length))]
+      (when (and
+              (sel-match-normalized? offset length [l r]) 
+              (= offset (start-offset (parse-node l))))
+        (let [p (or (z/up (parse-node l)) l)]
+          {:selection [(start-offset p) (end-offset p)]
+           :edits [{:offset (start-offset p) :length (- (start-offset l) (start-offset p)) :text ""}
+                   {:offset (end-offset r) :length (- (end-offset p) (end-offset r)) :text ""}]}
+          ; TODO fix col-shift and reintroduce it
+          #_(if-let [new-t (l/col-shift parse-state (-> new-t :modifs first) to-raise-offset replace-offset)]
+             (-> new-t
+               (assoc-in [:length] (count to-raise-text))
+               (assoc-in [:offset] replace-offset))
+             new-t))))))
 
 (defmethod paredit
   :paredit-split-sexp
