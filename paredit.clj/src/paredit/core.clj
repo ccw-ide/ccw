@@ -120,19 +120,20 @@
               [left-leave right-leave])))))))
 
 (defn structural-selection
-  [rloc offset length left-biased]
-  (let [[l r] (normalized-selection rloc offset length)
-        l (if (and (zero? length) left-biased)
-            (loop [l l]
-              (if-let [l (when (= offset (start-offset l)) (or (z/left l) (z/up l)))]
-                (recur l)
-                l))
-            l)
-        r (or r l)]
-    (if (or (punct-loc? l) (punct-loc? r))
-      (let [p (z/up l)]
-        [p p])
-      [l r])))
+  ([rloc offset length] (structural-selection rloc offset length false))
+  ([rloc offset length left-biased]
+    (let [[l r] (normalized-selection rloc offset length)
+          l (if (and (zero? length) left-biased)
+              (loop [l l]
+                (if-let [l (when (= offset (start-offset l)) (or (z/left l) (z/up l)))]
+                  (recur l)
+                  l))
+              l)
+          r (or r l)]
+      (if (or (punct-loc? l) (punct-loc? r))
+        (let [p (z/up l)]
+          [p p])
+        [l r]))))
 
 (defn parsed-in-tags? 
   [parsed tags-set]
@@ -399,7 +400,7 @@
     (let [[l r] (structural-selection rloc offset length true)
           [l r] (if (and (not= [offset length] (locs-to-sel l r)) (pos? offset))
                   [l r]
-                  (structural-selection rloc (dec offset) (inc length) false))]
+                  (structural-selection rloc (dec offset) (inc length)))]
       (-> t (assoc-in [:offset] (start-offset l))
              (assoc-in [:length] (if (nil? r) 0 (- (end-offset r) (start-offset l)))))))))
 
@@ -466,13 +467,12 @@
 (defmethod paredit
   :paredit-raise-sexp
   [cmd {:keys #{parse-tree buffer} :as parse-state} {:keys [^String text offset length] :as t}]
-  (with-important-memoized 
-    (when-let [[l r] (some-> parse-tree (parsed-root-loc true) (normalized-selection offset length))]
+  (with-important-memoized
+    (when-let [[l r] (some-> parse-tree (parsed-root-loc true) (structural-selection offset length))]
       (when (and
               (= [offset length] (locs-to-sel l r))
               (= offset (start-offset (parse-node l))))
-        (let [r (or r l)
-              p (or (z/up (parse-node l)) l)]
+        (let [p (or (z/up (parse-node l)) l)]
           {:selection [(start-offset p) (end-offset p)]
            :edits [{:offset (start-offset p) :length (- (start-offset l) (start-offset p)) :text ""}
                    {:offset (end-offset r) :length (- (end-offset p) (end-offset r)) :text ""}]}

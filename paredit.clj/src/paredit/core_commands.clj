@@ -476,14 +476,14 @@
     ;            "(a b c f)"))
     ["M-r"       :paredit-raise-sexp
                {
-                "(foo |bar)" "|bar|"
-                "(foo bar|)" "(foo bar|)"
+                "(foo |bar)" "(foo |bar)" ; TODO change selection
+                "(foo bar|)" "(foo bar|)" ; TODO change selection
                 "(dynamic-wind in (lambda () |body|) out)" "(dynamic-wind in |body| out)"
                 "(dynamic-wind in |body| out)" "|body|"
                 "(foo |(bar]|)" "(foo |(bar]|)"
                 "(foo |(bar])|" "(foo |(bar])|"
                 "(|foo|)" "|foo|"
-                "(foo |(bar))" "|(bar)|"
+                "(foo |(bar))" "(foo |(bar))" ; TODO change selection
                 }]
     ]
     ["Barfage & Slurpage"
