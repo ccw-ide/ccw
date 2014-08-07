@@ -462,7 +462,8 @@
       (when (and
               (sel-match-normalized? offset length [l r]) 
               (= offset (start-offset (parse-node l))))
-        (let [p (or (z/up (parse-node l)) l)]
+        (let [r (or r l)
+              p (or (z/up (parse-node l)) l)]
           {:selection [(start-offset p) (end-offset p)]
            :edits [{:offset (start-offset p) :length (- (start-offset l) (start-offset p)) :text ""}
                    {:offset (end-offset r) :length (- (end-offset p) (end-offset r)) :text ""}]}
