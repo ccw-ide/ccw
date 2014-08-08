@@ -18,10 +18,10 @@
                 (vec children)))
             root))
 
-(defn vdown
+(defn down-nth
   "Returns the loc of the child at index idx of the node at this loc, or
   nil if no children.
-  Node children MUST be vectors for vdown to work. And in this case,
+  Node children MUST be vectors for down-nth to work. And in this case,
   getting the loc of the idx'st child will be done in constant time."
   {:added "1.0"}
   [loc idx]
@@ -168,37 +168,31 @@
        (<= start offset (dec end))
        loc)))
 
+(defn- bisect [v pred x]
+  (loop [start 0 end (count v)]
+    (if (<= (- end start) 1)
+      start
+      (let [i (quot (+ start end) 2)
+            y (nth v i)]
+        (if (pred x y)
+          (recur start i)
+          (recur i end))))))
+
 (defn leave-loc-for-offset-common
   "returns a zipper location or nil if does not contain the offset"
-  [loc offset]
-  (if (not (z/branch? loc))
-    (if (< offset (count (z/node loc))) loc (root-loc loc))
-    (let [[cloc offset] 
-            (loop [start (int 0) end (int (count (-> loc z/node :content)))]
-              (if (<= end start)
-                (if (= start (count (-> loc z/node :content)))
-                  ; no loc found (end of text, will return root-loc instead)
-                  (let [last-leave (last 
-                                     (take-while 
-                                       #(and (z/branch? %) (seq (z/children %)))
-                                       (iterate (comp z/rightmost z/down) 
-                                                (z/rightmost loc))))]
-                    [last-leave 0])                  
-                  [(vdown loc start) (- offset (-> loc z/node :content-cumulative-count (get start)))])
-                (let [n (int (+ start (quot (- end start) 2)))
-                      n-offset (-> loc z/node :content-cumulative-count (get n))
-                      n-node (-> loc z/node :content (get n))
-                      n-count (if (string? n-node) (count n-node) (or (:count n-node) 0))]
-                  (cond
-                    (< offset n-offset)
-                      (recur start (dec n))
-                    (< offset (+ n-offset n-count))
-                      [(vdown loc n) (- offset n-offset)]
-                    :else
-                      (recur (inc n) end)))))]
-      (if (zero? offset) 
-        cloc
-        (recur cloc offset)))))
+  ([loc offset]
+    (leave-loc-for-offset-common loc offset false))
+  ([loc offset left-bias]
+    (if (not (z/branch? loc))
+      (if (< offset (count (z/node loc))) loc (root-loc loc))
+      (do
+        (let [content-cumulative-count (-> loc z/node :content-cumulative-count)]
+          (if (zero? (count content-cumulative-count)) ; only the root should be empty
+            loc
+            (let [n (bisect content-cumulative-count (if left-bias <= <) offset)]
+              (recur (down-nth loc n)
+                (if (pos? n) (- offset (nth content-cumulative-count (dec n))) offset)
+                left-bias))))))))
 
 (defn ^:dynamic leave-for-offset
   [loc offset]
