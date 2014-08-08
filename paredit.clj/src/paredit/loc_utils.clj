@@ -185,12 +185,10 @@
   ([loc offset left-bias]
     (if (not (z/branch? loc))
       (if (< offset (count (z/node loc))) loc (root-loc loc))
-      (do
-        (let [content-cumulative-count (-> loc z/node :content-cumulative-count)]
-          (if (zero? (count content-cumulative-count)) ; only the root should be empty
-            loc
-            (let [n (bisect content-cumulative-count (if left-bias <= <) offset)]
-              (recur (down-nth loc n) (- offset (nth content-cumulative-count n)) left-bias))))))))
+      (let [content-cumulative-count (-> loc z/node :content-cumulative-count)]
+        (when (seq content-cumulative-count) ; only the root should be empty
+          (let [n (bisect content-cumulative-count (if left-bias <= <) offset)]
+            (recur (down-nth loc n) (- offset (nth content-cumulative-count n)) left-bias)))))))
 
 (defn ^:dynamic leave-for-offset
   ([loc offset] (leave-for-offset loc offset false))
