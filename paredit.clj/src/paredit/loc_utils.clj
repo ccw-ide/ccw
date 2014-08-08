@@ -190,9 +190,7 @@
           (if (zero? (count content-cumulative-count)) ; only the root should be empty
             loc
             (let [n (bisect content-cumulative-count (if left-bias <= <) offset)]
-              (recur (down-nth loc n)
-                (if (pos? n) (- offset (nth content-cumulative-count (dec n))) offset)
-                left-bias))))))))
+              (recur (down-nth loc n) (- offset (nth content-cumulative-count n)) left-bias))))))))
 
 (defn ^:dynamic leave-for-offset
   [loc offset]
