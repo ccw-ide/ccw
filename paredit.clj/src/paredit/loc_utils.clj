@@ -193,16 +193,18 @@
               (recur (down-nth loc n) (- offset (nth content-cumulative-count n)) left-bias))))))))
 
 (defn ^:dynamic leave-for-offset
-  [loc offset]
-  (if-let [l (leave-loc-for-offset-common loc offset)]
-    l
-    (root-loc loc)))
+  ([loc offset] (leave-for-offset loc offset false))
+  ([loc offset left-bias]
+    (if-let [l (leave-loc-for-offset-common loc offset left-bias)]
+      l
+      (root-loc loc))))
 
 (defn ^:dynamic loc-for-offset 
   "returns a zipper location or nil if does not contain the offset"
-  [loc offset] 
-    (when-let [l (leave-loc-for-offset-common loc offset)]
-      (parse-node l)))
+  ([loc offset] (loc-for-offset loc offset false))
+  ([loc offset left-bias]
+    (when-let [l (leave-loc-for-offset-common loc offset left-bias)]
+      (parse-node l))))
 
 (defn ^:dynamic loc-containing-offset
   [loc offset]
