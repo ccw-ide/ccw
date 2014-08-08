@@ -86,8 +86,8 @@
    If the selection is not empty, the second loc will give the end (get it via a call to 'loc-end on it).
    Pre-requisites: length >=0, offset >=0. rloc = root loc of the tree"
   [rloc offset length]
-  (let [left-leave (parse-leave (leave-for-offset rloc offset))
-        right-leave (parse-leave (leave-for-offset rloc (+ offset length)))
+  (let [left-leave (parse-leave (leave-for-offset rloc offset false))
+        right-leave (parse-leave (leave-for-offset rloc (+ offset length) true))
         right-leave (cond 
                       (root-node-tag? (loc-tag right-leave))
                         (parse-leave (leave-for-offset rloc (dec (+ offset length)))) 
@@ -177,11 +177,11 @@
         (insert-balanced [o c] t chars-with-no-space-before chars-with-no-space-after)
         (-> t (t/insert (str o)))))
     (wrap-with-balanced parsed [o c] t)))
-  
+
 (defn close-balanced
   [parsed [o c] {:keys [^String text offset length] :as t} 
    chars-with-no-space-before chars-with-no-space-after]
-    (let [offset-loc (-> parsed parsed-root-loc (loc-for-offset offset))]       
+    (let [offset-loc (-> parsed parsed-root-loc (loc-for-offset offset true))]
       (if (in-code? offset-loc)
         (let [up-locs (take-while identity (iterate z/up offset-loc))
               match (some #(when (= c (peek (:content (z/node %)))) %) up-locs)]
