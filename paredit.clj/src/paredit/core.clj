@@ -101,17 +101,15 @@
           (= [0 0] [offset length])
           (and 
             (= 0 length)
-            (= (start-offset left-leave) offset))
-          (and 
-            (= (start-offset (parse-node left-leave)) offset)
-            (= (end-offset (parse-node right-leave)) (+ offset length))  
-            (same-parent? (parse-node left-leave) (parse-node right-leave)))) 
+            (= (start-offset left-leave) offset)))
       [left-leave (when-not (zero? length) right-leave)]
       (let [left-leave (parse-node left-leave)
             right-leave (parse-node right-leave)
-            min-depth (min (loc-depth left-leave) (loc-depth right-leave))
-            left-leave (up-to-depth left-leave min-depth)
-            right-leave (up-to-depth right-leave min-depth)]
+            left-depth (loc-depth left-leave)
+            right-depth (loc-depth right-leave)
+            min-depth (min left-depth right-depth)
+            left-leave (nth (iterate z/up left-leave) (- left-depth min-depth))
+            right-leave (nth (iterate z/up right-leave) (- right-depth min-depth))]
         (first 
           (filter 
             (fn [[l r]] (= (z/up l) (z/up r))) 
@@ -119,21 +117,27 @@
               (fn [[l r]] [(z/up l) (z/up r)])
               [left-leave right-leave])))))))
 
+(defn- structure-loc? [loc]
+  (not (#{:whitespace :comment} (loc-tag loc))))
+
 (defn structural-selection
-  ([rloc offset length] (structural-selection rloc offset length false))
-  ([rloc offset length left-biased]
-    (let [[l r] (normalized-selection rloc offset length)
-          l (if (and (zero? length) left-biased)
-              (loop [l l]
-                (if-let [l (when (= offset (start-offset l)) (or (z/left l) (z/up l)))]
-                  (recur l)
-                  l))
-              l)
-          r (or r l)]
-      (if (or (punct-loc? l) (punct-loc? r))
-        (let [p (z/up l)]
-          [p p])
-        [l r]))))
+  ([rloc offset length] (structural-selection rloc offset length structure-loc?))
+  ([rloc offset length ok-loc?]
+    (if (zero? length)
+      (let [loc (leave-for-offset rloc offset false)
+            r (parse-node loc)]
+        (if (= (start-offset loc) offset)
+          (let [l (parse-node (leave-for-offset rloc offset true))
+                loc (if (<= (start-offset r) (start-offset l))
+                      (if (ok-loc? l) l r)
+                      (if (ok-loc? r) r l))]
+            [loc loc])
+          [r r]))
+      (let [[l r] (normalized-selection rloc offset length)]
+        (if (or (punct-loc? l) (punct-loc? r))
+          (let [p (z/up l)]
+            [p p])
+          [l r])))))
 
 (defn parsed-in-tags? 
   [parsed tags-set]
@@ -397,12 +401,9 @@
   :paredit-expand-left
   [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
   (with-important-memoized (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
-    (let [[l r] (structural-selection rloc offset length true)
-          [l r] (if (and (not= [offset length] (locs-to-sel l r)) (pos? offset))
-                  [l r]
-                  (structural-selection rloc (dec offset) (inc length)))]
-      (-> t (assoc-in [:offset] (start-offset l))
-             (assoc-in [:length] (if (nil? r) 0 (- (end-offset r) (start-offset l)))))))))
+    (let [[l r] (structural-selection rloc (dec offset) (inc length) (constantly true))]
+      (-> t (assoc :offset (start-offset l))
+             (assoc :length (- (end-offset r) (start-offset l))))))))
 
 (defn default-behaviour-sel [parent l r]
   [(start-offset parent) (end-offset parent)])
@@ -431,7 +432,7 @@
   :paredit-expand-up
   [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
   (with-important-memoized (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
-    (let [[l r] (normalized-selection rloc offset length)]
+    (let [[l r] (structural-selection rloc offset length)]
       (if-not (= [offset length] (locs-to-sel l r))
         (assoc t :offset (start-offset l) 
                  :length (if (nil? r) 0 (- (end-offset r) (start-offset l))))
@@ -450,18 +451,9 @@
   :paredit-expand-right
   [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
   (with-important-memoized (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
-    (let [[l r] (normalized-selection rloc offset length)]
-      (if-not (= [offset length] (locs-to-sel l r))
-        (-> t (assoc-in [:offset] (start-offset l))
-          (assoc-in [:length] (if (nil? r) 0 (- (end-offset r) (start-offset l)))))
-        (let [r (if (nil? r) 
-                  l 
-                  (if-let [nr (z/right r)] 
-                    nr
-                    (z/up r)))
-              [l r] (normalized-selection rloc (start-offset l) (- (end-offset r) (start-offset l)))]
-          (-> t (assoc-in [:offset] (start-offset l))
-            (assoc-in [:length] (if (nil? r) 0 (- (end-offset r) (start-offset l))))))))
+    (let [[l r] (structural-selection rloc offset (min (inc length) (- (:count (z/node rloc)) offset)))]
+      (-> t (assoc :offset (start-offset l))
+        (assoc :length (- (end-offset r) (start-offset l)))))
     t)))
 
 (defmethod paredit
@@ -469,19 +461,21 @@
   [cmd {:keys #{parse-tree buffer} :as parse-state} {:keys [^String text offset length] :as t}]
   (with-important-memoized
     (when-let [[l r] (some-> parse-tree (parsed-root-loc true) (structural-selection offset length))]
-      (when (and
-              (= [offset length] (locs-to-sel l r))
-              (= offset (start-offset (parse-node l))))
-        (let [p (or (z/up (parse-node l)) l)]
-          {:selection [(start-offset p) (end-offset p)]
-           :edits [{:offset (start-offset p) :length (- (start-offset l) (start-offset p)) :text ""}
-                   {:offset (end-offset r) :length (- (end-offset p) (end-offset r)) :text ""}]}
-          ; TODO fix col-shift and reintroduce it
-          #_(if-let [new-t (l/col-shift parse-state (-> new-t :modifs first) to-raise-offset replace-offset)]
-             (-> new-t
-               (assoc-in [:length] (count to-raise-text))
-               (assoc-in [:offset] replace-offset))
-             new-t))))))
+      (let [[offset' length'] (locs-to-sel l r)]
+        (if (and (= offset offset') (= length length'))
+          (let [p (or (z/up (parse-node l)) l)]
+            {:selection [(start-offset p) (end-offset p)]
+             :edits [{:offset (start-offset p) :length (- (start-offset l) (start-offset p)) :text ""}
+                     {:offset (end-offset r) :length (- (end-offset p) (end-offset r)) :text ""}]}
+            ; TODO fix col-shift and reintroduce it
+            #_(if-let [new-t (l/col-shift parse-state (-> new-t :modifs first) to-raise-offset replace-offset)]
+               (-> new-t
+                 (assoc-in [:length] (count to-raise-text))
+                 (assoc-in [:offset] replace-offset))
+               new-t))
+          (let [p (or (z/up (parse-node l)) l)]
+            {:selection [offset' (+ offset' length')]
+             :edits []}))))))
 
 (defmethod paredit
   :paredit-split-sexp

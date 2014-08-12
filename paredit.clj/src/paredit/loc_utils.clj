@@ -67,14 +67,6 @@
   [loc]
   (count (z/path loc)))
 
-(defn up-to-depth
-  "finds from the loc the ancestor loc at the given depth."
-  [loc depth]
-  (let [delta (- (loc-depth loc) depth)]
-    (cond 
-      (zero? delta) loc
-      :else (nth (iterate z/up loc) delta))))
-
 (defn punct-loc?
   "true if the loc corresponds to punctuation."
   [loc]
@@ -183,12 +175,13 @@
   ([loc offset]
     (leave-loc-for-offset-common loc offset false))
   ([loc offset left-bias]
-    (if (not (z/branch? loc))
-      (if (< offset (count (z/node loc))) loc (root-loc loc))
-      (let [content-cumulative-count (-> loc z/node :content-cumulative-count)]
-        (when (seq content-cumulative-count) ; only the root should be empty
-          (let [n (bisect content-cumulative-count (if left-bias <= <) offset)]
-            (recur (down-nth loc n) (- offset (nth content-cumulative-count n)) left-bias)))))))
+    (let [op (if left-bias <= <)]
+      (if (not (z/branch? loc))
+        (if (op offset (count (z/node loc))) loc (root-loc loc))
+        (let [content-cumulative-count (-> loc z/node :content-cumulative-count)]
+          (when (seq content-cumulative-count) ; only the root should be empty
+            (let [n (bisect content-cumulative-count op offset)]
+              (recur (down-nth loc n) (- offset (nth content-cumulative-count n)) left-bias))))))))
 
 (defn ^:dynamic leave-for-offset
   ([loc offset] (leave-for-offset loc offset false))
@@ -197,7 +190,7 @@
       l
       (root-loc loc))))
 
-(defn ^:dynamic loc-for-offset 
+(defn ^:dynamic loc-for-offset
   "returns a zipper location or nil if does not contain the offset"
   ([loc offset] (loc-for-offset loc offset false))
   ([loc offset left-bias]

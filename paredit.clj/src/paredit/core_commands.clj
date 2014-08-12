@@ -362,7 +362,7 @@
                  
                 "^java.util.List |(.add \"test\")" "^java.util.List (|.add \"test\")"
                 "^java.util.List (|)" "^java.util.List |"
-                "|^java.util.List (.add \"test\")" "^|java.util.List (.add \"test\")"
+                "|^java.util.List (.add \"test\")" "|java.util.List (.add \"test\")"
                 }]
      ["BackDel" :paredit-backward-delete
                {
@@ -476,14 +476,19 @@
     ;            "(a b c f)"))
     ["M-r"       :paredit-raise-sexp
                {
-                "(foo |bar)" "(foo |bar)" ; TODO change selection
-                "(foo bar|)" "(foo bar|)" ; TODO change selection
+                "(foo |bar)" "(foo |bar|)" ; TODO change selection
+                "(foo bar|)" "(foo |bar|)" ; TODO change selection
                 "(dynamic-wind in (lambda () |body|) out)" "(dynamic-wind in |body| out)"
                 "(dynamic-wind in |body| out)" "|body|"
-                "(foo |(bar]|)" "(foo |(bar]|)"
-                "(foo |(bar])|" "(foo |(bar])|"
+     ;           "(foo |(bar]|)" "(foo |(bar]|)"
+     ;           "(foo |(bar])|" "(foo |(bar])|"
                 "(|foo|)" "|foo|"
-                "(foo |(bar))" "(foo |(bar))" ; TODO change selection
+                "(foo |(bar))" "(foo |(bar)|)"
+                "[(a) b|]" "[(a) |b|]"
+                "[(a) |b]" "[(a) |b|]"
+                "[(a) b|c]" "[(a) |bc|]"
+                "[(a)| b]" "[|(a)| b]"
+                "[|(a) b]" "[|(a)| b]"
                 }]
     ]
     ["Barfage & Slurpage"
@@ -517,6 +522,7 @@
     ["Selection"
     ["Shift+Alt+Left" :paredit-expand-left
                {
+                "^{} foo|" "^{} |foo|"
                 "foo bar| baz" "foo |bar| baz"
                 "foo bar |baz" "foo bar| |baz"
                 "foo ba|r baz" "foo |bar| baz"
@@ -537,7 +543,7 @@
                 "foo;ba|r\nbaz" "foo|;bar|\nbaz"
                  "foo (bar [ba|z] |foo)" "foo (bar |[baz] |foo)"
                  "foo (bar [ba|z]) (foo [bar (b|az)])" "foo |(bar [baz]) (foo [bar (baz)])|"
-                 "foo |(bar [baz (b|am)])" "foo |(bar [baz (bam)])|"
+                 "foo |(bar [baz (b|am)])" "foo| (bar [baz (bam)])|"
                  "(foo bar|)" "(foo |bar|)"
                  "fooz foo |(bar)| baz" "fooz foo| (bar)| baz"
                  "fooz foo| (bar)| baz" "fooz |foo (bar)| baz"
@@ -561,13 +567,13 @@
                 "|foo b|ar baz" "|foo bar| baz"
                 "foo (bar| baz)" "foo (bar| |baz)"
                 "foo (bar |baz)" "foo (bar |baz|)"
-                "foo b|ar| baz" "foo |bar| baz"
+                "foo b|ar| baz" "foo |bar |baz"
                 "foo2 (bar baz|)" "foo2 |(bar baz)|"
                 "foo3 (bar |baz|)" "foo3 |(bar baz)|"
                 "foo \"bar |baz\"" "foo \"|bar baz|\""
                 "foo \"|bar baz|\"" "foo |\"bar baz\"|"
                 "foo;ba|r\nbaz" "foo|;bar|\nbaz"
-                "foo (bar [ba|z] |foo)" "foo (bar |[baz] |foo)"
+                "foo (bar [ba|z] |foo)" "foo (bar |[baz] foo|)"
                 "foo (bar [ba|z]) (foo [bar (b|az)])" "foo |(bar [baz]) (foo [bar (baz)])|"
                 "foo |(bar [baz (b|am)])" "foo |(bar [baz (bam)])|"
                 ;with :chimera
@@ -577,25 +583,25 @@
                {
                 "abc defgh|i " "abc |defghi| "
                 "|abc| defghi " "|abc defghi |"
-                "foo bar| baz" "|foo bar baz|"
-                "foo bar |baz" "|foo bar baz|"
+                "foo bar| baz" "foo |bar| baz"
+                "foo bar |baz" "foo bar |baz|"
                 "foo ba|r baz" "foo |bar| baz"
                 "foo7 bar b|a|z" "foo7 bar |baz|"
                 "foo8 bar ba|z|" "foo8 bar |baz|"
                 "foo9 bar |baz|" "|foo9 bar baz|"
                 "foo bar| baz|" "|foo bar baz|"
                 "foo |bar baz|" "|foo bar baz|"
-                "|foo bar baz" "|foo bar baz|"
+                "|foo bar baz" "|foo| bar baz"
                 "|f|oo bar baz" "|foo| bar baz"
                 "|foo| bar baz" "|foo bar baz|"
                 "|foo |bar baz" "|foo bar baz|"
                 "|foo b|ar baz" "|foo bar| baz"
-                "foo4 (bar| baz)" "foo4 (|bar baz|)"
+                "foo4 (bar| baz)" "foo4 (|bar| baz)"
                 "foo4 (|bar baz|)" "foo4 |(bar baz)|"
-                "foo5 (bar |baz)" "foo5 (|bar baz|)"
+                "foo5 (bar |baz)" "foo5 (bar |baz|)"
                 "foo5 (|bar baz|)" "foo5 |(bar baz)|"
                 "foo b|ar| baz" "foo |bar| baz"
-                "foo6 (bar baz|)" "foo6 (|bar baz|)"
+                "foo6 (bar baz|)" "foo6 (bar |baz|)"
                 "foo6 (|bar baz|)" "foo6 |(bar baz)|"
                 "foo7 (bar |baz|)" "foo7 (|bar baz|)"
                 "foo7 (|bar baz|)" "foo7 |(bar baz)|"
@@ -617,10 +623,11 @@
                 "(foo #bar.ba|z [quux])" "(foo #|bar.baz| [quux])"
                 "(foo #|bar.baz| [quux])" "(foo |#bar.baz| [quux])"
                 "(foo |#bar.baz| [quux])" "(foo |#bar.baz [quux]|)"
+                "[|(a) b|]" "|[(a) b]|"
 
-                ;with :chimera
-                "(foo |bar]" "|(foo bar]|"
-                "(foo |{bar)]" "|(foo {bar)]|"
+                ;with :chimera -- is it worth testing such cases?
+                "(foo |bar]" "(foo |bar|]"
+                "(foo |{bar)]" "(foo |{bar)]|"
                 }]
     ]
     ["Miscellaneous"
