@@ -451,7 +451,7 @@
   :paredit-expand-right
   [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
   (with-important-memoized (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
-    (let [[l r] (structural-selection rloc offset (min (inc length) (- (:count (z/node rloc)) offset)))]
+    (let [[l r] (structural-selection rloc offset (inc length))]
       (-> t (assoc :offset (start-offset l))
         (assoc :length (- (end-offset r) (start-offset l)))))
     t)))
