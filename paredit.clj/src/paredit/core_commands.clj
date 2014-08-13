@@ -731,6 +731,11 @@
                 "(;; bon|jour\n)" "(;; bon|\n ;; jour\n)"
                 "(|;bonjour\n)" "()|;bonjour\n()" ; looks a bit strange but let's try!
                 "(;bonjour|\n)" "(;bonjour|\n ;\n)"
+
+                ; split w/ selection
+                "(a |b| c)" "(a) |b| (c)"
+                "(a |b c|)" "(a) |b c|"
+                "(|a| b c)" "|a| (b c)"
                 }]
      ["M-J"    :paredit-join-sexps
                {"(hello)| (world)" "(hello| world)",

@@ -456,63 +456,83 @@
         (assoc :length (- (end-offset r) (start-offset l)))))
     t)))
 
+(defn enforce-structural-selection [{:keys #{parse-tree buffer} :as parse-state} {:keys [offset length] :as t} action]
+  (when-let [[l r] (some-> parse-tree (parsed-root-loc true) (structural-selection offset length))]
+    (let [[offset' length'] (locs-to-sel l r)]
+      (if (and (= offset offset') (= length length'))
+        (action l r parse-state t)
+        (let [p (or (z/up (parse-node l)) l)]
+          {:selection [offset' (+ offset' length')]
+           :edits []})))))
+
 (defmethod paredit
   :paredit-raise-sexp
-  [cmd {:keys #{parse-tree buffer} :as parse-state} {:keys [^String text offset length] :as t}]
+  [cmd parse-state t]
   (with-important-memoized
-    (when-let [[l r] (some-> parse-tree (parsed-root-loc true) (structural-selection offset length))]
-      (let [[offset' length'] (locs-to-sel l r)]
-        (if (and (= offset offset') (= length length'))
-          (let [p (or (z/up (parse-node l)) l)]
-            {:selection [(start-offset p) (end-offset p)]
-             :edits [{:offset (start-offset p) :length (- (start-offset l) (start-offset p)) :text ""}
-                     {:offset (end-offset r) :length (- (end-offset p) (end-offset r)) :text ""}]}
-            ; TODO fix col-shift and reintroduce it
-            #_(if-let [new-t (l/col-shift parse-state (-> new-t :modifs first) to-raise-offset replace-offset)]
-               (-> new-t
-                 (assoc-in [:length] (count to-raise-text))
-                 (assoc-in [:offset] replace-offset))
-               new-t))
-          (let [p (or (z/up (parse-node l)) l)]
-            {:selection [offset' (+ offset' length')]
-             :edits []}))))))
+    (enforce-structural-selection parse-state t
+      (fn [l r parse-state t]
+        (let [p (or (z/up (parse-node l)) l)]
+          {:selection [(start-offset p) (end-offset p)]
+           :edits [{:offset (start-offset p) :length (- (start-offset l) (start-offset p)) :text ""}
+                   {:offset (end-offset r) :length (- (end-offset p) (end-offset r)) :text ""}]}
+          ; TODO fix col-shift and reintroduce it
+          #_(if-let [new-t (l/col-shift parse-state (-> new-t :modifs first) to-raise-offset replace-offset)]
+             (-> new-t
+               (assoc-in [:length] (count to-raise-text))
+               (assoc-in [:offset] replace-offset))
+             new-t))))))
 
 (defmethod paredit
   :paredit-split-sexp
-  [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
-  (with-important-memoized (if (not= 0 length)
-    t
-    (when-let [rloc (-?> parse-tree (parsed-root-loc true))]
-      (let [[l r] (normalized-selection rloc offset length)
-            parent (cond
-                     (and (#{:comment :string} (loc-tag l)) (> offset (start-offset l))) l ; stay at the same level, and let the code take the correct open/close puncts, e.g. \" \"
-                     (and (= :whitespace (loc-tag l)) (= offset (start-offset l)) (= :comment (loc-tag (z/left l)))) (z/left l)
-                     :else (if-let [nl (z/up (if (start-punct? l) (parse-node l) (parse-leave l)))] nl (parse-leave l)))
-            [open-punct ^String close-punct] (let [tag (loc-tag parent)]
-                                               (case tag
-                                                 :comment [(str "\n" (str/repeat " " (loc-col parent)) ";"
-                                                             (->> parent z/node :content second
-                                                               (re-find #"^;* *"))) ""]
-                                                 ((juxt *tag-opening-brackets* *tag-closing-brackets*) tag)))]
-        (when close-punct
-          (let [[replace-offset replace-length]
-                (if (or (= :comment (loc-tag parent))
-                      (and
-                        (not= :whitespace (loc-tag l))
-                        (or
-                          (= :string (loc-tag l))
-                          (not (and
-                                 (= [offset length] (locs-to-sel l r))
-                                 (= offset (start-offset (parse-node l))))))))
-                  [offset 0]
-                  (let [start (or (some #(when-not (#{:whitespace :comment} (loc-tag %)) (end-offset %)) (previous-leaves l)) offset)
-                        end (or (some #(when-not (#{:whitespace :comment} (loc-tag %)) (start-offset %)) (next-leaves l)) offset)]
-                    [start (- end start)]))
-                replace-text (str close-punct (subs text replace-offset (+ replace-offset replace-length)) open-punct)
-                new-offset (+ offset (.length close-punct))]
-            {:selection [replace-offset replace-offset]
-             :edits [{:offset replace-offset :length 0 :text replace-text :broaden (- new-offset replace-offset)}
-                     {:offset replace-offset :length replace-length :text ""}]})))))))
+  [cmd {:keys [parse-tree buffer] :as parse-state} {:keys [^String text offset length] :as t}]
+  (with-important-memoized
+    (if (zero? length)
+      (when-let [rloc (-?> parse-tree (parsed-root-loc true))]
+        (let [[l r] (normalized-selection rloc offset length)
+                  parent (cond
+                           (and (#{:comment :string} (loc-tag l)) (> offset (start-offset l))) l ; stay at the same level, and let the code take the correct open/close puncts, e.g. \" \"
+                           (and (= :whitespace (loc-tag l)) (= offset (start-offset l)) (= :comment (loc-tag (z/left l)))) (z/left l)
+                           :else (if-let [nl (z/up (if (start-punct? l) (parse-node l) (parse-leave l)))] nl (parse-leave l)))
+                  [open-punct ^String close-punct] (let [tag (loc-tag parent)]
+                                                     (case tag
+                                                       :comment [(str "\n" (str/repeat " " (loc-col parent)) ";"
+                                                                   (->> parent z/node :content second
+                                                                     (re-find #"^;* *"))) ""]
+                                                       ((juxt *tag-opening-brackets* *tag-closing-brackets*) tag)))]
+              (when close-punct
+                (let [[replace-offset replace-length]
+                      (if (or (= :comment (loc-tag parent))
+                            (and
+                              (not= :whitespace (loc-tag l))
+                              (or
+                                (= :string (loc-tag l))
+                                (not (and
+                                       (= [offset length] (locs-to-sel l r))
+                                       (= offset (start-offset (parse-node l))))))))
+                        [offset 0]
+                        (let [start (or (some #(when-not (#{:whitespace :comment} (loc-tag %)) (end-offset %)) (previous-leaves l)) offset)
+                              end (or (some #(when-not (#{:whitespace :comment} (loc-tag %)) (start-offset %)) (next-leaves l)) offset)]
+                          [start (- end start)]))
+                      replace-text (str close-punct (subs text replace-offset (+ replace-offset replace-length)) open-punct)
+                      new-offset (+ offset (.length close-punct))]
+                  {:selection [replace-offset replace-offset]
+                   :edits [{:offset replace-offset :length 0 :text replace-text :broaden (- new-offset replace-offset)}
+                           {:offset replace-offset :length replace-length :text ""}]}))))
+        (enforce-structural-selection parse-state t
+          (fn [l r parse-state t]
+            (when-some [[open close] ({:list ["(" ")"] :vector  ["[" "]"] :map ["{" "}"] :set ["#{" "}"]}
+                                       (-> l z/up loc-tag))]
+              (let [l' (or (last (take-while #(#{:whitespace :comment} (-> % z/node :tag))
+                                   (iterate z/left (z/left l)))) l)
+                    r' (or (last (take-while #(#{:whitespace :comment} (-> % z/node :tag))
+                                   (iterate z/right (z/right r)))) r)]
+                {:selection [(start-offset l) (end-offset r)]
+                 :edits [(if (punct-loc? (z/left l'))
+                           {:offset (start-offset (z/left l')) :length (count open) :text ""}
+                           {:offset (start-offset l') :length 0 :text close})
+                         (if (punct-loc? (z/right r'))
+                           {:offset (end-offset r') :length (count close) :text ""}
+                           {:offset (end-offset r') :length 0 :text open})]})))))))
 
 (defmethod paredit
   :paredit-join-sexps
