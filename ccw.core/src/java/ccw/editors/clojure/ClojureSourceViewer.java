@@ -37,8 +37,9 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.custom.VerifyKeyListener;
 import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
@@ -194,30 +195,22 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
         super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles);
         setPreferenceStore(store);
 
-        KeyListener escListener = new KeyListener() {
-            public void keyPressed(KeyEvent e) {
+        // add before all other listeners so that we're certain we enable/disable
+        //the Esc key feature based on accurate state information
+        prependVerifyKeyListener(new VerifyKeyListener() {
+            @Override
+            public void verifyKey(VerifyEvent e) {
                 if (e.character == SWT.ESC) {
-                	if (!isContentAssistantActive) {
-                		inEscapeSequence = true;
-                		updateTabsToSpacesConverter();
-                		updateStructuralEditingModeStatusField();
+                    if (!isContentAssistantActive) {
+                        inEscapeSequence = !inEscapeSequence;
+                        updateTabsToSpacesConverter();
+                        updateStructuralEditingModeStatusField();
+                        e.doit = !inEscapeSequence; // double esc -> single esc
                 	}
                 }
             }
+        });
 
-            public void keyReleased(KeyEvent e) {
-                if (inEscapeSequence && !(e.character == SWT.ESC)) {
-                    inEscapeSequence = false;
-                    updateTabsToSpacesConverter();
-                    updateStructuralEditingModeStatusField();
-                }
-            }
-        };
-        
-        // add before all other listeners so that we're certain we enable/disable 
-        //the Esc key feature based on accurate state information
-        addKeyListenerFirst(getTextWidget(), escListener);
-        
         addTextInputListener(new ITextInputListener() {
             public void inputDocumentChanged(IDocument oldInput, IDocument newInput) {
                 if (newInput != null) {
