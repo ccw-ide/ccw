@@ -200,13 +200,17 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
         prependVerifyKeyListener(new VerifyKeyListener() {
             @Override
             public void verifyKey(VerifyEvent e) {
-                if (e.character == SWT.ESC) {
-                    if (!isContentAssistantActive) {
-                        inEscapeSequence = !inEscapeSequence;
-                        updateTabsToSpacesConverter();
-                        updateStructuralEditingModeStatusField();
-                        e.doit = !inEscapeSequence; // double esc -> single esc
-                	}
+                if (!inEscapeSequence && e.character == SWT.ESC && !isContentAssistantActive) {
+                    inEscapeSequence = !inEscapeSequence;
+                    updateTabsToSpacesConverter();
+                    updateStructuralEditingModeStatusField();
+                    e.doit = false; // double esc -> single esc
+                    return;
+                }
+                if (inEscapeSequence) {
+                    inEscapeSequence = false;
+                    updateTabsToSpacesConverter();
+                    updateStructuralEditingModeStatusField();
                 }
             }
         });
