@@ -478,8 +478,8 @@
                {
                 "(foo |bar)" "(foo |bar|)" ; TODO change selection
                 "(foo bar|)" "(foo |bar|)" ; TODO change selection
-                "(dynamic-wind in (lambda () |body|) out)" "(dynamic-wind in |body| out)"
-                "(dynamic-wind in |body| out)" "|body|"
+                "(dynamic-wind in (lambda () |body|) out)" "(dynamic-wind in (|body|) out)"
+                "(dynamic-wind in |body| out)" "(|body|)"
      ;           "(foo |(bar]|)" "(foo |(bar]|)"
      ;           "(foo |(bar])|" "(foo |(bar])|"
                 "(|foo|)" "|foo|"
@@ -489,6 +489,7 @@
                 "[(a) b|c]" "[(a) |bc|]"
                 "[(a)| b]" "[|(a)| b]"
                 "[|(a) b]" "[|(a)| b]"
+                "(a |b c| d)" "(|b c|)"
                 }]
     ]
     ["Barfage & Slurpage"
@@ -582,7 +583,7 @@
     ["Shift+Alt+Up" :paredit-expand-up
                {
                 "abc defgh|i " "abc |defghi| "
-                "|abc| defghi " "|abc defghi |"
+                "|abc| defghi " "|abc defghi| "
                 "foo bar| baz" "foo |bar| baz"
                 "foo bar |baz" "foo bar |baz|"
                 "foo ba|r baz" "foo |bar| baz"

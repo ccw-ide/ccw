@@ -420,14 +420,14 @@
       :else
         [(start-offset pl) (end-offset pr)])))
 
-(def ^:dynamic *selection-strategy* {:list children-then-punct-sel
-                           :vector children-then-punct-sel
-                           :map children-then-punct-sel
-                           :set children-then-punct-sel
-                           :fn children-then-punct-sel
-                           ;; :string children-then-punct-sel NOT WORKING WITH STRINGS CURRENTLY (SHOULD IT ?) 
-                           ;; :regex children-then-punct-sel  NOT WOKING WITH REGEXES CURRENTLY (SHOULD IT ?)
-                           })
+(defn- broaden-to-siblings [l r]
+  (let [f (fn [best-loc loc]
+            (if loc
+              (let [node (z/node loc)]
+                (if (or (string? node) (= :whitespace (:tag node))) best-loc loc))
+              (reduced best-loc)))]
+    [(reduce f l (iterate z/left l)) (reduce f r (iterate z/right r))]))
+
 (defmethod paredit
   :paredit-expand-up
   [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
@@ -436,15 +436,13 @@
       (if-not (= [offset length] (locs-to-sel l r))
         (assoc t :offset (start-offset l) 
                  :length (if (nil? r) 0 (- (end-offset r) (start-offset l))))
-        (let [parent (if-let [nl (z/up (if (= offset (start-offset (parse-node l)))
-                                         (parse-node l) 
-                                         (parse-leave l)))]
-                       nl 
-                       l)
-              selection-strategy (*selection-strategy* (loc-tag parent) default-behaviour-sel)
-              [start-offset end-offset] (selection-strategy parent l r)]
+        (let [broadened (broaden-to-siblings l r)
+              [l r] (if (= broadened [l r])
+                      (let [p (z/up l)] [p p])
+                      broadened)
+              [start-offset length] (locs-to-sel l r)]
           (assoc t :offset start-offset
-                   :length (- end-offset start-offset)))))
+            :length length))))
     t)))
 
 (defmethod paredit
@@ -471,10 +469,13 @@
   (with-important-memoized
     (enforce-structural-selection parse-state t
       (fn [l r parse-state t]
-        (let [p (or (z/up (parse-node l)) l)]
-          {:selection [(start-offset p) (end-offset p)]
-           :edits [{:offset (start-offset p) :length (- (start-offset l) (start-offset p)) :text ""}
-                   {:offset (end-offset r) :length (- (end-offset p) (end-offset r)) :text ""}]}
+        (let [broadened (broaden-to-siblings l r)
+              [l' r'] (if (= broadened [l r])
+                        (let [p (z/up l)] [p p])
+                        broadened)]
+          {:selection [(start-offset l') (end-offset r')]
+           :edits [{:offset (start-offset l') :length (- (start-offset l) (start-offset l')) :text ""}
+                   {:offset (end-offset r) :length (- (end-offset r') (end-offset r)) :text ""}]}
           ; TODO fix col-shift and reintroduce it
           #_(if-let [new-t (l/col-shift parse-state (-> new-t :modifs first) to-raise-offset replace-offset)]
              (-> new-t
