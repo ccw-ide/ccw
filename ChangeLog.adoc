@@ -8,6 +8,10 @@ Laurent Petit <laurent dot petit at gmail dot com>
 :toc-title!:
 :toclevels: 0
 
+== Changes between Counterclockwise 0.27.0 and 0.27.1
+
+`0.27.1` released on , 2014
+
 == Changes between Counterclockwise 0.26.0 and 0.27.0
 
 `0.27.0` released on August 21, 2014
