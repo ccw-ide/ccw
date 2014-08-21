@@ -40,6 +40,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
@@ -155,6 +156,24 @@ public class CCWPlugin extends AbstractUIPlugin {
 					// by starting the code in a new thread
 					new Thread(new Runnable() {
 						@Override public void run() {
+							// Some Eclipse plugins, such as LaunchingResourceManager
+							// call PlatformUI.getWorbench() and checking for null,
+							// even though null is not a valid return value
+							// (instead, an exception is thrown), resulting
+							// in the whole Eclipse to collapse.
+						    // Let's protect this code once and for all by ensuring
+							// That the Workbench has been initialized before calling
+							// the initialization code
+							while(!PlatformUI.isWorkbenchRunning()) {
+								try {
+									if (CCWPlugin.this.getBundle().getState()!=Bundle.ACTIVE)
+										return;
+									Thread.sleep(200);
+								} catch (InterruptedException e) {
+									e.printStackTrace();
+								}
+							}
+
 					        if (System.getProperty("ccw.autostartnrepl") != null) {
 					        	try {
 									startREPLServer();
