@@ -15,6 +15,7 @@ Laurent Petit <laurent dot petit at gmail dot com>
 === Bug fixes
 
 - Fix Issue with Eclipse Kepler (race conditions on plugin startup). Fix Issue #652 - should also prevent some other problems as well
+- Fix Issue with `Namespace Browser View` which was broken in version 0.27.0
 
 == Changes between Counterclockwise 0.26.0 and 0.27.0
 

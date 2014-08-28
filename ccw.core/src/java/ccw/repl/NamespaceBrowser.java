@@ -358,7 +358,7 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 					if (oldInput != null && oldInput.equals(newInput)) {
 						return Status.CANCEL_STATUS;
 					} else {
-						asyncResetInput(null);
+						asyncResetInput(newInput);
 						return Status.OK_STATUS;
 					}
 				} catch (Exception e) {
@@ -417,8 +417,10 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 
 				treeViewer.setInput(newInput);
 
-				treeViewer.setExpandedTreePaths(expandedTreePaths);
-				treeViewer.setSelection(sel);
+				if (newInput != null) {
+					treeViewer.setExpandedTreePaths(expandedTreePaths);
+					treeViewer.setSelection(sel);
+				}
 			}
 		});
 	}
