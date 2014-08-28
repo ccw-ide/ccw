@@ -11,10 +11,12 @@ This page explains how to install a development environment for hacking on CCW.
 == Prerequisites
  
 - Java 7
-- Eclipse Standard 4.3.1 (aka Kepler) http://eclipse.org/downloads/packages/eclipse-standard-431/keplersr1
 - Install maven 3.1.1 (or above) from the command line:
 ** download from http://mirrors.linsrv.net/apache/maven/maven-3/3.1.1/binaries/apache-maven-3.1.1-bin.zip
 ** unzip somewhere, e.g. `/path/to/maven`, create an environment variable `M2_HOME=/path/to/maven`, add `$M2_HOME/bin` to your path
+- Eclipse Standard 4.3.1 (aka Kepler) http://eclipse.org/downloads/packages/eclipse-standard-431/keplersr1 with plugins:
+** m2e
+** Tycho Project Configurators
 
 == Command Line (maven based) Environment
 

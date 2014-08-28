@@ -8,9 +8,13 @@ Laurent Petit <laurent dot petit at gmail dot com>
 :toc-title!:
 :toclevels: 0
 
+== Changes between Counterclockwise 0.27.0 and 0.27.1
+
+`0.27.1` released on , 2014
+
 == Changes between Counterclockwise 0.26.0 and 0.27.0
 
-`0.27.0` released on July 24, 2014
+`0.27.0` released on August 21, 2014
 
 === Enhancements
 
@@ -18,9 +22,20 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 If source jars for dependencies are available on the repositories, they are downloaded and set up on the `Leiningen Dependencies` classpath container. (Thank you Zhang Yaokun - aka paxnil on Github - for the pull request!)
 
+==== Debugging Clojure Projects
+
+- It is now possible to add breakpoints on `cljx` files in addition to `cljs` files.
+- Breakpoints open the right files (those in source folders, not in bin/ folder) when leiningen is used to debug the project - i.e. the default behaviour - (was only working when project was started directly by Eclipse)
+- Breakpoints correctly pick the right files, e.g. they do not mess with multiple `core.clj` files in the project classpath. Fixes Issue #273
+
 === Bug fixes
 
 - Don't activate Leiningen commands in wrong places in the IDE (e.g. in unrelated contextual menus). Fix Issue #642
+
+- In CCW/Standalone, one can succesfully Open menu:Window[Preferences > General > Appearance] whereas an error occured previously. Fixes Issue #646. Thank you Andrea Richiardi for filing the Issue and finding the relevant resources which helped me to fix it quickly!)
+
+- Fixed race conditions during Eclipse startup between CCW and the JDT indirectly starting the DebugUIPlugin while the workbench has not been created yet (why the stack towards getting a JDT classpath check leads to trying to start the DebugUIPlugin in Eclipse is an exercise left to the reader). Fix Issue #651
+
 
 == Changes between Counterclockwise 0.25.2 and 0.26.0
 

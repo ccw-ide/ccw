@@ -22,7 +22,8 @@
      :java/project-name    (and project (e/project-name project))
      :java/vm-connector    (launch/vm-connector :socket-attach-vm-connector)
      :java/connect-map     {"port"     port
-                            "hostname" "localhost"}}))
+                            "hostname" "localhost"}
+     :source-path-computer-id "ccw.sourcePathComputer"}))
 
 (defn match-found 
   "state contains the console instance, and a set of seen (if many) debug port patterns.
