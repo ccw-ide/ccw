@@ -51,6 +51,7 @@ import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.StatusLineContributionItem;
 
+import clojure.lang.RT;
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.preferences.PreferenceConstants;
@@ -200,18 +201,21 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
         prependVerifyKeyListener(new VerifyKeyListener() {
             @Override
             public void verifyKey(VerifyEvent e) {
-                if (!inEscapeSequence && e.character == SWT.ESC && !isContentAssistantActive) {
-                    inEscapeSequence = !inEscapeSequence;
+                if (isContentAssistantActive) return;
+                if (inEscapeSequence) {
+                    inEscapeSequence = false;
+                    updateTabsToSpacesConverter();
+                    updateStructuralEditingModeStatusField();
+                    return;
+                }
+                if (e.character == SWT.ESC) {
+                    inEscapeSequence = true;
                     updateTabsToSpacesConverter();
                     updateStructuralEditingModeStatusField();
                     e.doit = false; // double esc -> single esc
                     return;
                 }
-                if (inEscapeSequence) {
-                    inEscapeSequence = false;
-                    updateTabsToSpacesConverter();
-                    updateStructuralEditingModeStatusField();
-                }
+                e.doit = !RT.booleanCast(editorSupport._("structedit-key-event", event, getParseState(), getDocument()));
             }
         });
 

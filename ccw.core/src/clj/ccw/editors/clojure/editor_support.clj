@@ -115,3 +115,6 @@
 		(.setMatchingCharacterPainterPreferenceKeys 
       PreferenceConstants/EDITOR_MATCHING_BRACKETS 
       PreferenceConstants/EDITOR_MATCHING_BRACKETS_COLOR)))
+
+(defn structedit-key-event [^org.eclipse.swt.events.VerifyEvent event parse-state document]
+  nil)
