@@ -215,7 +215,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
                     e.doit = false; // double esc -> single esc
                     return;
                 }
-                e.doit = !RT.booleanCast(editorSupport._("structedit-key-event", event, getParseState(), getDocument()));
+                e.doit = !RT.booleanCast(editorSupport._("structedit-key-event", e, getParseState(), getDocument()));
             }
         });
 
