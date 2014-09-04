@@ -118,7 +118,7 @@
 
 (def out *out*)
 
-(defn structedit-key-event [^org.eclipse.swt.events.VerifyEvent event #_^ccw.editors.clojure.ClojureSourceViewer source-viewer parse-state document]
+(defn structedit-key-event [^org.eclipse.swt.events.VerifyEvent event ^ccw.editors.clojure.ClojureSourceViewer source-viewer parse-state document]
   #_(binding [*out* out]
     (prn (.character event) (java.lang.Integer/toHexString (int (.character event)))
       (bit-and (bit-xor org.eclipse.swt.SWT/MODIFIER_MASK org.eclipse.swt.SWT/SHIFT) (.stateMask event)))
