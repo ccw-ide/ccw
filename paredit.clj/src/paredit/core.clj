@@ -428,6 +428,23 @@
               (reduced best-loc)))]
     [(reduce f l (iterate z/left l)) (reduce f r (iterate z/right r))]))
 
+(defn- broaden
+  "Broadens this selection by at least one character."
+  [l r]
+  (let [start (start-offset l)
+        end (end-offset r)]
+    (loop [l l r r broadened false]
+      (cond
+        (or (not= start (start-offset l)) (not= end (end-offset r)))
+        [l r]
+        broadened
+        (if-let [p (z/up l)]
+          (recur p p false)
+          [l r])
+        :else
+        (let [[l r] (broaden-to-siblings l r)]
+          (recur l r true))))))
+
 (defmethod paredit
   :paredit-expand-up
   [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
@@ -436,10 +453,7 @@
       (if-not (= [offset length] (locs-to-sel l r))
         (assoc t :offset (start-offset l) 
                  :length (if (nil? r) 0 (- (end-offset r) (start-offset l))))
-        (let [broadened (broaden-to-siblings l r)
-              [l r] (if (= broadened [l r])
-                      (let [p (z/up l)] [p p])
-                      broadened)
+        (let [[l r] (broaden l r)
               [start-offset length] (locs-to-sel l r)]
           (assoc t :offset start-offset
             :length length))))
@@ -469,10 +483,7 @@
   (with-important-memoized
     (enforce-structural-selection parse-state t
       (fn [l r parse-state t]
-        (let [broadened (broaden-to-siblings l r)
-              [l' r'] (if (= broadened [l r])
-                        (let [p (z/up l)] [p p])
-                        broadened)]
+        (let [[l' r'] (broaden l r)]
           {:selection [(start-offset l') (end-offset r')]
            :edits [{:offset (start-offset l') :length (- (start-offset l) (start-offset l')) :text ""}
                    {:offset (end-offset r) :length (- (end-offset r') (end-offset r)) :text ""}]}
