@@ -201,6 +201,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
         prependVerifyKeyListener(new VerifyKeyListener() {
             @Override
             public void verifyKey(VerifyEvent e) {
+                // TODO when isContentAssistantActive does not handle a key, give us back control
                 if (isContentAssistantActive) return;
                 if (inEscapeSequence) {
                     inEscapeSequence = false;
@@ -215,10 +216,9 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
                     e.doit = false; // double esc -> single esc
                     return;
                 }
-                e.doit = !RT.booleanCast(editorSupport._("structedit-key-event", e, getParseState(), getDocument()));
+                e.doit = !RT.booleanCast(editorSupport._("structedit-key-event", e, ClojureSourceViewer.this, getParseState(), getDocument()));
             }
         });
-
         addTextInputListener(new ITextInputListener() {
             public void inputDocumentChanged(IDocument oldInput, IDocument newInput) {
                 if (newInput != null) {
