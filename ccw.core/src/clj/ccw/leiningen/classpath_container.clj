@@ -83,7 +83,7 @@
   (let [entry-list (map library-entry project-dependencies)]
     (make-leiningen-classpath-container entry-list)))
 
-;; copied from ubersource
+;; copied from lein-ubersource
 (defn- find-transitive-deps
   [deps repositories]
   (->> (aether/resolve-dependencies
@@ -92,14 +92,14 @@
       keys
       set))
 
-;; copied from ubersource
+;; copied from lein-ubersource
 (defn- resolve-artifact
   [dep repositories]
   (->> (find-transitive-deps [dep] repositories)
       (filter #(= % dep))
       first))
 
-;; copied from ubersource
+;; copied from lein-ubersource
 (defn- try-resolve-sources-artifact!
   [dep repositories]
   (try
@@ -109,17 +109,18 @@
 
 (defn- artifacts-entry
   [dep repositories]
-  (let [main (resolve-artifact (take 2 dep) repositories)
+  (let [main (resolve-artifact
+               (take 2 dep) ; take only id and version, not optional exclusion sections
+               repositories)
         source (try-resolve-sources-artifact! dep repositories)]
     (if source [(-> main meta :file)
                 (-> source meta :file)]
                nil)))
 
 (defn get-source-map
-  "I don't do a lot."
   [{:keys [repositories dependencies] :as project} & args]
   (let [dep (find-transitive-deps dependencies repositories)]
-    (into {} (remove nil? (map #(artifacts-entry % repositories) dep)))))
+    (into {} (keep #(artifacts-entry % repositories) dep))))
 
 (defn resolve-dependencies
   "ADAPTED FROM LEININGEN-CORE resolve-dependencies.

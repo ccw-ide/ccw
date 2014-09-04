@@ -68,8 +68,12 @@ public class LoadFileAction extends Action {
 
         final REPLView repl = REPLView.activeREPL.get();
         if (repl != null && !repl.isDisposed())  {
-    		evaluateFileText(repl, editor.getDocument().get(), filePath, sourcePath, fileName);
-    		// FIXME: normal that we switch in namespace if start (if no repl), and not if not start ... ?
+        	try {
+        		evaluateFileText(repl, editor.getDocument().get(), filePath, sourcePath, fileName);
+        		//	FIXME: normal that we switch in namespace if start (if no repl), and not if not start ... ?
+        	} catch (Exception e) {
+        		CCWPlugin.logError("Could not start a REPL for loading file " + filePath, e);
+        	}
         } else if (editorFile != null) {
     		CCWPlugin.getTracer().trace(TraceOptions.LAUNCHER, "No active REPL found (",
     				(repl == null) ? "active repl is null" : "active repl is disposed", 
@@ -81,7 +85,11 @@ public class LoadFileAction extends Action {
 						@Override
 						public void run(final REPLView repl) {
 				        	if (repl != null && !repl.isDisposed()) {
-				        		evaluateFileText(repl, editor.getDocument().get(), filePath, sourcePath, fileName);
+				        		try {
+				        			evaluateFileText(repl, editor.getDocument().get(), filePath, sourcePath, fileName);
+				        		} catch(Exception e) {
+					        		CCWPlugin.logError("Could not start a REPL for loading file " + filePath, e);
+				        		}
 				        		SwitchNamespaceAction.run(repl, editor, false);
 				        	} else {
 				        		CCWPlugin.logError("Could not start a REPL for loading file " + filePath);
@@ -131,20 +139,16 @@ public class LoadFileAction extends Action {
 		return sourcePath;
 	}
 	
-	private static void evaluateFileText(REPLView repl, String text, String filePath, String sourcePath, String fileName) {
-        try {
-            if (repl.getAvailableOperations().contains("load-file")) {
-                repl.getConnection().sendSession(repl.getSessionId(),
-                        "op", "load-file", "file", text,
-                        "file-path", sourcePath, "file-name", fileName);
-            } else {
-                String loadFileText = (String) nreplHelpers._("load-file-command", text, sourcePath, fileName);
-                EvaluateTextUtil.evaluateText(repl, ";; Loading file " + filePath, false);
-                EvaluateTextUtil.evaluateText(repl, loadFileText, true);
-            }
-            Actions.ShowActiveREPL.execute(false);
-        } catch (Exception e) {
-            CCWPlugin.logError("Could not load file " + filePath, e);
+	private static void evaluateFileText(REPLView repl, String text, String filePath, String sourcePath, String fileName) throws Exception {
+        if (repl.getAvailableOperations().contains("load-file")) {
+            repl.getConnection().sendSession(repl.getSessionId(),
+                    "op", "load-file", "file", text,
+                    "file-path", sourcePath, "file-name", fileName);
+        } else {
+            String loadFileText = (String) nreplHelpers._("load-file-command", text, sourcePath, fileName);
+            EvaluateTextUtil.evaluateText(repl, ";; Loading file " + filePath, false);
+            EvaluateTextUtil.evaluateText(repl, loadFileText, true);
         }
+        Actions.ShowActiveREPL.execute(false);
 	}
 }
