@@ -38,15 +38,12 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.VerifyKeyListener;
-import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.StatusLineContributionItem;
@@ -239,30 +236,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 		isShowRainbowParens = store.getBoolean(ccw.preferences.PreferenceConstants.SHOW_RAINBOW_PARENS_BY_DEFAULT);
 		this.statusLineHandler = statusLineHandler;
 	}
-    
-    private void addKeyListenerFirst(Control control, KeyListener listener) {
-    	Listener[] keyDownListeners = control.getListeners(SWT.KeyDown);
-    	Listener[] keyUpListeners = control.getListeners(SWT.KeyUp);
-    	
-    	removeAll(control, SWT.KeyDown, keyDownListeners);
-    	removeAll(control, SWT.KeyUp, keyUpListeners);
 
-    	control.addKeyListener(listener);
-    	
-    	addAll(control, SWT.KeyDown, keyDownListeners);
-    	addAll(control, SWT.KeyUp, keyUpListeners);
-    }
-    private void removeAll(Control control, int eventType, Listener[] listeners) {
-    	for (Listener listener: listeners) {
-    		control.removeListener(eventType, listener);
-    	}
-    }
-    private void addAll(Control control, int eventType, Listener[] listeners) {
-    	for (Listener listener: listeners) {
-    		control.addListener(eventType, listener);
-    	}
-    }
-    
     public static StatusLineContributionItem createStructuralEditionModeStatusContributionItem() {
 		return new StatusLineContributionItem(
 				ClojureSourceViewer.STATUS_CATEGORY_STRUCTURAL_EDITION, 
