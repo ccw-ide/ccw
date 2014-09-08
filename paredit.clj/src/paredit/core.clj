@@ -23,38 +23,29 @@
 (defn compare-edits
   "Compare disjoint edits. Edits being assumed disjoint or equal, only their midpoints are compared."
   [a b]
-  (- (+ (* 2 (:offset a)) (:length a)) (+ (* 2 (:offset b)) (:length b))))
+  (- (+ (* 4 (:offset a)) (* 2 (:length a)) (if (:before a) 0 1))
+    (+ (* 4 (:offset b)) (* 2(:length b)) (if (:before b) 0 1))))
+
+(defn disjoint-edits [edits]
+  (for [[before after] (partition-by (juxt :offset :length) (sort compare-edits edits))]
+    (if after
+      (assoc before :text (str (:text before) (:text after)))
+      before)))
 
 (defn update-selection [[offset end-offset] edits]
   ;; only insertion edits (whose length is zero) can broaden a selection
   (let [edits (into (sorted-set-by compare-edits) edits)
-        start {:offset offset :length 0}
-        end {:offset end-offset :length 0}
-        before-sel (subseq edits < start)
+        start+ {:offset offset :length 0 :before false}
+        end- {:offset end-offset :length 0 :before true}
+        before-sel (subseq edits < start+)
         shift (reduce (fn [shift {:keys [text length]}]
                         (+ shift (- (count text) length)))
                 0 before-sel)
-        [offset' shift] (if-let [{:keys [text broaden]} (get edits start)]
-                          (let [shift' (+ shift (count text))
-                                offset (cond
-                                         (not broaden) (+ offset shift')
-                                         (true? broaden) (+ offset shift)
-                                         (neg? broaden) (+ offset shift' broaden)
-                                         :else (+ offset shift broaden))]
-                            [offset shift'])
-                          [(+ offset shift) shift])
+        offset' (+ offset shift)
         shift (reduce (fn [shift {:keys [text length]}]
                         (+ shift (- (count text) length)))
-                shift (subseq edits > start < end))
-        end-offset' (if-not (= end-offset offset)
-                      (if-let [{:keys [text broaden]} (get edits end)]
-                        (+ end-offset shift (cond
-                                              (not broaden) 0
-                                              (true? broaden) (count text)
-                                              (pos? broaden) broaden
-                                              (neg? broaden) (+ (count text) broaden)))
-                        (+ end-offset shift))
-                      offset')]
+                shift (subseq edits >= start+ <= end-))
+        end-offset' (+ end-offset shift)]
     [offset' end-offset']))
 
 (defmacro with-memoized [func-names & body]
@@ -525,10 +516,10 @@
                         (let [start (or (some #(when-not (#{:whitespace :comment} (loc-tag %)) (end-offset %)) (previous-leaves l)) offset)
                               end (or (some #(when-not (#{:whitespace :comment} (loc-tag %)) (start-offset %)) (next-leaves l)) offset)]
                           [start (- end start)]))
-                      replace-text (str close-punct (subs text replace-offset (+ replace-offset replace-length)) open-punct)
-                      new-offset (+ offset (.length close-punct))]
+                      replace-text (str close-punct (subs text replace-offset (+ replace-offset replace-length)))]
                   {:selection [replace-offset replace-offset]
-                   :edits [{:offset replace-offset :length 0 :text replace-text :broaden (- new-offset replace-offset)}
+                   :edits [{:offset replace-offset :length 0 :text replace-text :before true}
+                           {:offset replace-offset :length 0 :text open-punct :before false}
                            {:offset replace-offset :length replace-length :text ""}]}))))
         (enforce-structural-selection parse-state t
           (fn [l r parse-state t]
@@ -584,8 +575,8 @@
         (let [start (start-offset left-leave)
               end (or (-?> right-leave end-offset) (.length text))]
           {:selection [start end]
-           :edits [{:text o :offset start :length 0}
-                   {:text c :offset end :length 0}]})))))
+           :edits [{:text o :offset start :length 0 :before true}
+                   {:text c :offset end :length 0 :before false}]})))))
 
 (defmethod paredit
   :paredit-wrap-quote

@@ -44,7 +44,8 @@
   [^IClojureEditor editor ^DocumentCommand command result]
   (if (:selection result)
     (let [{edits :edits selection :selection} result
-          [caret-offset end-offset] (paredit/update-selection selection edits)]
+          [caret-offset end-offset] (paredit/update-selection selection edits)
+          edits (paredit/disjoint-edits edits)]
       (into-command command edits)
       (set! (.shiftsCaret command) false)
       (set! (.caretOffset command) caret-offset)

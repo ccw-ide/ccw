@@ -56,7 +56,8 @@
 (defn ^org.eclipse.text.edits.TextEdit to-text-edit
   "Creates a TextEdit from a collection of edits."
   [edits]
-  (let [text-edit (org.eclipse.text.edits.MultiTextEdit.)]
+  (let [text-edit (org.eclipse.text.edits.MultiTextEdit.)
+        edits (pc/disjoint-edits edits)]
     (doseq [{:keys [text offset length]} edits]
       (.addChild text-edit (org.eclipse.text.edits.ReplaceEdit. offset length text)))
     text-edit))
