@@ -235,7 +235,19 @@
   (with-important-memoized (close-balanced parse-tree ["{" "}"] t
     nil nil)))
 
-(defmethod paredit
+(defn- pad-left [{:keys [text offset] :as edit} parse-tree]
+  (let [loc (-> parse-tree parsed-root-loc (loc-for-offset offset true))]
+    (if (and (= (end-offset loc) offset) (not (when-let [c (some-> parse-tree parsed-root-loc (char-before offset))]
+                                                (or (Character/isWhitespace c) (= \# c)))))
+      (assoc edit :text (str " " text))
+      edit)))
+
+(defn- pad-right [{:keys [text offset] :as edit} parse-tree]
+  (let [loc (-> parse-tree parsed-root-loc (loc-for-offset offset false))]
+    (if (and (= (start-offset loc) offset) (not (some-> parse-tree parsed-root-loc (char-after offset) Character/isWhitespace)))
+      (assoc edit :text (str text " "))
+      edit)))
+
   :paredit-doublequote
   [cmd {:keys #{parse-tree buffer}} {:keys [text offset length] :as t}]
   (with-important-memoized 
