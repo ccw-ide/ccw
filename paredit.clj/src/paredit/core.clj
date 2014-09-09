@@ -167,7 +167,7 @@
   [parsed [o c] {:keys [^String text offset length] :as t} 
    chars-with-no-space-before chars-with-no-space-after]
   (if (zero? length) 
-    (let [offset-loc (-> parsed parsed-root-loc (leave-for-offset offset))]
+    (let [offset-loc (-> parsed parsed-root-loc (loc-containing-offset offset))]
       (if (in-code? offset-loc)
         (insert-balanced [o c] t chars-with-no-space-before chars-with-no-space-after)
         (-> t (t/insert (str o)))))

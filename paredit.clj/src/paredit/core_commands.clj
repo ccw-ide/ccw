@@ -210,8 +210,7 @@
 	               {"(a b |c d)"
 	                "(a b (|) c d)"
 	                "(foo \"bar |baz\" quux)" "(foo \"bar (|baz\" quux)"
-                 }
-	               {"(a b|c d)" "(a b (|) c d)"
+                 "(a b|c d)" "(a b (|) c d)"
 	                "(|)" "((|))"
 	                "|" "(|)"
 	                "a|" "a (|)"
@@ -257,8 +256,8 @@
      ["["         :paredit-open-square
                 {"(a b |c d)"  "(a b [|] c d)"
                  "(foo \"bar |baz\" quux)" "(foo \"bar [|baz\" quux)"
-                 }
-                 {"(a b|c d)" "(a b [|] c d)"
+                 "|\"hello\"" "[|] \"hello\""
+                  "(a b|c d)" "(a b [|] c d)"
                   "(|)" "([|])"
                   "|" "[|]"
                   "a|" "a [|]"
