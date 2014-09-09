@@ -150,16 +150,16 @@
 (defmulti paredit (fn [k & args] k))
 
 (defn insert-balanced
-  [[o c] t chars-with-no-space-before chars-with-no-space-after]
+  [[o c] {:keys [offset] :as t} chars-with-no-space-before chars-with-no-space-after]
   (let [add-pre-space? (not (contains? chars-with-no-space-before 
                                        (t/previous-char-str t 1 #_(count o))))
         add-post-space? (not (contains? chars-with-no-space-after 
-                                        (t/next-char-str t)))
-        ins-str (str (if add-pre-space? " " "")
-                     (str o c)
-                     (if add-post-space? " " ""))
-        offset-shift (if add-post-space? -2 -1)]
-    (-> t (t/insert ins-str) (t/shift-offset offset-shift))))
+                                        (t/next-char-str t)))]
+    {:selection [offset offset]
+     :edits [{:offset offset :text (str (if add-pre-space? " " "") (str o))
+              :length 0 :before true}
+             {:offset offset :text (str c (if add-post-space? " " ""))
+              :length 0 :before false}]}))
 
 (declare wrap-with-balanced)
 
@@ -170,7 +170,7 @@
     (let [offset-loc (-> parsed parsed-root-loc (loc-containing-offset offset))]
       (if (in-code? offset-loc)
         (insert-balanced [o c] t chars-with-no-space-before chars-with-no-space-after)
-        (-> t (t/insert (str o)))))
+        {:selection [offset offset] :edits [{:offset offset :text (str o) :length 0 :before true}]}))
     (wrap-with-balanced parsed [o c] t)))
 
 (defn close-balanced
@@ -195,7 +195,7 @@
               t)))
         (-> t (t/insert (str c))))))
 
-(defmethod paredit 
+(defmethod paredit
   :paredit-open-round
   [cmd {:keys #{parse-tree buffer}} {:keys [text offset length] :as t}]
   (with-important-memoized 
@@ -203,14 +203,14 @@
       (union (conj (into *real-spaces* *open-brackets*) "#") *form-macro-chars*)
       (into *extended-spaces* *close-brackets*))))
     
-(defmethod paredit 
+(defmethod paredit
   :paredit-open-square
   [cmd {:keys #{parse-tree buffer}} {:keys [text offset length] :as t}]
   (with-important-memoized (open-balanced parse-tree ["[" "]"] t
     (union (into *real-spaces* *open-brackets*) *form-macro-chars*)
     (into *extended-spaces* *close-brackets*))))
     
-(defmethod paredit 
+(defmethod paredit
   :paredit-open-curly
   [cmd {:keys #{parse-tree buffer}} {:keys [text offset length] :as t}]
   (with-important-memoized (open-balanced parse-tree ["{" "}"] t
