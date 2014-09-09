@@ -11,7 +11,10 @@
 
 package ccw.editors.clojure;
 
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -73,6 +76,10 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
      *  */
     public static final String STATUS_CATEGORY_STRUCTURAL_EDITION = "CCW.STATUS_CATEGORY_STRUCTURAL_EDITING_POSSIBLE";
     
+    public static interface ModeListener {
+        void modeChanged(ClojureEditorMode mode, boolean esc);
+    }
+
     /**
      * Due to Eclipse idiosyncracies, it is not possible for the viewer to 
      * directly manage lifecycle of StatusLineContributionItems.
@@ -83,8 +90,22 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
      *  This interface must be implemented by "components" (Editors, Viewers, whatever)
      *  which are capable of reporting status to status line managers
      */
-    public static interface IStatusLineHandler {
-    	StatusLineContributionItem getEditingModeStatusContributionItem();
+    public static abstract class EditingModeStatusUpdater implements ModeListener {
+
+        abstract protected StatusLineContributionItem getEditingModeStatusContributionItem();
+
+        public void modeChanged(ClojureEditorMode mode, boolean inEscapeSequence) {
+            StatusLineContributionItem field = getEditingModeStatusContributionItem();
+            if (field != null) {
+                boolean isStructuralEditingEnabled = mode != ClojureEditorMode.TEXT;
+                field.setText((isStructuralEditingEnabled ? "strict/paredit" : "unrestricted")
+                              + " edit mode" + (inEscapeSequence ? " ESC" : ""));
+                field.setToolTipText(
+                        (isStructuralEditingEnabled
+                                ? "strict/paredit edit mode:\neditor does its best to prevent you from breaking the structure of the code (requires you to know shortcut commands well)."
+                                : "unrestricted edit mode:\nhelps you with edition, but does not get in your way."));
+            }
+        }
     }
 
     /**
@@ -151,11 +172,8 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     
     private boolean isContentAssistantActive;
     
-	/**
-	 * Set to true if the editor is in "Strict" Structural editing mode
-	 */
-	private boolean useStrictStructuralEditing;
-	
+    private ClojureEditorMode editorMode;
+
 	/**
 	 * Set to true to have the viewer show rainbow parens
 	 */
@@ -172,8 +190,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 	 * STOLEN FROM THE JDT */
 	private SelectionHistory fSelectionHistory;
 	
-	/** can be null */
-	private IStatusLineHandler statusLineHandler;
+	private Set<ModeListener> modeListeners = new HashSet<ClojureSourceViewer.ModeListener>();
 	
 	/** The error message shown in the status line in case of failed information look up. */
 	protected final String fErrorLabel = "An unexpected error occured";
@@ -189,7 +206,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 	 */
 	private boolean structuralEditingPossible;
 	
-    public ClojureSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles, IPreferenceStore store, IStatusLineHandler statusLineHandler) {
+    public ClojureSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles, IPreferenceStore store) {
         super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles);
         setPreferenceStore(store);
 
@@ -203,13 +220,13 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
                 if (inEscapeSequence) {
                     inEscapeSequence = false;
                     updateTabsToSpacesConverter();
-                    updateStructuralEditingModeStatusField();
+                    fireModeChange();
                     return;
                 }
                 if (e.character == SWT.ESC) {
                     inEscapeSequence = true;
                     updateTabsToSpacesConverter();
-                    updateStructuralEditingModeStatusField();
+                    fireModeChange();
                     e.doit = false; // double esc -> single esc
                     return;
                 }
@@ -231,10 +248,9 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
                     oldInput.removeDocumentListener(parseTreeConstructorDocumentListener);
             }
         });
-        
-		useStrictStructuralEditing = store.getBoolean(ccw.preferences.PreferenceConstants.USE_STRICT_STRUCTURAL_EDITING_MODE_BY_DEFAULT);
+
+        editorMode = store.getBoolean(ccw.preferences.PreferenceConstants.USE_STRICT_STRUCTURAL_EDITING_MODE_BY_DEFAULT) ? ClojureEditorMode.PAREDIT : ClojureEditorMode.TEXT;
 		isShowRainbowParens = store.getBoolean(ccw.preferences.PreferenceConstants.SHOW_RAINBOW_PARENS_BY_DEFAULT);
-		this.statusLineHandler = statusLineHandler;
 	}
 
     public static StatusLineContributionItem createStructuralEditionModeStatusContributionItem() {
@@ -497,7 +513,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 
     // TODO rename because it's really "should we be in strict mode or not?" 
     public boolean isStructuralEditingEnabled() {
-        return useStrictStructuralEditing;
+        return editorMode == ClojureEditorMode.PAREDIT;
     }
     
     public boolean isShowRainbowParens() {
@@ -620,18 +636,30 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 		return pairsMatcher;
 	}
 	
-	public void setStructuralEditingPossible(boolean state) {
-		if (state != this.structuralEditingPossible) {
-			this.structuralEditingPossible = state;
-			updateStructuralEditingModeStatusField();
-		}
-	}
-	
     public void toggleStructuralEditionMode() {
-       useStrictStructuralEditing = !useStrictStructuralEditing;
-       updateStructuralEditingModeStatusField();
+       setMode(editorMode == ClojureEditorMode.TEXT ? ClojureEditorMode.PAREDIT : ClojureEditorMode.TEXT);
     }
 	
+    public void addModeListener(ModeListener listener) {
+        modeListeners.add(listener);
+        listener.modeChanged(editorMode, inEscapeSequence);
+    }
+
+    public void setMode(ClojureEditorMode mode) {
+        editorMode = mode;
+        fireModeChange();
+    }
+
+    protected void fireModeChange() {
+        for (ModeListener modeListener : modeListeners) {
+            modeListener.modeChanged(editorMode, inEscapeSequence);
+        }
+    }
+
+    public ClojureEditorMode getMode() {
+        return editorMode;
+    }
+
     public void toggleShowRainbowParens() {
        isShowRainbowParens = !isShowRainbowParens;
        markDamagedAndRedraw();
@@ -656,22 +684,6 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     	return isForceRepair;
     }
     
-	public void updateStructuralEditingModeStatusField() {
-		if (this.statusLineHandler == null) {
-			return;
-		}
-			
-		StatusLineContributionItem field = this.statusLineHandler.getEditingModeStatusContributionItem();
-		if (field != null) {
-			field.setText((isStructuralEditingEnabled() ? "strict/paredit" : "unrestricted")
-			              + " edit mode" + (inEscapeSequence ? " ESC" : ""));
-			field.setToolTipText(
-					(isStructuralEditingEnabled() 
-							? "strict/paredit edit mode:\neditor does its best to prevent you from breaking the structure of the code (requires you to know shortcut commands well)."
-						    : "unrestricted edit mode:\nhelps you with edition, but does not get in your way."));
-		}
-	}
-
 	/*
 	 * Eclipse TextEditor framework uses old "Action" framework. So it is impossible
 	 * to use handlers declaratively, one must plug the new behaviour via code,

@@ -137,16 +137,16 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 		fOverviewRuler= createOverviewRuler(getSharedColors());
 		
 		// ISourceViewer viewer= new ProjectionViewer(parent, ruler, getOverviewRuler(), isOverviewRulerVisible(), styles);
-		ClojureSourceViewer viewer= new ClojureSourceViewer(parent, ruler, getOverviewRuler(), isOverviewRulerVisible(), styles, getPreferenceStore(),
-				new ClojureSourceViewer.IStatusLineHandler() {
-					public StatusLineContributionItem getEditingModeStatusContributionItem() {
-						return (StatusLineContributionItem) ClojureEditor.this.getStatusField(ClojureSourceViewer.STATUS_CATEGORY_STRUCTURAL_EDITION);
-					}
-				}) {
+		ClojureSourceViewer viewer= new ClojureSourceViewer(parent, ruler, getOverviewRuler(), isOverviewRulerVisible(), styles, getPreferenceStore()) {
 			public void setStatusLineErrorMessage(String message) {
 				ClojureEditor.this.setStatusLineErrorMessage(message);
 			}
 		};
+		viewer.addModeListener(new ClojureSourceViewer.EditingModeStatusUpdater() {
+            protected StatusLineContributionItem getEditingModeStatusContributionItem() {
+                        return (StatusLineContributionItem) ClojureEditor.this.getStatusField(ClojureSourceViewer.STATUS_CATEGORY_STRUCTURAL_EDITION);
+            }
+        });
 		this.viewer = viewer;
 		// ensure decoration support has been created and configured.
 		getSourceViewerDecorationSupport(viewer);
@@ -209,7 +209,7 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 	 */
 	protected void updateStatusField(String category) {
 		if (ClojureSourceViewer.STATUS_CATEGORY_STRUCTURAL_EDITION.equals(category)) {
-			viewer.updateStructuralEditingModeStatusField();
+			viewer.setMode(viewer.getMode());
 		} else {
 			super.updateStatusField(category);
 		}
@@ -292,15 +292,6 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 		setAction("ClojureLaunchAction", action);
 
 //		TODO: same for content-assist handler ? markAsStateDependentAction(CONTENT_ASSIST_PROPOSAL, true);
-		
-		action = new Action() {
-			@Override
-			public void run() {
-				viewer.updateStructuralEditingModeStatusField();
-			};
-		};
-		action.setActionDefinitionId(ClojureSourceViewer.STATUS_CATEGORY_STRUCTURAL_EDITION);
-		setAction(ClojureSourceViewer.STATUS_CATEGORY_STRUCTURAL_EDITION, action);
 		
 }
 	
@@ -723,5 +714,13 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 	public boolean isEscapeInStringLiteralsEnabled() {
 		return sourceViewer().isEscapeInStringLiteralsEnabled();
 	}
+
+    public void setMode(ClojureEditorMode mode) {
+        sourceViewer().setMode(mode);
+    }
+
+    public ClojureEditorMode getMode() {
+        return sourceViewer().getMode();
+    }
 	
 }

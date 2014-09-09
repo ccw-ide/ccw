@@ -590,12 +590,7 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 		});
         
         structuralEditionModeStatusContributionItem = ClojureSourceViewer.createStructuralEditionModeStatusContributionItem();
-        viewer = new ClojureSourceViewer(split, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL, prefs,
-        		new ClojureSourceViewer.IStatusLineHandler() {
-					public StatusLineContributionItem getEditingModeStatusContributionItem() {
-						return structuralEditionModeStatusContributionItem;
-					}
-				}) {
+        viewer = new ClojureSourceViewer(split, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL, prefs) {
         	public REPLView getCorrespondingREPL() { return REPLView.this; };
             private SafeConnection getCorrespondingREPLConnection () {
                 // we'll be connected by the time this is called
@@ -621,6 +616,11 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
             	}
             };
         };
+        viewer.addModeListener(new ClojureSourceViewer.EditingModeStatusUpdater() {
+            protected StatusLineContributionItem getEditingModeStatusContributionItem() {
+                return structuralEditionModeStatusContributionItem;
+            }
+        });
         viewerConfig = new ClojureSourceViewerConfiguration(prefs, viewer);
         viewer.configure(viewerConfig);
         
@@ -685,7 +685,6 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
         split.setWeights(new int[] {100, 75});
         
         getViewSite().getActionBars().getStatusLineManager().add(this.structuralEditionModeStatusContributionItem);
-        viewer.updateStructuralEditingModeStatusField();
         structuralEditionModeStatusContributionItem.setActionHandler(new Action() {
     		public void run() {
 				viewer.toggleStructuralEditionMode();

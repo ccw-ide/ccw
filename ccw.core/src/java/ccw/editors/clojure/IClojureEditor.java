@@ -102,6 +102,9 @@ public interface IClojureEditor extends IAdaptable {
 
 	void toggleStructuralEditionMode();
 
+    void setMode(ClojureEditorMode mode);
+    ClojureEditorMode getMode();
+
 	boolean isShowRainbowParens();
 	
 	void toggleShowRainbowParens();
