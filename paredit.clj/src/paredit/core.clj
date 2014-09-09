@@ -248,11 +248,12 @@
       (assoc edit :text (str text " "))
       edit)))
 
-(defmethod paredit ; TODO convert to new style
+(defmethod paredit
   :paredit-doublequote
   [cmd {:keys #{parse-tree buffer}} {:keys [text offset length] :as t}]
   (with-important-memoized 
-    (let [offset-loc (-> parse-tree parsed-root-loc (loc-for-offset offset))] 
+    (let [rloc (parsed-root-loc parse-tree)
+          offset-loc (-> rloc (loc-for-offset offset))]
       (cond
         (in-code? offset-loc)
           (if (zero? length)
@@ -262,12 +263,12 @@
         (not (#{:string, :string-body
                 :regex :regex-body} (loc-tag offset-loc)))
           {:selection [offset offset] :edits [{:text "\"" :length 0 :offset offset :before true}]}
-        (and (= "\\" (t/previous-char-str t)) (not= "\\" (t/previous-char-str t 2)))
-          (-> t (t/insert (str \")))
-        (= "\"" (t/next-char-str t))
-          (t/shift-offset t 1)
+        (loop [offset offset escaped false] (if (= \\ (char-before rloc offset)) (recur (dec offset) (not escaped)) escaped))
+          {:selection [offset offset] :edits [{:text "\"" :length 0 :offset offset :before true}]}
+        (= \" (char-after rloc offset))
+          {:selection [(inc offset) (inc offset)] :edits []}
         :else
-          (-> t (t/insert (str \\ \")))))))
+          {:selection [offset offset] :edits [{:text "\\\"" :length 0 :offset offset :before true}]}))))
 
 (defmethod paredit 
   :paredit-forward-delete
