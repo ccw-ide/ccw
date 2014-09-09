@@ -248,6 +248,7 @@
       (assoc edit :text (str text " "))
       edit)))
 
+(defmethod paredit ; TODO convert to new style
   :paredit-doublequote
   [cmd {:keys #{parse-tree buffer}} {:keys [text offset length] :as t}]
   (with-important-memoized 
