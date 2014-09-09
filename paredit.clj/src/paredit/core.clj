@@ -243,15 +243,12 @@
       (cond
         (in-code? offset-loc)
           (if (zero? length)
-            (insert-balanced 
-              [\" \"] 
-              t 
-              (conj (into *real-spaces* *open-brackets*) "#")
-              (into *extended-spaces* *close-brackets*))
-            (wrap-with-balanced parse-tree ["\"" "\""] t))
+            {:selection [offset offset] :edits [(pad-left {:text "\"" :length 0 :offset offset :before true} parse-tree)
+                                                (pad-right {:text "\"" :length 0 :offset offset :before false} parse-tree)]}
+            (wrap-with-balanced parse-tree ["\"" "\""] t)) ; TODO should quote
         (not (#{:string, :string-body
                 :regex :regex-body} (loc-tag offset-loc)))
-          (-> t (t/insert (str \")))
+          {:selection [offset offset] :edits [{:text "\"" :length 0 :offset offset :before true}]}
         (and (= "\\" (t/previous-char-str t)) (not= "\\" (t/previous-char-str t 2)))
           (-> t (t/insert (str \")))
         (= "\"" (t/next-char-str t))
@@ -515,12 +512,10 @@
                         [offset 0]
                         (let [start (or (some #(when-not (#{:whitespace :comment} (loc-tag %)) (end-offset %)) (previous-leaves l)) offset)
                               end (or (some #(when-not (#{:whitespace :comment} (loc-tag %)) (start-offset %)) (next-leaves l)) offset)]
-                          [start (- end start)]))
-                      replace-text (str close-punct (subs text replace-offset (+ replace-offset replace-length)))]
-                  {:selection [replace-offset replace-offset]
-                   :edits [{:offset replace-offset :length 0 :text replace-text :before true}
-                           {:offset replace-offset :length 0 :text open-punct :before false}
-                           {:offset replace-offset :length replace-length :text ""}]}))))
+                          [start (- end start)]))]
+                  {:selection [offset offset]
+                   :edits [{:offset replace-offset :length 0 :text close-punct :before true}
+                           {:offset (+ replace-offset replace-length) :length 0 :text open-punct :before false}]}))))
         (enforce-structural-selection parse-state t
           (fn [l r parse-state t]
             (when-some [[open close] ({:list ["(" ")"] :vector  ["[" "]"] :map ["{" "}"] :set ["#{" "}"]}
@@ -531,11 +526,11 @@
                                    (iterate z/right (z/right r)))) r)]
                 {:selection [(start-offset l) (end-offset r)]
                  :edits [(if (punct-loc? (z/left l'))
-                           {:offset (start-offset (z/left l')) :length (count open) :text ""}
-                           {:offset (start-offset l') :length 0 :text close})
+                           {:offset (start-offset (z/left l')) :length (count open) :text "" :before true}
+                           {:offset (start-offset l') :length 0 :text close :before true})
                          (if (punct-loc? (z/right r'))
-                           {:offset (end-offset r') :length (count close) :text ""}
-                           {:offset (end-offset r') :length 0 :text open})]})))))))
+                           {:offset (end-offset r') :length (count close) :text "" :before false}
+                           {:offset (end-offset r') :length 0 :text open :before false})]})))))))
 
 (defmethod paredit
   :paredit-join-sexps
@@ -571,7 +566,7 @@
         (when-not (or (in-code? (loc-containing-offset rloc offset)) ; should rather check if no code node belongs to the selection etc etc
                       (in-code? (loc-containing-offset rloc (+ offset length))))
           {:selection [(+ offset length) (+ offset length)]
-           :edits [{:text o :offset offset :length length}]})
+           :edits [{:text o :offset offset :length length :before true}]})
         (let [start (start-offset left-leave)
               end (or (-?> right-leave end-offset) (.length text))]
           {:selection [start end]

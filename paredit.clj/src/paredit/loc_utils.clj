@@ -175,12 +175,20 @@
   ([loc offset]
     (leave-loc-for-offset-common loc offset false))
   ([loc offset left-bias]
+    (leave-loc-for-offset-common loc offset left-bias (fn [loc _] loc)))
+  ([loc offset left-bias f]
     (if (z/branch? loc)
       (let [content-cumulative-count (-> loc z/node :content-cumulative-count)]
         (when (seq content-cumulative-count) ; only the root should be empty
           (let [n (bisect content-cumulative-count (if left-bias <= <) offset)]
-            (recur (down-nth loc n) (- offset (nth content-cumulative-count n)) left-bias))))
-      loc)))
+            (recur (down-nth loc n) (- offset (nth content-cumulative-count n)) left-bias f))))
+      (f loc offset))))
+
+(defn char-before [loc offset]
+  (leave-loc-for-offset-common loc offset true (fn [loc offset] (nth (z/node loc) (dec offset) nil))))
+
+(defn char-after [loc offset]
+  (leave-loc-for-offset-common loc offset false (fn [loc offset] (nth (z/node loc) offset nil))))
 
 (defn ^:dynamic leave-for-offset
   ([loc offset] (leave-for-offset loc offset false))
