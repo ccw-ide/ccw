@@ -270,6 +270,7 @@
       <context
             name="%context.structEditingClojureSource.name"
             description="%context.structEditingClojureSource.description"
+            parentId="ccw.ui.clojureEditorScope"
             id="ccw.ui.clojureStructEditorScope">
       </context>
       <context
@@ -575,6 +576,18 @@
       </key>
       <key
             commandId="ccw.ui.edit.text.clojure.expand.selection.up"
+            contextId="ccw.ui.clojureStructEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="ARROW_UP">
+      </key>
+      <key
+            commandId="ccw.ui.edit.text.clojure.expand.selection.up"
+            contextId="ccw.ui.clojureStructEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="(">
+      </key>
+      <key
+            commandId="ccw.ui.edit.text.clojure.expand.selection.up"
             contextId="ccw.ui.clojureEditorScope"
             platform="gtk"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
@@ -783,6 +796,12 @@
             contextId="ccw.ui.clojureEditorScope"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M3+S">
+      </key>
+      <key
+            commandId="ccw.ui.edit.text.clojure.split.sexpr"
+            contextId="ccw.ui.clojureEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence=")">
       </key>
       <key
             commandId="ccw.ui.edit.text.clojure.join.sexpr"
@@ -2334,9 +2353,14 @@
               <iterate
                     ifEmpty="false"
                     operator="or">
+               <or>
                  <equals
                        value="ccw.ui.clojureEditorScope">
                  </equals>
+                 <equals
+                       value="ccw.ui.clojureStructEditorScope">
+                 </equals>
+               </or>
               </iterate>
            </with>
         </enabledWhen>
@@ -2346,9 +2370,14 @@
               <iterate
                     ifEmpty="false"
                     operator="or">
+               <or>
                  <equals
                        value="ccw.ui.clojureEditorScope">
                  </equals>
+                 <equals
+                       value="ccw.ui.clojureStructEditorScope">
+                 </equals>
+               </or>
               </iterate>
            </with>
         </activeWhen>
