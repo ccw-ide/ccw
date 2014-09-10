@@ -266,7 +266,7 @@
         (loop [offset offset escaped false] (if (= \\ (char-before rloc offset)) (recur (dec offset) (not escaped)) escaped))
           {:selection [offset offset] :edits [{:text "\"" :length 0 :offset offset :before true}]}
         (= \" (char-after rloc offset))
-          {:selection [(inc offset) (inc offset)] :edits []}
+          {:selection [(inc offset) (inc offset)]}
         :else
           {:selection [offset offset] :edits [{:text "\\\"" :length 0 :offset offset :before true}]}))))
 
@@ -404,8 +404,7 @@
   [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
   (with-important-memoized (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
     (let [[l r] (structural-selection rloc (dec offset) (inc length) (constantly true))]
-      (-> t (assoc :offset (start-offset l))
-             (assoc :length (- (end-offset r) (start-offset l))))))))
+      {:selection [(start-offset l) (end-offset r)]}))))
 
 (defn default-behaviour-sel [parent l r]
   [(start-offset parent) (end-offset parent)])
@@ -451,24 +450,16 @@
   :paredit-expand-up
   [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
   (with-important-memoized (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
-    (let [[l r] (structural-selection rloc offset length)]
-      (if-not (= [offset length] (locs-to-sel l r))
-        (assoc t :offset (start-offset l) 
-                 :length (if (nil? r) 0 (- (end-offset r) (start-offset l))))
-        (let [[l r] (broaden l r)
-              [start-offset length] (locs-to-sel l r)]
-          (assoc t :offset start-offset
-            :length length))))
-    t)))
+    (let [[l r] (structural-selection rloc offset length)
+          [l r] (if-not (= [offset length] (locs-to-sel l r)) [l r] (broaden l r))]
+      {:selection [(start-offset l) (end-offset r)]}))))
 
 (defmethod paredit
   :paredit-expand-right
   [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length] :as t}]
   (with-important-memoized (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
     (let [[l r] (structural-selection rloc offset (inc length))]
-      (-> t (assoc :offset (start-offset l))
-        (assoc :length (- (end-offset r) (start-offset l)))))
-    t)))
+      {:selection [(start-offset l) (end-offset r)]}))))
 
 (defn enforce-structural-selection [{:keys #{parse-tree buffer} :as parse-state} {:keys [offset length] :as t} action]
   (when-let [[l r] (some-> parse-tree (parsed-root-loc true) (structural-selection offset length))]
@@ -476,8 +467,7 @@
       (if (and (= offset offset') (= length length'))
         (action l r parse-state t)
         (let [p (or (z/up (parse-node l)) l)]
-          {:selection [offset' (+ offset' length')]
-           :edits []})))))
+          {:selection [offset' (+ offset' length')]})))))
 
 (defmethod paredit
   :paredit-raise-sexp
