@@ -31,6 +31,11 @@
              (f)
     (finally (-> editor .getSelectionHistory .listenToSelectionChanges))))
 
+(defn- set-mode [^IClojureEditor editor mode]
+  (some->> mode {:struct ccw.editors.clojure.ClojureEditorMode/STRUCTEDIT
+                 :paredit ccw.editors.clojure.ClojureEditorMode/PAREDIT
+                 :text ccw.editors.clojure.ClojureEditorMode/TEXT} (.setMode editor)))
+
 ;; TODO remove duplications with appli-paredit-command
 (defn- apply-paredit-selection-command [editor command-key & options]
   (let [{:keys #{length offset}} (bean (.getUnSignedSelection editor))
@@ -44,6 +49,7 @@
                                   [from (- to from)]
                                   ^:legacy [(:offset r) (:length r)])]
     (-> editor .getSelectionHistory (.remember (SourceRange. offset length)))
+    (set-mode editor (:mode r))
     (ignoring-selection-changes editor 
       #(.selectAndReveal editor new-offset new-length))))
 
@@ -82,6 +88,7 @@
             (to-text-edit edits)
             (bit-or org.eclipse.text.edits.TextEdit/CREATE_UNDO org.eclipse.text.edits.TextEdit/UPDATE_REGIONS))
           .performEdits)
+        (set-mode editor (:mode result))
         (.selectAndReveal editor caret-offset (- end-offset caret-offset)))
       ^:legacy
       (when-let [modif (-?> result :modifs first)] ;; TODO what if more than one modif in :modifs ?

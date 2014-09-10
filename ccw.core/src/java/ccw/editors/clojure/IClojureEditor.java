@@ -18,8 +18,8 @@ import ccw.repl.REPLView;
  */
 public interface IClojureEditor extends IAdaptable {
 	
-	String KEY_BINDING_SCOPE = "ccw.ui.clojureEditorScope";   //$NON-NLS-1$
-	
+    String KEY_BINDING_SCOPE = "ccw.ui.clojureEditorScope";   //$NON-NLS-1$
+    String STRUCT_KEY_BINDING_SCOPE = "ccw.ui.clojureStructEditorScope";
     /**
      * Corresponds to {@link AbstractTextEditor#selectAndReveal(int, int)}
      */

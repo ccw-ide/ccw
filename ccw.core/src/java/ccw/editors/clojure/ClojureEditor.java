@@ -41,6 +41,7 @@ import org.eclipse.ui.texteditor.StatusLineContributionItem;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import ccw.CCWPlugin;
+import ccw.editors.clojure.ClojureSourceViewer.ModeListener;
 import ccw.editors.outline.ClojureOutlinePage;
 import ccw.launching.ClojureLaunchShortcut;
 import ccw.preferences.PreferenceConstants;
@@ -49,7 +50,10 @@ import ccw.util.ClojureInvoker;
 import ccw.util.StringUtils;
 
 public class ClojureEditor extends TextEditor implements IClojureEditor {
-	/**
+    private static final String[] MIXEDMODE_SCOPES = new String[] { "org.eclipse.ui.textEditorScope", IClojureEditor.KEY_BINDING_SCOPE };
+    private static final String[] STRUCTMODE_SCOPES = new String[] { "org.eclipse.ui.textEditorScope", IClojureEditor.KEY_BINDING_SCOPE, IClojureEditor.STRUCT_KEY_BINDING_SCOPE };
+
+    /**
 	 * Shortens a namespace name,
 	 * e.g. net.cgrand.parsley.core => n.c.parsley.core.
 	 * @param namespace
@@ -145,6 +149,14 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 		viewer.addModeListener(new ClojureSourceViewer.EditingModeStatusUpdater() {
             protected StatusLineContributionItem getEditingModeStatusContributionItem() {
                         return (StatusLineContributionItem) ClojureEditor.this.getStatusField(ClojureSourceViewer.STATUS_CATEGORY_STRUCTURAL_EDITION);
+            }
+        });
+		viewer.addModeListener(new ModeListener() {
+            public void modeChanged(ClojureEditorMode mode, boolean esc) {
+                if (mode == ClojureEditorMode.STRUCTEDIT)
+                    setKeyBindingScopes(STRUCTMODE_SCOPES);
+                else
+                    setKeyBindingScopes(MIXEDMODE_SCOPES);
             }
         });
 		this.viewer = viewer;
@@ -517,7 +529,7 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#initializeKeyBindingScopes()
 	 */
 	protected void initializeKeyBindingScopes() {
-		setKeyBindingScopes(new String[] { "org.eclipse.ui.textEditorScope", IClojureEditor.KEY_BINDING_SCOPE });  //$NON-NLS-1$
+		setKeyBindingScopes(MIXEDMODE_SCOPES);  //$NON-NLS-1$
 	}
 
 	@Override

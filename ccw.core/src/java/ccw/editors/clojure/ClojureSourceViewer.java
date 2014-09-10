@@ -97,13 +97,20 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
         public void modeChanged(ClojureEditorMode mode, boolean inEscapeSequence) {
             StatusLineContributionItem field = getEditingModeStatusContributionItem();
             if (field != null) {
-                boolean isStructuralEditingEnabled = mode != ClojureEditorMode.TEXT;
-                field.setText((isStructuralEditingEnabled ? "strict/paredit" : "unrestricted")
-                              + " edit mode" + (inEscapeSequence ? " ESC" : ""));
-                field.setToolTipText(
-                        (isStructuralEditingEnabled
-                                ? "strict/paredit edit mode:\neditor does its best to prevent you from breaking the structure of the code (requires you to know shortcut commands well)."
-                                : "unrestricted edit mode:\nhelps you with edition, but does not get in your way."));
+                switch (mode) {
+                case TEXT:
+                    field.setText("text edit mode" + (inEscapeSequence ? " ESC" : ""));
+                    field.setToolTipText("unrestricted edit mode:\nhelps you with edition, but does not get in your way.");
+                    break;
+                case PAREDIT:
+                    field.setText("paredit mode" + (inEscapeSequence ? " ESC" : ""));
+                    field.setToolTipText("paredit edit mode:\neditor does its best to prevent you from breaking the structure of the code (requires you to know shortcut commands well).");
+                    break;
+                case STRUCTEDIT:
+                    field.setText("structedit mode" + (inEscapeSequence ? " ESC" : ""));
+                    field.setToolTipText("structedit edit mode:\neditor does its best to assist you manipulating the structure of the code (requires you to know shortcut commands well).");
+                    break;
+                }
             }
         }
     }
@@ -224,6 +231,11 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
                     return;
                 }
                 if (e.character == SWT.ESC) {
+                    if (getMode() == ClojureEditorMode.STRUCTEDIT) {
+                        setMode(ClojureEditorMode.PAREDIT);
+                        e.doit = false;
+                        return;
+                    }
                     inEscapeSequence = true;
                     updateTabsToSpacesConverter();
                     fireModeChange();
@@ -647,6 +659,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 
     public void setMode(ClojureEditorMode mode) {
         editorMode = mode;
+        inEscapeSequence = false;
         fireModeChange();
     }
 

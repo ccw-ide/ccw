@@ -452,7 +452,8 @@
   (with-important-memoized (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
     (let [[l r] (structural-selection rloc offset length)
           [l r] (if-not (= [offset length] (locs-to-sel l r)) [l r] (broaden l r))]
-      {:selection [(start-offset l) (end-offset r)]}))))
+      {:selection [(start-offset l) (end-offset r)]
+       :mode :struct}))))
 
 (defmethod paredit
   :paredit-expand-right
