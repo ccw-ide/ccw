@@ -35,12 +35,14 @@
 (defn- apply-paredit-selection-command [editor command-key & options]
   (let [{:keys #{length offset}} (bean (.getUnSignedSelection editor))
         text  (.get (.getDocument editor))
-        {new-length :length, new-offset :offset} 
-          (apply pc/paredit 
+        r (apply pc/paredit 
                  command-key
                  (.getParseState editor) 
                  {:text text :offset offset :length length}
-                 (pimpl/paredit-options command-key))]
+                 (pimpl/paredit-options command-key))
+        [new-offset new-length] (if-let [[from to] (:selection r)]
+                                  [from (- to from)]
+                                  ^:legacy [(:offset r) (:length r)])]
     (-> editor .getSelectionHistory (.remember (SourceRange. offset length)))
     (ignoring-selection-changes editor 
       #(.selectAndReveal editor new-offset new-length))))
