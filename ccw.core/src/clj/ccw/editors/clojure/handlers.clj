@@ -37,7 +37,7 @@
                  :text ccw.editors.clojure.ClojureEditorMode/TEXT} (.setMode editor)))
 
 ;; TODO remove duplications with appli-paredit-command
-(defn- apply-paredit-selection-command [editor command-key & options]
+(defn- apply-paredit-selection-command [editor command-key]
   (let [{:keys #{length offset}} (bean (.getUnSignedSelection editor))
         text  (.get (.getDocument editor))
         r (apply pc/paredit 
@@ -52,6 +52,13 @@
     (set-mode editor (:mode r))
     (ignoring-selection-changes editor 
       #(.selectAndReveal editor new-offset new-length))))
+
+(defn do-select [editor offset]
+  (let [r (pc/struct-select (.getParseState editor) offset)
+        [from to] (:selection r)]
+    (set-mode editor (:mode r))
+    (ignoring-selection-changes editor
+      #(.selectAndReveal editor from (- to from)))))
 
 (defn editor-text 
   "Return the current text, cursor offset and selection length
@@ -129,6 +136,9 @@
 (defn join [_ event]
   (apply-paredit-command (editor event)
                          (paredit-fn :paredit-join-sexps)))
+(defn leaf-left [_ event]
+  (apply-paredit-command (editor event)
+                         (paredit-fn :leaf-left)))
 (defn expand-left [_ event] 
   (apply-paredit-selection-command (editor event)
                                    :paredit-expand-left))
@@ -182,11 +192,13 @@
 ;; TODO won't work if the ClojureSourceViewer is reused many times via configure/unconfigure (since after a re-configure,
 ;; a fresh SelectionHistory instance will be created)
 ;; Inspired directly by JDT
+(defn do-select-last [editor]
+  (when-let [old (-> editor .getSelectionHistory .getLast)]
+    (ignoring-selection-changes editor
+      #(.selectAndReveal editor (.getOffset old) (.getLength old)))))
+
 (defn select-last [_ event] 
-  (let [editor (editor event)]
-    (when-let [old (-> editor .getSelectionHistory .getLast)]
-      (ignoring-selection-changes editor 
-        #(.selectAndReveal editor (.getOffset old) (.getLength old))))))
+  (do-select-last (editor event)))
 
 (defn open-declaration [_ event]
   (let [editor (editor event)
@@ -202,3 +214,15 @@
       #(-> editor 
          (.getAdapter org.eclipse.jface.text.ITextOperationTarget) 
          (.doOperation org.eclipse.jface.text.source.ISourceViewer/CONTENTASSIST_PROPOSALS)))))
+
+(defn structedit-key-event [^org.eclipse.swt.events.VerifyEvent event ^ccw.editors.clojure.ClojureSourceViewer source-viewer parse-state document]
+  #_(binding [*out* out]
+    (prn (.character event) (java.lang.Integer/toHexString (int (.character event)))
+      (bit-and (bit-xor org.eclipse.swt.SWT/MODIFIER_MASK org.eclipse.swt.SWT/SHIFT) (.stateMask event)))
+    #_(-> parse-state :parse-tree lu/parsed-root-loc (lu/leave-loc-for-offset-common (-> source-viewer .getSignedSelection .getOffset) true) lu/parse-leave clojure.zip/node :tag prn)
+    #_(-> parse-state :parse-tree lu/parsed-root-loc (lu/leave-loc-for-offset-common (-> source-viewer .getSignedSelection .getOffset)) lu/parse-leave clojure.zip/node :tag prn)
+    #_(prn (.getSignedSelection source-viewer)))
+  nil)
+
+(defn fire-structedit-event [source-viewer command-name]
+  (apply-paredit-selection-command source-viewer (keyword command-name)))

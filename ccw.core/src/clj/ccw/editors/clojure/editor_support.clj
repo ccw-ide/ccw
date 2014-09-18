@@ -115,14 +115,3 @@
 		(.setMatchingCharacterPainterPreferenceKeys 
       PreferenceConstants/EDITOR_MATCHING_BRACKETS 
       PreferenceConstants/EDITOR_MATCHING_BRACKETS_COLOR)))
-
-(def out *out*)
-
-(defn structedit-key-event [^org.eclipse.swt.events.VerifyEvent event ^ccw.editors.clojure.ClojureSourceViewer source-viewer parse-state document]
-  #_(binding [*out* out]
-    (prn (.character event) (java.lang.Integer/toHexString (int (.character event)))
-      (bit-and (bit-xor org.eclipse.swt.SWT/MODIFIER_MASK org.eclipse.swt.SWT/SHIFT) (.stateMask event)))
-    #_(-> parse-state :parse-tree lu/parsed-root-loc (lu/leave-loc-for-offset-common (-> source-viewer .getSignedSelection .getOffset) true) lu/parse-leave clojure.zip/node :tag prn)
-    #_(-> parse-state :parse-tree lu/parsed-root-loc (lu/leave-loc-for-offset-common (-> source-viewer .getSignedSelection .getOffset)) lu/parse-leave clojure.zip/node :tag prn)
-    #_(prn (.getSignedSelection source-viewer)))
-  nil)

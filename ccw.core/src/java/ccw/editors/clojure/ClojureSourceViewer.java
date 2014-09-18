@@ -41,12 +41,17 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.VerifyKeyListener;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseMoveListener;
+import org.eclipse.swt.events.MouseTrackListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.StatusLineContributionItem;
@@ -228,6 +233,57 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     public ClojureSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles, IPreferenceStore store) {
         super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles);
         setPreferenceStore(store);
+        getTextWidget().addListener(SWT.MouseVerticalWheel, new Listener() {
+            public void handleEvent(Event event) {
+                if ((event.stateMask & SWT.MODIFIER_MASK) == SWT.SHIFT) {
+                    if (event.count > 0) {
+                        handlers._("fire-structedit-event", ClojureSourceViewer.this, "paredit-expand-up");
+                    } else {
+                        handlers._("do-select-last", ClojureSourceViewer.this);
+                    }
+                    event.doit = false; 
+                }
+            }
+        });
+        getTextWidget().addMouseMoveListener(new MouseMoveListener() {
+            public void mouseMove(MouseEvent e) {
+                if (getTextWidget().isFocusControl() && (e.stateMask & SWT.MODIFIER_MASK) == SWT.COMMAND) {
+                    int offset = getOffsetFor(e.x, e.y);
+                    if (offset >= 0)
+                        handlers._("do-select", ClojureSourceViewer.this, offset);
+                }
+            }
+        });
+        getTextWidget().addListener(SWT.Gesture, new Listener() {
+            private int lastx = -1, lasty = -1;
+            private double lastMagnification;
+            private int lastTime;
+            public void handleEvent(Event event) {
+                switch (event.detail) {
+                case SWT.GESTURE_BEGIN:
+                    lastMagnification = 1.0;
+                    lastTime = event.time;
+                    break;
+                case SWT.GESTURE_MAGNIFY:
+                    event.doit = false;
+                    if (event.time - lastTime < 200) {
+                        return;
+                    }
+                    double rmag = (lastx == event.x) && (lasty == event.y) ? event.magnification / lastMagnification : event.magnification;
+                    lastMagnification = event.magnification;
+                    lastx = event.x;
+                    lasty = event.y;
+                    lastTime = event.time;
+                    System.err.println(rmag);
+                    if (rmag > 1.0) {
+                        handlers._("fire-structedit-event", ClojureSourceViewer.this, "paredit-expand-up");
+                    } else {
+                        handlers._("do-select-last", ClojureSourceViewer.this);
+                    }
+                    break;
+                }
+            }
+        });
         addModeListener(new ModeListener() {
             public void modeChanged(ClojureEditorMode mode, boolean esc) {
                 if (mode == ClojureEditorMode.STRUCTEDIT) {
@@ -265,7 +321,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
                     e.doit = false; // double esc -> single esc
                     return;
                 }
-                e.doit = !RT.booleanCast(editorSupport._("structedit-key-event", e, ClojureSourceViewer.this, getParseState(), getDocument()));
+                e.doit = !RT.booleanCast(handlers._("structedit-key-event", e, ClojureSourceViewer.this, getParseState(), getDocument()));
             }
         });
         addTextInputListener(new ITextInputListener() {
@@ -288,6 +344,19 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 		isShowRainbowParens = store.getBoolean(ccw.preferences.PreferenceConstants.SHOW_RAINBOW_PARENS_BY_DEFAULT);
 	}
 
+    public int getOffsetFor(int x, int y) {
+        StyledText styledText= getTextWidget();
+        try {
+            int widgetOffset= styledText.getOffsetAtLocation(new Point(x, y));
+            Point p= styledText.getLocationAtOffset(widgetOffset);
+            if (p.x > x)
+                widgetOffset--;
+            return this.widgetOffset2ModelOffset(widgetOffset);
+        } catch (IllegalArgumentException e) {
+            return -1;
+        }
+    }
+    
     public static StatusLineContributionItem createStructuralEditionModeStatusContributionItem() {
 		return new StatusLineContributionItem(
 				ClojureSourceViewer.STATUS_CATEGORY_STRUCTURAL_EDITION, 
