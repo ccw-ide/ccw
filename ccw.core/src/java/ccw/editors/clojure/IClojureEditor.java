@@ -83,11 +83,6 @@ public interface IClojureEditor extends IAdaptable {
     Object getParseState ();
     Object getPreviousParseTree ();
     
-    /**
-     * Can be null...
-     */
-    REPLView getCorrespondingREPL ();
-    
     void updateTabsToSpacesConverter ();
 
 	IDocument getDocument();

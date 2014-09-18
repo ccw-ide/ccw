@@ -12,7 +12,6 @@
 package ccw.editors.clojure;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -60,7 +59,6 @@ import clojure.lang.RT;
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.preferences.PreferenceConstants;
-import ccw.repl.REPLView;
 import ccw.util.ClojureInvoker;
 import ccw.util.DisplayUtil;
 
@@ -653,12 +651,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     public IJavaProject getAssociatedProject() {
         return null;
     }
-    
-    public REPLView getCorrespondingREPL () {
-        // this gets overridden in REPLView as appropriate so that the toolConnection there gets returned
-        return null;
-    }
-    
+
     public void updateTabsToSpacesConverter () {}
     
     // TODO get rid of this way of handling document initialization

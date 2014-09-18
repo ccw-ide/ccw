@@ -591,11 +591,6 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
         
         structuralEditionModeStatusContributionItem = ClojureSourceViewer.createStructuralEditionModeStatusContributionItem();
         viewer = new ClojureSourceViewer(split, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL, prefs) {
-        	public REPLView getCorrespondingREPL() { return REPLView.this; };
-            private SafeConnection getCorrespondingREPLConnection () {
-                // we'll be connected by the time this is called
-                return safeToolConnection;
-            }
             public void setStatusLineErrorMessage(String msg) {
             	if (msg != null) {
 	            	IStatusLineManager slm = REPLView.this.getViewSite().getActionBars().getStatusLineManager();
