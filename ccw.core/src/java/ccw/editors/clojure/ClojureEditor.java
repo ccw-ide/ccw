@@ -34,6 +34,7 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IKeyBindingService;
 import org.eclipse.ui.IPropertyListener;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
@@ -154,9 +155,9 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 		viewer.addModeListener(new ModeListener() {
             public void modeChanged(ClojureEditorMode mode, boolean esc) {
                 if (mode == ClojureEditorMode.STRUCTEDIT)
-                    setKeyBindingScopes(STRUCTMODE_SCOPES);
+                    getEditorSite().getKeyBindingService().setScopes(STRUCTMODE_SCOPES);
                 else
-                    setKeyBindingScopes(MIXEDMODE_SCOPES);
+                    getEditorSite().getKeyBindingService().setScopes(MIXEDMODE_SCOPES);
             }
         });
 		this.viewer = viewer;

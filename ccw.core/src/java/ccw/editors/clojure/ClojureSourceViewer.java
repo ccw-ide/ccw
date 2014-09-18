@@ -131,15 +131,25 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     	 */
     	public Color fBackgroundColor;
     	
-    	/**
-    	 * This viewer's selection foreground color.
-    	 */
-    	public Color fSelectionForegroundColor;
-    	
-    	/**
-    	 * The viewer's selection background color.
-    	 */
-    	public Color fSelectionBackgroundColor;
+        /**
+         * This viewer's selection foreground color.
+         */
+        public Color fSelectionForegroundColor;
+        
+        /**
+         * The viewer's selection background color.
+         */
+        public Color fSelectionBackgroundColor;
+
+        /**
+         * This viewer's struct selection foreground color.
+         */
+        public Color fStructSelectionForegroundColor;
+        
+        /**
+         * The viewer's struct selection background color.
+         */
+        public Color fStructSelectionBackgroundColor;
 
     	/**
     	 * The viewer's background color for the selected line
@@ -149,8 +159,10 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 		public void unconfigure() {
 			fForegroundColor = unconfigure(fForegroundColor);
 			fBackgroundColor = unconfigure(fBackgroundColor= null);
-			fSelectionForegroundColor = unconfigure(fSelectionForegroundColor);
-			fSelectionBackgroundColor = unconfigure(fSelectionBackgroundColor);
+            fSelectionForegroundColor = unconfigure(fSelectionForegroundColor);
+            fSelectionBackgroundColor = unconfigure(fSelectionBackgroundColor);
+            fStructSelectionForegroundColor = unconfigure(fStructSelectionForegroundColor);
+            fStructSelectionBackgroundColor = unconfigure(fStructSelectionBackgroundColor);
 			fCurrentLineBackgroundColor = unconfigure(fCurrentLineBackgroundColor);
 		}
 
@@ -216,6 +228,17 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     public ClojureSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles, IPreferenceStore store) {
         super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles);
         setPreferenceStore(store);
+        addModeListener(new ModeListener() {
+            public void modeChanged(ClojureEditorMode mode, boolean esc) {
+                if (mode == ClojureEditorMode.STRUCTEDIT) {
+                    getTextWidget().setSelectionBackground(editorColors.fStructSelectionBackgroundColor);
+                    getTextWidget().setSelectionForeground(editorColors.fStructSelectionForegroundColor);
+                } else {
+                    getTextWidget().setSelectionBackground(editorColors.fSelectionBackgroundColor);
+                    getTextWidget().setSelectionForeground(editorColors.fSelectionForegroundColor);
+                } 
+            }
+        });
 
         // add before all other listeners so that we're certain we enable/disable
         //the Esc key feature based on accurate state information
@@ -376,27 +399,45 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 
 			editorColors.fBackgroundColor= color;
 
-			// ----------- selection foreground color --------------------
-			color= preferenceStore.getBoolean(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_DEFAULT_COLOR)
-				? null
-				: createColor(preferenceStore, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_COLOR, styledText.getDisplay());
-			styledText.setSelectionForeground(color);
+            // ----------- selection foreground color --------------------
+            color= preferenceStore.getBoolean(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_DEFAULT_COLOR)
+                ? null
+                : createColor(preferenceStore, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_COLOR, styledText.getDisplay());
+            styledText.setSelectionForeground(color);
 
-			if (editorColors.fSelectionForegroundColor != null)
-				editorColors.fSelectionForegroundColor.dispose();
+            if (editorColors.fSelectionForegroundColor != null)
+                editorColors.fSelectionForegroundColor.dispose();
 
-			editorColors.fSelectionForegroundColor= color;
+            editorColors.fSelectionForegroundColor= color;
 
-			// ---------- selection background color ----------------------
-			color= preferenceStore.getBoolean(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_DEFAULT_COLOR)
-				? null
-				: createColor(preferenceStore, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_COLOR, styledText.getDisplay());
-			styledText.setSelectionBackground(color);
+            // ---------- selection background color ----------------------
+            color= preferenceStore.getBoolean(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_DEFAULT_COLOR)
+                ? null
+                : createColor(preferenceStore, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_COLOR, styledText.getDisplay());
+            styledText.setSelectionBackground(color);
 
-			if (editorColors.fSelectionBackgroundColor != null)
-				editorColors.fSelectionBackgroundColor.dispose();
+            if (editorColors.fSelectionBackgroundColor != null)
+                editorColors.fSelectionBackgroundColor.dispose();
 
-			editorColors.fSelectionBackgroundColor= color;
+            editorColors.fSelectionBackgroundColor= color;
+
+            // ----------- struct selection foreground color --------------------
+            color = new Color(styledText.getDisplay(), new RGB(0, 0, 0));
+            //            color= createColor(preferenceStore, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_COLOR, styledText.getDisplay());
+
+            if (editorColors.fStructSelectionForegroundColor != null)
+                editorColors.fStructSelectionForegroundColor.dispose();
+
+            editorColors.fStructSelectionForegroundColor= color;
+
+            // ---------- struct selection background color ----------------------
+            color = new Color(styledText.getDisplay(), new RGB(255, 255, 0));
+ //           color= createColor(preferenceStore, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_COLOR, styledText.getDisplay());
+
+            if (editorColors.fStructSelectionBackgroundColor != null)
+                editorColors.fStructSelectionBackgroundColor.dispose();
+
+            editorColors.fStructSelectionBackgroundColor= color;
 
 			// ---------- current line background color ----------------------
 			color= createColor(preferenceStore, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE_COLOR, styledText.getDisplay());
