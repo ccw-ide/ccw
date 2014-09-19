@@ -411,12 +411,11 @@ public class CCWDropAdapterEarlyStartup implements IStartup {
 									project,
 							workingSets);
 				}
-				// TODO nature update should not take place in UI thread ...
 				return Status.OK_STATUS;
 			}
 		};
 		wj.setPriority(Job.INTERACTIVE);
-		wj.setUser(true);
+		wj.setUser(false);
 		wj.schedule();
 		return true;
 	}
