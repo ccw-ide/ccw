@@ -20,6 +20,10 @@ In reaction to a project creation which contains a `project.clj` file, or an exi
 
 This feature can be disabled globally via the menu:Preferences[Clojure > General > Automatic detection of Clojure/Leiningen projects] preference
 
+=== Project Drag and Drop from OS to Counterclockwise
+
+It is possible to drag a project folder project from Windows Explorer / Finder onto Eclipse / Counterclockwise. Any Leiningen project found within the dragged folder(s) will automatically be created ; and configured appropriately if automatic configuration is enabled.
+
 == Changes between Counterclockwise 0.27.0 and 0.27.1
 
 `0.27.1` released on Thursday 28, 2014
