@@ -9,7 +9,8 @@
   (:import [org.eclipse.core.runtime       CoreException
                                            IPath
                                            Path
-                                           IProgressMonitor]
+                                           IProgressMonitor
+                                           Status]
            [org.eclipse.jdt.core           ClasspathContainerInitializer
                                            IClasspathContainer
                                            IJavaProject
@@ -76,7 +77,6 @@
    In both cases, the found project must be open, and with the Leiningen nature
    enabled."
   [handler event]
-  ;(println "update-dependencies")
   (if-let [project (event->project event)]
     (glaunch/generic-launch (when (e/project-open? project) project))
     (e/info-dialog "Leiningen Prompt" "unable to launch leiningen - no project found")))
@@ -137,23 +137,23 @@
 ;;      from the job, etc. will help ...
 (defn add-natures
   [project natures legend]
-  ;(println "add-natures:" project ", natures:" (seq natures) ", legend:'" legend "'")
-  (e/run-in-background
-    (e/runnable-with-progress-in-workspace
-      (fn [^IProgressMonitor monitor]
-        ;(println "add-natures: background job started for natures:" (seq natures))
-        (.beginTask monitor 
-          (str legend)
-          1)
-        (e/project-desc! 
-          project
-          (apply e/add-desc-natures! (e/project-desc project) natures))
-        (.worked monitor 1)
-        (.done monitor)
-        ;(println "add-natures: background job stopped for natures:" (seq natures))
-        )
-      (e/workspace-root))))
-
+  (doto (e/workspace-job
+             legend
+             (fn [^IProgressMonitor monitor]
+               (println "monitor:" monitor)
+               (.beginTask monitor
+                 (str legend)
+                 1)
+               (e/project-desc! 
+                 project
+                 (apply e/add-desc-natures! (e/project-desc project) natures))
+               (.worked monitor 1)
+               (.done monitor)
+               (Status/OK_STATUS)))
+    (.setRule (e/workspace-root))
+    (.setUser false)
+    (.schedule)))
+  
 (defn add-leiningen-nature
   "Pre-requisites:
    - The event's selection has size one, and is an open project
@@ -162,15 +162,17 @@
     (when-let [project (e/project event)]
       (add-leiningen-nature project)))
   ([^IProject project]
-    (add-natures 
+    (add-natures
       project
       [(JavaCore/NATURE_ID) n/NATURE-ID]
       (str "Adding leiningen support to project " (.getName project)))))
 
 (defn- upgrade-project-build-path [java-project overwrite?]
-  (e/run-in-background
-    (fn [monitor]
-      (n/reset-project-build-path java-project overwrite? monitor))))
+  (doto (e/workspace-job
+             (str "Upgrade project build path for project " (e/project-name java-project))
+             (fn [^IProgressMonitor monitor] (n/reset-project-build-path java-project overwrite? monitor)))
+    (.setUser false)
+    (.schedule)))
 
 (defn reset-project-build-path [handler event]
   (when-let [java-project (event->java-project event)]

@@ -30,6 +30,9 @@ It is possible to drag a Github / Bitbucket / Google code  project URL from your
 
 Once the project has been cloned, just select the `Create a general Project` option: a general project will be created, and if Automatic configuration is enabled, recognized as a Leiningen Project.
 
+== Bug fixes
+
+- Leiningen dependencies are updated in the background. They do not block the UI until they're finished anymore.
 
 == Changes between Counterclockwise 0.27.0 and 0.27.1
 

@@ -90,10 +90,8 @@
    - Install a Leiningen Classpath Container" 
   [java-proj]
   (let [lein-proj        (u/lein-project (e/project java-proj) :enhance-fn #(do (println %) (dissoc % :hooks)))
-        ;_ (println "lein-proj: " lein-proj)
         jvm-entry        (jvm-entry-or-default java-proj)
         source-folders   (concat (lein-source-folders lein-proj))
-        ;_ (println "source folders:" source-folders)
         source-entries   (map (fn [path] 
                                 (jdt/source-entry 
                                   {:path path,
@@ -103,7 +101,6 @@
                                                          (map (partial (comp e/path-add-trailing-separator e/path-subtract) path))) 
                                    :extra-attributes {jdt/optional "true"}}))
                               source-folders)
-        ;_ (println "source entries:" source-entries)        
         compile-entry    (jdt/library-entry {:path (lein-compile-folder lein-proj)
                                              :extra-attributes {jdt/optional "true"}})
         lein-container   (cpc/get-lein-container java-proj)
@@ -134,7 +131,6 @@
   [java-proj overwrite? & [monitor]]
   (let [monitor (or monitor (e/null-progress-monitor))
         lein-entries (lein-entries java-proj)
-        ;_ (println "++++" lein-entries)
         existing-entries (if overwrite? () (seq (.getRawClasspath java-proj)))
         new-entries (remove (set existing-entries) lein-entries)
         entries (concat existing-entries new-entries)]
@@ -159,26 +155,32 @@
         [this] (:project @state))
       (configure
         [this]
-        (e/run-in-background
-          (fn [progress-monitor]
-            (let [proj (.getProject this)
-                  desc (e/project-desc proj)
-                  java-proj (JavaCore/create proj)]
-              (when-not (e/desc-has-builder? desc LeiningenBuilder/ID)
-                (e/project-desc! proj (e/add-desc-builder! desc LeiningenBuilder/ID)))
-              (reset-project-build-path java-proj true progress-monitor)))))
+        (doto (e/workspace-job
+                   (str "Configuring Leiningen classpath dependencies for project " (e/project-name (.getProject this)))
+                   (fn [progress-monitor]
+                     (let [proj (.getProject this)
+                           desc (e/project-desc proj)
+                           java-proj (JavaCore/create proj)]
+                       (when-not (e/desc-has-builder? desc LeiningenBuilder/ID)
+                         (e/project-desc! proj (e/add-desc-builder! desc LeiningenBuilder/ID)))
+                       (reset-project-build-path java-proj true progress-monitor))))
+          (.setUser true)
+          (.schedule)))
       (deconfigure
         [this]
-        (e/run-in-background
-          (fn [progress-monitor]
-            (let [proj      (.getProject this)
-                  desc      (e/project-desc proj)
-                  java-proj (JavaCore/create proj)]
-              (when (e/desc-has-builder? desc LeiningenBuilder/ID)
-                (e/project-desc! proj (e/remove-desc-builder! desc LeiningenBuilder/ID)))
-              (when-let [cont (cpc/has-lein-container? java-proj)]
-                (let [raw-classpath (.getRawClasspath java-proj)
-                      raw-classpath (remove #{cont} raw-classpath)]
-                  (.setRawClasspath java-proj (into-array IClasspathEntry raw-classpath) progress-monitor))))))))))
+        (doto (e/workspace-job
+                   (str "Deconfiguring Leiningen classpath dependencies for project " (e/project-name (.getProject this)))
+                   (fn [progress-monitor]
+                     (let [proj      (.getProject this)
+                           desc      (e/project-desc proj)
+                           java-proj (JavaCore/create proj)]
+                       (when (e/desc-has-builder? desc LeiningenBuilder/ID)
+                         (e/project-desc! proj (e/remove-desc-builder! desc LeiningenBuilder/ID)))
+                       (when-let [cont (cpc/has-lein-container? java-proj)]
+                         (let [raw-classpath (.getRawClasspath java-proj)
+                               raw-classpath (remove #{cont} raw-classpath)]
+                           (.setRawClasspath java-proj (into-array IClasspathEntry raw-classpath) progress-monitor))))))
+          (.setUser true)
+          (.schedule))))))
 
 (println "ccw.leiningen.nature namespace loaded")
