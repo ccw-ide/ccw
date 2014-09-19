@@ -8,6 +8,18 @@ Laurent Petit <laurent dot petit at gmail dot com>
 :toc-title!:
 :toclevels: 0
 
+== Changes between Counterclockwise 0.27.1 and 0.28.0
+
+`0.28.0` released on Friday 19, 2014
+
+== Enhancements
+
+=== Automatic configuration of Leiningen Projects
+
+In reaction to a project creation which contains a `project.clj` file, or an existing project modification consisting in adding a `project.clj` file, etc., CCW will by default react by adding the `Leiningen Nature` to the project. Meaning you'll see the `Leiningen Dependencies` Classpath Container appear in the project, and be able to launch it as a Leiningen project.
+
+This feature can be disabled globally via the menu:Preferences[Clojure > General > Automatic detection of Clojure/Leiningen projects] preference
+
 == Changes between Counterclockwise 0.27.0 and 0.27.1
 
 `0.27.1` released on Thursday 28, 2014

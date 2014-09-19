@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Casey Marshal - initial API and implementation
  *******************************************************************************/
 package ccw.commands;
@@ -34,11 +34,12 @@ import ccw.util.DisplayUtil;
 /**
  * @author Laurent Petit
  */
-public class ToggleNatureCommand extends AbstractHandler {
+public class ToggleClojureNatureCommand extends AbstractHandler {
 
+		@Override
 		public Object execute(ExecutionEvent event) throws ExecutionException {
 			ISelection selection = HandlerUtil.getCurrentSelection(event);
-			
+
 			if (selection instanceof IStructuredSelection) {
 				for (Iterator<?> it = ((IStructuredSelection) selection). iterator(); it
 						.hasNext();) {
@@ -58,7 +59,7 @@ public class ToggleNatureCommand extends AbstractHandler {
 
 			return null;
 		}
-		
+
 		public static void toggleNature(IProject project, boolean quiet) {
 			final String title = "Change Clojure language support";
 			String mess;
@@ -76,18 +77,19 @@ public class ToggleNatureCommand extends AbstractHandler {
 				CCWPlugin.logError(mess, e);
 			}
 			final String message = mess;
-			
+
 			if (quiet) {
 				CCWPlugin.log(title + " : " + message);
 			} else {
 				DisplayUtil.asyncExec(new Runnable() {
+					@Override
 					public void run() {
 						MessageDialog.openInformation(Display.getCurrent().getActiveShell(), title, message);
 					}
 				});
 			}
 		}
-		
+
 		/**
 		 * Toggles clojure nature on a project.
 		 * @return true if nature added, false if nature removed
@@ -96,7 +98,7 @@ public class ToggleNatureCommand extends AbstractHandler {
 			IProjectDescription description = project.getDescription();
 			String[] natures = description.getNatureIds();
 			List<String> newNatures = new ArrayList<String>(natures.length + 1);
-			
+
 			boolean natureFound = false;
 			for (String nature: natures) {
 				if (nature.equals(ClojureCore.NATURE_ID)) {
@@ -106,7 +108,7 @@ public class ToggleNatureCommand extends AbstractHandler {
 					newNatures.add(nature);
 				}
 			}
-			
+
 			if (!natureFound) {
 				// Nature not found, so add it
 				newNatures.add(ClojureCore.NATURE_ID);
@@ -114,7 +116,7 @@ public class ToggleNatureCommand extends AbstractHandler {
 
 			description.setNatureIds(newNatures.toArray(new String[0]));
 			project.setDescription(description, null);
-			
+
 			return !natureFound;
 		}
 

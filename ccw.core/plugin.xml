@@ -2769,7 +2769,7 @@
         </activeWhen>
      </handler>
      <handler
-           class="ccw.commands.ToggleNatureCommand"
+           class="ccw.commands.ToggleClojureNatureCommand"
            commandId="ccw.core.command.toggle-clojure-nature">
      </handler>
   </extension>
@@ -3289,5 +3289,11 @@
              style="push">
        </action>
     </editorContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.startup">
+      <startup
+            class="ccw.CCWDropAdapterEarlyStartup">
+      </startup>
    </extension>
 </plugin>
