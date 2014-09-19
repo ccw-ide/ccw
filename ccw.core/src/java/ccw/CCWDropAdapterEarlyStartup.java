@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileFilter;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
@@ -16,6 +18,11 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.egit.ui.internal.clone.GitImportWizard;
+import org.eclipse.egit.ui.internal.provisional.wizards.GitRepositoryInfo;
+import org.eclipse.egit.ui.internal.provisional.wizards.IRepositorySearchResult;
+import org.eclipse.egit.ui.internal.provisional.wizards.NoRepositoryInfoException;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.dnd.DND;
@@ -25,6 +32,7 @@ import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.DropTargetListener;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.dnd.URLTransfer;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -45,6 +53,8 @@ import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.UIJob;
 
+import ccw.util.DisplayUtil;
+
 public class CCWDropAdapterEarlyStartup implements IStartup {
 
 	private static final int[] PREFERRED_DROP_OPERATIONS = {
@@ -55,7 +65,8 @@ public class CCWDropAdapterEarlyStartup implements IStartup {
 
 	private final DropTargetListener dropListener = new CreateProjectDropTargetListener();
 
-	private final FileTransfer transfer = FileTransfer.getInstance();
+	private final FileTransfer fileTransfer = FileTransfer.getInstance();
+	private final URLTransfer urlTransfer = URLTransfer.getInstance();
 
 	private final WorkbenchListener workbenchListener = new WorkbenchListener();
 
@@ -96,11 +107,12 @@ public class CCWDropAdapterEarlyStartup implements IStartup {
 		DropTarget target = findDropTarget(c);
 		if (target != null) {
 			// target exists, get it and check proper registration
-			registerWithExistingTarget(target, transfer);
+			registerWithExistingTarget(target, fileTransfer);
+			registerWithExistingTarget(target, urlTransfer);
 		} else {
 			target = new DropTarget(c, DROP_OPERATIONS);
 			if (transferAgents == null) {
-				transferAgents = new Transfer[] { transfer };
+				transferAgents = new Transfer[] { fileTransfer, urlTransfer };
 			}
 			target.setTransfer(transferAgents);
 		}
@@ -130,7 +142,8 @@ public class CCWDropAdapterEarlyStartup implements IStartup {
 		DropTarget target = findDropTarget(c);
 		if (target != null) {
 			// target exists, get it and check proper registration
-			registerWithExistingTarget(target, transfer);
+			registerWithExistingTarget(target, fileTransfer);
+			registerWithExistingTarget(target, urlTransfer);
 			registerDropListener(target, dropTargetListener);
 		}
 		hookChildren(c, dropTargetListener);
@@ -223,12 +236,38 @@ public class CCWDropAdapterEarlyStartup implements IStartup {
 		}
 
 		private boolean dropTargetIsValid(DropTargetEvent e) {
-			return transfer.isSupportedType(e.currentDataType);
+			return fileTransfer.isSupportedType(e.currentDataType) || urlTransfer.isSupportedType(e.currentDataType);
 		}
 
 		@Override
 		public void drop(DropTargetEvent event) {
-			if (!transfer.isSupportedType(event.currentDataType)) {
+			if (urlTransfer.isSupportedType(event.currentDataType)) {
+				// TODO url fetching on windows more complex than that => check how Eclise market place does it
+				final String url = getUrlFromEvent(event);
+				if (url != null &&
+						(url.startsWith("https://github.com/")
+						|| url.startsWith("https://bitbucket.org/")
+						|| url.startsWith("https://code.google.com/"))) {
+					final String sanitizedUrl = sanitizeForGit(url);
+					CCWPlugin.getTracer().trace(TraceOptions.LOG_INFO, "URL dropped: " + url + ". Once sanitized: " + sanitizedUrl);
+					DisplayUtil.asyncExec(new Runnable() {
+						@Override public void run() {
+							GitImportWizard w1 = new GitImportWizard(new IRepositorySearchResult() {
+								@Override
+								public GitRepositoryInfo getGitRepositoryInfo()
+										throws NoRepositoryInfoException {
+									return new GitRepositoryInfo(sanitizedUrl);
+								}
+							});
+							new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), w1).open();
+						}
+					});
+				} else {
+					event.detail = DND.DROP_NONE;
+				}
+				return;
+			}
+			if (!fileTransfer.isSupportedType(event.currentDataType)) {
 				// ignore
 				return;
 			}
@@ -247,8 +286,24 @@ public class CCWDropAdapterEarlyStartup implements IStartup {
 			}
 		}
 
+		private final Pattern p = Pattern.compile("(https?://[^/]+/[^/]+/[^/]+).*");
+		private String sanitizeForGit(String url) {
+			Matcher m = p.matcher(url);
+			return m.matches() ? m.group(1) : null;
+		}
+
 		private boolean isPotentialSolution(String[] files) {
 			return true;
+		}
+
+		private String getUrlFromEvent(DropTargetEvent event) {
+			Object eventData = event.data;
+			if (eventData == null)
+				return null;
+			if (!(eventData instanceof String)) {
+				return null;
+			}
+			return (String) eventData;
 		}
 
 		private String[] getFilesFromEvent(DropTargetEvent event) {

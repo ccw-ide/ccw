@@ -24,6 +24,13 @@ This feature can be disabled globally via the menu:Preferences[Clojure > General
 
 It is possible to drag a project folder project from Windows Explorer / Finder onto Eclipse / Counterclockwise. Any Leiningen project found within the dragged folder(s) will automatically be created ; and configured appropriately if automatic configuration is enabled.
 
+=== Project Drag and Drop from Github / Bitbucket / Google code to Counterclockwise
+
+It is possible to drag a Github / Bitbucket / Google code  project URL from your browser to Eclipse / Counterclockwise. The standard Eclipse Git Import wizard will be open, pre-filled with repository information.
+
+Once the project has been cloned, just select the `Create a general Project` option: a general project will be created, and if Automatic configuration is enabled, recognized as a Leiningen Project.
+
+
 == Changes between Counterclockwise 0.27.0 and 0.27.1
 
 `0.27.1` released on Thursday 28, 2014

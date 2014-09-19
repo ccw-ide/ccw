@@ -29,7 +29,9 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jdt.debug.ui,
  ccw.branding,
  paredit.clj,
- org.eclipse.ui.workbench.texteditor
+ org.eclipse.ui.workbench.texteditor,
+ org.eclipse.jgit,
+ org.eclipse.egit.ui
 Bundle-ClassPath: .,
  src/clj/,
  lib/aether-api.jar,
