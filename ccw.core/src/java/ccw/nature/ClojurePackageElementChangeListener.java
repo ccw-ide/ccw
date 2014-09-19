@@ -95,7 +95,6 @@ public final class ClojurePackageElementChangeListener implements
 	private void addClojureNature(final IProject[] projects) {
 		if (projects.length != 0) {
 			WorkspaceJob job = new ClojureNatureAdderWorkspaceJob(projects);
-			job.setRule(ResourcesPlugin.getWorkspace().getRoot());
 			job.setUser(false);
 			job.schedule(100);
 		}

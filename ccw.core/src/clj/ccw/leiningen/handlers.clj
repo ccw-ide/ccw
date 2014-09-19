@@ -133,8 +133,6 @@
                        (.exists (.getFile project "project.clj")))))]
         res)))) 
 
-;; TODO too many imbrications here, decomplecting the code
-;;      from the job, etc. will help ...
 (defn add-natures
   [project natures legend]
   (doto (e/workspace-job
@@ -150,7 +148,6 @@
                (.worked monitor 1)
                (.done monitor)
                (Status/OK_STATUS)))
-    (.setRule (e/workspace-root))
     (.setUser false)
     (.schedule)))
   

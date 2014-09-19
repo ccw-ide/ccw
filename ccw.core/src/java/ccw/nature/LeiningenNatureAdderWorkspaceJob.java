@@ -13,10 +13,7 @@ import org.eclipse.core.runtime.Status;
 import ccw.CCWPlugin;
 import ccw.util.ClojureInvoker;
 
-// TODO maybe this is too coarse grained ...
-// maybe we should set as many jobs as projects, and not require the whole workspace lock
-final class LeiningenNatureAdderWorkspaceJob extends
-		WorkspaceJob {
+final class LeiningenNatureAdderWorkspaceJob extends WorkspaceJob {
 
 	private final ClojureInvoker leinHandlers = ClojureInvoker.newInvoker(
             CCWPlugin.getDefault(),
