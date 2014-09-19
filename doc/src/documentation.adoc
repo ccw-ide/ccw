@@ -158,41 +158,22 @@ If you don't see the menu:File[New > Clojure Project] menu entry:
 ====
 
 
-== Open a non-Eclipse project present in the filesystem
+== Associate a project present in the filesystem with Eclipse
 
-You have in your disk this wonderful project cloned from Github, which is managed by Leiningen, since it has a `project.clj` file in its root folder.
+Drag a folder from your OS filesystem browser (Windows Explorer, Nautilus, Finder, etc.) and drop it onto an open Counterclockwise.
 
-If you can see a `.project` file in its root directory:
+If the folder is a root folder of many Leiningen projects, as many projects as found on the filesystem will be created in Counterclockwise.
 
-- Import it as a "general" project via the menu:File[Import > Existing project into Workspace] Wizard.
-
-If you don't have a `.project` file in the root directory:
-
-- Create a new project via menu:File[New > General > Project] (After entering the name of your project, uncheck the `Use default location` checkbox, and check btn:[Browse] to find your project folder on the file system)
-+
-Once referenced as an Eclipse project, you should see it in the `Package Explorer View`
-
-- Open the contextual menu of your project, select menu:Configure[Convert to Leiningen Project]
-
-
-== Add Clojure support to a Leiningen projet present in your Eclipse Workspace
-
-You already have the project referenced in Eclipse, it has a project.clj file and you want its class path to be managed by Counterclockwise:
-
-- Open the contextual menu of your project, select menu:Configure[Convert to Leiningen Project]
-
-== Add Clojure support to a non-Leiningen project present in your Eclipse Workspace
-
-Either:
-
-- manage to get somehow the Clojure jar in your project's `Java build path` settings (e.g. manually, or via some maven/gradle/whatever tool integrated with Eclipse) => the project will automatically be recognized as a Clojure Project
-
-INFO: You can check the project has been recognized as a Clojure project via the presence of a menu:Clojure menu entry in the project's contextual menu.
+[NOTE]
+====
+This feature will only work correctly if menu:Preference[Clojure > General > Automatic detection of Clojure / Leiningen projects] is enabled (which it is by default). +
+If the preference is disabled, it is possible to manually trigger leiningen detection via the contextual menu menu:Configure[Convert to Leiningen project].
+====
 
 
 = Leiningen Support
 
-To ensure Eclipse recognize your project as a Leiningen Project, see the previous <<enable-clojure>> section.
+Counterclockwise automatically detects Leiningen projects.
 
 == Project classpath management
 
