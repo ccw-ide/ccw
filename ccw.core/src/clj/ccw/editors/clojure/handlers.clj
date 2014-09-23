@@ -12,7 +12,8 @@
 (ns ccw.editors.clojure.handlers
   (:require [paredit.core :as pc]
             [ccw.editors.clojure.clojure-hyperlink-detector :as hlu] ; hlu as HyperLinkUtil
-            [ccw.editors.clojure.PareditAutoEditStrategyImpl :as pimpl]) 
+            [ccw.editors.clojure.PareditAutoEditStrategyImpl :as pimpl]
+            [ccw.editors.clojure.editor-support :as ed]) 
   (:use [clojure.core.incubator :only [-?>]])  
   (:import
     [org.eclipse.ui.handlers HandlerUtil]
@@ -25,11 +26,6 @@
   "Return the Clojure editor, if any, associated with the event."
   [event] 
   (PlatformUtil/getAdapter (HandlerUtil/getActivePart event) IClojureEditor))
-
-(defn ignoring-selection-changes [editor f]
-  (try       (-> editor .getSelectionHistory .ignoreSelectionChanges)
-             (f)
-    (finally (-> editor .getSelectionHistory .listenToSelectionChanges))))
 
 (def as-mode {:struct ccw.editors.clojure.ClojureEditorMode/STRUCTEDIT
               :paredit ccw.editors.clojure.ClojureEditorMode/PAREDIT
@@ -55,27 +51,27 @@
           (let [[new-offset new-length] (if-let [[from to] (:selection r)]
                                           [from (- to from)]
                                           ^:legacy [(:offset r) (:length r)])
-                updates {}
+                updates (fn [state]
+                          (update-in state [:selection-history] conj [offset length]))
                 updates (cond
                           (not (zero? new-length))
-                          (assoc updates :bias (neg? new-length))
+                          (comp updates #(assoc % :bias (neg? new-length)))
                           (not= (+ new-length new-offset) (+ length offset))
-                          (assoc updates :bias (< (+ new-length new-offset) (+ length offset)))
+                          (comp updates #(assoc % :bias (< (+ new-length new-offset) (+ length offset))))
                           :else updates)
                 updates (if-let [mode (as-mode (:mode r))]
-                          (assoc updates :mode mode)
+                          (comp updates #(assoc % :mode mode))
                           updates)]
-            (-> editor .getSelectionHistory (.remember (SourceRange. offset length)))
-            (swap! (.getState editor) into updates)
-            (ignoring-selection-changes editor 
-              #(.selectAndReveal editor new-offset new-length))))))
+            (swap! (.getState editor) updates)
+            (binding [ed/*random-selection* false]
+               (.selectAndReveal editor new-offset new-length))))))
 
 (defn do-select [editor offset]
   (let [r (pc/struct-select (.getParseState editor) offset)
         [from to] (:selection r)]
     (set-mode editor (:mode r))
-    (ignoring-selection-changes editor
-      #(.selectAndReveal editor from (- to from)))))
+    (binding [ed/*random-selection* false]
+      (.selectAndReveal editor from (- to from)))))
 
 (defn editor-text 
   "Return the current text, cursor offset and selection length
@@ -211,14 +207,22 @@
            (.isEscapeInStringLiteralsEnabled editor)
            (not (.isInEscapeSequence editor)))))))
 
+(defn- swap!'
+  "Like swap! but returns the value of the atom before update."
+  [a f & args]
+  (loop []
+    (let [v @a
+          v' (apply f v args)]
+      (if (compare-and-set! a v v')
+        v
+        (recur)))))
 
-;; TODO won't work if the ClojureSourceViewer is reused many times via configure/unconfigure (since after a re-configure,
-;; a fresh SelectionHistory instance will be created)
-;; Inspired directly by JDT
 (defn do-select-last [editor]
-  (when-let [old (-> editor .getSelectionHistory .getLast)]
-    (ignoring-selection-changes editor
-      #(.selectAndReveal editor (.getOffset old) (.getLength old)))))
+  (let [{:keys [selection-history]} (swap!' (.getState editor) update-in
+                                      [:selection-history] #(if (empty? %) % (pop %)))
+        [offset length] (peek selection-history)]
+    (binding [ed/*random-selection* false]
+      (.selectAndReveal editor offset length))))
 
 (defn select-last [_ event] 
   (do-select-last (editor event)))

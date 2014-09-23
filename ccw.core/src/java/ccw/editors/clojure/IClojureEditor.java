@@ -61,8 +61,6 @@ public interface IClojureEditor extends IAdaptable {
      */
     IRegion getSignedSelection ();
     
-	SelectionHistory getSelectionHistory();
-
     ISelectionProvider getSelectionProvider();
 
     /**

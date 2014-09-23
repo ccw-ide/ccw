@@ -37,6 +37,8 @@ import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.VerifyKeyListener;
@@ -226,20 +228,11 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
      */
     private boolean isForceRepair;
 
-    /** History for structure select action
-	 * STOLEN FROM THE JDT */
-	private SelectionHistory fSelectionHistory;
-	
 	private Set<ModeListener> modeListeners = new HashSet<ClojureSourceViewer.ModeListener>();
 	
 	/** The error message shown in the status line in case of failed information look up. */
 	protected final String fErrorLabel = "An unexpected error occured";
 
-
-	public SelectionHistory getSelectionHistory() {
-		return fSelectionHistory;
-	}
-    
 	/** 
 	 * Set to false if structural editing is not possible, because the document
 	 * is not parseable.
@@ -441,6 +434,12 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
         }
     }
 
+    final ISelectionChangedListener selectionChangeListener = new ISelectionChangedListener() {
+        public void selectionChanged(SelectionChangedEvent event) {
+            editorSupport._("selection-change", getState(), event);
+        }
+    };
+
     public void configure(SourceViewerConfiguration configuration) {
         super.configure(configuration);
 
@@ -448,11 +447,11 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
             fPreferenceStore.addPropertyChangeListener(this);
             initializeViewerColors();
         }
-        
+
+        getSelectionProvider().addSelectionChangedListener(selectionChangeListener);
+
         if (configuration instanceof ClojureSourceViewerConfiguration)
             fConfiguration = (ClojureSourceViewerConfiguration) configuration;
-
-		fSelectionHistory = new SelectionHistory(this);
 
         fIsConfigured= true;
     }
@@ -577,11 +576,8 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
         if (fPreferenceStore != null)
             fPreferenceStore.removePropertyChangeListener(this);
 
-		if (fSelectionHistory != null) {
-			fSelectionHistory.dispose();
-			fSelectionHistory = null;
-		}
-		
+        getSelectionProvider().removeSelectionChangedListener(selectionChangeListener);
+        
         super.unconfigure();
         fIsConfigured= false;
         fConfiguration = null;

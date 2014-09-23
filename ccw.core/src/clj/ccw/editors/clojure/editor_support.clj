@@ -21,7 +21,7 @@
          :build-id                the build id, identifying a \"version\" of the parse-tree
                                     (used for determining deltas between 2 updates)
    "}
-  ccw.editors.clojure.editor-support 
+  ccw.editors.clojure.editor-support
   (:require [paredit.parser :as p]
             [paredit.loc-utils :as lu]
             [paredit.static-analysis :as static-analysis])
@@ -117,7 +117,7 @@
       PreferenceConstants/EDITOR_MATCHING_BRACKETS_COLOR)))
 
 (defn init-state [default-mode]
-  (atom {:mode default-mode :bias true}))
+  (atom {:mode default-mode :bias true :selection-history ()}))
 
 (defn toggle-mode [state]
   (swap! state (fn [m]
@@ -129,3 +129,9 @@
 
 (defn set-state [state & kvs]
   (apply swap! state assoc kvs))
+
+(def ^:dynamic *random-selection* true)
+
+(defn selection-change [state event]
+  (when *random-selection*
+    (swap! state assoc :selection-history ())))

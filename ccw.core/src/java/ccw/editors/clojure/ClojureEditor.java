@@ -103,10 +103,6 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 	/** Preference key for matching brackets */
 	//PreferenceConstants.EDITOR_MATCHING_BRACKETS;
 
-	public SelectionHistory getSelectionHistory() {
-		return sourceViewer().getSelectionHistory();
-	}
-
 	/** The projection support */
 	private ProjectionSupport fProjectionSupport;
 
