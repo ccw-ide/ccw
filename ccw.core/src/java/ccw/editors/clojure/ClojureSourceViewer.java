@@ -75,11 +75,11 @@ import ccw.util.DisplayUtil;
 public abstract class ClojureSourceViewer extends ProjectionViewer implements
         IClojureEditor, IPropertyChangeListener {
     
-	private final ClojureInvoker editorSupport = ClojureInvoker.newInvoker(
+	public static final ClojureInvoker editorSupport = ClojureInvoker.newInvoker(
             CCWPlugin.getDefault(),
             "ccw.editors.clojure.editor-support");
     
-	private final ClojureInvoker handlers = ClojureInvoker.newInvoker(
+	public static final ClojureInvoker handlers = ClojureInvoker.newInvoker(
             CCWPlugin.getDefault(),
             "ccw.editors.clojure.handlers");
 
@@ -89,54 +89,6 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
      *  */
     public static final String STATUS_CATEGORY_STRUCTURAL_EDITION = "CCW.STATUS_CATEGORY_STRUCTURAL_EDITING_POSSIBLE";
     
-    public static interface ModeListener {
-        void modeChanged(ClojureEditorMode mode, boolean esc);
-    }
-
-    /**
-     * Due to Eclipse idiosyncracies, it is not possible for the viewer to 
-     * directly manage lifecycle of StatusLineContributionItems.
-     * 
-     *  But it is still required, to stay DRY, to centralise as much as possible
-     *  of the state reporting of the ClojureSourceViewer.
-     *  
-     *  This interface must be implemented by "components" (Editors, Viewers, whatever)
-     *  which are capable of reporting status to status line managers
-     */
-    public static abstract class EditingModeStatusUpdater implements ModeListener {
-
-        abstract protected StatusLineContributionItem getEditingModeStatusContributionItem();
-
-        private ClojureEditorMode mode;
-        private boolean inEscapeSequence;
-        
-        public void refresh() {
-            modeChanged(mode, inEscapeSequence);
-        }
-        
-        public void modeChanged(ClojureEditorMode mode, boolean inEscapeSequence) {
-            this.mode = mode;
-            this.inEscapeSequence = inEscapeSequence;
-            StatusLineContributionItem field = getEditingModeStatusContributionItem();
-            if (field != null) {
-                switch (mode) {
-                case TEXT:
-                    field.setText("text edit mode" + (inEscapeSequence ? " ESC" : ""));
-                    field.setToolTipText("unrestricted edit mode:\nhelps you with edition, but does not get in your way.");
-                    break;
-                case PAREDIT:
-                    field.setText("paredit mode" + (inEscapeSequence ? " ESC" : ""));
-                    field.setToolTipText("paredit edit mode:\neditor does its best to prevent you from breaking the structure of the code (requires you to know shortcut commands well).");
-                    break;
-                case STRUCTEDIT:
-                    field.setText("structedit mode" + (inEscapeSequence ? " ESC" : ""));
-                    field.setToolTipText("structedit edit mode:\neditor does its best to assist you manipulating the structure of the code (requires you to know shortcut commands well).");
-                    break;
-                }
-            }
-        }
-    }
-
     /**
      * The preference store.
      */
@@ -228,8 +180,6 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
      */
     private boolean isForceRepair;
 
-	private Set<ModeListener> modeListeners = new HashSet<ClojureSourceViewer.ModeListener>();
-	
 	/** The error message shown in the status line in case of failed information look up. */
 	protected final String fErrorLabel = "An unexpected error occured";
 
@@ -243,21 +193,8 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
         super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles);
         setPreferenceStore(store);
         
-        ClojureEditorMode defaultEditorMode = store.getBoolean(ccw.preferences.PreferenceConstants.USE_STRICT_STRUCTURAL_EDITING_MODE_BY_DEFAULT) ? ClojureEditorMode.PAREDIT : ClojureEditorMode.TEXT;
+        Object defaultEditorMode = Keyword.find(store.getBoolean(ccw.preferences.PreferenceConstants.USE_STRICT_STRUCTURAL_EDITING_MODE_BY_DEFAULT) ? "paredit" : "text");
         state = (Atom) editorSupport._("init-state", defaultEditorMode);
-        state.addWatch(this, new AFn() {
-            public Object invoke(Object key, Object state, Object oldValue,
-                    Object newValue) {
-                ClojureEditorMode editorMode = (ClojureEditorMode) MODE.invoke(newValue);
-                boolean inEscapeSequence = ESC.invoke(newValue) == Boolean.TRUE;
-                if (Util.equals(editorMode, MODE.invoke(oldValue))
-                    && inEscapeSequence == (ESC.invoke(oldValue) == Boolean.TRUE)) return null;
-                for (ModeListener modeListener : modeListeners) {  
-                    modeListener.modeChanged(editorMode, inEscapeSequence);
-                }
-                return null;
-            }
-        });
 
         isShowRainbowParens = store.getBoolean(ccw.preferences.PreferenceConstants.SHOW_RAINBOW_PARENS_BY_DEFAULT);
 
@@ -314,11 +251,11 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
                 }
             }
         });
-        addModeListener(new ModeListener() {
-            public void modeChanged(ClojureEditorMode mode, boolean esc) {
+        addModeListener(new AFn() {
+            public Object invoke(Object mode, Object esc) {
                 StyledText styledText = getTextWidget();
                 int lineHeight = styledText.getLineHeight();
-                if (mode == ClojureEditorMode.STRUCTEDIT) {
+                if (mode == Keyword.find("struct")) {
                     Display display = styledText.getDisplay();
                     Image insertionCaretBitmap = new Image(display, 5, lineHeight);
                     GC gc = new GC (insertionCaretBitmap); 
@@ -336,7 +273,8 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
                     styledText.getCaret().setSize(2, lineHeight);
                     styledText.setSelectionBackground(editorColors.fSelectionBackgroundColor);
                     styledText.setSelectionForeground(editorColors.fSelectionForegroundColor);
-                } 
+                }
+                return null;
             }
         });
 
@@ -354,8 +292,8 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
                     return;
                 }
                 if (e.character == SWT.ESC) {
-                    if (MODE.invoke(state.deref()) == ClojureEditorMode.STRUCTEDIT) {
-                        editorSupport._("set-state", state, MODE, ClojureEditorMode.PAREDIT);
+                    if (MODE.invoke(state.deref()) == Keyword.find("struct")) {
+                        editorSupport._("set-state", state, MODE, Keyword.find("paredit"));
                         e.doit = false;
                         return;
                     }
@@ -382,8 +320,11 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
                     oldInput.removeDocumentListener(parseTreeConstructorDocumentListener);
             }
         });
-
 	}
+
+    protected void handleDispose() {
+        editorSupport._("dispose-state", state);
+    }
 
     public int getOffsetFor(int x, int y) {
         StyledText styledText= getTextWidget();
@@ -679,7 +620,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 
     // TODO rename because it's really "should we be in strict mode or not?" 
     public boolean isStructuralEditingEnabled() {
-        return MODE.invoke(state.deref()) == ClojureEditorMode.PAREDIT;
+        return MODE.invoke(state.deref()) == Keyword.find("paredit");
     }
     
     public boolean isShowRainbowParens() {
@@ -797,10 +738,8 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
        editorSupport._("toggle-mode", state);
     }
 	
-    public void addModeListener(ModeListener listener) {
-        modeListeners.add(listener);
-        Object state = this.state.deref();
-        listener.modeChanged((ClojureEditorMode) MODE.invoke(state), Boolean.TRUE == ESC.invoke(state));
+    public void addModeListener(IFn listener) {
+        editorSupport._("add-mode-listener", state, listener);
     }
 
      public void toggleShowRainbowParens() {

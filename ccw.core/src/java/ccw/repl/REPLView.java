@@ -82,6 +82,7 @@ import ccw.util.StringUtils;
 import ccw.util.StyledTextUtil;
 import ccw.util.TextViewerSupport;
 import ccw.util.osgi.ClojureOSGi;
+import clojure.lang.AFn;
 import clojure.lang.ExceptionInfo;
 import clojure.lang.IFn;
 import clojure.lang.ISeq;
@@ -611,11 +612,11 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
             	}
             };
         };
-        viewer.addModeListener(new ClojureSourceViewer.EditingModeStatusUpdater() {
-            protected StatusLineContributionItem getEditingModeStatusContributionItem() {
+        viewer.addModeListener((IFn) ClojureSourceViewer.editorSupport._("status-line-updater", new AFn() {
+            public Object invoke() {
                 return structuralEditionModeStatusContributionItem;
             }
-        });
+        }));
         viewerConfig = new ClojureSourceViewerConfiguration(prefs, viewer);
         viewer.configure(viewerConfig);
         

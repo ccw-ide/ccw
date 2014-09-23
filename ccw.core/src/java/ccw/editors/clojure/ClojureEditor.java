@@ -41,9 +41,11 @@ import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.StatusLineContributionItem;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
+import clojure.lang.AFn;
 import clojure.lang.Atom;
+import clojure.lang.IFn;
+import clojure.lang.Keyword;
 import ccw.CCWPlugin;
-import ccw.editors.clojure.ClojureSourceViewer.ModeListener;
 import ccw.editors.outline.ClojureOutlinePage;
 import ccw.launching.ClojureLaunchShortcut;
 import ccw.preferences.PreferenceConstants;
@@ -133,11 +135,11 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 		super.configureSourceViewerDecorationSupport(support);
 	}
 
-    final ClojureSourceViewer.EditingModeStatusUpdater modeStatusUpdater = new ClojureSourceViewer.EditingModeStatusUpdater() {
-        protected StatusLineContributionItem getEditingModeStatusContributionItem() {
-                    return (StatusLineContributionItem) ClojureEditor.this.getStatusField(ClojureSourceViewer.STATUS_CATEGORY_STRUCTURAL_EDITION);
+    final IFn modeStatusUpdater = (IFn) ClojureSourceViewer.editorSupport._("status-line-updater", new AFn() {
+        public Object invoke() {
+            return getStatusField(ClojureSourceViewer.STATUS_CATEGORY_STRUCTURAL_EDITION);
         }
-    };
+    });
 
 	@Override
 	protected ISourceViewer createSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
@@ -151,12 +153,13 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 			}
 		};
         viewer.addModeListener(modeStatusUpdater);
-		viewer.addModeListener(new ModeListener() {
-            public void modeChanged(ClojureEditorMode mode, boolean esc) {
-                if (mode == ClojureEditorMode.STRUCTEDIT)
+		viewer.addModeListener(new AFn() {
+            public Object invoke(Object mode, Object esc) {
+                if (mode == Keyword.find("struct"))
                     getEditorSite().getKeyBindingService().setScopes(STRUCTMODE_SCOPES);
                 else
                     getEditorSite().getKeyBindingService().setScopes(MIXEDMODE_SCOPES);
+                return null;
             }
         });
 		this.viewer = viewer;
@@ -221,7 +224,7 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 	 */
 	protected void updateStatusField(String category) {
 	    if (ClojureSourceViewer.STATUS_CATEGORY_STRUCTURAL_EDITION.equals(category)) {
-	        modeStatusUpdater.refresh();
+	        modeStatusUpdater.invoke();
 	    } else {
 	        super.updateStatusField(category);
 	    }

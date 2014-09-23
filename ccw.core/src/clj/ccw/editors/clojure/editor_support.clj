@@ -116,15 +116,49 @@
       PreferenceConstants/EDITOR_MATCHING_BRACKETS 
       PreferenceConstants/EDITOR_MATCHING_BRACKETS_COLOR)))
 
+(def editor-states "All editor states." (atom #{}))
+
 (defn init-state [default-mode]
-  (atom {:mode default-mode :bias true :selection-history ()}))
+  (doto (atom {:mode default-mode :esc false
+               :bias true :selection-history ()
+               :mode-listeners #{}})
+    (add-watch :mode-listener (fn [k r o n]
+                                (when (or (not= (:mode o) (:mode n)) (not= (:esc o) (:esc n)))
+                                  (doseq [f (:mode-listeners n)] (f (:mode n) (:esc n))))))
+    (->> (swap! editor-states conj))))
+
+(defn dispose-state [state]
+  (swap! editor-states disj state))
+
+(defn add-mode-listener [state f]
+  (let [x (swap! state update-in [:mode-listeners] conj f)]
+    (f (:mode x) (:esc x))))
+
+(defn status-line-updater [get-status-line-contribution-item]
+  (let [prev-args (atom [nil nil])]
+    (fn f
+      ([] (apply f @prev-args))
+      ([mode esc]
+        (reset! prev-args [mode esc])
+        (when-let [^org.eclipse.ui.texteditor.StatusLineContributionItem item (get-status-line-contribution-item)]
+          (case mode
+            :text
+            (doto item
+              (.setText (str "text edit mode" (if esc " ESC" "")))
+              (.setToolTipText "unrestricted edit mode:\nhelps you with edition, but does not get in your way."))
+            :paredit
+            (doto item
+              (.setText (str "paredit mode" (if esc " ESC" "")))
+              (.setToolTipText "paredit edit mode:\neditor does its best to prevent you from breaking the structure of the code (requires you to know shortcut commands well)."))
+            :struct
+            (doto item
+              (.setText (str "structedit mode" (if esc " ESC" "")))
+              (.setToolTipText "structedit edit mode:\neditor does its best to assist you manipulating the structure of the code (requires you to know shortcut commands well)."))))))))
 
 (defn toggle-mode [state]
   (swap! state (fn [m]
                  (assoc m
-                   :mode (if (= (:mode m) ccw.editors.clojure.ClojureEditorMode/TEXT)
-                            ccw.editors.clojure.ClojureEditorMode/PAREDIT
-                            ccw.editors.clojure.ClojureEditorMode/TEXT)
+                   :mode (if (= :text (:mode m)) :paredit :text)
                    :esc false))))
 
 (defn set-state [state & kvs]

@@ -47,8 +47,8 @@
 (defn par-command [#^IClojureEditor editor command]
   (let [mode-commands (let [mode (:mode @(.getState editor))]
                         (cond
-                          (= mode ccw.editors.clojure.ClojureEditorMode/STRUCTEDIT) strict-commands
-                          (= mode ccw.editors.clojure.ClojureEditorMode/PAREDIT) strict-commands
+                          (= mode :struct) strict-commands
+                          (= mode :paredit) strict-commands
                           :else unstrict-commands))
         par-command (mode-commands (:text command))
         enabled (if-let [pref (*configuration-based-commands* par-command)]

@@ -36,12 +36,8 @@
   [event] 
   (PlatformUtil/getAdapter (HandlerUtil/getActivePart event) IClojureEditor))
 
-(def as-mode {:struct ccw.editors.clojure.ClojureEditorMode/STRUCTEDIT
-              :paredit ccw.editors.clojure.ClojureEditorMode/PAREDIT
-              :text ccw.editors.clojure.ClojureEditorMode/TEXT})
-
 (defn- set-mode [^IClojureEditor editor mode]
-  (swap! (.getState editor) assoc :mode (as-mode mode)))
+  (swap! (.getState editor) assoc :mode mode))
 
 (defn antagonist-selection? [[_ _ command-key' direction'] command-key direction]
   (and (= command-key command-key') (= direction (not direction'))))
@@ -77,7 +73,7 @@
                                             ^:legacy [(:offset r) (:length r)])
                   updates (fn [state]
                             (update-in state [:selection-history] conj [offset length command-key direction]))
-                  updates (if-let [mode (as-mode (:mode r))]
+                  updates (if-let [mode (:mode r)]
                             (comp updates #(assoc % :mode mode))
                             updates)]
               (swap! (.getState editor) updates)
