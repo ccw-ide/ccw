@@ -304,15 +304,17 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
                     if (event.time - lastTime < 200) {
                         return;
                     }
-                    double rmag = (lastx == event.x) && (lasty == event.y) ? event.magnification / lastMagnification : event.magnification;
-                    lastMagnification = event.magnification;
+                    double rmag = event.magnification / lastMagnification;
                     lastx = event.x;
                     lasty = event.y;
                     lastTime = event.time;
                     System.err.println(rmag);
-                    if (rmag > 1.0) {
+                    if (rmag > 1.1) {
+                        lastMagnification = event.magnification;
                         handlers._("fire-structedit-event", ClojureSourceViewer.this, "paredit-expand-up");
-                    } else {
+                    }
+                    if (rmag < 0.9) {
+                        lastMagnification = event.magnification;
                         handlers._("do-select-last", ClojureSourceViewer.this);
                     }
                     break;
