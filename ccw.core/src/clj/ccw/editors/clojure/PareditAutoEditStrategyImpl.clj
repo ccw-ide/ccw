@@ -45,7 +45,7 @@
   {:paredit-indent-line ccw.preferences.PreferenceConstants/USE_TAB_FOR_REINDENTING_LINE})
 
 (defn par-command [#^IClojureEditor editor command]
-  (let [mode-commands (let [mode (.getMode editor)]
+  (let [mode-commands (let [mode (:mode (.getState editor))]
                         (cond
                           (= mode ccw.editors.clojure.ClojureEditorMode/STRUCTEDIT) strict-commands
                           (= mode ccw.editors.clojure.ClojureEditorMode/PAREDIT) strict-commands
@@ -77,7 +77,7 @@
   [^PareditAutoEditStrategy this, #^IDocument document, #^DocumentCommand command]
   (let [^IClojureEditor editor (-> this .state deref :editor)]
     (when (and (.doit command) 
-               (not (.isInEscapeSequence editor)) 
+               (not (:esc (.getState editor))) 
                (.isStructuralEditionPossible editor))
       (let [signed-selection (bean (.getSignedSelection editor))
             document-text {:text (.get document) 

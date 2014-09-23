@@ -24,7 +24,7 @@
   (let [^IClojureEditor editor (-> this .state deref :editor)
         prev-caret-offset (.caretOffset command)]
     (when (and (.doit command)
-               (not (.isInEscapeSequence editor))
+               (not (:esc (.getState editor)))
                (support/boolean-ccw-pref PreferenceConstants/EXPERIMENTAL_AUTOSHIFT_ENABLED))
       (when-let [{[modif] :modifs offset :offset} 
                  (lu/col-shift (.getParseState editor)
