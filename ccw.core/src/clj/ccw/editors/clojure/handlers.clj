@@ -18,9 +18,18 @@
   (:import
     [org.eclipse.ui.handlers HandlerUtil]
     [ccw.util PlatformUtil]
-    [ccw.editors.clojure IClojureEditor
-                            SourceRange]))
-   
+    [ccw.editors.clojure IClojureEditor]))
+
+(defn- swap!'
+  "Like swap! but returns the value of the atom before update."
+  [a f & args]
+  (loop []
+    (let [v @a
+          v' (apply f v args)]
+      (if (compare-and-set! a v v')
+        v
+        (recur)))))
+
 (defn
   editor
   "Return the Clojure editor, if any, associated with the event."
@@ -34,37 +43,46 @@
 (defn- set-mode [^IClojureEditor editor mode]
   (swap! (.getState editor) assoc :mode (as-mode mode)))
 
-;; TODO remove duplications with appli-paredit-command
-(defn- apply-paredit-selection-command [^IClojureEditor editor command-key]
-  (let [{:keys #{length offset}} (bean (.getSignedSelection editor))
-        caret-at-left (if-not (zero? length)
-                        (neg? length)
-                        (:bias @(.getState editor)))
-        length (if caret-at-left (- length) length)
-        offset (if caret-at-left (- offset length) offset)
-        text  (.get (.getDocument editor))]
-        (when-let [r (apply pc/paredit 
-                       command-key
-                       (.getParseState editor) 
-                       {:text text :offset offset :length length :caret-at-left caret-at-left}
-                       (pimpl/paredit-options command-key))]
-          (let [[new-offset new-length] (if-let [[from to] (:selection r)]
-                                          [from (- to from)]
-                                          ^:legacy [(:offset r) (:length r)])
-                updates (fn [state]
-                          (update-in state [:selection-history] conj [offset length]))
-                updates (cond
-                          (not (zero? new-length))
-                          (comp updates #(assoc % :bias (neg? new-length)))
-                          (not= (+ new-length new-offset) (+ length offset))
-                          (comp updates #(assoc % :bias (< (+ new-length new-offset) (+ length offset))))
-                          :else updates)
-                updates (if-let [mode (as-mode (:mode r))]
-                          (comp updates #(assoc % :mode mode))
-                          updates)]
-            (swap! (.getState editor) updates)
-            (binding [ed/*random-selection* false]
-               (.selectAndReveal editor new-offset new-length))))))
+(defn antagonist-selection? [[_ _ command-key' direction'] command-key direction]
+  (and (= command-key command-key') (= direction (not direction'))))
+
+(defn- apply-paredit-selection-command
+  ([^IClojureEditor editor command-key]
+    (apply-paredit-selection-command editor command-key nil))
+  ([^IClojureEditor editor command-key direction]
+    (let [{:keys #{length offset}} (bean (.getSignedSelection editor))
+          [prev-offset prev-length :as sel]
+          (peek (:selection-history
+                  (swap!' (.getState editor) update-in [:selection-history]
+                    (fn [history]
+                      (let [sel (peek history)]
+                        (if (antagonist-selection? sel command-key direction)
+                          (pop history)
+                          history))))))]
+      (if (antagonist-selection? sel command-key direction)
+        (binding [ed/*random-selection* false]
+          (.selectAndReveal editor prev-offset prev-length))
+        (let [caret-at-left (neg? length)
+              length+ (if caret-at-left (- length) length)
+              offset+ (if caret-at-left (+ offset length) offset)
+              text  (.get (.getDocument editor))]
+          (when-let [r (apply pc/paredit 
+                         command-key
+                         (.getParseState editor)
+                         {:text text :offset offset+ :length length+ :caret-at-left caret-at-left
+                          :direction direction}
+                         (pimpl/paredit-options command-key))]
+            (let [[new-offset new-length] (if-let [[from to] (:selection r)]
+                                            [from (- to from)]
+                                            ^:legacy [(:offset r) (:length r)])
+                  updates (fn [state]
+                            (update-in state [:selection-history] conj [offset length command-key direction]))
+                  updates (if-let [mode (as-mode (:mode r))]
+                            (comp updates #(assoc % :mode mode))
+                            updates)]
+              (swap! (.getState editor) updates)
+              (binding [ed/*random-selection* false]
+                (.selectAndReveal editor new-offset new-length)))))))))
 
 (defn do-select [editor offset]
   (let [r (pc/struct-select (.getParseState editor) offset)
@@ -151,13 +169,16 @@
                          (paredit-fn :paredit-join-sexps)))
 (defn leaf-left [_ event]
   (apply-paredit-selection-command (editor event)
-                         :leaf-left))
+                         :leaf true))
 (defn leaf-right [_ event]
   (apply-paredit-selection-command (editor event)
-                         :leaf-right))
-(defn leaf-up [_ event]
+                         :leaf false))
+(defn leaf-up-left [_ event]
   (apply-paredit-selection-command (editor event)
-                         :leaf-up))
+                         :leaf-up true))
+(defn leaf-up-right [_ event]
+  (apply-paredit-selection-command (editor event)
+                         :leaf-up false))
 (defn expand-left [_ event] 
   (apply-paredit-selection-command (editor event)
                                    :paredit-expand-left))
@@ -206,16 +227,6 @@
          (and
            (.isEscapeInStringLiteralsEnabled editor)
            (not (:esc @(.getState editor))))))))
-
-(defn- swap!'
-  "Like swap! but returns the value of the atom before update."
-  [a f & args]
-  (loop []
-    (let [v @a
-          v' (apply f v args)]
-      (if (compare-and-set! a v v')
-        v
-        (recur)))))
 
 (defn do-select-last [editor]
   (let [{:keys [selection-history]} (swap!' (.getState editor) update-in

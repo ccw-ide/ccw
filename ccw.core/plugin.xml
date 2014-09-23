@@ -303,7 +303,13 @@
       <command
             categoryId="org.eclipse.ui.category.edit"
             description="%command.expandSelection.up.description"
-            id="ccw.ui.edit.text.clojure.leaf.up"
+            id="ccw.ui.edit.text.clojure.leaf.up-left"
+            name="%command.expandSelection.up.name">
+      </command> <!-- TODO -->
+      <command
+            categoryId="org.eclipse.ui.category.edit"
+            description="%command.expandSelection.up.description"
+            id="ccw.ui.edit.text.clojure.leaf.up-right"
             name="%command.expandSelection.up.name">
       </command> <!-- TODO -->
       <command
@@ -604,10 +610,16 @@
             sequence="M2+ARROW_UP">
       </key>
       <key
-            commandId="ccw.ui.edit.text.clojure.leaf.up"
+            commandId="ccw.ui.edit.text.clojure.leaf.up-left"
             contextId="ccw.ui.clojureStructEditorScope"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="ARROW_UP">
+      </key>
+      <key
+            commandId="ccw.ui.edit.text.clojure.leaf.up-right"
+            contextId="ccw.ui.clojureStructEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="ARROW_DOWN">
       </key>
       <key
             commandId="ccw.ui.edit.text.clojure.leaf.left"
@@ -2478,7 +2490,7 @@
         </activeWhen>
      </handler>
      <handler
-           commandId="ccw.ui.edit.text.clojure.leaf.up">
+           commandId="ccw.ui.edit.text.clojure.leaf.up-left">
         <class
               class="ccw.util.GenericExecutableExtension">
            <parameter
@@ -2487,7 +2499,45 @@
            </parameter>
            <parameter
                  name="handler"
-                 value="ccw.editors.clojure.handlers/leaf-up">
+                 value="ccw.editors.clojure.handlers/leaf-up-left">
+           </parameter>
+        </class>
+        <enabledWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </enabledWhen>
+        <activeWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </activeWhen>
+     </handler>
+     <handler
+           commandId="ccw.ui.edit.text.clojure.leaf.up-right">
+        <class
+              class="ccw.util.GenericExecutableExtension">
+           <parameter
+                 name="factory"
+                 value="ccw.core.factories/handler-factory">
+           </parameter>
+           <parameter
+                 name="handler"
+                 value="ccw.editors.clojure.handlers/leaf-up-right">
            </parameter>
         </class>
         <enabledWhen>
