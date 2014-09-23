@@ -205,7 +205,7 @@
          (clipboard-text (org.eclipse.swt.widgets.Display/getCurrent))
          (and
            (.isEscapeInStringLiteralsEnabled editor)
-           (not (:esc (.getState editor))))))))
+           (not (:esc @(.getState editor))))))))
 
 (defn- swap!'
   "Like swap! but returns the value of the atom before update."

@@ -592,6 +592,12 @@
             sequence="M2+M3+ARROW_UP">
       </key>
       <key
+            commandId="ccw.ui.edit.text.clojure.split.sexpr"
+            contextId="ccw.ui.clojureStructEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence=")">
+      </key>
+      <key
             commandId="ccw.ui.edit.text.clojure.expand.selection.up"
             contextId="ccw.ui.clojureStructEditorScope"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
@@ -825,12 +831,6 @@
             contextId="ccw.ui.clojureEditorScope"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M3+S">
-      </key>
-      <key
-            commandId="ccw.ui.edit.text.clojure.split.sexpr"
-            contextId="ccw.ui.clojureEditorScope"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence=")">
       </key>
       <key
             commandId="ccw.ui.edit.text.clojure.join.sexpr"
