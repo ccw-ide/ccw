@@ -41,6 +41,7 @@ import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.StatusLineContributionItem;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
+import clojure.lang.Atom;
 import ccw.CCWPlugin;
 import ccw.editors.clojure.ClojureSourceViewer.ModeListener;
 import ccw.editors.outline.ClojureOutlinePage;
@@ -136,6 +137,12 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 		super.configureSourceViewerDecorationSupport(support);
 	}
 
+    final ClojureSourceViewer.EditingModeStatusUpdater modeStatusUpdater = new ClojureSourceViewer.EditingModeStatusUpdater() {
+        protected StatusLineContributionItem getEditingModeStatusContributionItem() {
+                    return (StatusLineContributionItem) ClojureEditor.this.getStatusField(ClojureSourceViewer.STATUS_CATEGORY_STRUCTURAL_EDITION);
+        }
+    };
+
 	@Override
 	protected ISourceViewer createSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
 		fAnnotationAccess= createAnnotationAccess();
@@ -147,11 +154,7 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 				ClojureEditor.this.setStatusLineErrorMessage(message);
 			}
 		};
-		viewer.addModeListener(new ClojureSourceViewer.EditingModeStatusUpdater() {
-            protected StatusLineContributionItem getEditingModeStatusContributionItem() {
-                        return (StatusLineContributionItem) ClojureEditor.this.getStatusField(ClojureSourceViewer.STATUS_CATEGORY_STRUCTURAL_EDITION);
-            }
-        });
+        viewer.addModeListener(modeStatusUpdater);
 		viewer.addModeListener(new ModeListener() {
             public void modeChanged(ClojureEditorMode mode, boolean esc) {
                 if (mode == ClojureEditorMode.STRUCTEDIT)
@@ -221,17 +224,13 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 	 * @since 2.0
 	 */
 	protected void updateStatusField(String category) {
-		if (ClojureSourceViewer.STATUS_CATEGORY_STRUCTURAL_EDITION.equals(category)) {
-			viewer.setMode(viewer.getMode());
-		} else {
-			super.updateStatusField(category);
-		}
+	    if (ClojureSourceViewer.STATUS_CATEGORY_STRUCTURAL_EDITION.equals(category)) {
+	        modeStatusUpdater.refresh();
+	    } else {
+	        super.updateStatusField(category);
+	    }
 	}
 
-	
-	public boolean isInEscapeSequence () {
-	    return ((IClojureEditor)getSourceViewer()).isInEscapeSequence();
-	}
 	
 	public void toggleStructuralEditionMode() {
 		sourceViewer().toggleStructuralEditionMode();
@@ -661,7 +660,7 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
     @Override
     protected boolean isTabsToSpacesConversionEnabled() {
     	if (getPreferenceStore().getBoolean(ccw.preferences.PreferenceConstants.USE_TAB_FOR_REINDENTING_LINE)
-    			&& !isInEscapeSequence()) {
+    			&& ClojureSourceViewer.ESC.invoke(getState().deref()) == Boolean.TRUE) {
     		return false;
     	} else {
     		return super.isTabsToSpacesConversionEnabled();
@@ -728,12 +727,8 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 		return sourceViewer().isEscapeInStringLiteralsEnabled();
 	}
 
-    public void setMode(ClojureEditorMode mode) {
-        sourceViewer().setMode(mode);
-    }
-
-    public ClojureEditorMode getMode() {
-        return sourceViewer().getMode();
+    public Atom getState() {
+        return sourceViewer().getState();
     }
 	
 }

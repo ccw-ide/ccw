@@ -8,6 +8,7 @@ import org.eclipse.jface.text.source.DefaultCharacterPairMatcher;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
+import clojure.lang.Atom;
 import ccw.repl.REPLView;
 
 /**
@@ -36,12 +37,6 @@ public interface IClojureEditor extends IAdaptable {
      */
     boolean isEscapeInStringLiteralsEnabled();
     
-    /**
-     * Returns true only if the editor is in an "escape sequence", temporarily
-     * disabling structural editing mode (if enabled).
-     */
-    boolean isInEscapeSequence ();
-
     // @todo -- what does "unsigned"/"signed" mean in this context?
     /**
      * Returns the unsigned current selection.
@@ -97,9 +92,8 @@ public interface IClojureEditor extends IAdaptable {
 
 	void toggleStructuralEditionMode();
 
-    void setMode(ClojureEditorMode mode);
-    ClojureEditorMode getMode();
-
+	Atom getState();
+	
 	boolean isShowRainbowParens();
 	
 	void toggleShowRainbowParens();

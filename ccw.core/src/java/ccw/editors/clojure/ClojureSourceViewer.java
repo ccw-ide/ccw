@@ -45,8 +45,11 @@ import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.MouseTrackListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.widgets.Caret;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
@@ -55,7 +58,12 @@ import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.StatusLineContributionItem;
 
+import clojure.lang.AFn;
+import clojure.lang.Atom;
+import clojure.lang.IFn;
+import clojure.lang.Keyword;
 import clojure.lang.RT;
+import clojure.lang.Util;
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.preferences.PreferenceConstants;
@@ -97,7 +105,16 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 
         abstract protected StatusLineContributionItem getEditingModeStatusContributionItem();
 
+        private ClojureEditorMode mode;
+        private boolean inEscapeSequence;
+        
+        public void refresh() {
+            modeChanged(mode, inEscapeSequence);
+        }
+        
         public void modeChanged(ClojureEditorMode mode, boolean inEscapeSequence) {
+            this.mode = mode;
+            this.inEscapeSequence = inEscapeSequence;
             StatusLineContributionItem field = getEditingModeStatusContributionItem();
             if (field != null) {
                 switch (mode) {
@@ -190,11 +207,12 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
      */
     private boolean fIsConfigured;
 
-    private boolean inEscapeSequence;
-    
     private boolean isContentAssistantActive;
-    
-    private ClojureEditorMode editorMode;
+
+    private Atom state;
+    public static Keyword MODE = Keyword.intern("mode");
+    public static Keyword ESC = Keyword.intern("esc");
+    public static Keyword BIAS = Keyword.intern("bias");
 
 	/**
 	 * Set to true to have the viewer show rainbow parens
@@ -231,6 +249,25 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     public ClojureSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles, IPreferenceStore store) {
         super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles);
         setPreferenceStore(store);
+        
+        ClojureEditorMode defaultEditorMode = store.getBoolean(ccw.preferences.PreferenceConstants.USE_STRICT_STRUCTURAL_EDITING_MODE_BY_DEFAULT) ? ClojureEditorMode.PAREDIT : ClojureEditorMode.TEXT;
+        state = (Atom) editorSupport._("init-state", defaultEditorMode);
+        state.addWatch(this, new AFn() {
+            public Object invoke(Object key, Object state, Object oldValue,
+                    Object newValue) {
+                ClojureEditorMode editorMode = (ClojureEditorMode) MODE.invoke(newValue);
+                boolean inEscapeSequence = ESC.invoke(newValue) == Boolean.TRUE;
+                if (Util.equals(editorMode, MODE.invoke(oldValue))
+                    && inEscapeSequence == (ESC.invoke(oldValue) == Boolean.TRUE)) return null;
+                for (ModeListener modeListener : modeListeners) {  
+                    modeListener.modeChanged(editorMode, inEscapeSequence);
+                }
+                return null;
+            }
+        });
+
+        isShowRainbowParens = store.getBoolean(ccw.preferences.PreferenceConstants.SHOW_RAINBOW_PARENS_BY_DEFAULT);
+
         getTextWidget().addListener(SWT.MouseVerticalWheel, new Listener() {
             public void handleEvent(Event event) {
                 if ((event.stateMask & SWT.MODIFIER_MASK) == SWT.SHIFT) {
@@ -284,12 +321,26 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
         });
         addModeListener(new ModeListener() {
             public void modeChanged(ClojureEditorMode mode, boolean esc) {
+                StyledText styledText = getTextWidget();
+                int lineHeight = styledText.getLineHeight();
                 if (mode == ClojureEditorMode.STRUCTEDIT) {
-                    getTextWidget().setSelectionBackground(editorColors.fStructSelectionBackgroundColor);
-                    getTextWidget().setSelectionForeground(editorColors.fStructSelectionForegroundColor);
+                    Display display = styledText.getDisplay();
+                    Image insertionCaretBitmap = new Image(display, 5, lineHeight);
+                    GC gc = new GC (insertionCaretBitmap); 
+                    gc.setBackground(display.getSystemColor(SWT.COLOR_WHITE));
+                    gc.fillRectangle(0, 0, 5, lineHeight);
+                    gc.setForeground(display.getSystemColor(SWT.COLOR_BLACK));
+                    gc.drawLine(2,-1,2,lineHeight);
+                    gc.dispose();
+                    styledText.getCaret().setSize(5, lineHeight);
+                    styledText.getCaret().setImage(insertionCaretBitmap);
+                    styledText.setSelectionBackground(editorColors.fStructSelectionBackgroundColor);
+                    styledText.setSelectionForeground(editorColors.fStructSelectionForegroundColor);
                 } else {
-                    getTextWidget().setSelectionBackground(editorColors.fSelectionBackgroundColor);
-                    getTextWidget().setSelectionForeground(editorColors.fSelectionForegroundColor);
+                    styledText.getCaret().setImage(null);
+                    styledText.getCaret().setSize(2, lineHeight);
+                    styledText.setSelectionBackground(editorColors.fSelectionBackgroundColor);
+                    styledText.setSelectionForeground(editorColors.fSelectionForegroundColor);
                 } 
             }
         });
@@ -301,21 +352,20 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
             public void verifyKey(VerifyEvent e) {
                 // TODO when isContentAssistantActive does not handle a key, give us back control
                 if (isContentAssistantActive) return;
+                boolean inEscapeSequence = ESC.invoke(state.deref()) == Boolean.TRUE;
                 if (inEscapeSequence) {
-                    inEscapeSequence = false;
+                    editorSupport._("set-state", state, ESC, false);
                     updateTabsToSpacesConverter();
-                    fireModeChange();
                     return;
                 }
                 if (e.character == SWT.ESC) {
-                    if (getMode() == ClojureEditorMode.STRUCTEDIT) {
-                        setMode(ClojureEditorMode.PAREDIT);
+                    if (MODE.invoke(state.deref()) == ClojureEditorMode.STRUCTEDIT) {
+                        editorSupport._("set-state", state, MODE, ClojureEditorMode.PAREDIT);
                         e.doit = false;
                         return;
                     }
-                    inEscapeSequence = true;
+                    editorSupport._("set-state", state, ESC, true);
                     updateTabsToSpacesConverter();
-                    fireModeChange();
                     e.doit = false; // double esc -> single esc
                     return;
                 }
@@ -338,8 +388,6 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
             }
         });
 
-        editorMode = store.getBoolean(ccw.preferences.PreferenceConstants.USE_STRICT_STRUCTURAL_EDITING_MODE_BY_DEFAULT) ? ClojureEditorMode.PAREDIT : ClojureEditorMode.TEXT;
-		isShowRainbowParens = store.getBoolean(ccw.preferences.PreferenceConstants.SHOW_RAINBOW_PARENS_BY_DEFAULT);
 	}
 
     public int getOffsetFor(int x, int y) {
@@ -633,15 +681,11 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 
     // TODO rename because it's really "should we be in strict mode or not?" 
     public boolean isStructuralEditingEnabled() {
-        return editorMode == ClojureEditorMode.PAREDIT;
+        return MODE.invoke(state.deref()) == ClojureEditorMode.PAREDIT;
     }
     
     public boolean isShowRainbowParens() {
     	return isShowRainbowParens;
-    }
-
-    public boolean isInEscapeSequence () {
-        return inEscapeSequence;
     }
     
     public String findDeclaringNamespace() {
@@ -752,31 +796,16 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 	}
 	
     public void toggleStructuralEditionMode() {
-       setMode(editorMode == ClojureEditorMode.TEXT ? ClojureEditorMode.PAREDIT : ClojureEditorMode.TEXT);
+       editorSupport._("toggle-mode", state);
     }
 	
     public void addModeListener(ModeListener listener) {
         modeListeners.add(listener);
-        listener.modeChanged(editorMode, inEscapeSequence);
+        Object state = this.state.deref();
+        listener.modeChanged((ClojureEditorMode) MODE.invoke(state), Boolean.TRUE == ESC.invoke(state));
     }
 
-    public void setMode(ClojureEditorMode mode) {
-        editorMode = mode;
-        inEscapeSequence = false;
-        fireModeChange();
-    }
-
-    protected void fireModeChange() {
-        for (ModeListener modeListener : modeListeners) {
-            modeListener.modeChanged(editorMode, inEscapeSequence);
-        }
-    }
-
-    public ClojureEditorMode getMode() {
-        return editorMode;
-    }
-
-    public void toggleShowRainbowParens() {
+     public void toggleShowRainbowParens() {
        isShowRainbowParens = !isShowRainbowParens;
        markDamagedAndRedraw();
     }
@@ -847,6 +876,8 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 	public void setContentAssistantActive(boolean isContentAssistantActive) {
 		this.isContentAssistantActive = isContentAssistantActive;
 	}
-
 	
+	public Atom getState() {
+	    return state;
+	}
 }

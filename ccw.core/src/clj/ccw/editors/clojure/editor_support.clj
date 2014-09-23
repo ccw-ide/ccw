@@ -115,3 +115,17 @@
 		(.setMatchingCharacterPainterPreferenceKeys 
       PreferenceConstants/EDITOR_MATCHING_BRACKETS 
       PreferenceConstants/EDITOR_MATCHING_BRACKETS_COLOR)))
+
+(defn init-state [default-mode]
+  (atom {:mode default-mode :bias true}))
+
+(defn toggle-mode [state]
+  (swap! state (fn [m]
+                 (assoc m
+                   :mode (if (= (:mode m) ccw.editors.clojure.ClojureEditorMode/TEXT)
+                            ccw.editors.clojure.ClojureEditorMode/PAREDIT
+                            ccw.editors.clojure.ClojureEditorMode/TEXT)
+                   :esc false))))
+
+(defn set-state [state & kvs]
+  (apply swap! state assoc kvs))

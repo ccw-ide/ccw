@@ -31,27 +31,44 @@
              (f)
     (finally (-> editor .getSelectionHistory .listenToSelectionChanges))))
 
+(def as-mode {:struct ccw.editors.clojure.ClojureEditorMode/STRUCTEDIT
+              :paredit ccw.editors.clojure.ClojureEditorMode/PAREDIT
+              :text ccw.editors.clojure.ClojureEditorMode/TEXT})
+
 (defn- set-mode [^IClojureEditor editor mode]
-  (some->> mode {:struct ccw.editors.clojure.ClojureEditorMode/STRUCTEDIT
-                 :paredit ccw.editors.clojure.ClojureEditorMode/PAREDIT
-                 :text ccw.editors.clojure.ClojureEditorMode/TEXT} (.setMode editor)))
+  (swap! (.getState editor) assoc :mode (as-mode mode)))
 
 ;; TODO remove duplications with appli-paredit-command
-(defn- apply-paredit-selection-command [editor command-key]
-  (let [{:keys #{length offset}} (bean (.getUnSignedSelection editor))
-        text  (.get (.getDocument editor))
-        r (apply pc/paredit 
-                 command-key
-                 (.getParseState editor) 
-                 {:text text :offset offset :length length}
-                 (pimpl/paredit-options command-key))
-        [new-offset new-length] (if-let [[from to] (:selection r)]
-                                  [from (- to from)]
-                                  ^:legacy [(:offset r) (:length r)])]
-    (-> editor .getSelectionHistory (.remember (SourceRange. offset length)))
-    (set-mode editor (:mode r))
-    (ignoring-selection-changes editor 
-      #(.selectAndReveal editor new-offset new-length))))
+(defn- apply-paredit-selection-command [^IClojureEditor editor command-key]
+  (let [{:keys #{length offset}} (bean (.getSignedSelection editor))
+        caret-at-left (if-not (zero? length)
+                        (neg? length)
+                        (:bias @(.getState editor)))
+        length (if caret-at-left (- length) length)
+        offset (if caret-at-left (- offset length) offset)
+        text  (.get (.getDocument editor))]
+        (when-let [r (apply pc/paredit 
+                       command-key
+                       (.getParseState editor) 
+                       {:text text :offset offset :length length :caret-at-left caret-at-left}
+                       (pimpl/paredit-options command-key))]
+          (let [[new-offset new-length] (if-let [[from to] (:selection r)]
+                                          [from (- to from)]
+                                          ^:legacy [(:offset r) (:length r)])
+                updates {}
+                updates (cond
+                          (not (zero? new-length))
+                          (assoc updates :bias (neg? new-length))
+                          (not= (+ new-length new-offset) (+ length offset))
+                          (assoc updates :bias (< (+ new-length new-offset) (+ length offset)))
+                          :else updates)
+                updates (if-let [mode (as-mode (:mode r))]
+                          (assoc updates :mode mode)
+                          updates)]
+            (-> editor .getSelectionHistory (.remember (SourceRange. offset length)))
+            (swap! (.getState editor) into updates)
+            (ignoring-selection-changes editor 
+              #(.selectAndReveal editor new-offset new-length))))))
 
 (defn do-select [editor offset]
   (let [r (pc/struct-select (.getParseState editor) offset)
@@ -137,8 +154,14 @@
   (apply-paredit-command (editor event)
                          (paredit-fn :paredit-join-sexps)))
 (defn leaf-left [_ event]
-  (apply-paredit-command (editor event)
-                         (paredit-fn :leaf-left)))
+  (apply-paredit-selection-command (editor event)
+                         :leaf-left))
+(defn leaf-right [_ event]
+  (apply-paredit-selection-command (editor event)
+                         :leaf-right))
+(defn leaf-up [_ event]
+  (apply-paredit-selection-command (editor event)
+                         :leaf-up))
 (defn expand-left [_ event] 
   (apply-paredit-selection-command (editor event)
                                    :paredit-expand-left))
