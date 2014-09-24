@@ -729,5 +729,8 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
     public Atom getState() {
         return sourceViewer().getState();
     }
-	
+
+    public void selectAndReveal(int start, int length) {
+        super.selectAndReveal(start, length, start + length, -length);
+    }
 }
