@@ -406,6 +406,14 @@
     (let [[l r] (structural-selection rloc (dec offset) (inc length) (constantly true))]
       {:selection [(start-offset l) (end-offset r)]}))))
 
+(defn- closest-ancestor-with-different [invariant loc]
+  (let [v (invariant loc)]
+    (loop [loc loc]
+      (when-let [loc (z/up loc)]
+        (if (= v (invariant loc))
+          (recur loc)
+          loc)))))
+
 (defmethod paredit
   :leaf-left
   [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length caret-at-left] :as t}]
@@ -455,27 +463,6 @@
                   {:selection [sl sl]})
                 {:selection [sl el]}))))))))
 
-(defn struct-select [{:keys #{parse-tree buffer}} offset]
-  (when-let [rloc (-?> parse-tree (parsed-root-loc true))]
-    (let [[l r] (structural-selection rloc offset 1)]
-      {:selection [(start-offset l) (end-offset r)]
-       :mode :struct})))
-
-(defn default-behaviour-sel [parent l r]
-  [(start-offset parent) (end-offset parent)])
-
-(defn children-then-punct-sel [parent l r]
-  (let [pl (-> parent z/down z/right)
-        pr (-> pl z/rightmost z/left)]
-    (cond
-      (or
-        (<= (count (z/children parent)) 2) ; TODO if we had :punct nodes, we could just check
-                                           ; if only :punct nodes are present ...
-        (and (= l pl) (= r pr)))
-        [(start-offset parent) (end-offset parent)]
-      :else
-        [(start-offset pl) (end-offset pr)])))
-
 (defn- broaden-to-siblings [l r]
   (let [f (fn [best-loc loc]
             (if loc
@@ -499,6 +486,67 @@
         :else
         (let [[l r] (broaden-to-siblings l r)]
           (recur l r true))))))
+
+(defmethod paredit
+  :narrow
+  [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length caret-at-left] :as t}]
+  (when (pos? length)
+    (with-important-memoized
+      (when-let [rloc (-?> parse-tree (parsed-root-loc true))]
+        (let [start offset end (+ offset length)
+              [l r] (structural-selection rloc offset length)
+              dir (if caret-at-left z/right z/left)
+              down (if caret-at-left z/down (comp z/rightmost z/down))]
+          (loop [loc (if caret-at-left l r)]
+            (let [sl (start-offset loc) el (end-offset loc)]
+              (if (and (= start sl) (= end el))
+                (if-let [loc (first (drop-while 
+                                      #(or (punct-loc? %) (= :whitespace (loc-tag %)))
+                                      (iterate dir (down loc))))]
+                  (recur loc)
+                  {:selection (if caret-at-left [sl sl] [el el])})
+                {:selection (if caret-at-left [el sl] [sl el])}))))))))
+
+(defmethod paredit
+  :expand
+  [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length caret-at-left] :as t}]
+  (with-important-memoized
+    (when-let [rloc (-?> parse-tree (parsed-root-loc true))]
+      (let [[l r] (structural-selection rloc offset length)
+            loc (if (pos? length)
+                  (let [loc (if caret-at-left l r)
+                        dir (if caret-at-left z/left z/right)]
+                    (if-let [loc (first (drop-while #(or (punct-loc? %) (= :whitespace (loc-tag %)))
+                                          (iterate dir (dir loc))))]
+                      loc
+                      (closest-ancestor-with-different
+                        (if caret-at-left start-offset end-offset) 
+                        loc)))
+                  l)]
+        {:selection (if caret-at-left
+                      [(end-offset loc) (start-offset loc)]
+                      [(start-offset loc) (end-offset loc)])}))))
+
+(defn struct-select [{:keys #{parse-tree buffer}} offset]
+  (when-let [rloc (-?> parse-tree (parsed-root-loc true))]
+    (let [[l r] (structural-selection rloc offset 1)]
+      {:selection [(start-offset l) (end-offset r)]
+       :mode :struct})))
+
+(defn default-behaviour-sel [parent l r]
+  [(start-offset parent) (end-offset parent)])
+
+(defn children-then-punct-sel [parent l r]
+  (let [pl (-> parent z/down z/right)
+        pr (-> pl z/rightmost z/left)]
+    (cond
+      (or
+        (<= (count (z/children parent)) 2) ; TODO if we had :punct nodes, we could just check
+                                           ; if only :punct nodes are present ...
+        (and (= l pl) (= r pr)))
+        [(start-offset parent) (end-offset parent)]
+      :else
+        [(start-offset pl) (end-offset pr)])))
 
 (defmethod paredit
   :paredit-expand-up

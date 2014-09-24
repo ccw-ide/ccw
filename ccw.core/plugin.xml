@@ -309,6 +309,12 @@
       <command
             categoryId="org.eclipse.ui.category.edit"
             description="%command.expandSelection.up.description"
+            id="ccw.ui.edit.text.clojure.leaf.down"
+            name="%command.expandSelection.up.name">
+      </command> <!-- TODO -->
+      <command
+            categoryId="org.eclipse.ui.category.edit"
+            description="%command.expandSelection.up.description"
             id="ccw.ui.edit.text.clojure.expand.selection.up"
             name="%command.expandSelection.up.name">
       </command>
@@ -604,13 +610,13 @@
             sequence="M2+ARROW_UP">
       </key>
       <key
-            commandId="ccw.ui.edit.text.clojure.expand.selection.up"
+            commandId="ccw.ui.edit.text.clojure.leaf.up"
             contextId="ccw.ui.clojureStructEditorScope"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="ARROW_UP">
       </key>
       <key
-            commandId="ccw.ui.edit.text.clojure.select.last"
+            commandId="ccw.ui.edit.text.clojure.leaf.down"
             contextId="ccw.ui.clojureStructEditorScope"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="ARROW_DOWN">
@@ -2494,6 +2500,44 @@
            <parameter
                  name="handler"
                  value="ccw.editors.clojure.handlers/leaf-up">
+           </parameter>
+        </class>
+        <enabledWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </enabledWhen>
+        <activeWhen>
+           <with
+                 variable="activeContexts">
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <equals
+                       value="ccw.ui.clojureEditorScope">
+                 </equals>
+              </iterate>
+           </with>
+        </activeWhen>
+     </handler>
+     <handler
+           commandId="ccw.ui.edit.text.clojure.leaf.down">
+        <class
+              class="ccw.util.GenericExecutableExtension">
+           <parameter
+                 name="factory"
+                 value="ccw.core.factories/handler-factory">
+           </parameter>
+           <parameter
+                 name="handler"
+                 value="ccw.editors.clojure.handlers/leaf-down">
            </parameter>
         </class>
         <enabledWhen>

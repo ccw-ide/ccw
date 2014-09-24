@@ -153,7 +153,10 @@
                          :leaf-right))
 (defn leaf-up [_ event]
   (apply-paredit-selection-command (editor event)
-                         :leaf-up))
+                         :expand))
+(defn leaf-down [_ event]
+  (apply-paredit-selection-command (editor event)
+                         :narrow))
 (defn expand-left [_ event] 
   (apply-paredit-selection-command (editor event)
                                    :paredit-expand-left))
