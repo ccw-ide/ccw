@@ -604,10 +604,16 @@
             sequence="M2+ARROW_UP">
       </key>
       <key
-            commandId="ccw.ui.edit.text.clojure.leaf.up"
+            commandId="ccw.ui.edit.text.clojure.expand.selection.up"
             contextId="ccw.ui.clojureStructEditorScope"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="ARROW_UP">
+      </key>
+      <key
+            commandId="ccw.ui.edit.text.clojure.select.last"
+            contextId="ccw.ui.clojureStructEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="ARROW_DOWN">
       </key>
       <key
             commandId="ccw.ui.edit.text.clojure.leaf.left"

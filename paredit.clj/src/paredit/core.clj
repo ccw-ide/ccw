@@ -422,13 +422,13 @@
       (if (and (not caret-at-left) (pos? length))
         {:selection [(+ offset length) offset]}
         (when-let [l (skip-whitespaces offset)]
-          (if (zero? length)
-            (let [sl (start-offset l)]
-              (if (punct-loc? l)
+          (let [el (end-offset l)
+                sl (start-offset l)]
+            (if (punct-loc? l)
+              (if (= offset el)
                 {:selection [sl sl]}
-                {:selection [(end-offset l) sl]}))
-            (let [el (end-offset l)]
-              {:selection [el el]})))))))
+                {:selection [el el]})
+              {:selection [el sl]})))))))
 
 (defmethod paredit
   :leaf-right
@@ -446,13 +446,13 @@
       (if (and caret-at-left (pos? length))
         {:selection [offset (+ offset length)]}
         (when-let [l (skip-whitespaces (+ offset length))]
-          (if (zero? length)
-            (let [el (end-offset l)]
-              (if (punct-loc? l)
+          (let [el (end-offset l)
+                sl (start-offset l)]
+            (if (punct-loc? l)
+              (if (= offset sl) 
                 {:selection [el el]}
-                {:selection [(start-offset l) el]}))
-            (let [sl (start-offset l)]
-              {:selection [sl sl]})))))))
+                {:selection [sl sl]})
+              {:selection [sl el]})))))))
 
 (defn struct-select [{:keys #{parse-tree buffer}} offset]
   (when-let [rloc (-?> parse-tree (parsed-root-loc true))]
