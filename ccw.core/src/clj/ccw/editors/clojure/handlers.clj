@@ -28,7 +28,7 @@
   (PlatformUtil/getAdapter (HandlerUtil/getActivePart event) IClojureEditor))
 
 (defn- set-mode [^IClojureEditor editor mode]
-  (swap! (.getState editor) assoc :mode mode))
+  (when mode (swap! (.getState editor) assoc :mode mode)))
 
 ;; TODO remove duplications with appli-paredit-command
 (defn- apply-paredit-selection-command [^IClojureEditor editor command-key]

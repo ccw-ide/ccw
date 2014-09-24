@@ -445,14 +445,15 @@
     (with-important-memoized
       (if (and caret-at-left (pos? length))
         {:selection [offset (+ offset length)]}
-        (when-let [l (skip-whitespaces (+ offset length))]
-          (let [el (end-offset l)
-                sl (start-offset l)]
-            (if (punct-loc? l)
-              (if (= offset sl) 
-                {:selection [el el]}
-                {:selection [sl sl]})
-              {:selection [sl el]})))))))
+        (let [offset (+ offset length)]
+          (when-let [l (skip-whitespaces offset)]
+            (let [el (end-offset l)
+                  sl (start-offset l)]
+              (if (punct-loc? l)
+                (if (= offset sl)
+                  {:selection [el el]}
+                  {:selection [sl sl]})
+                {:selection [sl el]}))))))))
 
 (defn struct-select [{:keys #{parse-tree buffer}} offset]
   (when-let [rloc (-?> parse-tree (parsed-root-loc true))]
