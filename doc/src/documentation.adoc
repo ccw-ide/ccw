@@ -110,23 +110,25 @@ See the https://github.com/technomancy/leiningen/wiki/HTTP-Proxies[Leiningen HTT
 [[first-project]]
 = Create your first project
 
-Create and run a simple Clojure project ("Hello Betty")
-
-- Open the Java perspective (unnecessary for Counterclockwise Standalone product users)
+- Open the Java perspective (unnecessary step for `Counterclockwise Standalone product` users)
 ** menu:Window[Open Perspective > Java] '''(a perspective is a predefined layout of views, suitable for a particular type of development)'''
 - Create a Clojure project 
 ** Menu menu:File[New > Clojure Project], name it `myproject`
 ** The project is created using the `default` Leiningen Template, which creates a Clojure project with a predefined `myproject.core` namespace in `src/myproject/core.clj`
 - Run the project: 
-** Click on the editor pane containing the code in `src/myproject/core.clj` and then select `Load file in REPL` from the `Clojure` menu. This sends the whole file's code to the REPL (and also takes care of starting a REPL for the project if none is currently started).
+** Click on the editor pane containing the code in `core.clj` and then select `Load file in REPL` from the `Clojure` menu. This sends the whole file's code to the REPL (and also takes care of starting a REPL for the project if none is currently started).
 - Switch to the REPL in the namespace of your file: 
 ** Click on the bottom of the REPL inside the "text input area"
 - Call your function (Hit kbd:[Enter] to send the expression if the cursor is at the end, or hit kbd:[Ctrl+Enter] / kbd:[Cmd+Enter] if the cursor is not at the end of the text):
 
 [source,clojure]
 ----
-> 1:1 helloworld=> (hello "Betty") [Ctrl+Enter]
-> "Hello Betty !"
+;; Clojure 1.5.1
+#<Namespace myproject.core>
+#'myproject.core/foo
+=> (foo "Hey")
+Hey Hello, World!
+nil
 ----
 
 
