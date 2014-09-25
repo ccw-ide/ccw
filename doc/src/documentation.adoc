@@ -64,7 +64,7 @@ link:products/Counterclockwise-%%VERSION%%-macosx.cocoa.x86_64.zip[OS X 64 Bits]
 | Launch the `Counterclockwise` executable for your platform, located inside the `Counterclockwise-%%VERSION%%` directory
 |===
 
-You may now want to <<first-project,create your first project>>. +
+You may now want to <<first-project,create your first project>> or <<open-project,open an existing project>>. +
 Having a problem? Check the <<configure,Configure Counterclockwise>> Section or the https://code.google.com/p/counterclockwise/wiki/FAQ[Troubleshooting page].
 
 
@@ -85,7 +85,7 @@ Pre-requisites
 - via the Eclipse Marketplace Client: search for `Counterclockwise`
 - via the Eclipse Software Update Site: http://updatesite.ccw-ide.org/stable
 
-You may now want to <<first-project,create your first project>>. +
+You may now want to <<first-project,create your first project>> or <<open-project,open an existing project>>. +
 Having a problem? Check the <<configure,Configure Counterclockwise>> Section or the https://code.google.com/p/counterclockwise/wiki/FAQ[Troubleshooting page].
 
 [[configure]]
@@ -132,12 +132,8 @@ nil
 ----
 
 
-[[enable-clojure]]
-= Enable Clojure (Leiningen batteries included)
-
-No matter where you're coming from, there's a quick path towards enabling Clojure support for your project:
-
-== Create a new project
+[[create-new-project]]
+= Create a new project
 
 Use the wizard named `Clojure Project`.
 
@@ -166,12 +162,12 @@ If you don't see the menu:File[New > Clojure Project] menu entry:
 ** If you still don't see the command, then Reset your Perspective ( menu:Window[Reset Perspective ...])
 ====
 
+[[open-project]]
+= Open a project
 
-== Associate a project present in the filesystem with Eclipse
+Drag a folder from your OS filesystem browser (Windows Explorer, Nautilus, Finder, etc.) and drop it over Counterclockwise's Window.
 
-Drag a folder from your OS filesystem browser (Windows Explorer, Nautilus, Finder, etc.) and drop it onto an open Counterclockwise.
-
-If the folder is a root folder of many Leiningen projects, as many projects as found on the filesystem will be created in Counterclockwise.
+If the folder is a root folder containing many Leiningen projects, as many projects as found on the filesystem will be created in Counterclockwise.
 
 [NOTE]
 ====
