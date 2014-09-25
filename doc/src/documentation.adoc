@@ -7,6 +7,7 @@ Laurent Petit <laurent.petit@gmail.com>
 :sectanchors:
 :highlight: highlightjs
 :experimental:
+:icons:font
 
 Counterclockwise User Documentation
 
@@ -44,7 +45,9 @@ Current Version is %%VERSION%%
 [NOTE]
 ====
 Pre-requisites
-* Java Virtual Machine (JVM) 7 installed and setup in the Operating System's PATH
+
+- Java Virtual Machine (JVM) 7 installed and setup in the Operating System's PATH
+
 ====
 
 [cols="1,6"]
@@ -71,8 +74,9 @@ Having a problem? Check the <<configure,Configure Counterclockwise>> Section or 
 [NOTE]
 ====
 Pre-requisites
-* Java Virtual Machine (JVM) 7 running Eclipse
-* Eclipse 4.3 (Kepler) highly recommanded. Eclipse 3.7 (Indigo) still supported.
+
+- Java Virtual Machine (JVM) 7 running Eclipse
+- Eclipse 4.3 (Kepler) highly recommanded. Eclipse 3.7 (Indigo) still supported.
 ** any packaging including JDT (Java Development Tools) will do:  "Eclipse SDK" package, "Eclipse for Java Developers" package, "Eclipse for Java EE Developers" package, etc.
 ====
 
@@ -104,7 +108,7 @@ See the https://github.com/technomancy/leiningen/wiki/HTTP-Proxies[Leiningen HTT
 
 
 [[first-project]]
-=== Create your first project
+= Create your first project
 
 Create and run a simple Clojure project ("Hello Betty")
 
