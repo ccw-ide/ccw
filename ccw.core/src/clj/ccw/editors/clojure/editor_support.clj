@@ -120,7 +120,7 @@
 
 (defn init-state [default-mode]
   (doto (atom {:mode default-mode :esc false
-               :bias true :selection-history ()
+               :left-bias false :selection-history ()
                :mode-listeners #{}})
     (add-watch :mode-listener (fn [k r o n]
                                 (when (or (not= (:mode o) (:mode n)) (not= (:esc o) (:esc n)))

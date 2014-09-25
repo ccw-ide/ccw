@@ -33,16 +33,16 @@
 ;; TODO remove duplications with appli-paredit-command
 (defn- apply-paredit-selection-command [^IClojureEditor editor command-key]
   (let [{:keys #{length offset}} (bean (.getSignedSelection editor))
-        caret-at-left (if-not (zero? length)
+        left-bias (if-not (zero? length)
                         (neg? length)
-                        (:bias @(.getState editor)))
-        length (if caret-at-left (- length) length)
-        offset (if caret-at-left (- offset length) offset)
+                        (:left-bias @(.getState editor)))
+        length (if left-bias (- length) length)
+        offset (if left-bias (- offset length) offset)
         text  (.get (.getDocument editor))]
         (when-let [r (apply pc/paredit 
                        command-key
                        (.getParseState editor) 
-                       {:text text :offset offset :length length :caret-at-left caret-at-left}
+                       {:text text :offset offset :length length :left-bias left-bias}
                        (pimpl/paredit-options command-key))]
           (let [[new-offset new-length] (if-let [[from to] (:selection r)]
                                           [from (- to from)]
@@ -51,9 +51,9 @@
                           (update-in state [:selection-history] conj [offset length]))
                 updates (cond
                           (not (zero? new-length))
-                          (comp updates #(assoc % :bias (neg? new-length)))
+                          (comp updates #(assoc % :left-bias (neg? new-length)))
                           (not= (+ new-length new-offset) (+ length offset))
-                          (comp updates #(assoc % :bias (< (+ new-length new-offset) (+ length offset))))
+                          (comp updates #(assoc % :left-bias (< (+ new-length new-offset) (+ length offset))))
                           :else updates)
                 updates (if-let [mode (:mode r)]
                           (comp updates #(assoc % :mode mode))
@@ -153,10 +153,10 @@
                          :leaf-right))
 (defn leaf-up [_ event]
   (apply-paredit-selection-command (editor event)
-                         :expand))
+                         :leaf-up-left))
 (defn leaf-down [_ event]
   (apply-paredit-selection-command (editor event)
-                         :narrow))
+                         :leaf-up-right))
 (defn expand-left [_ event] 
   (apply-paredit-selection-command (editor event)
                                    :paredit-expand-left))

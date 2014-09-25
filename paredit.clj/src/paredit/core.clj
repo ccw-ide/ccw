@@ -414,54 +414,44 @@
           (recur loc)
           loc)))))
 
+(defn- xor [a b]
+  (if a (not b) b))
+
+(defn leaf [to-left parse-tree offset length left-bias]
+  (let [dir-offset (if to-left start-offset end-offset)
+        opposite-dir-offset (if to-left end-offset start-offset)
+        cmp (if to-left < >)
+        offset (if to-left offset (+ offset length))]
+    (letfn [(skip-whitespaces [offset]
+              (when-let [rloc (-?> parse-tree (parsed-root-loc true))]
+                (loop [offset offset]
+                  (let [l (parse-leave (leave-for-offset rloc offset to-left))
+                        loffset (dir-offset l)]
+                    (if (= :whitespace (loc-tag l))
+                      (when (cmp loffset offset)
+                        (recur loffset))
+                      l)))))]
+      (with-important-memoized
+        (if (and (xor to-left left-bias) (pos? length))
+          {:selection (if to-left [(+ offset length) offset] [(- offset length) offset])}
+          (when-let [l (skip-whitespaces offset)]
+            (let [el (opposite-dir-offset l)
+                  sl (dir-offset l)]
+              (if (punct-loc? l)
+                (if (= offset el)
+                  {:selection [sl sl]}
+                  {:selection [el el]})
+                {:selection [el sl]}))))))))
+
 (defmethod paredit
   :leaf-left
-  [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length caret-at-left] :as t}]
-  (letfn [(skip-whitespaces [offset]
-            (when-let [rloc (-?> parse-tree (parsed-root-loc true))]
-              (loop [offset offset]
-                (let [l (parse-leave (leave-for-offset rloc offset true))
-                      sl (start-offset l)]
-                  (if (= :whitespace (loc-tag l))
-                    (when (< sl offset)
-                      (recur sl))
-                    l)))))]
-    (with-important-memoized
-      (if (and (not caret-at-left) (pos? length))
-        {:selection [(+ offset length) offset]}
-        (when-let [l (skip-whitespaces offset)]
-          (let [el (end-offset l)
-                sl (start-offset l)]
-            (if (punct-loc? l)
-              (if (= offset el)
-                {:selection [sl sl]}
-                {:selection [el el]})
-              {:selection [el sl]})))))))
+  [cmd {:keys #{parse-tree}} {:keys [offset length left-bias]}]
+  (leaf true parse-tree offset length left-bias))
 
 (defmethod paredit
   :leaf-right
-  [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length caret-at-left] :as t}]
-  (letfn [(skip-whitespaces [offset]
-            (when-let [rloc (-?> parse-tree (parsed-root-loc true))]
-              (loop [offset offset]
-                (let [l (parse-leave (leave-for-offset rloc offset false))
-                      el (end-offset l)]
-                  (if (= :whitespace (loc-tag l))
-                    (when (< offset el)
-                      (recur el))
-                    l)))))]
-    (with-important-memoized
-      (if (and caret-at-left (pos? length))
-        {:selection [offset (+ offset length)]}
-        (let [offset (+ offset length)]
-          (when-let [l (skip-whitespaces offset)]
-            (let [el (end-offset l)
-                  sl (start-offset l)]
-              (if (punct-loc? l)
-                (if (= offset sl)
-                  {:selection [el el]}
-                  {:selection [sl sl]})
-                {:selection [sl el]}))))))))
+  [cmd {:keys #{parse-tree}} {:keys [offset length left-bias]}]
+  (leaf false parse-tree offset length left-bias))
 
 (defn- broaden-to-siblings [l r]
   (let [f (fn [best-loc loc]
@@ -489,43 +479,55 @@
 
 (defmethod paredit
   :narrow
-  [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length caret-at-left] :as t}]
+  [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length left-bias] :as t}]
   (when (pos? length)
     (with-important-memoized
       (when-let [rloc (-?> parse-tree (parsed-root-loc true))]
         (let [start offset end (+ offset length)
               [l r] (structural-selection rloc offset length)
-              dir (if caret-at-left z/right z/left)
-              down (if caret-at-left z/down (comp z/rightmost z/down))]
-          (loop [loc (if caret-at-left l r)]
+              dir (if left-bias z/right z/left)
+              down (if left-bias z/down (comp z/rightmost z/down))]
+          (loop [loc (if left-bias l r)]
             (let [sl (start-offset loc) el (end-offset loc)]
               (if (and (= start sl) (= end el))
                 (if-let [loc (first (drop-while 
                                       #(or (punct-loc? %) (= :whitespace (loc-tag %)))
                                       (iterate dir (down loc))))]
                   (recur loc)
-                  {:selection (if caret-at-left [sl sl] [el el])})
-                {:selection (if caret-at-left [el sl] [sl el])}))))))))
+                  {:selection (if left-bias [sl sl] [el el])})
+                {:selection (if left-bias [el sl] [sl el])}))))))))
 
-(defmethod paredit
-  :expand
-  [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length caret-at-left] :as t}]
-  (with-important-memoized
-    (when-let [rloc (-?> parse-tree (parsed-root-loc true))]
-      (let [[l r] (structural-selection rloc offset length)
-            loc (if (pos? length)
-                  (let [loc (if caret-at-left l r)
-                        dir (if caret-at-left z/left z/right)]
+(defn leaf-up [to-left parse-tree offset length]
+    (with-important-memoized
+      (when-let [rloc (-?> parse-tree (parsed-root-loc true))]
+        (let [[l r] (structural-selection rloc offset length)
+              loc (if to-left l r)
+              dir (if to-left z/left z/right)
+              dir-offset (if to-left start-offset end-offset)
+              offset (if to-left offset (+ offset length))
+              loc (if (= (dir-offset loc) offset)
                     (if-let [loc (first (drop-while #(or (punct-loc? %) (= :whitespace (loc-tag %)))
                                           (iterate dir (dir loc))))]
                       loc
                       (closest-ancestor-with-different
-                        (if caret-at-left start-offset end-offset) 
-                        loc)))
-                  l)]
-        {:selection (if caret-at-left
-                      [(end-offset loc) (start-offset loc)]
-                      [(start-offset loc) (end-offset loc)])}))))
+                        (if to-left start-offset end-offset)
+                        loc))
+                    loc)]
+          {:selection [(dir-offset loc) (dir-offset loc)]}))))
+
+(defmethod paredit
+  :leaf-up-left
+  [cmd {:keys #{parse-tree}} {:keys [offset length left-bias]}]
+  (if (not left-bias)
+    (leaf true parse-tree offset length left-bias)
+    (leaf-up true parse-tree offset length)))
+
+(defmethod paredit
+  :leaf-up-right
+  [cmd {:keys #{parse-tree}} {:keys [offset length left-bias]}]
+  (if left-bias
+    (leaf false parse-tree offset length left-bias)
+    (leaf-up false parse-tree offset length)))
 
 (defn struct-select [{:keys #{parse-tree buffer}} offset]
   (when-let [rloc (-?> parse-tree (parsed-root-loc true))]
@@ -550,32 +552,32 @@
 
 (defmethod paredit
   :paredit-expand-up
-  [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length caret-at-left] :as t}]
+  [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length left-bias] :as t}]
   (with-important-memoized (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
     (let [[l r] (structural-selection rloc offset length)]
       (when-let [[l r] (if-not (= [offset length] (locs-to-sel l r)) [l r] (broaden l r))]
-        {:selection (if caret-at-left
+        {:selection (if left-bias
                     [(end-offset r) (start-offset l)]
                     [(start-offset l) (end-offset r)])
          :mode :struct})))))
 
 (defmethod paredit
    :leaf-up
-   [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length caret-at-left] :as t}]
+   [cmd {:keys #{parse-tree buffer}} {:keys [^String text offset length left-bias] :as t}]
    (with-important-memoized
      (when-let [rloc (-?> parse-tree (parsed-root-loc true))]
-       (let [offset (if caret-at-left offset (+ offset length))
-             pred (if caret-at-left
+       (let [offset (if left-bias offset (+ offset length))
+             pred (if left-bias
                     (fn [l r] (< (start-offset l) offset))
                     (fn [l r] (> (end-offset r) offset)))
              [l r] (structural-selection rloc offset length)
-             offset (if caret-at-left (start-offset l) (end-offset r))
-             pred (if caret-at-left
+             offset (if left-bias (start-offset l) (end-offset r))
+             pred (if left-bias
                     (fn [l r] (< (start-offset l) offset))
                     (fn [l r] (> (end-offset r) offset)))]
          (loop [l l r r]
            (if (pred l r)
-             {:selection (if caret-at-left
+             {:selection (if left-bias
                            [(start-offset l) (start-offset l)]
                            [(end-offset r) (end-offset r)])}
              (when-let [[l r] (broaden l r)]
