@@ -54,8 +54,6 @@ final class LeiningenNatureAdderWorkspaceJob extends WorkspaceJob {
 					project.isOpen()
 					&&
 					!project.hasNature(CCWPlugin.LEININGEN_NATURE_ID);
-					//&&
-					//project.hasNature(JavaCore.NATURE_ID); // Check needed when doing a full scan
 			if (!maybeCandidate) {
 				return false;
 			} else {
