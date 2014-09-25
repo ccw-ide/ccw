@@ -421,7 +421,7 @@
   (let [dir-offset (if to-left start-offset end-offset)
         opposite-dir-offset (if to-left end-offset start-offset)
         cmp (if to-left < >)
-        offset (if to-left offset (+ offset length))]
+        offset (if left-bias offset (+ offset length))]
     (letfn [(skip-whitespaces [offset]
               (when-let [rloc (-?> parse-tree (parsed-root-loc true))]
                 (loop [offset offset]
@@ -432,26 +432,28 @@
                         (recur loffset))
                       l)))))]
       (with-important-memoized
-        (if (and (xor to-left left-bias) (pos? length))
-          {:selection (if to-left [(+ offset length) offset] [(- offset length) offset])}
-          (when-let [l (skip-whitespaces offset)]
-            (let [el (opposite-dir-offset l)
-                  sl (dir-offset l)]
-              (if (punct-loc? l)
-                (if (= offset el)
-                  {:selection [sl sl]}
-                  {:selection [el el]})
-                {:selection [el sl]}))))))))
+        (when-let [l (skip-whitespaces offset)]
+          (let [el (opposite-dir-offset l)
+                sl (dir-offset l)]
+            (if (punct-loc? l)
+              (if (= offset el)
+                {:selection [sl sl]}
+                {:selection [el el]})
+              {:selection [el sl]})))))))
 
 (defmethod paredit
   :leaf-left
   [cmd {:keys #{parse-tree}} {:keys [offset length left-bias]}]
-  (leaf true parse-tree offset length left-bias))
+  (if left-bias
+    (leaf true parse-tree offset length left-bias)
+    {:selection [(+ offset length) offset]}))
 
 (defmethod paredit
   :leaf-right
   [cmd {:keys #{parse-tree}} {:keys [offset length left-bias]}]
-  (leaf false parse-tree offset length left-bias))
+  (if (not left-bias)
+    (leaf false parse-tree offset length left-bias)
+    {:selection [offset (+ offset length)]}))
 
 (defn- broaden-to-siblings [l r]
   (let [f (fn [best-loc loc]
@@ -504,6 +506,7 @@
               loc (if to-left l r)
               dir (if to-left z/left z/right)
               dir-offset (if to-left start-offset end-offset)
+              opposite-dir-offset (if to-left end-offset start-offset)
               offset (if to-left offset (+ offset length))
               loc (if (= (dir-offset loc) offset)
                     (if-let [loc (first (drop-while #(or (punct-loc? %) (= :whitespace (loc-tag %)))
@@ -513,20 +516,20 @@
                         (if to-left start-offset end-offset)
                         loc))
                     loc)]
-          {:selection [(dir-offset loc) (dir-offset loc)]}))))
+          {:selection [(opposite-dir-offset loc) (dir-offset loc)]}))))
 
 (defmethod paredit
   :leaf-up-left
   [cmd {:keys #{parse-tree}} {:keys [offset length left-bias]}]
   (if (not left-bias)
-    (leaf true parse-tree offset length left-bias)
+    (leaf true parse-tree (+ offset length) 0 true)
     (leaf-up true parse-tree offset length)))
 
 (defmethod paredit
   :leaf-up-right
   [cmd {:keys #{parse-tree}} {:keys [offset length left-bias]}]
   (if left-bias
-    (leaf false parse-tree offset length left-bias)
+    (leaf false parse-tree offset 0 false)
     (leaf-up false parse-tree offset length)))
 
 (defn struct-select [{:keys #{parse-tree buffer}} offset]
