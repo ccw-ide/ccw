@@ -8,8 +8,7 @@ Laurent Petit <laurent.petit@gmail.com>
 :highlight: highlightjs
 :experimental:
 
-Counterclockwise User Documentation +
-All things listed here should work.
+Counterclockwise User Documentation
 
 = What is Counterclockwise ?
 
@@ -42,6 +41,12 @@ Counterclockwise bundles everything for hacking Clojure Code:
 
 Current Version is %%VERSION%%
 
+[NOTE]
+====
+Pre-requisites
+* Java Virtual Machine (JVM) 7 installed and setup in the Operating System's PATH
+====
+
 [cols="1,6"]
 |===
 | 1. Download
@@ -56,28 +61,28 @@ link:products/Counterclockwise-%%VERSION%%-macosx.cocoa.x86_64.zip[OS X 64 Bits]
 | Launch the `Counterclockwise` executable for your platform, located inside the `Counterclockwise-%%VERSION%%` directory
 |===
 
-=== Pre-requisites
-* Java Virtual Machine (JVM) 7 installed and setup in the Operating System's PATH
-
-You may now want to <<configure,configure Counterclockwise for your specific environment>> +
-or directly <<test-install,test your installation>>
+You may now want to <<first-project,create your first project>>. +
+Having a problem? Check the <<configure,Configure Counterclockwise>> Section or the https://code.google.com/p/counterclockwise/wiki/FAQ[Troubleshooting page].
 
 
 [[install-as-plugin]]
 == Install as an Eclipse Plugin
+
+[NOTE]
+====
+Pre-requisites
+* Java Virtual Machine (JVM) 7 running Eclipse
+* Eclipse 4.3 (Kepler) highly recommanded. Eclipse 3.7 (Indigo) still supported.
+** any packaging including JDT (Java Development Tools) will do:  "Eclipse SDK" package, "Eclipse for Java Developers" package, "Eclipse for Java EE Developers" package, etc.
+====
 
 === TL;DR
 
 - via the Eclipse Marketplace Client: search for `Counterclockwise`
 - via the Eclipse Software Update Site: http://updatesite.ccw-ide.org/stable
 
-=== Pre-requisites
-* Java Virtual Machine (JVM) 7 running Eclipse
-* Eclipse 4.3 (Kepler) highly recommanded. Eclipse 3.7 (Indigo) still supported.
-** any packaging including JDT (Java Development Tools) will do:  "Eclipse SDK" package, "Eclipse for Java Developers" package, "Eclipse for Java EE Developers" package, etc.
-
-You may now want to <<configure,configure Counterclockwise for your specific environment>> +
-or directly <<test-install,test your installation>>
+You may now want to <<first-project,create your first project>>. +
+Having a problem? Check the <<configure,Configure Counterclockwise>> Section or the https://code.google.com/p/counterclockwise/wiki/FAQ[Troubleshooting page].
 
 [[configure]]
 == Configure Counterclockwise
@@ -98,22 +103,20 @@ e.g. `http_no_proxy="*.example1.com|*.example2.com|*.example3.com"`
 See the https://github.com/technomancy/leiningen/wiki/HTTP-Proxies[Leiningen HTTP Proxies] page for more detail.
 
 
-[[test-install]]
-== Test a Counterclockwise install
+[[first-project]]
+=== Create your first project
 
 Create and run a simple Clojure project ("Hello Betty")
 
-- Open the Java perspective
+- Open the Java perspective (unnecessary for Counterclockwise Standalone product users)
 ** menu:Window[Open Perspective > Java] '''(a perspective is a predefined layout of views, suitable for a particular type of development)'''
 - Create a Clojure project 
 ** Menu menu:File[New > Clojure Project], name it `myproject`
 ** The project is created using the `default` Leiningen Template, which creates a Clojure project with a predefined `myproject.core` namespace in `src/myproject/core.clj`
-- Add a function definition to `myproject.core`: 
-** Open `src/myproject/core.clj`, add the following at the end: `(defn hello [who] (str "Hello " who " !"))`, save the file
 - Run the project: 
-** With file `src/myproject/core.clj` open, Hit kbd:[Ctrl+Alt+S] (kbd:[Cmd+Alt+S] on OSX). This sends the whole file's code to the REPL (and also takes care of starting a REPL for the project if none is currently started)
+** Click on the editor pane containing the code in `src/myproject/core.clj` and then select `Load file in REPL` from the `Clojure` menu. This sends the whole file's code to the REPL (and also takes care of starting a REPL for the project if none is currently started).
 - Switch to the REPL in the namespace of your file: 
-** Hit kbd:[Ctrl+Alt+N] (kbd:[Cmd+Alt+N] on OSX). Alternatively, just click on the bottom of the REPL inside the "text input area"
+** Click on the bottom of the REPL inside the "text input area"
 - Call your function (Hit kbd:[Enter] to send the expression if the cursor is at the end, or hit kbd:[Ctrl+Enter] / kbd:[Cmd+Enter] if the cursor is not at the end of the text):
 
 [source,clojure]
