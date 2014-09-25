@@ -444,16 +444,12 @@
 (defmethod paredit
   :leaf-left
   [cmd {:keys #{parse-tree}} {:keys [offset length left-bias]}]
-  (if left-bias
-    (leaf true parse-tree offset length left-bias)
-    {:selection [(+ offset length) offset]}))
+  (leaf true parse-tree offset length left-bias))
 
 (defmethod paredit
   :leaf-right
   [cmd {:keys #{parse-tree}} {:keys [offset length left-bias]}]
-  (if (not left-bias)
-    (leaf false parse-tree offset length left-bias)
-    {:selection [offset (+ offset length)]}))
+  (leaf false parse-tree offset length left-bias))
 
 (defn- broaden-to-siblings [l r]
   (let [f (fn [best-loc loc]
@@ -499,16 +495,18 @@
                   {:selection (if left-bias [sl sl] [el el])})
                 {:selection (if left-bias [el sl] [sl el])}))))))))
 
-(defn leaf-up [to-left parse-tree offset length]
+(defn leaf-up [to-left parse-tree offset length left-bias]
     (with-important-memoized
       (when-let [rloc (-?> parse-tree (parsed-root-loc true))]
-        (let [[l r] (structural-selection rloc offset length)
+        (let [caret-offset (if left-bias offset (+ offset length))
+              length (if (xor to-left left-bias) 0 length)
+              offset (if (xor to-left left-bias) caret-offset offset)
+              [l r] (structural-selection rloc offset length)
               loc (if to-left l r)
               dir (if to-left z/left z/right)
               dir-offset (if to-left start-offset end-offset)
               opposite-dir-offset (if to-left end-offset start-offset)
-              offset (if to-left offset (+ offset length))
-              loc (if (= (dir-offset loc) offset)
+              loc (if (= (dir-offset loc) caret-offset)
                     (if-let [loc (first (drop-while #(or (punct-loc? %) (= :whitespace (loc-tag %)))
                                           (iterate dir (dir loc))))]
                       loc
@@ -521,16 +519,12 @@
 (defmethod paredit
   :leaf-up-left
   [cmd {:keys #{parse-tree}} {:keys [offset length left-bias]}]
-  (if (not left-bias)
-    (leaf true parse-tree (+ offset length) 0 true)
-    (leaf-up true parse-tree offset length)))
+  (leaf-up true parse-tree offset length left-bias))
 
 (defmethod paredit
   :leaf-up-right
   [cmd {:keys #{parse-tree}} {:keys [offset length left-bias]}]
-  (if left-bias
-    (leaf false parse-tree offset 0 false)
-    (leaf-up false parse-tree offset length)))
+  (leaf-up false parse-tree offset length left-bias))
 
 (defn struct-select [{:keys #{parse-tree buffer}} offset]
   (when-let [rloc (-?> parse-tree (parsed-root-loc true))]
