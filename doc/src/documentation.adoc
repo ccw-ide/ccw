@@ -7,7 +7,7 @@ Laurent Petit <laurent.petit@gmail.com>
 :sectanchors:
 :highlight: highlightjs
 :experimental:
-:icons:font
+:icons: font
 
 Counterclockwise User Documentation
 
