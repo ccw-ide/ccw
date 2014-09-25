@@ -46,6 +46,8 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
@@ -573,6 +575,8 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
         final IPreferenceStore prefs = getPreferences();
         
         SashForm split = new SashForm(parent, SWT.VERTICAL);
+        split.setBackground(split.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
+
         
         logPanel = new StyledText(split, SWT.V_SCROLL | SWT.WRAP);
         logPanel.setIndent(4);
@@ -629,6 +633,36 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
         
         getViewSite().setSelectionProvider(viewer);
         viewer.setDocument(ClojureDocumentProvider.configure(new Document()));
+        // Display placeholder text when widget is empty and does not have focus
+        final StyledText st = (StyledText) viewer.getControl();
+        final String TYPE_TEXT_HERE = "<type clojure code here>";
+        st.addModifyListener(new ModifyListener() {
+			@Override public void modifyText(ModifyEvent e) {
+				if (!st.isFocusControl() && st.getEditable()) {
+					if (st.getText().isEmpty()) {
+						st.setText(TYPE_TEXT_HERE);
+						st.setStyleRange(new StyleRange(0, TYPE_TEXT_HERE.length(), null, null, SWT.ITALIC));
+					}
+				}
+			}});
+        st.addFocusListener(new FocusListener() {
+			@Override public void focusLost(FocusEvent e) {
+				if (st.getEditable() && st.getText().isEmpty()) {
+					st.setText(TYPE_TEXT_HERE);
+					st.setStyleRange(new StyleRange(0, TYPE_TEXT_HERE.length(), null, null, SWT.ITALIC));
+				}
+			}
+			@Override public void focusGained(FocusEvent e) {
+				if (st.getEditable() && TYPE_TEXT_HERE.equals(st.getText())) {
+					st.setText("");
+					st.setStyleRange(null);
+				}
+			}
+		});
+        if (st.getEditable() && st.getText().isEmpty()) {
+			st.setText(TYPE_TEXT_HERE);
+			st.setStyleRange(new StyleRange(0, TYPE_TEXT_HERE.length(), null, null, SWT.ITALIC));
+        }
         viewerWidget = viewer.getTextWidget();
         
         viewerWidget.setFont(JFaceResources.getFont(JFaceResources.TEXT_FONT));
