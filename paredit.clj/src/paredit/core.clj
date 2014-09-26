@@ -436,9 +436,26 @@
           (let [el (opposite-dir-offset l)
                 sl (dir-offset l)]
             (if (punct-loc? l)
-              (if (= offset el)
-                {:selection [sl sl]}
-                {:selection [el el]})
+              (if (or (zero? length) (= (boolean left-bias) (boolean to-left)))
+                (let [p (z/up l)
+                      ep (opposite-dir-offset p)
+                      sp (dir-offset p)]
+                  (if (= ep el)
+                    {:selection [sp ep]}
+                    {:selection [ep sp]}))
+                #_(leaf to-left parse-tree sl 0 (not left-bias))
+                (let [offset sl]
+                  (when-let [l (skip-whitespaces sl)]
+                    (let [el (opposite-dir-offset l)
+                          sl (dir-offset l)]
+                      (if (punct-loc? l)
+                        (let [p (z/up l)
+                              ep (opposite-dir-offset p)
+                              sp (dir-offset p)]
+                          (if (= ep el)
+                            {:selection [sp ep]}
+                            {:selection [el el]}))
+                        {:selection [sl el]})))))
               {:selection [el sl]})))))))
 
 (defmethod paredit
