@@ -55,8 +55,8 @@ public final class LeiningenProjectResourceListener implements IResourceChangeLi
 		}
 
 		WorkspaceJob job = new LeiningenNatureAdderWorkspaceJob(project);
-		job.setRule(project.getParent());
-		job.setUser(true);
+		job.setRule(ResourcesPlugin.getWorkspace().getRoot());
+		job.setUser(false);
 		job.schedule();
 	}
 

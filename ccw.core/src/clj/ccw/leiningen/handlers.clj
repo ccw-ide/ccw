@@ -106,23 +106,18 @@
 
 
 (defn add-natures
-  [project natures legend]
-  (doto (e/workspace-job
-             legend
-             (fn [^IProgressMonitor monitor]
-               (println "monitor:" monitor)
-               (.beginTask monitor
-                 (str legend)
-                 1)
-               (e/project-desc! 
-                 project
-                 (apply e/add-desc-natures! (e/project-desc project) natures))
-               (.worked monitor 1)
-               (.done monitor)
-               (Status/OK_STATUS)))
-    (.setUser true)
-    (.setRule (e/workspace-root))
-    (.schedule)))
+  ([project natures legend]
+    (doto (e/workspace-job
+               legend
+               (fn [^IProgressMonitor monitor]
+                 (add-natures project natures legend monitor)))
+      (.setUser true)
+      (.setRule (e/workspace-root))
+      (.schedule)))
+  ([project natures legend ^IProgressMonitor monitor]
+    (e/project-desc! 
+      project
+      (apply e/add-desc-natures! (e/project-desc project) natures))))
   
 (defn add-leiningen-nature
   "Pre-requisites:
@@ -136,6 +131,16 @@
       project
       [(JavaCore/NATURE_ID) n/NATURE-ID]
       (str "Adding leiningen support to project " (.getName project)))))
+
+(defn add-leiningen-nature-with-monitor
+  "Pre-requisites
+   - The project does not already have the leiningen nature"
+  [^IProject project ^IProgressMonitor monitor]
+    (add-natures
+      project
+      [(JavaCore/NATURE_ID) n/NATURE-ID]
+      ""
+      monitor))
 
 (defn upgrade-project-build-path
   ([java-project overwrite?]

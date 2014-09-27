@@ -164,7 +164,7 @@
                        (when-not (e/desc-has-builder? desc LeiningenBuilder/ID)
                          (e/project-desc! proj (e/add-desc-builder! desc LeiningenBuilder/ID)))
                        (reset-project-build-path java-proj true progress-monitor))))
-          (.setUser true)
+          (.setUser false)
           (.setRule (e/workspace-root))
           (.schedule)))
       (deconfigure
@@ -181,7 +181,7 @@
                          (let [raw-classpath (.getRawClasspath java-proj)
                                raw-classpath (remove #{cont} raw-classpath)]
                            (.setRawClasspath java-proj (into-array IClasspathEntry raw-classpath) progress-monitor))))))
-          (.setUser true)
+          (.setUser false)
           (.setRule (e/workspace-root))
           (.schedule))))))
 

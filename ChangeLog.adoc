@@ -18,6 +18,8 @@ Laurent Petit <laurent dot petit at gmail dot com>
 === Leiningen / Clojure autodetection
 
 - Added a check for missing `.classpath` file for Leiningen projects. Automatically reconstruct the java build path if it is missing.
+- Better User feedback for Drag & Drop folder actions
+
 
 == Changes between Counterclockwise 0.27.1 and 0.28.0
 

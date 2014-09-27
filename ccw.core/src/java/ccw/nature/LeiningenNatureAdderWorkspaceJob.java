@@ -42,7 +42,7 @@ final class LeiningenNatureAdderWorkspaceJob extends WorkspaceJob {
 
 			if (isCandidateLeiningenProject(project)) {
 				System.out.println("CREATING LEININGEN PROJECT " + project.getName());
-				leinHandlers._("add-leiningen-nature", project);
+				leinHandlers._("add-leiningen-nature-with-monitor", project, monitor);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
