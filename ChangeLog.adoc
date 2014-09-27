@@ -8,6 +8,17 @@ Laurent Petit <laurent dot petit at gmail dot com>
 :toc-title!:
 :toclevels: 0
 
+
+== Changes between Counterclockwise 0.28.0 and 0.28.1
+
+`0.28.1` released on September XX, 2014
+
+== Enhancements
+
+=== Leiningen / Clojure autodetection
+
+- Added a check for missing `.classpath` file for Leiningen projects. Automatically reconstruct the java build path if it is missing.
+
 == Changes between Counterclockwise 0.27.1 and 0.28.0
 
 `0.28.0` released on September 25, 2014

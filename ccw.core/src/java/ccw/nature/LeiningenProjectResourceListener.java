@@ -11,12 +11,15 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.JavaCore;
 
 import ccw.CCWPlugin;
 import ccw.preferences.PreferenceConstants;
-
+import ccw.util.ClojureInvoker;
 
 public final class LeiningenProjectResourceListener implements IResourceChangeListener {
+
+	private final ClojureInvoker handlers = ClojureInvoker.newInvoker(CCWPlugin.getDefault(), "ccw.leiningen.handlers");
 
 	@Override
 	public void resourceChanged(IResourceChangeEvent event) {
@@ -32,14 +35,24 @@ public final class LeiningenProjectResourceListener implements IResourceChangeLi
 		for (IResourceDelta projectDelta: projectsDelta) {
 			IProject project = (IProject) projectDelta.getResource();
 
-			if (project == null || !project.exists() || !project.isOpen() || hasLeiningenNature(project))
+			if (project == null || !project.exists() || !project.isOpen())
 				continue;
+
+			if  (hasLeiningenNature(project)) {
+				if (!checkLeiningenProjectConsistency(project))
+					handlers._("reset-project-build-path", JavaCore.create(project));
+				continue;
+			}
 
 			if (project.getFile("project.clj").exists())
 				projects.add(project);
 		}
 
 		addLeiningenNature(projects.toArray(new IProject[projects.size()]));
+	}
+
+	private boolean checkLeiningenProjectConsistency(IProject project) {
+		return project.getFile(".classpath").exists();
 	}
 
 	private boolean hasLeiningenNature(IProject project) {

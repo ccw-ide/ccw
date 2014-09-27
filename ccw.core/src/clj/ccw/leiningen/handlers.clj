@@ -143,9 +143,10 @@
     (.setUser false)
     (.schedule)))
 
-(defn reset-project-build-path [handler event]
-  (when-let [java-project (event->java-project event)]
-    (upgrade-project-build-path java-project true)))
+(defn reset-project-build-path 
+  ([handler event] (reset-project-build-path (event->java-project event)))
+  ([java-project]
+    (when java-project (upgrade-project-build-path java-project true))))
 
 (defn update-project-build-path [handler event]
   (when-let [java-project (event->java-project event)]
