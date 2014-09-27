@@ -1,8 +1,5 @@
 package ccw.nature;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
@@ -11,15 +8,11 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.JavaCore;
 
 import ccw.CCWPlugin;
 import ccw.preferences.PreferenceConstants;
-import ccw.util.ClojureInvoker;
 
 public final class LeiningenProjectResourceListener implements IResourceChangeListener {
-
-	private final ClojureInvoker handlers = ClojureInvoker.newInvoker(CCWPlugin.getDefault(), "ccw.leiningen.handlers");
 
 	@Override
 	public void resourceChanged(IResourceChangeEvent event) {
@@ -30,25 +23,41 @@ public final class LeiningenProjectResourceListener implements IResourceChangeLi
 
 		IResourceDelta[] projectsDelta = rootDelta.getAffectedChildren();
 
-		List<IProject> projects = new ArrayList<IProject>();
-
 		for (IResourceDelta projectDelta: projectsDelta) {
 			IProject project = (IProject) projectDelta.getResource();
+			addLeiningenNature(project);
+		}
+	}
 
-			if (project == null || !project.exists() || !project.isOpen())
-				continue;
-
-			if  (hasLeiningenNature(project)) {
-				if (!checkLeiningenProjectConsistency(project))
-					handlers._("reset-project-build-path", JavaCore.create(project));
-				continue;
+	private void addLeiningenNature(final IProject[] projects) {
+		if (projects.length != 0) {
+			for (IProject project: projects) {
+				addLeiningenNature(project);
 			}
+		}
+	}
 
-			if (project.getFile("project.clj").exists())
-				projects.add(project);
+	private void addLeiningenNature(final IProject project) {
+		// Some failfast tests
+		if (project == null || !project.exists() || !project.isOpen())
+			return;
+
+		if  (hasLeiningenNature(project)) {
+			if (checkLeiningenProjectConsistency(project)) {
+				return;
+			} else {
+				// continue
+			}
 		}
 
-		addLeiningenNature(projects.toArray(new IProject[projects.size()]));
+		if (!project.getFile("project.clj").exists()) {
+			return;
+		}
+
+		WorkspaceJob job = new LeiningenNatureAdderWorkspaceJob(project);
+		job.setRule(project.getParent());
+		job.setUser(true);
+		job.schedule();
 	}
 
 	private boolean checkLeiningenProjectConsistency(IProject project) {
@@ -61,14 +70,6 @@ public final class LeiningenProjectResourceListener implements IResourceChangeLi
 		} catch (CoreException e) {
 			e.printStackTrace();
 			return false;
-		}
-	}
-
-	private void addLeiningenNature(final IProject[] projects) {
-		if (projects.length != 0) {
-			WorkspaceJob job = new LeiningenNatureAdderWorkspaceJob(projects);
-			job.setUser(false);
-			job.schedule(100);
 		}
 	}
 

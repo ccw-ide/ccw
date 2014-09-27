@@ -415,7 +415,7 @@ public class CCWDropAdapterEarlyStartup implements IStartup {
 			}
 		};
 		wj.setPriority(Job.INTERACTIVE);
-		wj.setUser(false);
+		wj.setUser(true);
 		wj.schedule();
 		return true;
 	}

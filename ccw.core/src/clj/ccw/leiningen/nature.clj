@@ -165,6 +165,7 @@
                          (e/project-desc! proj (e/add-desc-builder! desc LeiningenBuilder/ID)))
                        (reset-project-build-path java-proj true progress-monitor))))
           (.setUser true)
+          (.setRule (e/workspace-root))
           (.schedule)))
       (deconfigure
         [this]
@@ -181,6 +182,7 @@
                                raw-classpath (remove #{cont} raw-classpath)]
                            (.setRawClasspath java-proj (into-array IClasspathEntry raw-classpath) progress-monitor))))))
           (.setUser true)
+          (.setRule (e/workspace-root))
           (.schedule))))))
 
 (println "ccw.leiningen.nature namespace loaded")

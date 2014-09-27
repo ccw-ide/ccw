@@ -120,7 +120,8 @@
                (.worked monitor 1)
                (.done monitor)
                (Status/OK_STATUS)))
-    (.setUser false)
+    (.setUser true)
+    (.setRule (e/workspace-root))
     (.schedule)))
   
 (defn add-leiningen-nature
@@ -136,12 +137,17 @@
       [(JavaCore/NATURE_ID) n/NATURE-ID]
       (str "Adding leiningen support to project " (.getName project)))))
 
-(defn- upgrade-project-build-path [java-project overwrite?]
-  (doto (e/workspace-job
-             (str "Upgrade project build path for project " (e/project-name java-project))
-             (fn [^IProgressMonitor monitor] (n/reset-project-build-path java-project overwrite? monitor)))
-    (.setUser false)
-    (.schedule)))
+(defn upgrade-project-build-path
+  ([java-project overwrite?]
+    (doto
+      (e/workspace-job
+        (str "Upgrade project build path for project " (e/project-name java-project))
+        (fn [^IProgressMonitor monitor] (upgrade-project-build-path java-project overwrite? monitor)))
+      (.setUser true)
+      (.setRule (e/workspace-root))
+      (.schedule)))
+  ([java-project overwrite? ^IProgressMonitor monitor]
+    (n/reset-project-build-path java-project overwrite? monitor)))
 
 (defn reset-project-build-path 
   ([handler event] (reset-project-build-path (event->java-project event)))
