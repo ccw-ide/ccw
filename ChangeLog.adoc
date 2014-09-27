@@ -13,9 +13,13 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 `0.28.1` released on September XX, 2014
 
-== Enhancements
+=== Fix
 
-=== Leiningen / Clojure autodetection
+- Drag & Drop from Github / Bitbucket / Google Code URLs works in Linux
+
+=== Enhancements
+
+==== Leiningen / Clojure autodetection
 
 - Added a check for missing `.classpath` file for Leiningen projects. Automatically reconstruct the java build path if it is missing.
 - Better User feedback for Drag & Drop folder actions
@@ -25,32 +29,32 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 `0.28.0` released on September 25, 2014
 
-== Enhancements
+=== Enhancements
 
-=== Automatic configuration of Leiningen Projects
+==== Automatic configuration of Leiningen Projects
 
 In reaction to a project creation which contains a `project.clj` file, or an existing project modification consisting in adding a `project.clj` file, etc., CCW will by default react by adding the `Leiningen Nature` to the project. Meaning you'll see the `Leiningen Dependencies` Classpath Container appear in the project, and be able to launch it as a Leiningen project.
 
 This feature can be disabled globally via the menu:Preferences[Clojure > General > Automatic detection of Clojure/Leiningen projects] preference
 
-=== Project Drag and Drop from OS to Counterclockwise
+==== Project Drag and Drop from OS to Counterclockwise
 
 It is possible to drag a project folder project from Windows Explorer / Finder onto Eclipse / Counterclockwise. Any Leiningen project found within the dragged folder(s) will automatically be created ; and configured appropriately if automatic configuration is enabled.
 
-=== Project Drag and Drop from Github / Bitbucket / Google code to Counterclockwise
+==== Project Drag and Drop from Github / Bitbucket / Google code to Counterclockwise
 
 It is possible to drag a Github / Bitbucket / Google code  project URL from your browser to Eclipse / Counterclockwise. The standard Eclipse Git Import wizard will be open, pre-filled with repository information.
 
 Once the project has been cloned, just select the `Create a general Project` option: a general project will be created, and if Automatic configuration is enabled, recognized as a Leiningen Project.
 
-=== REPL Text Input Area visibility
+==== REPL Text Input Area visibility
 
 - The `REPL View` shows a visible separation between the log area and the text input area
 - A `<type clojure code here>` placeholder is also visible when the input area doesn't have the focus
 
 Fix Issue #560
 
-== Bug fixes
+=== Bug fixes
 
 - Leiningen dependencies are updated in the background. They do not block the UI until they're finished anymore.
 

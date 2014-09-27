@@ -316,15 +316,20 @@ public class CCWDropAdapterEarlyStartup implements IStartup {
 			return true;
 		}
 
-		private String getUrlFromEvent(DropTargetEvent event) {
-			Object eventData = event.data;
-			if (eventData == null)
-				return null;
-			if (!(eventData instanceof String)) {
-				return null;
-			}
-			return (String) eventData;
-		}
+		// Taken from Eclipse Market Place code, see class
+        // org.eclipse.epp.mpc.ui/src/org/eclipse/epp/internal/mpc/ui/wizards/MarketplaceDropAdapter.java
+		// in repository ttp://git.eclipse.org/gitroot/mpc/org.eclipse.epp.mpc.git
+        // Depending on the form the link and browser/os,
+        // we get the url twice in the data separated by new lines
+        private String getUrlFromEvent(DropTargetEvent event) {
+                Object eventData = event.data;
+                if (eventData == null || !(eventData instanceof String)) {
+                        return null;
+                }
+                String[] dataLines = ((String) eventData).split(System.getProperty("line.separator")); //$NON-NLS-1$
+                String url = dataLines[0];
+                return url;
+        }
 
 		private String[] getFilesFromEvent(DropTargetEvent event) {
 			Object eventData = event.data;
