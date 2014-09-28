@@ -9,6 +9,16 @@ Laurent Petit <laurent dot petit at gmail dot com>
 :toclevels: 0
 
 
+== Changes between Counterclockwise 0.28.1 and 0.28.2
+
+`0.28.2` released on October XXX, 2014
+
+=== Fix
+
+
+=== Enhancements
+
+
 == Changes between Counterclockwise 0.28.0 and 0.28.1
 
 `0.28.1` released on September 28, 2014
