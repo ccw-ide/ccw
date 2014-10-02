@@ -7,9 +7,9 @@ Laurent Petit <laurent.petit@gmail.com>
 :sectanchors:
 :highlight: highlightjs
 :experimental:
+:icons: font
 
-Counterclockwise User Documentation +
-All things listed here should work.
+Counterclockwise User Documentation
 
 = What is Counterclockwise ?
 
@@ -42,6 +42,14 @@ Counterclockwise bundles everything for hacking Clojure Code:
 
 Current Version is %%VERSION%%
 
+[NOTE]
+====
+Pre-requisites
+
+- Java Virtual Machine (JVM) 7 installed and setup in the Operating System's PATH
+
+====
+
 [cols="1,6"]
 |===
 | 1. Download
@@ -56,28 +64,29 @@ link:products/Counterclockwise-%%VERSION%%-macosx.cocoa.x86_64.zip[OS X 64 Bits]
 | Launch the `Counterclockwise` executable for your platform, located inside the `Counterclockwise-%%VERSION%%` directory
 |===
 
-=== Pre-requisites
-* Java Virtual Machine (JVM) 7 installed and setup in the Operating System's PATH
-
-You may now want to <<configure,configure Counterclockwise for your specific environment>> +
-or directly <<test-install,test your installation>>
+You may now want to <<first-project,create your first project>> or <<open-project,open an existing project>>. +
+Having a problem? Check the <<configure,Configure Counterclockwise>> Section or the https://code.google.com/p/counterclockwise/wiki/FAQ[Troubleshooting page].
 
 
 [[install-as-plugin]]
 == Install as an Eclipse Plugin
+
+[NOTE]
+====
+Pre-requisites
+
+- Java Virtual Machine (JVM) 7 running Eclipse
+- Eclipse 4.3 (Kepler) highly recommanded. Eclipse 3.7 (Indigo) still supported.
+** any packaging including JDT (Java Development Tools) will do:  "Eclipse SDK" package, "Eclipse for Java Developers" package, "Eclipse for Java EE Developers" package, etc.
+====
 
 === TL;DR
 
 - via the Eclipse Marketplace Client: search for `Counterclockwise`
 - via the Eclipse Software Update Site: http://updatesite.ccw-ide.org/stable
 
-=== Pre-requisites
-* Java Virtual Machine (JVM) 7 running Eclipse
-* Eclipse 4.3 (Kepler) highly recommanded. Eclipse 3.7 (Indigo) still supported.
-** any packaging including JDT (Java Development Tools) will do:  "Eclipse SDK" package, "Eclipse for Java Developers" package, "Eclipse for Java EE Developers" package, etc.
-
-You may now want to <<configure,configure Counterclockwise for your specific environment>> +
-or directly <<test-install,test your installation>>
+You may now want to <<first-project,create your first project>> or <<open-project,open an existing project>>. +
+Having a problem? Check the <<configure,Configure Counterclockwise>> Section or the https://code.google.com/p/counterclockwise/wiki/FAQ[Troubleshooting page].
 
 [[configure]]
 == Configure Counterclockwise
@@ -98,37 +107,33 @@ e.g. `http_no_proxy="*.example1.com|*.example2.com|*.example3.com"`
 See the https://github.com/technomancy/leiningen/wiki/HTTP-Proxies[Leiningen HTTP Proxies] page for more detail.
 
 
-[[test-install]]
-== Test a Counterclockwise install
+[[first-project]]
+= Create your first project
 
-Create and run a simple Clojure project ("Hello Betty")
-
-- Open the Java perspective
+- Open the Java perspective (unnecessary step for `Counterclockwise Standalone product` users)
 ** menu:Window[Open Perspective > Java] '''(a perspective is a predefined layout of views, suitable for a particular type of development)'''
 - Create a Clojure project 
 ** Menu menu:File[New > Clojure Project], name it `myproject`
 ** The project is created using the `default` Leiningen Template, which creates a Clojure project with a predefined `myproject.core` namespace in `src/myproject/core.clj`
-- Add a function definition to `myproject.core`: 
-** Open `src/myproject/core.clj`, add the following at the end: `(defn hello [who] (str "Hello " who " !"))`, save the file
 - Run the project: 
-** With file `src/myproject/core.clj` open, Hit kbd:[Ctrl+Alt+S] (kbd:[Cmd+Alt+S] on OSX). This sends the whole file's code to the REPL (and also takes care of starting a REPL for the project if none is currently started)
+** Click on the editor pane containing the code in `core.clj` and then select `Load file in REPL` from the `Clojure` menu. This sends the whole file's code to the REPL (and also takes care of starting a REPL for the project if none is currently started).
 - Switch to the REPL in the namespace of your file: 
-** Hit kbd:[Ctrl+Alt+N] (kbd:[Cmd+Alt+N] on OSX). Alternatively, just click on the bottom of the REPL inside the "text input area"
+** Click on the bottom of the REPL inside the "text input area"
 - Call your function (Hit kbd:[Enter] to send the expression if the cursor is at the end, or hit kbd:[Ctrl+Enter] / kbd:[Cmd+Enter] if the cursor is not at the end of the text):
 
 [source,clojure]
 ----
-> 1:1 helloworld=> (hello "Betty") [Ctrl+Enter]
-> "Hello Betty !"
+;; Clojure 1.5.1
+#<Namespace myproject.core>
+#'myproject.core/foo
+=> (foo "Hey")
+Hey Hello, World!
+nil
 ----
 
 
-[[enable-clojure]]
-= Enable Clojure (Leiningen batteries included)
-
-No matter where you're coming from, there's a quick path towards enabling Clojure support for your project:
-
-== Create a new project
+[[create-new-project]]
+= Create a new project
 
 Use the wizard named `Clojure Project`.
 
@@ -157,42 +162,23 @@ If you don't see the menu:File[New > Clojure Project] menu entry:
 ** If you still don't see the command, then Reset your Perspective ( menu:Window[Reset Perspective ...])
 ====
 
+[[open-project]]
+= Open a project
 
-== Open a non-Eclipse project present in the filesystem
+Drag a folder from your OS filesystem browser (Windows Explorer, Nautilus, Finder, etc.) and drop it over Counterclockwise's Window.
 
-You have in your disk this wonderful project cloned from Github, which is managed by Leiningen, since it has a `project.clj` file in its root folder.
+If the folder is a root folder containing many Leiningen projects, as many projects as found on the filesystem will be created in Counterclockwise.
 
-If you can see a `.project` file in its root directory:
-
-- Import it as a "general" project via the menu:File[Import > Existing project into Workspace] Wizard.
-
-If you don't have a `.project` file in the root directory:
-
-- Create a new project via menu:File[New > General > Project] (After entering the name of your project, uncheck the `Use default location` checkbox, and check btn:[Browse] to find your project folder on the file system)
-+
-Once referenced as an Eclipse project, you should see it in the `Package Explorer View`
-
-- Open the contextual menu of your project, select menu:Configure[Convert to Leiningen Project]
-
-
-== Add Clojure support to a Leiningen projet present in your Eclipse Workspace
-
-You already have the project referenced in Eclipse, it has a project.clj file and you want its class path to be managed by Counterclockwise:
-
-- Open the contextual menu of your project, select menu:Configure[Convert to Leiningen Project]
-
-== Add Clojure support to a non-Leiningen project present in your Eclipse Workspace
-
-Either:
-
-- manage to get somehow the Clojure jar in your project's `Java build path` settings (e.g. manually, or via some maven/gradle/whatever tool integrated with Eclipse) => the project will automatically be recognized as a Clojure Project
-
-INFO: You can check the project has been recognized as a Clojure project via the presence of a menu:Clojure menu entry in the project's contextual menu.
+[NOTE]
+====
+This feature will only work correctly if menu:Preference[Clojure > General > Automatic detection of Clojure / Leiningen projects] is enabled (which it is by default). +
+If the preference is disabled, it is possible to manually trigger leiningen detection via the contextual menu menu:Configure[Convert to Leiningen project].
+====
 
 
 = Leiningen Support
 
-To ensure Eclipse recognize your project as a Leiningen Project, see the previous <<enable-clojure>> section.
+Counterclockwise automatically detects Leiningen projects.
 
 == Project classpath management
 

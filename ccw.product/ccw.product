@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="Counterclockwise" uid="ccw" id="ccw.branding.ccw" application="org.eclipse.ui.ide.workbench" version="0.27.1.qualifier" useFeatures="true" includeLaunchers="true">
+<product name="Counterclockwise" uid="ccw" id="ccw.branding.ccw" application="org.eclipse.ui.ide.workbench" version="0.28.2.qualifier" useFeatures="true" includeLaunchers="true">
 
    <aboutInfo>
       <image path="/ccw.branding/images/ccw-250x250.png"/>
@@ -44,7 +44,12 @@ Apache Software Foundation http://www.apache.org/
    </launcher>
 
 
-   <vm/>
+   <vm>
+      <linux include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7</linux>
+      <macos include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7</macos>
+      <solaris include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7</solaris>
+      <windows include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7</windows>
+   </vm>
 
    <license>
         <url>http://www.eclipse.org/legal/epl-v10.html</url>

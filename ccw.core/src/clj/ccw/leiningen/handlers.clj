@@ -9,7 +9,8 @@
   (:import [org.eclipse.core.runtime       CoreException
                                            IPath
                                            Path
-                                           IProgressMonitor]
+                                           IProgressMonitor
+                                           Status]
            [org.eclipse.jdt.core           ClasspathContainerInitializer
                                            IClasspathContainer
                                            IJavaProject
@@ -76,7 +77,6 @@
    In both cases, the found project must be open, and with the Leiningen nature
    enabled."
   [handler event]
-  ;(println "update-dependencies")
   (if-let [project (event->project event)]
     (glaunch/generic-launch (when (e/project-open? project) project))
     (e/info-dialog "Leiningen Prompt" "unable to launch leiningen - no project found")))
@@ -104,56 +104,21 @@
              true ;; force launching via leiningen
              ))))))
 
-(defn leiningen-enabled-project-factory 
-  "Creates a PropertyTester. It will try to derive the IProject from the
-   receiver, and if an IProject is found, detect if the project is open,
-   and the Leiningen Nature is enabled."
-  [_]
-  (proxy [PropertyTester]
-         []
-    (test [receiver, property, args, expectedValue]
-      (boolean
-        (when-let [project (e/project receiver)]
-          (and
-            (.isOpen project)
-            (.isNatureEnabled project "ccw.leiningen.nature")))))))
 
-(defn leiningen-project-file-present-factory
-  "Creates a PropertyTester whose purpose will be to test the presence of the
-   project.clj file."
-  [_]
-  (proxy [PropertyTester]
-         []
-    (test [receiver, property, args, expectedValue]
-      true
-      #_(let [res  (boolean
-                   (when-let [project (e/project receiver)]
-                     (and
-                       (.isOpen project)
-                       (.exists (.getFile project "project.clj")))))]
-        res)))) 
-
-;; TODO too many imbrications here, decomplecting the code
-;;      from the job, etc. will help ...
 (defn add-natures
-  [project natures legend]
-  ;(println "add-natures:" project ", natures:" (seq natures) ", legend:'" legend "'")
-  (e/run-in-background
-    (e/runnable-with-progress-in-workspace
-      (fn [^IProgressMonitor monitor]
-        ;(println "add-natures: background job started for natures:" (seq natures))
-        (.beginTask monitor 
-          (str legend)
-          1)
-        (e/project-desc! 
-          project
-          (apply e/add-desc-natures! (e/project-desc project) natures))
-        (.worked monitor 1)
-        (.done monitor)
-        ;(println "add-natures: background job stopped for natures:" (seq natures))
-        )
-      (e/workspace-root))))
-
+  ([project natures legend]
+    (doto (e/workspace-job
+               legend
+               (fn [^IProgressMonitor monitor]
+                 (add-natures project natures legend monitor)))
+      (.setUser true)
+      (.setRule (e/workspace-root))
+      (.schedule)))
+  ([project natures legend ^IProgressMonitor monitor]
+    (e/project-desc! 
+      project
+      (apply e/add-desc-natures! (e/project-desc project) natures))))
+  
 (defn add-leiningen-nature
   "Pre-requisites:
    - The event's selection has size one, and is an open project
@@ -162,19 +127,37 @@
     (when-let [project (e/project event)]
       (add-leiningen-nature project)))
   ([^IProject project]
-    (add-natures 
+    (add-natures
       project
       [(JavaCore/NATURE_ID) n/NATURE-ID]
       (str "Adding leiningen support to project " (.getName project)))))
 
-(defn- upgrade-project-build-path [java-project overwrite?]
-  (e/run-in-background
-    (fn [monitor]
-      (n/reset-project-build-path java-project overwrite? monitor))))
+(defn add-leiningen-nature-with-monitor
+  "Pre-requisites
+   - The project does not already have the leiningen nature"
+  [^IProject project ^IProgressMonitor monitor]
+    (add-natures
+      project
+      [(JavaCore/NATURE_ID) n/NATURE-ID]
+      ""
+      monitor))
 
-(defn reset-project-build-path [handler event]
-  (when-let [java-project (event->java-project event)]
-    (upgrade-project-build-path java-project true)))
+(defn upgrade-project-build-path
+  ([java-project overwrite?]
+    (doto
+      (e/workspace-job
+        (str "Upgrade project build path for project " (e/project-name java-project))
+        (fn [^IProgressMonitor monitor] (upgrade-project-build-path java-project overwrite? monitor)))
+      (.setUser true)
+      (.setRule (e/workspace-root))
+      (.schedule)))
+  ([java-project overwrite? ^IProgressMonitor monitor]
+    (n/reset-project-build-path java-project overwrite? monitor)))
+
+(defn reset-project-build-path 
+  ([handler event] (reset-project-build-path (event->java-project event)))
+  ([java-project]
+    (when java-project (upgrade-project-build-path java-project true))))
 
 (defn update-project-build-path [handler event]
   (when-let [java-project (event->java-project event)]

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Counterclockwise Clojure Plug-in
 Bundle-SymbolicName: ccw.core;singleton:=true
-Bundle-Version: 0.27.1.qualifier
+Bundle-Version: 0.28.2.qualifier
 Bundle-Localization: plugin
 Bundle-Activator: ccw.CCWPlugin
 Require-Bundle: org.eclipse.ui,
@@ -29,7 +29,9 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jdt.debug.ui,
  ccw.branding,
  paredit.clj,
- org.eclipse.ui.workbench.texteditor
+ org.eclipse.ui.workbench.texteditor,
+ org.eclipse.jgit,
+ org.eclipse.egit.ui
 Bundle-ClassPath: .,
  src/clj/,
  lib/aether-api.jar,

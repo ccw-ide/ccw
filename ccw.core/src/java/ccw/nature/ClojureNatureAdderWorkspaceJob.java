@@ -15,7 +15,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
-import ccw.commands.ToggleNatureCommand;
+import ccw.commands.ToggleClojureNatureCommand;
 
 final class ClojureNatureAdderWorkspaceJob extends
 		WorkspaceJob {
@@ -23,7 +23,7 @@ final class ClojureNatureAdderWorkspaceJob extends
 
 	ClojureNatureAdderWorkspaceJob(IProject[] projects) {
 		super("Checking/Adding Clojure Nature for projects " + projects);
-		
+
 		assert projects.length != 0;
 		this.projects = Arrays.asList(projects);
 	}
@@ -33,24 +33,24 @@ final class ClojureNatureAdderWorkspaceJob extends
 		for (IProject project: projects) {
 			try {
 				if (isCandidateClojureProject(project)) {
-					ToggleNatureCommand.toggleNature(project, true);
+					ToggleClojureNatureCommand.toggleNature(project, true);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
 				return CCWPlugin.createErrorStatus(
-						"Exception occured while trying to automatically " 
-								+ "add Clojure nature for project " 
-								+ project.getName(), 
+						"Exception occured while trying to automatically "
+								+ "add Clojure nature for project "
+								+ project.getName(),
 								e);
 			}
 		}
 		return Status.OK_STATUS;
 	}
-	
+
 	private boolean isCandidateClojureProject(IProject project) {
 		try {
 			boolean maybeCandidate = project.exists()
-					&& 
+					&&
 					project.isOpen()
 					&&
 					!project.hasNature(ClojureCore.NATURE_ID)
@@ -59,24 +59,8 @@ final class ClojureNatureAdderWorkspaceJob extends
 			if (!maybeCandidate) {
 				return false;
 			} else {
-				//System.out.println("============== before creating java project");
 				IJavaProject jProject = JavaCore.create(project);
-				//System.out.println("////////////// after creating java project");
-				//System.out.println("////////////// after creating java project");
-				//System.out.println("////////////// after creating java project");
-				//System.out.println("////////////// after creating java project");
-				//System.out.println("////////////// after creating java project");
-				//System.out.println("////////////// after creating java project");
 			    boolean isCandidate = jProject.findElement(ClojurePackageElementChangeListener.CLOJURE_PACKAGE_PATH) != null;
-			    //System.out.println("\\\\\\\\\\\\\\\\\\\\\\ after finding Element");
-			    //System.out.println("\\\\\\\\\\\\\\\\\\\\\\ after finding Element");
-			    //System.out.println("\\\\\\\\\\\\\\\\\\\\\\ after finding Element");
-			    //System.out.println("\\\\\\\\\\\\\\\\\\\\\\ after finding Element");
-			    //System.out.println("\\\\\\\\\\\\\\\\\\\\\\ after finding Element");
-			    //System.out.println("\\\\\\\\\\\\\\\\\\\\\\ after finding Element");
-			    //System.out.println("\\\\\\\\\\\\\\\\\\\\\\ after finding Element");
-			    //System.out.println("\\\\\\\\\\\\\\\\\\\\\\ after finding Element");
-			    //System.out.println("\\\\\\\\\\\\\\\\\\\\\\ after finding Element");
 			    return isCandidate;
 			}
 		} catch (JavaModelException e) {

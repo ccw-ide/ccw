@@ -2,7 +2,7 @@
 <feature
       id="ccw.feature"
       label="%featureName"
-      version="0.27.1.qualifier"
+      version="0.28.2.qualifier"
       provider-name="%providerName"
       plugin="ccw.branding">
 
@@ -26,23 +26,28 @@
       <import plugin="org.eclipse.help"/>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.core.runtime" version="3.4.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.jface.text"/>
-      <import plugin="org.eclipse.ui.editors"/>
-      <import plugin="org.eclipse.debug.core"/>
-      <import plugin="org.eclipse.debug.ui"/>
-      <import plugin="org.eclipse.jdt.debug"/>
-      <import plugin="org.eclipse.jdt.debug.ui"/>
       <import plugin="org.eclipse.ui.ide" version="3.4.2" match="greaterOrEqual"/>
       <import plugin="org.eclipse.jdt.launching"/>
       <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.eclipse.jdt.ui"/>
       <import plugin="org.eclipse.ui.console"/>
+      <import plugin="org.eclipse.ui.editors"/>
+      <import plugin="org.eclipse.jface.text"/>
       <import plugin="org.eclipse.ui.views" match="greaterOrEqual"/>
       <import plugin="org.eclipse.core.filesystem"/>
       <import plugin="org.eclipse.core.expressions"/>
       <import plugin="org.eclipse.ui.forms"/>
+      <import plugin="org.eclipse.debug.core"/>
+      <import plugin="org.eclipse.debug.ui"/>
+      <import plugin="org.eclipse.jdt.debug"/>
+      <import plugin="org.eclipse.jdt.debug.ui"/>
       <import plugin="org.eclipse.ui.workbench.texteditor"/>
-      <import plugin="org.eclipse.osgi"/>
+      <import plugin="org.eclipse.ui.intro.universal"/>
+      <import plugin="org.eclipse.ui.intro"/>
+      <import plugin="org.eclipse.jface"/>
+      <import plugin="org.eclipse.platform"/>
+      <import plugin="org.eclipse.jgit"/>
+      <import plugin="org.eclipse.egit.ui"/>
    </requires>
 
    <plugin
@@ -61,8 +66,8 @@
          id="ccw.core.e4"
          download-size="0"
          install-size="0"
-         fragment="true"
-         version="0.0.0"/>
+         version="0.0.0"
+         fragment="true"/>
 
    <plugin
          id="paredit.clj"

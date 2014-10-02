@@ -24,50 +24,51 @@ public final class ClojurePackageElementChangeListener implements
 	private static final String CLOJURE_PACKAGE = "clojure.lang";
 	static final IPath CLOJURE_PACKAGE_PATH = new Path("clojure/lang");
 
+	@Override
 	public void elementChanged(ElementChangedEvent javaModelEvent) {
-		
+
 		if (!CCWPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.CCW_GENERAL_AUTOMATIC_NATURE_ADDITION))
 			return;
-		
+
 		IJavaElementDelta delta = javaModelEvent.getDelta();
 		IJavaElement element = delta.getElement();
-		
+
 		if (element instanceof IJavaModel) {
-			
+
 			visitJavaModelDelta(delta);
-			
+
 		} else if (element instanceof IJavaProject) {
-			
+
 			visitJavaProjectDelta(delta);
-			
+
 		} else if (element instanceof IPackageFragmentRoot) {
-			
+
 			IPackageFragmentRoot packageFragmentRoot = (IPackageFragmentRoot) element;
 			if (!ClojureNaturePropertyTest.hasClojureNature(packageFragmentRoot.getJavaProject().getProject())) {
 				visitPackageFragmentRootDelta(delta);
 			}
 		}
 	}
-	
+
 	private void visitJavaModelDelta(IJavaElementDelta javaModelDelta) {
 		for (IJavaElementDelta javaProjectDelta: javaModelDelta.getAffectedChildren()) {
 			visitJavaProjectDelta(javaProjectDelta);
 		}
 	}
-	
+
 	private void visitJavaProjectDelta(IJavaElementDelta javaProjectDelta) {
 		IJavaProject javaProject = (IJavaProject) javaProjectDelta.getElement();
 		IProject project = javaProject.getProject();
 
 		if (!project.exists() || !project.isOpen())
 			return;
-		
+
 		if (ClojureNaturePropertyTest.hasClojureNature(project))
 			return;
-		
+
 		for (IJavaElementDelta fragmentRootDelta: javaProjectDelta.getAffectedChildren()) {
 			if (visitPackageFragmentRootDelta(fragmentRootDelta)) {
-				// Clojure fragment found, stop 
+				// Clojure fragment found, stop
 				break;
 			}
 		}
@@ -82,7 +83,7 @@ public final class ClojurePackageElementChangeListener implements
 			return false;
 		}
 	}
-	
+
 	private boolean isClojureElement(IPackageFragmentRoot packageFragmentRoot) {
 		return packageFragmentRoot.getPackageFragment(CLOJURE_PACKAGE). exists();
 	}
@@ -94,18 +95,18 @@ public final class ClojurePackageElementChangeListener implements
 	private void addClojureNature(final IProject[] projects) {
 		if (projects.length != 0) {
 			WorkspaceJob job = new ClojureNatureAdderWorkspaceJob(projects);
-			job.setRule(projects[0].getWorkspace().getRoot()); // Potentially several projects 
-			job.setUser(true);
-			job.schedule(100);
+			job.setUser(false);
+			job.setRule(ResourcesPlugin.getWorkspace().getRoot());
+			job.schedule();
 		}
 	}
 
 	public void performFullScan() {
 		if (!CCWPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.CCW_GENERAL_AUTOMATIC_NATURE_ADDITION))
 			return;
-		
+
 		IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
 		addClojureNature(workspaceRoot.getProjects());
 	}
-	
+
 }

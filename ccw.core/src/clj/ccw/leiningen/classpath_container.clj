@@ -109,10 +109,10 @@
 
 (defn- artifacts-entry
   [dep repositories]
-  (let [main (resolve-artifact
-               (take 2 dep) ; take only id and version, not optional exclusion sections
-               repositories)
-        source (try-resolve-sources-artifact! dep repositories)]
+  (let [main (resolve-artifact (take 2 dep) repositories)
+        source (try-resolve-sources-artifact!
+                 (take 2 dep) ; take only id and version, not optional exclusion sections
+                 repositories)]
     (if source [(-> main meta :file)
                 (-> source meta :file)]
                nil)))

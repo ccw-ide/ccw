@@ -89,13 +89,13 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 	private ISelection selectionBeforePatternSearchBegan;
 	private Object[] expandedElementsBeforeSearchBegan;
 
-	private final ClojureInvoker docUtils = 
+	private final ClojureInvoker docUtils =
 			ClojureInvoker.newInvoker(
-					CCWPlugin.getDefault(), 
+					CCWPlugin.getDefault(),
 					"ccw.core.doc-utils");
-	
+
 	private static final String VAR_DOC_INFO = "var-doc-info-text";
-	
+
 	/**
 	 * Creates a content outline view with no content outline pages.
 	 */
@@ -103,6 +103,7 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 		super();
 	}
 
+	@Override
 	public void init(IViewSite site) throws PartInitException {
 		super.init(site);
 		site.setSelectionProvider(this);
@@ -113,6 +114,7 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 	 * <code>IWorkbenchPart</code> method creates a <code>PageBook</code>
 	 * control with its default page showing.
 	 */
+	@Override
 	public void createPartControl(Composite theParent) {
 		control = new Composite(theParent, SWT.NONE);
 
@@ -135,6 +137,7 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 		gd.grabExcessHorizontalSpace = true;
 		filterText.setLayoutData(gd);
 		filterText.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				patternString = ((Text) e.getSource()).getText();
 				if ("".equals(patternString.trim())) {
@@ -186,7 +189,7 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 					return recursiveElemMatches(element);
 				}
 			}
-			
+
 			/** Tests element node, and its children if necessary, recursively */
 			private boolean recursiveElemMatches(Object element) {
 				if (elemMatches(element)) {
@@ -205,7 +208,7 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 					}
 				}
 			}
-			
+
 			/** Test just element node, not its children */
 			private boolean elemMatches(Object element) {
 				Map elem = (Map) element;
@@ -220,6 +223,7 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 		});
 
 		treeViewer.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				IStructuredSelection sel = (IStructuredSelection) event.getSelection();
 				if (sel.size() == 0)
@@ -240,21 +244,26 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 		// CONTENT_OUTLINE_VIEW_HELP_CONTEXT_ID);
 	}
 
+	@Override
 	public Object getAdapter(Class key) {
 		return super.getAdapter(key);
 	}
 
 	private static class ContentProvider implements ITreeContentProvider {
+		@Override
 		public Object[] getElements(Object inputElement) {
 			return getChildren(inputElement);
 		}
 
+		@Override
 		public void dispose() {
 		}
 
+		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		}
 
+		@Override
 		public Object[] getChildren(Object parentElement) {
 			if (Map.class.isInstance(parentElement)) {
 				Collection children = (Collection) ((Map) parentElement).get(KEYWORD_CHILDREN);
@@ -268,10 +277,12 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 			}
 		}
 
+		@Override
 		public Object getParent(Object element) {
 			return null;
 		}
 
+		@Override
 		public boolean hasChildren(Object parentElement) {
 			if (Map.class.isInstance(parentElement)) {
 				return ((Map) parentElement).get(KEYWORD_CHILDREN) != null;
@@ -283,22 +294,27 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 
 	private class LabelProvider extends CellLabelProvider {
 
+		@Override
 		public String getToolTipText(Object element) {
 			return (String) docUtils._(VAR_DOC_INFO, element);
 		}
 
+		@Override
 		public Point getToolTipShift(Object object) {
 			return new Point(5, 15);
 		}
 
+		@Override
 		public int getToolTipDisplayDelayTime(Object object) {
 			return 100;
 		}
 
+		@Override
 		public int getToolTipTimeDisplayed(Object object) {
 			return 15000;
 		}
 
+		@Override
 		public void update(ViewerCell cell) {
 			cell.setText(getText(cell.getElement()));
 			cell.setImage(getImage(cell.getElement()));
@@ -358,10 +374,11 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 					if (oldInput != null && oldInput.equals(newInput)) {
 						return Status.CANCEL_STATUS;
 					} else {
-						asyncResetInput(null);
+						asyncResetInput(newInput);
 						return Status.OK_STATUS;
 					}
 				} catch (Exception e) {
+					e.printStackTrace();
 					repl.connectionLost();
 					asyncResetInput(null);
 					return Status.OK_STATUS;
@@ -388,6 +405,7 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 				if (Display.getCurrent() == null) {
 					final Display display = PlatformUI.getWorkbench().getDisplay();
 					display.asyncExec(new Runnable() {
+						@Override
 						public void run() {
 //							System.out.println("delayed refresh start");
 							treeViewer.refresh(updateLabels);
@@ -416,20 +434,22 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 				TreePath[] expandedTreePaths = treeViewer.getExpandedTreePaths();
 
 				treeViewer.setInput(newInput);
-
-				treeViewer.setExpandedTreePaths(expandedTreePaths);
-				treeViewer.setSelection(sel);
+				if (newInput != null) {
+					treeViewer.setExpandedTreePaths(expandedTreePaths);
+					treeViewer.setSelection(sel);
+				}
 			}
 		});
 	}
 
+	@Override
 	public void addSelectionChangedListener(ISelectionChangedListener listener) {
 		selectionChangedListeners.add(listener);
 	}
 
 	/**
 	 * Fires a selection changed event.
-	 * 
+	 *
 	 * @param selection
 	 *            the new selection
 	 */
@@ -442,6 +462,7 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 		for (int i = 0; i < listeners.length; ++i) {
 			final ISelectionChangedListener l = (ISelectionChangedListener) listeners[i];
 			SafeRunner.run(new SafeRunnable() {
+				@Override
 				public void run() {
 					l.selectionChanged(event);
 				}
@@ -456,6 +477,7 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 		return control;
 	}
 
+	@Override
 	public ISelection getSelection() {
 		if (treeViewer == null) {
 			return StructuredSelection.EMPTY;
@@ -463,10 +485,12 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 		return treeViewer.getSelection();
 	}
 
+	@Override
 	public void removeSelectionChangedListener(ISelectionChangedListener listener) {
 		selectionChangedListeners.remove(listener);
 	}
 
+	@Override
 	public void selectionChanged(SelectionChangedEvent event) {
 		fireSelectionChanged(event.getSelection());
 	}
@@ -474,12 +498,14 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 	/**
 	 * Sets focus to a part in the page.
 	 */
+	@Override
 	public void setFocus() {
 		if (treeViewer != null) {
 			treeViewer.getControl().setFocus();
 		}
 	}
 
+	@Override
 	public void setSelection(ISelection selection) {
 		if (treeViewer != null) {
 			treeViewer.setSelection(selection);
@@ -488,12 +514,13 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 
 	public static void setREPLConnection (final SafeConnection repl) {
         DisplayUtil.asyncExec(new Runnable() {
-            public void run() {
+            @Override
+			public void run() {
                 inUIThreadSetREPLConnection(repl);
             }
         });
 	}
-	
+
 	private static void inUIThreadSetREPLConnection (SafeConnection repl) {
 		IWorkbenchWindow activeWorkbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		if (activeWorkbenchWindow == null ) {
@@ -504,7 +531,7 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 		if (activePage == null) {
 			CCWPlugin.getTracer().trace(TraceOptions.REPL, "activePage is null");
 		}
-		IViewPart[] views = activePage.getViews();			
+		IViewPart[] views = activePage.getViews();
 		NamespaceBrowser co = null;
 		for (IViewPart v: views) {
 			if (NamespaceBrowser.class.isInstance(v)) {

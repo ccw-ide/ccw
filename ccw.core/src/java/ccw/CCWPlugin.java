@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IStatus;
@@ -34,6 +35,7 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewReference;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
@@ -174,6 +176,34 @@ public class CCWPlugin extends AbstractUIPlugin {
 								}
 							}
 
+							// The Workbench may not be initialized, causing weird issues e.g. in Kepler
+							// WorkbenchThemeManager.getInstance() in Kepler for instance does
+							// not ensure the instance is created in the UI Thread
+							// Once the Workbench is initialized, WorkbenchThemeManager & all
+							// are ensured to be created, so this removes a bunch of plugin startup
+							// race conditions
+							final IWorkbench workbench = PlatformUI.getWorkbench();
+							final AtomicBoolean isWorkbenchInitialized = new AtomicBoolean();
+							while (true) {
+								workbench.getDisplay().syncExec(new Runnable() {
+									@Override public void run() {
+										if (workbench.getActiveWorkbenchWindow() != null) {
+											// we've got an active window, so workbench is initialized!
+											isWorkbenchInitialized.set(true);
+										}
+									}});
+								if (isWorkbenchInitialized.get()) {
+									break;
+								} else {
+									try {
+										Thread.sleep(200);
+									} catch (InterruptedException e) {
+										e.printStackTrace();
+									}
+								}
+							}
+
+							// Here, the workbench is initialized
 					        if (System.getProperty("ccw.autostartnrepl") != null) {
 					        	try {
 									startREPLServer();
