@@ -145,8 +145,8 @@
   [java-project]
   (add-lib-on-classpath!
     java-project
-    (file-to-path (e/get-file-inside-plugin "ccw.clojure", "clojure.jar"))
-    (file-to-path (e/get-file-inside-plugin "ccw.clojure", "src.jar"))
+    (file-to-path (e/get-file-inside-plugin "ccw.core", "lib/clojure.jar"))
+    nil
     true))      	    
 
 (defn- add-classes-directory!

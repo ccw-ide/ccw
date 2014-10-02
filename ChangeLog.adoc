@@ -16,6 +16,7 @@ Laurent Petit <laurent dot petit at gmail dot com>
 === Fix
 
 - Removed default keybinding kbd:[Alt+Command+Q E] for command 'New REPL client for Eclipse embedded nrepl server (advanced usages) which was conflicting with a JDT command
+- Fixed `Convert to Clojure Project` when one wants a quick & dirty way to add clojure jar to a project classpath
 
 === Enhancements
 
