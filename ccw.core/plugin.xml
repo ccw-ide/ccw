@@ -976,12 +976,6 @@
             sequence="M1+K">
       </key>
       <key
-            commandId="ccw.ui.repl.connectToEclipseNREPL"
-            contextId="org.eclipse.ui.contexts.window"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="M1+M3+Q E">
-      </key>
-      <key
             commandId="ccw.ui.repl.history.previous"
             contextId="ccw.ui.context.repl"
             platform="win32"
