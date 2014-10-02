@@ -285,9 +285,9 @@ public class CCWDropAdapterEarlyStartup implements IStartup {
 					@Override public void run() {
 						String msg;
 						if (files.length == 1) {
-							msg = "Will research and create projects from " + files[0];
+							msg = "Find and create projects from " + files[0] + "?";
 						} else {
-							msg = "Will research and create projects from:\n";
+							msg = "Find and create projects from ... ?\n";
 							for (String file: files) {
 								msg += "  - " + file + "\n";
 							}
