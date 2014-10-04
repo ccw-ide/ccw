@@ -32,9 +32,13 @@ final class LeiningenNatureAdderWorkspaceJob extends WorkspaceJob {
 			if (project == null || !project.isOpen() ||!project.exists())
 				return Status.OK_STATUS;
 
+			if (hasJavaNature(project)) {
+				// We don't override existing java natures
+				return Status.OK_STATUS;
+			}
+
 			if (hasLeiningenNature(project)) {
 				if (!checkLeiningenProjectConsistency(project)) {
-					System.out.println("UPGRADING PROJECT BUILD PATH " + project.getName());
 					leinHandlers._("upgrade-project-build-path", JavaCore.create(project), monitor);
 				}
 				return Status.OK_STATUS;
@@ -59,6 +63,15 @@ final class LeiningenNatureAdderWorkspaceJob extends WorkspaceJob {
 		return project.getFile(".classpath").exists();
 	}
 
+	private boolean hasJavaNature(IProject project) {
+		try {
+			return project.hasNature(JavaCore.NATURE_ID);
+		} catch (CoreException e) {
+			e.printStackTrace();
+			// When in doubt, consider it has java nature, this will stop the process
+			return true;
+		}
+	}
 	private boolean hasLeiningenNature(IProject project) {
 		try {
 			return project.hasNature(CCWPlugin.LEININGEN_NATURE_ID);
