@@ -8,25 +8,28 @@
  * Contributors: 
  *    Laurent PETIT - initial API and implementation
  *******************************************************************************/
-package ccw.editors.clojure;
+package ccw.editors.clojure.actions;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.action.Action;
 
-public class GotoNextMemberAction extends Action {
+import ccw.editors.clojure.ClojureEditor;
+import ccw.editors.clojure.ClojureEditorMessages;
 
-	public final static String ID = "ClojureGotoNextMember"; //$NON-NLS-1$
+public class SelectTopLevelSExpressionAction extends Action {
+
+	public final static String ID = "SelectTopLevelSExpressionAction"; //$NON-NLS-1$
 
 	private final ClojureEditor editor;
 
-	public GotoNextMemberAction(ClojureEditor editor) {
-		super(ClojureEditorMessages.GotoNextMemberAction_label);
+	public SelectTopLevelSExpressionAction(ClojureEditor editor) {
+		super(ClojureEditorMessages.SelectTopLevelSExpressionAction_label);
 		Assert.isNotNull(editor);
 		this.editor= editor;
 		setEnabled(true);
 	}
 
 	public void run() {
-		editor.gotoEndOfMember();
+		editor.selectTopLevelSExpression();
 	}
 }

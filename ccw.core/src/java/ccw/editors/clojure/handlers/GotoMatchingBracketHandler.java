@@ -8,7 +8,7 @@
  * Contributors: 
  *    Laurent PETIT - initial API and implementation
  *******************************************************************************/
-package ccw.editors.clojure;
+package ccw.editors.clojure.handlers;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -17,6 +17,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import ccw.CCWPlugin;
+import ccw.editors.clojure.IClojureEditor;
 import ccw.util.PlatformUtil;
 
 public class GotoMatchingBracketHandler extends AbstractHandler {

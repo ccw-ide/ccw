@@ -1,4 +1,4 @@
-package ccw.editors.clojure;
+package ccw.editors.clojure.strategies;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.DocumentCommand;
@@ -6,28 +6,29 @@ import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
 
 import ccw.CCWPlugin;
+import ccw.editors.clojure.IClojureEditor;
 import ccw.util.ClojureInvoker;
 import clojure.lang.Ref;
 
-public class PareditAutoEditStrategy implements IAutoEditStrategy {
+public class PareditAutoAdjustWhitespaceStrategy implements IAutoEditStrategy {
 
 	private final ClojureInvoker pareditAutoEditSupport = ClojureInvoker.newInvoker(
             CCWPlugin.getDefault(),
             "ccw.editors.clojure.paredit-auto-edit-support");
 	
-	private final ClojureInvoker pareditAutoEditStrategyImpl = ClojureInvoker.newInvoker(
+	private final ClojureInvoker pareditAutoAdjustWhitespacetrategyImpl = ClojureInvoker.newInvoker(
             CCWPlugin.getDefault(),
-            "ccw.editors.clojure.PareditAutoEditStrategyImpl");
+            "ccw.editors.clojure.PareditAutoAdjustWhitespaceStrategyImpl");
 
 	public final Ref state;
 	
-	public PareditAutoEditStrategy(IClojureEditor editor, IPreferenceStore prefs) {
+	public PareditAutoAdjustWhitespaceStrategy(IClojureEditor editor, IPreferenceStore prefs) {
 		state = (Ref) pareditAutoEditSupport._("init", editor, prefs);
 	}
 	
 	public void customizeDocumentCommand(IDocument document,
 			DocumentCommand command) {
-		pareditAutoEditStrategyImpl._("customizeDocumentCommand", 
+		pareditAutoAdjustWhitespacetrategyImpl._("customizeDocumentCommand", 
 				this, document, command);
 	}
 }

@@ -8,11 +8,14 @@
  * Contributors: 
  *    Laurent PETIT - initial API and implementation
  *******************************************************************************/
-package ccw.editors.clojure;
+package ccw.editors.clojure.actions;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.action.Action;
 
+import ccw.editors.clojure.ClojureEditor;
+import ccw.editors.clojure.ClojureEditorMessages;
+import ccw.editors.clojure.EvaluateTextUtil;
 import ccw.repl.Actions;
 import ccw.repl.REPLView;
 

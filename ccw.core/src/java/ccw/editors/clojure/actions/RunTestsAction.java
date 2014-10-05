@@ -8,7 +8,7 @@
  * Contributors: 
  *    Tuomas KARKKAINEN - initial API and implementation
  *******************************************************************************/
-package ccw.editors.clojure;
+package ccw.editors.clojure.actions;
 
 import java.util.Map;
 
@@ -21,6 +21,8 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 
 import ccw.CCWPlugin;
+import ccw.editors.clojure.ClojureEditor;
+import ccw.editors.clojure.ClojureEditorMessages;
 import ccw.repl.REPLView;
 import ccw.repl.SafeConnection;
 import clojure.lang.Keyword;

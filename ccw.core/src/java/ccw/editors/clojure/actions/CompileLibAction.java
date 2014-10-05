@@ -8,7 +8,7 @@
  * Contributors: 
  *    Laurent PETIT - initial API and implementation
  *******************************************************************************/
-package ccw.editors.clojure;
+package ccw.editors.clojure.actions;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -16,6 +16,10 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
+
+import ccw.editors.clojure.ClojureEditor;
+import ccw.editors.clojure.ClojureEditorMessages;
+import ccw.editors.clojure.EvaluateTextUtil;
 
 public class CompileLibAction extends Action {
 
