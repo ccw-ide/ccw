@@ -17,6 +17,7 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 - Removed default keybinding kbd:[Alt+Command+Q E] for command 'New REPL client for Eclipse embedded nrepl server (advanced usages) which was conflicting with a JDT command
 - Fixed `Convert to Clojure Project` when one wants a quick & dirty way to add clojure jar to a project classpath
+- Dragging a leiningen project already placed inside the workspace folder now works (was throwing an exception previously)
 
 === Enhancements
 - Embedded Leiningen version upgraded from version 2.3.4 to 2.5.0

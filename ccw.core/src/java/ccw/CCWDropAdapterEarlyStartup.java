@@ -424,7 +424,13 @@ public class CCWDropAdapterEarlyStartup implements IStartup {
 				final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 
 				IProjectDescription desc = ResourcesPlugin.getWorkspace().newProjectDescription(projectName);
-				desc.setLocation(new Path(folder.getAbsolutePath()));
+				if (folder.getParentFile().getAbsolutePath().equals(ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile().getAbsolutePath())) {
+					// Special case: when the projects resides inside the workspace path,
+					// location must be set to null to assume the "default location"
+					desc.setLocation(null);
+				} else {
+					desc.setLocation(new Path(folder.getAbsolutePath()));
+				}
 				project.create(desc, null);
 				project.open(null);
 
