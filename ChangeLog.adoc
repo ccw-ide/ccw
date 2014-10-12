@@ -19,6 +19,7 @@ Laurent Petit <laurent dot petit at gmail dot com>
 - Fixed `Convert to Clojure Project` when one wants a quick & dirty way to add clojure jar to a project classpath
 
 === Enhancements
+- Embedded Leiningen version upgraded from version 2.3.4 to 2.5.0
 - Leiningen Automatic detection now works only if the project does not already have Java Classpath metadata set (technically speaking: if the project does not have the Java Nature).
 
 
