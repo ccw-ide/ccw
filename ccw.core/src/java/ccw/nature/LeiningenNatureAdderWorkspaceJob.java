@@ -48,6 +48,7 @@ final class LeiningenNatureAdderWorkspaceJob extends WorkspaceJob {
 				System.out.println("CREATING LEININGEN PROJECT " + project.getName());
 				leinHandlers._("add-leiningen-nature-with-monitor", project, monitor);
 			}
+			return Status.OK_STATUS;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return CCWPlugin.createErrorStatus(
@@ -56,7 +57,6 @@ final class LeiningenNatureAdderWorkspaceJob extends WorkspaceJob {
 							+ project.getName(),
 							e);
 		}
-		return Status.OK_STATUS;
 	}
 
 	private boolean checkLeiningenProjectConsistency(IProject project) {

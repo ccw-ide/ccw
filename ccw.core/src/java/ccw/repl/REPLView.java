@@ -46,8 +46,6 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
@@ -97,20 +95,20 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 	private static final double DISCONNECTED_REPL_FG_TRANSPARENCY_PCT = 0.5;
 
 	private final ClojureInvoker viewHelpers = ClojureInvoker.newInvoker(CCWPlugin.getDefault(), "ccw.repl.view-helpers");
-	
+
 	private final ClojureInvoker editorSupport = ClojureInvoker.newInvoker(
             CCWPlugin.getDefault(),
             "ccw.editors.clojure.editor-support");
-    
+
 	private final ClojureInvoker str = ClojureInvoker.newInvoker(
             CCWPlugin.getDefault(),
             "clojure.string");
 
 	/* Keep this in sync with the context defined in plugin.xml */
 	public static final String CCW_UI_CONTEXT_REPL = "ccw.ui.context.repl";
-	
+
     public static final String VIEW_ID = "ccw.view.repl";
-    public static final AtomicReference<REPLView> activeREPL = new AtomicReference();
+    public static final AtomicReference<REPLView> activeREPL = new AtomicReference<REPLView>();
 
     /**
      * This misery around secondary IDs is due to the fact that:
@@ -123,14 +121,14 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
      * Try as I might, I cannot find a way to get a view to (a) be displayed in a particular place
      * in the IDE (short of defining a Clojure perspective!) or (b) be notified of when a REPL
      * view is moved to begin with.
-     * 
+     *
      * This approach will result in a user "training" the IDE where to put REPL views
      * (with seemingly intransigent or arbitrary behaviour to start); eventually, REPLs will
      * all end up displaying in the desired location.
      */
     private static Set<String> SECONDARY_VIEW_IDS = new TreeSet<String>() {{
        // no one will create more than 1000 REPLs at a time, right? :-P
-       for (int i = 0; i < 1000; i++) add(String.format("%03d", i)); 
+       for (int i = 0; i < 1000; i++) add(String.format("%03d", i));
     }};
     private static String getSecondaryId () {
         synchronized (SECONDARY_VIEW_IDS) {
@@ -141,17 +139,17 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
     }
     private static void releaseSecondaryId (String id) {
     	assert id != null;
-    	
+
         synchronized (SECONDARY_VIEW_IDS) {
             SECONDARY_VIEW_IDS.add(id);
         }
     }
-    
+
     private static final Keyword inputExprLogType = Keyword.intern("in-expr");
     private static final Keyword errLogType = Keyword.intern("err");
     private static final Keyword errorResponseKey = Keyword.intern("err");
     private static final Pattern boostIndent = Pattern.compile("^", Pattern.MULTILINE);
-    
+
     // TODO would like to eliminate separate log view, but:
     // 1. PareditAutoEditStrategy gets all text from a source document, and bails badly if its not well-formed
     //      (and REPL output is guaranteed to not be well-formed)
@@ -161,43 +159,46 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
     public StyledText logPanel;
     /** record for colors used in logPanel */
     public final ClojureSourceViewer.EditorColors logPanelEditorColors = new ClojureSourceViewer.EditorColors();
-    
+
     public ClojureSourceViewer viewer;
-    
+
     public StyledText viewerWidget; // public only to simplify interop with helpers impl'd in Clojure
-    
+
+    private StyledTextPlaceHolder placeholder;
+
     private ClojureSourceViewerConfiguration viewerConfig;
-    
+
     private final IPropertyChangeListener fontChangeListener = new IPropertyChangeListener() {
-        public void propertyChange(PropertyChangeEvent event) {
+        @Override
+		public void propertyChange(PropertyChangeEvent event) {
             if (event.getProperty().equals(JFaceResources.TEXT_FONT)) resetFont();
         }
     };
-        
+
     private Connection interactive;
     private SafeConnection safeToolConnection;
-    
+
     private IConsole console;
     private ILaunch launch;
-    
+
     private String currentNamespace = "user";
     private Map<String, Object> describeInfo;
     private IFn evalExpression;
     private String sessionId;
     private String secondaryId;
-    
+
     /* function implementing load previous/next command from history into input area */
     private IFn historyActionFn;
-    
+
     public void setHistoryActionFn(IFn historyActionFn) {
     	this.historyActionFn = historyActionFn;
     }
     public IFn getHistoryActionFn() {
     	return this.historyActionFn;
     }
-    
+
     private boolean isConnectionLost;
-    
+
     private boolean inConnectionLost;
     @Override
     public void connectionLost() {
@@ -205,7 +206,7 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
     		// Prevent infinite loops
     		return;
     	}
-    	
+
     	inConnectionLost = true;
     	try {
 	    	if (launch != null && !launch.isTerminated()) {
@@ -223,11 +224,11 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
     		inConnectionLost = false;
     	}
     }
-    
+
     public boolean isConnectionLost() {
     	return isConnectionLost;
     }
-    
+
     private void markAsLost() {
     	isConnectionLost = true;
     	try {
@@ -235,7 +236,7 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
     	} catch (Exception e) {
     		e.printStackTrace();
     	}
-    	
+
     	// visual
     	DisplayUtil.asyncExec(new Runnable() {
 			@Override public void run() {
@@ -258,34 +259,34 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 			}
 		});
     }
-    
+
     public SafeConnection getSafeToolingConnection() {
     	return safeToolConnection;
     }
-    
+
     private SourceViewerDecorationSupport fSourceViewerDecorationSupport;
 	private StatusLineContributionItem structuralEditionModeStatusContributionItem;
 
-	/** Eclipse Preferences Listener */ 
+	/** Eclipse Preferences Listener */
 	private IPropertyChangeListener prefsListener;
-    
+
 	/** Last expression sent via the REPL input area, as opposed to sent by CCW, or sent via an editor, etc. */
 	private String lastExpressionSentFromREPL;
 
-    public REPLView () {}    
-    
+    public REPLView () {}
+
     @Override
     public void init(IViewSite site) throws PartInitException {
     	super.init(site);
         activeREPL.set(REPLView.this);
     }
-    
+
     private void resetFont () {
         Font font= JFaceResources.getTextFont();
         logPanel.setFont(font);
         viewerWidget.setFont(font);
     }
-    
+
     private void copyToLog (StyledText s) {
         // sadly, need to reset text on the ST in order to get formatting/style ranges...
         s.setText(boostIndent.matcher(s.getText()).replaceAll("   ").replaceFirst("^\\s+", "=> "));
@@ -301,7 +302,7 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
             CCWPlugin.logError("Could not copy expression to log", e);
         }
     }
-    
+
     private String removeTrailingSpaces(String s) {
     	return (String) str._("trimr", s);
     }
@@ -317,11 +318,11 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
         copyToLog(viewerWidget);
         viewerWidget.setText("");
     }
-    
+
     public String getLastExpressionSentFromREPL() {
     	return lastExpressionSentFromREPL;
     }
-    
+
     public void evalExpression (String s, boolean addToHistory, boolean printToLog, boolean repeatLastREPLEvalIfActive) {
         try {
         	if (s.trim().length() > 0) {
@@ -330,7 +331,7 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
                 	viewHelpers._("log", this, logPanel, "Invalid REPL", errLogType);
                 } else {
                 	final Object ret = evalExpression.invoke(s, addToHistory);
-                	
+
                 	if (repeatLastREPLEvalIfActive && autoRepeatLastAction.isChecked()) {
 	            		final String lastREPLExpr = getLastExpressionSentFromREPL();
 	            		if (!StringUtils.isBlank(lastREPLExpr)) {
@@ -354,8 +355,8 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
         }
     }
 
-    /** 
-     * BE CAREFUL: this is a blocking method, waiting for the full 
+    /**
+     * BE CAREFUL: this is a blocking method, waiting for the full
      * nrepl response to come back !
      */
     private boolean hasEvalResponseException(Object evalResponse) {
@@ -369,7 +370,7 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
     	}
     	return false;
     }
-    
+
     public void printErrorDetail() {
         evalExpression("(require 'clojure.repl)" +
         		"(binding [*out* *err*]" +
@@ -384,7 +385,7 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
         viewHelpers._("log", this, logPanel, ";; Interrupting...", inputExprLogType);
         evalExpression.invoke(PersistentHashMap.create("op", "interrupt"), false);
     }
-    
+
     public void getStdIn () {
         InputDialog dlg = new InputDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
                 "Input requested", String.format("A REPL expression sent to %s requires a line of *in* input:",
@@ -394,36 +395,37 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
         dlg.open();
         evalExpression.invoke(PersistentHashMap.create("op", "stdin", "stdin", dlg.getValue() + "\n"), false);
     }
-    
+
     /**
      * Echos appropriate content to the log area for an nREPL
      * Response provoked by an expression.
-     * 
+     *
      * @deprecated this should no longer be needed; view_helpers.clj
      * sets up a future that will handle all responses on a REPL's
      * session
      */
-    public void handleResponse (Response resp, String expression) {
-        viewHelpers._("handle-responses", this, logPanel, expression, resp.seq());        
+    @Deprecated
+	public void handleResponse (Response resp, String expression) {
+        viewHelpers._("handle-responses", this, logPanel, expression, resp.seq());
     }
-    
+
     public void closeView () throws Exception {
         IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
         page.hideView(this);
         closeConnections();
     }
-    
+
     public void closeConnections () throws Exception {
         if (interactive != null) interactive.close();
         if (safeToolConnection != null) safeToolConnection.close();
     }
-    
+
     public boolean reconnect () throws Exception {
         closeConnections();
         logPanel.append(";; Reconnecting...\n");
         return configure(interactive.url);
     }
-    
+
     public void setCurrentNamespace (String ns) {
         // TODO waaaay better to put a dropdown namespace chooser in the view's toolbar,
         // and this would just change its selection
@@ -433,17 +435,17 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 				setPartName(String.format("REPL @ %s (%s)", interactive.url, currentNamespace));
 			}});
     }
-    
+
     public String getCurrentNamespace () {
         return currentNamespace;
     }
-    
+
     private void prepareView () throws Exception {
     	// 10s timeout for establishing session (somewhat arbitrary atm)
         sessionId = SafeConnection.safeNewSession(interactive, 10000);
         evalExpression = (IFn) viewHelpers._("configure-repl-view", this, logPanel, interactive.client, sessionId);
     }
-    
+
     @SuppressWarnings("unchecked")
     public boolean configure (final String url) throws Exception {
         try {
@@ -451,7 +453,7 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
         	if (url.trim().startsWith("http://")) {
         		ClojureOSGi.require(CCWPlugin.getDefault().getBundle(), "cemerick.drawbridge.client");
         	}
-        	
+
             // TODO - don't need multiple connections anymore, just separate sessions will do.
             interactive = new Connection(url);
             safeToolConnection = new SafeConnection(new Connection(url), this);
@@ -489,11 +491,11 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
             return false;
         }
     }
-    
+
     public static REPLView connect (String url, boolean makeActiveREPL) throws Exception {
         return connect(url, null, null, makeActiveREPL);
     }
-    
+
     public static REPLView connect (final String url, IConsole console, ILaunch launch, final boolean makeActiveREPL) throws Exception {
         String secondaryId;
         final REPLView repl = (REPLView)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(
@@ -515,15 +517,15 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
         	return null;
         }
     }
-    
+
     public Connection getConnection () {
         return interactive;
     }
-    
+
     public String getSessionId () {
         return sessionId;
     }
-    
+
     public Set<String> getAvailableOperations () throws IllegalStateException {
         if (describeInfo == null) {
         	try {
@@ -545,11 +547,11 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
         		describeInfo = new HashMap();
         	}
         }
-        
+
         Map<String, Object> ops = (Map<String, Object>)describeInfo.get("ops");
         return ops == null ? new HashSet() : ops.keySet();
     }
-    
+
     /**
      * Returns the console for the launch that this REPL is associated with, or
      * null if this REPL is using a remote connection.
@@ -557,15 +559,15 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
     public IConsole getConsole () {
         return console;
     }
-    
+
     public void showConsole() {
         if (console != null) ConsolePlugin.getDefault().getConsoleManager().showConsoleView(console);
     }
-    
+
     public ILaunch getLaunch() {
         return launch;
     }
-    
+
     private IPreferenceStore getPreferences() {
     	return  CCWPlugin.getDefault().getCombinedPreferenceStore();
     }
@@ -573,16 +575,16 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
     @Override
     public void createPartControl(Composite parent) {
         final IPreferenceStore prefs = getPreferences();
-        
+
         SashForm split = new SashForm(parent, SWT.VERTICAL);
         split.setBackground(split.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
 
-        
+
         logPanel = new StyledText(split, SWT.V_SCROLL | SWT.WRAP);
         logPanel.setIndent(4);
         logPanel.setEditable(false);
         logPanel.setFont(JFaceResources.getFont(JFaceResources.TEXT_FONT));
-        
+
         // Enables logPanel to have same background, etc. colors than clojure
         // editors.
 		ClojureSourceViewer.initializeViewerColors(logPanel, prefs, logPanelEditorColors);
@@ -592,20 +594,23 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 				logPanelEditorColors.unconfigure();
 			}
 		});
-        
+
         structuralEditionModeStatusContributionItem = ClojureSourceViewer.createStructuralEditionModeStatusContributionItem();
         viewer = new ClojureSourceViewer(split, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL, prefs,
         		new ClojureSourceViewer.IStatusLineHandler() {
+					@Override
 					public StatusLineContributionItem getEditingModeStatusContributionItem() {
 						return structuralEditionModeStatusContributionItem;
 					}
 				}) {
-        	public REPLView getCorrespondingREPL() { return REPLView.this; };
+        	@Override
+			public REPLView getCorrespondingREPL() { return REPLView.this; };
             private SafeConnection getCorrespondingREPLConnection () {
                 // we'll be connected by the time this is called
                 return safeToolConnection;
             }
-            public void setStatusLineErrorMessage(String msg) {
+            @Override
+			public void setStatusLineErrorMessage(String msg) {
             	if (msg != null) {
 	            	IStatusLineManager slm = REPLView.this.getViewSite().getActionBars().getStatusLineManager();
 
@@ -616,7 +621,8 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 	            	}
             	}
             };
-            public String findDeclaringNamespace() {
+            @Override
+			public String findDeclaringNamespace() {
             	String inline = super.findDeclaringNamespace();
             	if (inline != null) {
             		return inline;
@@ -627,46 +633,21 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
         };
         viewerConfig = new ClojureSourceViewerConfiguration(prefs, viewer);
         viewer.configure(viewerConfig);
-        
+
         // Adds support for undo, redo, context information, etc.
         new TextViewerSupport(viewer, getHandlerService());
-        
+
         getViewSite().setSelectionProvider(viewer);
         viewer.setDocument(ClojureDocumentProvider.configure(new Document()));
         // Display placeholder text when widget is empty and does not have focus
         final StyledText st = (StyledText) viewer.getControl();
-        final String TYPE_TEXT_HERE = "<type clojure code here>";
-        st.addModifyListener(new ModifyListener() {
-			@Override public void modifyText(ModifyEvent e) {
-				if (!st.isFocusControl() && st.getEditable()) {
-					if (st.getText().isEmpty()) {
-						st.setText(TYPE_TEXT_HERE);
-						st.setStyleRange(new StyleRange(0, TYPE_TEXT_HERE.length(), null, null, SWT.ITALIC));
-					}
-				}
-			}});
-        st.addFocusListener(new FocusListener() {
-			@Override public void focusLost(FocusEvent e) {
-				if (st.getEditable() && st.getText().isEmpty()) {
-					st.setText(TYPE_TEXT_HERE);
-					st.setStyleRange(new StyleRange(0, TYPE_TEXT_HERE.length(), null, null, SWT.ITALIC));
-				}
-			}
-			@Override public void focusGained(FocusEvent e) {
-				if (st.getEditable() && TYPE_TEXT_HERE.equals(st.getText())) {
-					st.setText("");
-					st.setStyleRange(null);
-				}
-			}
-		});
-        if (st.getEditable() && st.getText().isEmpty()) {
-			st.setText(TYPE_TEXT_HERE);
-			st.setStyleRange(new StyleRange(0, TYPE_TEXT_HERE.length(), null, null, SWT.ITALIC));
-        }
+
+        setPlaceHolder(st, "<type clojure code here>");
+
         viewerWidget = viewer.getTextWidget();
-        
+
         viewerWidget.setFont(JFaceResources.getFont(JFaceResources.TEXT_FONT));
-        
+
 		// ensure decoration support has been created and configured.
 		getSourceViewerDecorationSupport(viewer).install(prefs);
 
@@ -682,7 +663,8 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
         viewerWidget.setKeyBinding(SWT.PAGE_DOWN, SWT.NULL);
         viewerWidget.setKeyBinding(SWT.PAGE_UP, SWT.NULL);
         viewerWidget.addListener(SWT.KeyDown, new Listener () {
-           public void handleEvent (Event e) {
+           @Override
+		public void handleEvent (Event e) {
                switch (e.keyCode) {
                    case SWT.PAGE_DOWN:
                        logPanel.invokeAction(ST.PAGE_DOWN);
@@ -693,40 +675,42 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
                }
            }
         });
-        
+
         installMessageDisplayer(viewerWidget, new MessageProvider() {
+			@Override
 			public String getMessageText() {
 				return getEvaluationHint();
 			}
 		});
-        
+
         installAutoEvalExpressionOnEnter();
 
         installEvalTopLevelSExpressionCommand();
-        
+
         /*
          * Need to hook up here to force a re-evaluation of the preferences
          * for the syntax coloring, after the token scanner has been
          * initialized. Otherwise the very first Clojure editor will not
          * have any tokens colored.
-         * TODO this is repeated in ClojureEditor...surely we can make the source viewer self-sufficient here 
+         * TODO this is repeated in ClojureEditor...surely we can make the source viewer self-sufficient here
          */
         viewer.propertyChange(null);
-        
+
         viewerWidget.addFocusListener(new NamespaceRefreshFocusListener());
         logPanel.addFocusListener(new NamespaceRefreshFocusListener());
-        
+
         split.setWeights(new int[] {100, 75});
-        
+
         getViewSite().getActionBars().getStatusLineManager().add(this.structuralEditionModeStatusContributionItem);
         viewer.updateStructuralEditingModeStatusField();
         structuralEditionModeStatusContributionItem.setActionHandler(new Action() {
-    		public void run() {
+    		@Override
+			public void run() {
 				viewer.toggleStructuralEditionMode();
 			}
     	});
-        
-       
+
+
         resetFont();
         JFaceResources.getFontRegistry().addListener(fontChangeListener);
         parent.addDisposeListener(new DisposeListener() {
@@ -738,7 +722,7 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 				activeREPL.compareAndSet(REPLView.this, null);
 			}
 		});
-        
+
         /*
          * There's a BUG starting with Eclipse Juno 4.2.2 with the compatibility
          * layer and the context mgt / toolbar icons mgt (they just don't work).
@@ -747,7 +731,7 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
          */
         createActions();
         createToolbar();
-    
+
         /*
          * TODO find a way for the following code line to really work. That is add
          * the necessary additional code for enabling "handlers" (in fact, my fear
@@ -758,11 +742,91 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 
         /* Thought just activating CCW_UI_CONTEXT_REPL would also activate its parent contexts
          * but apparently not, so here we activate explicitly all the contexts we want (FIXME?)
-         */ 
+         */
         activate(IClojureEditor.KEY_BINDING_SCOPE);
         activate(CCW_UI_CONTEXT_REPL);
     }
-    
+
+	private void setPlaceHolder(final StyledText st, final String placeholder) {
+		final IPropertyChangeListener replHintsListener = new IPropertyChangeListener() {
+			@Override public void propertyChange(PropertyChangeEvent event) {
+				if (event.getProperty().equals(PreferenceConstants.REPL_VIEW_DISPLAY_HINTS)) {
+					updatePlaceHolder(st, placeholder);
+				}
+			}
+		};
+		getPreferences().addPropertyChangeListener(replHintsListener);
+		st.addDisposeListener(new DisposeListener() {
+			@Override public void widgetDisposed(DisposeEvent e) {
+				getPreferences().removePropertyChangeListener(replHintsListener);
+			}
+		});
+		updatePlaceHolder(st, placeholder);
+	}
+
+	private void updatePlaceHolder(final StyledText st, final String placeholder) {
+		if (getPreferences().getBoolean(PreferenceConstants.REPL_VIEW_DISPLAY_HINTS)) {
+			if (this.placeholder == null) {
+				this.placeholder = new StyledTextPlaceHolder(st, placeholder);
+			}
+			this.placeholder.setPlaceHolder(placeholder);
+		} else {
+			if (this.placeholder != null) {
+				this.placeholder.setPlaceHolder(null);
+			}
+		}
+	}
+
+	private static class StyledTextPlaceHolder {
+		private final StyledText st;
+		private String placeholder;
+		private boolean hasFocus;
+		private boolean isPlaceholderDisplayed;
+
+		public StyledTextPlaceHolder(final StyledText st, String p) {
+			this.st = st;
+			this.placeholder = p;
+			this.hasFocus = st.isFocusControl();
+
+			renderPlaceholder();
+
+			st.addFocusListener(new FocusListener() {
+				@Override public void focusLost(FocusEvent e) {
+					hasFocus = false;
+					renderPlaceholder();
+				}
+				@Override public void focusGained(FocusEvent e) {
+					hasFocus = true;
+					renderPlaceholder();
+				}
+			});
+		}
+
+		private void renderPlaceholder() {
+			if (hasFocus) {
+				if (isPlaceholderDisplayed) {
+					isPlaceholderDisplayed = false;
+					st.setText("");
+					st.setStyleRange(null);
+				}
+			} else {
+				if (isPlaceholderDisplayed || StringUtils.isEmpty(st.getText())) {
+					isPlaceholderDisplayed = true;
+					st.setText(StringUtils.safeString(placeholder));
+					if (!StringUtils.isEmpty(placeholder)) {
+						st.setStyleRange(new StyleRange(0, placeholder.length(), null, null, SWT.ITALIC));
+					}
+				}
+			}
+		}
+
+		public void setPlaceHolder(final String placeholder) {
+			this.placeholder = placeholder;
+			renderPlaceholder();
+		}
+
+	}
+
     private Action autoRepeatLastAction;
     private Action printErrorAction;
     private Action interruptAction;
@@ -770,7 +834,7 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
     private Action clearLogAction;
     private Action newSessionAction;
     private Action showConsoleAction;
-    
+
 	private void createActions() {
 
 		autoRepeatLastAction = new Action("Repeat last evaluation each time editor sends changes", Action.AS_CHECK_BOX) {
@@ -781,7 +845,7 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 		};
 		autoRepeatLastAction.setToolTipText("Repeat last evaluation each time editor sends changes");
 		autoRepeatLastAction.setImageDescriptor(getImageDescriptor("repl/arrow-repeat-once_16x16.png"));
-		
+
 		printErrorAction = new Action("Print detailed output from the last exception") {
 			@Override
 			public void run() {
@@ -792,7 +856,7 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 		printErrorAction
 				.setImageDescriptor(getImageDescriptor("repl/print_last_error.gif"));
 
-		
+
 		interruptAction = new Action("Interrupt Evaluation") {
 			@Override
 			public void run() {
@@ -803,14 +867,14 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 		interruptAction
 				.setImageDescriptor(getImageDescriptor("repl/interrupt.gif"));
 
-		
+
 		reconnectAction = new Action("Reconnect") {
 			@Override
 			public void run() {
 	            try {
 	                reconnect();
 	            } catch (Exception e) {
-	            	final String MSG = "Unexpected exception occured while trying to reconnect REPL view to clojure server"; 
+	            	final String MSG = "Unexpected exception occured while trying to reconnect REPL view to clojure server";
 	            	ErrorDialog.openError(
 	            			REPLView.this.getSite().getShell(),
 	            			"Reconnection Error",
@@ -823,8 +887,9 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 		reconnectAction
 				.setImageDescriptor(getImageDescriptor("repl/reconnect.gif"));
 
-		
+
 		clearLogAction = new Action("Clear REPL log") {
+			@Override
 			public void run() {
 				logPanel.setText("");
 			}
@@ -832,13 +897,14 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 		clearLogAction.setToolTipText("Clear the REPL&apos;s log");
 		clearLogAction.setImageDescriptor(getImageDescriptor("repl/clear.gif"));
 
-		
+
 		newSessionAction = new Action("New Session") {
+			@Override
 			public void run() {
 	            try {
 	                REPLView.connect(getConnection().url, true);
 	            } catch (Exception e) {
-	                final String msg = "Unexpected exception occured while trying to connect REPL view to clojure server"; 
+	                final String msg = "Unexpected exception occured while trying to connect REPL view to clojure server";
 	                ErrorDialog.openError(
 	            			REPLView.this.getSite().getShell(),
 	                        "Connection Error",
@@ -851,8 +917,9 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 		newSessionAction
 				.setImageDescriptor(getImageDescriptor("repl/new_wiz.gif"));
 
-		
+
 		showConsoleAction = new Action("Show Console") {
+			@Override
 			public void run() {
 				showConsole();
 			}
@@ -861,10 +928,10 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 		showConsoleAction.setDisabledImageDescriptor(getImageDescriptor("repl/console_disabled.gif"));
 		showConsoleAction
 				.setImageDescriptor(getImageDescriptor("repl/console.gif"));
-		
-		
+
+
 	}
-    
+
     private void createToolbar() {
     	IToolBarManager mgr = getViewSite().getActionBars().getToolBarManager();
     	mgr.add(autoRepeatLastAction);
@@ -875,7 +942,7 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
     	mgr.add(newSessionAction);
     	mgr.add(showConsoleAction);
     }
-    
+
     /**
      * Returns the image descriptor with the given relative path.
      */
@@ -892,26 +959,26 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
                     return ImageDescriptor.getMissingImageDescriptor();
             }
     }
-    
+
     private void activate(String contextId) {
         ((IContextService)getSite().getService(IContextService.class)).activateContext(contextId);
 
     }
-    
+
     private void initializeLogPanelColors() {
 		ClojureSourceViewer.initializeViewerColors(logPanel, getPreferences(), logPanelEditorColors);
-    	
+
     }
-    
+
     private interface MessageProvider {
     	String getMessageText();
     }
-    
+
     private void installMessageDisplayer(final StyledText textViewer, final MessageProvider hintProvider) {
 		textViewer.addListener(SWT.Paint, new Listener() {
 		    private int getScrollbarAdjustment () {
 		        if (!Platform.getOS().equals(Platform.OS_MACOSX)) return 0;
-		        
+
 		        // You cannot reliably determine if a scrollbar is visible or not
                 //   (http://stackoverflow.com/questions/5674207)
                 // So, we need to determine if the vertical scrollbar is "needed" based
@@ -924,20 +991,21 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
                     return 0;
                 }
 		    }
-		    
+
+			@Override
 			public void handleEvent(Event event) {
 				String message = hintProvider.getMessageText();
-				if (message == null) 
+				if (message == null)
 					return;
 
-                // keep the 'tooltip' using the default font 
+                // keep the 'tooltip' using the default font
                 event.gc.setFont(JFaceResources.getFont(JFaceResources.DEFAULT_FONT));
 
 				Point topRightPoint = topRightPoint(textViewer.getClientArea());
 				int sWidth = textWidthPixels(message, event);
 				int x = Math.max(topRightPoint.x - sWidth + getScrollbarAdjustment(), 0);
 				int y = topRightPoint.y;
-				
+
 				// the text widget doesn't know we're painting the hint, so it won't necessarily
 				// clear old presentations of it; this leads to streaking on Windows if we don't
 				// clear the foreground explicitly
@@ -962,11 +1030,11 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 			}
 		});
     }
-    
+
     private String getEvaluationHint() {
     	if (!getPreferences().getBoolean(PreferenceConstants.REPL_VIEW_DISPLAY_HINTS))
     		return null;
-    	
+
     	if (getPreferences().getBoolean(PreferenceConstants.REPL_VIEW_AUTO_EVAL_ON_ENTER_ACTIVE)) {
     		return Messages.REPLView_autoEval_on_Enter_active;
     	} else {
@@ -976,7 +1044,7 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
     				    : "Ctrl");
     	}
     }
-    
+
     private void installAutoEvalExpressionOnEnter() {
         viewerWidget.addVerifyKeyListener(new VerifyKeyListener() {
         	private boolean enterAlonePressed(VerifyEvent e) {
@@ -993,15 +1061,16 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
         	private boolean isAutoEvalOnEnterAllowed() {
         		return getPreferences().getBoolean(PreferenceConstants.REPL_VIEW_AUTO_EVAL_ON_ENTER_ACTIVE);
         	}
+			@Override
 			public void verifyKey(VerifyEvent e) {
 				if (    isAutoEvalOnEnterAllowed()
-						&& enterAlonePressed(e) 
-						&& noSelection() 
+						&& enterAlonePressed(e)
+						&& noSelection()
 						&& textAfterCaret().trim().isEmpty()
 						&& !viewer.isParseTreeBroken()) {
-					
+
 					final String widgetText = viewerWidget.getText();
-					
+
 					// Executing evalExpression() via SWT's asyncExec mechanism,
 					// we ensure all the normal behaviour is done by the Eclipse
 					// framework on the Enter key, before sending the code.
@@ -1009,6 +1078,7 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 					// the content assistant which ensures the text is completed
 					// with the selection before being sent for evaluation.
 					DisplayUtil.asyncExec(new Runnable() {
+						@Override
 						public void run() {
 							// we do not execute auto eval if some non-blank text has
 							// been added between the check and the execution
@@ -1018,24 +1088,25 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 								evalExpression();
 							}
 						}});
-				} 
+				}
 			}
         });
     }
-    
+
     IHandlerService getHandlerService() {
         return (IHandlerService) getViewSite().getService(IHandlerService.class);
     }
-    
+
     private void installEvalTopLevelSExpressionCommand() {
         getHandlerService().activateHandler(IClojureEditorActionDefinitionIds.EVALUATE_TOP_LEVEL_S_EXPRESSION, new AbstractHandler() {
-    		public Object execute(ExecutionEvent event) throws ExecutionException {
+    		@Override
+			public Object execute(ExecutionEvent event) throws ExecutionException {
     			evalExpression();
     			return null;
     		}
     	});
     }
-    
+
     /**
      * This exists solely to work around what can only be considered a bug in Eclipse starting
      * with Juno (I20120608-1400 FWIW), where views that can have multiple simultaneous instances
@@ -1044,19 +1115,21 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
      */
     private class ViewContextActivationListener implements FocusListener {
         private List<IContextActivation> activations = new ArrayList();
-        
-        public void focusLost(FocusEvent e) {
+
+        @Override
+		public void focusLost(FocusEvent e) {
             //for (IContextActivation activation : activations) {
             //    ((IContextService)REPLView.this.getSite().getService(IContextService.class)).deactivateContext(activation);
             //}
             activations = new ArrayList();
         }
-        
+
         private void activate (String contextId) {
             activations.add(((IContextService)getSite().getService(IContextService.class)).activateContext(contextId));
         }
-        
-        public void focusGained(FocusEvent e) {
+
+        @Override
+		public void focusGained(FocusEvent e) {
             /*
              * TODO find a way for the following code line to really work. That is add
              * the necessary additional code for enabling "handlers" (in fact, my fear
@@ -1067,12 +1140,12 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 
             /* Thought just activating CCW_UI_CONTEXT_REPL would also activate its parent contexts
              * but apparently not, so here we activate explicitly all the contexts we want (FIXME?)
-             */ 
+             */
             activate(IClojureEditor.KEY_BINDING_SCOPE);
             activate(CCW_UI_CONTEXT_REPL);
         }
     }
-    
+
 	/**
 	 * Returns the source viewer decoration support.
 	 *
@@ -1083,9 +1156,9 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 	protected SourceViewerDecorationSupport getSourceViewerDecorationSupport(ISourceViewer viewer) {
 		if (fSourceViewerDecorationSupport == null) {
 			fSourceViewerDecorationSupport= new SourceViewerDecorationSupport(
-					viewer, 
-					null/*getOverviewRuler()*/, 
-					null/*getAnnotationAccess()*/, 
+					viewer,
+					null/*getOverviewRuler()*/,
+					null/*getAnnotationAccess()*/,
 					EditorsPlugin.getDefault().getSharedTextColors()/*getSharedColors()*/
 					);
 			editorSupport._("configureSourceViewerDecorationSupport",
@@ -1093,7 +1166,7 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 		}
 		return fSourceViewerDecorationSupport;
 	}
-	
+
     @Override
     public void dispose() {
         super.dispose();
@@ -1101,13 +1174,13 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
         if (secondaryId != null) {
         	releaseSecondaryId(secondaryId);
         }
-        
+
         fSourceViewerDecorationSupport = (SourceViewerDecorationSupport) editorSupport._("disposeSourceViewerDecorationSupport",
         		fSourceViewerDecorationSupport);
         try {
             if (interactive != null) interactive.close();
             if (safeToolConnection != null) safeToolConnection.close();
-            
+
             if (launch != null && launch.canTerminate()) {
             	try {
 					launch.terminate();
@@ -1115,7 +1188,7 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 					e.printStackTrace();
 				}
             }
-            
+
         } catch (IOException e) {
             CCWPlugin.logError(e);
         }
@@ -1133,7 +1206,8 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
     }
 
     private final class NamespaceRefreshFocusListener implements FocusListener {
-        public void focusGained(FocusEvent e) {
+        @Override
+		public void focusGained(FocusEvent e) {
         	if (isConnectionLost) {
         		NamespaceBrowser.setREPLConnection(null);
         	} else {
@@ -1142,7 +1216,8 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
         	}
         }
 
-        public void focusLost(FocusEvent e) {}
+        @Override
+		public void focusLost(FocusEvent e) {}
     }
 
     @Override
@@ -1153,5 +1228,5 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
     		return super.getAdapter(adapter);
     	}
     }
-    
+
 }
