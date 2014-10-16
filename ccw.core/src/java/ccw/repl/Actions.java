@@ -21,19 +21,20 @@ import clojure.lang.ExceptionInfo;
 
 public class Actions {
     private Actions () {}
-    
+
     public static class Connect extends AbstractHandler {
-        public Object execute (final ExecutionEvent event) throws ExecutionException {
+        @Override
+		public Object execute (final ExecutionEvent event) throws ExecutionException {
         	ConnectDialog dlg = null;
         	REPLView repl = null;
             try {
                 IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
                 dlg = new ConnectDialog(window.getShell(), CCWPlugin.getDefault().getDialogSettings());
-                
+
                 if (dlg.open() == ConnectDialog.OK) {
                     repl = REPLView.connect(dlg.getURL(), true);
                 }
-                
+
                 return repl;
             } catch (Exception e) {
             	final REPLView maybeREPL = repl;
@@ -62,12 +63,13 @@ public class Actions {
             }
         }
     }
-    
+
     public static void connectToEclipseNREPL() throws ExecutionException {
     	new ConnectToEclipseNREPL().execute(null);
     }
-    
+
     public static class ConnectToEclipseNREPL extends AbstractHandler {
+		@Override
 		public Object execute(ExecutionEvent event) throws ExecutionException {
             try {
                 return REPLView.connect("nrepl://127.0.0.1:" + CCWPlugin.getDefault().getREPLServerPort(), true);
@@ -76,20 +78,24 @@ public class Actions {
             }
 		}
     }
-    
+
     public static class ShowActiveREPL extends AbstractHandler {
-        public static boolean execute (boolean activate) {
-            REPLView active = REPLView.activeREPL.get();
+        public static boolean execute (final boolean activate) {
+            final REPLView active = REPLView.activeREPL.get();
             if (active != null) {
                 for (IWorkbenchWindow window : PlatformUI.getWorkbench().getWorkbenchWindows()) {
-                    for (IWorkbenchPage p : window.getPages()) {
+                    for (final IWorkbenchPage p : window.getPages()) {
                         for (IViewReference ref : p.getViewReferences()) {
                             if (ref.getPart(false) == active) {
-                                if (activate) {
-                                    p.activate(active);
-                                } else {
-                                    p.bringToTop(active);
-                                }
+                            	DisplayUtil.asyncExec(new Runnable() {
+									@Override public void run() {
+		                                if (activate) {
+		                                    p.activate(active);
+		                                } else {
+		                                    p.bringToTop(active);
+		                                }
+									}
+                            	});
                                 return true;
                             }
                         }
@@ -98,19 +104,21 @@ public class Actions {
             }
             return false;
         }
-        
-        public Object execute (ExecutionEvent event) throws ExecutionException {
+
+        @Override
+		public Object execute (ExecutionEvent event) throws ExecutionException {
             if (execute(true)) return null;
-            
+
             MessageDialog.openError(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
                     "No Active REPL",
                     "No REPL is active. Click in an existing REPL to make it the active target, or open a new REPL.");
             return null;
         }
     }
-    
+
     public static class ShowConsoleHandler extends AbstractREPLViewHandler {
-    	public void doExecute(ExecutionEvent event, REPLView repl) throws ExecutionException {
+    	@Override
+		public void doExecute(ExecutionEvent event, REPLView repl) throws ExecutionException {
             ConsolePlugin.getDefault().getConsoleManager().showConsoleView(repl.getConsole());
         }
     	// TODO: see if this ever worked ?
@@ -126,18 +134,20 @@ public class Actions {
         }
     }
 
-    public static class ClearLogHandler extends AbstractREPLViewHandler {        
-    	public void doExecute(ExecutionEvent event, REPLView repl) throws ExecutionException {
+    public static class ClearLogHandler extends AbstractREPLViewHandler {
+    	@Override
+		public void doExecute(ExecutionEvent event, REPLView repl) throws ExecutionException {
             repl.logPanel.setText("");
         }
     }
-    
+
     public static class ReconnectHandler extends AbstractREPLViewHandler {
-    	public void doExecute(ExecutionEvent event, REPLView repl) throws ExecutionException {
+    	@Override
+		public void doExecute(ExecutionEvent event, REPLView repl) throws ExecutionException {
             try {
                 repl.reconnect();
             } catch (Exception e) {
-            	final String MSG = "Unexpected exception occured while trying to reconnect REPL view to clojure server"; 
+            	final String MSG = "Unexpected exception occured while trying to reconnect REPL view to clojure server";
             	ErrorDialog.openError(
             			HandlerUtil.getActiveShell(event),
             			"Reconnection Error",
@@ -146,13 +156,14 @@ public class Actions {
             }
         }
     }
-    
+
     public static class NewSessionHandler extends AbstractREPLViewHandler {
-        public void doExecute(ExecutionEvent event, REPLView repl) throws ExecutionException {
+        @Override
+		public void doExecute(ExecutionEvent event, REPLView repl) throws ExecutionException {
             try {
                 REPLView.connect(repl.getConnection().url, true);
             } catch (Exception e) {
-                final String msg = "Unexpected exception occured while trying to connect REPL view to clojure server"; 
+                final String msg = "Unexpected exception occured while trying to connect REPL view to clojure server";
                 ErrorDialog.openError(
                         HandlerUtil.getActiveShell(event),
                         "Connection Error",
@@ -161,20 +172,23 @@ public class Actions {
             }
         }
     }
-    
+
     public static class PrintErrorHandler extends AbstractREPLViewHandler {
+		@Override
 		public void doExecute(ExecutionEvent event, REPLView repl) throws ExecutionException {
 			repl.printErrorDetail();
 		}
     }
-    
+
     public static class InterruptHandler extends AbstractREPLViewHandler {
-        public void doExecute(ExecutionEvent event, REPLView repl) throws ExecutionException {
+        @Override
+		public void doExecute(ExecutionEvent event, REPLView repl) throws ExecutionException {
             repl.sendInterrupt();
         }
     }
-    
+
     private static abstract class AbstractREPLViewHandler extends AbstractHandler {
+		@Override
 		public final Object execute(ExecutionEvent event) throws ExecutionException {
 			IWorkbenchPart part = HandlerUtil.getActivePart(event);
 			if (! (part instanceof REPLView)) {
@@ -185,5 +199,5 @@ public class Actions {
 		}
 		protected abstract void doExecute(ExecutionEvent event, REPLView part) throws ExecutionException;
     }
-    
+
 }
