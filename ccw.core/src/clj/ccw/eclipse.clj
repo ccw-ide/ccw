@@ -402,13 +402,13 @@
         new-natures     (concat natures missing-natures)]
     (desc-natures! desc new-natures)))
 
-(defn remove-desc-nature! [^IProjectDescription desc nature-id]
+(defn remove-desc-natures! [^IProjectDescription desc & nature-ids]
   (let [natures (.getNatureIds desc)]
-    (when-not (some #{nature-id} natures)
-      (let [new-natures (remove #{nature-id} natures)
-            new-natures (into [] natures)]
-        (desc-natures! desc new-natures)))))
-
+    (println "(some (set natures) nature-ids)" (some (set natures) nature-ids))
+    (if (some (set natures) nature-ids)
+      (let [new-natures (remove (set nature-ids) natures)]
+        (desc-natures! desc new-natures))
+      desc)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Editor helper functions

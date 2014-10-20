@@ -104,7 +104,6 @@
              true ;; force launching via leiningen
              ))))))
 
-
 (defn add-natures
   ([project natures legend]
     (doto (e/workspace-job
@@ -118,6 +117,20 @@
     (e/project-desc! 
       project
       (apply e/add-desc-natures! (e/project-desc project) natures))))
+
+(defn remove-natures
+  ([project natures legend]
+    (doto (e/workspace-job
+               legend
+               (fn [^IProgressMonitor monitor]
+                 (remove-natures project natures legend monitor)))
+      (.setUser true)
+      (.setRule (e/workspace-root))
+      (.schedule)))
+  ([project natures legend ^IProgressMonitor monitor]
+    (e/project-desc!
+      project
+      (apply e/remove-desc-natures! (e/project-desc project) natures))))
   
 (defn add-leiningen-nature
   "Pre-requisites:
@@ -131,6 +144,19 @@
       project
       [(JavaCore/NATURE_ID) n/NATURE-ID]
       (str "Adding leiningen support to project " (.getName project)))))
+
+(defn remove-leiningen-nature
+  "Pre-requisites:
+   - The event's selection has size one, and is an open project
+   - The project does already have the leiningen nature"
+  ([handler event]
+    (when-let [project (e/project event)]
+      (remove-leiningen-nature project)))
+  ([^IProject project]
+    (remove-natures
+      project
+      [n/NATURE-ID]
+      (str "Removing leiningen support from project " (.getName project)))))
 
 (defn add-leiningen-nature-with-monitor
   "Pre-requisites

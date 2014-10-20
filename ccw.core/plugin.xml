@@ -2827,6 +2827,12 @@
    </command>
    <command
          categoryId="ccw.leiningen.category"
+         description="%ccw.leiningen.command.remove-leiningen-nature.description"
+         id="ccw.leiningen.command.remove-leiningen-nature"
+         name="%ccw.leiningen.command.remove-leiningen-nature.name">
+   </command>
+   <command
+         categoryId="ccw.leiningen.category"
          description="%ccw.leiningen.command.reset-project-classpath.description"
          id="ccw.leiningen.command.reset-project-classpath"
          name="%ccw.leiningen.command.reset-project-classpath.name">
@@ -2979,6 +2985,72 @@
                   </iterate>
                </and>
             </not>
+         </and>
+      </enabledWhen>
+   </handler>
+   <handler
+         commandId="ccw.leiningen.command.remove-leiningen-nature">
+      <class
+            class="ccw.util.GenericExecutableExtension">
+         <parameter
+               name="factory"
+               value="ccw.core.factories/handler-factory">
+         </parameter>
+         <parameter
+               name="handler"
+               value="ccw.leiningen.handlers/remove-leiningen-nature">
+         </parameter>
+      </class>
+      <activeWhen>
+         <and>
+            <iterate
+                  operator="and">
+               <adapt
+                     type="org.eclipse.core.resources.IProject">
+               </adapt>
+            </iterate>
+           <and>
+              <count
+                    value="1">
+              </count>
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <adapt
+                       type="org.eclipse.core.resources.IProject">
+                    <test
+                          property="org.eclipse.core.resources.projectNature"
+                          value="ccw.leiningen.nature">
+                    </test>
+                 </adapt>
+              </iterate>
+           </and>
+         </and>
+      </activeWhen>
+      <enabledWhen>
+         <and>
+            <iterate
+                  operator="and">
+               <adapt
+                     type="org.eclipse.core.resources.IProject">
+               </adapt>
+            </iterate>
+           <and>
+              <count
+                    value="1">
+              </count>
+              <iterate
+                    ifEmpty="false"
+                    operator="or">
+                 <adapt
+                       type="org.eclipse.core.resources.IProject">
+                    <test
+                          property="org.eclipse.core.resources.projectNature"
+                          value="ccw.leiningen.nature">
+                    </test>
+                 </adapt>
+              </iterate>
+           </and>
          </and>
       </enabledWhen>
    </handler>
@@ -3181,6 +3253,15 @@
                   checkEnabled="true">
             </visibleWhen>
          </command>
+        <command
+              commandId="ccw.leiningen.command.remove-leiningen-nature"
+              label="%ccw.leiningen.command.remove-leiningen-nature.name"
+              mnemonic="R"
+              style="push">
+           <visibleWhen
+                 checkEnabled="true">
+           </visibleWhen>
+        </command>
       </menu>
    </menuContribution>
    <menuContribution

@@ -22,6 +22,7 @@ Laurent Petit <laurent dot petit at gmail dot com>
 === Enhancements
 - Embedded Leiningen version upgraded from version 2.3.4 to 2.5.0
 - Leiningen Automatic detection now works only if the project does not already have Java Classpath metadata set (technically speaking: if the project does not have the Java Nature).
+- Added command `Remove Leiningen Support` to the `Leiningen` contextual menu. Removes the `Leiningen` Support, but will not touch the project's `Java build path`. Fix Issue #663.
 - REPL View visual hint (<type clojure code here>) is displayed according to the menu:Preferences[Clojure > REPL View > Show hints] Preference. Fixes #662 - Toggle REPL hint (Settings)
 
 
