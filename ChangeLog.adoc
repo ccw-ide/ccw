@@ -13,6 +13,9 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 `0.29.1` released on October xx, 2014
 
+=== Fix
+- The `:repositories` Leinineng key was not currectly respected since the source files addition. Fix Issue #653 - Issue 653: Wrong error reports for dependency resolution, as well as issue reported on mailing by Alexander Taggart.
+
 
 == Changes between Counterclockwise 0.28.1 and 0.29.0
 
