@@ -392,7 +392,15 @@
     (initialize [container-path, java-project]
       (if-let [deps (seq (load-project-dependencies java-project))]
         (set-lein-container java-project deps)
-        (update-project-dependencies java-project)))
+        (let [job (e/workspace-job
+                    (str "Initializing classpath container" container-path)
+                    (fn [monitor]
+                      (update-project-dependencies java-project)))] 
+          (doto job
+            (.setUser false)
+            (.setRule (e/workspace-root))
+            (.schedule))
+          nil)))
     
     (canUpdateClasspathContainer [container-path, java-project]
       false)
