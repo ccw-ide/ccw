@@ -2,9 +2,10 @@ package ccw;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,6 +17,7 @@ import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -243,6 +245,7 @@ public class CCWDropAdapterEarlyStartup implements IStartup {
 
 		@Override
 		public void drop(DropTargetEvent event) {
+			System.out.println("drop " + event.widget.hashCode());
 			if (urlTransfer.isSupportedType(event.currentDataType)) {
 				// TODO url fetching on windows more complex than that => check how Eclise market place does it
 				final String url = getUrlFromEvent(event);
@@ -279,28 +282,28 @@ public class CCWDropAdapterEarlyStartup implements IStartup {
 			}
 			setDropOperation(event);
 			final String[] files = getFilesFromEvent(event);
-			if (isPotentialSolution(files)) {
-				final AtomicBoolean userConfirms = new AtomicBoolean();
-				DisplayUtil.syncExec(new Runnable() {
+			final List<File> candidateProjects = new ArrayList<File>();
+			collectCandidateProjects(files, candidateProjects);
+			if (candidateProjects.size() > 0) {
+				DisplayUtil.asyncExec(new Runnable() {
 					@Override public void run() {
 						String msg;
-						if (files.length == 1) {
-							msg = "Find and create projects from " + files[0] + "?";
+						if (candidateProjects.size() == 1) {
+							msg = "Find and create projects from " + candidateProjects.get(0) + "?";
 						} else {
 							msg = "Find and create projects from ... ?\n";
-							for (String file: files) {
-								msg += "  - " + file + "\n";
+							for (File file: candidateProjects) {
+								msg += "  - " + file.getAbsolutePath() + "\n";
 							}
 						}
 						boolean c = MessageDialog.openConfirm(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
 								"Drag & Drop project creation",
 								msg);
-						userConfirms.set(c);
+						if (c) {
+						    proceedLeiningenProjectsCreation(candidateProjects);
+						}
 					}
 				});
-				if (!userConfirms.get() || !proceedProjectsCreation(files)) {
-					event.detail = DND.DROP_NONE;
-				}
 			} else {
 				event.detail = DND.DROP_NONE;
 			}
@@ -310,10 +313,6 @@ public class CCWDropAdapterEarlyStartup implements IStartup {
 		private String sanitizeForGit(String url) {
 			Matcher m = p.matcher(url);
 			return m.matches() ? m.group(1) : null;
-		}
-
-		private boolean isPotentialSolution(String[] files) {
-			return true;
 		}
 
 		// Taken from Eclipse Market Place code, see class
@@ -347,118 +346,115 @@ public class CCWDropAdapterEarlyStartup implements IStartup {
 			return ret;
 		}
 
-		private boolean proceedProjectsCreation(String[] files) {
-			boolean atLeastOneProjectCreated = false;
+		private void collectCandidateProjects(String[] files, List<File> collect) {
 			for (String f : files) {
 				File file = new File(f);
-				boolean created = proceedProjectCreation(file, file);
-				if (created) {
-					atLeastOneProjectCreated = true;
-				}
+				collectCandidateProjects(file, collect);
 			}
-			return atLeastOneProjectCreated;
 		}
 
-		private boolean proceedProjectCreation(File startFolder, File file) {
+		private void collectCandidateProjects(File folder, List<File> collect) {
 
-			if (!file.exists() || !file.isDirectory()) {
-				CCWPlugin.getTracer().trace(TraceOptions.LOG_INFO,
-						"Cannot create project because '" + file.getAbsolutePath() + "' does not exist or is not a directory");
-				return false;
+			if (!folder.exists() || !folder.isDirectory()) {
+				return;
 			}
 
-			File projectClj = new File(file, "project.clj");
+			File projectClj = new File(folder, "project.clj");
 
-			if (projectClj.exists()) {
-				return proceedLeiningenProjectCreation(startFolder, file);
+			if (!projectClj.exists()) {
+				// try recursively
+				for (File subFolder: getSubFolders(folder)) {
+					collectCandidateProjects(subFolder, collect);
+				}
+			} else {
+				// projectClj found, check it's not already an Eclipse project location
+				IContainer[] containers = ResourcesPlugin.getWorkspace().getRoot().findContainersForLocationURI(folder.toURI());
+				if (containers.length == 0) {
+					collect.add(folder);
+				} else {
+					CCWPlugin.getTracer().trace(TraceOptions.LOG_INFO, "No project will be created for folder '"
+							+ folder.getAbsolutePath() + "': project with same folder exists in workspace");
+				}
 			}
+		}
 
-			// try recursively
-			File[] subFolders = file.listFiles(new FileFilter() {
+		private File[] getSubFolders(File folder) {
+			return folder.listFiles(new FileFilter() {
 				@Override public boolean accept(File c) {
 					return c.isDirectory();
 				}
 			});
-			boolean atLeastOneProjectCreated = false;
-			for (File subFolder: subFolders) {
-				boolean created = proceedProjectCreation(startFolder, subFolder);
-				if (created) {
-					atLeastOneProjectCreated = true;
-				}
-			}
-			return atLeastOneProjectCreated;
-	}
-
-	private boolean proceedLeiningenProjectCreation(final File startFolder, final File folder) {
-
-		// check no project with file location already
-		IContainer[] containers = ResourcesPlugin.getWorkspace().getRoot().findContainersForLocationURI(folder.toURI());
-		if (containers.length > 0) {
-			CCWPlugin.getTracer().trace(TraceOptions.LOG_INFO, "No project will be created for folder '"
-					+ folder.getAbsolutePath() + "': project with same folder exists in workspace");
-			return false;
 		}
-		final String relativeFolder = folder.equals(startFolder) ? startFolder.getName() :  folder.getAbsolutePath().substring(startFolder.getAbsolutePath().length());
-		WorkspaceJob wj = new WorkspaceJob("Creation of Eclipse project for folder " + relativeFolder) {
 
-			@Override
-			public IStatus runInWorkspace(IProgressMonitor monitor)
-					throws CoreException {
-				final String initialProjectName = folder.getName();
-				// find a project name matching the folder name
-				IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-				Set<String> projectNames = new HashSet<String>(projects.length);
-				for (IProject project: projects) {
-					projectNames.add(project.getName());
-				}
-				String maybeProjectName = initialProjectName;
-				int i = 1;
-				while (projectNames.contains(maybeProjectName)) {
-					maybeProjectName = initialProjectName + i;
-					i++;
-				}
-
-				final String projectName = maybeProjectName;
-
-				// Let's create the eclipse project
-				final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-
-				IProjectDescription desc = ResourcesPlugin.getWorkspace().newProjectDescription(projectName);
-				if (folder.getParentFile().getAbsolutePath().equals(ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile().getAbsolutePath())) {
-					// Special case: when the projects resides inside the workspace path,
-					// location must be set to null to assume the "default location"
-					desc.setLocation(null);
-				} else {
-					desc.setLocation(new Path(folder.getAbsolutePath()));
-				}
-				project.create(desc, null);
-				project.open(null);
-
-				// Add project to current WorkingSet
-				IWorkingSetManager workingSetManager = PlatformUI.getWorkbench().getWorkingSetManager();
-				IWorkingSet[] workingSets = workingSetManager.getWorkingSets();
-				if (workingSets != null && workingSets.length > 0) {
-					workingSetManager
-							.addToWorkingSets(
-									project,
-							workingSets);
-				}
-				DisplayUtil.asyncExec(new Runnable(){
-					@Override public void run() {
-						MessageDialog.openInformation(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
-								"Project " + projectName + " created",
-								"The Eclipse project " + projectName + " has been created for filesystem folder " + folder.getAbsolutePath());
-					}});
-				return Status.OK_STATUS;
+		private void proceedLeiningenProjectsCreation(List<File> folders) {
+			for (File folder: folders) {
+				proceedLeiningenProjectCreation(folder);
 			}
-		};
-		wj.setPriority(Job.INTERACTIVE);
-		wj.setUser(true);
-		wj.setRule(ResourcesPlugin.getWorkspace().getRoot());
-		wj.schedule();
-		return true;
+		}
+
+		private void proceedLeiningenProjectCreation(final File folder) {
+
+			WorkspaceJob wj = new WorkspaceJob("Creation of Eclipse project for " + folder.getAbsolutePath()) {
+
+				@Override
+				public IStatus runInWorkspace(IProgressMonitor monitor)
+						throws CoreException {
+					if (monitor == null) monitor = new NullProgressMonitor();
+
+					final String initialProjectName = folder.getName();
+					// find a project name matching the folder name
+					IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+					Set<String> projectNames = new HashSet<String>(projects.length);
+					for (IProject project: projects) {
+						projectNames.add(project.getName());
+					}
+					String maybeProjectName = initialProjectName;
+					int i = 1;
+					while (projectNames.contains(maybeProjectName)) {
+						maybeProjectName = initialProjectName + i;
+						i++;
+					}
+
+					final String projectName = maybeProjectName;
+
+					// Let's create the eclipse project
+					final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+
+					IProjectDescription desc = ResourcesPlugin.getWorkspace().newProjectDescription(projectName);
+					if (folder.getParentFile().getAbsolutePath().equals(ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile().getAbsolutePath())) {
+						// Special case: when the projects resides inside the workspace path,
+						// location must be set to null to assume the "default location"
+						desc.setLocation(null);
+					} else {
+						desc.setLocation(new Path(folder.getAbsolutePath()));
+					}
+					project.create(desc, monitor);
+					project.open(monitor);
+
+					// Add project to current WorkingSet
+					IWorkingSetManager workingSetManager = PlatformUI.getWorkbench().getWorkingSetManager();
+					IWorkingSet[] workingSets = workingSetManager.getWorkingSets();
+					if (workingSets != null && workingSets.length > 0) {
+						workingSetManager
+								.addToWorkingSets(
+										project,
+								workingSets);
+					}
+					DisplayUtil.asyncExec(new Runnable(){
+						@Override public void run() {
+							MessageDialog.openInformation(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+									"Project " + projectName + " created",
+									"The Eclipse project " + projectName + " has been created for filesystem folder " + folder.getAbsolutePath());
+						}});
+					return Status.OK_STATUS;
+				}
+			};
+			wj.setPriority(Job.INTERACTIVE);
+			wj.setUser(true);
+			wj.setRule(ResourcesPlugin.getWorkspace().getRoot());
+			wj.schedule();
+		}
 	}
-}
 
 	private class WorkbenchListener implements IPartListener2, IPageListener,
 			IPerspectiveListener, IWindowListener {
