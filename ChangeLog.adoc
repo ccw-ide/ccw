@@ -17,6 +17,7 @@ Laurent Petit <laurent dot petit at gmail dot com>
 - The `:repositories` Leinineng key was not currectly respected since the source files addition. Fix Issue #653 - Issue 653: Wrong error reports for dependency resolution, as well as issue reported on mailing by Alexander Taggart.
 - Counterclockwise was too chatty when files were dragged from the filesystem (e.g. dragging jar files was triggering the 'do you want to create a leiningen project?' popup).
 - Counterclockwise was triggering many times the 'do you want to create a leiningen project?' popup after a user declined or failed drag.
+- The `letfn` form is indenting correctly the definitions of named functions inside the definition vector. Fix Issue #439
 
 == Changes between Counterclockwise 0.28.1 and 0.29.0
 

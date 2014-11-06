@@ -290,9 +290,14 @@
    rather to a protocol/record inline implementation in defrecord, defprotocol,
    extend-*, etc." 
   [loc]
-  (when-let [pcalled (-?> loc z/up z/up z/node paredit.parser/called)]
-    (#{"defrecord", "extend-protocol", "extend-type", "proxy",
-       "deftype", "reify"} pcalled)))
+  (let [inside-call #(-?> % z/up z/up z/node paredit.parser/called)
+        inside-binding #(-?> % z/up z/up z/up z/node paredit.parser/called)]
+    (or
+      (#{"defrecord", "extend-protocol", "extend-type", "proxy",
+         "deftype", "reify"}
+        (inside-call loc))
+      (#{"letfn"}
+        (inside-binding loc) ))))
 
 (defn indent-column 
   "pre-condition: line-offset is already the starting offset of a line"
