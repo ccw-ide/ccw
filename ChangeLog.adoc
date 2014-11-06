@@ -18,6 +18,7 @@ Laurent Petit <laurent dot petit at gmail dot com>
 - Counterclockwise was too chatty when files were dragged from the filesystem (e.g. dragging jar files was triggering the 'do you want to create a leiningen project?' popup).
 - Counterclockwise was triggering many times the 'do you want to create a leiningen project?' popup after a user declined or failed drag.
 - The `letfn` form is indenting correctly the definitions of named functions inside the definition vector. Fix Issue #439
+- Fix Issue #666 - Some :repository declarations in project.clj cause
 
 == Changes between Counterclockwise 0.28.1 and 0.29.0
 

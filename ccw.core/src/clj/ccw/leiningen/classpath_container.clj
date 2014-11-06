@@ -4,6 +4,7 @@
   (:use [clojure.core.incubator :only [-?> -?>>]])
   (:require [leiningen.core.project :as p]
             [leiningen.core.classpath :as cp]
+            [leiningen.core.user :as lcu]
             [cemerick.pomegranate.aether :as aether]
             [clojure.string :as str]
             [ccw.eclipse :as e]
@@ -119,7 +120,14 @@
 
 (defn get-source-map
   [{:keys [repositories dependencies] :as project} & args]
-  (let [dep (find-transitive-deps dependencies repositories)]
+  (let [;; we must explicitly call leiningen.core.user/resolve-crendentials, or repositories
+        ;; with credentials like  {:username :env/SOME_ENV} are left as keywords
+        ;; and later down the road, pomegranate calls Aether's Authentication ctor which expects
+        ;; Strings, not keys ... resulting in a runtime exception such as:
+        ;; "No matching ctor found for class org.sonatype.aether.repository.Authentication"
+        ;; See Issue #666 - https://code.google.com/p/counterclockwise/issues/detail?id=666
+        repositories (map (fn [[name settings]] [name (lcu/resolve-credentials settings)]) repositories)
+        dep (find-transitive-deps dependencies repositories)]
     (into {} (keep #(artifacts-entry % repositories) dep))))
 
 (defn resolve-dependencies
