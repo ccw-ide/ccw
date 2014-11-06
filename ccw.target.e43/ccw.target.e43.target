@@ -19,7 +19,7 @@
 <repository location="http://download.eclipse.org/releases/kepler/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="false" type="InstallableUnit">
-<unit id="com.github.eclipsecolortheme.feature.feature.group" version="0.14.0.201407150859"/>
+<unit id="com.github.eclipsecolortheme.feature.feature.group" version="1.0.0.201410260308"/>
 <repository location="http://eclipse-color-theme.github.io/update/"/>
 </location>
 </locations>
