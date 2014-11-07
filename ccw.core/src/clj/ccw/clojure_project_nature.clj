@@ -154,8 +154,8 @@
   (io!
 	  (let [classes-folder (-> java-project .getProject (.getFolder "classes"))
           classes-entry (jdt/library-entry {:path classes-folder
-                         :is-exported true
-                         :extra-attributes {jdt/optional "true"}})]
+                                            :is-exported true
+                                            :extra-attributes {jdt/optional "true"}})]
      (jdt/conj-entries! java-project [classes-entry]))))
 
 (defn- setup-clojure-project-classpath!
