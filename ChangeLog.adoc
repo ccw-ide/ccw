@@ -19,6 +19,8 @@ Laurent Petit <laurent dot petit at gmail dot com>
 - Counterclockwise was triggering many times the 'do you want to create a leiningen project?' popup after a user declined or failed drag.
 - The `letfn` form is indenting correctly the definitions of named functions inside the definition vector. Fix Issue #439
 - Fix Issue #666 - Some :repository declarations in project.clj cause
+- Make Leiningen created projects honor the Java Preference `Java > Build Path > Output folder name`.
+
 
 == Changes between Counterclockwise 0.28.1 and 0.29.0
 

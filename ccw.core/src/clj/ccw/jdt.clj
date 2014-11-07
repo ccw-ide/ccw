@@ -7,7 +7,8 @@
                                  IAccessRule]
            [org.eclipse.jdt.launching JavaRuntime]
            [org.eclipse.core.resources IResource]
-           [org.eclipse.core.runtime IPath]))
+           [org.eclipse.core.runtime IPath]
+           [org.eclipse.jdt.ui PreferenceConstants]))
 
 (println "ccw.jdt load starts")
 
@@ -103,5 +104,28 @@
 
 (defn conj-entries! [java-project entries] 
   (update-entries! java-project entries false))
+
+(defn default-output-path
+  "Return what would constitute default output path for java-project, which can
+   be passed to set-default-output-path!"
+  [java-project]
+  (str "/" (e/project-name java-project) "/"
+    (PreferenceConstants/getPreference
+      PreferenceConstants/SRCBIN_BINNAME
+      java-project)))
+
+(defn set-default-output-path!
+  "Takes a java project, a path relative to the workspace root, and an optional progress-monitor.
+     java-project -> an IJavaProject
+     path ->  IPathCoercionable, or (default-output-path java-project) if nil
+     progress-monitor -> an optional progress monitor. Defaults to (ccw.eclipse/null-progress-monitor)"
+  ([java-project path] (set-default-output-path! path (e/null-progress-monitor)))
+  ([java-project path progress-monitor]
+    (.setOutputLocation
+      java-project
+      (if-let [path (e/path path)]
+        path
+        (default-output-path java-project))
+      progress-monitor)))
 
 (println "ccw.jdt namespace loaded")
