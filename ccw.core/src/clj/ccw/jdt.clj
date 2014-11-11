@@ -106,8 +106,8 @@
   (update-entries! java-project entries false))
 
 (defn default-output-path
-  "Return what would constitute default output path for java-project, which can
-   be passed to set-default-output-path!"
+  "Return as a String what would constitute default output path for java-project,
+   which can be passed to set-default-output-path!"
   [java-project]
   (str "/" (e/project-name java-project) "/"
     (PreferenceConstants/getPreference
@@ -125,7 +125,7 @@
       java-project
       (if-let [path (e/path path)]
         path
-        (default-output-path java-project))
+        (e/path (default-output-path java-project)))
       progress-monitor)))
 
 (println "ccw.jdt namespace loaded")
