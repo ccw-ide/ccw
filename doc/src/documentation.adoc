@@ -377,7 +377,7 @@ Once you have started a REPL for your project, and when the menu:Project[Build a
 
 == Create a "fat" executable jar with all dependencies packaged into
 
-There's a community contributed Eclipse Plugin for this task, called `Flat Jar`.
+There's a community contributed Eclipse Plugin for this task, called `Fat Jar`.
 
 Install the Fat Jar plugin 
 
