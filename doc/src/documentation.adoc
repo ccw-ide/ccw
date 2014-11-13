@@ -23,10 +23,10 @@ Goals of Counterclockwise:
 
 Counterclockwise bundles everything for hacking Clojure Code:
 
-- Wizards for creating / importing existing Clojure projects from scratch or from Leiningen project definitions
+- Wizards for creating / importing existing Clojure projects from scratch or from http://leiningen.org[Leiningen] project definitions
 - Clojure Editor with advanced editing features
 - Starting Clojure REPLs, interacting between Clojure Editors and Clojure REPLs 
-- Tight integration with Leiningen
+- Tight integration with http://leiningen.org[Leiningen] (http://leiningen.org[Leiningen] is the most popular build tool used for clojure projects)
 
 
 = Install Counterclockwise
@@ -114,7 +114,7 @@ See the https://github.com/technomancy/leiningen/wiki/HTTP-Proxies[Leiningen HTT
 ** menu:Window[Open Perspective > Java] '''(a perspective is a predefined layout of views, suitable for a particular type of development)'''
 - Create a Clojure project 
 ** Menu menu:File[New > Clojure Project], name it `myproject`
-** The project is created using the `default` Leiningen Template, which creates a Clojure project with a predefined `myproject.core` namespace in `src/myproject/core.clj`
+** The project is created using the `default` http://leiningen.org[Leiningen] Template, which creates a Clojure project with a predefined `myproject.core` namespace in `src/myproject/core.clj`
 - Run the project: 
 ** Click on the editor pane containing the code in `core.clj` and then select `Load file in REPL` from the `Clojure` menu. This sends the whole file's code to the REPL (and also takes care of starting a REPL for the project if none is currently started).
 - Switch to the REPL in the namespace of your file: 
@@ -142,6 +142,7 @@ Use the wizard named `Clojure Project`.
 // TODO image
 ** In the wizard, choose a project name (the project folder will be named after the project name),  and a location for where to create the project folder (if you don't like the default one)
 - "Leiningen template" field:
+** http://leiningen.org[Leiningen] is the de-facto build tool for clojure projects
 ** By default it uses the "default" template
 ** You can change it to use another lein-newnew template released somewhere in a maven repository (generally in clojars) *(`*`)*
 
@@ -167,7 +168,7 @@ If you don't see the menu:File[New > Clojure Project] menu entry:
 
 Drag a folder from your OS filesystem browser (Windows Explorer, Nautilus, Finder, etc.) and drop it over Counterclockwise's Window.
 
-If the folder is a root folder containing many Leiningen projects, as many projects as found on the filesystem will be created in Counterclockwise.
+If the folder is a root folder containing many http://leiningen.org[Leiningen]-based projects, as many projects as found on the filesystem will be created in Counterclockwise.
 
 [NOTE]
 ====
@@ -177,6 +178,8 @@ If the preference is disabled, it is possible to manually trigger leiningen dete
 
 
 = Leiningen Support
+
+http://leiningen.org[Leiningen] is the de-facto standard build tool used for Clojure projects.
 
 Counterclockwise automatically detects Leiningen projects.
 
