@@ -398,11 +398,18 @@ NOTE: There is also an out-of-the-box "create Executable Jar" feature in Eclipse
 
 = User Plugins
 
-WARNING: This feature only works with Counterclockwise Standalone or Counterclockwise installed as a plugin on an Eclipse 4 installation.
+User Plugins allow you to customize Counterclockwise / Eclipse with Clojure!!
 
-It is possible to extend Counterclockwise / Eclipse yourself using the Clojure programming language.
+User Plugins are...
 
-Contributions must be placed in `.clj` files inside your `~/.ccw/` folder.
+- *Safe*: plug / unplug user plugins by adding / deleting repos clones from `~/.ccw/`
+- *Dynamic*: with the help of the `ccw-plugin-manager` user plugin, you can open your user plugins as regular Eclipse projects, use the Eclipse embedded REPL to interact with your current environment *live*, as usual with Clojure!
+- *Powerful*: user plugins are added to Counterclockwise's classpath and can access the same Eclipse services Counterclockwise has access to.
+- *Agile*: updating a user plugin is as simple as 1. git checkout 2. Alt+U S (re[S]tart plugins)
+
+== How User Plugins work
+
+User Plugins must be placed in `.clj` files inside your `~/.ccw/` folder.
 
 Content in `~/.ccw/` folder is processed as such:
 
@@ -419,9 +426,19 @@ Content in `~/.ccw/` folder is processed as such:
 
 The idea behind this layout is that users will share plugins via git repositories, and each plugin can directly be cloned into its own directory inside `~/.ccw/`.
 
+INFO: It is strongly suggested that User Plugins be available as git repositories. It then is natural to follow e.g. github organization for your user plugins inside `~/.ccw/`: create a subfolder per github user/organization and clone respective repositories in respective folders. E.G. clone https://github.com/laurentpetit/ccw-plugin-manager.git inside `~/.ccw/laurentpetit/ccw-plugin-manager/`.
+
 INFO: a User Plugin is dynamic. To remove it, just delete its folder inside `~/.ccw/`.
 
-== Examples
+== User Plugins List
+
+Counterclockwise offers a number of User Plugins available as Github projects. Each one comes with a README file explaining its intent, status, installation and usage.
+
+- `ccw-plugin-manager`: mandatory user plugin if you want to develop your own user plugins (and not just consume existing user plugins). https://github.com/laurentpetit/ccw-plugin-manager.git
+- `ccw-plugin-hello-world`: if you want to learn how to write User Plugins, start studying this one. https://github.com/laurentpetit/ccw-plugin-hello-world.git
+
+
+== HISP - Hello (world) In Small Pieces
 
 === Example 1: Hello World - single script file
 
@@ -486,32 +503,4 @@ This also demonstrates how to split a plugin into script + companion namespaces.
 ----
 
 WARNING: the `hello-world` subdirectory will only be recognized as a plugin if there is no `.clj` file inside `~/.ccw/`
-
-=== Example 3: Dynamic Reload of User Plugins
-
-A somewhat meta example, which shows that User plugins have access to Counterclockwise Internals. +
-This plugin adds a command that calls Counterclockwise's `start-user-plugins` function to dynamically reload user plugins without the necessity to restart the IDE.
-
-.~/.ccw/plugin-additions/reload.clj
-[source,clojure]
-----
-(ns reload
-  (:require [ccw.e4.dsl :refer :all]
-            [ccw.eclipse :as e]
-            [ccw.core.user-plugins :as p]))
- 
-(defn reload [context]
-  (try
-    (p/start-user-plugins)
-    (e/error-dialog "User plugins"
-      "User plugins have been restarted successfully!")
-    (catch Exception e
-      (e/error-dialog"User plugins" (str
-        "An error occured while starting User plugins: \n"
-        (.getMessage e))))))
- 
-(defcommand start-user-plugins "Start/restart user plugins")
-(defhandler start-user-plugins reload)
-(defkeybinding start-user-plugins "Alt+U S")
-----
 
