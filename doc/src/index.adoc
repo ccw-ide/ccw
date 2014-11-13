@@ -6,6 +6,9 @@ Laurent Petit <laurent.petit@gmail.com>
 
 Welcome to Counterclockwise's Documentation Site.
 
+Counterclockwise is best described as an Integrated Development Environment for the http://www.clojure.org[Clojure] language. +
+It is an extension of the popular http://www.eclipse.org[Eclipse IDE].
+
 == Install
 
 
