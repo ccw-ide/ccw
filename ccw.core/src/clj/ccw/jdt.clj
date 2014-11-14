@@ -7,10 +7,16 @@
                                  IAccessRule]
            [org.eclipse.jdt.launching JavaRuntime]
            [org.eclipse.core.resources IResource]
-           [org.eclipse.core.runtime IPath]
-           [org.eclipse.jdt.ui PreferenceConstants]))
+           [org.eclipse.core.runtime IPath]))
 
 (println "ccw.jdt load starts")
+
+;; We do not directly reference org.eclipse.jdt.ui/PreferenceConstants
+;; because depending on when the class is imported, its initialization may occur
+;; too early, which can cause subtle issues such as SWT invalid thread access errors
+;; see https://groups.google.com/d/msg/clojuredev-users/KQwPvSIvFlQ/KHFZi_dKj3EJ
+(def JDT_UI_PLUGIN_ID "org.eclipse.jdt.ui")
+(def JDT_PREFERENCE_CONSTANTS_SRCBIN_BINNAME "org.eclipse.jdt.ui.wizards.srcBinFoldersBinName")
 
 (def optional         (IClasspathAttribute/OPTIONAL))
 (def javadoc-location (IClasspathAttribute/JAVADOC_LOCATION_ATTRIBUTE_NAME))
@@ -110,9 +116,9 @@
    which can be passed to set-default-output-path!"
   [java-project]
   (str "/" (e/project-name java-project) "/"
-    (PreferenceConstants/getPreference
-      PreferenceConstants/SRCBIN_BINNAME
-      java-project)))
+    (e/preference
+      JDT_UI_PLUGIN_ID
+      JDT_PREFERENCE_CONSTANTS_SRCBIN_BINNAME)))
 
 (defn set-default-output-path!
   "Takes a java project, a path relative to the workspace root, and an optional progress-monitor.

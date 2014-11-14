@@ -18,6 +18,8 @@
                                      IAdaptable
                                      IProgressMonitor
                                      Status]
+           [org.eclipse.core.runtime.preferences IEclipsePreferences
+                                                 InstanceScope]
            [org.eclipse.jdt.core IJavaProject]
            [org.eclipse.debug.core ILaunchConfiguration ILaunch]
            [org.eclipse.ui.handlers HandlerUtil]
@@ -501,6 +503,25 @@
       (if-let [s (f monitor)]
         s
         (Status/OK_STATUS)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Preferences management utilities
+
+(defn preferences
+  "Return the preferences for node-name. node-name is generally a bundle name."
+  [node-name]
+  (.getNode InstanceScope/INSTANCE node-name))
+
+(defn preference
+  "Get the value for key, or return the default value.
+   preferences-or-node-name is generally either a bundle name, or the result of
+   calling 'preferences.
+   Example: (preference \"org.eclipse.jdt.ui\" \"org.eclipse.jdt.ui.wizards.srcBinFoldersBinName\")"
+  [preferences-or-node-name key default-value]
+  (.get (if (instance? String preferences-or-node-name)
+          (preferences preferences-or-node-name)
+          preferences-or-node-name)
+    key default-value))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Event Handler utilities

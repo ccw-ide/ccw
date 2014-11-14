@@ -13,6 +13,9 @@ Laurent Petit <laurent dot petit at gmail dot com>
 `0.29.2` released on November XX, 2014
 
 === Fix
+There were java.lang.ExceptionInInitializerError caused by: org.eclipse.swt.SWTException: Invalid thread access errors at Eclipse startup, caused by (import) calls in Clojure loading JDT classes static initializers too early.
+
+This has been fixed by changing the way Preferences are fetched from the JDT.
 
 
 == Changes between Counterclockwise 0.29.0 and 0.29.1
