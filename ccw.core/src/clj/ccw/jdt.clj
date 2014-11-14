@@ -31,10 +31,11 @@
 
 (defn preference
   "Get the value for the JDT preference Key expressed as a clojure keyword or directly as String value"
-  [key]
+  [key default-value]
   (e/preference
     JDT_UI_PLUGIN_ID
-    (get preference-constants key key)))
+    (get preference-constants key key)
+    default-value))
 
 (defn native-library-path
   "Take a path, absolute or relative, and transform it into a suitable path
@@ -129,7 +130,7 @@
   "Return as a String what would constitute default output path for java-project,
    which can be passed to set-default-output-path!"
   [java-project]
-  (str "/" (e/project-name java-project) "/" (preference ::srcbin-name)))
+  (str "/" (e/project-name java-project) "/" (preference ::srcbin-name "bin")))
 
 (defn set-default-output-path!
   "Takes a java project, a path relative to the workspace root, and an optional progress-monitor.
