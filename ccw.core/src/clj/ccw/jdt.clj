@@ -16,11 +16,25 @@
 ;; too early, which can cause subtle issues such as SWT invalid thread access errors
 ;; see https://groups.google.com/d/msg/clojuredev-users/KQwPvSIvFlQ/KHFZi_dKj3EJ
 (def JDT_UI_PLUGIN_ID "org.eclipse.jdt.ui")
-(def JDT_PREFERENCE_CONSTANTS_SRCBIN_BINNAME "org.eclipse.jdt.ui.wizards.srcBinFoldersBinName")
+
+(def preference-constants
+  "Map of clojure keyword to org.eclipse.jdt.ui.PreferenceConstants constants" {
+  ::srcbin-name                    "org.eclipse.jdt.ui.wizards.srcBinFoldersBinName" ; JDT_PREFERENCE_CONSTANTS_SRCBIN_BINNAME
+  ::editor-matching-brackets       "matchingBrackets"                                ; EDITOR_MATCHING_BRACKETS
+  ::editor-matching-brackets-color "matchingBracketsColor"                           ; EDITOR_MATCHING_BRACKETS_COLOR
+ })
 
 (def optional         (IClasspathAttribute/OPTIONAL))
 (def javadoc-location (IClasspathAttribute/JAVADOC_LOCATION_ATTRIBUTE_NAME))
 (def native-library   (JavaRuntime/CLASSPATH_ATTR_LIBRARY_PATH_ENTRY))
+
+
+(defn preference
+  "Get the value for the JDT preference Key expressed as a clojure keyword or directly as String value"
+  [key]
+  (e/preference
+    JDT_UI_PLUGIN_ID
+    (get preference-constants key key)))
 
 (defn native-library-path
   "Take a path, absolute or relative, and transform it into a suitable path
@@ -115,10 +129,7 @@
   "Return as a String what would constitute default output path for java-project,
    which can be passed to set-default-output-path!"
   [java-project]
-  (str "/" (e/project-name java-project) "/"
-    (e/preference
-      JDT_UI_PLUGIN_ID
-      JDT_PREFERENCE_CONSTANTS_SRCBIN_BINNAME)))
+  (str "/" (e/project-name java-project) "/" (preference ::srcbin-name)))
 
 (defn set-default-output-path!
   "Takes a java project, a path relative to the workspace root, and an optional progress-monitor.

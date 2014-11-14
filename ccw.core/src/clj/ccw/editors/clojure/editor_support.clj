@@ -24,9 +24,9 @@
   ccw.editors.clojure.editor-support 
   (:require [paredit.parser :as p]
             [paredit.loc-utils :as lu]
-            [paredit.static-analysis :as static-analysis])
-  (:import [org.eclipse.jdt.ui PreferenceConstants]
-           [ccw.editors.clojure IClojureEditor]
+            [paredit.static-analysis :as static-analysis]
+            [ccw.jdt :as jdt])
+  (:import [ccw.editors.clojure IClojureEditor]
            [org.eclipse.ui.texteditor SourceViewerDecorationSupport]))
 
 #_(set! *warn-on-reflection* true)
@@ -111,7 +111,7 @@
 (defn configureSourceViewerDecorationSupport [^SourceViewerDecorationSupport support ^IClojureEditor viewer]
 		;; TODO more to pick in configureSourceViewerDecorationSupport of AbstractDecoratedTextEditor, if you want ...
   (doto support
-		(.setCharacterPairMatcher (.getPairsMatcher viewer))
-		(.setMatchingCharacterPainterPreferenceKeys 
-      PreferenceConstants/EDITOR_MATCHING_BRACKETS 
-      PreferenceConstants/EDITOR_MATCHING_BRACKETS_COLOR)))
+    (.setCharacterPairMatcher (.getPairsMatcher viewer))
+    (.setMatchingCharacterPainterPreferenceKeys
+      (jdt/preference-constants ::jdt/editor-matching-brackets)
+      (jdt/preference-constants ::jdt/editor-matching-brackets-color))))
