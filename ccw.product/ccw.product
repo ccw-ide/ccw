@@ -256,7 +256,7 @@ litigation.
    <plugins/>
 
    <features>
-      <feature id="ccw.feature"/><!-- installMode="root"/>-->
+      <feature id="ccw.feature" installMode="root"/>
       <feature id="org.eclipse.e4.rcp"/>
       <feature id="org.eclipse.platform"/>
       <feature id="org.eclipse.jdt"/>
