@@ -11,16 +11,18 @@
 <unit id="org.eclipse.epp.mpc.feature.group" version="1.2.1.I20130917-2019"/>
 <unit id="org.eclipse.pde.feature.group" version="3.9.1.v20130911-1000"/>
 <unit id="org.eclipse.egit.feature.group" version="3.0.3.201309161630-r"/>
-<unit id="org.eclipse.wst.web_ui.feature.feature.group" version="3.5.1.v201307171524-7O7QG2NEMkBS3C2az0gQwwALctEj3DZPgTEZceV4"/>
+<!--unit id="org.eclipse.wst.web_ui.feature.feature.group" version="3.5.1.v201307171524-7O7QG2NEMkBS3C2az0gQwwALctEj3DZPgTEZceV4"/-->
 <unit id="org.eclipse.recommenders.feature.rcp.feature.group" version="1.0.5.v20130822-0858-b90"/>
 <unit id="org.eclipse.jgit.feature.group" version="3.0.3.201309161630-r"/>
 <unit id="org.eclipse.jdt.feature.group" version="3.9.1.v20130911-1000"/>
 <unit id="org.eclipse.m2e.feature.feature.group" version="1.4.0.20130601-0317"/>
 <repository location="http://download.eclipse.org/releases/kepler/"/>
 </location>
+<!--
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="false" type="InstallableUnit">
 <unit id="com.github.eclipsecolortheme.feature.feature.group" version="1.0.0.201410260308"/>
 <repository location="http://eclipse-color-theme.github.io/update/"/>
 </location>
+-->
 </locations>
 </target>
