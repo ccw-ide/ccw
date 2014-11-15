@@ -22,6 +22,12 @@
       <update label="Counterclockwise Update Site" url="http://updatesite.ccw-ide.org/stable/"/>
    </url>
 
+   <!--
+   <requires>
+      <import plugin="org.eclipse.equinox.app"/>
+   </requires>
+   -->
+
    <requires>
       <import plugin="org.eclipse.help"/>
       <import plugin="org.eclipse.ui"/>
@@ -75,5 +81,21 @@
          install-size="0"
          version="0.0.0"
          fragment="true"/>
+
+<!--
+   <plugin
+         id="org.eclipse.ui.themes"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ui.themes.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+-->
 
 </feature>

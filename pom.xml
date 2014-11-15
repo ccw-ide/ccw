@@ -1,133 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-                      http://maven.apache.org/xsd/maven-4.0.0.xsd"
-  xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <modelVersion>4.0.0</modelVersion>
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+        xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <modelVersion>4.0.0</modelVersion>
 
-  <groupId>ccw</groupId>
-  <artifactId>parent</artifactId>
-  <version>0.29.2-SNAPSHOT</version>
-  <packaging>pom</packaging>
+        <groupId>ccw</groupId>
+        <artifactId>ccw.main</artifactId>
+        <version>0.29.2-SNAPSHOT</version>
+        <packaging>pom</packaging>
 
-  <properties>
-    <tycho-version>0.21.0</tycho-version>
-  </properties>
-  
-  <modules>
-    <module>ccw.target.e43</module>
-    <module>ccw.branding</module>
-    <module>paredit.clj</module>
-    <module>ccw.core</module>
-    <module>ccw.core.e4</module>
-<!--
-    <module>ccw.core.test</module>
--->
-    <module>ccw.feature</module>
-    <module>ccw.product</module>
-    <module>doc</module>
-  </modules>
+        <modules>
+                <module>ccw.aggregator</module>
+        </modules>
 
-  <profiles>
-    <profile>
-      <id>default-target</id>
-      <activation>
-        <property>
-          <name>!env.ECLIPSE_TARGET</name>
-        </property>
-      </activation>
-      <properties>
-        <target-platform>e43</target-platform>
-      </properties>
-    </profile>
-    <profile>
-      <id>kepler</id>
-      <activation>
-        <property>
-          <name>env.ECLIPSE_TARGET</name>
-          <value>kepler</value>
-        </property>
-      </activation>
-      <properties>
-        <target-platform>e43</target-platform>
-      </properties>
-    </profile>
-  </profiles>
-  
-  <repositories>
-    <repository>
-      <id>clojars.org</id>
-      <url>http://clojars.org/repo</url>
-    </repository>
-  </repositories>
-
-  <pluginRepositories>
-    <pluginRepository>
-      <id>tycho-snapshots</id>
-      <url>https://oss.sonatype.org/content/groups/public/</url>
-    </pluginRepository>
-    <pluginRepository>
-      <id>tycho-staged</id>
-      <url>https://oss.sonatype.org/content/repositories/orgeclipsetycho-1007/</url>
-    </pluginRepository>
-  </pluginRepositories> 
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.eclipse.tycho</groupId>
-        <artifactId>tycho-versions-plugin</artifactId>
-        <version>${tycho-version}</version>
-      </plugin>
-      <plugin>
-        <!-- enable tycho build extension -->
-        <groupId>org.eclipse.tycho</groupId>
-        <artifactId>tycho-maven-plugin</artifactId>
-        <version>${tycho-version}</version>
-        <extensions>true</extensions>
-      </plugin>
-      <plugin>
-        <groupId>org.eclipse.tycho</groupId>
-        <artifactId>target-platform-configuration</artifactId>
-        <version>${tycho-version}</version>
-        <configuration>
-          <resolver>p2</resolver>
-          <environments>
-            <environment>
-              <os>win32</os>
-              <ws>win32</ws>
-              <arch>x86</arch>
-            </environment>
-            <environment>
-              <os>win32</os>
-              <ws>win32</ws>
-              <arch>x86_64</arch>
-            </environment>
-            <environment>
-              <os>linux</os>
-              <ws>gtk</ws>
-              <arch>x86</arch>
-            </environment>
-            <environment>
-              <os>linux</os>
-              <ws>gtk</ws>
-              <arch>x86_64</arch>
-            </environment>
-            <environment>
-              <os>macosx</os>
-              <ws>cocoa</ws>
-              <arch>x86_64</arch>
-            </environment>
-          </environments>
-          <target>
-            <artifact>
-              <groupId>${project.groupId}</groupId>
-              <artifactId>${project.groupId}.target.${target-platform}</artifactId>
-              <version>${project.version}</version>
-            </artifact>
-          </target>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 </project>

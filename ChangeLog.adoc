@@ -8,14 +8,18 @@ Laurent Petit <laurent dot petit at gmail dot com>
 :toc-title!:
 :toclevels: 0
 
-== Changes between Counterclockwise 0.29.1 and 0.29.2
+== Changes between Counterclockwise 0.29.1 and 0.30.0
 
-`0.29.2` released on November 14, 2014
+`0.30.0` released on November 16, 2014
+
+This release fixes bug in the 0.29.1 release.
+
+It has not been labelled 0.29.2 because one fix involved a new way of building the CCW/Standalone Product.
 
 === Fix
-There were java.lang.ExceptionInInitializerError caused by: org.eclipse.swt.SWTException: Invalid thread access errors at Eclipse startup, caused by (import) calls in Clojure loading JDT classes static initializers too early.
-
-This has been fixed by changing the way Preferences are fetched from the JDT.
+- There were `java.lang.ExceptionInInitializerError` caused by: org.eclipse.swt.SWTException: Invalid thread access errors at Eclipse startup, caused by (import) calls in Clojure loading JDT classes static initializers too early.
+    This has been fixed by changing the way Preferences are fetched from the JDT.
+- The CCW/Standalone Product is built differently than before. Hopefully for the better. I've followed the way e.g. the voclipse IDE by Vogella is built.
 
 
 == Changes between Counterclockwise 0.29.0 and 0.29.1
