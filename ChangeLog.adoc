@@ -23,6 +23,7 @@ It has not been labelled 0.29.2 because one fix involved a new way of building t
 === CCW/Standalone Product
 - The CCW/Standalone Product is built differently than before. Hopefully for the better. I've followed the way e.g. the voclipse IDE by Vogella is built.
 - Fixed some lifecycle exceptions when Eclipse is closed. Not really problematic, but was filling the logs.
+- Added CCW / Luna Release / Luna Updates / Eclipse Color Themes repositories to Software Update Sites list
 
 
 == Changes between Counterclockwise 0.29.0 and 0.29.1
