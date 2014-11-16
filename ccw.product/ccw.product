@@ -311,6 +311,7 @@ litigation.
       <property name="eclipse.buildId" value="${unqualifiedVersion}.${buildQualifier}" />
       <property name="org.eclipse.update.reconcile" value="false" />
       <property name="osgi.bundles.defaultStartLevel" value="4" />
+      <property name="osgi.instance.area.default" value="@user.home/.ccw-workspace" os="win32" />
    </configurations>
 
    <repositories>
