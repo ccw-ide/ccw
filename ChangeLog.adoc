@@ -17,9 +17,12 @@ This release fixes bug in the 0.29.1 release.
 It has not been labelled 0.29.2 because one fix involved a new way of building the CCW/Standalone Product.
 
 === Fix
+
 - There were `java.lang.ExceptionInInitializerError` caused by: org.eclipse.swt.SWTException: Invalid thread access errors at Eclipse startup, caused by (import) calls in Clojure loading JDT classes static initializers too early.
     This has been fixed by changing the way Preferences are fetched from the JDT.
+=== CCW/Standalone Product
 - The CCW/Standalone Product is built differently than before. Hopefully for the better. I've followed the way e.g. the voclipse IDE by Vogella is built.
+- Fixed some lifecycle exceptions when Eclipse is closed. Not really problematic, but was filling the logs.
 
 
 == Changes between Counterclockwise 0.29.0 and 0.29.1
