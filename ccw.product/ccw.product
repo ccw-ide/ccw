@@ -257,15 +257,17 @@ litigation.
 
    <features>
       <feature id="ccw.feature" installMode="root"/>
+
       <feature id="org.eclipse.e4.rcp"/>
       <feature id="org.eclipse.platform"/>
       <feature id="org.eclipse.jdt"/>
-      <feature id="org.eclipse.pde"/>
+      <!--feature id="org.eclipse.pde"/-->
       <feature id="org.eclipse.jgit"/>
       <feature id="org.eclipse.egit"/>
       <feature id="org.eclipse.help"/>
-      <feature id="org.eclipse.wst.xml_ui.feature"/>
+
       <!--
+      <feature id="org.eclipse.wst.xml_ui.feature"/>
       <feature id="org.eclipse.swtbot"/>
       <feature id="org.eclipse.swtbot.eclipse.gef"/>
       <feature id="org.eclipse.swtbot.eclipse"/>
@@ -273,20 +275,27 @@ litigation.
       <feature id="org.eclipse.swtbot.ide"/>
       <feature id="org.eclipse.swtbot.generator.feature"/>
       -->
+
+      <!--
       <feature id="org.eclipse.emf.sdk"/>
+      -->
+
+      <!--
       <feature id="org.eclipse.mylyn.context_feature"/>
       <feature id="org.eclipse.mylyn.java_feature"/>
       <feature id="org.eclipse.mylyn.pde_feature"/>
       <feature id="org.eclipse.mylyn.bugzilla_feature"/>
       <feature id="org.eclipse.mylyn.github.feature"/>
       <feature id="org.eclipse.mylyn.git"/>
+      -->
+
+      <!--
       <feature id="com.tetrade.eclipse.plugins.easyshell.feature"/>
       <feature id="org.eclipse.e4.core.tools.feature"/>
       <feature id="org.eclipse.e4.tools.css.spy.feature"/>
       <feature id="org.eclipse.e4.tools.event.spy.feature"/>
       <feature id="org.eclipse.pde.api.tools.ee.feature"/>
       <feature id="org.eclipse.wb.rcp.feature"/>
-      <!--
       <feature id="org.eclipse.e4.rcp.source"/>
       <feature id="org.eclipse.egit.source"/>
       <feature id="org.eclipse.emf.source"/>
@@ -295,8 +304,10 @@ litigation.
       <feature id="org.eclipse.platform.source"/>
       <feature id="org.eclipse.rcp.source"/>
       -->
+
       <feature id="org.eclipse.epp.mpc"/>
-      <feature id="com.github.eclipsecolortheme.feature"/>
+
+      <feature id="com.github.eclipsecolortheme.feature" installMode="root"/>
 
    </features>
 
@@ -317,8 +328,12 @@ litigation.
    <repositories>
       <repository location="http://updatesite.ccw-ide.org/stable/" enabled="true" />
       <repository location="http://eclipse-color-theme.github.io/update/" enabled="true" />
+      <repository location="http://download.eclipse.org/eclipse/updates/4.5milestones/" enabled="true" />
+      <repository location="http://download.eclipse.org/egit/updates/" enabled="true" />
+      <!--
       <repository location="http://download.eclipse.org/releases/luna/" enabled="true" />
       <repository location="http://download.eclipse.org/eclipse/updates/4.4/" enabled="true" />
+      -->
    </repositories>
 
 </product>

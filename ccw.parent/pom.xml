@@ -25,19 +25,39 @@
                         <id>clojars.org</id>
                         <url>http://clojars.org/repo</url>
                 </repository>
-                <repository>
+                <!--repository>
                         <id>swtbot</id>
                         <url>http://download.eclipse.org/technology/swtbot/releases/latest/</url>
                         <layout>p2</layout>
-                </repository>
+                </repository-->
                 <repository>
                         <id>eclipse-color-theme</id>
                         <url>http://eclipse-color-theme.github.io/update/</url>
                         <layout>p2</layout>
                 </repository>
-                <repository>
+                <!--repository>
                         <id>luna</id>
                         <url>http://download.eclipse.org/releases/luna/</url>
+                        <layout>p2</layout>
+                </repository-->
+                <repository>
+                        <id>mars-M3</id>
+                        <url>http://download.eclipse.org/eclipse/updates/4.5milestones/S-4.5M3-201410292000/</url>
+                        <layout>p2</layout>
+                </repository>
+                <!--repository>
+                        <id>emf-releases</id>
+                        <url>http://download.eclipse.org/modeling/emf/updates/releases/</url>
+                        <layout>p2</layout>
+                </repository-->
+                <repository>
+                        <id>emp-eclipse-market-place</id>
+                        <url>http://download.eclipse.org/mpc/luna/</url>
+                        <layout>p2</layout>
+                </repository>
+                <repository>
+                        <id>egit</id>
+                        <url>http://download.eclipse.org/egit/updates/</url>
                         <layout>p2</layout>
                 </repository>
                 <repository>
@@ -45,16 +65,16 @@
                         <url>http://download.eclipse.org/tools/orbit/downloads/drops/R20130827064939/repository</url>
                         <layout>p2</layout>
                 </repository>
-                <repository>
+                <!--repository>
                         <id>pluginbox</id>
                         <url>http://pluginbox.sourceforge.net</url>
                         <layout>p2</layout>
-                </repository>
-                <repository>
+                </repository-->
+                <!--repository>
                         <id>org.eclipse.e4.core.tools</id>
                         <url>http://download.vogella.com/p2/C-MASTER-e4tools-master/lastSuccessful/archive/build/org.eclipse.e4.core.tools.update/target/repository/</url>
                         <layout>p2</layout>
-                </repository>
+                </repository-->
 
         </repositories>
 
