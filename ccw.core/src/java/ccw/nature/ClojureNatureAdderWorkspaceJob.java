@@ -1,6 +1,6 @@
 package ccw.nature;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
@@ -25,7 +25,15 @@ final class ClojureNatureAdderWorkspaceJob extends
 		super("Checking/Adding Clojure Nature for projects " + projects);
 
 		assert projects.length != 0;
-		this.projects = Arrays.asList(projects);
+
+		// Check the projects before the job is started, to try preventing race conditions
+		// when the workspace is locked and the maven / jdt bundles try to load ... ?
+		this.projects = new ArrayList<IProject>(projects.length);
+		for (IProject p: projects) {
+			if (isCandidateClojureProject(p)) {
+				this.projects.add(p);
+			}
+		}
 	}
 
 	@Override
@@ -47,7 +55,7 @@ final class ClojureNatureAdderWorkspaceJob extends
 		return Status.OK_STATUS;
 	}
 
-	private boolean isCandidateClojureProject(IProject project) {
+	public static boolean isCandidateClojureProject(IProject project) {
 		try {
 			boolean maybeCandidate = project.exists()
 					&&
@@ -71,5 +79,6 @@ final class ClojureNatureAdderWorkspaceJob extends
 			return false;
 		}
 	}
+
 
 }

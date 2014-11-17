@@ -20,6 +20,8 @@ It has not been labelled 0.29.2 because one fix involved a new way of building t
 
 - There were `java.lang.ExceptionInInitializerError` caused by: org.eclipse.swt.SWTException: Invalid thread access errors at Eclipse startup, caused by (import) calls in Clojure loading JDT classes static initializers too early.
     This has been fixed by changing the way Preferences are fetched from the JDT.
+- Race conditions between the Automatic Clojure Nature adder and m2e initializing its classpath containers.
+
 === CCW/Standalone Product
 - The CCW/Standalone Product is built differently than before. Hopefully for the better. I've followed the way e.g. the voclipse IDE by Vogella is built.
 - Fixed some lifecycle exceptions when Eclipse is closed. Not really problematic, but was filling the logs.
