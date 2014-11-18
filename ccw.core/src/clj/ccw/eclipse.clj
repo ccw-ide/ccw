@@ -512,16 +512,31 @@
   [node-name]
   (.getNode InstanceScope/INSTANCE node-name))
 
+(defn- as-preferences
+  "Return a preferences given either an argument of type either String or preferences"
+  [preferences-or-node-name]
+  (if (instance? String preferences-or-node-name)
+    (preferences preferences-or-node-name)
+    preferences-or-node-name))
+
 (defn preference
   "Get the value for key, or return the default value.
    preferences-or-node-name is generally either a bundle name, or the result of
    calling 'preferences.
+   The 2-arity version is a shortcut for selecting the ccw.core bundle as the node-name
    Example: (preference \"org.eclipse.jdt.ui\" \"org.eclipse.jdt.ui.wizards.srcBinFoldersBinName\")"
-  [preferences-or-node-name key default-value]
-  (.get (if (instance? String preferences-or-node-name)
-          (preferences preferences-or-node-name)
-          preferences-or-node-name)
-    key default-value))
+  ([key default-value] (preference "ccw.core" key default-value))
+  ([preferences-or-node-name key default-value]
+   (.get (as-preferences preferences-or-node-name) key default-value)))
+
+(defn preference!
+  "Set the value for key.
+   preferences-or-node-name is generally either a bundlename, or the result of
+   calling 'preferences.
+   The 2-arity version is a shortcut for selecting the ccw.core bundle as the node-name.
+   Example:"
+  ([key value] (preference! "ccw.core" key value))
+  ([preferences-or-node-name key value] (.put (as-preferences preferences-or-node-name) key value)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Event Handler utilities
