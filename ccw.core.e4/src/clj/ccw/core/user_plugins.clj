@@ -17,6 +17,7 @@
         ;_ (println "to-remove:" to-remove)
         app-cmds (application-type-elements app)]
     (doseq [c to-remove]
+      (println "user-plugins gc, element to remove:" c)
       (.remove app-cmds c))))
 
 (defn clean-commands!
@@ -40,16 +41,16 @@
   "Find all key-bindings with tag 'ccw', and remove all those that
    dont have 'ccw/load-key' transient key with value load-key."
   [app load-key]
-  (doseq [binding-table (m/binding-tables app)
-          :let [key-bindings (m/bindings binding-table)]]
-    (let [to-remove (doall (for [key-binding key-bindings
-                                 :let [tags (m/tags key-binding)]]
-                             (when (and 
-                                     (.contains tags "ccw")
-                                     (not= (get tags "ccw/load-key") load-key))
-                               key-binding)))]
-      (doseq [key-binding to-remove]
-        (.remove key-bindings key-binding)))))
+  (let [to-remove (for [binding-table (m/binding-tables app)
+                        :let [key-bindings (m/bindings binding-table)]
+                        key-binding key-bindings
+                        :when (and
+                                (.contains (m/tags key-binding) "ccw")
+                                (not= load-key (get (m/transient-data key-binding) "ccw/load-key")))]
+                    [key-binding key-bindings])]
+    (doseq [[kb kbs] to-remove]
+      (println "user-plugins gc, key-binding to remove: " kb)
+      (.remove kbs kb))))
 
 (defn clean-elements!
  "Find all elements with tag 'ccw', and remove all those that don't
@@ -60,11 +61,11 @@
               app
               nil ; don't find by id
               nil ; don't find a specific subclass of MUIElement
-              ["ccw"])]
-   (doseq [e elts
-           :let [tags (m/tags e)]]
-     (when-not (= (get tags "ccw/load-key") load-key)
-       (-> e .getParent .getChildren (.remove e))))))
+              ["ccw"])
+       to-remove (remove #(not= load-key (get (m/transient-data %) "ccw/load-key")) elts)]
+   (doseq [e to-remove]
+     (println "user-plugins gc, element to remove:" e)
+     (-> e .getParent .getChildren (.remove e)))))
 
 (defn clean-model!
   "Find all elements with tag 'ccw', and remove all those that

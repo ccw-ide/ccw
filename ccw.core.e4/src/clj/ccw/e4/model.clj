@@ -727,8 +727,10 @@
   "Find transient data in (:transient-data spec) and add to the transient
    data of e"
   [e spec]
+  ;(println "update-transient-data!" (type e) e spec)
   (let [td (transient-data e)]
     (doseq [[k v] (:transient-data spec)]
+      ;(println "transient data:" "k:" k "v:" v)
       (.put td k v))))
 
 (def default-cmd-spec
@@ -808,16 +810,20 @@
   [app context]
   (if-let [bt (find-binding-table app context)]
     bt
-    (let [bt (create-binding-table)]
-      (doto bt
-        (binding-context context))
-      (.add (binding-tables app) 0 bt))))
+    (do 
+      (println "find-or-create-binding-table bt not found")
+      (let [bt (create-binding-table)]
+       (doto bt
+         (binding-context context))
+       (.add (binding-tables app) 0 bt)
+       bt))))
 
 (defn add-key-binding!
   "Add the key binding to the Application Model. Return the application"
   [app context kb]
   (let [bt (find-or-create-binding-table app context)]
-    (.add (bindings bt) 0 kb)))
+    (.add (bindings bt) 0 kb)
+    app))
   
 ;; how/where to use :scheme ?
 (defn merge-key-binding!
@@ -832,8 +838,15 @@
         spec (if (keyword? (:scheme spec))
                (assoc spec :scheme (key-binding-scheme (:scheme spec)))
                spec)]
+    (println "merge-key-binding! spec" spec)
     (if-let [kb (find-key-binding app spec)]
-      kb
-      (let [kb (-> (create-key-binding) (update-key-binding! spec))]
-        (add-key-binding! app (:context spec) kb)
-        kb))))
+      (do 
+        (println "key binding found:" kb)
+        kb)
+      (do
+        (println "key binding not found, let's create one")
+        (let [kb (-> (create-key-binding) (update-key-binding! spec))]
+          (println "created key binding:" kb)
+          (add-key-binding! app (:context spec) kb)
+          (println "added key binding:" kb)
+          kb)))))

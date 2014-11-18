@@ -92,8 +92,7 @@
   `(let [spec# (-> (merge {:command ~command
                            :scheme  :default
                            :key-sequence ~key-sequence
-                           :context "org.eclipse.ui.contexts.window"
-                           :transient-data {"ccw/load-key" *load-key*}}
+                           :context "org.eclipse.ui.contexts.window"}
                           ~opts)
                  (update-in [:transient-data]
                               assoc
