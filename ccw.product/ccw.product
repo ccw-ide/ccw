@@ -257,14 +257,17 @@ litigation.
 
    <features>
       <feature id="ccw.feature" installMode="root"/>
+      <feature id="com.github.eclipsecolortheme.feature" installMode="root"/>
+
+      <!--feature id="org.eclipse.pde"/-->
 
       <feature id="org.eclipse.e4.rcp"/>
       <feature id="org.eclipse.platform"/>
       <feature id="org.eclipse.jdt"/>
-      <!--feature id="org.eclipse.pde"/-->
       <feature id="org.eclipse.jgit"/>
       <feature id="org.eclipse.egit"/>
       <feature id="org.eclipse.help"/>
+      <feature id="org.eclipse.epp.mpc"/>
 
       <!--
       <feature id="org.eclipse.wst.xml_ui.feature"/>
@@ -305,9 +308,6 @@ litigation.
       <feature id="org.eclipse.rcp.source"/>
       -->
 
-      <feature id="org.eclipse.epp.mpc"/>
-
-      <feature id="com.github.eclipsecolortheme.feature" installMode="root"/>
 
    </features>
 
@@ -322,7 +322,7 @@ litigation.
       <property name="eclipse.buildId" value="${unqualifiedVersion}.${buildQualifier}" />
       <property name="org.eclipse.update.reconcile" value="false" />
       <property name="osgi.bundles.defaultStartLevel" value="4" />
-      <property name="osgi.instance.area.default" value="@user.home/.ccw-workspace" os="win32" />
+      <property name="osgi.instance.area.default" value="@user.home/.ccw-workspace" />
    </configurations>
 
    <repositories>
