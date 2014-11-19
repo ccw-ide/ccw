@@ -12,6 +12,7 @@ package ccw.preferences;
 
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
+import org.eclipse.jface.preference.FileFieldEditor;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
@@ -57,6 +58,12 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements
                 	ccw.preferences.PreferenceConstants.CCW_GENERAL_USE_LEININGEN_LAUNCHER,
                     Messages.ClojureGeneralPreferencePage_use_leiningen_launcher,
                     getFieldEditorParent()));
+
+        addField(
+        		new FileFieldEditor(
+        	        "ccw.leiningen.standalone-path.pref",
+        	        "Leiningen jar (empty = use embedded):",
+        	        getFieldEditorParent()));
 
     }
 

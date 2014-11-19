@@ -28,6 +28,8 @@ It has not been labelled 0.29.2 because one fix involved a new way of building t
 - Added CCW / Luna Release / Luna Updates / Eclipse Color Themes repositories to Software Update Sites list
 - Changed the default proposal for the workspace: instead of locating it inside the Eclipse folder, suggest `$user.home/.ccw-workspace`
 
+=== Leiningen
+- New preference menu:Preferences[Clojure > General > Leiningen jar] for selecting a leiningen jar to use instead of the one embedded with Counterclockwise.
 
 == Changes between Counterclockwise 0.29.0 and 0.29.1
 
