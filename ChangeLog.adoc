@@ -26,7 +26,7 @@ It has not been labelled 0.29.2 because one fix involved a new way of building t
 - The CCW/Standalone Product is built differently than before. Hopefully for the better. I've followed the way e.g. the voclipse IDE by Vogella is built.
 - Fixed some lifecycle exceptions when Eclipse is closed. Not really problematic, but was filling the logs.
 - Added CCW / Luna Release / Luna Updates / Eclipse Color Themes repositories to Software Update Sites list
-- Changed the default proposal for the workspace: instead of locating it inside the Eclipse folder, suggest `$user.home/.ccw-workspace`
+- Changed the default proposal for the workspace: instead of locating it inside the Eclipse folder, suggest `$user.home/ccw-settings`
 
 === Leiningen
 - New preference menu:Preferences[Clojure > General > Leiningen jar] for selecting a leiningen jar to use instead of the one embedded with Counterclockwise.
