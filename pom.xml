@@ -10,7 +10,27 @@
         <packaging>pom</packaging>
 
         <modules>
-                <module>ccw.aggregator</module>
+                <module>ccw.branding</module>
+                <module>ccw.core</module>
+                <module>ccw.core.e4</module>
+                <module>paredit.clj</module>
+                <module>ccw.feature</module>
+                <module>doc</module>
+                <!--
+                <module>../ccw.core.test</module>
+                -->
         </modules>
+
+        <profiles>
+                <profile>
+                        <id>luna</id>
+                        <activation>
+                                <activeByDefault>true</activeByDefault>
+                        </activation>
+                        <modules>
+                                <module>ccw.product</module>
+                        </modules>
+                </profile>
+        </profiles>
 
 </project>
