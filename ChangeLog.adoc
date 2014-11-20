@@ -31,6 +31,10 @@ It has not been labelled 0.29.2 because one fix involved a new way of building t
 === Leiningen
 - New preference menu:Preferences[Clojure > General > Leiningen jar] for selecting a leiningen jar to use instead of the one embedded with Counterclockwise.
 
+=== Project creation wizard
+The project does not suggest the Eclipse workspace as default location anymore. +
+Instead, the last value for the location field is suggested.
+
 == Changes between Counterclockwise 0.29.0 and 0.29.1
 
 `0.29.1` released on November 13, 2014

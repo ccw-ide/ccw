@@ -142,13 +142,12 @@ public class NewLeiningenProjectWizard extends BasicNewResourceWizard
 	 * Creates a wizard for creating a new project resource in the workspace.
 	 */
 	public NewLeiningenProjectWizard() {
-		IDialogSettings workbenchSettings = IDEWorkbenchPlugin.getDefault()
-				.getDialogSettings();
-		IDialogSettings section = workbenchSettings
-				.getSection("BasicNewProjectResourceWizard");//$NON-NLS-1$
+		IDialogSettings dialogSettings = CCWPlugin.getDefault().getDialogSettings();
+		IDialogSettings section = dialogSettings
+				.getSection("NewLeinigenProjectWizard");//$NON-NLS-1$
 		if (section == null) {
-			section = workbenchSettings
-					.addNewSection("BasicNewProjectResourceWizard");//$NON-NLS-1$
+			section = dialogSettings
+					.addNewSection("NewLeinigenProjectWizard");//$NON-NLS-1$
 		}
 		setDialogSettings(section);
 	}
@@ -156,7 +155,7 @@ public class NewLeiningenProjectWizard extends BasicNewResourceWizard
 	public void addPages() {
 		super.addPages();
 
-		mainPage = new WizardNewLeiningenProjectTemplatePage(this, "basicNewProjectPage"); 
+		mainPage = new WizardNewLeiningenProjectTemplatePage("basicNewProjectPage");
 
 		this.addPage(mainPage);
 
@@ -321,7 +320,11 @@ public class NewLeiningenProjectWizard extends BasicNewResourceWizard
 
 	public boolean performFinish() {
 		if (newProjectWizardPerformFinish()) {
-			return doPerformFinish();
+			boolean res = doPerformFinish();
+			if (res) {
+				this.mainPage.persistSettings();
+			}
+            return res;
 		} else {
 			return false;
 		}

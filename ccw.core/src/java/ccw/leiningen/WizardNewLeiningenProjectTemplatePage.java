@@ -38,6 +38,9 @@ import ccw.CCWPlugin;
 import ccw.util.ClojureInvoker;
 
 public final class WizardNewLeiningenProjectTemplatePage extends WizardPage {
+
+	private static final String NEW_PROJECT_PREVIOUS_LOCATION = "new-project-previous-location";
+
 	
 	private static final String checkProjectName = "check-project-name";
 
@@ -45,13 +48,12 @@ public final class WizardNewLeiningenProjectTemplatePage extends WizardPage {
 			                                         CCWPlugin.getDefault(),
 			                                         "ccw.leiningen.wizard");
 
-	private final NewLeiningenProjectWizard containingWizard;
-	
 	private static final int SIZING_TEXT_FIELD_WIDTH = 250;
 
     private Text projectNameText;
 	
-	private Button defaultLocationCheckbox;
+
+	private Button previousLocationCheckbox;
 	private Text locationText;
 
 	private Text templateNameText;
@@ -70,10 +72,8 @@ public final class WizardNewLeiningenProjectTemplatePage extends WizardPage {
 		}
 	};
 
-	public WizardNewLeiningenProjectTemplatePage(
-			NewLeiningenProjectWizard newLeiningenProjectWizard, String pageName) {
+	public WizardNewLeiningenProjectTemplatePage(String pageName) {
 		super(pageName);
-		this.containingWizard = newLeiningenProjectWizard;
 	}
 
 	public void createControl(Composite parent) {
@@ -131,25 +131,28 @@ public final class WizardNewLeiningenProjectTemplatePage extends WizardPage {
     	label.setText("Create in:");
     	FormData labelData = new FormData();
     	label.setLayoutData(labelData);
-    	
-    	defaultLocationCheckbox = new Button(composite, SWT.CHECK);
-    	defaultLocationCheckbox.setText("default location");
-    	defaultLocationCheckbox.setSelection(true);
-    	FormData defaultLocationCheckboxData = new FormData();
-    	defaultLocationCheckboxData.left = new FormAttachment(label);
-    	defaultLocationCheckboxData.top = new FormAttachment(label, 0, SWT.CENTER);
-    	defaultLocationCheckbox.setLayoutData(defaultLocationCheckboxData);
-    	
+
+    	final boolean doesPreviousLocationExist = (getDefaultParentLocationDialogSettings() != null);
+
+    	previousLocationCheckbox = new Button(composite, SWT.CHECK);
+    	previousLocationCheckbox.setText("same location as previous wizard run");
+    	previousLocationCheckbox.setSelection(doesPreviousLocationExist);
+    	previousLocationCheckbox.setEnabled(doesPreviousLocationExist);
+    	FormData previousLocationCheckboxData = new FormData();
+    	previousLocationCheckboxData.left = new FormAttachment(label);
+    	previousLocationCheckboxData.top = new FormAttachment(label, 0, SWT.CENTER);
+    	previousLocationCheckbox.setLayoutData(previousLocationCheckboxData);
+
     	locationText = new Text(composite, SWT.BORDER);
     	FormData locationData = new FormData();
-    	locationData.top = new FormAttachment(defaultLocationCheckbox);
-    	locationData.left = new FormAttachment(defaultLocationCheckbox, 0, SWT.LEFT);
+    	locationData.top = new FormAttachment(previousLocationCheckbox);
+    	locationData.left = new FormAttachment(previousLocationCheckbox, 0, SWT.LEFT);
     	locationText.setLayoutData(locationData);
-    	locationText.setText(getDefaultParentLocation());
+    	locationText.setText(computeDefaultParentLocation());
     	locationText.setFont(parent.getFont());
     	locationText.setToolTipText("Location in which the project directory will be created");
-    	locationText.setEnabled(false);
-    	
+    	locationText.setEnabled(!doesPreviousLocationExist);
+
     	locationText.addModifyListener(new ModifyListener() {
 			@Override public void modifyText(ModifyEvent e) {
 				setPageComplete(validatePage());
@@ -163,17 +166,17 @@ public final class WizardNewLeiningenProjectTemplatePage extends WizardPage {
     	browse.setLayoutData(browseData);
     	browse.setText("Browse ...");
     	browse.setFont(parent.getFont());
-    	browse.setEnabled(false);
+    	browse.setEnabled(getDefaultParentLocationDialogSettings() == null);
     	browse.setToolTipText("Click to open a popup for choosing the location the project directory will be created in");
-    	
+
     	locationData.right = new FormAttachment(browse);
-    	
-    	defaultLocationCheckbox.addSelectionListener(new SelectionListener() {
+
+    	previousLocationCheckbox.addSelectionListener(new SelectionListener() {
 			@Override public void widgetSelected(SelectionEvent e) {
-				locationText.setEnabled(!defaultLocationCheckbox.getSelection());
-				browse.setEnabled(!defaultLocationCheckbox.getSelection());
-				if (defaultLocationCheckbox.getSelection()) {
-					locationText.setText(getDefaultParentLocation());
+				locationText.setEnabled(!previousLocationCheckbox.getSelection());
+				browse.setEnabled(!previousLocationCheckbox.getSelection());
+				if (previousLocationCheckbox.getSelection()) {
+					locationText.setText(computeDefaultParentLocation());
 				}
 				setPageComplete(validatePage());
 			}
@@ -186,7 +189,7 @@ public final class WizardNewLeiningenProjectTemplatePage extends WizardPage {
 			@Override public void widgetSelected(SelectionEvent e) {
 				DirectoryDialog dialog = new DirectoryDialog(browse.getShell(), SWT.NONE);
 				dialog.setText("Choose Project parent directory");
-				dialog.setMessage("Select a parent directory within with the project's directory will be created");
+				dialog.setMessage("Select a parent directory within which the project's directory will be created");
 				dialog.setFilterPath(locationText.getText());
 				String result = dialog.open();
 				if (result != null) {
@@ -201,9 +204,14 @@ public final class WizardNewLeiningenProjectTemplatePage extends WizardPage {
     	
 		return composite;
 	}
-    
-    private String getDefaultParentLocation() {
-    	return ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString();
+
+    private String getDefaultParentLocationDialogSettings() {
+    	return getDialogSettings().get(NEW_PROJECT_PREVIOUS_LOCATION);
+    }
+
+    private String computeDefaultParentLocation() {
+    	String pref = getDefaultParentLocationDialogSettings();
+    	return (pref==null) ? System.getProperty("user.home") : pref;
     }
 
     public String getSafeProjectFieldValue() {
@@ -289,12 +297,16 @@ public final class WizardNewLeiningenProjectTemplatePage extends WizardPage {
 		}
 		
 		templateNameText.addListener(SWT.Modify, templateNameModifyListener);
-		
-		Label emptyLabel = new Label(leinTemplateGroup, SWT.NONE);
+
+		Label ph = new Label(leinTemplateGroup, SWT.NONE);
+		ph.setLayoutData(new GridData());
+
 		Label helpLabel = new Label(leinTemplateGroup, SWT.NONE);
 		helpLabel.setText("specify template name. You can use template options, e.g.: luminus +cljs +http-kit");
 		helpLabel.setFont(parent.getFont());
-		
+		GridData lData = new GridData(GridData.FILL_HORIZONTAL);
+		helpLabel.setLayoutData(lData);
+
 		return leinTemplateGroup;
 	}
 
@@ -366,8 +378,7 @@ public final class WizardNewLeiningenProjectTemplatePage extends WizardPage {
         }
         
 		String validLocationMessage = checkValidLocation(
-				projectHandle, 
-				this.defaultLocationCheckbox.getSelection(),
+				projectHandle,
 				this.locationText.getText(),
 				getProjectName());
 		if (validLocationMessage != null) {
@@ -415,13 +426,13 @@ public final class WizardNewLeiningenProjectTemplatePage extends WizardPage {
 	 * 
 	 * @return String
 	 */
-	public String checkValidLocation(IProject project, boolean isDefaultParentLocation, String projectParentLocation, String projectFolderName) {
+	public String checkValidLocation(IProject project, String projectParentLocation, String projectFolderName) {
 
 		if (projectParentLocation == null || projectParentLocation.trim().equals("")) {
 			return "A location to create the project folder in must be specified";
 		}
-		File parentFolder = new File(projectParentLocation);
-		
+		final File parentFolder = new File(projectParentLocation);
+
 		if (!parentFolder.exists()) {
 			return "Parent folder '" + projectParentLocation + "' does not exist";
 		}
@@ -438,9 +449,9 @@ public final class WizardNewLeiningenProjectTemplatePage extends WizardPage {
 
 		IStatus locationStatus = ResourcesPlugin.getWorkspace()
 				.validateProjectLocationURI(project,
-						// We need to test parent location with default parent location to prevent false positives
-						(isDefaultParentLocation || projectParentLocation.equals(getDefaultParentLocation())) 
-						? null 
+						// We test whether the location is the workspace root or not
+						(parentFolder.equals(ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile()))
+						? null
 					    : uri);
 
 		if (!locationStatus.isOK()) {
@@ -463,14 +474,14 @@ public final class WizardNewLeiningenProjectTemplatePage extends WizardPage {
      * @return boolean
      */
     public boolean useDefaultProjectParentLocation() {
-    	return defaultLocationCheckbox.getSelection();
+    	return previousLocationCheckbox.getSelection();
     }
     
     /**
      * The specific location for the project folder, or null if default location
      */
     public URI getLocationURI() {
-    	if (defaultLocationCheckbox.getSelection()) {
+    	if (previousLocationCheckbox.getSelection()) {
     		return null;
     	} else {
     		String parentDir = locationText.getText();
@@ -479,9 +490,7 @@ public final class WizardNewLeiningenProjectTemplatePage extends WizardPage {
     	}
     }
 
-    @Override
-    public boolean isPageComplete() {
-    	// TODO Auto-generated method stub
-    	return super.isPageComplete();
-    }
+	public void persistSettings() {
+		getDialogSettings().put(NEW_PROJECT_PREVIOUS_LOCATION, locationText.getText());
+	}
 }
