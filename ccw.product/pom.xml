@@ -4,12 +4,12 @@
   <parent>
     <groupId>ccw</groupId>
     <artifactId>ccw.parent</artifactId>
-    <version>0.29.2-SNAPSHOT</version>
+    <version>0.30.0.STABLE001</version>
     <relativePath>..</relativePath>
   </parent>
   <groupId>ccw</groupId>
   <artifactId>ccw.product</artifactId>
-  <version>0.29.2-SNAPSHOT</version>
+  <version>0.30.0.STABLE001</version>
   <packaging>eclipse-repository</packaging>
   <name>Counterclockwise Product (Repository)</name>
   <build>
