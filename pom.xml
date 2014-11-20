@@ -5,7 +5,7 @@
         <modelVersion>4.0.0</modelVersion>
 
         <groupId>ccw</groupId>
-        <artifactId>ccw.main</artifactId>
+        <artifactId>ccw.parent</artifactId>
         <version>0.29.2-SNAPSHOT</version>
         <packaging>pom</packaging>
 
@@ -32,5 +32,136 @@
                         </modules>
                 </profile>
         </profiles>
+
+        <properties>
+                <tycho-version>0.21.0</tycho-version>
+        </properties>
+
+        <pluginRepositories>
+                <pluginRepository>
+                        <id>tycho</id>
+                        <url>https://oss.sonatype.org/content/groups/public/</url>
+                </pluginRepository>
+        </pluginRepositories>
+
+        <repositories>
+                <repository>
+                        <id>clojars.org</id>
+                        <url>http://clojars.org/repo</url>
+                </repository>
+                <!--repository>
+                        <id>swtbot</id>
+                        <url>http://download.eclipse.org/technology/swtbot/releases/latest/</url>
+                        <layout>p2</layout>
+                </repository-->
+                <repository>
+                        <id>eclipse-color-theme</id>
+                        <url>http://eclipse-color-theme.github.io/update/</url>
+                        <layout>p2</layout>
+                </repository>
+                <!--repository>
+                        <id>luna</id>
+                        <url>http://download.eclipse.org/releases/luna/</url>
+                        <layout>p2</layout>
+                </repository-->
+                <repository>
+                        <id>mars-M3</id>
+                        <url>http://download.eclipse.org/eclipse/updates/4.5milestones/S-4.5M3-201410292000/</url>
+                        <layout>p2</layout>
+                </repository>
+                <!--repository>
+                        <id>emf-releases</id>
+                        <url>http://download.eclipse.org/modeling/emf/updates/releases/</url>
+                        <layout>p2</layout>
+                </repository-->
+                <repository>
+                        <id>emp-eclipse-market-place</id>
+                        <url>http://download.eclipse.org/mpc/luna/</url>
+                        <layout>p2</layout>
+                </repository>
+                <repository>
+                        <id>egit</id>
+                        <url>http://download.eclipse.org/egit/updates/</url>
+                        <layout>p2</layout>
+                </repository>
+                <repository>
+                        <id>orbit</id>
+                        <url>http://download.eclipse.org/tools/orbit/downloads/drops/R20130827064939/repository</url>
+                        <layout>p2</layout>
+                </repository>
+                <!--repository>
+                        <id>pluginbox</id>
+                        <url>http://pluginbox.sourceforge.net</url>
+                        <layout>p2</layout>
+                </repository-->
+                <!--repository>
+                        <id>org.eclipse.e4.core.tools</id>
+                        <url>http://download.vogella.com/p2/C-MASTER-e4tools-master/lastSuccessful/archive/build/org.eclipse.e4.core.tools.update/target/repository/</url>
+                        <layout>p2</layout>
+                </repository-->
+
+        </repositories>
+
+        <build>
+                <plugins>
+                        <!--
+                        <plugin>
+                                <groupId>org.eclipse.tycho</groupId>
+                                <artifactId>tycho-versions-plugin</artifactId>
+                                <version>${tycho-version}</version>
+                        </plugin>
+                        -->
+                        <plugin>
+                                <groupId>org.eclipse.tycho</groupId>
+                                <artifactId>tycho-maven-plugin</artifactId>
+                                <version>${tycho-version}</version>
+                                <extensions>true</extensions>
+                        </plugin>
+                        <plugin>
+                                <groupId>org.eclipse.tycho</groupId>
+                                <artifactId>target-platform-configuration</artifactId>
+                                <version>${tycho-version}</version>
+                                <configuration>
+                                        <!--resolver>p2</resolver-->
+                                        <environments>
+                                                <environment>
+                                                        <os>linux</os>
+                                                        <ws>gtk</ws>
+                                                        <arch>x86_64</arch>
+                                                </environment>
+                                                <environment>
+                                                        <os>win32</os>
+                                                        <ws>win32</ws>
+                                                        <arch>x86</arch>
+                                                </environment>
+                                                <environment>
+                                                        <os>win32</os>
+                                                        <ws>win32</ws>
+                                                        <arch>x86_64</arch>
+                                                </environment>
+                                                <environment>
+                                                        <os>linux</os>
+                                                        <ws>gtk</ws>
+                                                        <arch>x86</arch>
+                                                </environment>
+                                                <environment>
+                                                        <os>macosx</os>
+                                                        <ws>cocoa</ws>
+                                                        <arch>x86_64</arch>
+                                                </environment>
+                                        </environments>
+                                        <!--
+                                        <target>
+                                                <artifact>
+                                                        <groupId>${project.groupId}</groupId>
+                                                        <artifactId>${project.groupId}.target.${target-platform}</artifactId>
+                                                        <version>${project.version}</version>
+                                                </artifact>
+                                        </target>
+                                        -->
+                                </configuration>
+                        </plugin>
+                </plugins>
+        </build>
 
 </project>
