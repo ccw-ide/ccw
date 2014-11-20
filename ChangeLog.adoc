@@ -8,6 +8,16 @@ Laurent Petit <laurent dot petit at gmail dot com>
 :toc-title!:
 :toclevels: 0
 
+== Changes between Counterclockwise 0.30.0 and 0.30.1
+
+`0.30.1` released on November , 2014
+
+=== Fix
+=== CCW/Standalone Product
+=== Leiningen
+=== Project creation wizard
+
+
 == Changes between Counterclockwise 0.29.1 and 0.30.0
 
 `0.30.0` released on November 16, 2014
