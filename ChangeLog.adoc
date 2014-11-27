@@ -17,7 +17,10 @@ Laurent Petit <laurent dot petit at gmail dot com>
 === Leiningen
 === Project creation wizard
 
+=== User Plugins
 
+==== Fix
+- commands/handlers/keybindings were not properly removed when all user plugins were removed at once (e.g. ~/.ccw/ was renamed to ~/.ccw-disabled)
 == Changes between Counterclockwise 0.29.1 and 0.30.0
 
 `0.30.0` released on November 16, 2014

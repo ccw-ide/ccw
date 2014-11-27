@@ -70,11 +70,15 @@
 (defn clean-model!
   "Find all elements with tag 'ccw', and remove all those that
    dont have 'ccw/load-key' transient key with value load-key."
-  [app load-key]
-  (clean-commands! app load-key)
-  (clean-handlers! app load-key)
-  (clean-key-bindings! app load-key)
-  (clean-elements! app load-key))
+  ([app]
+    ;; generate a fresh load-key. The net result is a guarantee that all 'ccw'
+    ;; tagged elements will be removed mercilessly
+    (clean-model! app (str (java.util.UUID/randomUUID))))
+  ([app load-key]
+    (clean-commands! app load-key)
+    (clean-handlers! app load-key)
+    (clean-key-bindings! app load-key)
+    (clean-elements! app load-key)))
 
 (defn with-bundle [bundle urls f]
   (ccw.util.osgi.ClojureOSGi/withBundle 
@@ -123,8 +127,13 @@
                                       ".ccw"))]
     d))
 
-(defn start-user-plugins []
-  (when-let [user-plugins (some-> (plugins-root-dir) user-plugins)]
+(defn start-user-plugins
+  "Find user plugins, load them, and then clean the Eclipse Application model
+   to remove traces of user plugin artifacts that have not yet been loaded
+   (meaning they are now considered garbage).
+   If no user plugin is found, remove all user plugin artifacts from the model."
+  []
+  (if-let [user-plugins (some-> (plugins-root-dir) user-plugins)]
     (binding [dsl/*load-key* (str (java.util.UUID/randomUUID))]
       (try
         (doseq [p user-plugins]
@@ -132,4 +141,5 @@
         (ccw.CCWPlugin/log (str "Loaded User Plugins"))
         (catch Exception e
           (ccw.CCWPlugin/logError "Error while loading User Plugins" e))
-        (finally (clean-model! @m/app dsl/*load-key*))))))
+        (finally (clean-model! @m/app dsl/*load-key*))))
+    (clean-model! @m/app)))
