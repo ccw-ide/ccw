@@ -22,6 +22,7 @@ Laurent Petit <laurent dot petit at gmail dot com>
 ==== Feature
 
 - `defhandler` now accepts closures in addition to var symbols.
+- in `defkeybinding`, `Cmd` is now an alias for `M1`, thus making it OS portable (`Cmd` will be replaced to `COMMAND` for OS X, and `Ctrl` for Windows/Linux). If you really insist on being specific, you can you `COMMAND` or `CTRL` which are not interpreted.
 ==== Fix
 - commands/handlers/keybindings were not properly removed when all user plugins were removed at once (e.g. ~/.ccw/ was renamed to ~/.ccw-disabled)
 - `defhandler` does not create a new var named after the command (with a '-handler' suffix) anymore

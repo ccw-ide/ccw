@@ -14,7 +14,7 @@
            [org.eclipse.e4.ui.model.application.commands 
             MCommand MCategory MHandler
             MCommandsFactory]
-           
+           [org.eclipse.jface.bindings.keys KeySequence]
            [org.eclipse.swt.widgets Composite]
            [org.eclipse.e4.ui.model.application.ui 
             MContext]
@@ -824,7 +824,25 @@
   (let [bt (find-or-create-binding-table app context)]
     (.add (bindings bt) 0 kb)
     app))
-  
+
+(defn normalize-key-sequence
+  "Takes a key sequence such as \"M1+A B\" and transforms it into a platform
+   specific key sequence such as \"COMMAND+A B\" on OS X or \"CTRL+A B\" on
+   Windows/Linux."
+  [ks]
+  (.toString (KeySequence/getInstance ks)))
+
+(defn desugarize-key-sequence
+  "Considers ks is not already normalized, and applies the following transformations
+   to it. The result can be passed to 'normalize-key-sequence.
+   - transforms \"Cmd+A B\" into \"M1+A B\". Cmd feels more natural than M1, and
+     since it only exists on Mac Keyboards, can be used to express either Cmd on
+     OS X or Ctrl on Windows/Linux."
+  [ks]
+  (-> ks
+    (.toUpperCase)
+    (.replaceAll "CMD" "M1")))
+
 ;; how/where to use :scheme ?
 (defn merge-key-binding!
   [app spec]
@@ -837,7 +855,8 @@
                spec)
         spec (if (keyword? (:scheme spec))
                (assoc spec :scheme (key-binding-scheme (:scheme spec)))
-               spec)]
+               spec)
+        spec (update-in spec [:key-sequence] (comp normalize-key-sequence desugarize-key-sequence))]
     (println "merge-key-binding! spec" spec)
     (if-let [kb (find-key-binding app spec)]
       (do 
