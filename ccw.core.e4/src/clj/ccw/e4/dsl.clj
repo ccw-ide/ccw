@@ -77,14 +77,14 @@
 :default org.eclipse.ui.defaultAcceleratorConfiguration
 :emacs org.eclipse.ui.emacsAcceleratorConfiguration
 
-:context-id
-:clojure-editor ccw.ui.clojureEditorScope
-:text-editor org.eclipse.ui.textEditorScope
-:clojure-repl ccw.ui.contextRepl
-:dialog&window org.eclipse.ui.context.dialogAndWindow
-:dialog org.eclipse.ui.context.dialog
-:window org.eclipse.ui.context.window
-:console org.eclipse.ui.console.ConsoleView
+:context
+\"ccw.ui.clojureEditorScope\"
+\"org.eclipse.ui.textEditorScope\"
+\"ccw.ui.context.repl\"
+\"org.eclipse.ui.context.dialogAndWindow\"
+\"org.eclipse.ui.context.dialog\"
+\"org.eclipse.ui.context.window\"
+\"org.eclipse.ui.console.ConsoleView\"
 
 :command-id
 

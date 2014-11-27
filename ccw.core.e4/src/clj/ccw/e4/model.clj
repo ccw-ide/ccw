@@ -587,14 +587,13 @@
   [c name]
   (if (= name (element-id c))
     c
-    (first (filter #(find-binding-context % name) 
-                   (binding-context-children c)))))
+    (some #(find-binding-context % name)
+            (binding-context-children c))))
 
 (defn find-app-binding-context 
   [app name]
   (let [contexts (root-context app)]
-    (first 
-      (filter #(find-binding-context % name) contexts))))
+    (some #(find-binding-context % name) contexts)))
 
 (defn find-binding-table 
   [app context]
