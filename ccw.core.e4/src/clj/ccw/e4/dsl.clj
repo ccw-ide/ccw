@@ -30,20 +30,19 @@
 (defmacro defhandler [command var-symbol]
   (let [cmd-id (str *ns* "/" command)
         id (str cmd-id "-handler")]
-    `(def ~(symbol id)
-      (let [spec# (-> {:contribution-URI
-                       ~(str "bundleclass://ccw.core/clojure/ccw.e4.dsl/handler-factory/"
-                             (or (namespace var-symbol) (ns-name *ns*)) "/" (name var-symbol))
-                       :command ~cmd-id
-                       :id ~id}
-                    (update-in [:transient-data]
-                              assoc
-                              "ccw/load-key" *load-key*)
-                   (update-in [:tags]
-                              (fnil conj #{})
-                              "ccw"))]
-        ;(println "spec#:" spec#)
-       (m/merge-handler! @m/app spec#)))))
+    `(let [spec# (-> {:contribution-URI
+                      ~(str "bundleclass://ccw.core/clojure/ccw.e4.dsl/handler-factory/"
+                            (or (namespace var-symbol) (ns-name *ns*)) "/" (name var-symbol))
+                      :command ~cmd-id
+                      :id ~id}
+                   (update-in [:transient-data]
+                             assoc
+                             "ccw/load-key" *load-key*)
+                  (update-in [:tags]
+                             (fnil conj #{})
+                             "ccw"))]
+       ;(println "spec#:" spec#)
+      (m/merge-handler! @m/app spec#))))
 
 ;; TODO support options !!!
 (defmacro defkeybinding 
