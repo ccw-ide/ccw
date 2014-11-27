@@ -19,6 +19,9 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 === User Plugins
 
+==== Feature
+
+- `defhandler` now accepts closures in addition to var symbols.
 ==== Fix
 - commands/handlers/keybindings were not properly removed when all user plugins were removed at once (e.g. ~/.ccw/ was renamed to ~/.ccw-disabled)
 - `defhandler` does not create a new var named after the command (with a '-handler' suffix) anymore
