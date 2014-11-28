@@ -33,10 +33,10 @@
    bound to a var."
   [command var-symbol-or-closure]
   (let [cmd-id (str *ns* "/" command)
-        id (str cmd-id "-handler")
+        id (str *ns* "/" "__" command "-handler")
         create-var? (not (symbol? var-symbol-or-closure))
         var-symbol (if create-var?
-                     (gensym id)
+                     (symbol id)
                      var-symbol-or-closure)
         platform-uri (str "bundleclass://ccw.core/clojure/ccw.e4.dsl/handler-factory/"
                        (or (namespace var-symbol) (ns-name *ns*)) "/" (name var-symbol))]
