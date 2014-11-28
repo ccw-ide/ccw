@@ -13,6 +13,8 @@ Laurent Petit <laurent dot petit at gmail dot com>
 `0.30.1` released on November , 2014
 
 === Fix
+- Eclipse source folders could not be correctly set when some Leiningen plugins were placing jar files external to the project in the source folders list. Fix Issue #675 - Could not reset project classpath NPE
+
 === CCW/Standalone Product
 === Leiningen
 === Project creation wizard

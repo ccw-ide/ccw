@@ -72,7 +72,9 @@
   (.getContainerForLocation (e/workspace-root) (e/path path)))
 
 (defn lein-source-folders [lein-proj]
-  (map path-to-folder (lein-raw-source-folders lein-proj)))
+  ;; We must use keep or if lein tries to give us classpath source-folders
+  ;; outside the project, we'll have nils
+  (keep path-to-folder (lein-raw-source-folders lein-proj)))
 
 (defn lein-compile-folder [lein-proj]
   (-> lein-proj lein-raw-compile-folder path-to-folder))
@@ -91,7 +93,7 @@
   [java-proj]
   (let [lein-proj        (u/lein-project (e/project java-proj) :enhance-fn #(do (println %) (dissoc % :hooks)))
         jvm-entry        (jvm-entry-or-default java-proj)
-        source-folders   (concat (lein-source-folders lein-proj))
+        source-folders   (lein-source-folders lein-proj)
         source-entries   (map (fn [path] 
                                 (jdt/source-entry 
                                   {:path path,

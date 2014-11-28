@@ -48,7 +48,7 @@
   (JavaCore/newClasspathAttribute name value))
 
 (defn source-entry 
-  "Takes a ma representing a source entry, with following keys:
+  "Takes a map representing a source entry, with following keys:
      :path -> IPathCoercionable
      :inclusion-patterns -> list of IPathCoercionables. Optional
      :exclusion-patterns -> list of IPathCoercionables. Optional
