@@ -17,6 +17,7 @@
                                      FileLocator
                                      IAdaptable
                                      IProgressMonitor
+                                     IStatus
                                      Status]
            [org.eclipse.core.runtime.preferences IEclipsePreferences
                                                  InstanceScope]
@@ -500,9 +501,10 @@
   [name f]
   (proxy [WorkspaceJob] [name]
     (runInWorkspace [^IProgressMonitor monitor]
-      (if-let [s (f monitor)]
-        s
-        (Status/OK_STATUS)))))
+      (let [s (f monitor)]
+        (if (instance? IStatus s)
+          s
+          (Status/OK_STATUS))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Preferences management utilities

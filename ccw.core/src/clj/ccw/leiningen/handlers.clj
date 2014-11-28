@@ -173,12 +173,10 @@
     (doto
       (e/workspace-job
         (str "Upgrade project build path for project " (e/project-name java-project))
-        (fn [^IProgressMonitor monitor] (upgrade-project-build-path java-project overwrite? monitor)))
+        (fn [^IProgressMonitor monitor]
+          (n/reset-project-build-path java-project overwrite? monitor)))
       (.setUser true)
-      (.setRule (e/workspace-root))
-      (.schedule)))
-  ([java-project overwrite? ^IProgressMonitor monitor]
-    (n/reset-project-build-path java-project overwrite? monitor)))
+      (.schedule))))
 
 (defn reset-project-build-path 
   ([handler event] (reset-project-build-path (event->java-project event)))

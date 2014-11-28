@@ -13,6 +13,7 @@
             [ccw.leiningen.util :as u])
   (:import [org.eclipse.core.runtime CoreException
                                      IPath
+                                     IProgressMonitor
                                      Path]
            [org.eclipse.jdt.core ClasspathContainerInitializer
                                  IClasspathContainer
@@ -347,33 +348,49 @@
   (let [container (leiningen-classpath-container deps)]
     (set-classpath-container java-project CONTAINER-PATH container)))
 
-(defn refresh-target-folder 
+(defn refresh-target-folder
   "Refreshes the target folder of a project, if it exists.
    project may be anything coercible to an IProject.
    This function does not call refresh on a background job, nor does it run
    inside a workspace runnable."
-  [project-coercible]
+  [project-coercible monitor]
   (if-let [target-folder (.getFolder (e/project project-coercible) "target")]
-    (.refreshLocal target-folder (IResource/DEPTH_INFINITE) nil)))
+    (.refreshLocal target-folder (IResource/DEPTH_INFINITE) monitor)))
 
 (defn update-project-dependencies
   "Get the dependencies.
    If deps fetched ok: sets lein container, save the dependencies list on disk.
-   If an exception is throw while fetching deps: report problem markers, 
+   If an exception is thrown while fetching deps: report problem markers, 
    do not touch the current lein container."
   [java-project] ;; TODO checks
   (try
     (let [lein-project (u/lein-project java-project :enhance-fn #(do (println %) (dissoc % :hooks)))
           deps (get-project-dependencies (.getName (e/project java-project)) lein-project)]
-      (set-lein-container java-project deps)
-      (delete-container-markers java-project)
-      (save-project-dependencies java-project deps))
-    (refresh-target-folder java-project)
+      ;; Here, get-project-dependencies has succeeded or thrown an error
+      ;; it can take a long time, so we do not put it inside the workspace job
+      (doto
+        (e/workspace-job
+          (str "Upgrade project build path for project " (e/project-name java-project))
+          (fn [^IProgressMonitor monitor]
+            (set-lein-container java-project deps)
+            (delete-container-markers java-project)
+            (save-project-dependencies java-project deps)
+            (doto ;; we refresh the target folder outside the workspace-root lock
+              (e/workspace-job
+                (str "Refreshing project " (e/project-name java-project))
+                (fn [^IProgressMonitor monitor]
+                  (refresh-target-folder java-project monitor)))
+              (.setUser true)
+              (.schedule))))
+        (.setUser true)
+        ;; this rule is OK because we know the job needs it and will not take too long
+        (.setRule (e/workspace-root))
+        (.schedule)))
     (catch Exception e
       ;; TODO enhance this in the future ... (more accurate problem markers)
       (let [[jresource message] (resource-message e java-project)
             project-name (-> java-project e/resource .getName)]
-        (report-container-error 
+        (report-container-error
           jresource
           ;(str "Project '" project-name "', Leiningen classpath container problem: " message)
           (str "Leiningen Managed Dependencies issue: " message)
@@ -406,7 +423,6 @@
                       (update-project-dependencies java-project)))] 
           (doto job
             (.setUser false)
-            (.setRule (e/workspace-root))
             (.schedule))
           nil)))
     

@@ -39,7 +39,7 @@ final class LeiningenNatureAdderWorkspaceJob extends WorkspaceJob {
 
 			if (hasLeiningenNature(project)) {
 				if (!checkLeiningenProjectConsistency(project)) {
-					leinHandlers._("upgrade-project-build-path", JavaCore.create(project), monitor);
+					leinHandlers._("upgrade-project-build-path", JavaCore.create(project));
 				}
 				return Status.OK_STATUS;
 			}

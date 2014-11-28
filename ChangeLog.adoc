@@ -13,6 +13,7 @@ Laurent Petit <laurent dot petit at gmail dot com>
 `0.30.1` released on November , 2014
 
 === Fix
+- Removed lots of workspace locks when managing leiningen dependencies (after importing a project, after editing project.clj) which were really annoying because it was then impossible to save a file because the background leiningen job had a lock on the workspace. Fix #Issue 671 - Update leiningen dependencies should not block the workspace that long
 - Eclipse source folders could not be correctly set when some Leiningen plugins were placing jar files external to the project in the source folders list. Fix Issue #675 - Could not reset project classpath NPE
 
 === CCW/Standalone Product
@@ -30,6 +31,8 @@ Laurent Petit <laurent dot petit at gmail dot com>
 - `defhandler` does not create a new var named after the command (with a '-handler' suffix) anymore
 - `defkeybinding` correctly interprets the :context key
 - `defkeybinding` a bad :context value could break binding tables. This is fixed, an error is reported on stdout and the :window context is used as a default
+
+
 == Changes between Counterclockwise 0.29.1 and 0.30.0
 
 `0.30.0` released on November 16, 2014

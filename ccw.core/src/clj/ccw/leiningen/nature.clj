@@ -130,7 +130,7 @@
    If file project.clj cannot be read, nothing happens.
    If overwrite? is true, then the project's build path is replaced.
    If overwrite? is false, the the new entries found are appended to the existing build path" 
-  [java-proj overwrite? & [monitor]]
+  [java-proj overwrite? monitor]
   (let [monitor (or monitor (e/null-progress-monitor))
         lein-entries (lein-entries java-proj)
         existing-entries (if overwrite? () (seq (.getRawClasspath java-proj)))
@@ -142,7 +142,7 @@
       (.setRawClasspath 
         java-proj
         (into-array IClasspathEntry entries)
-        (e/null-progress-monitor))
+        monitor)
       (.beginTask monitor (str "Project " (-> java-proj e/project .getName) ": Updating Leiningen Dependencies") 1)
       (cpc/update-project-dependencies java-proj)
       (.worked monitor 1)
@@ -159,17 +159,17 @@
         [this] (:project @state))
       (configure
         [this]
-        (doto (e/workspace-job
-                   (str "Configuring Leiningen classpath dependencies for project " (e/project-name (.getProject this)))
-                   (fn [progress-monitor]
-                     (let [proj (.getProject this)
-                           desc (e/project-desc proj)
-                           java-proj (JavaCore/create proj)]
-                       (when-not (e/desc-has-builder? desc LeiningenBuilder/ID)
-                         (e/project-desc! proj (e/add-desc-builder! desc LeiningenBuilder/ID)))
-                       (reset-project-build-path java-proj true progress-monitor))))
+        (doto
+          (e/workspace-job
+            (str "Configuring Leiningen classpath dependencies for project " (e/project-name (.getProject this)))
+            (fn [progress-monitor]
+              (let [proj (.getProject this)
+                    desc (e/project-desc proj)
+                    java-proj (JavaCore/create proj)]
+                (when-not (e/desc-has-builder? desc LeiningenBuilder/ID)
+                  (e/project-desc! proj (e/add-desc-builder! desc LeiningenBuilder/ID)))
+                (reset-project-build-path java-proj true progress-monitor))))
           (.setUser false)
-          (.setRule (e/workspace-root))
           (.schedule)))
       (deconfigure
         [this]
