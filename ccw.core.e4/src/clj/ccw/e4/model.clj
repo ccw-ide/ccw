@@ -793,9 +793,25 @@
         (add-handler! app hdl)
         hdl))))
 
+(defn assoc-value-as-keys
+  [m]
+  (merge (zipmap (vals m) (vals m)) m))
+
 (def key-binding-scheme
-  {:default "org.eclipse.ui.defaultAcceleratorConfiguration"
-   :emacs   "org.eclipse.ui.emacsAcceleratorConfiguration"})
+  (assoc-value-as-keys
+    {:default "org.eclipse.ui.defaultAcceleratorConfiguration"
+     :emacs   "org.eclipse.ui.emacsAcceleratorConfiguration"}))
+
+(def key-binding-context
+  (assoc-value-as-keys
+    {:clojure-editor "ccw.ui.clojureEditorScope"
+     :text-editor "org.eclipse.ui.textEditorScope"
+     :repl "ccw.ui.context.repl"
+     :dialog+window "org.eclipse.ui.contexts.dialogAndWindow"
+     :dialog "org.eclipse.ui.contexts.dialog"
+     :window "org.eclipse.ui.contexts.window"
+     :views "org.eclipse.ui.contexts.views"
+     :console "org.eclipse.ui.console.ConsoleView"}))
 
 (defn update-key-binding!
   [kb spec]
@@ -849,12 +865,15 @@
               (find-command app (:command spec))
               (:command spec))
         spec (assoc spec :command cmd)
-        spec (if (string? (:context spec))
-               (assoc spec :context (find-app-binding-context app (:context spec)))
-               spec)
-        spec (if (keyword? (:scheme spec))
-               (assoc spec :scheme (key-binding-scheme (:scheme spec)))
-               spec)
+        spec (assoc spec :context (or
+                                    (find-app-binding-context app
+                                      (key-binding-context (:context spec) (:context spec)))
+                                    (do
+                                      (println "merge-key-binding! error no binding context found for" (:context spec)
+                                        ". Falling back to :window context")
+                                      (find-app-binding-context app
+                                        (key-binding-context :window)))))
+        spec (assoc spec :scheme (key-binding-scheme (:scheme spec) (:scheme spec)))
         spec (update-in spec [:key-sequence] (comp normalize-key-sequence desugarize-key-sequence))]
     (println "merge-key-binding! spec" spec)
     (if-let [kb (find-key-binding app spec)]

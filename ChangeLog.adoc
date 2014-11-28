@@ -27,6 +27,7 @@ Laurent Petit <laurent dot petit at gmail dot com>
 - commands/handlers/keybindings were not properly removed when all user plugins were removed at once (e.g. ~/.ccw/ was renamed to ~/.ccw-disabled)
 - `defhandler` does not create a new var named after the command (with a '-handler' suffix) anymore
 - `defkeybinding` correctly interprets the :context key
+- `defkeybinding` a bad :context value could break binding tables. This is fixed, an error is reported on stdout and the :window context is used as a default
 == Changes between Counterclockwise 0.29.1 and 0.30.0
 
 `0.30.0` released on November 16, 2014

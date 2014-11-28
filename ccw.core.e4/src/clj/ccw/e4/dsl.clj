@@ -73,20 +73,11 @@
 \"M1+M2+P\"
 \"Ctrl+Alt+M\"
 
-:scheme-id
-:default org.eclipse.ui.defaultAcceleratorConfiguration
-:emacs org.eclipse.ui.emacsAcceleratorConfiguration
+:scheme key - see ccw.e4.model/key-binding-scheme
 
-:context
-\"ccw.ui.clojureEditorScope\"
-\"org.eclipse.ui.textEditorScope\"
-\"ccw.ui.context.repl\"
-\"org.eclipse.ui.context.dialogAndWindow\"
-\"org.eclipse.ui.context.dialog\"
-\"org.eclipse.ui.context.window\"
-\"org.eclipse.ui.console.ConsoleView\"
+:context key - see ccw.e4.model/key-binding-context
 
-:command-id
+:command
 
 :platform ; Based on SWT/getPlatform ()
 :win32
@@ -104,7 +95,7 @@
   `(let [spec# (-> (merge {:command ~command
                            :scheme  :default
                            :key-sequence ~key-sequence
-                           :context "org.eclipse.ui.contexts.window"}
+                           :context :window}
                           ~opts)
                  (update-in [:transient-data]
                               assoc
