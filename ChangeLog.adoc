@@ -33,6 +33,8 @@ Laurent Petit <laurent dot petit at gmail dot com>
 - `defkeybinding` correctly interprets the :context key
 - `defkeybinding` a bad :context value could break binding tables. This is fixed, an error is reported on stdout and the :window context is used as a default
 
+=== REPLs
+- Everytime a response is received from an nrepl connection, the response data is posted to the Eclipse 4 Event Broker to the "ccw/repl/response" topic (just use :ccw.repl.response in your user plugins to refer to the topic, the conversion from :ccw.repl.reponse to "ccw/repl/response" is done by `ccw.events` functions).
 
 == Changes between Counterclockwise 0.29.1 and 0.30.0
 

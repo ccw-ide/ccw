@@ -1,6 +1,7 @@
 (ns ccw.repl.view-helpers
   (:require [clojure.tools.nrepl :as repl]
-    [ccw.repl.cmdhistory :as history])
+    [ccw.repl.cmdhistory :as history]
+    [ccw.events :as evt])
   (:use [clojure.core.incubator :only (-?>)]
         [clojure.tools.nrepl.misc :only (uuid)])
   (:import ccw.CCWPlugin
@@ -86,17 +87,19 @@
 
 (defn handle-responses
   [repl-view log-component expr responses]
-  (future (doseq [{:keys [out err value ns status] :as resp} responses]
-            (ui-sync
-              (when ns (.setCurrentNamespace repl-view ns))
-              (doseq [[k v] (dissoc resp :id :ns :status :session)
-                      :when (log-styles k)]
-                (log repl-view log-component v k))
-              (doseq [status status]
-                (case status
-                  "interrupted" (log repl-view log-component (eval-failure-msg status expr) :err)
-                  "need-input" (ui-sync (.getStdIn repl-view))
-                  nil))))))
+  (future
+    (doseq [{:keys [out err value ns status] :as resp} responses]
+      (evt/post-event :ccw.repl.response resp)
+      (ui-sync
+        (when ns (.setCurrentNamespace repl-view ns))
+        (doseq [[k v] (dissoc resp :id :ns :status :session)
+                :when (log-styles k)]
+          (log repl-view log-component v k))
+        (doseq [status status]
+          (case status
+            "interrupted" (log repl-view log-component (eval-failure-msg status expr) :err)
+            "need-input" (ui-sync (.getStdIn repl-view))
+            nil))))))
 
 (defn eval-expression
   [repl-view log-component client expr]
