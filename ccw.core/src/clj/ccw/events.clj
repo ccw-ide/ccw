@@ -33,16 +33,16 @@
     (.post event-broker (as-topic topic) [data])))
 
 (defn subscribe
-  ([topic event-handler-fn] (subscribe topic false event-handler-fn))
-  ([topic require-ui? event-handler-fn]
+  ([topic event-handler-var] (subscribe topic false event-handler-var))
+  ([topic require-ui? event-handler-var]
     (println "subscribing to topic" (as-topic topic))
     (when-let [event-broker @event-broker]
       (let [event-handler
             (reify org.osgi.service.event.EventHandler
               (handleEvent [this event]
-                (event-handler-fn
+                (event-handler-var
                   (topic-as-keyword (.getTopic event))
-                  (.getProperty event DATA))))]
+                  (first (.getProperty event DATA)))))]
         (when (.subscribe event-broker
                 (as-topic topic)
                 nil
@@ -52,4 +52,5 @@
 
 (defn unsubscribe [event-handler]
   (when-let [event-broker @event-broker]
-    (.unsubscribe event-broker event-handler)))
+    (.unsubscribe event-broker
+      event-handler)))
