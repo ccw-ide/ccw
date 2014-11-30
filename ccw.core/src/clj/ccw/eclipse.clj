@@ -135,6 +135,9 @@
   nil
   (resource [this] nil)
   
+  Object
+  (resource [o] (adapter o IResource))
+
   IResource
   (resource [this] this)
   
@@ -169,6 +172,10 @@
 (extend-protocol IPathCoercion
   nil
   (path [_] nil)
+
+  Object
+  (path [o] (adapter o IPath))
+
   
   IPath
   (path [this] this)
