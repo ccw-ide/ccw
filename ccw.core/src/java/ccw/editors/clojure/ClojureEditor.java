@@ -199,6 +199,7 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 	protected void editorSaved() {
 		super.editorSaved();
 		updatePartNameAndDescription();
+		editorSupport._("editor-saved", this);
 	}
 	
 	/**

@@ -25,7 +25,9 @@
   (:require [paredit.parser :as p]
             [paredit.loc-utils :as lu]
             [paredit.static-analysis :as static-analysis]
-            [ccw.jdt :as jdt])
+            [ccw.jdt :as jdt]
+            [ccw.events :as evt]
+            [ccw.eclipse :as e])
   (:import [ccw.editors.clojure IClojureEditor]
            [org.eclipse.ui.texteditor SourceViewerDecorationSupport]))
 
@@ -115,3 +117,9 @@
     (.setMatchingCharacterPainterPreferenceKeys
       (jdt/preference-constants ::jdt/editor-matching-brackets)
       (jdt/preference-constants ::jdt/editor-matching-brackets-color))))
+
+(defn editor-saved [editor]
+  (evt/post-event :ccw.editor.saved
+    {:namespace     (.findDeclaringNamespace editor)
+     :absolute-path (some-> editor .getEditorInput e/resource e/path .toOSString)
+     :repl          (-> editor .getCorrespondingREPL)}))
