@@ -10,16 +10,18 @@
    add-to-history:   truthy if the expression should be added to the history of
                      sent repl commands (defaults to false)
    print-to-log:     truthy if the expression should be logged in the log area
-                     of the repl (defaults to false)
+                     of the repl (defaults to true)
    repeat-last-eval: truthy if the preferences for repeating the last
                      user sent expression should be honored (defaults to false)"
-  ([repl expr] (send repl expr false false false))
+  ([repl expr] (send repl expr false true false))
   ([repl expr add-to-history print-to-log repeat-last-eval]
+    (println "repl:" repl "expr:" expr)
     (when (and repl expr)
       (.evalExpression repl expr
         (boolean add-to-history)
         (boolean print-to-log)
-        (boolean repeat-last-eval)))))
+        (boolean repeat-last-eval)))
+    (println "done sending")))
 
 (defn namespace
   "Get the current namespace for the repl connection"
