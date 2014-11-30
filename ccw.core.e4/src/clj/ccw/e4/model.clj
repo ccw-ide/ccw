@@ -14,6 +14,7 @@
            [org.eclipse.e4.ui.model.application.commands 
             MCommand MCategory MHandler
             MCommandsFactory]
+           [org.eclipse.e4.core.services.events IEventBroker]
            [org.eclipse.jface.bindings.keys KeySequence]
            [org.eclipse.swt.widgets Composite]
            [org.eclipse.e4.ui.model.application.ui 
@@ -66,6 +67,7 @@
    :window           MWindow
    :mpart            MPart
    :part             MPart
+   :event-broker     IEventBroker
    })
 
 (defn context-key 
