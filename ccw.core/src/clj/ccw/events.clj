@@ -25,11 +25,15 @@
 (defn send-event [topic data]
   (when-let [event-broker @event-broker]
     (println "will send" (as-topic topic) ", data:" data)
+    ;; we force the data type to smth other than a Map so
+    ;; we get consistent behavior in the handler
     (.send event-broker (as-topic topic) [data])))
 
 (defn post-event [topic data]
   (println "will post" (as-topic topic) ", data:" data)
   (when-let [event-broker @event-broker]
+    ;; we force the data type to smth other than a Map so
+    ;; we get consistent behavior in the handler
     (.post event-broker (as-topic topic) [data])))
 
 (defn subscribe
@@ -42,6 +46,8 @@
               (handleEvent [this event]
                 (event-handler-var
                   (topic-as-keyword (.getTopic event))
+                  ;; call to (get 0) to extract the data from the
+                  ;; vector
                   (first (.getProperty event DATA)))))]
         (when (.subscribe event-broker
                 (as-topic topic)
