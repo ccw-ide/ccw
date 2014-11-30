@@ -15,7 +15,6 @@
                      user sent expression should be honored (defaults to false)"
   ([repl expr] (send repl expr false true false))
   ([repl expr add-to-history print-to-log repeat-last-eval]
-    (println "repl:" repl "expr:" expr)
     (when (and repl expr)
       (.evalExpression repl expr
         (boolean add-to-history)
