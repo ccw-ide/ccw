@@ -22,6 +22,8 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 === User Plugins
 
+- New namespace `ccw.api.repl` for use by user plugins. Related to REPL management (sending expressions for evaluation, getting/setting the current namespace).
+
 ==== Feature
 
 - Added namespace `ccw.events` which is a thin wrapper around Eclipse 4 IEventBroker, allowing User plugin developers to subscribe to topics, post / send data to topics.
