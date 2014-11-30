@@ -22,13 +22,14 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 === User Plugins
 
-- New namespace `ccw.api.repl` for use by user plugins. Related to REPL management (sending expressions for evaluation, getting/setting the current namespace).
 
 ==== Feature
 
+- Added namespace `ccw.api.repl` for use by user plugins. Related to REPL management (sending expressions for evaluation, getting/setting the current namespace).
 - Added namespace `ccw.events` which is a thin wrapper around Eclipse 4 IEventBroker, allowing User plugin developers to subscribe to topics, post / send data to topics.
 - `defhandler` now accepts closures in addition to var symbols.
 - in `defkeybinding`, `Cmd` is now an alias for `M1`, thus making it OS portable (`Cmd` will be replaced to `COMMAND` for OS X, and `Ctrl` for Windows/Linux). If you really insist on being specific, you can you `COMMAND` or `CTRL` which are not interpreted.
+
 ==== Fix
 - commands/handlers/keybindings were not properly removed when all user plugins were removed at once (e.g. ~/.ccw/ was renamed to ~/.ccw-disabled)
 - `defhandler` does not create a new var named after the command (with a '-handler' suffix) anymore
@@ -39,7 +40,7 @@ Laurent Petit <laurent dot petit at gmail dot com>
 Everytime a Clojure editor is saved, a map with the namespace String, the absolute file path and the active REPL if there is one is posted to the Eclipse 4 Event Broker to the "ccw/editor/saved" topic (just use :ccw.editor.saved in your user plugins to refer to the topic, the conversion is automatic).
 
 === REPLs
-- Everytime a response is received from an nrepl connection, the response data is posted to the Eclipse 4 Event Broker to the "ccw/repl/response" topic (just use :ccw.repl.response in your user plugins to refer to the topic, the conversion from :ccw.repl.reponse to "ccw/repl/response" is done by `ccw.events` functions).
+Everytime a response is received from an nrepl connection, the response data is posted to the Eclipse 4 Event Broker to the "ccw/repl/response" topic (just use :ccw.repl.response in your user plugins to refer to the topic, the conversion from :ccw.repl.reponse to "ccw/repl/response" is done by `ccw.events` functions).
 
 == Changes between Counterclockwise 0.29.1 and 0.30.0
 
