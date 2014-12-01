@@ -4,6 +4,10 @@
   (:refer-clojure :exclude [send namespace])
   (:import [ccw.repl REPLView]))
 
+(defn active
+  "Return the active REPL"
+  [] (.get REPLView/activeREPL))
+
 (defn send
   "Send expression expr (a String) to repl (repl object obtained e.g. via an 
    :ccw.editor.saved event).
@@ -12,11 +16,15 @@
    print-to-log:     truthy if the expression should be logged in the log area
                      of the repl (defaults to true)
    repeat-last-eval: truthy if the preferences for repeating the last
-                     user sent expression should be honored (defaults to false)"
+                     user sent expression should be honored (defaults to false)
+   If repl is not specified, then the active repl is used.
+   If expr is a String it is used as is. If it's not a String, then pr-str is
+   called on it first."
+  ([expr] (send (active) expr false true false))
   ([repl expr] (send repl expr false true false))
   ([repl expr add-to-history print-to-log repeat-last-eval]
     (when (and repl expr)
-      (.evalExpression repl expr
+      (.evalExpression repl (if (string? expr) expr (pr-str expr))
         (boolean add-to-history)
         (boolean print-to-log)
         (boolean repeat-last-eval)))
