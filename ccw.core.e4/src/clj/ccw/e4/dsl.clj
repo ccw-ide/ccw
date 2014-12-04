@@ -32,13 +32,30 @@
     is similar to
     (defcommand reset-components \"Reset Components\")
     (defkeybinding reset-components \"Cmd+U R\")
-    (defhandler reset-components (fn [context] (repl/send '(user/reset))))"
+    (defhandler reset-components (fn [context] (repl/send '(user/reset)))).
+  
+    In the sugared form, the arguments vector for the handling function can 
+    have zero args, or a context arg. If context arg is given, it's possible
+    to use destructuring on it to immediately get value for key(s) of interest
+    in the context.
+    Keys can be any key acceptable by IEclipseContext, plus predefined keyword
+    keys in ccw.core.e4.model/service-constants.
+
+    Examples:
+    (defcommand c2 \\\"command name/description\\\" \\\"Cmd+U S\\\"
+      [] (repl/send '(user/reset)))
+    (defcommand c1 \"command name/description\" \"Cmd+U R\"
+      [context] (function-using context)))
+    (defcommand c3 \"command name/description\" \"Cmd+U R\"
+      [{:keys [:workbench :active-shell]}]
+      (function-using workbench)
+      (function-using active-shell))"
   [command name & [keybinding arg-vec & body :as rest]]
   (if-not rest
     `(defcommand' ~command ~(into {:name name} (apply hash-map rest)))
     `(do
        (defcommand' ~command ~{:name name})
-       (defhandler ~command (fn ~arg-vec ~@body))
+       (defhandler ~command (fn ~(if (empty? arg-vec) [(gensym)] arg-vec) ~@body))
        (defkeybinding ~command ~keybinding))))
 
 (defn- wrap-context

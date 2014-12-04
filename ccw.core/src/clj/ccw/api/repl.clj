@@ -2,7 +2,8 @@
   "Functions related to repl [views] interactions.
    API for User Plugins."
   (:refer-clojure :exclude [send namespace])
-  (:import [ccw.repl REPLView]))
+  (:import [ccw.repl REPLView
+                     Actions]))
 
 (defn active
   "Return the active REPL"
@@ -37,3 +38,13 @@
 (defn namespace!
   "Set the namespace (a String) for the repl"
   [repl namespace] (.setCurrentNamespace repl namespace))
+
+(defn show-repl
+  "If repl is hidden, brings it to the top.
+   0-arity args version will bring the last active repl to the top
+           and give it focus.
+   1-arity args version will bring the given repl to the top
+           and give it focus."
+  ([] (show-repl (active)))
+  ([repl] (show-repl repl true))
+  ([repl give-focus?] (Actions/showActiveREPL repl give-focus?)))

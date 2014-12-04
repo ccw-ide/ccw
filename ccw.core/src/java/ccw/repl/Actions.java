@@ -79,30 +79,47 @@ public class Actions {
 		}
     }
 
-    public static class ShowActiveREPL extends AbstractHandler {
-        public static boolean execute (final boolean activate) {
-            final REPLView active = REPLView.activeREPL.get();
-            if (active != null) {
-                for (IWorkbenchWindow window : PlatformUI.getWorkbench().getWorkbenchWindows()) {
-                    for (final IWorkbenchPage p : window.getPages()) {
-                        for (IViewReference ref : p.getViewReferences()) {
-                            if (ref.getPart(false) == active) {
-                            	DisplayUtil.asyncExec(new Runnable() {
-									@Override public void run() {
-		                                if (activate) {
-		                                    p.activate(active);
-		                                } else {
-		                                    p.bringToTop(active);
-		                                }
-									}
-                            	});
-                                return true;
-                            }
+    /**
+     * Finds the active REPL and bring it to the front, activating it optionally.
+     * @param activate should we activate the REPL (give it focus) ?
+     * @return true if the command succeeded, false if no repl found
+     */
+	public static boolean showActiveREPL(final boolean activate) {
+		return showActiveREPL(REPLView.activeREPL.get(), activate);
+	}
+
+	/**
+     * Finds the active REPL and bring it to the front, activating it optionally.
+     * @param activate should we activate the REPL (give it focus) ?
+     * @return true if the command succeeded, false if no repl found
+     */
+	public static boolean showActiveREPL(final REPLView active, final boolean activate) {
+        if (active != null) {
+            for (IWorkbenchWindow window : PlatformUI.getWorkbench().getWorkbenchWindows()) {
+                for (final IWorkbenchPage p : window.getPages()) {
+                    for (IViewReference ref : p.getViewReferences()) {
+                        if (ref.getPart(false) == active) {
+                        	DisplayUtil.asyncExec(new Runnable() {
+								@Override public void run() {
+	                                if (activate) {
+	                                    p.activate(active);
+	                                } else {
+	                                    p.bringToTop(active);
+	                                }
+								}
+                        	});
+                            return true;
                         }
                     }
                 }
             }
-            return false;
+        }
+        return false;
+	}
+
+    public static class ShowActiveREPL extends AbstractHandler {
+        public static boolean execute (final boolean activate) {
+            return showActiveREPL(activate);
         }
 
         @Override

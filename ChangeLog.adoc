@@ -15,8 +15,30 @@ Laurent Petit <laurent dot petit at gmail dot com>
 === User Plugins
 
 ==== commands
-The Eclipse context is now wrapped. The wrapper extends ILookup. This allows the Eclipse context to be destructured easily. +
-The original Eclipse context is available with the key "org.eclipse.e4.core.contexts.IEclipseContext" or ":eclipse-context" for advanced usages.
+- The Eclipse context is now wrapped. The wrapper extends ILookup. This allows the Eclipse context to be destructured easily. The original Eclipse context is available with the key "org.eclipse.e4.core.contexts.IEclipseContext" or ":eclipse-context" for advanced usages.
+- The concise form of `defcommand` now accepts that argument vectors be empty as an alternative to having the context argument
+
+Examples:
+
+[source,clojure]
+----
+; version with 0 arguments (not interested of using the eclipse context)
+(defcommand switch-to-repl "Switch to the REPL View" "Cmd+R S"
+  [] (repl/show-repl))
+
+; version with the context argument without destructuring
+(require '[ccw.core.e4.model :as m])
+(defcommand zoom-in "Zoom the text in" "Cmd++"
+  [context] (zoom (m/context-key @m/app :workbench) 2))
+
+; version with the context argument and destructuring
+(defcommand zoom-in "Zoom the text in" "Cmd++"
+  [{:keys [workbench]}] (zoom workbench 2))
+----
+
+==== REPL
+- Added function `ccw.api.repl/show-repl` for bringing to front / optionally giving focus to a (or the last active) REPL. Demonstration of the feature for creating a new command in the [ccw-plugin-repl](https://github.com/laurentpetit/ccw-plugin-repl/) user plugin, in script file `repl-keybindings.clj`.
+
 
 == Changes between Counterclockwise 0.30.0 and 0.31.0
 
