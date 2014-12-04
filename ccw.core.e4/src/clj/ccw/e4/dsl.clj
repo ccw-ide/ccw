@@ -34,7 +34,7 @@
     (defkeybinding reset-components \"Cmd+U R\")
     (defhandler reset-components (fn [context] (repl/send '(user/reset))))"
   [command name & [keybinding arg-vec & body :as rest]]
-  (if (keyword? keybinding)
+  (if-not rest
     `(defcommand' ~command ~(into {:name name} (apply hash-map rest)))
     `(do
        (defcommand' ~command ~{:name name})
