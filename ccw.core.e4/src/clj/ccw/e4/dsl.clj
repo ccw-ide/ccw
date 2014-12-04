@@ -11,12 +11,12 @@
 (defn handler-factory [context nsname name] 
   (GenericHandler. (str nsname "/" name)))
 
-(defmacro defcommand [command command-name & {:as opts}]
+(defmacro defcommand' [command opts]
   `(def ~command
      (let [spec# (-> (merge
                        {:id ~(str *ns* "/" command)
-                        :name ~command-name}
-                       ~opts)
+                        :name ~(opts :name (str command))}
+                       ~(dissoc opts :name))
                    (update-in [:transient-data]
                               assoc
                               "ccw/load-key" *load-key*)
@@ -25,6 +25,21 @@
                               "ccw"))]
        ;(println "spec#:" spec#)
        (m/merge-command! @m/app spec#))))
+
+(defmacro defcommand
+   "(defcommand reset-components \"Reset Components\" \"Cmd+U R\"
+      [context] (repl/send '(user/reset)))
+    is similar to
+    (defcommand reset-components \"Reset Components\")
+    (defkeybinding reset-components \"Cmd+U R\")
+    (defhandler reset-components (fn [context] (repl/send '(user/reset))))"
+  [command name & [keybinding arg-vec & body :as rest]]
+  (if (keyword? keybinding)
+    `(defcommand' ~command ~(into {:name name} (apply hash-map rest)))
+    `(do
+       (defcommand' ~command ~{:name name})
+       (defhandler ~command (fn ~arg-vec ~@body))
+       (defkeybinding ~command ~keybinding))))
 
 ;;; TODO register for deletion in  m/*elements* (a set)
 (defmacro defhandler
