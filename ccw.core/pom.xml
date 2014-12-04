@@ -7,13 +7,13 @@
   <parent>
     <groupId>ccw</groupId>
     <artifactId>ccw.parent</artifactId>
-    <version>0.31.1-SNAPSHOT</version>
+    <version>0.31.1.STABLE001</version>
     <relativePath>..</relativePath>
   </parent>
   
   <groupId>ccw</groupId>
   <artifactId>ccw.core</artifactId>
-  <version>0.31.1-SNAPSHOT</version>
+  <version>0.31.1.STABLE001</version>
   <packaging>eclipse-plugin</packaging>
 
   <properties>
