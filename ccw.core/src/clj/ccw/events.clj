@@ -1,5 +1,10 @@
 (ns ccw.events)
 
+(try
+  (require '[ccw.e4.model])
+  (catch Exception e
+    (println "ccw.e4.model could not be loaded.")))
+
 ;; remove this once CCW has definitely dropped Eclipse 3.x support
 (def DATA
   "IEventBroker/DATA"
@@ -8,7 +13,6 @@
 (def event-broker
   (delay
     (try 
-      (require '[ccw.e4.model])
       (ccw.e4.model/context-key @ccw.e4.model/app :event-broker)
       (catch Exception e
         (println "Event Broker cannot be loaded. Please upgrade to Eclipse 4")

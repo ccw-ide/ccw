@@ -11,6 +11,8 @@ Laurent Petit <laurent dot petit at gmail dot com>
 == Changes between Counterclockwise 0.31.0 and 0.31.1
 
 `0.31.1` released on December xx, 2014
+=== Fix
+- Editors which were open when exiting the IDE would break when reloading. Fix Issue #678 - Error trying to edit a Clojure source file, after upgrading to v0.31.0
 
 === User Plugins
 
