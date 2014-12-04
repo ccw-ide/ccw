@@ -8,21 +8,15 @@ Laurent Petit <laurent dot petit at gmail dot com>
 :toc-title!:
 :toclevels: 0
 
-== Changes between Counterclockwise 0.30.0 and 0.30.1
+== Changes between Counterclockwise 0.30.0 and 0.31.0
 
-`0.30.1` released on November , 2014
+`0.31.0` released on December 4, 2014
 
 === Fix
 - Removed lots of workspace locks when managing leiningen dependencies (after importing a project, after editing project.clj) which were really annoying because it was then impossible to save a file because the background leiningen job had a lock on the workspace. Fix #Issue 671 - Update leiningen dependencies should not block the workspace that long
 - Eclipse source folders could not be correctly set when some Leiningen plugins were placing jar files external to the project in the source folders list. Fix Issue #675 - Could not reset project classpath NPE
 
-=== CCW/Standalone Product
-=== Leiningen
-=== Project creation wizard
-
 === User Plugins
-
-
 ==== Feature
 
 - Added namespace `ccw.api.repl` for use by user plugins. Related to REPL management (sending expressions for evaluation, getting/setting the current namespace).
@@ -41,6 +35,7 @@ Everytime a Clojure editor is saved, a map with the namespace String, the absolu
 
 === REPLs
 Everytime a response is received from an nrepl connection, the response data is posted to the Eclipse 4 Event Broker to the "ccw/repl/response" topic (just use :ccw.repl.response in your user plugins to refer to the topic, the conversion from :ccw.repl.reponse to "ccw/repl/response" is done by `ccw.events` functions).
+
 
 == Changes between Counterclockwise 0.29.1 and 0.30.0
 
