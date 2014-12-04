@@ -69,15 +69,17 @@
    :part             MPart
    :event-broker     IEventBroker
    :workbench        org.eclipse.ui.IWorkbench
+   :eclipse-context "org.eclipse.e4.core.contexts.IEclipseContext"
    })
 
 (defn context-key 
-  "Get value of key k for has-context which must be extended from protocol HasContext"
-  [has-context k]
-  (.get (-context has-context)
-    (if (keyword? k)
-      (service-constants k)
-      k)))
+  "Get value of key k for has-context which must be extended from protocol HasContext.
+   For the 3-arity version, return default-k if the context does not contain the key."
+  ([has-context k] (context-key has-context k nil))
+  ([has-context k default-k]
+    (let [context (-context has-context)
+          k (if (keyword? k) (service-constants k) k)]
+      (or (.get context k) default-k))))
 
 ;; Dynamic creation of Model Elements: MParts, MWindow, etc.
 (defn mbasic-factory [] MBasicFactory/INSTANCE)

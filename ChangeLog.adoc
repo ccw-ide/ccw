@@ -12,6 +12,12 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 `0.31.1` released on December xx, 2014
 
+=== User Plugins
+
+==== commands
+The Eclipse context is now wrapped. The wrapper extends ILookup. This allows the Eclipse context to be destructured easily. +
+The original Eclipse context is available with the key "org.eclipse.e4.core.contexts.IEclipseContext" or ":eclipse-context" for advanced usages.
+
 == Changes between Counterclockwise 0.30.0 and 0.31.0
 
 `0.31.0` released on December 4, 2014
