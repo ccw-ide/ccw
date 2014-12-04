@@ -68,6 +68,7 @@
    :mpart            MPart
    :part             MPart
    :event-broker     IEventBroker
+   :workbench        org.eclipse.ui.IWorkbench
    })
 
 (defn context-key 
