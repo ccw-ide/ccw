@@ -8,6 +8,11 @@ Laurent Petit <laurent dot petit at gmail dot com>
 :toc-title!:
 :toclevels: 0
 
+== Changes between Counterclockwise 0.31.1 and 0.31.2
+
+`0.31.2` released on December 4, 2014
+
+
 == Changes between Counterclockwise 0.31.0 and 0.31.1
 
 `0.31.1` released on December 4, 2014
