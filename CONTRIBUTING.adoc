@@ -78,6 +78,11 @@ ccw$ script/set-version.sh 0.20.0-SNAPSHOT
 - Add the test namespace in `ccw.core.test/src/clj` using the usual namespace structure for folders
 - Add the namespace to the list of namespaces to be tested in the java file `ccw.core.test/src/java/ccw/core/ClojureTests.java`
 
+== Make CCW depend on a new feature
+
+- Add the new feature dependency to the product definition in file `ccw.product/ccw.product`. See https://github.com/laurentpetit/ccw/blob/v0.31.1.STABLE001/ccw.product/ccw.product#L270
+- If the new feature is not already provided by the p2 repositories known to the build, you'll need to add its repository to file `ccw.parent/pom.xml`. See https://github.com/laurentpetit/ccw/blob/v0.31.1.STABLE001/ccw.parent/pom.xml#L63
+
 
 = Version Release Checklist
 
