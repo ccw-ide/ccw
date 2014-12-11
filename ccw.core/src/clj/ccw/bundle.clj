@@ -33,7 +33,7 @@
 
  (defn bundle 
    "Return the bundle object associated with the bundle-symbolic-name (a String)"
-   ^Bundle [bundle-symbolic-name]
+   [bundle-symbolic-name]
    (Platform/getBundle bundle-symbolic-name))
  
  (defn version 
@@ -98,13 +98,65 @@
   `(with-bundle* (load-and-get-bundle ~(name bundle-name))
      (fn [] ~@body)))
 
+(defn field
+  "Uses reflection to get the value of field field-name of object.
+   Works even for private/protected fields. Does not use any cache, beware
+   using it in tight loops."
+  [object field-name]
+  (let [field (.getDeclaredField (.getClass object) field-name)]
+    (.setAccessible field true)
+    (.get field object)))
+
+(defn force-field!
+  "Uses reflection to set the value of field field-name of object to new-value.
+   Works even for private/protected fields. Does not use any cache, beware
+   using it in tight loops."
+  [object field-name new-value]
+  (let [field (.getDeclaredField (.getClass object) field-name)]
+    (.setAccessible field true)
+    (.set object field new-value)))
+
+(defn registry
+  "Return the IExtensionRegistry instance"
+  [] (org.eclipse.core.runtime.RegistryFactory/getRegistry))
+
+(defn master-token
+  "Steals the master token from the Extension Registry so we can do evil things"
+  []
+  (field (registry) "masterToken"))
+
 ;; http://www.ibm.com/developerworks/opensource/library/os-ecl-dynext/
-(defn add-contribution! [s bundle]
-  (let [registry (org.eclipse.core.runtime.RegistryFactory/getRegistry)
-        key (.getTemporaryUserToken ^ExtensionRegistry registry)
-        contributor (org.eclipse.core.runtime.ContributorFactoryOSGi/createContributor bundle)
-        is (java.io.ByteArrayInputStream. (.getBytes s))]
-    (.addContribution registry is contributor false nil nil key)))
+(defn add-contribution!
+  "s: the contribution, as a String, in the form
+      '<plugin>
+          <extension
+             id=\"a-dynamic-marker-type-id\"
+             name=\"A dynamic marker type\"
+             point=\"org.eclipse.core.resources.markers\">
+               <persistent value=\"true\" />
+               <super type=\"org.eclipse.core.resources.problemmarker\" />
+          </extension>
+        </plugin>'
+   bundle: which bundle declares to be the contributor? defaults to \"ccw.core\"
+   persist: if true, the contribution is stored in registry cache, and thus not lost on Eclipse restart
+            true by default"
+  ([s] (add-contribution! s (bundle "ccw.core")))
+  ([s bundle] (add-contribution! s bundle true))
+  ([s bundle persist]
+    (let [token (.getTemporaryUserToken (registry))]
+      (add-contribution! s bundle persist token)))
+  ([s bundle persist token]
+    (let [contributor (org.eclipse.core.runtime.ContributorFactoryOSGi/createContributor bundle)
+          is (java.io.ByteArrayInputStream. (.getBytes s))]
+      (.addContribution (registry) is contributor persist nil nil token))))
+
+(defn remove-extension!
+  "Remove registry Extension by id.
+   Return true if successfully removed, false if not removed or no such extension."
+  ([id] (remove-extension! (bundle "ccw.core") id))
+  ([bundle id]
+    (when-let [extension (.getExtension (registry) id)]
+      (.removeExtension (registry) extension (master-token)))))
 
 (defn xml-map->extension [ext-map]
   (let [m {:tag "plugin" :content [ext-map]}]

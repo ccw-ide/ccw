@@ -58,7 +58,7 @@
   (io/as-url [p] (io/as-url (io/as-file p))))
 
 (defn workspace 
-  "Return the Eclipse Workspace" ^IWorkspace []
+  "Return the Eclipse Workspace" []
   (ResourcesPlugin/getWorkspace))
 
 

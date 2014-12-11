@@ -12,6 +12,27 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 `0.31.2` released on December 4, 2014
 
+=== User Plugins
+
+- Added namespace `ccw.api.markers` for managing resource markers. Resource markers typically appear in the editor margins (error markers, warning markers, tasks, bookmarks, etc.), and in their respective problem views, task views, bookmark views, etc.
+
+Example: creating a new type of marker `ccw-plugin-clj-lint`, simply inheriting from Eclipse-provided Problem markers (implicit inheritence if not provided), with markers that will persist across Eclipse restarts. Then creating a marker for some imaginary `foo.clj` file, located in project `my-project`, in subfolder `src/bar/`
+
+[source,clojure]
+----
+(require '[ccw.api.markers :refer (register-marker-type! create-marker!)])
+(require '[ccw.eclipse     :refer (workspace-resource)])
+
+(register-marker-type!  {:id "ccw-plugin-clj-lint", :persistent true})
+
+(create-marker!
+  (workspace-resource "my-project/src/bar/foo.clj")
+  {:type        "ccw-plugin-clj-lint"
+   :severity    :warning
+   :line-number 2
+   :message     "The variable baz is unused."})
+----
+
 
 == Changes between Counterclockwise 0.31.0 and 0.31.1
 
