@@ -175,7 +175,6 @@
 
   Object
   (path [o] (adapter o IPath))
-
   
   IPath
   (path [this] this)
@@ -313,6 +312,13 @@
 (defn worskpace-file? [r] (resource-of-type? r :file))
 (defn workspace-folder? [r] (resource-of-type? r :folder))
 (defn workspace-project? [r] (resource-of-type? r :project))
+
+(defn workspace-resource
+  "Takes an IPathCoercible representing a workspace-related resource
+   (e.g. a String like \"/myproject/src/aPackage/aResource.whatever\")
+   and returns a resource handler associated to it"
+  [workspace-path]
+  (.findMember (workspace-root) (path workspace-path)))
 
 (defn file-extension [r] (and r (.getFileExtension r)))
 
