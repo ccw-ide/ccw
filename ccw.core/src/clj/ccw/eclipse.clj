@@ -64,7 +64,7 @@
 
 (defn workspace-root 
   "Return the Eclipse Workspace root"
-  ^IWorkspaceRoot []
+  []
   (.getRoot (workspace)))
 
 (defn workbench 
