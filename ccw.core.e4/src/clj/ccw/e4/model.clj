@@ -70,6 +70,7 @@
    :event-broker     IEventBroker
    :workbench        org.eclipse.ui.IWorkbench
    :eclipse-context "org.eclipse.e4.core.contexts.IEclipseContext"
+   :active-editor   org.eclipse.ui.IEditorPart
    })
 
 (defn context-key 

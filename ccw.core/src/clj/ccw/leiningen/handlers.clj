@@ -34,26 +34,6 @@
 
 (println "ccw.leiningen.handlers load starts")
 
-(defn event->project
-  "Extract (if possible) a project from an execution event"
-  [event]
-  (let [sel (e/current-selection event)
-        part (e/active-part event)]
-    (cond
-      (e/project part) (e/project part)
-      (and (instance? IStructuredSelection sel)
-           (-> ^IStructuredSelection sel .getFirstElement))
-        ;; TODO consider giving the user a hint for why the expected command did not work
-        (some-> ^IStructuredSelection sel .getFirstElement e/resource .getProject e/project)
-      :else (when-let [editor (e/active-editor event)]
-              (e/project editor)))))
-
-(defn event->java-project
-  "Extract (if possible) a java project from an execution event"
-  [event]
-  (when-let [p (event->project event)]
-    (JavaCore/create p)))
-
 (defn update-dependencies
   "Pre-requisites:
    - Either the event's selection is a selection containing resources of the 
@@ -64,7 +44,7 @@
    In both cases, the found project must be open, and with the Leiningen nature
    enabled."
   [handler event]
-  (when-let [java-project (event->java-project event)]
+  (when-let [java-project (e/event->java-project event)]
     (cpc/update-project-dependencies java-project)))
 
 (defn generic-launch
@@ -77,7 +57,7 @@
    In both cases, the found project must be open, and with the Leiningen nature
    enabled."
   [handler event]
-  (if-let [project (event->project event)]
+  (if-let [project (e/event->project event)]
     (glaunch/generic-launch (when (e/project-open? project) project))
     (e/info-dialog "Leiningen Prompt" "unable to launch leiningen - no project found")))
 
@@ -179,12 +159,12 @@
       (.schedule))))
 
 (defn reset-project-build-path 
-  ([handler event] (reset-project-build-path (event->java-project event)))
+  ([handler event] (reset-project-build-path (e/event->java-project event)))
   ([java-project]
     (when java-project (upgrade-project-build-path java-project true))))
 
 (defn update-project-build-path [handler event]
-  (when-let [java-project (event->java-project event)]
+  (when-let [java-project (e/event->java-project event)]
     (upgrade-project-build-path java-project false)))
 
 (println "ccw.leiningen.handlers namespace loaded")

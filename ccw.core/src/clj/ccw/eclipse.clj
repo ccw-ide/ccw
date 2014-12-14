@@ -21,7 +21,8 @@
                                      Status]
            [org.eclipse.core.runtime.preferences IEclipsePreferences
                                                  InstanceScope]
-           [org.eclipse.jdt.core IJavaProject]
+           [org.eclipse.jdt.core IJavaProject
+                                 JavaCore]
            [org.eclipse.debug.core ILaunchConfiguration ILaunch]
            [org.eclipse.ui.handlers HandlerUtil]
            [org.eclipse.ui IEditorPart
@@ -237,6 +238,23 @@
         (CCWPlugin/logError (str "Unable to find " plugin-name " plugin. This is probably a regression."))
         nil))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Event Handler utilities
+
+(defn current-selection [execution-event]
+  (HandlerUtil/getCurrentSelection execution-event))
+
+(defn active-editor [execution-event]
+  (HandlerUtil/getActiveEditor execution-event))
+
+(defn active-part [execution-event]
+  (HandlerUtil/getActivePart execution-event))
+
+(defn null-progress-monitor []
+  (org.eclipse.core.runtime.NullProgressMonitor.))
+
+
+
 (def ^:private
   resource-type {IResource/FOLDER  IResource/FOLDER
                  IResource/PROJECT IResource/PROJECT
@@ -426,6 +444,41 @@
         (desc-natures! desc new-natures))
       desc)))
 
+(defn event->project
+  "Extract (if possible) a project from an execution event"
+  [event]
+  (let [sel (current-selection event)
+        part (active-part event)]
+    (cond
+      (project part) (project part)
+      (and (instance? IStructuredSelection sel)
+           (-> ^IStructuredSelection sel .getFirstElement))
+        ;; TODO consider giving the user a hint for why the expected command did not work
+        (some-> ^IStructuredSelection sel .getFirstElement resource project)
+      :else (when-let [editor (active-editor event)]
+              (project editor)))))
+
+(defn event->java-project
+  "Extract (if possible) a java project from an execution event"
+  [event]
+  (when-let [p (event->project event)]
+    (JavaCore/create p)))
+
+(defn context-map->project
+  "Extract (if possible) a project from a context-map"
+  [{:keys [active-selection active-part active-editor]}]
+  (println "active-selection:" active-selection)
+  (println "active-part:" active-part)
+  (println "active-editor:" active-editor)
+  (cond
+    (project active-part) (project active-part)
+    (and
+      (instance? IStructuredSelection active-selection)
+      (-> ^IStructuredSelection active-selection .getFirstElement))
+    ;; TODO consider giving the user a hint for why the expected command did not work
+      (some-> ^IStructuredSelection active-selection .getFirstElement resource project)
+    :else (when active-editor (project active-editor))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Editor helper functions
 ;; 
@@ -552,21 +605,6 @@
    Example:"
   ([key value] (preference! "ccw.core" key value))
   ([preferences-or-node-name key value] (.put (as-preferences preferences-or-node-name) key value)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Event Handler utilities
-
-(defn current-selection [execution-event]
-  (HandlerUtil/getCurrentSelection execution-event))
-
-(defn active-editor [execution-event]
-  (HandlerUtil/getActiveEditor execution-event))
-
-(defn active-part [execution-event]
-  (HandlerUtil/getActivePart execution-event))
-
-(defn null-progress-monitor []
-  (org.eclipse.core.runtime.NullProgressMonitor.))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; SWT utilities
