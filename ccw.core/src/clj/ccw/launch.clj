@@ -167,11 +167,18 @@
     (set-attribute! working-copy k v))
   working-copy)
 
+(defn valid&unique-name
+  "Create a valid and unique name for the launch configuration"
+  [s]
+  (-> (DebugPlugin/getDefault)
+     .getLaunchManager
+     (.generateLaunchConfigurationName s)))
+
 (defn- new-working-copy
   "Create a launch configuration working copy with given name and type-id"
   [& {:keys #{name type-id} :or {type-id :java}}]
-  (let [name (or name (.toString (java.util.UUID/randomUUID)))
-        manager (-> (DebugPlugin/getDefault) .getLaunchManager)
+  (let [name (valid&unique-name (or name (.toString (java.util.UUID/randomUUID))))
+        manager (.getLaunchManager (DebugPlugin/getDefault))
         type (.getLaunchConfigurationType manager (launch-configuration-types type-id type-id))]
     (.newInstance type nil name)))
 
@@ -181,7 +188,6 @@
   (let [m (merge (default-launch) m)
         wc (new-working-copy :name (:name m) :type-id (:type-id m))
         attrs (dissoc m :name :type-id)
-        
         wc (set-attributes! wc attrs)]
     wc))
 
