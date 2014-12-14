@@ -1,5 +1,7 @@
 (ns ccw.api.markers
-  "API for managing problem markers in Eclipse."
+  "API for managing problem markers in Eclipse.
+   References:
+   - https://www.eclipse.org/articles/Article-Mark%20My%20Words/mark-my-words.html"
   (:require [ccw.eclipse :as e]
             [ccw.bundle :as b])
   (:import [org.eclipse.ui.texteditor MarkerUtilities]
@@ -108,11 +110,13 @@
   "Transforms a map defining a type into a String representing a valid Eclipse
    xml extension."
   [type-def]
+  (when (.contains (:id type-def) ".")
+        (throw (RuntimeException. (str "id" (:id type-def) " must not contain dots"))))
   (b/xml-map->extension 
     {:tag "extension"
      :attrs {:point "org.eclipse.core.resources.markers"
              :id (:id type-def)
-             :name (or (:name type-def) (:id type-def))}
+             :name (or (:name type-def) (:id type-def) "<unknown>")}
      :content (into []
                 (concat
                   [{:tag "persistent"
@@ -148,8 +152,6 @@
      {:id \"ccw-plugin-my-other-id\", :persistent true, :parents [:problem]})"
   ([type-def] (register-marker-type! (b/bundle "ccw.core") type-def))
   ([bundle type-def]
-    (when (.contains (:id type-def) ".")
-      (throw (RuntimeException. (str "id" (:id type-def) " must not contain dots"))))
     (b/remove-extension! (str (.getSymbolicName bundle) "." (:id type-def)))
     (let [ext-str (as-extension type-def)]
       (b/add-contribution!
@@ -170,22 +172,3 @@
      .getExtensions
      (filter #(.contains (.getUniqueIdentifier %) s))
      (map #(.getUniqueIdentifier %))))
-
-(comment
-  
-(require '[ccw.api.markers :refer (register-marker-type! create-marker!)])
-(require '[ccw.eclipse     :refer (workspace-resource)])
-
-(register-marker-type! {:id "ccw-plugin-clj-lint", :persistent true})
-
-(create-marker!
-  (workspace-resource "my-project/src/bar/foo.clj")
-  {:type        "ccw-plugin-clj-lint"
-   :severity    :warning
-   :line-number 1
-   :message     "The variable baz is unused."})
-
-(ma/delete-markers! (e/workspace-resource "my-project"))
-
-)
-

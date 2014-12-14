@@ -8,7 +8,12 @@
                                  DebugUITools]
            [org.eclipse.debug.core ILaunchManager
                                    DebugPlugin
-                                   ILaunchConfiguration]
+                                   ILaunchConfiguration
+                                   IDebugEventSetListener
+                                   DebugEvent
+                                   ILaunchesListener2
+                                   IStreamListener]
+           [org.eclipse.debug.core.model IProcess]
            [org.eclipse.debug.core.sourcelookup ISourcePathComputer]))
 
 ;;;; UTILITY FOR JDT
@@ -114,8 +119,9 @@
     
 (def default-jre-container-name "Name of the default JRE container" JavaRuntime/JRE_CONTAINER)
 
-(def default-launch
+(defn default-launch
   "Somes default values for launch configurations: GUID name, java type"
+  []
   {:name (.toString (java.util.UUID/randomUUID))
    :type-id :java})
 
@@ -172,7 +178,7 @@
 (defn mk-launch-configuration-working-copy 
   "Create a working copy given the launch configuration spec in map m."
   [m]
-  (let [m (merge default-launch m)
+  (let [m (merge (default-launch) m)
         wc (new-working-copy :name (:name m) :type-id (:type-id m))
         attrs (dissoc m :name :type-id)
         
@@ -193,10 +199,49 @@
 (defn launch 
   "Launch configuration (either a ILaunchConfigurationWorkingCopy, either a Map spec)
    in the given mode"
-  [mode configuration]
-  (DebugUITools/launch
-    (launch-configuration configuration)
-    (launch-modes mode mode)))
+  ([mode configuration]
+    (DebugUITools/launch
+      (launch-configuration configuration)
+      (launch-modes mode mode)))
+  ([mode configuration {:keys [result-listener] :as options}]
+    (let [lc (launch-configuration configuration)]
+      (when result-listener
+        (let [right-launch? (fn [launch]
+                              (and (= (.getName lc)
+                                     (-> launch .getLaunchConfiguration .getName))
+                                (first (seq (.getProcesses launch)))))
+              listener (let [state (atom {:add-listener? true
+                                          :str-out (StringBuilder.)
+                                          :str-err (StringBuilder.)
+                                          :exit-value nil})]
+                         (reify ILaunchesListener2
+                           (launchesRemoved [this launches])
+                           (launchesAdded [this launches])
+                           (launchesChanged [this launches]
+                             (when-let [process (and (:add-listener? @state)
+                                                  (some right-launch? launches))]
+                               (swap! state assoc :add-listener? false)
+                               (-> process .getStreamsProxy .getOutputStreamMonitor
+                                 (.addListener
+                                   (reify IStreamListener
+                                     (streamAppended [this text monitor]
+                                       (.append (:str-out @state) text)))))
+                               (-> process .getStreamsProxy .getErrorStreamMonitor
+                                 (.addListener
+                                   (reify IStreamListener
+                                     (streamAppended [this text monitor]
+                                       (.append (:str-err @state) text)))))))
+                           (launchesTerminated [this launches]
+                             (when-let [process (some right-launch? launches)]
+                               (swap! state assoc :exit-value (.getExitValue process))
+                               (future (result-listener
+                                         (.toString (:str-out @state))
+                                         (.toString (:str-err @state))
+                                         (:exit-value @state))))
+                             (-> (DebugPlugin/getDefault)
+                               .getLaunchManager (.removeLaunchListener this)))))]
+          (-> (DebugPlugin/getDefault) .getLaunchManager (.addLaunchListener listener))))
+      (DebugUITools/launch lc (launch-modes mode mode)))))
 
 (def debug "Launch a configuration in debug mode" (partial launch :debug))
 (def run   "Launch a configuration in run   mode" (partial launch :run))

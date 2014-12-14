@@ -1,6 +1,6 @@
 (ns ccw.leiningen.launch
-  (:require [ccw.launch      :as launch]
-            [ccw.eclipse     :as e]))
+  (:require [ccw.launch  :as launch]
+            [ccw.eclipse :as e]))
 
 (def leiningen-standalone-path-pref
   "ccw.core's preference key for storing the absolute filesystem path of a leiningen standalone jar
@@ -17,11 +17,13 @@
           leiningen-standalone-path (if-not (seq leiningen-standalone-path)
                                       (e/get-file-inside-plugin "ccw.core" "leiningen-standalone.jar")
                                       leiningen-standalone-path)]
-      {
-       :private                true
+      {:private                true
        :launch-in-background   false
        :append-environment-variables true
-       :name                   launch-name
+       :name                   (or launch-name
+                                 (str (gensym (format "%s (%s)-"
+                                                command
+                                                (e/project-name project)))))
        
        :java/project-name      (and project (e/project-name project))
        :java/classpath         [{:entry-type :lib
@@ -44,9 +46,12 @@
 
 (defn lein 
   "project can be nil"
-  [project command & {:keys [leiningen-standalone-path launch-name] :as rest}]
-  (println (lein-launch-configuration project command rest))
-  (launch/run (lein-launch-configuration project command rest)))
+  [project command & {:keys [result-listener] :as rest}]
+  (let [lc (lein-launch-configuration project command rest)]
+    (apply
+      launch/run
+      (lein-launch-configuration project command rest)
+      (when result-listener [{:result-listener result-listener}]))))
   
 (comment 
   (lein "project-name" "repl :headless"))
