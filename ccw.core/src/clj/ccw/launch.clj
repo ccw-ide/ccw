@@ -156,7 +156,7 @@
   [working-copy attr value]
   (let [value (compute-value attr value)
         attr  (attrs-map attr attr)]
-    (.setAttribute working-copy attr value)
+    (when (string? attr) (.setAttribute working-copy attr value))
     working-copy))
 
 (defn- set-attributes! [working-copy attrs-map]

@@ -16,33 +16,35 @@
                                         (e/preference leiningen-standalone-path-pref nil))
           leiningen-standalone-path (if-not (seq leiningen-standalone-path)
                                       (e/get-file-inside-plugin "ccw.core" "leiningen-standalone.jar")
-                                      leiningen-standalone-path)]
-      {:private                true
-       :launch-in-background   false
-       :append-environment-variables true
-       :name                   (or launch-name
-                                 (str (gensym (format "%s (%s)-"
-                                                command
-                                                (e/project-name project)))))
-       
-       :java/project-name      (and project (e/project-name project))
-       :java/classpath         [{:entry-type :lib
-                                 :path leiningen-standalone-path}
-                                {:entry-type :lib
-                                 :path (e/get-file-inside-plugin "ccw.core" "lein")}
-                                {:entry-type :jre-container
-                                 :name launch/default-jre-container-name}]
-       :java/default-classpath false
-       :java/vm-arguments      (str 
-                                 " -client" 
-                                 " -Xbootclasspath/a:" "\"" (.toOSString (e/path leiningen-standalone-path)) "\"" 
-                                 " -XX:+TieredCompilation"
-                                 " -XX:TieredStopAtLevel=1"
-                                 " -Dfile.encoding=UTF-8"
-                                 " -Dmaven.wagon.http.ssl.easy=false")
-       :java/main-type-name    "clojure.main"
-       :java/program-arguments (str "-m ccw.leiningen.main " command)
-      })))
+                                      leiningen-standalone-path)
+          options (dissoc options :leiningen-standalone-path)]
+      (merge {:private                true
+              :launch-in-background   false
+              :append-environment-variables true
+              :name                   (or launch-name
+                                        (str (gensym (format "%s (%s)-"
+                                                       command
+                                                       (e/project-name project)))))
+              
+              :java/project-name      (and project (e/project-name project))
+              :java/classpath         [{:entry-type :lib
+                                        :path leiningen-standalone-path}
+                                       {:entry-type :lib
+                                        :path (e/get-file-inside-plugin "ccw.core" "lein")}
+                                       {:entry-type :jre-container
+                                        :name launch/default-jre-container-name}]
+              :java/default-classpath false
+              :java/vm-arguments      (str 
+                                        " -client" 
+                                        " -Xbootclasspath/a:" "\"" (.toOSString (e/path leiningen-standalone-path)) "\"" 
+                                        " -XX:+TieredCompilation"
+                                        " -XX:TieredStopAtLevel=1"
+                                        " -Dfile.encoding=UTF-8"
+                                        " -Dmaven.wagon.http.ssl.easy=false")
+              :java/main-type-name    "clojure.main"
+              :java/program-arguments (str "-m ccw.leiningen.main " command)
+              }
+        options))))
 
 (defn lein 
   "project can be nil"
@@ -50,9 +52,9 @@
   (let [lc (lein-launch-configuration project command rest)]
     (apply
       launch/run
-      (lein-launch-configuration project command rest)
+      lc
       (when result-listener [{:result-listener result-listener}]))))
-  
+
 (comment 
   (lein "project-name" "repl :headless"))
 
