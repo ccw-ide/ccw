@@ -481,13 +481,9 @@ public final class WizardNewLeiningenProjectTemplatePage extends WizardPage {
      * The specific location for the project folder, or null if default location
      */
     public URI getLocationURI() {
-    	if (previousLocationCheckbox.getSelection()) {
-    		return null;
-    	} else {
-    		String parentDir = locationText.getText();
-    		String projectFolder = getProjectName();
-    		return new File(parentDir, projectFolder).toURI();
-    	}
+		String parentDir = locationText.getText();
+		String projectFolder = getProjectName();
+		return new File(parentDir, projectFolder).toURI();
     }
 
 	public void persistSettings() {

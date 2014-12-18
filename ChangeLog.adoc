@@ -16,6 +16,11 @@ Internal Refactoring: merge of the Eclipse 4 code into the main Counterclockwise
 
 From now on, Counterclockwise drops Eclipse 3.x support, and only supports Eclipse 4.
 
+=== Fix
+
+- New Clojure Project Wizard honors the 'use previous location' checkbox. Fixes #682
+
+
 == Changes between Counterclockwise 0.31.1 and 0.31.2
 
 `0.31.2` released on December 4, 2014
