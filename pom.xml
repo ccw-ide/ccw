@@ -12,7 +12,6 @@
         <modules>
                 <module>ccw.branding</module>
                 <module>ccw.core</module>
-                <module>ccw.core.e4</module>
                 <module>paredit.clj</module>
                 <module>ccw.feature</module>
                 <module>doc</module>

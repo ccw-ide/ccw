@@ -24,7 +24,7 @@ This page explains how to install a development environment for hacking on CCW.
 
 - Clone CCW Repository 
 ** https://github.com/laurentpetit/ccw
-- In Eclipse, import the repository projects (`ccw.aggregator`, `ccw.branding`, `ccw.core`, `ccw.core.e4`, `ccw.core.test`, `ccw.feature`, `ccw.parent`, `ccw.product`, `doc`, `paredit.clj`)
+- In Eclipse, import the repository projects (`ccw.aggregator`, `ccw.branding`, `ccw.core`, `ccw.core.test`, `ccw.feature`, `ccw.parent`, `ccw.product`, `doc`, `paredit.clj`)
 - cd into `ccw.core` and invoke `mvn clean verify`
 ** This will install all CCW dependencies in folder `ccw.core/lib/`
 ** The operation must be be repeated after each update of `ccw.core` dependencies

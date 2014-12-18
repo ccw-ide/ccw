@@ -76,7 +76,7 @@ Having a problem? Check the <<configure,Configure Counterclockwise>> Section or 
 Pre-requisites
 
 - Java Virtual Machine (JVM) 7 running Eclipse
-- Eclipse 4.3 (Kepler) highly recommanded. Eclipse 3.7 (Indigo) still supported.
+- Eclipse 4.3 (Kepler) highly recommanded. Eclipse 3 (Indigo, Eclipse 3.8.x) not supported for new versions (>= 0.30).
 ** any packaging including JDT (Java Development Tools) will do:  "Eclipse SDK" package, "Eclipse for Java Developers" package, "Eclipse for Java EE Developers" package, etc.
 ====
 
