@@ -611,7 +611,7 @@
 
 ;;; TODO fusionner avec swt.clj
 (defn ui*
-  "Calls f with (optionnaly) args on the UI Thread, using
+  "Calls f with (optionally) args on the UI Thread, using
    Display/asyncExec.
    Return a promise which can be used to get back the
    eventual result of the execution of f.
@@ -626,6 +626,9 @@
                       (apply f args)
                       (catch Exception e e)))))
     a))
+
+(defmacro async-ui [& args]
+  `(ui* (fn [] ~@args)))
 
 (defmacro ui [& args]
   `(if (org.eclipse.swt.widgets.Display/getCurrent)
