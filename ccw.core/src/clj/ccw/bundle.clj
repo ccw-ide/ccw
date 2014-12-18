@@ -140,15 +140,15 @@
    bundle: which bundle declares to be the contributor? defaults to \"ccw.core\"
    persist: if true, the contribution is stored in registry cache, and thus not lost on Eclipse restart
             true by default"
-  ([s] (add-contribution! s (bundle "ccw.core")))
-  ([s bundle] (add-contribution! s bundle true))
-  ([s bundle persist]
+  ([name s] (add-contribution! name s (bundle "ccw.core")))
+  ([name s bundle] (add-contribution! name s bundle true))
+  ([name s bundle persist]
     (let [token (.getTemporaryUserToken (registry))]
-      (add-contribution! s bundle persist token)))
-  ([s bundle persist token]
+      (add-contribution! name s bundle persist token)))
+  ([name s bundle persist token]
     (let [contributor (org.eclipse.core.runtime.ContributorFactoryOSGi/createContributor bundle)
           is (java.io.ByteArrayInputStream. (.getBytes s))]
-      (.addContribution (registry) is contributor persist nil nil token))))
+      (.addContribution (registry) is contributor persist name nil token))))
 
 (defn remove-extension!
   "Remove registry Extension by id.
@@ -161,21 +161,6 @@
 (defn xml-map->extension [ext-map]
   (let [m {:tag "plugin" :content [ext-map]}]
     (with-out-str (xml/emit-element m))))
-
-(defn add-command! [bundle command-attrs]
-  (let [ext-str (xml-map->extension 
-                  {:tag "extension"
-                   :attrs {:point "org.eclipse.ui.commands"}
-                   :content [{:tag "command"
-                              :attrs command-attrs}]})]
-    (add-contribution! ext-str bundle)))
-
-(defn add-menu! [bundle menu-contribution]
-  (let [ext-str (xml-map->extension 
-                  {:tag "extension"
-                   :attrs {:point "org.eclipse.ui.menus"}
-                   :content [menu-contribution]})]
-    (add-contribution! ext-str bundle)))
 
 ;(ccw.bundle/add-contribution! 
 ;     "

@@ -101,10 +101,24 @@
    the Eclipse Marker Manager."
   []
   (let [mm (.getMarkerManager (e/workspace))
-         cache-field (.getDeclaredField org.eclipse.core.internal.resources.MarkerManager "cache")
-         new-cache (org.eclipse.core.internal.resources.MarkerTypeDefinitionCache.)]
+        cache-field (.getDeclaredField org.eclipse.core.internal.resources.MarkerManager "cache")
+        new-cache (org.eclipse.core.internal.resources.MarkerTypeDefinitionCache.)]
     (.setAccessible cache-field true)
     (.set cache-field mm new-cache)))
+
+(defn- reset-marker-MarkerTypesModel!
+  "The Eclipse Marker API does not dynamically update its marker type list when
+   we dynamically register a new marker type extension.
+   This function is a work-around that reinjects a newly created cache into
+   the Eclipse MarkerTypesModel."
+  []
+  (let [instance-field (.getDeclaredField org.eclipse.ui.views.markers.internal.MarkerTypesModel "instance")]
+    (.setAccessible instance-field true)
+    (.set instance-field nil nil)))
+
+(defn- reset-marker-types! []
+  (reset-marker-manager-cache!)
+  (reset-marker-MarkerTypesModel!))
 
 (defn- as-extension
   "Transforms a map defining a type into a String representing a valid Eclipse
@@ -129,6 +143,18 @@
                        :attrs {:type (type-map parent parent)}})
                     (or (seq (:parents type-def))
                       [:ccw]))))}))
+
+(defn find-marker-extensions-in-registry
+  "Find all marker extensions whose unique name contain the string s.
+   Useful for debuggin in the REPL."
+  [s]
+  (->> (.getExtensionPoint
+         (org.eclipse.core.runtime.Platform/getExtensionRegistry)
+         "org.eclipse.core.resources"
+         "markers")
+     .getExtensions
+     (filter #(.contains (.getUniqueIdentifier %) s))
+     (map #(.getUniqueIdentifier %))))
 
 (defn register-marker-type!
   "Given the type definition map, registers the marker type with Eclipse
@@ -155,20 +181,10 @@
     (b/remove-extension! (str (.getSymbolicName bundle) "." (:id type-def)))
     (let [ext-str (as-extension type-def)]
       (b/add-contribution!
+        (or (:name type-def) (:id type-def))
         ext-str
         bundle
         true ; we must force persistence, or markers disappear when Eclipse restarts
         (b/master-token)))
-    (reset-marker-manager-cache!)))
+    (reset-marker-types!)))
 
-(defn find-marker-extensions-in-registry
-  "Find all marker extensions whose unique name contain the string s.
-   Useful for debuggin in the REPL."
-  [s]
-  (->> (.getExtensionPoint
-         (org.eclipse.core.runtime.Platform/getExtensionRegistry)
-         "org.eclipse.core.resources"
-         "markers")
-     .getExtensions
-     (filter #(.contains (.getUniqueIdentifier %) s))
-     (map #(.getUniqueIdentifier %))))
