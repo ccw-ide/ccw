@@ -30,9 +30,10 @@
             <version>0.2.0</version>
           </dependency>
         <dependency>
-            <groupId>org.clojure</groupId>
+            <groupId>ccw</groupId>
             <artifactId>clojure</artifactId>
-            <version>1.6.0</version>
+            <version>1.7.0-master-SNAPSHOT</version>
+            <!--version>1.7.0-alpha4</version-->
         </dependency>
         <dependency>
             <groupId>org.clojure</groupId>
