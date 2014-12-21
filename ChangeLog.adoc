@@ -10,11 +10,13 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 == Changes between Counterclockwise 0.31.2 and 0.32.0
 
-`0.32.0` released on Dcember xx, 2014
+`0.32.0` released on December xx, 2014
 
 Internal Refactoring: merge of the Eclipse 4 code into the main Counterclockwise Plugin.
 
 From now on, Counterclockwise drops Eclipse 3.x support, and only supports Eclipse 4.
+
+Internally, Counterclockwise now uses Clojure 1.7.0-master. It adds a couple patches to it, waiting for the relevant JIRA tickets to be applied mainstream.
 
 === Fix
 
