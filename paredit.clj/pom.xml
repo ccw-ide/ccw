@@ -48,15 +48,21 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.clojure</groupId>
-      <artifactId>clojure</artifactId>
-      <version>1.5.1</version>
+      <groupId>ccw</groupId>
+      <artifactId>clojure-ccw</artifactId>
+      <version>1.7.0-01</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>clojure-contrib</artifactId>
       <version>1.2.0</version>
+      <exclusions>
+          <exclusion>
+              <groupId>org.clojure</groupId>
+              <artifactId>clojure</artifactId>
+          </exclusion>
+      </exclusions>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -64,12 +70,24 @@
       <artifactId>core.incubator</artifactId>
       <version>0.1.0</version>
       <scope>test</scope>
+      <exclusions>
+          <exclusion>
+              <groupId>org.clojure</groupId>
+              <artifactId>clojure</artifactId>
+          </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>net.cgrand</groupId>
       <artifactId>parsley</artifactId>
       <version>0.9.2</version>
       <scope>test</scope>
+      <exclusions>
+          <exclusion>
+              <groupId>org.clojure</groupId>
+              <artifactId>clojure</artifactId>
+          </exclusion>
+      </exclusions>
     </dependency>
   </dependencies>
 </project>
