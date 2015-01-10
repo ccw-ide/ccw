@@ -1,8 +1,39 @@
-/*.zip
-/*.tgz
+*.zip
+*.tgz
 .DS_Store
-*.swp
-/workspace
-.DS_Store
+workspace/
 ccw.repl.cmdhistory.prefs
+.lein-repl-history
 .nrepl
+.project
+*.orig
+
+# https://github.com/github/gitignore/blob/master/Global/Eclipse.gitignore
+*.pydevproject
+.metadata
+.gradle
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
+
+# External tool builders
+.externalToolBuilders/
+
+# Locally stored "Eclipse launch configurations"
+# CDT-specific
+.cproject
+
+# PDT-specific
+.buildpath
+
+# sbteclipse plugin
+.target
+
+# TeXlipse plugin
+.texlipse
