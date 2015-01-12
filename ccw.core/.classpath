@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="lib/tools.namespace.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/tools.trace.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/cljs-tooling.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/compliment.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/java.classpath.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/cider-nrepl.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/hamcrest-core.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/pedantic.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/aether-api.jar"/>
