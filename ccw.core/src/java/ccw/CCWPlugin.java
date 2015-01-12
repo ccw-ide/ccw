@@ -12,10 +12,7 @@
  *******************************************************************************/
 package ccw;
 
-import java.io.IOException;
-import java.net.ServerSocket;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.core.resources.IProject;
@@ -47,6 +44,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 
+import ccw.core.StaticStrings;
 import ccw.editors.clojure.IScanContext;
 import ccw.launching.LaunchUtils;
 import ccw.nature.AutomaticNatureAdder;
@@ -54,13 +52,12 @@ import ccw.preferences.PreferenceConstants;
 import ccw.preferences.SyntaxColoringHelper;
 import ccw.repl.REPLView;
 import ccw.repl.SafeConnection;
-import ccw.util.BundleUtils;
+import ccw.util.ClojureInvoker;
 import ccw.util.DisplayUtil;
 import ccw.util.ITracer;
 import ccw.util.NullTracer;
 import ccw.util.Tracer;
 import clojure.lang.Keyword;
-import clojure.lang.Var;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -95,11 +92,13 @@ public class CCWPlugin extends AbstractUIPlugin {
     
     private FontRegistry fontRegistry;
     
-    private ServerSocket ackREPLServer;
     
 	private AutomaticNatureAdder synchronizedNatureAdapter;
 
 	private ITracer tracer = NullTracer.INSTANCE;
+	
+	// Clojure Invokers
+	private ClojureInvoker lauchInvoker;
 	
 	public static ITracer getTracer() {
 		CCWPlugin plugin = getDefault();
@@ -109,31 +108,18 @@ public class CCWPlugin extends AbstractUIPlugin {
 			return NullTracer.INSTANCE;
 	}
     
-    public synchronized void startREPLServer() {
-    	if (ackREPLServer == null) {
-	        try {
-	        	// TODO use ClojureOSGi.withBundle instead
-	        	Var startServer = BundleUtils.requireAndGetVar(getBundle().getSymbolicName(), "clojure.tools.nrepl.server/start-server");
-	        	Object defaultHandler = BundleUtils.requireAndGetVar(
-	        	        getBundle().getSymbolicName(),
-	        	        "clojure.tools.nrepl.server/default-handler").invoke();
-	        	Object handler = BundleUtils.requireAndGetVar(
-	        	        getBundle().getSymbolicName(),
-	        	        "clojure.tools.nrepl.ack/handle-ack").invoke(defaultHandler);
-	            ackREPLServer = (ServerSocket)((Map)startServer.invoke(Keyword.intern("handler"), handler)).get(Keyword.intern("server-socket"));
-	            CCWPlugin.log("Started ccw nREPL server: nrepl://127.0.0.1:" + ackREPLServer.getLocalPort());
-	        } catch (Exception e) {
-	            CCWPlugin.logError("Could not start plugin-hosted REPL server", e);
-	            throw new RuntimeException("Could not start plugin-hosted REPL server", e);
-	        }
+    public void startREPLServer() {
+    	try {
+    		lauchInvoker._("ccw-nrepl-start-if-necessary");
+    	} catch (Exception e) {
+    		CCWPlugin.logError("Could not start plugin-hosted REPL server", e);
+    		throw new RuntimeException("Could not start plugin-hosted REPL server", e);
     	}
     }
     
     public int getREPLServerPort() {
-    	if (ackREPLServer == null) {
-    		startREPLServer();
-    	}
-    	return ackREPLServer.getLocalPort();
+    	startREPLServer();
+    	return (Integer) lauchInvoker._("ccw-nrepl-port");
     }
 
     public CCWPlugin() {
@@ -144,7 +130,9 @@ public class CCWPlugin extends AbstractUIPlugin {
         super.start(context);
         System.out.println("CCWPlugin.start: ENTER");
         plugin = this;
-        
+
+        lauchInvoker = ClojureInvoker.newInvoker(this, "ccw.core.launch");
+
         context.addBundleListener(new BundleListener() {
 			
 			@Override
@@ -172,7 +160,7 @@ public class CCWPlugin extends AbstractUIPlugin {
 										return;
 									Thread.sleep(200);
 								} catch (InterruptedException e) {
-									e.printStackTrace();
+									logError("Error while querying for the active bundle", e);
 								}
 							}
 
@@ -198,30 +186,27 @@ public class CCWPlugin extends AbstractUIPlugin {
 									try {
 										Thread.sleep(200);
 									} catch (InterruptedException e) {
-										e.printStackTrace();
+										logError("Error while trying to Thread.sleep.", e);
 									}
 								}
 							}
 
 							// Here, the workbench is initialized
-					        if (System.getProperty("ccw.autostartnrepl") != null) {
-					        	try {
+							if (System.getProperty(StaticStrings.CCW_PROPERTY_NREPL_AUTOSTART) != null) {
+								try {
 									startREPLServer();
 								} catch (Exception e) {
-									e.printStackTrace();
+									logError("Error while querying for property: " + StaticStrings.CCW_PROPERTY_NREPL_AUTOSTART, e);
 								}
-					        }
-					        
-					        getNatureAdapter().start();
+							}
+
+							getNatureAdapter().start();
 						}
 						
 					}).start();
 				}
 			}
 		});
-        
-
-        
         System.out.println("CCWPlugin.start: EXIT");
     }
     
@@ -310,12 +295,10 @@ public class CCWPlugin extends AbstractUIPlugin {
     }
     
     private void stopREPLServer() {
-    	if (ackREPLServer != null) {
-    		try {
-				ackREPLServer.close();
-			} catch (IOException e) {
-				logError("Error while trying to close ccw internal nrepl server", e);
-			}
+    	try {
+    		lauchInvoker._("ccw-nrepl-stop");
+    	} catch (Exception e) {
+    		logError("Error while trying to close ccw internal nrepl server", e);
     	}
     }
     
@@ -427,7 +410,7 @@ public class CCWPlugin extends AbstractUIPlugin {
                 	return replView;
                 }
             }
-        };
+        }
         
         return null;
     }

@@ -17,7 +17,7 @@
   <packaging>eclipse-plugin</packaging>
 
   <properties>
-    <nrepl.version>0.2.3</nrepl.version>
+    <nrepl.version>0.2.5</nrepl.version>
     <leiningen.version>2.5.0</leiningen.version>
   </properties>
 
