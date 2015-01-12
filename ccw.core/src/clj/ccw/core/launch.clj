@@ -1,7 +1,8 @@
 (ns ccw.core.launch
   (:require [clojure.tools.nrepl.server :refer [start-server stop-server default-handler]]
             [clojure.tools.nrepl.ack :refer [handle-ack]]
-            [ccw.eclipse :as e])
+            [cider.nrepl :refer (cider-nrepl-handler)]
+            [ccw.eclipse :refer [property-ccw-nrepl-port property-ccw-nrepl-cider-enable]])
   (:import ccw.CCWPlugin
            ccw.core.StaticStrings
            java.lang.System))
@@ -50,11 +51,14 @@
   []
   (when (= nil @ccw-nrepl-server-map)
     ;; TODO use ClojureOSGi.withBundle instead
-    (let [nrepl-port (e/property-ccw-nrepl-port)]
+    (let [nrepl-port (property-ccw-nrepl-port)
+          handler (if (property-ccw-nrepl-cider-enable)
+                    (handle-ack cider-nrepl-handler)
+                    (handle-ack (default-handler)))]
       (if (= 0 nrepl-port)
         (CCWPlugin/log (str "nRepl port will be automatically selected"))
         (CCWPlugin/log (str "nRepl port will be: " nrepl-port)))
-      (reset! ccw-nrepl-server-map (start-server :port nrepl-port :handler (handle-ack (default-handler))))
+      (reset! ccw-nrepl-server-map (start-server :port nrepl-port :handler handler))
       (CCWPlugin/log (str "Started ccw nREPL server: nrepl://127.0.0.1:" nrepl-port)))))
 
 (defn ccw-nrepl-port
