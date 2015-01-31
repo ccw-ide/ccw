@@ -31,6 +31,8 @@
                            IWorkbench]
            [org.eclipse.jface.viewers IStructuredSelection]
            [org.eclipse.jface.operation IRunnableWithProgress]
+           [org.eclipse.jface.util IPropertyChangeListener]
+           [org.eclipse.jface.preference IPreferenceStore]
            [org.eclipse.core.commands ExecutionEvent]
            [org.eclipse.ui.actions WorkspaceModifyDelegatingOperation]
            [java.io File IOException]
@@ -608,6 +610,50 @@
    Example:"
   ([key value] (preference! "ccw.core" key value))
   ([preferences-or-node-name key value] (.put (as-preferences preferences-or-node-name) key value)))
+
+(defn ccw-combined-prefs
+  ^IPreferenceStore []
+  (.getCombinedPreferenceStore (ccw.CCWPlugin/getDefault)))
+
+(defn boolean-ccw-pref
+  "Get the value of a boolean Preference set for CCW. The 2-arity
+  function allows to specify an IPreferenceStore."
+  ([pref-key] (boolean-ccw-pref (ccw-combined-prefs) pref-key))
+  ([ccw-prefs pref-key] (.getBoolean ccw-prefs pref-key)))
+
+(defn int-ccw-pref
+  "Get the value of an Int Preference set for CCW. The 2-arity function
+  allows to specify an IPreferenceStore."
+  ([pref-key] (int-ccw-pref (ccw-combined-prefs) pref-key))
+  ([ccw-prefs pref-key] (.getInt ccw-prefs pref-key)))
+
+(defn string-ccw-pref
+  "Get the value of an Int Preference set for CCW. The 2-arity function
+  allows to specify an IPreferenceStore."
+  ([pref-key] (string-ccw-pref (ccw-combined-prefs) pref-key))
+  ([ccw-combined-prefs pref-key] (.getString ccw-combined-prefs pref-key)))
+
+(defn ^IEclipsePreferences get-pref-node
+  "Get the preference node set for CCW"
+  [^String project-name ^String pref-node-id]
+  (-?> project-name
+    ccw.launching.LaunchUtils/getProject
+    org.eclipse.core.resources.ProjectScope.
+    (.getNode pref-node-id)
+    (doto .sync)))
+
+(defn add-preference-listener
+  "Adds a listener in order to react to changes in the pref-key preference and executes
+   the given closure if any. Note that this function generates a IPropertyChangeListener
+   every time it is invoked. The version without preference store defaults toccw-combined-prefs."
+  ([pref-key closure]
+    (add-preference-listener (ccw-combined-prefs) pref-key closure))
+  ([^IPreferenceStore pref-store pref-key closure]
+    (-> pref-store (.addPropertyChangeListener (reify
+                                                 IPropertyChangeListener
+                                                 (propertyChange [this event]
+                                                   (when (= (.getProperty event) pref-key)
+                                                     (closure))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; SWT utilities
