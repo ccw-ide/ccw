@@ -1,8 +1,7 @@
 (ns ^{:doc "Eclipse interop utilities"}
      ccw.eclipse
-     (:require [clojure.java.io :as io]
-               [clojure.test :refer [deftest testing is]])
-  (:use [clojure.core.incubator :only [-?> -?>>]])
+  (:require [clojure.java.io :as io]
+            [clojure.core.incubator :refer [.?.]])
   (:import [org.eclipse.core.resources IResource
                                        IProject
                                        IProjectDescription
@@ -28,7 +27,9 @@
            [org.eclipse.ui.handlers HandlerUtil]
            [org.eclipse.ui IEditorPart
                            PlatformUI
-                           IWorkbench]
+                           IWorkbench
+                           IWorkbenchWindow
+                           IWorkbenchPage]
            [org.eclipse.jface.viewers IStructuredSelection]
            [org.eclipse.jface.operation IRunnableWithProgress]
            [org.eclipse.jface.util IPropertyChangeListener]
@@ -80,13 +81,17 @@
 (defn workbench-window
   "Return the Active workbench window" 
   ([] (workbench-window (workbench)))
-  ([workbench] (.getActiveWorkbenchWindow workbench)))
+  ([^IWorkbench workbench] (.?. workbench getActiveWorkbenchWindow)))
 
 (defn workbench-page
-  "Return the Active workbench page" 
+  "Return the Active workbench page, might return nil."
   ([] (workbench-page (workbench-window)))
-  ([workbench-window] (.getActivePage workbench-window)))
+  ([^IWorkbenchWindow workbench-window] (.?. workbench-window getActivePage)))
 
+(defn workbench-editor
+  "Return the Active workbench editor, might return nil."
+  ([] (workbench-editor (workbench-page)))
+  ([^IWorkbenchPage workbench-page] (.?. workbench-page getActiveEditor)))
 
 (defprotocol IProjectCoercion
   (project ^org.eclipse.core.resources.IProject [this] "Coerce this into an IProject"))
@@ -613,7 +618,7 @@
 
 (defn ccw-combined-prefs
   ^IPreferenceStore []
-  (.getCombinedPreferenceStore (ccw.CCWPlugin/getDefault)))
+  (some-> (ccw.CCWPlugin/getDefault) .getCombinedPreferenceStore ))
 
 (defn boolean-ccw-pref
   "Get the value of a boolean Preference set for CCW. The 2-arity
@@ -636,16 +641,18 @@
 (defn ^IEclipsePreferences get-pref-node
   "Get the preference node set for CCW"
   [^String project-name ^String pref-node-id]
-  (-?> project-name
+  (some-> project-name
     ccw.launching.LaunchUtils/getProject
     org.eclipse.core.resources.ProjectScope.
     (.getNode pref-node-id)
     (doto .sync)))
 
 (defn add-preference-listener
-  "Adds a listener in order to react to changes in the pref-key preference and executes
-   the given closure if any. Note that this function generates a IPropertyChangeListener
-   every time it is invoked. The version without preference store defaults toccw-combined-prefs."
+  "Adds a listener in order to react to changes in the pref-key
+  preference and executes the given closure if any. Note that this
+  function generates a IPropertyChangeListener every time it is
+  invoked. The version without preference store defaults to
+  ccw-combined-prefs."
   ([pref-key closure]
     (add-preference-listener (ccw-combined-prefs) pref-key closure))
   ([^IPreferenceStore pref-store pref-key closure]
@@ -973,9 +980,9 @@
   ([service-locator desc]
     (let [binding-service (service service-locator :bindings)
           kb (key-binding desc)
-          kb-id (-?> kb .getParameterizedCommand .getId)
-          id-binding-map (-?>> (bindings service-locator) 
-                           (group-by #(-?> % .getParameterizedCommand .getId)))
+          kb-id (some-> kb .getParameterizedCommand .getId)
+          id-binding-map (some->> (bindings service-locator)
+                           (group-by #(some-> % .getParameterizedCommand .getId)))
           id-binding-map (update-in id-binding-map [kb-id] (fnil conj []) kb)]
       (.savePreferences binding-service 
         (.getActiveScheme binding-service) 
@@ -1002,12 +1009,3 @@
    (if-let [nrepl-port (re-matches port-validating-regex (str port))]
       (Integer/valueOf nrepl-port)
       0)))
-
-
-(deftest property-tests
-  (testing "nRepl port validation tests"
-    (is (= 0 (property-ccw-nrepl-port 0)))
-    (is (= 0 (property-ccw-nrepl-port 65536)))
-    (is (= 4 (property-ccw-nrepl-port 4)))
-    (is (= 4 (property-ccw-nrepl-port "4")))
-    (is (= 65535 (property-ccw-nrepl-port 65535)))))

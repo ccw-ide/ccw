@@ -179,6 +179,13 @@ public class PreferenceConstants {
     
     public static final String EDITOR_COLORING_ENABLED_SUFFIX = ".enabled"; //$NON-NLS-1$
 
+	/**
+	 * A named preference that defines the key for the hover modifier state masks.
+	 * The value is only used if the value of <code>EDITOR_TEXT_HOVER_MODIFIERS</code>
+	 * cannot be resolved to valid SWT modifier bits (taken from org.eclipse.jdt.ui).
+	 */
+	public static final String EDITOR_TEXT_HOVER_DESCRIPTORS = CCW_PREFERENCE_PREFIX + ".hover_descriptors"; //$NON-NLS-1$
+
     public static class ColorizableToken {
     	public final RGB rgb;
     	public final Boolean isBold;
