@@ -1,12 +1,12 @@
 (ns ccw.editors.clojure.PareditAutoAdjustWhitespaceStrategyImpl
-  (:require [paredit [core :refer [paredit]]])
-  (:require [clojure.core.incubator :refer [-?>]])
-  (:require [ccw.editors.clojure.paredit-auto-edit-support :as support])
-  (:require [paredit.loc-utils :as lu])
-  (:require [paredit.text-utils :as tu])
-  (:require [paredit.parser :as p])
-  (:require [clojure.string :as s])
-  (:require [clojure.zip :as zip])
+  (:require [paredit [core :refer [paredit]]]
+            [clojure.core.incubator :refer [-?>]]
+            [ccw.eclipse :refer [boolean-ccw-pref]]
+            [paredit.loc-utils :as lu]
+            [paredit.text-utils :as tu]
+            [paredit.parser :as p]
+            [clojure.string :as s]
+            [clojure.zip :as zip])
   (:import
     [org.eclipse.jface.text IAutoEditStrategy
                             IDocument
