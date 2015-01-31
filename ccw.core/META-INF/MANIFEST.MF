@@ -5,8 +5,7 @@ Bundle-SymbolicName: ccw.core;singleton:=true
 Bundle-Version: 0.31.2.qualifier
 Bundle-Localization: plugin
 Bundle-Activator: ccw.CCWPlugin
-Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime,
+Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui.ide,
  org.eclipse.jdt.launching,
  org.eclipse.jdt.core,
@@ -44,7 +43,15 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.e4.ui.widgets,
  org.eclipse.e4.ui.workbench,
  org.eclipse.core.runtime.compatibility,
- org.eclipse.osgi.services
+ org.eclipse.osgi.services,
+ org.eclipse.core.databinding,
+ org.eclipse.core.databinding.property,
+ org.eclipse.core.databinding.beans,
+ org.eclipse.ui.workbench,
+ org.eclipse.jface.databinding,
+ org.eclipse.core.databinding.observable,
+ org.eclipse.osgi,
+ org.eclipse.jdt.annotation;bundle-version="[1.1.0,2.0.0)";resolution:=optional
 Bundle-ClassPath: .,
  src/clj/,
  lib/aether-api.jar,
@@ -125,6 +132,8 @@ Bundle-ClassPath: .,
  lib/cljunit.jar,
  lib/hamcrest-core.jar,
  lib/pedantic.jar,
+ lib/tools.logging.jar,
+ lib/java.data.jar,
  lib/cider-nrepl.jar,
  lib/java.classpath.jar,
  lib/compliment.jar,
@@ -138,4 +147,3 @@ Export-Package: ccw,ccw.builder,ccw.commands,ccw.core,ccw.debug,ccw.ed
  itors.clojure,ccw.editors.outline,ccw.launching,ccw.leiningen,ccw.nat
  ure,ccw.preferences,ccw.repl,ccw.util,ccw.util.osgi,ccw.wizards
 Bundle-ActivationPolicy: lazy
-

@@ -1,8 +1,7 @@
 (ns ^{:doc "Eclipse interop utilities"}
      ccw.eclipse
-     (:require [clojure.java.io :as io]
-               [clojure.test :refer [deftest testing is]])
-  (:use [clojure.core.incubator :only [-?> -?>>]])
+  (:require [clojure.java.io :as io]
+            [clojure.core.incubator :refer [.?.]])
   (:import [org.eclipse.core.resources IResource
                                        IProject
                                        IProjectDescription
@@ -28,7 +27,9 @@
            [org.eclipse.ui.handlers HandlerUtil]
            [org.eclipse.ui IEditorPart
                            PlatformUI
-                           IWorkbench]
+                           IWorkbench
+                           IWorkbenchWindow
+                           IWorkbenchPage]
            [org.eclipse.jface.viewers IStructuredSelection]
            [org.eclipse.jface.operation IRunnableWithProgress]
            [org.eclipse.jface.util IPropertyChangeListener]
@@ -38,9 +39,7 @@
            [java.io File IOException]
            [ccw CCWPlugin]
            [ccw.util PlatformUtil DisplayUtil]
-           [ccw.launching LaunchUtils]
-           java.lang.System
-           ccw.core.StaticStrings))
+           [ccw.launching LaunchUtils]))
 
 (defn adapter
   "Invokes Eclipse Platform machinery to try by all means to adapt object to 
@@ -80,13 +79,17 @@
 (defn workbench-window
   "Return the Active workbench window" 
   ([] (workbench-window (workbench)))
-  ([workbench] (.getActiveWorkbenchWindow workbench)))
+  ([^IWorkbench workbench] (.?. workbench getActiveWorkbenchWindow)))
 
 (defn workbench-page
-  "Return the Active workbench page" 
+  "Return the Active workbench page, might return nil."
   ([] (workbench-page (workbench-window)))
-  ([workbench-window] (.getActivePage workbench-window)))
+  ([^IWorkbenchWindow workbench-window] (.?. workbench-window getActivePage)))
 
+(defn workbench-editor
+  "Return the Active workbench editor, might return nil."
+  ([] (workbench-editor (workbench-page)))
+  ([^IWorkbenchPage workbench-page] (.?. workbench-page getActiveEditor)))
 
 (defprotocol IProjectCoercion
   (project ^org.eclipse.core.resources.IProject [this] "Coerce this into an IProject"))
@@ -636,7 +639,7 @@
 (defn ^IEclipsePreferences get-pref-node
   "Get the preference node set for CCW"
   [^String project-name ^String pref-node-id]
-  (-?> project-name
+  (some-> project-name
     ccw.launching.LaunchUtils/getProject
     org.eclipse.core.resources.ProjectScope.
     (.getNode pref-node-id)
@@ -973,9 +976,9 @@
   ([service-locator desc]
     (let [binding-service (service service-locator :bindings)
           kb (key-binding desc)
-          kb-id (-?> kb .getParameterizedCommand .getId)
-          id-binding-map (-?>> (bindings service-locator) 
-                           (group-by #(-?> % .getParameterizedCommand .getId)))
+          kb-id (some-> kb .getParameterizedCommand .getId)
+          id-binding-map (some->> (bindings service-locator)
+                           (group-by #(some-> % .getParameterizedCommand .getId)))
           id-binding-map (update-in id-binding-map [kb-id] (fnil conj []) kb)]
       (.savePreferences binding-service 
         (.getActiveScheme binding-service) 

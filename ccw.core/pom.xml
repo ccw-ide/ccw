@@ -83,6 +83,11 @@
         </dependency>
         <dependency>
             <groupId>org.clojure</groupId>
+            <artifactId>java.data</artifactId>
+            <version>0.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.clojure</groupId>
             <artifactId>java.classpath</artifactId>
             <version>0.2.2</version>
         </dependency>
