@@ -21,6 +21,9 @@ public class ClojureTests extends ClojureTest {
 		
 		namespaces.add("ccw.edn-test");
 		namespaces.add("ccw.launch-test");
+		namespaces.add("ccw.extensions-test");
+		namespaces.add("ccw.util-test");
+		namespaces.add("ccw.editors.clojure.hover-support-test");
 		
 		requireNamespaces(namespaces);
 	}

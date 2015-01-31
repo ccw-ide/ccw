@@ -25,8 +25,8 @@
         prev-caret-offset (.caretOffset command)]
     (when (and (.doit command)
                (not (.isInEscapeSequence editor))
-               (support/boolean-ccw-pref PreferenceConstants/EXPERIMENTAL_AUTOSHIFT_ENABLED))
-      (when-let [{[modif] :modifs offset :offset} 
+               (boolean-ccw-pref PreferenceConstants/EXPERIMENTAL_AUTOSHIFT_ENABLED))
+      (when-let [{[modif] :modifs offset :offset}
                  (lu/col-shift (.getParseState editor)
                                {:offset (.offset command)
                                 :length (.length command) 

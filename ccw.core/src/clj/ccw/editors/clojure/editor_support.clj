@@ -7,6 +7,7 @@
 ;*
 ;* Contributors: 
 ;*    Laurent PETIT - initial API and implementation
+;*    Andrea Richiardi - SourceViewer* wrapper
 ;*******************************************************************************/
 (ns
   ^{:doc 
@@ -22,7 +23,8 @@
                                     (used for determining deltas between 2 updates)
    "}
   ccw.editors.clojure.editor-support 
-  (:require [paredit.parser :as p]
+  (:require [clojure.core.incubator :refer [.?.]]
+            [paredit.parser :as p]
             [paredit.loc-utils :as lu]
             [paredit.static-analysis :as static-analysis]
             [ccw.jdt :as jdt]
@@ -126,3 +128,8 @@
     {:namespace     (.findDeclaringNamespace editor)
      :absolute-path (some-> editor .getEditorInput e/resource e/path .toOSString)
      :repl          (-> editor .getCorrespondingREPL)}))
+
+(defn source-viewer
+  "Return the ClojureSourceViewer of the input IClojureEditor, might return nil."
+  ([] (source-viewer (e/workbench-editor)))
+  ([^IClojureEditor editor] (.?. editor (sourceViewer))))

@@ -24,6 +24,7 @@ import org.eclipse.jface.text.IDocumentExtension3;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.ITextHover;
+import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.text.contentassist.ContentAssistEvent;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.ICompletionListener;
@@ -53,9 +54,9 @@ public class ClojureSourceViewerConfiguration extends
 	private final ClojureInvoker proposalProcessor = ClojureInvoker.newInvoker(
             CCWPlugin.getDefault(),
             "ccw.editors.clojure.clojure-proposal-processor");
-	private final ClojureInvoker textHover = ClojureInvoker.newInvoker(
-            CCWPlugin.getDefault(),
-            "ccw.editors.clojure.clojure-text-hover");
+	
+	ClojureInvoker hoverSupportInvoker = ClojureInvoker.newInvoker(CCWPlugin.getDefault(),
+            "ccw.editors.clojure.hover-support");
 	
 	public ClojureSourceViewerConfiguration(IPreferenceStore preferenceStore,
 			IClojureEditor editor) {
@@ -151,8 +152,7 @@ public class ClojureSourceViewerConfiguration extends
 			ISourceViewer sourceViewer) {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
-				return new DefaultInformationControl(parent,
-						new HTMLTextPresenter());
+				return new DefaultInformationControl(parent, new HTMLTextPresenter());
 			}
 		};
 	}
@@ -173,14 +173,24 @@ public class ClojureSourceViewerConfiguration extends
 		// and code, and spell check based on these partitions
 		return null;
 	}
+
 	
 	@Override
-	public ITextHover getTextHover(ISourceViewer sourceViewer,
-			String contentType) {
-		return (ITextHover) textHover._("make-TextHover", editor);
+	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
+		return (ITextHover) hoverSupportInvoker._("hover-instance", editor, contentType, stateMask);
 	}
 
 	@Override
+	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType) {
+		return getTextHover(sourceViewer, contentType, ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK);
+	}
+
+	@Override
+    public int[] getConfiguredTextHoverStateMasks(ISourceViewer sourceViewer, String contentType) {
+	    return (int[])hoverSupportInvoker._("configured-state-masks", sourceViewer, contentType);
+    }
+
+    @Override
 	public IAutoEditStrategy[] getAutoEditStrategies(
 			ISourceViewer sourceViewer, final String contentType) {
 		

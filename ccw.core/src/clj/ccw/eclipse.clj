@@ -81,17 +81,17 @@
 (defn workbench-window
   "Return the Active workbench window" 
   ([] (workbench-window (workbench)))
-  ([^IWorkbench workbench] (.?. workbench getActiveWorkbenchWindow)))
+  ([^IWorkbench workbench] (some-> workbench .getActiveWorkbenchWindow)))
 
 (defn workbench-page
   "Return the Active workbench page, might return nil."
   ([] (workbench-page (workbench-window)))
-  ([^IWorkbenchWindow workbench-window] (.?. workbench-window getActivePage)))
+  ([^IWorkbenchWindow workbench-window] (some-> workbench-window .getActivePage)))
 
 (defn workbench-editor
   "Return the Active workbench editor, might return nil."
   ([] (workbench-editor (workbench-page)))
-  ([^IWorkbenchPage workbench-page] (.?. workbench-page getActiveEditor)))
+  ([^IWorkbenchPage workbench-page] (some-> workbench-page .getActiveEditor)))
 
 (defprotocol IProjectCoercion
   (project ^org.eclipse.core.resources.IProject [this] "Coerce this into an IProject"))

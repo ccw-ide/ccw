@@ -107,6 +107,8 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
         new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.replLogError), true, new RGB(0x80, 0, 0), false, false),
     };
     
+    public static final String DEFAULT_EDITOR_TEXT_HOVER_DESCRIPTORS = "({:id \"ccw.editors.clojure.hovers.docstringHover\", :enabled true, :modifier-string \"\"})";
+    
 	@Override
 	public void initializeDefaultPreferences() {
 	    IPreferenceStore store = CCWPlugin.getDefault().getPreferenceStore();
@@ -148,5 +150,8 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	    
 	    // Experimental Features
 	    store.setDefault(PreferenceConstants.EXPERIMENTAL_AUTOSHIFT_ENABLED, true);
+	    
+	    // Hover pref
+	    store.setDefault(PreferenceConstants.EDITOR_TEXT_HOVER_DESCRIPTORS, DEFAULT_EDITOR_TEXT_HOVER_DESCRIPTORS);
 	}
 }
