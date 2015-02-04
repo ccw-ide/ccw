@@ -30,7 +30,7 @@
             [ccw.bundle :refer [available? bundle]]
             [ccw.eclipse :refer [preference
                                  preference!
-                                 workbench-editor]]
+                                 workbench-active-editor]]
             [ccw.editors.clojure.editor-support :refer [source-viewer]]
             [ccw.core.trace :refer [trace]]
             [ccw.extensions :refer [configuration-elements
@@ -48,7 +48,7 @@
             ;; remove these
             [clojure.pprint :refer [pprint]]))
 
-(set! *warn-on-reflection* true)
+#_(set! *warn-on-reflection* true)
 
 (defn- create-hover
   "When the bundle is available and the element has activate=true, adds
@@ -271,7 +271,7 @@
 
 (def ^{:doc "Function that resets the default hover of the active editor."}
   reset-default-hover-on-active-editor!
-  #(reset-default-hover-on-editor! (workbench-editor)))
+  #(reset-default-hover-on-editor! (workbench-active-editor)))
 
 ;;;;;;;;;;;;;;;;;
 ;;; Listeners ;;;
@@ -352,7 +352,7 @@
 
 (defn hover-instance
   "Returns an ITextHover (or extensions) instance give editor, content-type and state-mask."
-  [editor content-type state-mask]
+  [content-type state-mask]
   ;; TODO The selection could be improved by indexing the descriptors by state-mask
   (init-atoms)
   (let [select-descriptor (partial select-hover-or-default

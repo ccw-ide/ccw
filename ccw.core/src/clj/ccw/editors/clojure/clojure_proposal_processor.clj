@@ -9,23 +9,23 @@
             [ccw.debug.serverrepl :as serverrepl]
             [ccw.core.trace :as trace]
             [ccw.editors.clojure.editor-common :as common])
-  (:use [clojure.core.incubator :only [-?>]])
   (:import [org.eclipse.jface.viewers StyledString
                                       StyledString$Styler]
            [org.eclipse.jface.text ITextViewer]
-           [org.eclipse.jface.text.contentassist 
-            IContentAssistProcessor
-            ContentAssistant
-            CompletionProposal
-            ICompletionProposal
-            ICompletionProposalExtension6
-            IContextInformation
-            IContextInformationExtension
-            IContextInformationValidator]
+           [org.eclipse.jface.text.contentassist IContentAssistProcessor
+                                                 ContentAssistant
+                                                 CompletionProposal
+                                                 ICompletionProposal
+                                                 ICompletionProposalExtension6
+                                                 IContextInformation
+                                                 IContextInformationExtension
+                                                 IContextInformationValidator]
            [org.eclipse.jdt.core JavaCore
                                  IMethod
                                  IType]
-           [ccw.editors.clojure IClojureEditor]))
+           [ccw.editors.clojure IClojureAwarePart
+                                IClojurePart
+                                IReplAwarePart]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; parse tree manipulation functions
@@ -44,15 +44,15 @@
     (first (filter (comp call? z/node) parents))))
 
 (defn call-context-loc
-  "for viewer, at offset 12, return the loc containing the encapsulating
+  "For a IClojureAwarePart, at offset 12, return the loc containing the encapsulating
    call, or nil"
-  [^IClojureEditor viewer offset]
+  [^IClojureAwarePart part offset]
   (when (pos? offset)
-    (let [loc (lu/loc-containing-offset 
-                (-> viewer .getParseState :parse-tree lu/parsed-root-loc)
+    (let [loc (lu/loc-containing-offset
+                (-> part .getParseState :parse-tree lu/parsed-root-loc)
                 offset)
-          maybe-call-loc (-?> loc parent-call)]
-      (when (-?> maybe-call-loc z/node call?)
+          maybe-call-loc (some-> loc parent-call)]
+      (when (some-> maybe-call-loc z/node call?)
         maybe-call-loc))))
 
 (defn call-symbol
@@ -203,7 +203,7 @@
           (swap! timed-out-safe-connections update-in [safe-connection] (fnil inc 0)))))))
 
 (defn find-var-metadata
-  [current-namespace ^IClojureEditor editor var]
+  [current-namespace ^IClojurePart editor var]
   (when-let [repl (.getCorrespondingREPL editor)]
     (let [safe-connection (.getSafeToolingConnection repl)
           command (format (str "(ccw.debug.serverrepl/var-info "
@@ -225,7 +225,7 @@
 (defn find-suggestions
   "For the given prefix, inside the current editor and in the current namespace,
    query the remote REPL for code completions list"
-  [current-namespace prefix ^IClojureEditor editor find-only-public]
+  [current-namespace prefix ^IReplAwarePart editor find-only-public]
   (cond
     (nil? namespace) []
     (s/blank? prefix) []
@@ -306,26 +306,25 @@
 
 (defn compute-completion-proposals
   "Return the list of java completion objects to the Completion framework."
-  [^IClojureEditor editor      content-assistant
-   ^ITextViewer text-viewer offset]
+  [^IClojureAwarePart source-viewer content-assistant offset]
   (reset! ca content-assistant)
-  (let [prefix-offset (compute-prefix-offset 
-                        (-> text-viewer .getDocument .get)
+  (let [prefix-offset (compute-prefix-offset
+                        (-> source-viewer .getDocument .get)
                         offset)
-        current-namespace (.findDeclaringNamespace editor)
+        current-namespace (.findDeclaringNamespace source-viewer)
         prefix (.substring
-                 (-> text-viewer .getDocument .get)
+                 (-> source-viewer .getDocument .get)
                  prefix-offset
                  offset)]
     (when (pos? (count prefix))
       (let [hippie-suggestions (find-hippie-suggestions
                                  prefix
                                  offset
-                                 (.getParseState editor))
-            repl-suggestions (find-suggestions 
+                                 (.getParseState source-viewer))
+            repl-suggestions (find-suggestions
                                current-namespace
                                prefix
-                               editor
+                               source-viewer
                                false)
             suggestions (apply sorted-set-by 
                                (adapt-args (serverrepl/textmate-comparator prefix) :completion :completion)
@@ -357,17 +356,16 @@
           [\. \- \? \!]))
 
 (defn compute-context-information
-  [^IClojureEditor editor
-   text-viewer new-offset]
+  [^IClojureAwarePart part new-offset]
   (into-array
     IContextInformation
-    (when-let [loc (call-context-loc text-viewer new-offset)]
+    (when-let [loc (call-context-loc part new-offset)]
       (let [call-symbol (call-symbol loc)
-            context-info (context-info-data 
-                           call-symbol 
-                           new-offset 
-                           (find-var-metadata (.findDeclaringNamespace editor) 
-                                              editor
+            context-info (context-info-data
+                           call-symbol
+                           new-offset
+                           (find-var-metadata (.findDeclaringNamespace part)
+                                              part
                                               call-symbol))]
         (when context-info [context-info])))))
 
@@ -382,13 +380,13 @@
    The problem is that Eclipse framework then triggers wrongly code completion
    feature.
    This predicate is there to restore the truth :-)"
-  [^IClojureEditor editor offset]
-  (let [parse-tree     ((-> editor .getParseState :parse-tree :abstract-node) 
+  [^IClojureAwarePart part offset]
+  (let [parse-tree     ((-> part .getParseState :parse-tree :abstract-node)
                          p/parse-tree-view)
         last-token-tag (-> parse-tree :content peek :tag)]
     (not= last-token-tag :comment)))
 
-(defn make-process [editor ^ContentAssistant content-assistant]
+(defn make-process [^ContentAssistant content-assistant]
   (reify IContentAssistProcessor
     (computeCompletionProposals
       [this text-viewer offset]
@@ -396,17 +394,13 @@
       ;; TODO manage error message
       (into-array 
         ICompletionProposal
-        (when (should-compute-proposals? editor offset)
-          (compute-completion-proposals
-            editor      content-assistant
-            text-viewer offset))))
-    
+        (when (should-compute-proposals? text-viewer offset)
+          (compute-completion-proposals text-viewer content-assistant offset))))
+
     (computeContextInformation
       [this text-viewer new-offset]
-      (compute-context-information
-        editor
-        text-viewer new-offset))
-    
+      (compute-context-information text-viewer new-offset))
+
     (getCompletionProposalAutoActivationCharacters
       [this] 
       (into-array 

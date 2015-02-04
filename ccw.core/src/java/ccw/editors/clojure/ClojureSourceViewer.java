@@ -7,6 +7,7 @@
  *
  * Contributors: 
  *    Stephan Muehlstrasser - initial implementation
+ *    Andrea Richiardi - refactoring of interfaces and cleaning
  *******************************************************************************/
 
 package ccw.editors.clojure;
@@ -57,9 +58,8 @@ import ccw.repl.REPLView;
 import ccw.util.ClojureInvoker;
 import ccw.util.DisplayUtil;
 
-public abstract class ClojureSourceViewer extends ProjectionViewer implements
-        IClojureEditor, IPropertyChangeListener {
-    
+public abstract class ClojureSourceViewer extends ProjectionViewer implements IClojureSourceViewer, IPropertyChangeListener {
+
 	private final ClojureInvoker editorSupport = ClojureInvoker.newInvoker(
             CCWPlugin.getDefault(),
             "ccw.editors.clojure.editor-support");
@@ -199,7 +199,6 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
                 if (e.character == SWT.ESC) {
                 	if (!isContentAssistantActive) {
                 		inEscapeSequence = true;
-                		updateTabsToSpacesConverter();
                 		updateStructuralEditingModeStatusField();
                 	}
                 }
@@ -208,7 +207,6 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
             public void keyReleased(KeyEvent e) {
                 if (inEscapeSequence && !(e.character == SWT.ESC)) {
                     inEscapeSequence = false;
-                    updateTabsToSpacesConverter();
                     updateStructuralEditingModeStatusField();
                 }
             }
@@ -279,13 +277,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
         }
     }
 
-    /**
-     * Sets the preference store on this viewer.
-     *
-     * @param store the preference store
-     *
-     * @since 3.0
-     */
+    @Override
     public void setPreferenceStore(IPreferenceStore store) {
         if (fIsConfigured && fPreferenceStore != null)
             fPreferenceStore.removePropertyChangeListener(this);
@@ -544,14 +536,12 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
     public IJavaProject getAssociatedProject() {
         return null;
     }
-    
+
     public REPLView getCorrespondingREPL () {
         // this gets overridden in REPLView as appropriate so that the toolConnection there gets returned
         return null;
     }
-    
-    public void updateTabsToSpacesConverter () {}
-    
+
     // TODO get rid of this way of handling document initialization
     @Override
     public void setDocument(IDocument document,
@@ -728,7 +718,10 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
 	}
 
 	public Object getAdapter(Class adapter) {
-		if ( IClojureEditor.class == adapter) {
+		if (IClojureSourceViewer.class == adapter) {
+			return this;
+		}
+        if (IClojureAwarePart.class == adapter) {
 			return this;
 		}
 		if (ITextOperationTarget.class == adapter) {
