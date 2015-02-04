@@ -8,7 +8,7 @@
  * Contributors: 
  *    Laurent PETIT - initial API and implementation
  *    Some code (e.g. contextInformation wiring) from Scala plugin & original 
- *      clojure rule based editor
+ *      clojure rule based part
  *******************************************************************************/
 package ccw.editors.clojure;
 
@@ -20,7 +20,6 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentExtension3;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.ITextHover;
@@ -31,78 +30,37 @@ import org.eclipse.jface.text.contentassist.ICompletionListener;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
-import org.eclipse.jface.text.presentation.IPresentationDamager;
-import org.eclipse.jface.text.presentation.IPresentationReconciler;
-import org.eclipse.jface.text.presentation.IPresentationRepairer;
-import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.reconciler.IReconciler;
-import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
 import org.eclipse.jface.text.rules.ITokenScanner;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
 
 import ccw.CCWPlugin;
 import ccw.preferences.PreferenceConstants;
 import ccw.util.ClojureInvoker;
 
 public class ClojureSourceViewerConfiguration extends
-		TextSourceViewerConfiguration {
+		SimpleSourceViewerConfiguration {
 	protected ITokenScanner tokenScanner;
-	private final IClojureEditor editor;
+	private final IClojureAwarePart part;
 
 	private final ClojureInvoker proposalProcessor = ClojureInvoker.newInvoker(
             CCWPlugin.getDefault(),
             "ccw.editors.clojure.clojure-proposal-processor");
-	
+
 	ClojureInvoker hoverSupportInvoker = ClojureInvoker.newInvoker(CCWPlugin.getDefault(),
             "ccw.editors.clojure.hover-support");
-	
+
 	public ClojureSourceViewerConfiguration(IPreferenceStore preferenceStore,
-			IClojureEditor editor) {
-		super(preferenceStore);
-		this.editor = editor;
-		initTokenScanner();
-	}
-
-	@Override
-	public IPresentationReconciler getPresentationReconciler(
-			ISourceViewer sourceViewer) {
-		PresentationReconciler reconciler = new PresentationReconciler();
-
-		reconciler
-				.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
-
-		addDamagerRepairerForContentType(reconciler,
-				IDocument.DEFAULT_CONTENT_TYPE);
-
-		return reconciler;
-	}
-
-	@Override
-	public String getConfiguredDocumentPartitioning(ISourceViewer sourceViewer) {
-		return IDocumentExtension3.DEFAULT_PARTITIONING;
-	}
-
-	private void addDamagerRepairerForContentType(
-			PresentationReconciler reconciler, String contentType) {
-		
-		IPresentationDamager d = new ClojureTopLevelFormsDamager(editor); 
-		reconciler.setDamager(d, contentType);
-		
-		IPresentationRepairer r = new DefaultDamagerRepairer(tokenScanner);
-		reconciler.setRepairer(r, contentType);
-
-	}
-
-	public String[] getConfiguredContentTypes(ISourceViewer sourceViewer) {
-		return new String[] { IDocument.DEFAULT_CONTENT_TYPE };
+	        IClojureAwarePart part) {
+		super(preferenceStore, part);
+		this.part = part;
 	}
 
 	@Override
 	public IContentAssistant getContentAssistant(final ISourceViewer sourceViewer) {
 		ContentAssistant assistant = new ContentAssistant();
-		
+
 		assistant.addCompletionListener(new ICompletionListener() {
 			public void assistSessionStarted(ContentAssistEvent event) {
 				((ClojureSourceViewer) sourceViewer).setContentAssistantActive(true);
@@ -116,13 +74,13 @@ public class ClojureSourceViewerConfiguration extends
 
 		assistant.setDocumentPartitioning(ClojurePartitionScanner.CLOJURE_PARTITIONING);
 		assistant.setContentAssistProcessor(
-				(IContentAssistProcessor) proposalProcessor._("make-process", editor, assistant), 
+				(IContentAssistProcessor) proposalProcessor._("make-process", assistant), 
 				IDocument.DEFAULT_CONTENT_TYPE);
 		//assistant.setContentAssistProcessor(
-		//		(IContentAssistProcessor) proposalProcessor._("make-process", editor, assistant), 
+		//		(IContentAssistProcessor) proposalProcessor._("make-process", part, assistant), 
 		//		ClojurePartitionScanner.CLOJURE_COMMENT);
 		//assistant.setContentAssistProcessor(
-		//		(IContentAssistProcessor) proposalProcessor._("make-process", editor, assistant), 
+		//		(IContentAssistProcessor) proposalProcessor._("make-process", part, assistant), 
 		//		ClojurePartitionScanner.CLOJURE_STRING);
 
 		assistant.enableAutoActivation(this.fPreferenceStore.getBoolean(PreferenceConstants.EDITOR_CODE_COMPLETION_AUTO_ACTIVATE));
@@ -157,15 +115,6 @@ public class ClojureSourceViewerConfiguration extends
 		};
 	}
 
-	public void initTokenScanner() {
-		tokenScanner = new ClojureTokenScanner(
-				CCWPlugin.getDefault().getColorCache(), 
-				CCWPlugin.getDefault()
-				.getDefaultScanContext(), 
-				CCWPlugin.getDefault().getCombinedPreferenceStore(),
-				editor);
-	}
-
 	@Override
 	public IReconciler getReconciler(ISourceViewer sourceViewer) {
 		// cf. http://code.google.com/p/counterclockwise/issues/detail?id=5
@@ -177,7 +126,7 @@ public class ClojureSourceViewerConfiguration extends
 	
 	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
-		return (ITextHover) hoverSupportInvoker._("create-hover-proxy", editor, contentType, stateMask);
+		return (ITextHover) hoverSupportInvoker._("hover-instance", contentType, stateMask);
 	}
 
 	@Override
@@ -195,15 +144,15 @@ public class ClojureSourceViewerConfiguration extends
 			ISourceViewer sourceViewer, final String contentType) {
 		
 		return new IAutoEditStrategy[] { 
-				new PareditAutoEditStrategy(editor, fPreferenceStore),
-			    new PareditAutoAdjustWhitespaceStrategy(editor, fPreferenceStore)};
+				new PareditAutoEditStrategy(part, fPreferenceStore),
+			    new PareditAutoAdjustWhitespaceStrategy(part, fPreferenceStore)};
 	}
 	
 	@Override
 	protected Map getHyperlinkDetectorTargets(ISourceViewer sourceViewer) {
 		Map<String, IAdaptable> map = (Map<String, IAdaptable>) super.getHyperlinkDetectorTargets(sourceViewer);
-		if (editor instanceof IAdaptable)
-		    map.put(IHyperlinkConstants.ClojureHyperlinkDetector_TARGET_ID, (IAdaptable)editor);
+		if (part instanceof IAdaptable)
+		    map.put(IHyperlinkConstants.ClojureHyperlinkDetector_TARGET_ID, (IAdaptable)part);
 		return map;
 	}
 	

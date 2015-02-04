@@ -1,11 +1,10 @@
 (ns ccw.editors.clojure.paredit-auto-edit-support
-  (:use [clojure.core.incubator :only [-?>]])  
   (:import [org.eclipse.jface.text DocumentCommand]
-           [ccw.editors.clojure IClojureEditor]))
+           [ccw.editors.clojure IClojureAwarePart]))
 
 (defn init
   "State Initialization for a new AutoEditInstance"
-  [editor preference-store] (ref {:editor editor :prefs-store preference-store}))
+  [part preference-store] (ref {:part part :prefs-store preference-store}))
 
 (defn add-command! [command modif]
   (.addCommand command (:offset modif)
@@ -13,11 +12,11 @@
                        (:text modif)
                        nil))
 
-(defn apply-modif! 
+(defn apply-modif!
   "Apply modification in result to command for editor."
-  [^IClojureEditor editor ^DocumentCommand command result]
+  [^IClojureAwarePart part ^DocumentCommand command result]
   (when (and result (not= :ko (-> result :parser-state)))
-    (if-let [modif (-?> result :modifs first)]
+    (if-let [modif (some-> result :modifs first)]
       (do
         (set! (.offset command) (-> result :modifs first :offset))
         (set! (.length command) (-> result :modifs first :length))
@@ -31,5 +30,5 @@
         (set! (.doit command) false)))
     (set! (.shiftsCaret command) false)
     (set! (.caretOffset command) (:offset result))
-    (when-not (zero? (:length result)) ;;; WHY when-not zero? 
-      (.selectAndReveal editor (:offset result) (:length result)))))
+    (when-not (zero? (:length result)) ;;; WHY when-not zero?
+      (.selectAndReveal part (:offset result) (:length result)))))

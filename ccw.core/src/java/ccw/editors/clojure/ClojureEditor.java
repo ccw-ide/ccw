@@ -7,6 +7,7 @@
  *
  * Contributors: 
  *    Laurent PETIT - initial API and implementation
+ *    Andrea Richiardi - abstraction & interface refactoring
  *******************************************************************************/
 package ccw.editors.clojure;
 
@@ -108,7 +109,6 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 	
 	public ClojureEditor() {
         setPreferenceStore(CCWPlugin.getDefault().getCombinedPreferenceStore());
-		setSourceViewerConfiguration(new ClojureSourceViewerConfiguration(getPreferenceStore(), this));
         setDocumentProvider(new ClojureDocumentProvider()); 
         setHelpContextId(EDITOR_REFERENCE_HELP_CONTEXT_ID);
         addPropertyListener(new IPropertyListener() {
@@ -147,6 +147,7 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 				ClojureEditor.this.setStatusLineErrorMessage(message);
 			}
 		};
+		setSourceViewerConfiguration(new ClojureSourceViewerConfiguration(getPreferenceStore(), viewer));
 		this.viewer = viewer;
 		// ensure decoration support has been created and configured.
 		getSourceViewerDecorationSupport(viewer);
@@ -218,7 +219,7 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 
 	
 	public boolean isInEscapeSequence () {
-	    return ((IClojureEditor)getSourceViewer()).isInEscapeSequence();
+	    return ((IClojureSourceViewer)getSourceViewer()).isInEscapeSequence();
 	}
 	
 	public void toggleStructuralEditionMode() {
@@ -226,9 +227,8 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 	}
 	
     public DefaultCharacterPairMatcher getPairsMatcher() {
-        return ((IClojureEditor) getSourceViewer())==null ? null :
-        	((IClojureEditor) getSourceViewer())
-        	.getPairsMatcher();
+        IClojureSourceViewer isv = (IClojureSourceViewer)getSourceViewer();
+        return isv ==null ? null : isv.getPairsMatcher();
     }
 
     @Override
@@ -516,11 +516,11 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 	}
 
 	public IRegion getUnSignedSelection () {
-	    return ((IClojureEditor)getSourceViewer()).getUnSignedSelection();
+	    return sourceViewer().getUnSignedSelection();
 	}
 	
 	public IRegion getSignedSelection () {
-	    return ((IClojureEditor)getSourceViewer()).getSignedSelection();
+	    return sourceViewer().getSignedSelection();
 	}
 	
 	/*
@@ -591,7 +591,7 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 	}
 	
 	public String findDeclaringNamespace () {
-		return ((IClojureEditor)getSourceViewer()).findDeclaringNamespace();
+		return sourceViewer().findDeclaringNamespace();
 	}
 	
 	public REPLView getCorrespondingREPL () {
@@ -615,13 +615,14 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
     @Override
     protected void setPreferenceStore(IPreferenceStore store) {
         super.setPreferenceStore(store);
-        if (getSourceViewer() instanceof ClojureSourceViewer) {
-            ((ClojureSourceViewer) getSourceViewer()).setPreferenceStore(store);
+        if (getSourceViewer() instanceof IClojureSourceViewer) {
+            ((IClojureSourceViewer) getSourceViewer()).setPreferenceStore(store);
         }
     }
 
-    public final ClojureSourceViewer sourceViewer() {
-        return (ClojureSourceViewer) super.getSourceViewer();
+    @Override
+    public final IClojureSourceViewer sourceViewer() {
+        return (IClojureSourceViewer) super.getSourceViewer();
     }
 
     /** Change the visibility of the method to public */
@@ -708,7 +709,7 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 		return sourceViewer().isForceRepair();
 	}
     
-    
+    @Override
     public boolean isShowRainbowParens() {
     	return sourceViewer().isShowRainbowParens();
     }

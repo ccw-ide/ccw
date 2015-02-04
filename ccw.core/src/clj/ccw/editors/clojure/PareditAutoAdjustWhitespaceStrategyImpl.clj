@@ -1,6 +1,5 @@
 (ns ccw.editors.clojure.PareditAutoAdjustWhitespaceStrategyImpl
   (:require [paredit [core :refer [paredit]]]
-            [clojure.core.incubator :refer [-?>]]
             [ccw.eclipse :refer [boolean-ccw-pref]]
             [paredit.loc-utils :as lu]
             [paredit.text-utils :as tu]
@@ -12,7 +11,7 @@
                             IDocument
                             DocumentCommand]
     [org.eclipse.jface.preference IPreferenceStore]
-    [ccw.editors.clojure IClojureEditor PareditAutoAdjustWhitespaceStrategy]
+    [ccw.editors.clojure IClojureAwarePart PareditAutoAdjustWhitespaceStrategy]
     [ccw.preferences PreferenceConstants]))
    
 
@@ -21,13 +20,13 @@
 (defn customizeDocumentCommand 
   "Work only if no command has been added via (.addCommand)"
   [^PareditAutoAdjustWhitespaceStrategy this, #^IDocument document, #^DocumentCommand command]
-  (let [^IClojureEditor editor (-> this .state deref :editor)
+  (let [^IClojureAwarePart part (-> this .state deref :part)
         prev-caret-offset (.caretOffset command)]
     (when (and (.doit command)
-               (not (.isInEscapeSequence editor))
+               (not (.isInEscapeSequence part))
                (boolean-ccw-pref PreferenceConstants/EXPERIMENTAL_AUTOSHIFT_ENABLED))
       (when-let [{[modif] :modifs offset :offset}
-                 (lu/col-shift (.getParseState editor)
+                 (lu/col-shift (.getParseState part)
                                {:offset (.offset command)
                                 :length (.length command) 
                                 :text   (.text command)})]

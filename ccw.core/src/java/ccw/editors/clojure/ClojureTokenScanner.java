@@ -61,7 +61,7 @@ public final class ClojureTokenScanner implements ITokenScanner {
 //    private final IToken noRainbowParenToken = newParenTokenWith(getSystemColor(SWT.COLOR_DARK_GRAY/*COLOR_BLACK*/));
 
     private ColorRegistry colorCache;
-    private IClojureEditor clojureEditor;
+    private IClojureAwarePart part;
     private IPreferenceStore preferenceStore;
     
     private static IToken newParenTokenWith(Color color) {
@@ -87,14 +87,14 @@ public final class ClojureTokenScanner implements ITokenScanner {
 	private static Keyword readerLiteralTagKeyword = Keyword.intern("reader-literal");
 	private static Keyword whitespaceKeyword = Keyword.intern("whitespace");
 	
-    public ClojureTokenScanner(final ColorRegistry colorCache, IScanContext context, IPreferenceStore preferenceStore, IClojureEditor clojureEditor) {
-        if (clojureEditor == null) {
-        	throw new IllegalArgumentException("clojureEditor cannot be null");
+    public ClojureTokenScanner(final ColorRegistry colorCache, IScanContext context, IPreferenceStore preferenceStore, IClojureAwarePart part) {
+        if (part == null) {
+        	throw new IllegalArgumentException("part cannot be null");
         }
         this.colorCache = colorCache;
         this.context = context;
         this.preferenceStore = preferenceStore;
-        this.clojureEditor = clojureEditor;
+        this.part = part;
         parserTokenKeywordToJFaceToken = new HashMap<Keyword, IToken>();
         initClojureTokenTypeToJFaceTokenMap();
         initialized = true;
@@ -215,7 +215,7 @@ public final class ClojureTokenScanner implements ITokenScanner {
         	if (currentParenLevel < 0) {
         		result = errorToken;
         	} else {
-        		if (this.clojureEditor.isShowRainbowParens()) {
+        		if (this.part.isShowRainbowParens()) {
         			result =  parserTokenKeywordToJFaceToken.get(parenLevelPrefKeywords[currentParenLevel % parenLevelPrefKeywords.length]);
         		} else {
         			result = parserTokenKeywordToJFaceToken.get(PreferenceConstants.deactivatedRainbowParen);
@@ -264,7 +264,7 @@ public final class ClojureTokenScanner implements ITokenScanner {
     	getSymbolTypeDuration = 0;
     	text = document.get();
         tokenSeq = (ISeq) topLevelFormsDamager._("getTokensSeq",
-        		editorSupport._("getParseTree", clojureEditor.getParseState())
+        		editorSupport._("getParseTree", part.getParseState())
         		, offset, length);
         // STRONG HYPOTHESES HERE (related to the Damager used: offset always corresponds to the start of a top level form
         {

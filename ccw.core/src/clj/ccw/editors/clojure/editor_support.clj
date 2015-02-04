@@ -29,8 +29,9 @@
             [paredit.static-analysis :as sa]
             [ccw.jdt :as jdt]
             [ccw.events :refer [post-event]]
-            [ccw.eclipse :refer [resource path workbench-editor]])
-  (:import [ccw.editors.clojure IClojureEditor]
+            [ccw.eclipse :refer [resource path workbench-active-editor]])
+  (:import [ccw.editors.clojure IClojureEditor
+                                IClojureAwarePart]
            [org.eclipse.ui.texteditor SourceViewerDecorationSupport]))
 
 #_(set! *warn-on-reflection* true)
@@ -112,7 +113,7 @@
     (doto s .uninstall .dispose)
     nil))
 
-(defn configureSourceViewerDecorationSupport [^SourceViewerDecorationSupport support ^IClojureEditor viewer]
+(defn configureSourceViewerDecorationSupport [^SourceViewerDecorationSupport support ^IClojureAwarePart viewer]
 		;; TODO more to pick in configureSourceViewerDecorationSupport of AbstractDecoratedTextEditor, if you want ...
   (doto support
     (.setCharacterPairMatcher (.getPairsMatcher viewer))
@@ -127,6 +128,7 @@
      :repl          (-> editor .getCorrespondingREPL)}))
 
 (defn source-viewer
-  "Return the ClojureSourceViewer of the input IClojureEditor, might return nil."
-  ([] (source-viewer (workbench-editor)))
+  "Return the ClojureSourceViewer of the input IClojureEditor, might
+  return nil. The 0-arity tries to get it from the Active editor."
+  ([] (source-viewer (workbench-active-editor)))
   ([^IClojureEditor editor] (.?. editor (sourceViewer))))

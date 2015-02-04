@@ -3,7 +3,7 @@
                                    ITextHover
                                    ITextHoverExtension
                                    ITextHoverExtension2]
-           [ccw.editors.clojure IClojureEditor]
+           [ccw.editors.clojure.IClojureAwarePart]
            [ccw CCWPlugin])
   (:require [ccw.core.trace :refer [trace]]
             [ccw.interop :refer [simple-name]]))

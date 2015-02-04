@@ -33,6 +33,7 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.TextUtilities;
+import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -71,7 +72,7 @@ import ccw.editors.clojure.ClojureColorManager;
 import ccw.editors.clojure.ClojurePartitionScanner;
 import ccw.editors.clojure.ClojurePartitioner;
 import ccw.editors.clojure.ClojureSourceViewer;
-import ccw.editors.clojure.ClojureSourceViewerConfiguration;
+import ccw.editors.clojure.SimpleSourceViewerConfiguration;
 
 /**
  * Configures Clojure Editor syntax coloring preferences.
@@ -732,7 +733,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
 			}
         };
         
-        ClojureSourceViewerConfiguration configuration= new ClojureSourceViewerConfiguration(store, fPreviewViewer);
+        SourceViewerConfiguration configuration= new SimpleSourceViewerConfiguration(store, fPreviewViewer);
         fPreviewViewer.configure(configuration);
         fPreviewViewer.initializeViewerColors();
         

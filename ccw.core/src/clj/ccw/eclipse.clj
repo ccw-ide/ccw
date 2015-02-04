@@ -76,20 +76,43 @@
   "Return the Eclipse Workbench" []
   (PlatformUI/getWorkbench))
 
-(defn workbench-window
-  "Return the Active workbench window" 
-  ([] (workbench-window (workbench)))
+(defn workbench-active-window
+  "Return the Active workbench window. The 0-arity function will try to
+  get the Active window of the Eclipse workbench."
+  ([] (workbench-active-window (workbench)))
   ([^IWorkbench workbench] (.?. workbench getActiveWorkbenchWindow)))
 
-(defn workbench-page
-  "Return the Active workbench page, might return nil."
-  ([] (workbench-page (workbench-window)))
+(defn workbench-windows
+  "Return the workbench windows. The 0-arity function will try to get
+  the windows of the Eclipse workbench."
+  ([] (workbench-windows (workbench)))
+  ([^IWorkbench workbench] (.?. workbench getWorkbenchWindows)))
+
+(defn workbench-active-page
+  "Return the Active workbench page, might return nil. The 0-arity
+  function will try to get the Active page on the Active window."
+  ([] (workbench-active-page (workbench-active-window)))
   ([^IWorkbenchWindow workbench-window] (.?. workbench-window getActivePage)))
 
-(defn workbench-editor
-  "Return the Active workbench editor, might return nil."
-  ([] (workbench-editor (workbench-page)))
+(defn workbench-pages
+  "Return the workbench pages of the input window, might return nil. The
+  0-arity function will try to get the pages on the Active window."
+  ([] (workbench-pages (workbench-active-window)))
+  ([^IWorkbenchWindow workbench-window] (.?. workbench-window getPages)))
+
+(defn workbench-active-editor
+  "Return the Active workbench editor, might return nil. The 0-arity
+  function will try to get the Active editor of the Active page in the
+  Active window."
+  ([] (workbench-active-editor (workbench-active-page)))
   ([^IWorkbenchPage workbench-page] (.?. workbench-page getActiveEditor)))
+
+(defn page-editor-references
+  "Return the editor references of the input page, might return nil. The
+  0-arity function will try to get the editor references of the Active
+  page in the Active window."
+  ([] (page-editor-references (workbench-active-page)))
+  ([^IWorkbenchPage workbench-page] (.?. workbench-page getEditorReferences)))
 
 (defprotocol IProjectCoercion
   (project ^org.eclipse.core.resources.IProject [this] "Coerce this into an IProject"))
@@ -497,7 +520,7 @@
    workbench-page is the workbench page to open.
    f is an IFile, or something that can be coerced to an IFile.
    Return the Editor object (IEditorPart)"
-  ([f] (open-workspace-file (workbench-page) f))
+  ([f] (open-workspace-file (workbench-active-page) f))
   ([workbench-page f]
     (org.eclipse.ui.ide.IDE/openEditor
       workbench-page
