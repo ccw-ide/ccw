@@ -12,8 +12,7 @@
 (ns ccw.editors.clojure.handlers
   (:require [paredit.core :as pc]
             [ccw.editors.clojure.clojure-hyperlink-detector :as hlu] ; hlu as HyperLinkUtil
-            [ccw.editors.clojure.PareditAutoEditStrategyImpl :as pimpl]) 
-  (:use [clojure.core.incubator :only [-?>]])  
+            [ccw.editors.clojure.PareditAutoEditStrategyImpl :as pimpl])
   (:import
     [org.eclipse.ui.handlers HandlerUtil]
     [ccw.util PlatformUtil]
@@ -62,7 +61,7 @@
    and selection in the :length key"
   [editor f]
   (let [result (f (.getParseState editor) (editor-text editor))]
-    (when-let [modif (-?> result :modifs first)] ;; TODO what if more than one modif in :modifs ?
+    (when-let [modif (some-> result :modifs first)] ;; TODO what if more than one modif in :modifs ?
       (let [{:keys #{length offset text}} modif
             document (-> editor .getDocument)]
         (.replace document offset length text)

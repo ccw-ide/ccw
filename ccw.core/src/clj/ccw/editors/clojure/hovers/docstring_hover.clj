@@ -1,7 +1,7 @@
 (ns ccw.editors.clojure.hovers.docstring-hover
   "Supports documentation hovers for Clojure Editor"
   (:import [org.eclipse.jface.text Region ITextHover]
-           ccw.editors.clojure.IClojureEditor
+           ccw.editors.clojure.IClojureAwarePart
            ccw.CCWPlugin)
   (:require [ccw.core.trace :refer [trace]]
             [ccw.interop :refer [simple-name]]
@@ -15,7 +15,7 @@
 (defn- hover-info
   "Return the documentation hover text to be displayed at offset offset for
   editor. The text can be composed of a subset of html (e.g. <pre>, <i>, etc.)"
-  [^IClojureEditor editor offset]
+  [^IClojureAwarePart editor offset]
   (let [loc (offset-loc editor offset)
         parse-symbol (parse-symbol? loc)]
     (when parse-symbol
@@ -45,13 +45,13 @@
       (trace :support/hover (str "[DOCSTRING-HOVER] " (simple-name this) ".getHoverInfo called with:\n"
                                  "text-viewer -> " (.toString text-viewer) "\n"
                                  "region -> " (.toString hover-region) "\n"))
-      (hover-info (CCWPlugin/getClojureEditor) (.getOffset hover-region)))
+      (hover-info text-viewer (.getOffset hover-region)))
 
     (getHoverRegion [this text-viewer offset]
       (trace :support/hover (str "[DOCSTRING-HOVER] " (simple-name this) ".getHoverRegion called with:\n"
                                  "text-viewer -> "(.toString text-viewer) "\n"
                                  "offset -> " offset "\n"))
-      (let [[offset length] (hover-region (CCWPlugin/getClojureEditor) offset)]
+      (let [[offset length] (hover-region text-viewer offset)]
         (Region. offset length)))))
 
 (defn create-docstring-hover [& params]

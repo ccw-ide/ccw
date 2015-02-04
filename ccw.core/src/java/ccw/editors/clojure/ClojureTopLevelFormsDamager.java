@@ -17,7 +17,7 @@ public class ClojureTopLevelFormsDamager implements IPresentationDamager {
 
 	public final Ref state;
 	
-	public ClojureTopLevelFormsDamager(IClojureEditor editor) {
+	public ClojureTopLevelFormsDamager(IClojureAwarePart editor) {
 		state = (Ref) topLevelFormsDamager._("init", editor);
 	}
 	

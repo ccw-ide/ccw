@@ -17,7 +17,7 @@
   (:use [paredit.utils :as utils])
   (:import [org.eclipse.jface.text IRegion ITypedRegion DocumentEvent Region
                                    IDocument]
-           [ccw.editors.clojure ClojureTopLevelFormsDamager IClojureEditor])
+           [ccw.editors.clojure ClojureTopLevelFormsDamager IClojureAwarePart])
   (:require [ccw.editors.clojure.editor-support :as editor])
   (:require [paredit.parser :as p]))
 
@@ -25,12 +25,12 @@
 
 (defn state-val [^ClojureTopLevelFormsDamager this] (-> this .state deref))
 
-(defn ^IClojureEditor editor [^ClojureTopLevelFormsDamager this]
-  (:editor (state-val this)))
+(defn ^IClojureAwarePart editor [^ClojureTopLevelFormsDamager this]
+  (:part (state-val this)))
 
 (defn init
-  [editor] (ref {:editor editor 
-                 :document nil}))
+  [part] (ref {:part part
+               :document nil}))
 
 (defn setDocument [^ClojureTopLevelFormsDamager this document]
   (dosync (alter (.state this) assoc :document document)))
