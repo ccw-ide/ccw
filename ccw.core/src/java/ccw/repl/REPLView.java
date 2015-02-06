@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.ILaunch;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -260,7 +261,7 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 		});
     }
 
-    public SafeConnection getSafeToolingConnection() {
+    public @Nullable SafeConnection getSafeToolingConnection() {
     	return safeToolConnection;
     }
 
@@ -604,8 +605,8 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 					}
 				}) {
         	@Override
-			public REPLView getCorrespondingREPL() { return REPLView.this; };
-            private SafeConnection getCorrespondingREPLConnection () {
+			public @Nullable REPLView getCorrespondingREPL() { return REPLView.this; };
+			public @Nullable SafeConnection getSafeToolingConnection () {
                 // we'll be connected by the time this is called
                 return safeToolConnection;
             }

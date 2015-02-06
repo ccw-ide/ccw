@@ -14,6 +14,7 @@ package ccw.editors.clojure;
 
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
@@ -55,6 +56,7 @@ import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.preferences.PreferenceConstants;
 import ccw.repl.REPLView;
+import ccw.repl.SafeConnection;
 import ccw.util.ClojureInvoker;
 import ccw.util.DisplayUtil;
 
@@ -537,7 +539,12 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements IC
         return null;
     }
 
-    public REPLView getCorrespondingREPL () {
+    public @Nullable REPLView getCorrespondingREPL () {
+        // this gets overridden in REPLView as appropriate so that the toolConnection there gets returned
+        return null;
+    }
+    
+    public @Nullable SafeConnection getSafeToolingConnection () {
         // this gets overridden in REPLView as appropriate so that the toolConnection there gets returned
         return null;
     }
