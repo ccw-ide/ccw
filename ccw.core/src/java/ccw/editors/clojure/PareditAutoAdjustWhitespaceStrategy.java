@@ -21,7 +21,7 @@ public class PareditAutoAdjustWhitespaceStrategy implements IAutoEditStrategy {
 
 	public final Ref state;
 	
-	public PareditAutoAdjustWhitespaceStrategy(IClojureEditor editor, IPreferenceStore prefs) {
+	public PareditAutoAdjustWhitespaceStrategy(IClojureAwarePart editor, IPreferenceStore prefs) {
 		state = (Ref) pareditAutoEditSupport._("init", editor, prefs);
 	}
 	

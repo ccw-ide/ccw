@@ -7,6 +7,7 @@
 ;*
 ;* Contributors: 
 ;*    Laurent PETIT - initial API and implementation
+;*    Andrea Richiardi - refactoring and SourceViewer* wrappers
 ;*******************************************************************************/
 (ns
   ^{:doc 
@@ -21,45 +22,47 @@
          :build-id                the build id, identifying a \"version\" of the parse-tree
                                     (used for determining deltas between 2 updates)
    "}
-  ccw.editors.clojure.editor-support 
-  (:require [paredit.parser :as p]
-            [paredit.loc-utils :as lu]
-            [paredit.static-analysis :as static-analysis]
+  ccw.editors.clojure.editor-support
+  (:require [clojure.core.incubator :refer [.?.]]
+            [paredit.parser :refer [buffer-parse-tree edit-buffer]]
+            [paredit.loc-utils :refer [loc-text node-text parsed-root-loc]]
+            [paredit.static-analysis :as sa]
             [ccw.jdt :as jdt]
-            [ccw.events :as evt]
-            [ccw.eclipse :as e])
-  (:import [ccw.editors.clojure IClojureEditor]
+            [ccw.events :refer [post-event]]
+            [ccw.eclipse :refer [resource path workbench-active-editor]])
+  (:import [ccw.editors.clojure IClojureEditor
+                                IClojureAwarePart]
            [org.eclipse.ui.texteditor SourceViewerDecorationSupport]))
 
 #_(set! *warn-on-reflection* true)
 
 (defn- safe-edit-buffer [buffer offset len text final-text]
   (try
-    (p/edit-buffer buffer offset len text)
+    (edit-buffer buffer offset len text)
     (catch Exception e
       (println (str "--------------------------------------------------------------------------------" \newline
                     "Error while editing parsley buffer. offset:" offset ", len:" len ", text:'" text "'" \newline
-                    "buffer text:'" (-> buffer (p/buffer-parse-tree 0) lu/node-text) "'"))
-      (p/edit-buffer nil 0 0 final-text))))
+                    "buffer text:'" (-> buffer (buffer-parse-tree 0) node-text) "'"))
+      (edit-buffer nil 0 0 final-text))))
 
 (defn updateTextBuffer [r final-text offset len text]
   (let [r (if (nil? r) (ref nil) r), text (or text ""), build-id (if-let [old (:build-id @r)] (inc old) 0)] 
     (dosync
       (when-not (= final-text (:text @r))
         (let [buffer (safe-edit-buffer (:incremental-text-buffer @r) offset len text final-text)
-              parse-tree (p/buffer-parse-tree buffer build-id)]
-          (if-not true #_(= final-text (lu/node-text parse-tree)) ;;;;;;;;; TODO remove this potentially huge perf sucker!
+              parse-tree (buffer-parse-tree buffer build-id)]
+          (if-not true #_(= final-text (node-text parse-tree)) ;;;;;;;;; TODO remove this potentially huge perf sucker!
             (do
               (println (str 
                          "Doh! the incremental update did not work well. "
                          \newline
                          "offset:" offset ", " "len:" len ", " (str "text:'" text "'")
                          \newline
-                         "final-text passed as argument:'" final-text "'" ", but text recomputed from parse-tree: '" (lu/node-text parse-tree) "'"
+                         "final-text passed as argument:'" final-text "'" ", but text recomputed from parse-tree: '" (node-text parse-tree) "'"
                          \newline
                          "What happened ? Will throw away the current buffer and start with a fresh one..."))
-              (let [buffer (p/edit-buffer nil 0 -1 final-text)
-                    parse-tree (p/buffer-parse-tree buffer build-id)]
+              (let [buffer (edit-buffer nil 0 -1 final-text)
+                    parse-tree (buffer-parse-tree buffer build-id)]
                 (ref-set r {:text final-text, :incremental-text-buffer buffer, :previous-parse-tree (:parse-tree @r), :parse-tree parse-tree, :build-id build-id})))
             (ref-set r {:text final-text, :incremental-text-buffer buffer, :previous-parse-tree (:parse-tree @r), :parse-tree parse-tree :build-id build-id}))
           )))
@@ -95,9 +98,9 @@
   "Return the top level form which corresponds to code for the current offset" 
   [parse-state offset]
   (when-let [parse-tree (getParseTree parse-state)]
-    (let [root-loc (lu/parsed-root-loc parse-tree)
-          top-level-loc (static-analysis/top-level-code-form root-loc offset)]
-      (lu/loc-text top-level-loc))))
+    (let [root-loc (parsed-root-loc parse-tree)
+          top-level-loc (sa/top-level-code-form root-loc offset)]
+      (loc-text top-level-loc))))
 
 ;; Now, I don't like the fact that getting the current and the previous parse tree may lead to incorrect code
 ;; since they both are dereferencing a ref instead of decomposing a consistent snapshot of a ref
@@ -110,7 +113,7 @@
     (doto s .uninstall .dispose)
     nil))
 
-(defn configureSourceViewerDecorationSupport [^SourceViewerDecorationSupport support ^IClojureEditor viewer]
+(defn configureSourceViewerDecorationSupport [^SourceViewerDecorationSupport support ^IClojureAwarePart viewer]
 		;; TODO more to pick in configureSourceViewerDecorationSupport of AbstractDecoratedTextEditor, if you want ...
   (doto support
     (.setCharacterPairMatcher (.getPairsMatcher viewer))
@@ -119,7 +122,13 @@
       (jdt/preference-constants ::jdt/editor-matching-brackets-color))))
 
 (defn editor-saved [editor]
-  (evt/post-event :ccw.editor.saved
+  (post-event :ccw.editor.saved
     {:namespace     (.findDeclaringNamespace editor)
-     :absolute-path (some-> editor .getEditorInput e/resource e/path .toOSString)
+     :absolute-path (some-> editor .getEditorInput resource path .toOSString)
      :repl          (-> editor .getCorrespondingREPL)}))
+
+(defn source-viewer
+  "Return the ClojureSourceViewer of the input IClojureEditor, might
+  return nil. The 0-arity tries to get it from the Active editor."
+  ([] (source-viewer (workbench-active-editor)))
+  ([^IClojureEditor editor] (.?. editor (sourceViewer))))
