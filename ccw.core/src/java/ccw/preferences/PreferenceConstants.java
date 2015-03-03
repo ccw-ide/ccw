@@ -186,6 +186,11 @@ public class PreferenceConstants {
 	 */
 	public static final String EDITOR_TEXT_HOVER_DESCRIPTORS = CCW_PREFERENCE_PREFIX + ".hover_descriptors"; //$NON-NLS-1$
 
+	/**
+     * A Boolean preference that defines whether to show the hint to make sticky hover.
+     */
+    public static final String EDITOR_SHOW_TEXT_HOVER_AFFORDANCE= CCW_PREFERENCE_PREFIX + ".show_hover_affordance"; //$NON-NLS-1$
+    
     public static class ColorizableToken {
     	public final RGB rgb;
     	public final Boolean isBold;

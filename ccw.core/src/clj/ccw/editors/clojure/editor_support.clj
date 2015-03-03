@@ -29,7 +29,7 @@
             [paredit.static-analysis :as sa]
             [ccw.jdt :as jdt]
             [ccw.events :refer [post-event]]
-            [ccw.eclipse :refer [resource path workbench-active-editor]])
+            [ccw.eclipse :refer [resource path workbench-active-editor ui]])
   (:import [ccw.editors.clojure IClojureEditor
                                 IClojureAwarePart]
            [org.eclipse.ui.texteditor SourceViewerDecorationSupport]))
@@ -132,3 +132,9 @@
   return nil. The 0-arity tries to get it from the Active editor."
   ([] (source-viewer (workbench-active-editor)))
   ([^IClojureEditor editor] (.?. editor (sourceViewer))))
+
+(defn set-status-line-error-msg-async
+  "The function wraps IClojureAwarePart.setStatusLineErrorMessage in an async ui-only call.
+  Remember that passing nil as message resets the status line."
+  [^IClojureAwarePart part message]
+  (ui (.setStatusLineErrorMessage part message)))

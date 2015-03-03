@@ -114,6 +114,11 @@
   ([] (page-editor-references (workbench-active-page)))
   ([^IWorkbenchPage workbench-page] (.?. workbench-page getEditorReferences)))
 
+(defn workbench-first-editor
+  "Gets the active editor of the first page of the first window in the workbench."
+  []
+  (workbench-active-editor (first (workbench-pages (first (workbench-windows (workbench)))))))
+
 (defprotocol IProjectCoercion
   (project ^org.eclipse.core.resources.IProject [this] "Coerce this into an IProject"))
 
@@ -703,6 +708,7 @@
     a))
 
 (defmacro async-ui [& args]
+  "Executes args on the UI Thread, using Display/asyncExec."
   `(ui* (fn [] ~@args)))
 
 (defmacro ui [& args]

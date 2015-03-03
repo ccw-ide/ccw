@@ -2,6 +2,8 @@
   (:use clojure.java.data
         clojure.pprint)
   (:require [ccw.editors.clojure.hover-support :refer :all]
+            [ccw.editors.clojure.hovers.docstring-hover :refer [create-docstring-hover]]
+            [ccw.editors.clojure.hovers.debug-hover :refer [create-debug-hover]]
             [ccw.extensions :refer :all]
             [clojure.test :refer :all])
   (:import org.eclipse.swt.SWT
@@ -20,7 +22,9 @@
                                                       select-default-descriptor
                                                       select-hover-by-state-mask
                                                       select-hover-or-default
-                                                      remove-and-cons]]
+                                                      remove-and-cons
+                                                      hover-result-pair
+                                                      create-hover-instance]]
   (deftest hover-support-tests
 
     (defn build-test-descriptor-fn
@@ -28,7 +32,6 @@
        (build-test-descriptor-fn element true))
       ([element enabled]
        {:element element
-        :instance nil
         :enabled enabled
         :description "Mock Description"
         :label "Mock"
@@ -92,7 +95,6 @@
       (is (nil? (:modifier-string nil-modifier-descriptor)))
       (is (= SWT/DEFAULT (:state-mask nil-modifier-descriptor)))
 
-
       (def test-string-valid-modifier "({:modifier-string \"Alt + Shift\", :enabled true, :id \"Id1\"}
       {:modifier-string \"Ctrl\", :enabled true, :id \"Id2\"})")
       (def test-descriptors (read-and-sanitize-descriptor-string test-string-valid-modifier))
@@ -131,6 +133,26 @@
       (is (some #(= "Test3" (:id %1)) (remove-and-cons #(= (:id %1) "Test2") {:id "Test3"} mock-descriptors)))
       (is (not-any? #(= "Test2" (:id %1)) (remove-and-cons #(= (:id %1) "Test2") {:id "Test3"} mock-descriptors))))
 
-    (testing "Proxy creation"
-      (def hover-proxy (create-hover-proxy "" 262144))
-      (is (identical? hover-proxy (create-hover-proxy "" 262144))))))
+    (testing "Hover instances creation"
+      (def mock-contributed-hovers ({:id "mock-debug" :modifier-string "" :state-mask SWT/NONE :enabled true :create-hover #(create-debug-hover) :label "Mock debug" :activate "true"},
+                                    {:id "mock-docstring" :modifier-string "Ctrl" :state-mask 262144 :enabled true :create-hover #(create-docstring-hover) :label "Mock docstring" :activate "true"}))
+      (def hover-proxy (create-hover-instance mock-contributed-hovers "" 262144))
+      (is (identical? hover-proxy (create-hover-instance mock-contributed-hovers "" 262144)))
+
+      (def mock-debug-hover (create-debug-hover))
+      (def mock-docstring-hover (create-docstring-hover))
+      (def mock-hover-instances {0 mock-docstring-hover, 262144 mock-debug-hover })
+      (is (identical? mock-docstring-hover (first (hover-result-pair #(.toString %1)
+                                                                     #(.contains %1 "docstring")
+                                                                     mock-hover-instances nil))) "Should return the found hover instance")
+      (is (every? nil? (hover-result-pair #(.toString %1)
+                                          #(.contains %1 "something")
+                                          mock-hover-instances nil)) "Should return nil because not found")
+      (is (identical? mock-debug-hover (first (hover-result-pair #(.toString %1)
+                                                                 #(.contains %1 "debug")
+                                                                 mock-hover-instances mock-debug-hover))) "Should return hover and result")
+      (is (identical? mock-debug-hover (first (hover-result-pair #(.toString %1)
+                                                                 #(.contains %1 "something")
+                                                                 mock-hover-instances mock-debug-hover))) "Should always hover and result"))
+    ))
+(run-tests)

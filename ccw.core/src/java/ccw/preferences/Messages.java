@@ -11,7 +11,6 @@
 package ccw.preferences;
 
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.swt.SWT;
 
 public class Messages extends NLS {
     private static final String BUNDLE_NAME = "ccw.preferences.messages"; //$NON-NLS-1$
@@ -43,6 +42,8 @@ public class Messages extends NLS {
     
     public static String ClojurePreferencePage_show_more_context_in_tabs;
 
+    public static String ClojurePreferencePage_show_text_hover_affordance;
+    
     public static String SyntaxColoringPreferencePage_function;
 
     public static String SyntaxColoringPreferencePage_callableFunction;
