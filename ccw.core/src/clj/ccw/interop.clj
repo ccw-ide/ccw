@@ -46,29 +46,36 @@
            #(re-find (re-pattern (or (join "|" string) #".*")) %)
            (map #(.getName %) (-> instance class .getMethods)))))
 
-(defn- reified-param
+(defn- reified-string-param
   [param]
   (let [s (str param)
         i (.lastIndexOf s ".")]
     (clojure.string/lower-case (if (> i -1) (.substring s (inc i)) s))))
 
-(defn- reified-method
+(defn- reified-string-method
   [method-member]
   (str "(" (:name method-member) " [this"
        (when-let [parameters (seq (:parameter-types method-member))]
-         (str " " (clojure.string/join " " (map reified-param parameters)))) "]" \newline "  )" \newline \newline))
+         (str " " (clojure.string/join " " (map reified-string-param parameters)))) "]" \newline "  )" \newline \newline))
 
-(defn reified-string
-  "Return a string which will contain the reified version of the input type. This string is not supposed
-   to be used directly as form (reify ...), it may contain duplicates (for instance, all the parameter names
-   will be the same. It can be used as a template that needs some adjustment."
-  [obj]
-  {:pre [(not (nil? obj))]}
-  (let [clazz (if (class? obj) obj (class obj))
+(defn- reified-string-class
+  [class-or-instance]
+  {:pre [(not (nil? class-or-instance))]}
+  (let [clazz (if (class? class-or-instance) class-or-instance (class class-or-instance))
         methods (->> (:members (reflect clazz)) (filter :return-type))]
-    (str "(reify"
-         \newline
-         "  " (-> (.getSimpleName clazz))
+    (str "  " (-> (.getSimpleName clazz))
          \newline
          "  "
-         (clojure.string/join "  " (map reified-method methods)) ")")))
+         (clojure.string/join "  " (map reified-string-method methods)))))
+
+(defn reified-string
+  "Return a string which will contain the reified version of the input
+  type. This string is not supposed to be used directly as form (reify
+  ...) as it may contain duplicate parameters (because the parameter
+  name is stringified from the type name). It can be used but it needs
+  some adjustment."
+  [& classes-or-instances]
+  (str "(reify"
+       \newline
+       (clojure.string/join (map reified-string-class classes-or-instances))
+       ")"))

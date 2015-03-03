@@ -1058,6 +1058,12 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+( R">
       </key>
+      <key
+            commandId="org.eclipse.ui.edit.text.showInformation"
+            contextId="ccw.ui.clojureEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="F2">
+      </key>
 	</extension>
    <extension
          point="org.eclipse.ui.menus">

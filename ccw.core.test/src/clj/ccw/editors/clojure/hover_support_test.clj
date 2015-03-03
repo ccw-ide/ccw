@@ -6,7 +6,7 @@
 ;* http://www.eclipse.org/legal/epl-v10.html
 ;*
 ;* Contributors:
-;*    Andrea Richiardi - initial test implementation
+;*    Andrea RICHIARDI - initial test implementation
 ;*******************************************************************************/
 
 (ns ccw.editors.clojure.hover-support-test
@@ -159,5 +159,29 @@
     (testing "Hover instances creation"
       (let [mock-contributed-hovers ({:id "mock-debug" :modifier-string "" :state-mask SWT/NONE :enabled true :create-hover! #(create-debug-hover) :label "Mock debug" :activate "true"},
                                      {:id "mock-docstring" :modifier-string "Ctrl" :state-mask 262144 :enabled true :create-hover! #(create-docstring-hover) :label "Mock docstring" :activate "true"})
-            hover-proxy (create-hover-instance mock-contributed-hovers "" 262144)]
-        (is (identical? hover-proxy (create-hover-instance mock-contributed-hovers "" 262144)))))))
+            hover-proxy (create-hover-instance mock-contributed-hovers "" 262144)
+            mock-debug-hover (create-debug-hover)
+            mock-docstring-hover (create-docstring-hover)
+            mock-hover-instances {0 mock-docstring-hover, 262144 mock-debug-hover }]
+        (is (identical? hover-proxy (create-hover-instance mock-contributed-hovers "" 262144)))
+        (is (identical? mock-docstring-hover (first (hover-result-pair #(.toString %1)
+                                                                       #(.contains %1 "docstring")
+                                                                       mock-hover-instances
+                                                                       nil
+                                                                       identity))) "Should return the found hover instance")
+        (is (every? nil? (hover-result-pair #(.toString %1)
+                                            #(.contains %1 "something")
+                                            mock-hover-instances
+                                            nil
+                                            identity)) "Should return nil because not found")
+        (is (identical? mock-debug-hover (first (hover-result-pair #(.toString %1)
+                                                                   #(.contains %1 "debug")
+                                                                   mock-hover-instances
+                                                                   mock-debug-hover
+                                                                   identity))) "Should return hover and result")
+        (is (identical? mock-debug-hover (first (hover-result-pair #(.toString %1)
+                                                                   #(.contains %1 "something")
+                                                                   mock-hover-instances
+                                                                   mock-debug-hover
+                                                                   identity))) "Should always hover and result")))))
+

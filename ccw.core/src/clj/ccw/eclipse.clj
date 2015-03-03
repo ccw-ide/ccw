@@ -1,3 +1,15 @@
+;*******************************************************************************
+;* Copyright (c) 2015 Laurent PETIT.
+;* All rights reserved. This program and the accompanying materials
+;* are made available under the terms of the Eclipse Public License v1.0
+;* which accompanies this distribution, and is available at
+;* http://www.eclipse.org/legal/epl-v10.html
+;*
+;* Contributors:
+;*    Laurant PETIT - initial implementation
+;*    Andrea RICHIARDI - workbench getters
+;*******************************************************************************/
+
 (ns ^{:doc "Eclipse interop utilities"}
      ccw.eclipse
   (:require [ccw.core.trace :as t]
@@ -68,7 +80,6 @@
   "Return the Eclipse Workspace" []
   (ResourcesPlugin/getWorkspace))
 
-
 (defn workspace-root 
   "Return the Eclipse Workspace root"
   []
@@ -78,20 +89,48 @@
   "Return the Eclipse Workbench" []
   (PlatformUI/getWorkbench))
 
-(defn workbench-window
-  "Return the Active workbench window" 
-  ([] (workbench-window (workbench)))
+(defn workbench-active-window
+  "Return the Active workbench window. The 0-arity function will try to
+  get the Active window of the Eclipse workbench."
+  ([] (workbench-active-window (workbench)))
   ([^IWorkbench workbench] (some-> workbench .getActiveWorkbenchWindow)))
 
-(defn workbench-page
-  "Return the Active workbench page, might return nil."
-  ([] (workbench-page (workbench-window)))
+(defn workbench-windows
+  "Return the workbench windows. The 0-arity function will try to get
+  the windows of the Eclipse workbench."
+  ([] (workbench-windows (workbench)))
+  ([^IWorkbench workbench] (some-> workbench .getWorkbenchWindows)))
+
+(defn workbench-active-page
+  "Return the Active workbench page, might return nil. The 0-arity
+  function will try to get the Active page on the Active window."
+  ([] (workbench-active-page (workbench-active-window)))
   ([^IWorkbenchWindow workbench-window] (some-> workbench-window .getActivePage)))
 
-(defn workbench-editor
-  "Return the Active workbench editor, might return nil."
-  ([] (workbench-editor (workbench-page)))
+(defn workbench-pages
+  "Return the workbench pages of the input window, might return nil. The
+  0-arity function will try to get the pages on the Active window."
+  ([] (workbench-pages (workbench-active-window)))
+  ([^IWorkbenchWindow workbench-window] (some-> workbench-window .getPages)))
+
+(defn workbench-active-editor
+  "Return the Active workbench editor, might return nil. The 0-arity
+  function will try to get the Active editor of the Active page in the
+  Active window."
+  ([] (workbench-active-editor (workbench-active-page)))
   ([^IWorkbenchPage workbench-page] (some-> workbench-page .getActiveEditor)))
+
+(defn page-editor-references
+  "Return the editor references of the input page, might return nil. The
+  0-arity function will try to get the editor references of the Active
+  page in the Active window."
+  ([] (page-editor-references (workbench-active-page)))
+  ([^IWorkbenchPage workbench-page] (some-> workbench-page .getEditorReferences)))
+
+(defn workbench-first-editor
+  "Gets the active editor of the first page of the first window in the workbench."
+  []
+  (workbench-active-editor (first (workbench-pages (first (workbench-windows (workbench)))))))
 
 (defprotocol IProjectCoercion
   (project ^org.eclipse.core.resources.IProject [this] "Coerce this into an IProject"))
@@ -499,7 +538,7 @@
    workbench-page is the workbench page to open.
    f is an IFile, or something that can be coerced to an IFile.
    Return the Editor object (IEditorPart)"
-  ([f] (open-workspace-file (workbench-page) f))
+  ([f] (open-workspace-file (workbench-active-page) f))
   ([workbench-page f]
     (org.eclipse.ui.ide.IDE/openEditor
       workbench-page
@@ -688,6 +727,7 @@
     a))
 
 (defmacro async-ui [& args]
+  "Executes args on the UI Thread, using Display/asyncExec."
   `(ui* (fn [] ~@args)))
 
 (defmacro ui [& args]

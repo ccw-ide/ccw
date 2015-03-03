@@ -21,7 +21,6 @@
            [ccw.editors.clojure.hovers HoverModel
                                        HoverDescriptor]
            ccw.preferences.PreferenceConstants
-           ccw.util.EditorUtility
            java.util.ArrayList
            org.eclipse.core.databinding.observable.Realm
            [org.eclipse.core.databinding.observable.list ObservableList
@@ -33,6 +32,8 @@
                                      IExtensionPoint]
            [org.eclipse.e4.core.contexts IEclipseContext
                                          ContextInjectionFactory]
+           org.eclipse.jface.resource.JFaceResources
+           org.eclipse.jface.internal.text.html.HTMLPrinter
            org.eclipse.jface.databinding.swt.SWTObservables
            [org.eclipse.jface.text Region
                                    ITextHover
@@ -41,14 +42,34 @@
                                    ITextViewer
                                    ITextViewerExtension2
                                    IDocument]
-           org.eclipse.swt.SWT)
-  (:require [ccw.bundle :refer [available? bundle]]
-            [ccw.core.trace :refer [trace]]
+           [org.eclipse.jface.text.information IInformationProvider
+                                               IInformationProviderExtension
+                                               IInformationProviderExtension2]
+           org.eclipse.swt.SWT
+           ccw.CCWPlugin
+           ccw.core.StaticStrings
+           [ccw.editors.clojure ClojureEditorMessages
+                                IClojureEditor]
+           [ccw.editors.clojure.hovers HoverModel
+                                       HoverDescriptor
+                                       IClojureHover]
+           ccw.util.UiUtils
+           ccw.preferences.PreferenceConstants
+           ccw.TraceOptions)
+  (:require [clojure.string :refer [blank? join]]
+            [ccw.bundle :refer [available? bundle]]
             [ccw.eclipse :refer [preference
                                  preference!
                                  ccw-combined-prefs
-                                 workbench-editor]]
-            [ccw.editors.clojure.editor-support :refer [source-viewer]]
+                                 workbench-active-editor]]
+            [paredit.loc-utils :refer [start-offset
+                                       loc-count]]
+            [ccw.core.doc-utils :refer [var-doc-info-html]]
+            [ccw.editors.clojure.editor-common :refer [offset-loc
+                                                       find-var-metadata
+                                                       parse-symbol?]]
+            [ccw.editors.clojure.editor-support :refer [source-viewer set-status-line-error-msg-async]]
+            [ccw.core.trace :refer [trace]]
             [ccw.extensions :refer [configuration-elements
                                     attributes->map
                                     element->map
@@ -217,8 +238,8 @@
 (defn- sanitize-descriptor
   "Sanitize function on a hover descriptor."
   [descriptor]
-  (let [state-mask (EditorUtility/computeStateMask (:modifier-string descriptor))
-        modifier-string (EditorUtility/getModifierString state-mask)]
+  (let [state-mask (UiUtils/computeStateMask (:modifier-string descriptor))
+        modifier-string (UiUtils/getModifierString state-mask)]
     (assoc descriptor :modifier-string modifier-string :state-mask state-mask)))
 
 (defn- read-and-sanitize-descriptor-string
@@ -263,6 +284,76 @@
   []
   (apply-rules-to-descriptors (merge-descriptors (load-extension-descriptors!)
                                                  (read-descriptors-from-preference!))))
+
+;;;;;;;;;;;;;;;;;;;
+;; Hover Display ;;
+;;;;;;;;;;;;;;;;;;;
+
+(defn hover-result-pair
+  "This function is strictly tied with the hover-instances
+  representation but tries to hide what it can. If previous-hover is not
+  nil, it just executes f-on-hover on it.  If nil, it maps and filters
+  over hover-instances in order to find the first hover
+  where (result-pred (f-on-hover ith-hover)) is true. It also executes
+  (else-side-effects [hover result]) when previous-hover is nil. It
+  always returns a pair [hover result] or nil."
+  [f-on-hover result-pred hover-instances previous-hover else-side-effect]
+  (if previous-hover
+    (let [result (f-on-hover previous-hover)]
+      [previous-hover result])
+    (let [[hover result] (first (take-while (fn [[hover result]] (result-pred result))
+                                            (map (juxt val #(f-on-hover (val %1))) hover-instances)))]
+      (else-side-effect [hover result])
+      [hover result])))
+
+(defonce ^{:private true :doc "The common hover css."}
+  hover-css (do (trace :support/hover (str "Processing " StaticStrings/CCW_HOVER_CSS "..."))
+                (slurp StaticStrings/CCW_HOVER_CSS)))
+
+(defn- hover-prepend-prolog
+  "Prepend text to hover information."
+  [hover-info]
+  (let [buffer (java.lang.StringBuffer. hover-info)
+        prepend-text (HTMLPrinter/convertTopLevelFont hover-css
+                                                      (aget (-> (JFaceResources/getFontRegistry)
+                                                                (.getFontData StaticStrings/CCW_HOVER_FONT)) 0))]
+    (HTMLPrinter/insertPageProlog buffer 0 prepend-text)
+    (HTMLPrinter/addPageEpilog buffer)
+    (.toString buffer)))
+
+(defn hover-info
+  "Return the documentation hover text to be displayed at offset offset
+  for editor. The text can be composed of a subset of html (e.g. <pre>,
+  <i>, etc.). If no info is available or the REPL is nil, it returns
+  nil."
+  [^IClojureEditor part offset]
+  (let [loc (offset-loc part offset)
+        parse-symbol (parse-symbol? loc)]
+    (trace :support/hover (str "hover-info:\n" "offset -> " offset "\n" "parse-symbol -> " parse-symbol "\n"))
+    (when parse-symbol
+      (let [m (find-var-metadata (.findDeclaringNamespace part)
+                                 (.getCorrespondingREPL part)
+                                 parse-symbol)]
+        (var-doc-info-html m)))))
+
+(defn hover-region
+  "For editor, given the character offset, return a vector of [offset
+  length] representing a region of the editor (containing offset).  The
+  idea is that for every offset in that region, the same documentation
+  hover as the one computed for offset will be used.  This is a function
+  for optimizing the number of times the hover-info function is called."
+  [^IClojureEditor part offset]
+  (let [loc (offset-loc part offset)]
+    [(start-offset loc) (loc-count loc)]))
+
+(defn hover-html
+  "Given a IClojureEditor and an offset, builds the html file to be displayed.
+  Simlarly to hover-info, if no info is available or the REPL is nil, it
+  returns nil."
+  [^IClojureEditor part offset]
+  (let [info (hover-info part offset)]
+    (if-not (blank? info)
+      (hover-prepend-prolog info))))
 
 ;;;;;;;;;;;;;
 ;;; State ;;;
@@ -425,7 +516,7 @@
            (props :label)
            (props :enabled)
            (props :description)
-           (EditorUtility/computeStateMask ms)
+           (UiUtils/computeStateMask ms)
            ms))))
 
 (defmethod from-java HoverDescriptor [^HoverDescriptor instance]
@@ -489,3 +580,38 @@
   load the descriptors."
   [_ _]
   (int-array (keep :state-mask (:contributed-descriptors (descriptors-update!)))))
+
+(defn hover-information-provider
+  "Creates the InformationProvider that displays hovers."
+  []
+  (let [previous-hover (atom nil)]
+    (reify
+      IInformationProvider
+      (getSubject [this text-viewer offset]
+        (trace :support/hover (str (simple-name this) ": offset-> " offset))
+        (let [[_ region] (hover-result-pair #(.getHoverRegion %1 text-viewer offset)
+                                            (complement nil?)
+                                            (:hovers-by-state-mask @state-atom)
+                                            @previous-hover
+                                            (fn [[hover _]] (reset! previous-hover hover)))]
+          region))
+
+      (getInformation [this text-viewer region]
+        ;; AR - deprecated
+        nil)
+
+      IInformationProviderExtension
+      (getInformation2 [this text-viewer region]
+        (trace :support/hover (str (simple-name this) ": region " region))
+        (let [[_ info] (hover-result-pair #(.getHoverInfo2 %1 text-viewer region)
+                                          blank?
+                                          (:hovers-by-state-mask @state-atom)
+                                          @previous-hover
+                                          (fn [[hover _]] (reset! previous-hover hover)))]
+          (let [[i msg] (if info [info nil] [nil ClojureEditorMessages/You_need_a_running_repl])]
+            (do (set-status-line-error-msg-async text-viewer msg) i))))
+
+      IInformationProviderExtension2
+      (getInformationPresenterControlCreator [this]
+        (trace :support/hover (str (simple-name this) "getInformationPresenterControlCreator called"))
+        (.getInformationPresenterControlCreator @previous-hover)))))

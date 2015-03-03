@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2015 Laurent Petit.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors: 
+ *    Andrea RICHIARDI - initial implementation
+ *******************************************************************************/
 package ccw.preferences;
 
 import java.util.Iterator;
@@ -24,7 +34,7 @@ import org.eclipse.swt.SWT;
 
 import ccw.editors.clojure.hovers.HoverDescriptor;
 import ccw.editors.clojure.hovers.HoverModel;
-import ccw.util.EditorUtility;
+import ccw.util.UiUtils;
 
 /**
  * The ViewModel of the Hover Preference page.
@@ -105,7 +115,7 @@ public final class HoverViewModel {
             Integer stateMask = SWT.DEFAULT;
             if (object instanceof String) {
                 String s = (String) object;
-                stateMask = s != null ? EditorUtility.computeStateMask(s) : SWT.NONE;
+                stateMask = s != null ? UiUtils.computeStateMask(s) : SWT.NONE;
             }
             return stateMask;
         }
@@ -122,7 +132,7 @@ public final class HoverViewModel {
             String modifierString = null;
             if (object instanceof Integer) {
                 Integer i = (Integer) object;
-                modifierString = EditorUtility.getModifierString(i);
+                modifierString = UiUtils.getModifierString(i);
             }
             return modifierString != null ? modifierString : "";
         }
@@ -132,7 +142,7 @@ public final class HoverViewModel {
         @Override
         public IStatus validate(Object modifiers) {
             if (modifiers instanceof String) {
-                int stateMask = EditorUtility.computeStateMask((String) modifiers);
+                int stateMask = UiUtils.computeStateMask((String) modifiers);
                 if (!isStateMaskUnique(stateMask)) {
                     return stateMaskError(stateMask);
                 }
@@ -170,7 +180,7 @@ public final class HoverViewModel {
         if (stateMask == SWT.NONE || stateMask == SWT.DEFAULT) {
             return ValidationStatus.error(Messages.HoverPreferencePage_errorDefaultHoverNotUnique);
         } else {
-            String modifiers = EditorUtility.getModifierString(stateMask);
+            String modifiers = UiUtils.getModifierString(stateMask);
             if (modifiers != null && !modifiers.isEmpty()) {
                 return ValidationStatus.error(Messages.bind(Messages.HoverPreferencePage_errorStatusMaskAlreadyInUse,
                         modifiers));

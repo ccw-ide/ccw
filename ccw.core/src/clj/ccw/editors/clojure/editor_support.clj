@@ -23,8 +23,7 @@
                                     (used for determining deltas between 2 updates)
    "}
   ccw.editors.clojure.editor-support 
-  (:require [clojure.core.incubator :refer [.?.]]
-            [paredit.parser :as p]
+  (:require [paredit.parser :as p]
             [paredit.loc-utils :as lu]
             [paredit.static-analysis :as static-analysis]
             [ccw.jdt :as jdt]
@@ -130,6 +129,15 @@
      :repl          (-> editor .getCorrespondingREPL)}))
 
 (defn source-viewer
-  "Return the ClojureSourceViewer of the input IClojureEditor, might return nil."
-  ([] (source-viewer (e/workbench-editor)))
-  ([^IClojureEditor editor] (.?. editor (sourceViewer))))
+  "Return the ClojureSourceViewer of the input IClojureEditor, might
+  return nil. The 0-arity tries to get it from the Active editor."
+  ([] (source-viewer (e/workbench-active-editor)))
+  ([^IClojureEditor editor]
+   {:pre [(not (nil? editor))]}
+   (.sourceViewer editor)))
+
+(defn set-status-line-error-msg-async
+  "The function wraps IClojureAwarePart.setStatusLineErrorMessage in an async ui-only call.
+  Remember that passing nil as message resets the status line."
+  [^IClojureEditor part message]
+  (e/ui (.setStatusLineErrorMessage part message)))
