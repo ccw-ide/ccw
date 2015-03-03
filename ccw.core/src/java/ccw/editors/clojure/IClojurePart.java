@@ -18,7 +18,7 @@ public interface IClojurePart {
     ISelectionProvider getSelectionProvider();
     
     /**
-     * Sets the status line.
+     * Overrides the status line message (visibility widened from AbstractTextEditor).
      * @param msg A message.
      */
     void setStatusLineErrorMessage(String msg);

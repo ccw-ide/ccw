@@ -74,8 +74,15 @@ public final class ClojureEditorMessages extends NLS {
     public static String Tests_failed;
     public static String Tests_passed;
 
+    public static String ShowInformation_label;
+    public static String ShowInformation_tooltip;
+    public static String ShowInformation_description;
+    public static String ShowInformation_image;
+    
+    public static String HoverInfo_args_label;
+    public static String HoverInfo_doc_label;
+    
     static {
         NLS.initializeMessages(BUNDLE_NAME, ClojureEditorMessages.class);
     }
-
 }

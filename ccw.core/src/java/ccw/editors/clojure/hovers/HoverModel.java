@@ -4,6 +4,11 @@ import java.util.List;
 
 import org.eclipse.core.databinding.observable.list.IObservableList;
 
+/**
+ * The hover model. It is injected during the plugin initialization.
+ * @author Andrea Richiardi
+ *
+ */
 public interface HoverModel {
 	
     /**

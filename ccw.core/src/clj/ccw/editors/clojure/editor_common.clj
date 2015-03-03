@@ -6,21 +6,19 @@
             [paredit.loc-utils :as lu]
             [clojure.zip :as z]
             [ccw.core.doc-utils :as doc]
-            [ccw.debug.serverrepl :as serverrepl]
             [ccw.core.trace :as trace]
             [ccw.editors.clojure.editor-support :as editor])
   (:use [clojure.core.incubator :only [-?>]])
   (:import [org.eclipse.jface.viewers StyledString
                                       StyledString$Styler]
-           [org.eclipse.jface.text.contentassist 
-            IContentAssistProcessor
-            ContentAssistant
-            CompletionProposal
-            ICompletionProposal
-            ICompletionProposalExtension6
-            IContextInformation
-            IContextInformationExtension
-            IContextInformationValidator]
+           [org.eclipse.jface.text.contentassist IContentAssistProcessor
+                                                 ContentAssistant
+                                                 CompletionProposal
+                                                 ICompletionProposal
+                                                 ICompletionProposalExtension6
+                                                 IContextInformation
+                                                 IContextInformationExtension
+                                                 IContextInformationValidator]
            [org.eclipse.jdt.core JavaCore
                                  IMethod
                                  IType]

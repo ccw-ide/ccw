@@ -1,5 +1,7 @@
 package ccw.core;
 
+import ccw.CCWPlugin;
+
 /**
  * Container of static strings, used for various tasks in Counterclockwise.
  * Examples of string included here can be, command-line properties names, context/injection keys...
@@ -18,4 +20,10 @@ public class StaticStrings {
 	
 	// Loggers
 	public static final String CCW_STATIC_LOGGER = "ccw.logger";
+	
+	// Files
+	public final static String CCW_HOVER_CSS = "platform:/plugin/" + CCWPlugin.PLUGIN_ID + "/assets/hover-control-style.css";
+
+	// Symbolic Names
+	public final static String CCW_HOVER_FONT = org.eclipse.jdt.ui.PreferenceConstants.APPEARANCE_JAVADOC_FONT;
 }

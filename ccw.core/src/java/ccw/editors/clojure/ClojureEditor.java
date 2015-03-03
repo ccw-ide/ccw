@@ -647,7 +647,6 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
         return (IClojureSourceViewer) super.getSourceViewer();
     }
 
-    /** Change the visibility of the method to public */
     @Override
     public void setStatusLineErrorMessage(String message) {
         super.setStatusLineErrorMessage(message);

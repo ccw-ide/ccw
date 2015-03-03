@@ -11,7 +11,6 @@
 package ccw.preferences;
 
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.swt.SWT;
 
 public class Messages extends NLS {
     private static final String BUNDLE_NAME = "ccw.preferences.messages"; //$NON-NLS-1$
