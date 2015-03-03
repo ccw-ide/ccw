@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jface.text.TextViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
@@ -12,13 +13,13 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 public class SelectionHistory {
 
 	private List fHistory;
-	private IClojureEditor fEditor;
+	private final TextViewer fTextViewer;
 	private ISelectionChangedListener fSelectionListener;
 	private int fSelectionChangeListenerCounter;
 
-	public SelectionHistory(IClojureEditor editor) {
-		Assert.isNotNull(editor);
-		fEditor= editor;
+	public SelectionHistory(TextViewer viewer) {
+		Assert.isNotNull(viewer);
+		fTextViewer= viewer;
 		fHistory= new ArrayList(3);
 		fSelectionListener= new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -26,7 +27,7 @@ public class SelectionHistory {
 					flush();
 			}
 		};
-		fEditor.getSelectionProvider().addSelectionChangedListener(fSelectionListener);
+		fTextViewer.getSelectionProvider().addSelectionChangedListener(fSelectionListener);
 	}
 
 	public boolean isEmpty() {
@@ -64,6 +65,6 @@ public class SelectionHistory {
 	}
 
 	public void dispose() {
-		fEditor.getSelectionProvider().removeSelectionChangedListener(fSelectionListener);
+	    fTextViewer.getSelectionProvider().removeSelectionChangedListener(fSelectionListener);
 	}
 }

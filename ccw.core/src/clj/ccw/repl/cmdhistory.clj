@@ -1,6 +1,7 @@
 (ns ccw.repl.cmdhistory
   (:use [clojure.core.incubator :only [-?>]])
-  (:require [ccw.edn :refer [read-vector]])
+  (:require [ccw.edn :refer [read-vector]]
+            [ccw.eclipse :refer [get-pref-node int-ccw-pref]])
   (:import
     ccw.CCWPlugin
     ccw.preferences.PreferenceConstants
@@ -31,20 +32,12 @@
 (defn max-history
   "Maximum number of retained history entries."
   []
-  (.getInt (preference-store) PreferenceConstants/REPL_HISTORY_MAX_SIZE))
+  (int-ccw-pref PreferenceConstants/REPL_HISTORY_MAX_SIZE))
 
 (defn- persist-schedule-ms
   "Queued commands are persisted to project preferences every _ milliseconds."
   []
-  (.getInt (preference-store) PreferenceConstants/REPL_HISTORY_PERSIST_SCHEDULE))
-
-(defn- ^IEclipsePreferences get-pref-node
-  [^String project-name]
-  (-?> project-name
-    ccw.launching.LaunchUtils/getProject
-    org.eclipse.core.resources.ProjectScope.
-    (.getNode pref-node-id)
-    (doto .sync))) 
+  (int-ccw-pref PreferenceConstants/REPL_HISTORY_PERSIST_SCHEDULE))
 
 (defn- queue-expression
   [project-name expr]
@@ -66,7 +59,7 @@
    fn (which will nevertheless still return its argument)."
   [project-name]
   (schedule-job) ; ensure that history persistence job is scheduled upon first access
-  (let [pref-node (get-pref-node project-name)]
+  (let [pref-node (get-pref-node project-name pref-node-id)]
     (if pref-node
       [(into (or (-?> pref-node
                    (.get history-key "[]")
@@ -82,7 +75,7 @@
          retrying? false]
     (when project-name
       (let [[history] (get-history project-name)
-            node (get-pref-node project-name)
+            node (get-pref-node project-name pref-node-id)
             retry? (atom false)]
         (.subTask pm project-name)
         (try (doto node

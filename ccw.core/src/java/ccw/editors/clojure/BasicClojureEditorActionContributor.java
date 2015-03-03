@@ -23,6 +23,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.actions.RetargetAction;
 import org.eclipse.ui.texteditor.BasicTextEditorActionContributor;
@@ -42,6 +43,7 @@ public class BasicClojureEditorActionContributor extends BasicTextEditorActionCo
 
 	private RetargetTextEditorAction gotoPreviousMember;
 	private RetargetTextEditorAction gotoNextMember;
+	private RetargetTextEditorAction showInformationAction;
 	
 	/**
 	 * The active editor part.
@@ -86,6 +88,9 @@ public class BasicClojureEditorActionContributor extends BasicTextEditorActionCo
 
 		ResourceBundle b= ClojureEditorMessages.getBundleForConstructedKeys();
 
+		showInformationAction= new RetargetTextEditorAction(b, "ShowInformation_"); //$NON-NLS-1$
+		showInformationAction.setActionDefinitionId(ITextEditorActionDefinitionIds.SHOW_INFORMATION);
+		
 		gotoNextMember= new RetargetTextEditorAction( b, "GotoNextMember_"); //$NON-NLS-1$
 		gotoNextMember.setActionDefinitionId(IClojureEditorActionDefinitionIds.GOTO_NEXT_MEMBER);
 
@@ -114,6 +119,11 @@ public class BasicClojureEditorActionContributor extends BasicTextEditorActionCo
 	public void contributeToMenu(IMenuManager menu) {
 
 		super.contributeToMenu(menu);
+
+		IMenuManager editMenu= menu.findMenuUsingPath(IWorkbenchActionConstants.M_EDIT);
+		if (editMenu != null) {
+		    editMenu.appendToGroup(ITextEditorActionConstants.GROUP_INFORMATION, showInformationAction);
+		}
 
 //		IMenuManager gotoMenu= menu.findMenuUsingPath("navigate/goTo"); //$NON-NLS-1$
 //		if (gotoMenu != null) {
@@ -164,6 +174,8 @@ public class BasicClojureEditorActionContributor extends BasicTextEditorActionCo
 				extension.setStatusField(statusField, STATUS_FIELD_DEFS[i].category);
 			}
 		}
+		
+		showInformationAction.setAction(getAction(textEditor, ITextEditorActionConstants.SHOW_INFORMATION));
 	}
 	
 	@Override

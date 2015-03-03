@@ -552,7 +552,20 @@ public final class ClojureCore {
 		}
     }
     
-    private static String getFileText(IFile file) {
+    public static String getFileText(String pathname) {
+        return getFileText(new File(pathname));
+    }
+    
+    public static String getFileText(File file) {
+        try {
+            return (String) RT.var("clojure.core", "slurp").invoke(file);
+        } catch (Exception e) {
+            CCWPlugin.logError("error while getting text from file " + file.getAbsolutePath(), e);
+            return null;
+        }
+    }
+    
+    public static String getFileText(IFile file) {
     	try {
 			return (String) RT.var("clojure.core", "slurp").invoke(file.getLocation().toOSString());
 		} catch (Exception e) {
