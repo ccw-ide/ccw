@@ -1,5 +1,7 @@
 package ccw.core;
 
+import ccw.CCWPlugin;
+
 public class StaticStrings {
 
 	// Properties
@@ -11,4 +13,10 @@ public class StaticStrings {
 	
 	// Loggers
 	public static final String CCW_STATIC_LOGGER = "ccw.logger";
+	
+	// Files
+	public final static String CCW_HOVER_CSS = "platform:/plugin/" + CCWPlugin.PLUGIN_ID + "/assets/hover-control-style.css";
+
+	// Symbolic Names
+	public final static String CCW_HOVER_FONT = org.eclipse.jdt.ui.PreferenceConstants.APPEARANCE_JAVADOC_FONT;
 }
