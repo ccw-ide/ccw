@@ -9,17 +9,18 @@
  *    Laurent PETIT - initial API and implementation
  *    Some code (e.g. contextInformation wiring) from Scala plugin & original 
  *      clojure rule based editor
+ *    Andrea RICHIARDI - Scanner initialization refactoring
  *******************************************************************************/
 package ccw.editors.clojure;
 
 import java.util.Map;
 
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jface.internal.text.html.HTMLTextPresenter;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentExtension3;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.ITextHover;
@@ -33,81 +34,36 @@ import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.information.IInformationPresenter;
 import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.information.InformationPresenter;
-import org.eclipse.jface.text.presentation.IPresentationDamager;
-import org.eclipse.jface.text.presentation.IPresentationReconciler;
-import org.eclipse.jface.text.presentation.IPresentationRepairer;
-import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.reconciler.IReconciler;
-import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
-import org.eclipse.jface.text.rules.ITokenScanner;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
 
 import ccw.CCWPlugin;
+import ccw.editors.clojure.scanners.ClojurePartitionScanner;
 import ccw.preferences.PreferenceConstants;
 import ccw.util.ClojureInvoker;
 
-public class ClojureSourceViewerConfiguration extends
-		TextSourceViewerConfiguration {
-	protected ITokenScanner tokenScanner;
-	private final IClojureEditor editor;
-
+public class ClojureSourceViewerConfiguration extends SimpleSourceViewerConfiguration {
+    
 	public static final int HOVER_CONSTRAINTS_MAX_WIDTH_IN_CHAR = 1000;
 	public static final int HOVER_CONSTRAINTS_MAX_HEIGHT_IN_CHAR = 50;
 
 	private final ClojureInvoker proposalProcessor = ClojureInvoker.newInvoker(
             CCWPlugin.getDefault(),
             "ccw.editors.clojure.clojure-proposal-processor");
-	
-	ClojureInvoker hoverSupportInvoker = ClojureInvoker.newInvoker(CCWPlugin.getDefault(),
+    
+    ClojureInvoker hoverSupportInvoker = ClojureInvoker.newInvoker(CCWPlugin.getDefault(),
             "ccw.editors.clojure.hover-support");
-	
-	public ClojureSourceViewerConfiguration(IPreferenceStore preferenceStore,
-			IClojureEditor editor) {
-		super(preferenceStore);
-		this.editor = editor;
-		initTokenScanner();
-	}
-
-	@Override
-	public IPresentationReconciler getPresentationReconciler(
-			ISourceViewer sourceViewer) {
-		PresentationReconciler reconciler = new PresentationReconciler();
-
-		reconciler
-				.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
-
-		addDamagerRepairerForContentType(reconciler,
-				IDocument.DEFAULT_CONTENT_TYPE);
-
-		return reconciler;
-	}
-
-	@Override
-	public String getConfiguredDocumentPartitioning(ISourceViewer sourceViewer) {
-		return IDocumentExtension3.DEFAULT_PARTITIONING;
-	}
-
-	private void addDamagerRepairerForContentType(
-			PresentationReconciler reconciler, String contentType) {
-		
-		IPresentationDamager d = new ClojureTopLevelFormsDamager(editor); 
-		reconciler.setDamager(d, contentType);
-		
-		IPresentationRepairer r = new DefaultDamagerRepairer(tokenScanner);
-		reconciler.setRepairer(r, contentType);
-
-	}
-
-	public String[] getConfiguredContentTypes(ISourceViewer sourceViewer) {
-		return new String[] { IDocument.DEFAULT_CONTENT_TYPE };
-	}
+    
+    public ClojureSourceViewerConfiguration(IPreferenceStore preferenceStore,
+            IClojureEditor editor) {
+        super(preferenceStore, editor);
+    }
 
 	@Override
 	public IContentAssistant getContentAssistant(final ISourceViewer sourceViewer) {
 		ContentAssistant assistant = new ContentAssistant();
-		
+
 		assistant.addCompletionListener(new ICompletionListener() {
 			public void assistSessionStarted(ContentAssistEvent event) {
 				((ClojureSourceViewer) sourceViewer).setContentAssistantActive(true);
@@ -153,25 +109,15 @@ public class ClojureSourceViewerConfiguration extends
 
 	}
 
-	/**
-	 * Returns the Information Control Creator for the configured SourceViewer.
-	 */
-	public IInformationControlCreator getInformationControlCreator(ISourceViewer sourceViewer) {
-		return new IInformationControlCreator() {
-			public IInformationControl createInformationControl(Shell parent) {
-				return new DefaultInformationControl(parent, false);
-			}
-		};
-	}
-
-	public void initTokenScanner() {
-		tokenScanner = new ClojureTokenScanner(
-				CCWPlugin.getDefault().getColorCache(), 
-				CCWPlugin.getDefault()
-				.getDefaultScanContext(), 
-				CCWPlugin.getDefault().getCombinedPreferenceStore(),
-				editor);
-	}
+	public IInformationControlCreator getInformationControlCreator(
+            ISourceViewer sourceViewer) {
+        return new IInformationControlCreator() {
+            public IInformationControl createInformationControl(Shell parent) {
+                return new DefaultInformationControl(parent,
+                        new HTMLTextPresenter());
+            }
+        };
+    }
 
 	@Override
 	public IReconciler getReconciler(ISourceViewer sourceViewer) {
@@ -180,7 +126,6 @@ public class ClojureSourceViewerConfiguration extends
 		// and code, and spell check based on these partitions
 		return null;
 	}
-
 	
 	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
@@ -213,7 +158,6 @@ public class ClojureSourceViewerConfiguration extends
 		    map.put(IHyperlinkConstants.ClojureHyperlinkDetector_TARGET_ID, (IAdaptable)editor);
 		return map;
 	}
-	
     /* (non-Javadoc)
      * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getInformationPresenter(org.eclipse.jface.text.source.ISourceViewer)
      */

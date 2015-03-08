@@ -1,5 +1,7 @@
 package ccw.core;
 
+import org.eclipse.jface.resource.JFaceResources;
+
 import ccw.CCWPlugin;
 
 /**
@@ -25,5 +27,8 @@ public class StaticStrings {
 	public final static String CCW_HOVER_CSS = "platform:/plugin/" + CCWPlugin.PLUGIN_ID + "/assets/hover-control-style.css";
 
 	// Symbolic Names
-	public final static String CCW_HOVER_FONT = org.eclipse.jdt.ui.PreferenceConstants.APPEARANCE_JAVADOC_FONT;
+    public final static String CCW_HOVER_FONT = JFaceResources.DIALOG_FONT;
+    
+	// Colors
+	public final static String CCW_COLOR_REPL_EXPR_BACKGROUND = "ccw.editors.clojure.colors.repl.expressionBackground";
 }

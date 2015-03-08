@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.e4.core.contexts.EclipseContextFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.ColorRegistry;
@@ -61,11 +62,10 @@ import org.osgi.framework.BundleListener;
 import ccw.core.StaticStrings;
 import ccw.editors.clojure.ClojureEditor;
 import ccw.editors.clojure.IClojureEditor;
-import ccw.editors.clojure.IScanContext;
+import ccw.editors.clojure.scanners.IScanContext;
 import ccw.launching.LaunchUtils;
 import ccw.nature.AutomaticNatureAdder;
 import ccw.preferences.PreferenceConstants;
-import ccw.preferences.SyntaxColoringHelper;
 import ccw.repl.REPLView;
 import ccw.repl.SafeConnection;
 import ccw.util.ClojureInvoker;
@@ -336,8 +336,7 @@ public class CCWPlugin extends AbstractUIPlugin {
     
     private synchronized void createColorCache() {
     	if (colorCache == null) {
-    		colorCache = new ColorRegistry(getWorkbench().getDisplay());
-    		colorCache.put("ccw.repl.expressionBackground", new RGB(0xf0, 0xf0, 0xf0));
+    	    colorCache = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry();
     	}
     }
     
@@ -546,43 +545,65 @@ public class CCWPlugin extends AbstractUIPlugin {
 		return scanContext;
 	}
 	
-	public static RGB getPreferenceRGB(IPreferenceStore store, String preferenceKey, RGB defaultColor) {
-	    return
-    	    store.getBoolean(SyntaxColoringHelper.getEnabledPreferenceKey(preferenceKey))
+	public static @NonNull RGB getPreferenceRGB(IPreferenceStore store, String preferenceKey) {
+	    return store.getBoolean(PreferenceConstants.getEnabledPreferenceKey(preferenceKey))
                 ? PreferenceConverter.getColor(store, preferenceKey)
-                : defaultColor;
+                : PreferenceConverter.getDefaultColor(store, preferenceKey);
+	}
+	
+	private static void ensureColorInCache(ColorRegistry registry, String id, RGB rgb) {
+	    if (!registry.hasValueFor(id)) {
+	        registry.put(id, rgb);
+        }
+	}
+	
+	/** 
+     * Not thread safe, but should only be called from the UI Thread, so it's
+     * not really a problem.
+     * @param rgbString The rgb string
+     * @return The <code>Color</code> instance cached for this rgb value, creating
+     *         it along the way if required.
+     */
+	public static Color getColor(String rgbString) {
+	    ColorRegistry r = getDefault().getColorCache();
+	    RGB rgb = StringConverter.asRGB(rgbString);
+	    ensureColorInCache(r, rgbString, rgb);
+        return r.get(rgbString);
 	}
 	
 	/** 
 	 * Not thread safe, but should only be called from the UI Thread, so it's
 	 * not really a problem.
-	 * @param rgb
+	 * @param rgb The RGB istance
 	 * @return The <code>Color</code> instance cached for this rgb value, creating
 	 *         it along the way if required.
 	 */
 	public static Color getColor(RGB rgb) {
 		ColorRegistry r = getDefault().getColorCache();
 		String rgbString = StringConverter.asString(rgb);
-		if (!r.hasValueFor(rgbString)) {
-			r.put(rgbString, rgb);
-		}
-		return r.get(rgbString);
+		ensureColorInCache(r, rgbString, rgb);
+        return r.get(rgbString);
 	}
 	
-	public static Color getPreferenceColor(IPreferenceStore store, String preferenceKey, RGB defaultColor) {
-		return getColor(getPreferenceRGB(store, preferenceKey, defaultColor));
+	public static Color getPreferenceColor(IPreferenceStore store, String preferenceKey) {
+		return getColor(getPreferenceRGB(store, preferenceKey));
 	}
 	
-    public static void registerEditorColors(IPreferenceStore store, RGB foregroundColor) {
+	/**
+	 * Registers all the editor colors in the ColorRegistry, except the ones declared in plugin.xml,
+	 * which are already in the registry.
+	 * @param store
+	 */
+    public static void registerEditorColors(IPreferenceStore store) {
         final ColorRegistry colorCache = getDefault().getColorCache();
-        
+
         for (Keyword token: PreferenceConstants.colorizableTokens) {
-        	PreferenceConstants.ColorizableToken tokenStyle = PreferenceConstants.getColorizableToken(store, token, foregroundColor);
-        	colorCache.put(tokenStyle.rgb.toString(), tokenStyle.rgb);
+        	PreferenceConstants.ColorizableToken tokenStyle = PreferenceConstants.getColorizableToken(store, token);
+        	String rgbString = StringConverter.asString(tokenStyle.rgb);
+        	ensureColorInCache(colorCache, rgbString, tokenStyle.rgb);
         }
-        
     }
-    
+
     /**
 	 * Return the Active editor or null if there is no focus.
 	 * 

@@ -9,7 +9,7 @@
  *    Casey Marshall - initial API and implementation
  *    Laurent Petit  - evolution and maintenance
  *******************************************************************************/
-package ccw.editors.clojure;
+package ccw.editors.clojure.scanners;
 
 import java.util.ArrayList;
 import java.util.List;
