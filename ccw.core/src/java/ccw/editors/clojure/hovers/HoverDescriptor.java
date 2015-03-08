@@ -1,6 +1,6 @@
 package ccw.editors.clojure.hovers;
 
-import ccw.util.AbstractModelObject;
+import ccw.core.AbstractModelObject;
 
 /**
  * Data structure to hold a (mutable) hover descriptor.

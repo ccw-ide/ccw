@@ -282,7 +282,7 @@
   (let [buffer (java.lang.StringBuffer. hover-info)
         prepend-text (HTMLPrinter/convertTopLevelFont hover-css
                                                       (aget (-> (JFaceResources/getFontRegistry)
-                                                                (.getFontData StaticStrings/CCW_HOVER_FONT)) 0))]
+                                                                (.getFontData StaticStrings/CCW_FONT_HOVER_DEFAULT)) 0))]
     (HTMLPrinter/insertPageProlog buffer 0 prepend-text)
     (HTMLPrinter/addPageEpilog buffer)
     (.toString buffer)))

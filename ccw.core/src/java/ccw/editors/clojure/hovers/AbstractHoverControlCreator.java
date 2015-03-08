@@ -34,7 +34,7 @@ public abstract class AbstractHoverControlCreator extends AbstractReusableInform
      * @return
      */
     protected String symbolicFontName() {
-        return StaticStrings.CCW_HOVER_FONT;
+        return StaticStrings.CCW_FONT_HOVER_DEFAULT;
     }
     
     /**
