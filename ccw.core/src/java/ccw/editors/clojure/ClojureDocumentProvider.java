@@ -22,6 +22,8 @@ import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 
 import ccw.StorageMarkerAnnotationModel;
+import ccw.editors.clojure.scanners.ClojurePartitionScanner;
+import ccw.editors.clojure.scanners.ClojurePartitioner;
 
 public class ClojureDocumentProvider extends TextFileDocumentProvider {
     

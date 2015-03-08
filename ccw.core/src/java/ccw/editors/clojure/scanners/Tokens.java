@@ -8,7 +8,7 @@
  * Contributors: 
  *    Tuomas KARKKAINEN - initial API and implementation
  *******************************************************************************/
-package ccw.editors.clojure;
+package ccw.editors.clojure.scanners;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
@@ -21,6 +21,7 @@ import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.graphics.Color;
 
 import ccw.CCWPlugin;
+import ccw.editors.clojure.IClojureAwarePart;
 
 public class Tokens {
     private final ITokenScanner tokenScanner;

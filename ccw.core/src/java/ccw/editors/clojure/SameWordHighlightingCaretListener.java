@@ -20,6 +20,8 @@ import org.eclipse.swt.custom.CaretListener;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.graphics.RGB;
 
+import ccw.editors.clojure.scanners.Tokens;
+
 public class SameWordHighlightingCaretListener implements CaretListener {
 	private static final String COLOR_KEY = "ccw.editors.SameWordHighlightingCaretListener.COLOR_KEY";
 	private static final String OTHER_MATCHES_COLOR_KEY = "ccw.editors.SameWordHighlightingCaretListener.OTHER_MATCHES_COLOR_KEY";

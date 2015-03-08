@@ -1,6 +1,7 @@
 package ccw.editors.clojure;
 
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * A callback interface allowing various facilities to treat
@@ -18,8 +19,8 @@ public interface IClojureEditor extends IClojureAwarePart, IReplAwarePart, ICloj
     void updateTabsToSpacesConverter();
 
 	/**
-     * Returns the ClojureSourceViewer, it should never be null.
+     * Returns an IClojureSourceViewer instance.
      * @return Instance or null.
      */
-    IClojureSourceViewer sourceViewer();
+    @NonNull IClojureSourceViewer sourceViewer();
 }

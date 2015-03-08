@@ -26,4 +26,7 @@ public class StaticStrings {
 
 	// Symbolic Names
 	public final static String CCW_HOVER_FONT = org.eclipse.jdt.ui.PreferenceConstants.APPEARANCE_JAVADOC_FONT;
+
+	// Colors
+	public final static String CCW_COLOR_REPL_EXPR_BACKGROUND = "ccw.editors.clojure.colors.repl.expressionBackground";
 }

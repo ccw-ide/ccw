@@ -101,16 +101,16 @@ public interface IClojureAwarePart {
     void toggleShowRainbowParens();
 
     /**
+     * Indicate a Damager to consider that the whole document must be considered damaged,
+     * e.g. to force syntax coloring & al. to refresh.
+     * @return true or false.
+     */
+    boolean isForceRepair();
+    
+    /**
      * Force the viewer to consider the whole document as damaged, even if its
      * text has not changed.
      * e.g., useful to have syntax coloring adapt to new preference settings.
      */
     void markDamagedAndRedraw();
-    
-    /**
-     * Forces the repairing of this part.
-     * @return
-     */
-    boolean isForceRepair();
-    
 }

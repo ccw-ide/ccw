@@ -9,7 +9,7 @@
  *    Laurent PETIT - initial API and implementation
  *******************************************************************************/
 
-package ccw.editors.clojure;
+package ccw.editors.clojure.scanners;
 
 import clojure.lang.Keyword;
 

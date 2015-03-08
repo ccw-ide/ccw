@@ -9,31 +9,37 @@
  *    Laurent PETIT - initial API and implementation
  *    Thomas Ettinger
  *******************************************************************************/
-package ccw.editors.clojure;
+package ccw.editors.clojure.scanners;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ColorRegistry;
+import org.eclipse.jface.resource.StringConverter;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.ITokenScanner;
 import org.eclipse.jface.text.rules.Token;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
+import org.junit.Assert;
 
 import ccw.CCWPlugin;
+import ccw.editors.clojure.IClojureAwarePart;
 import ccw.preferences.PreferenceConstants;
 import ccw.util.ClojureInvoker;
 import clojure.lang.ISeq;
 import clojure.lang.Keyword;
 
-public final class ClojureTokenScanner implements ITokenScanner {
+public final class ClojureTokenScanner implements ITokenScanner, IPropertyChangeListener {
 	private final ClojureInvoker editorSupport = ClojureInvoker.newInvoker(
             CCWPlugin.getDefault(),
             "ccw.editors.clojure.editor-support");
@@ -60,13 +66,14 @@ public final class ClojureTokenScanner implements ITokenScanner {
 //    private final IToken[] parenLevelTokens = new IToken[] { newParenTokenWith(getSystemColor(SWT.COLOR_RED)), newParenTokenWith(getCCWColor(0)), newParenTokenWith(getSystemColor(SWT.COLOR_GRAY)), newParenTokenWith(getSystemColor(SWT.COLOR_MAGENTA)), newParenTokenWith(getCCWColor(1)), newParenTokenWith(getCCWColor(2)), newParenTokenWith(getCCWColor(3)), newParenTokenWith(getSystemColor(SWT.COLOR_DARK_GRAY)), newParenTokenWith(getCCWColor(4)), newParenTokenWith(getSystemColor(SWT.COLOR_DARK_BLUE)), newParenTokenWith(getCCWColor(5)), newParenTokenWith(getSystemColor(SWT.COLOR_DARK_CYAN)) };
 //    private final IToken noRainbowParenToken = newParenTokenWith(getSystemColor(SWT.COLOR_DARK_GRAY/*COLOR_BLACK*/));
 
-    private ColorRegistry colorCache;
     private IClojureAwarePart part;
     private IPreferenceStore preferenceStore;
+    private TokenScannerUtils utils;
     
-    private static IToken newParenTokenWith(Color color) {
-        return new org.eclipse.jface.text.rules.Token(new TextAttribute(color));
-    }
+    // AR - Never used
+//    private static IToken newParenTokenWith(Color color) {
+//        return new org.eclipse.jface.text.rules.Token(new TextAttribute(color));
+//    }
 
     protected static final IToken errorToken = new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_WHITE), Display.getDefault().getSystemColor(SWT.COLOR_DARK_RED), TextAttribute.UNDERLINE));
     private int currentParenLevel = 0;
@@ -88,30 +95,27 @@ public final class ClojureTokenScanner implements ITokenScanner {
 	private static Keyword whitespaceKeyword = Keyword.intern("whitespace");
 	
     public ClojureTokenScanner(final ColorRegistry colorCache, IScanContext context, IPreferenceStore preferenceStore, IClojureAwarePart part) {
-        if (part == null) {
-        	throw new IllegalArgumentException("part cannot be null");
-        }
-        this.colorCache = colorCache;
+        Assert.assertNotNull(part);
+        	
         this.context = context;
         this.preferenceStore = preferenceStore;
         this.part = part;
         parserTokenKeywordToJFaceToken = new HashMap<Keyword, IToken>();
-        initClojureTokenTypeToJFaceTokenMap();
+        utils = new TokenScannerUtils(this);
+        initClojureTokenTypeToJFaceTokenMap(utils);
         initialized = true;
     }
 
-	protected void initClojureTokenTypeToJFaceTokenMap() {
-		TokenScannerUtils u = new TokenScannerUtils(this, colorCache);
-		
+	protected void initClojureTokenTypeToJFaceTokenMap(TokenScannerUtils u) {
 		u.addTokenType(Keyword.intern("unexpected"), ClojureTokenScanner.errorToken);
 		u.addTokenType(Keyword.intern("eof"), Token.EOF);
 		u.addTokenType(Keyword.intern("whitespace"), Token.WHITESPACE);
 
 		for (Keyword token: PreferenceConstants.colorizableTokens) {
-			PreferenceConstants.ColorizableToken tokenStyle = PreferenceConstants.getColorizableToken(preferenceStore, token, null);
+			PreferenceConstants.ColorizableToken tokenStyle = PreferenceConstants.getColorizableToken(preferenceStore, token);
 			u.addTokenType(
 					token,
-					(tokenStyle.rgb==null) ? null : tokenStyle.rgb.toString(),
+					(tokenStyle.rgb==null) ? null : StringConverter.asString(tokenStyle.rgb),
 					tokenStyle.isBold,
 					tokenStyle.isItalic);
 		}
@@ -119,22 +123,14 @@ public final class ClojureTokenScanner implements ITokenScanner {
 
     
     public final void addTokenType(Keyword tokenIndex, org.eclipse.jface.text.rules.IToken token) {
-        if (initialized) {
-            throw lifeCycleError();
-        }
         parserTokenKeywordToJFaceToken.put(tokenIndex, token);
     }
 
     public final void addTokenType(Keyword tokenIndex, TextAttribute textAttribute) {
-        if (initialized) {
-            throw lifeCycleError();
-        }
         addTokenType(tokenIndex, new org.eclipse.jface.text.rules.Token(textAttribute));
     }
-    private RuntimeException lifeCycleError() {
-        return new RuntimeException("Object Lifecycle error: method called at an inappropriate time");
-    }
 
+    @Override
     public final int getTokenLength() {
     	long start = System.currentTimeMillis();
     	Number tokenLength = (Number) currentToken.get(tokenLengthKeyword);
@@ -144,6 +140,7 @@ public final class ClojureTokenScanner implements ITokenScanner {
 		return tokenLength.intValue();
     }
 
+    @Override
     public final int getTokenOffset() {
     	return currentOffset;
     }
@@ -179,11 +176,13 @@ public final class ClojureTokenScanner implements ITokenScanner {
     		//add(Keyword.intern("open-var"));
     	}
     };
+    
+    @Override
     public final IToken nextToken() {
     	long start = System.currentTimeMillis();
     	advanceToken();   	
     	IToken result;
-    	
+	
 		if (currentToken.get(tokenTypeKeyword).equals(nestKeyword)) {
             currentParenLevel += 1;
             long localDuration = System.currentTimeMillis() - start;
@@ -221,6 +220,9 @@ public final class ClojureTokenScanner implements ITokenScanner {
         			result = parserTokenKeywordToJFaceToken.get(PreferenceConstants.deactivatedRainbowParen);
         		}
         	}
+        } else if (currentToken.get(tokenTypeKeyword).equals(whitespaceKeyword)) {
+            // AR - I don't need to process whitespaces
+            return nextToken();
         } else {
             result = toJFaceToken();
         }
@@ -250,8 +252,9 @@ public final class ClojureTokenScanner implements ITokenScanner {
 		System.out.println("length:" + length);
 		System.out.println("document:" + document);
 		System.out.println("---------------------------");
-	};
+	}
 
+	@Override
     public final void setRange(IDocument document, int offset, int length) {
 		//printSetRange("ClojureTokenScanner", document, offset, length);
     	long start = System.currentTimeMillis();
@@ -311,5 +314,59 @@ public final class ClojureTokenScanner implements ITokenScanner {
     	}
     	guessEclipseTokenTypeForSymbolDuration += System.currentTimeMillis() - start;
     	return res;
+    }
+
+    /**
+     * Copy constructor plus the new value. Generates a new {@link IToken}
+     * @param token A token.
+     * @param key The property key.
+     * @param newValue The new value.
+     * @return A ColorizableToken, never null.
+     */
+    public static @NonNull IToken adaptToken(IToken token, String key, Object newValue) {
+        TextAttribute textAttribute = (TextAttribute) token.getData();
+        
+        Boolean isBold = (textAttribute.getStyle() & SWT.BOLD) == SWT.BOLD;
+        Boolean isItalic = (textAttribute.getStyle() & SWT.ITALIC) == SWT.ITALIC;
+        RGB rgb = textAttribute.getForeground().getRGB();
+        boolean newValueProcessed = false;
+        
+        if (PreferenceConstants.isBoldPreferenceKey(key) == Boolean.TRUE) {
+            if (newValue instanceof Boolean) {
+                isBold = (Boolean)newValue;
+                newValueProcessed = true;
+            } else if (newValue instanceof String) {
+                isBold = Boolean.valueOf((String)newValue);
+                newValueProcessed = true;
+            }
+        }
+        
+        if (!newValueProcessed && PreferenceConstants.isItalicPreferenceKey(key) == Boolean.TRUE) {
+            if (newValue instanceof Boolean) {
+                isItalic = (Boolean)newValue;
+                newValueProcessed = true;
+            } else if (newValue instanceof String) {
+                isItalic = Boolean.valueOf((String)newValue);
+                newValueProcessed = true;
+            }
+        }
+        
+        if (!newValueProcessed) {
+            if (newValue instanceof RGB) {
+                rgb = ((RGB)newValue);
+            } else if (newValue instanceof String) {
+                rgb = StringConverter.asRGB((String)newValue);
+            }
+        }
+        return new org.eclipse.jface.text.rules.Token(TokenScannerUtils.createTokenData(rgb, isBold, isItalic));
+    }
+    
+    @Override
+    public void propertyChange(PropertyChangeEvent event) {
+        Keyword keyword = PreferenceConstants.guessPreferenceKeyword(event.getProperty());
+        if (PreferenceConstants.colorizableTokens.contains(keyword)) {
+            IToken eclipseToken = parserTokenKeywordToJFaceToken.get(keyword);
+            utils.addTokenType(keyword, adaptToken(eclipseToken, event.getProperty(), event.getNewValue()));
+        }
     }
 }

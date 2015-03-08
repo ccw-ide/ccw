@@ -15,6 +15,7 @@ package ccw.editors.clojure;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IAutoEditStrategy;
@@ -33,11 +34,11 @@ import org.eclipse.jface.text.information.IInformationPresenter;
 import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.information.InformationPresenter;
 import org.eclipse.jface.text.reconciler.IReconciler;
-import org.eclipse.jface.text.rules.ITokenScanner;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.widgets.Shell;
 
 import ccw.CCWPlugin;
+import ccw.editors.clojure.scanners.ClojurePartitionScanner;
 import ccw.preferences.PreferenceConstants;
 import ccw.util.ClojureInvoker;
 
@@ -46,9 +47,6 @@ public class ClojureSourceViewerConfiguration extends SimpleSourceViewerConfigur
     public static final int HOVER_CONSTRAINTS_WIDTH_IN_CHAR = 100;
     public static final int HOVER_CONSTRAINTS_HEIGHT_IN_CHAR = 12;
     
-	protected ITokenScanner tokenScanner;
-	private final IClojureAwarePart part;
-
 	private final ClojureInvoker proposalProcessor = ClojureInvoker.newInvoker(
             CCWPlugin.getDefault(),
             "ccw.editors.clojure.clojure-proposal-processor");
@@ -56,10 +54,8 @@ public class ClojureSourceViewerConfiguration extends SimpleSourceViewerConfigur
 	ClojureInvoker hoverSupportInvoker = ClojureInvoker.newInvoker(CCWPlugin.getDefault(),
             "ccw.editors.clojure.hover-support");
 
-	public ClojureSourceViewerConfiguration(IPreferenceStore preferenceStore,
-	        IClojureAwarePart part) {
+	public ClojureSourceViewerConfiguration(@NonNull IPreferenceStore preferenceStore, @NonNull IClojureAwarePart part) {
 		super(preferenceStore, part);
-		this.part = part;
 	}
 
 	@Override

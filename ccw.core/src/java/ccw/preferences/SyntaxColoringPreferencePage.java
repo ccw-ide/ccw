@@ -69,10 +69,10 @@ import org.osgi.service.prefs.BackingStoreException;
 
 import ccw.CCWPlugin;
 import ccw.editors.clojure.ClojureColorManager;
-import ccw.editors.clojure.ClojurePartitionScanner;
-import ccw.editors.clojure.ClojurePartitioner;
 import ccw.editors.clojure.ClojureSourceViewer;
 import ccw.editors.clojure.SimpleSourceViewerConfiguration;
+import ccw.editors.clojure.scanners.ClojurePartitionScanner;
+import ccw.editors.clojure.scanners.ClojurePartitioner;
 
 /**
  * Configures Clojure Editor syntax coloring preferences.
@@ -195,7 +195,6 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
     
          /* @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
          */
-        @SuppressWarnings("unchecked")
         public Object[] getElements(Object inputElement) {
             return inputElement instanceof List
                 ? ((List) inputElement).toArray()
@@ -217,56 +216,56 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
      * The keys of the overlay store.
      */
     private final String[][] fSyntaxColorListModel= new String[][] {
-//          { Messages.SyntaxColoringPreferencePage_literal, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.literalSymbolToken)},
-//          { Messages.SyntaxColoringPreferencePage_symbol, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.symbolToken)},
+//          { Messages.SyntaxColoringPreferencePage_literal, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.literalSymbolToken)},
+//          { Messages.SyntaxColoringPreferencePage_symbol, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.symbolToken)},
 
-        { Messages.SyntaxColoringPreferencePage_rawSymbol, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.RAW_SYMBOL_Token)},
-        { Messages.SyntaxColoringPreferencePage_callableRawSymbol, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.callable_RAW_SYMBOL_Token)},
+        { Messages.SyntaxColoringPreferencePage_rawSymbol, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.RAW_SYMBOL_Token)},
+        { Messages.SyntaxColoringPreferencePage_callableRawSymbol, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.callable_RAW_SYMBOL_Token)},
 
-        { Messages.SyntaxColoringPreferencePage_specialForm, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.SPECIAL_FORM_Token)},
-        { Messages.SyntaxColoringPreferencePage_callableSpecialForm, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.callableSPECIAL_FORM_Token)},
+        { Messages.SyntaxColoringPreferencePage_specialForm, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.SPECIAL_FORM_Token)},
+        { Messages.SyntaxColoringPreferencePage_callableSpecialForm, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.callableSPECIAL_FORM_Token)},
 
-        { Messages.SyntaxColoringPreferencePage_macro, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.MACRO_Token)},
-        { Messages.SyntaxColoringPreferencePage_callableMacro, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.callableMACRO_Token)},
+        { Messages.SyntaxColoringPreferencePage_macro, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.MACRO_Token)},
+        { Messages.SyntaxColoringPreferencePage_callableMacro, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.callableMACRO_Token)},
 
-        { Messages.SyntaxColoringPreferencePage_function, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.FUNCTION_Token)},
-        { Messages.SyntaxColoringPreferencePage_callableFunction, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.callableFUNCTION_Token)},
+        { Messages.SyntaxColoringPreferencePage_function, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.FUNCTION_Token)},
+        { Messages.SyntaxColoringPreferencePage_callableFunction, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.callableFUNCTION_Token)},
         
 
-        { Messages.SyntaxColoringPreferencePage_javaClass, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.JAVA_CLASS_Token)},
-        { Messages.SyntaxColoringPreferencePage_callableJavaClass, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.callableJAVA_CLASS_Token)},
-        { Messages.SyntaxColoringPreferencePage_javaInstanceMethod, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.JAVA_INSTANCE_METHOD_Token)},
-        { Messages.SyntaxColoringPreferencePage_callableJavaInstanceMethod, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.callableJAVA_INSTANCE_METHOD_Token)},
-        { Messages.SyntaxColoringPreferencePage_javaStaticMethod, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.JAVA_STATIC_METHOD_Token)},
-        { Messages.SyntaxColoringPreferencePage_callableJavaStaticMethod, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.callableJAVA_STATIC_METHOD_Token)},
+        { Messages.SyntaxColoringPreferencePage_javaClass, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.JAVA_CLASS_Token)},
+        { Messages.SyntaxColoringPreferencePage_callableJavaClass, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.callableJAVA_CLASS_Token)},
+        { Messages.SyntaxColoringPreferencePage_javaInstanceMethod, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.JAVA_INSTANCE_METHOD_Token)},
+        { Messages.SyntaxColoringPreferencePage_callableJavaInstanceMethod, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.callableJAVA_INSTANCE_METHOD_Token)},
+        { Messages.SyntaxColoringPreferencePage_javaStaticMethod, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.JAVA_STATIC_METHOD_Token)},
+        { Messages.SyntaxColoringPreferencePage_callableJavaStaticMethod, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.callableJAVA_STATIC_METHOD_Token)},
         
-        { Messages.SyntaxColoringPreferencePage_globalVar, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.GLOBAL_VAR_Token)},
-        { Messages.SyntaxColoringPreferencePage_callableGlobalVar, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.callableGLOBAL_VAR_Token)},
+        { Messages.SyntaxColoringPreferencePage_globalVar, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.GLOBAL_VAR_Token)},
+        { Messages.SyntaxColoringPreferencePage_callableGlobalVar, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.callableGLOBAL_VAR_Token)},
         
-        { Messages.SyntaxColoringPreferencePage_comment, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.commentToken)},
-        { Messages.SyntaxColoringPreferencePage_string, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.stringToken)},
-        { Messages.SyntaxColoringPreferencePage_metadataTypehint, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.metaToken)},
-        { Messages.SyntaxColoringPreferencePage_readerLiteralTag, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.readerLiteralTag)},
-        { Messages.SyntaxColoringPreferencePage_keyword, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.keywordToken)},
-        { Messages.SyntaxColoringPreferencePage_regex, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.regexToken)},
-        { Messages.SyntaxColoringPreferencePage_int, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.intToken)},
-        { Messages.SyntaxColoringPreferencePage_float, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.floatToken)},
-        { Messages.SyntaxColoringPreferencePage_char, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.charToken)},
-        { Messages.SyntaxColoringPreferencePage_otherLiterals, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.otherLiteralsToken)},
+        { Messages.SyntaxColoringPreferencePage_comment, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.commentToken)},
+        { Messages.SyntaxColoringPreferencePage_string, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.stringToken)},
+        { Messages.SyntaxColoringPreferencePage_metadataTypehint, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.metaToken)},
+        { Messages.SyntaxColoringPreferencePage_readerLiteralTag, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.readerLiteralTag)},
+        { Messages.SyntaxColoringPreferencePage_keyword, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.keywordToken)},
+        { Messages.SyntaxColoringPreferencePage_regex, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.regexToken)},
+        { Messages.SyntaxColoringPreferencePage_int, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.intToken)},
+        { Messages.SyntaxColoringPreferencePage_float, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.floatToken)},
+        { Messages.SyntaxColoringPreferencePage_char, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.charToken)},
+        { Messages.SyntaxColoringPreferencePage_otherLiterals, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.otherLiteralsToken)},
         
                 
-        { Messages.SyntaxColoringPreferencePage_deactivateRainbowParen, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.deactivatedRainbowParen)},
-        { Messages.SyntaxColoringPreferencePage_rainbowParenLevel1, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.rainbowParenLevel1)},
-        { Messages.SyntaxColoringPreferencePage_rainbowParenLevel2, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.rainbowParenLevel2)},
-        { Messages.SyntaxColoringPreferencePage_rainbowParenLevel3, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.rainbowParenLevel3)},
-        { Messages.SyntaxColoringPreferencePage_rainbowParenLevel4, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.rainbowParenLevel4)},
-        { Messages.SyntaxColoringPreferencePage_rainbowParenLevel5, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.rainbowParenLevel5)},
-        { Messages.SyntaxColoringPreferencePage_rainbowParenLevel6, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.rainbowParenLevel6)},
-        { Messages.SyntaxColoringPreferencePage_rainbowParenLevel7, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.rainbowParenLevel7)},
-        { Messages.SyntaxColoringPreferencePage_rainbowParenLevel8, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.rainbowParenLevel8)},
+        { Messages.SyntaxColoringPreferencePage_deactivateRainbowParen, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.deactivatedRainbowParen)},
+        { Messages.SyntaxColoringPreferencePage_rainbowParenLevel1, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.rainbowParenLevel1)},
+        { Messages.SyntaxColoringPreferencePage_rainbowParenLevel2, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.rainbowParenLevel2)},
+        { Messages.SyntaxColoringPreferencePage_rainbowParenLevel3, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.rainbowParenLevel3)},
+        { Messages.SyntaxColoringPreferencePage_rainbowParenLevel4, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.rainbowParenLevel4)},
+        { Messages.SyntaxColoringPreferencePage_rainbowParenLevel5, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.rainbowParenLevel5)},
+        { Messages.SyntaxColoringPreferencePage_rainbowParenLevel6, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.rainbowParenLevel6)},
+        { Messages.SyntaxColoringPreferencePage_rainbowParenLevel7, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.rainbowParenLevel7)},
+        { Messages.SyntaxColoringPreferencePage_rainbowParenLevel8, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.rainbowParenLevel8)},
 
-        { Messages.SyntaxColoringPreferencePage_replLogValue, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.replLogValue)},
-        { Messages.SyntaxColoringPreferencePage_replLogError, PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.replLogError)},
+        { Messages.SyntaxColoringPreferencePage_replLogValue, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.replLogValue)},
+        { Messages.SyntaxColoringPreferencePage_replLogError, PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.replLogError)},
 };
     
     OverlayPreferenceStore fOverlayStore;
@@ -323,12 +322,12 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
             fListModel.add(new HighlightingColorListItem(
                     modelItem[0],
                     modelItem[1], 
-                    SyntaxColoringHelper.getBoldPreferenceKey(modelItem[1]),
-                    SyntaxColoringHelper.getItalicPreferenceKey(modelItem[1]),
+                    PreferenceConstants.getBoldPreferenceKey(modelItem[1]),
+                    PreferenceConstants.getItalicPreferenceKey(modelItem[1]),
                     /*
                     getStrikethroughPreferenceKey(model[1]),
                     getUnderlinePreferenceKey(model[1]),*/
-                    SyntaxColoringHelper.getEnabledPreferenceKey(modelItem[1])));
+                    PreferenceConstants.getEnabledPreferenceKey(modelItem[1])));
     }
 
 /*    private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
@@ -521,49 +520,76 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         
         GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
         gridData.widthHint= 150; // only expand further if anyone else requires it
-        gridData.horizontalSpan= 2;
         link.setLayoutData(gridData);
 
-        Label label;
-        label= new Label(colorComposite, SWT.LEFT);
-        label.setText(Messages.SyntaxColoringPreferencePage_coloring_element);
-        label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-    
+        //////////////////////////
+        //// EDITOR COMPOSITE ////
+        //////////////////////////
+        
         Composite editorComposite= new Composite(colorComposite, SWT.NONE);
         layout= new GridLayout();
+        layout.marginRight = 10;
         layout.numColumns= 2;
         layout.marginHeight= 0;
         layout.marginWidth= 0;
         editorComposite.setLayout(layout);
-        GridData gd= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+        GridData gd= new GridData(SWT.BEGINNING, SWT.BEGINNING, false, false);
         editorComposite.setLayoutData(gd);
-    
+
+        // AR
+        ///////////////////////////////////////////////
+        // Refactoring of editorComposite            //
+        // | Label (span x 2)             |          //
+        // | ListViewer | StylesComposite |          //
+        ///////////////////////////////////////////////
+        ///////////////////////////////////////////////
+        
+        ////
+        //// ListViewer label
+        ////
+        Label label;
+        label= new Label(editorComposite, SWT.LEFT);
+        label.setText(Messages.SyntaxColoringPreferencePage_coloring_element);
+        gd= new GridData(SWT.BEGINNING, SWT.BEGINNING, false, false);
+        gd.horizontalSpan= 2;
+        label.setLayoutData(gd);
+
+        ////
+        //// ListViewer for the options
+        ////
         fListViewer= new ListViewer(editorComposite, SWT.SINGLE | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
         fListViewer.setLabelProvider(new ColorListLabelProvider());
         fListViewer.setContentProvider(new ColorListContentProvider());
         fListViewer.setInput(fListModel);
 
-        gd= new GridData(SWT.BEGINNING, SWT.BEGINNING, false, true);
-        gd.heightHint= convertHeightInCharsToPixels(30);
-        int maxWidth= 0;
+        int maxHeight = 150; // convertHeightInCharsToPixels(30);
+        int maxWidth = 100;
+        
+        gd= new GridData(SWT.BEGINNING, SWT.BEGINNING, true, true);
+        gd.heightHint= maxHeight;
+        
         for (Iterator<HighlightingColorListItem> it= fListModel.iterator(); it.hasNext();) {
             HighlightingColorListItem item=  it.next();
             maxWidth= Math.max(maxWidth, convertWidthInCharsToPixels(item.getDisplayName().length()));
         }
         ScrollBar vBar= ((Scrollable) fListViewer.getControl()).getVerticalBar();
         if (vBar != null)
-            maxWidth += vBar.getSize().x * 3; // scrollbars and tree indentation guess
-        gd.widthHint= maxWidth;
+            maxWidth += vBar.getSize().x; // no need to include tree guess here
         
-        fListViewer.getControl().setLayoutData(gd);
-                        
-        Composite stylesComposite= new Composite(editorComposite, SWT.NONE);
+        gd.widthHint= maxWidth - 18; // AR - some visual adjustment
+        fListViewer.getList().setLayoutData(gd);
+        
+        ////
+        //// Styles enabler
+        ////
+        Composite stylesComposite= new Composite(editorComposite, SWT.LEFT);
         layout= new GridLayout();
         layout.marginHeight= 0;
         layout.marginWidth= 0;
         layout.numColumns= 2;
         stylesComposite.setLayout(layout);
-        stylesComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
+        gd= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+        stylesComposite.setLayoutData(gd);
         
         fEnableCheckbox= new Button(stylesComposite, SWT.CHECK);
         fEnableCheckbox.setText(Messages.SyntaxColoringPreferencePage_enable);
@@ -582,6 +608,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         Button foregroundColorButton= fSyntaxForegroundColorEditor.getButton();
         gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
         foregroundColorButton.setLayoutData(gd);
+        new Label(stylesComposite, SWT.NONE);
         
         fBoldCheckBox= new Button(stylesComposite, SWT.CHECK);
         fBoldCheckBox.setText(Messages.SyntaxColoringPreferencePage_bold);
@@ -612,16 +639,45 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         gd.horizontalSpan= 2;
         fUnderlineCheckBox.setLayoutData(gd);
         */
+
+        ////////////////////////////////
+        //// END - EDITOR COMPOSITE ////
+        ////////////////////////////////
         
-        label= new Label(colorComposite, SWT.LEFT);
+        /////////////////////////////
+        //// PREVIEWER COMPOSITE ////
+        /////////////////////////////
+        Composite previewerComposite= new Composite(colorComposite, SWT.NONE);
+        layout= new GridLayout();
+        layout.marginHeight= 0;
+        layout.marginWidth= 0;
+        previewerComposite.setLayout(layout);
+        gd= new GridData(SWT.FILL, SWT.BEGINNING, false, false);
+        previewerComposite.setLayoutData(gd);
+        
+        ////
+        //// Previewer label
+        ////
+        label= new Label(previewerComposite, SWT.LEFT);
         label.setText(Messages.SyntaxColoringPreferencePage_preview);
         label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         
-        Control previewer= createPreviewer(colorComposite);
+        ////
+        //// Previewer
+        ////
+        Control previewer= createPreviewer(previewerComposite);
         gd= new GridData(GridData.FILL_BOTH);
-        gd.widthHint= convertWidthInCharsToPixels(20);
-        gd.heightHint= convertHeightInCharsToPixels(5);
+        gd.widthHint= convertWidthInCharsToPixels(20) + 2; // AR - some visual adjustment
+        gd.heightHint= convertHeightInCharsToPixels(12);
         previewer.setLayoutData(gd);
+
+        ///////////////////////////////////
+        //// END - PREVIEWER COMPOSITE ////
+        ///////////////////////////////////
+        
+        ///////////////////
+        //// LISTENERS ////
+        ///////////////////
         
         fListViewer.addSelectionChangedListener(new ISelectionChangedListener() {
             public void selectionChanged(SelectionChangedEvent event) {
@@ -793,9 +849,9 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
 
         for (String[] s: fSyntaxColorListModel) {
             overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, s[1]));
-            overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, SyntaxColoringHelper.getBoldPreferenceKey(s[1])));
-            overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, SyntaxColoringHelper.getItalicPreferenceKey(s[1])));
-            overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, SyntaxColoringHelper.getEnabledPreferenceKey(s[1])));
+            overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.getBoldPreferenceKey(s[1])));
+            overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.getItalicPreferenceKey(s[1])));
+            overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.getEnabledPreferenceKey(s[1])));
         }
         
         OverlayPreferenceStore.OverlayKey[] keys= new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];

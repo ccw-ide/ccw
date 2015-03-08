@@ -694,8 +694,11 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
          * initialized. Otherwise the very first Clojure editor will not
          * have any tokens colored.
          * TODO this is repeated in ClojureEditor...surely we can make the source viewer self-sufficient here
+         *
+         * AR - Solved by initializing the ClojureSourceViewerConfiguration at the very
+         * beginning of the ClojureSourceViewer
          */
-        viewer.propertyChange(null);
+//        viewer.propertyChange(null);
 
         viewerWidget.addFocusListener(new NamespaceRefreshFocusListener());
         logPanel.addFocusListener(new NamespaceRefreshFocusListener());

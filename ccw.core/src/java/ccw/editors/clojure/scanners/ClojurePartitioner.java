@@ -8,7 +8,7 @@
  * Contributors: 
  *    Casey Marshall - initial API and implementation
  *******************************************************************************/
-package ccw.editors.clojure;
+package ccw.editors.clojure.scanners;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.rules.FastPartitioner;

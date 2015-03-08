@@ -14,11 +14,11 @@ package ccw.editors.clojure;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -28,7 +28,9 @@ import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.source.DefaultCharacterPairMatcher;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
+import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.text.source.projection.ProjectionSupport;
+import org.eclipse.jface.text.source.projection.ProjectionViewer;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -43,6 +45,7 @@ import org.eclipse.ui.texteditor.StatusLineContributionItem;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import ccw.CCWPlugin;
+import ccw.editors.clojure.scanners.ClojurePartitionScanner;
 import ccw.editors.outline.ClojureOutlinePage;
 import ccw.launching.ClojureLaunchShortcut;
 import ccw.preferences.PreferenceConstants;
@@ -124,32 +127,26 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 		});
 	}
 	
-	ClojureSourceViewer viewer; // TODO try a way of removing this horrible hack 
-								// (currently if I replace viewer in configureSourceViewerDecorationSupport(),
-								// there's a NPE thrown due to initialization ordering issue
-	@Override
-	protected void configureSourceViewerDecorationSupport(SourceViewerDecorationSupport support) {
-		editorSupport._("configureSourceViewerDecorationSupport", support, viewer);
-		super.configureSourceViewerDecorationSupport(support);
-	}
-
-	@Override
-	protected ISourceViewer createSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
-		fAnnotationAccess= createAnnotationAccess();
-		fOverviewRuler= createOverviewRuler(getSharedColors());
-		
-		// ISourceViewer viewer= new ProjectionViewer(parent, ruler, getOverviewRuler(), isOverviewRulerVisible(), styles);
-		ClojureSourceViewer viewer= new ClojureSourceViewer(parent, ruler, getOverviewRuler(), isOverviewRulerVisible(), styles, getPreferenceStore(),
-				new ClojureSourceViewer.IStatusLineHandler() {
-					public StatusLineContributionItem getEditingModeStatusContributionItem() {
-						return (StatusLineContributionItem) ClojureEditor.this.getStatusField(ClojureSourceViewer.STATUS_CATEGORY_STRUCTURAL_EDITION);
-					}
-				}) {
-		    
-		    @Override
-			public void setStatusLineErrorMessage(String message) {
-				ClojureEditor.this.setStatusLineErrorMessage(message);
-			}
+	/**
+	 * Creates the custom ClojureSourceViewer.
+	 * @param parent Composite parent
+	 * @param ruler
+	 * @param styles
+	 * @return
+	 */
+	private ClojureSourceViewer createClojureSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
+	    
+	    ClojureSourceViewer viewer= new ClojureSourceViewer(parent, ruler, getOverviewRuler(), isOverviewRulerVisible(), styles, getPreferenceStore(),
+                new ClojureSourceViewer.IStatusLineHandler() {
+                    public StatusLineContributionItem getEditingModeStatusContributionItem() {
+                        return (StatusLineContributionItem) ClojureEditor.this.getStatusField(ClojureSourceViewer.STATUS_CATEGORY_STRUCTURAL_EDITION);
+                    }
+                }) {
+            
+            @Override
+            public void setStatusLineErrorMessage(String message) {
+                ClojureEditor.this.setStatusLineErrorMessage(message);
+            }
 
             @Override
             public @Nullable REPLView getCorrespondingREPL() {
@@ -170,40 +167,77 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
             public @Nullable SafeConnection getSafeToolingConnection() {
                 return REPLView.activeREPL.get().getSafeToolingConnection();
             }
-		    
-		    
-		};
-		setSourceViewerConfiguration(new ClojureSourceViewerConfiguration(getPreferenceStore(), viewer));
-		this.viewer = viewer;
+        };
+        
+        return viewer;
+	}
+	
+	private ClojureSourceViewerConfiguration createClojureSourceViewerConfiguration() {
+	    return new ClojureSourceViewerConfiguration(getPreferenceStore(), this);
+	}
+	
+	@Override
+	protected void initializeViewerColors(ISourceViewer viewer) {
+	    sourceViewer().initializeViewerColors();
+	}
+	
+	@Override
+    protected void setSourceViewerConfiguration(SourceViewerConfiguration configuration) {
+        super.setSourceViewerConfiguration(createClojureSourceViewerConfiguration());
+    }
+
+	
+    @Override
+	protected ISourceViewer createSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
+		fAnnotationAccess= createAnnotationAccess();
+		fOverviewRuler= createOverviewRuler(getSharedColors());
+		
+		ClojureSourceViewer viewer = createClojureSourceViewer(parent, ruler, styles);
+        if (viewer instanceof ProjectionViewer) {
+            /*
+             * Need to hook up here to force a re-evaluation of the preferences
+             * for the syntax coloring, after the token scanner has been
+             * initialized. Otherwise the very first Clojure editor will not
+             * have any tokens colored.
+             * TODO this is repeated in ClojureEditor...surely we can make the source viewer self-sufficient here
+             *
+             * AR - Solved by initializing the ClojureSourceViewerConfiguration at the very
+             * beginning of the ClojureSourceViewer
+             */
+//            viewer.propertyChange(null);
+            
+            fProjectionSupport= new ProjectionSupport(viewer, getAnnotationAccess(), getSharedColors());
+
+            // TODO remove the 2 following lines ?
+            fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.error"); //$NON-NLS-1$
+            fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.warning"); //$NON-NLS-1$
+
+            fProjectionSupport.install();
+            
+            // TODO Add the hovers on the Projection?
+//          fProjectionSupport.setHoverControlCreator(new IInformationControlCreator() {
+//                public IInformationControl createInformationControl(Shell shell) {
+//                    return new SourceViewerInformationControl(shell, false, getOrientation(), EditorsUI.getTooltipAffordanceString());
+//                }
+//            });
+//            fProjectionSupport.setInformationPresenterControlCreator(new IInformationControlCreator() {
+//                public IInformationControl createInformationControl(Shell shell) {
+//                    return new SourceViewerInformationControl(shell, true, getOrientation(), null);
+//                }
+//            });
+        }
+        
+        viewer.doOperation(ClojureSourceViewer.TOGGLE);
+
 		// ensure decoration support has been created and configured.
-		getSourceViewerDecorationSupport(viewer);
+		SourceViewerDecorationSupport sourceViewerDecorationSupport = getSourceViewerDecorationSupport(viewer);
+		editorSupport._("configureSourceViewerDecorationSupport", sourceViewerDecorationSupport, viewer);
+		
 		return viewer;
 	}
 
 	public void createPartControl(Composite parent) {
-		super.createPartControl(parent);
-		ClojureSourceViewer viewer= (ClojureSourceViewer) getSourceViewer();
-		
-		/*
-		 * Need to hook up here to force a re-evaluation of the preferences
-		 * for the syntax coloring, after the token scanner has been
-		 * initialized. Otherwise the very first Clojure editor will not
-		 * have any tokens colored.
-		 * 
-         * TODO this is repeated in REPLView...surely we can make the source viewer self-sufficient here
-		 */
-	    viewer.propertyChange(null);
-	    
-		fProjectionSupport= new ProjectionSupport(viewer, getAnnotationAccess(), getSharedColors());
-		
-		// TODO remove the 2 following lines ?
-		fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.error"); //$NON-NLS-1$
-		fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.warning"); //$NON-NLS-1$
-		
-		fProjectionSupport.install();
-		viewer.doOperation(ClojureSourceViewer.TOGGLE);
-
-		updatePartNameAndDescription();
+//		super.createPartControl(parent); // AR - the doc say to configure and then call this
 		
 		final IPropertyChangeListener prefsListener = new IPropertyChangeListener() {
 			@Override
@@ -220,6 +254,13 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 				getPreferenceStore().removePropertyChangeListener(prefsListener);
 			}
 		});
+		
+		// AR - Call super now
+		super.createPartControl(parent);
+		
+		// AR - This goes after because I am sure now that the SourceViewer
+		// is correctly setup (is there another way to know it?) 
+		updatePartNameAndDescription();
 	}
 	
 	@Override
@@ -237,7 +278,10 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 	 */
 	protected void updateStatusField(String category) {
 		if (ClojureSourceViewer.STATUS_CATEGORY_STRUCTURAL_EDITION.equals(category)) {
-			viewer.updateStructuralEditingModeStatusField();
+		    IClojureSourceViewer sourceViewer = (IClojureSourceViewer) getSourceViewer();
+            if (sourceViewer instanceof IClojureSourceViewer) {
+                ((ClojureSourceViewer) sourceViewer).updateStructuralEditingModeStatusField();
+            }
 		} else {
 			super.updateStatusField(category);
 		}
@@ -323,8 +367,11 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 		action = new Action() {
 			@Override
 			public void run() {
-				viewer.updateStructuralEditingModeStatusField();
-			};
+			    IClojureSourceViewer sourceViewer = (IClojureSourceViewer) getSourceViewer();
+			    if (sourceViewer instanceof IClojureSourceViewer) {
+			        ((ClojureSourceViewer) sourceViewer).updateStructuralEditingModeStatusField();
+			    }
+			}
 		};
 		action.setActionDefinitionId(ClojureSourceViewer.STATUS_CATEGORY_STRUCTURAL_EDITION);
 		setAction(ClojureSourceViewer.STATUS_CATEGORY_STRUCTURAL_EDITION, action);
@@ -630,20 +677,8 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
         return sourceViewer().getSafeToolingConnection();
     }
 
-	/*
-     * @see org.eclipse.ui.texteditor.AbstractTextEditor#setPreferenceStore(org.eclipse.jface.preference.IPreferenceStore)
-     * @since 3.0
-     */
     @Override
-    protected void setPreferenceStore(IPreferenceStore store) {
-        super.setPreferenceStore(store);
-        if (getSourceViewer() instanceof IClojureSourceViewer) {
-            ((IClojureSourceViewer) getSourceViewer()).setPreferenceStore(store);
-        }
-    }
-
-    @Override
-    public final IClojureSourceViewer sourceViewer() {
+    public final @NonNull IClojureSourceViewer sourceViewer() {
         return (IClojureSourceViewer) super.getSourceViewer();
     }
 
@@ -721,15 +756,13 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
         return sourceViewer().isStructuralEditingEnabled();
     }
 
-    /**
-     * @return true to indicate a Damager to consider that the whole document
-     *         must be considered damaged, e.g. to force syntax coloring & al.
-     *         to refresh.
+    /* (non-Javadoc)
+     * @see ccw.editors.clojure.IClojureSourceViewer#isForceRepair()
      */
 	public boolean isForceRepair() {
 		return sourceViewer().isForceRepair();
 	}
-    
+
     @Override
     public boolean isShowRainbowParens() {
     	return sourceViewer().isShowRainbowParens();
