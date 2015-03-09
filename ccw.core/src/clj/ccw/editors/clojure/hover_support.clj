@@ -2,7 +2,19 @@
   ^{:author "Andrea Richiardi"
     :doc "Implements the pluggable hover framework for ClojureEditor." }
   ccw.editors.clojure.hover-support
-  (:import java.util.ArrayList
+  (:import ccw.CCWPlugin
+           ccw.TraceOptions
+           ccw.core.StaticStrings
+           [ccw.editors.clojure ClojureEditorMessages
+                                IClojureAwarePart]
+           [ccw.editors.clojure.hovers HoverModel
+                                       HoverDescriptor
+                                       IClojureHover]
+           ccw.preferences.PreferenceConstants
+           ccw.util.UiUtils
+           [java util.ArrayList
+                 lang.StringBuffer
+                 lang.CharSequence]
            [org.eclipse.core.databinding.observable.list ObservableList
                                                          WritableList]
            [org.eclipse.core.runtime CoreException
@@ -10,43 +22,30 @@
                                      IExtensionRegistry]
            [org.eclipse.e4.core.contexts IEclipseContext
                                          ContextInjectionFactory]
-           org.eclipse.jface.resource.JFaceResources
            org.eclipse.jface.internal.text.html.HTMLPrinter
+           org.eclipse.jface.resource.JFaceResources
            [org.eclipse.jface.text Region
                                    ITextHover
                                    ITextHoverExtension
                                    ITextHoverExtension2
+                                   ITextViewer
                                    ITextViewerExtension2
                                    IDocument]
            [org.eclipse.jface.text.information IInformationProvider
                                                IInformationProviderExtension
                                                IInformationProviderExtension2]
-           org.eclipse.swt.SWT
-           ccw.CCWPlugin
-           ccw.core.StaticStrings
-           [ccw.editors.clojure ClojureEditorMessages
-                                IClojureAwarePart]
-           [ccw.editors.clojure.hovers HoverModel
-                                       HoverDescriptor
-                                       IClojureHover]
-           ccw.util.UiUtils
-           ccw.preferences.PreferenceConstants
-           ccw.TraceOptions)
+           org.eclipse.swt.SWT)
   (:use clojure.java.data)
-  (:require [clojure.string :refer [blank? join]]
-            [clojure.test :refer [deftest is run-tests]]
-            [ccw.bundle :refer [available? bundle]]
+  (:require [ccw.bundle :refer [available? bundle]]
+            [ccw.core.doc-utils :refer [var-doc-info-html]]
+            [ccw.core.trace :refer [trace]]
             [ccw.eclipse :refer [preference
                                  preference!
                                  workbench-active-editor]]
-            [paredit.loc-utils :refer [start-offset
-                                       loc-count]]
-            [ccw.core.doc-utils :refer [var-doc-info-html]]
             [ccw.editors.clojure.editor-common :refer [offset-loc
                                                        find-var-metadata
                                                        parse-symbol?]]
             [ccw.editors.clojure.editor-support :refer [source-viewer set-status-line-error-msg-async]]
-            [ccw.core.trace :refer [trace]]
             [ccw.extensions :refer [configuration-elements
                                     attributes->map
                                     element->map
@@ -58,10 +57,14 @@
                                     add-extension-listener
                                     mock-element]]
             [ccw.interop :refer [simple-name]]
+            [clojure.string :refer [blank? join]]
+            [clojure.test :refer [deftest is run-tests]]
+            [paredit.loc-utils :refer [start-offset
+                                       loc-count]]
             ;; remove these
             [clojure.pprint :refer [pprint]]))
 
-#_(set! *warn-on-reflection* true)
+(set! *warn-on-reflection* true)
 
 (defn- create-hover
   "When the bundle is available and the element has activate=true, adds
@@ -213,22 +216,41 @@
     old-values
     (map (comp assoc-create-hover-closure hover-element->descriptor) (load-extensions))))
 
-(defn- reset-hover-on-editor!
-  "Sets the hover with given content-type and state-mask to nil on the input editor."
-  [content-type state-mask editor]
+(defn- set-hover-on-editor!
+  "Sets the hover with given content-type and state-mask on the input editor."
+  [editor content-type state-mask ^ITextHover hover]
   {:pre [(not (nil? editor))]}
   (when-let [sv (source-viewer editor)]
     (condp instance? sv
-      ITextViewerExtension2 (.setTextHover sv nil content-type state-mask)
-      true (.setTextHover sv nil content-type))))
+      ITextViewerExtension2 (.setTextHover ^ITextViewerExtension2 sv hover content-type state-mask)
+      :else (.setTextHover ^ITextViewer sv hover content-type))))
 
-(def ^{:private true :doc "Function that resets the default hover of the input editor."}
-  reset-default-hover-on-editor!
-  (partial reset-hover-on-editor! IDocument/DEFAULT_CONTENT_TYPE ITextViewerExtension2/DEFAULT_HOVER_STATE_MASK))
+(defn- set-hover-on-active-editor!
+  "Function that sets the hover for the given content-type state-mask on the active
+  editor."
+  [content-type state-mask ^ITextHover hover]
+  (set-hover-on-editor! (workbench-active-editor) content-type state-mask hover))
 
-(def ^{:private true :doc "Function that resets the default hover of the active editor."}
-  reset-default-hover-on-active-editor!
-  #(reset-default-hover-on-editor! (workbench-active-editor)))
+(defn- remove-hover-on-editor!
+  "Removes the hover with the given content-type and state-mask (sets to
+  nil if necessary) from the input editor."
+  [editor content-type state-mask]
+  (set-hover-on-editor! editor content-type state-mask nil))
+
+(defn- remove-hovers-by-mask-on-editor!
+  "Function that removes the hover for each [content-type state-mask(s)] pair on the
+  input editor. Similar to remove-hover-on-editor! but removes with fixed content-type while
+  iterating on the status-masks."
+  [editor content-type status-masks]
+  (doseq [sm status-masks]
+    (remove-hover-on-editor! editor content-type sm)))
+
+(defn- remove-hovers-by-mask-on-active-editor!
+  "Function that removes the hover for each [content-type state-mask(s)] pair on the
+  active editor. Similar to remove-hover-on-editor! but removes with fixed content-type while
+  iterating on the status-masks."
+  [content-type status-masks]
+  (remove-hovers-by-mask-on-editor! (workbench-active-editor) content-type status-masks))
 
 (defn- select-descriptor
   "Selects an hover descriptor given content-type, status-mask and a
@@ -253,19 +275,19 @@
 
 (defn hover-result-pair
   "This function is strictly tied with the hover-instances
-  representation but tries to hide what it can. If previous-hover is not
+  representation but tries to hide what it can. If hover is not
   nil, it just executes f-on-hover on it.  If nil, it maps and filters
   over hover-instances in order to find the first hover
   where (result-pred (f-on-hover ith-hover)) is true. It also executes
-  (else-side-effects [hover result]) when previous-hover is nil. It
-  always returns a pair [hover result] or nil."
-  [f-on-hover result-pred hover-instances previous-hover else-side-effect]
-  (if previous-hover
-    (let [result (f-on-hover previous-hover)]
-      [previous-hover result])
+  (else-side-effects [hover result]) -possibly many- when hover is
+  nil. It always returns a pair [hover result] or nil."
+  [hover f-on-hover result-pred hover-instances & else-side-effects]
+  (if hover
+    (let [result (f-on-hover hover)]
+      [hover result])
     (let [[hover result] (first (take-while (fn [[hover result]] (result-pred result))
                                             (map (juxt val #(f-on-hover (val %1))) hover-instances)))]
-      (else-side-effect [hover result])
+      (map #(% [hover result]) else-side-effects)
       [hover result])))
 
 ;;;;;;;;;;;;;;;;
@@ -278,8 +300,8 @@
 
 (defn- hover-prepend-prolog
   "Prepend text to hover information."
-  [hover-info]
-  (let [buffer (java.lang.StringBuffer. hover-info)
+  [^CharSequence hover-info]
+  (let [buffer (StringBuffer. hover-info)
         prepend-text (HTMLPrinter/convertTopLevelFont hover-css
                                                       (aget (-> (JFaceResources/getFontRegistry)
                                                                 (.getFontData StaticStrings/CCW_FONT_HOVER_DEFAULT)) 0))]
@@ -382,9 +404,36 @@
    :modifier-string (.getModifierString instance)
    :state-mask (.getStateMask instance)})
 
-;;;;;;;;;;;;;;
-;;; Public ;;;
-;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;
+;;; Trasducers ;;;
+;;;;;;;;;;;;;;;;;;
+(def ^{:private true :doc "Trasducer that extracts the status mask from descriptors."} xf-state-mask
+  (map :state-mask))
+
+(def ^{:private true :doc "Trasducer that creates the hover instance from descriptors."} xf-create-hover
+  (map #((% :create-hover)))) ;; notice the execution of the function with :create-hover key
+
+(def ^{:private true :doc "Trasducer that indexes descriptors by state-mask."} xf-hovers-by-state-mask
+  (map (juxt :state-mask #((% :create-hover)))))
+
+(def ^{:private true :doc "Trasducer that  indexes descriptors by state-mask."} xf-index-by-state-mask
+  (map (:state-mask identity)))
+
+;;;;;;;;;;;
+;;; API ;;;
+;;;;;;;;;;;
+
+(defn- reset-hovers-and-locals!
+  "Function that reconfigures the hovers of the active editor and resets
+  locals if necessary."
+  []
+  (do (remove-hovers-by-mask-on-active-editor! IDocument/DEFAULT_CONTENT_TYPE (keys @hover-instances))
+      (let [new-descriptors (merge-from-preference @contributed-hovers)
+            new-hovers (into {} xf-hovers-by-state-mask new-descriptors)]
+        (doseq [[state-mask hover] new-hovers]
+          (set-hover-on-active-editor! IDocument/DEFAULT_CONTENT_TYPE state-mask hover))
+        (reset! contributed-hovers new-descriptors)
+        (reset! hover-instances new-hovers))))
 
 (defn add-registry-listener
   []
@@ -393,32 +442,28 @@
    (reify
      IRegistryEventListener
      (^void added [this #^"[Lorg.eclipse.core.runtime.IExtension;" extensions]
-       (doall (map #(trace :support/hover (str "IRegistryEventListener added extension with id: "
-                                               (.getLabel ^org.eclipse.core.runtime.IExtension %1))) extensions))
+       (doseq [ex extensions] (trace :support/hover (str "IRegistryEventListener added extension with id: "
+                                                         (.getLabel ^org.eclipse.core.runtime.IExtension ex))))
        (trace :support/hover "Resetting hovers...")
-       (reset-locals)
-       (reset-default-hover-on-active-editor!))
+       (reset-hovers-and-locals!))
 
      (^void removed [this #^"[Lorg.eclipse.core.runtime.IExtension;" extensions]
-       (doall (map #(trace :support/hover (str "IRegistryEventListener removed extension with id: "
-                                               (.getLabel ^org.eclipse.core.runtime.IExtension %1))) extensions))
+       (doseq [ex extensions] (trace :support/hover (str "IRegistryEventListener removed extension with id: "
+                                                         (.getLabel ^org.eclipse.core.runtime.IExtension ex))))
        (trace :support/hover "Resetting hovers...")
-       (reset-locals)
-       (reset-default-hover-on-active-editor!))
+       (reset-hovers-and-locals!))
 
      (^void added [this #^"[Lorg.eclipse.core.runtime.IExtensionPoint;" extensionpoints]
-       (doall (map #(trace :support/hover (str "IRegistryEventListener removed extension point with id: "
-                                               (.getLabel ^org.eclipse.core.runtime.IExtension %1))) extensionpoints))
+       (doseq [ex extensionpoints] (trace :support/hover (str "IRegistryEventListener removed extension point with id: "
+                                                         (.getLabel ^org.eclipse.core.runtime.IExtension ex))))
        (trace :support/hover "Resetting hovers...")
-       (reset-locals)
-       (reset-default-hover-on-active-editor!))
+       (reset-hovers-and-locals!))
 
      (^void removed [this #^"[Lorg.eclipse.core.runtime.IExtensionPoint;" extensionpoints]
-       (doall (map #(trace :support/hover (str "IRegistryEventListener removed extension point with id: "
-                                               (.getLabel ^org.eclipse.core.runtime.IExtension %1))) extensionpoints))
+       (doseq [ex extensionpoints] (trace :support/hover (str "IRegistryEventListener removed extension point with id: "
+                                                         (.getLabel ^org.eclipse.core.runtime.IExtension ex))))
        (trace :support/hover "Resetting hovers...")
-       (reset-locals)
-       (reset-default-hover-on-active-editor!)))
+       (reset-hovers-and-locals!)))
 
    text-hover-extension-point))
 
@@ -429,25 +474,27 @@
     (ccw.eclipse/add-preference-listener pref-key
                                          #(do
                                             (trace :support/hover (str "Preference " pref-key " has changed. Resetting hovers..."))
-                                            (reset-locals)
-                                            (reset-default-hover-on-active-editor!)))))
+                                            (reset-hovers-and-locals!)))))
 
-(defn- create-hover-instance
-  "Returns an ITextHover (or extensions) instance given, content-type and state-mask."
+(defn- create-hover-instance!
+  "Creates an hover instance given descriptors content-type and
+  state-mask. It queries the local hover-instances atom in order to
+  check if the instance have been previously cached there. Test with
+  care."
   [descriptors content-type state-mask]
-  ;; TODO The selection could be improved by indexing the descriptors by state-mask
-  (init-locals)
-  (when-let [selected-descriptor (select-descriptor content-type state-mask descriptors)]
-    ;; ensure non nil descriptor arrives here
-    (let [state-mask (selected-descriptor :state-mask)]
-      (do-if-no-value descriptors state-mask
-                      (swap! hover-instances #(assoc %1 state-mask value#))
-                      ((selected-descriptor :create-hover))))))
+  (if-let [instance (get @hover-instances state-mask)]
+    instance
+    (when-let [selected-descriptor (select-descriptor content-type state-mask descriptors)]
+      (trace :support/hover (str "Selected descriptor:" selected-descriptor))
+      (when-let [hover ((selected-descriptor :create-hover))]
+        (swap! hover-instances #(assoc %1 state-mask hover))
+        hover))))
 
 (defn hover-instance
-  "Public API which is called from java."
+  "Returns an ITextHover (or extensions) instance given, content-type and state-mask."
   [content-type state-mask]
-  (create-hover-instance @contributed-hovers content-type state-mask))
+  (init-locals)
+  (create-hover-instance! @contributed-hovers content-type state-mask))
 
 (defn init-injections
   "Sets the a new instance of HoverModel in the input context."
@@ -468,7 +515,7 @@
   This function is called early, when the contributed-hovers atom is still empty, therefore needs
   to get its returned array from the preferences."
   [_ _]
-  (int-array (map #(%1 :state-mask) (read-descriptors-from-preference!))))
+  (int-array (map :state-mask (read-descriptors-from-preference!))))
 
 (defn hover-information-provider
   "Creates the InformationProvider that displays hovers."
@@ -478,10 +525,10 @@
       IInformationProvider
       (getSubject [this text-viewer offset]
         (trace :support/hover (str (simple-name this) ": offset-> " offset))
-        (let [[_ region] (hover-result-pair #(.getHoverRegion %1 text-viewer offset)
+        (let [[_ region] (hover-result-pair @previous-hover
+                                            #(.getHoverRegion %1 text-viewer offset)
                                             (complement nil?)
                                             @hover-instances
-                                            @previous-hover
                                             (fn [[hover _]] (reset! previous-hover hover)))]
           region))
 
@@ -492,10 +539,10 @@
       IInformationProviderExtension
       (getInformation2 [this text-viewer region]
         (trace :support/hover (str (simple-name this) ": region " region))
-        (let [[_ info] (hover-result-pair #(.getHoverInfo2 %1 text-viewer region)
+        (let [[_ info] (hover-result-pair @previous-hover
+                                          #(.getHoverInfo2 %1 text-viewer region)
                                           blank?
                                           @hover-instances
-                                          @previous-hover
                                           (fn [[hover _]] (reset! previous-hover hover)))]
           (let [[i msg] (if info [info nil] [nil ClojureEditorMessages/You_need_a_running_repl])]
             (do (set-status-line-error-msg-async text-viewer msg) i))))
@@ -503,4 +550,5 @@
       IInformationProviderExtension2
       (getInformationPresenterControlCreator [this]
         (trace :support/hover (str (simple-name this) "getInformationPresenterControlCreator called"))
-        (.getInformationPresenterControlCreator @previous-hover)))))
+        (when-let [hover @previous-hover]
+          (.getInformationPresenterControlCreator hover))))))

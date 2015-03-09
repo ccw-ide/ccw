@@ -22,9 +22,8 @@
                                                       select-default-descriptor
                                                       select-hover-by-state-mask
                                                       select-hover-or-default
-                                                      remove-and-cons
                                                       hover-result-pair
-                                                      create-hover-instance]]
+                                                      create-hover-instance!]]
   (deftest hover-support-tests
 
     (defn build-test-descriptor-fn
@@ -128,31 +127,32 @@
       (is (= ctrl-modifier-descriptor (select-hover-or-default select-hover-by-state-mask "" 262144 no-modifier-descriptors)))
       (is (not= ctrl-modifier-descriptor (select-hover-or-default select-hover-by-state-mask "" 196608 no-modifier-descriptors))))
 
-    (testing "Descriptor list ops"
-      (def mock-descriptors (list {:id "Test1" :enabled true} {:id "Test2" :enabled false}))
-      (is (some #(= "Test3" (:id %1)) (remove-and-cons #(= (:id %1) "Test2") {:id "Test3"} mock-descriptors)))
-      (is (not-any? #(= "Test2" (:id %1)) (remove-and-cons #(= (:id %1) "Test2") {:id "Test3"} mock-descriptors))))
-
     (testing "Hover instances creation"
-      (def mock-contributed-hovers ({:id "mock-debug" :modifier-string "" :state-mask SWT/NONE :enabled true :create-hover #(create-debug-hover) :label "Mock debug" :activate "true"},
+      (def mock-contributed-hovers (list {:id "mock-debug" :modifier-string "" :state-mask SWT/NONE :enabled true :create-hover #(create-debug-hover) :label "Mock debug" :activate "true"},
                                     {:id "mock-docstring" :modifier-string "Ctrl" :state-mask 262144 :enabled true :create-hover #(create-docstring-hover) :label "Mock docstring" :activate "true"}))
-      (def hover-proxy (create-hover-instance mock-contributed-hovers "" 262144))
-      (is (identical? hover-proxy (create-hover-instance mock-contributed-hovers "" 262144)))
+      (def docstring-hover (create-hover-instance! mock-contributed-hovers "" 262144))
+      (def debug-hover (create-hover-instance! mock-contributed-hovers "" SWT/NONE))
+      (is (identical? docstring-hover (create-hover-instance! mock-contributed-hovers "" 262144)))
+      (is (identical? debug-hover (create-hover-instance! mock-contributed-hovers "" SWT/NONE)))
 
       (def mock-debug-hover (create-debug-hover))
       (def mock-docstring-hover (create-docstring-hover))
       (def mock-hover-instances {0 mock-docstring-hover, 262144 mock-debug-hover })
-      (is (identical? mock-docstring-hover (first (hover-result-pair #(.toString %1)
+      (is (identical? mock-docstring-hover (first (hover-result-pair nil
+                                                                     #(.toString %1)
                                                                      #(.contains %1 "docstring")
-                                                                     mock-hover-instances nil))) "Should return the found hover instance")
-      (is (every? nil? (hover-result-pair #(.toString %1)
+                                                                     mock-hover-instances))) "Should return the found hover instance")
+      (is (every? nil? (hover-result-pair nil
+                                          #(.toString %1)
                                           #(.contains %1 "something")
-                                          mock-hover-instances nil)) "Should return nil because not found")
-      (is (identical? mock-debug-hover (first (hover-result-pair #(.toString %1)
+                                          mock-hover-instances)) "Should return nil because not found")
+      (is (identical? mock-debug-hover (first (hover-result-pair mock-debug-hover
+                                                                 #(.toString %1)
                                                                  #(.contains %1 "debug")
-                                                                 mock-hover-instances mock-debug-hover))) "Should return hover and result")
-      (is (identical? mock-debug-hover (first (hover-result-pair #(.toString %1)
+                                                                 mock-hover-instances))) "Should correctly return mock-debug-hover instance")
+      (is (identical? mock-debug-hover (first (hover-result-pair mock-debug-hover
+                                                                 #(.toString %1)
                                                                  #(.contains %1 "something")
-                                                                 mock-hover-instances mock-debug-hover))) "Should always hover and result"))
+                                                                 mock-hover-instances))) "Should ignore the predicate and return mock-debug-hover instance"))
     ))
-(run-tests)
+;(run-tests)

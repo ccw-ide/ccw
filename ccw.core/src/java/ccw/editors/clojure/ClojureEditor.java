@@ -237,7 +237,7 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 	}
 
 	public void createPartControl(Composite parent) {
-//		super.createPartControl(parent); // AR - the doc say to configure and then call this
+		super.createPartControl(parent); // AR - the doc say to configure and then call this
 		
 		final IPropertyChangeListener prefsListener = new IPropertyChangeListener() {
 			@Override
@@ -254,9 +254,6 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 				getPreferenceStore().removePropertyChangeListener(prefsListener);
 			}
 		});
-		
-		// AR - Call super now
-		super.createPartControl(parent);
 		
 		// AR - This goes after because I am sure now that the SourceViewer
 		// is correctly setup (is there another way to know it?) 

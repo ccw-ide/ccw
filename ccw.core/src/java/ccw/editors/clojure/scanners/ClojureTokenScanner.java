@@ -367,6 +367,7 @@ public final class ClojureTokenScanner implements ITokenScanner, IPropertyChange
         if (PreferenceConstants.colorizableTokens.contains(keyword)) {
             IToken eclipseToken = parserTokenKeywordToJFaceToken.get(keyword);
             utils.addTokenType(keyword, adaptToken(eclipseToken, event.getProperty(), event.getNewValue()));
+            part.markDamagedAndRedraw();
         }
     }
 }
