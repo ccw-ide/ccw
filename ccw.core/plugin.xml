@@ -3,7 +3,7 @@
 <plugin>
 
  <!-- see http://help.eclipse.org/indigo/topic/org.eclipse.jdt.doc.isv/reference/extension-points/org_eclipse_jdt_ui_javaEditorTextHovers.html -->
- <extension-point id="cljEditorTextHovers" name="%cljEditorTextHoversExtensionName" schema="schema/cljEditorTextHovers.exsd"/>
+ <extension-point id="ccw.core.cljEditorTextHovers" name="%cljEditorTextHoversExtensionName" schema="schema/cljEditorTextHovers.exsd"/>
 
  <extension point="org.eclipse.ui.console.consolePatternMatchListeners">
     <consolePatternMatchListener
