@@ -38,7 +38,7 @@ Issues tracker: https://github.com/laurentpetit/ccw/issues/list
 
 ### Install CCW development environment, build CCW with Maven
 
-[Contributing](Contributing.adoc)
+[Contributing](CONTRIBUTING.adoc)
 
 ## License
 
