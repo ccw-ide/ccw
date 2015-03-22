@@ -16,7 +16,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/clj-stacktrace.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/clojure-complete.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/clojure-contrib.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/clojure.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-codec.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-fileupload.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-io.jar"/>
@@ -82,5 +81,6 @@
 	<classpathentry kind="lib" path="lib/potemkin.jar"/>
 	<classpathentry kind="lib" path="lib/riddley.jar"/>
 	<classpathentry kind="lib" path="lib/tools.reader.jar"/>
+	<classpathentry kind="lib" path="lib/clojure-ccw.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
