@@ -1,12 +1,16 @@
-= Counterclockwise ChangeLog 
+= Counterclockwise ChangeLog
 Laurent Petit <laurent dot petit at gmail dot com>
 :sectanchors:
 :sectlinks:
 :source-highlighter: coderay
 :experimental:
-:toc: 
+:toc:
 :toc-title!:
 :toclevels: 0
+
+== Changes between Counterclockwise 0.32.0 and 0.33.0
+
+- Command line options: `-Dccw.nrepl.port=[1-65535]` allows to select the embedded nrepl port. `ccw.autostartrepl` has been renamed to `ccw.nrepl.autostart` for coherence.
 
 == Changes between Counterclockwise 0.31.2 and 0.32.0
 
@@ -269,7 +273,7 @@ The wizard now accepts `lein new` template arguments. Simply put them after the 
 
 - Adds preferences for REPL history - Contributed by Gunnar Völkel
   - Preference for REPL history size.
-  - Preference for REPL history persistence schedule. 
+  - Preference for REPL history persistence schedule.
 - zombie REPLs (when connection is lost)
   - are automatically disabled (buttons and text grayed, input area non editable)
   - and won't be used for sending code from editors
@@ -287,7 +291,7 @@ The wizard now accepts `lein new` template arguments. Simply put them after the 
 - `REPL View` accepts the Drawbridge protocol, thus allowing `http(s)://<server>:<port>/repl` or `http(s)://<user>:<password>@<server>:<port>/repl` URLs. Fix Issue #501
 - `REPL View` does not open and give proper error message if connection is not possible (e.g. Drawbridge HTTP 401)
 - `Outline View`: There were unexpected exceptions thrown depending on the content of the Editor. These were due to `java.lang.Comparator` contract violations. Fix Issue #639
-- `Editor`: In strict/paredit mode, forward/backward delete do not prevent to remove `#` in front of `()` or `{}` or `""`. Also, fixed a bug where forward delete allowed to remove `(` or `{` or `"` if there was a leading `#`. Fix Issue #523 
+- `Editor`: In strict/paredit mode, forward/backward delete do not prevent to remove `#` in front of `()` or `{}` or `""`. Also, fixed a bug where forward delete allowed to remove `(` or `{` or `"` if there was a leading `#`. Fix Issue #523
   - Also changed a behavior: the cursor is not stuck, either something is deleted, either the cursors moves forward or backward
 
 == Changes between Counterclockwise 0.25.1 and 0.25.2
@@ -472,9 +476,9 @@ Overlapping `:source-paths`, `:resource-paths`,  `:test-paths` and/or `:java-sou
 Counterclockwise resolves the conflict by adding the required exclusions to its source classpath entries.
 
 For instance, if you have declared (explicitly or implicitly) both `resources`  and `resources/public` as resource paths,
-Counterclockwise will create 2 source path entries: 
+Counterclockwise will create 2 source path entries:
 
-- one for `resources/public`, 
+- one for `resources/public`,
 - and one for `resources`, with an exclusion filter for its `public` subfolder
 
 ==== Missing source paths are not reported as errors anymore
@@ -543,9 +547,9 @@ git clone https://gist.github.com/7924786.git ~/.ccw/plugin-additions
 
 === nREPL Version Update
 
-The embedded nREPL client in Counterclockwise, and which is also used to serve as nREPL client when the project does not declare a dependency on nREPL (the majority of the cases) has been upgraded from version `0.2.1` to `0.2.3`. 
+The embedded nREPL client in Counterclockwise, and which is also used to serve as nREPL client when the project does not declare a dependency on nREPL (the majority of the cases) has been upgraded from version `0.2.1` to `0.2.3`.
 
-=== Bug fix 
+=== Bug fix
 
 - Explicitly ask the user for confirmation before launching a second process for the same project
 
@@ -596,7 +600,7 @@ In a nutshell:
   cd ccw
   mvn verify
   cd ccw.product/target/products # the products for Windows / Linux / OS X
-  cd ../../../ccw.updatesite/target/repository # the Software Update Site 
+  cd ../../../ccw.updatesite/target/repository # the Software Update Site
 
 For more information on installing a full-fledged dev environment, see the Wiki Page https://code.google.com/p/counterclockwise/wiki/HowToBuild[How To Build]
 
@@ -717,7 +721,7 @@ will result in:
 +
 [source,clojure]
 ----
-;; from 
+;; from
 (cond test1 expr1
   test2 expr2)
 ;; to
@@ -739,9 +743,9 @@ A common usecase for this is while you're defining a function in the Editor and 
 ** switch to the editor, modify the function, eval via Cmd+Enter ... when the eval succeeds, the last expression entered in the REPl is reevaluated ... repeat ...
 
 
-=== Repl 
+=== Repl
 
-- A bug had slipped in the project classpath management preventing native libraries to load properly, for instance when trying to work with Overtone. Fix Issue #577 
+- A bug had slipped in the project classpath management preventing native libraries to load properly, for instance when trying to work with Overtone. Fix Issue #577
 
 - Reverting the behaviour of the "Evaluate selection" when sending to the REPL : back to using 'in-ns instead of 'ns while transitioning to the selection's namespace
 Fixes Issue #533: ns is sent to REPL instead of in-ns
@@ -765,4 +769,3 @@ Fixes Issue #533: ns is sent to REPL instead of in-ns
 === Better plays as an Eclipse plugin
 
 - CCW plugin does not start unnecessarily when invoking the project's contextual menu
-
