@@ -531,19 +531,21 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 		if (activePage == null) {
 			CCWPlugin.getTracer().trace(TraceOptions.REPL, "activePage is null");
 		}
-		IViewPart[] views = activePage.getViews();
+
 		NamespaceBrowser co = null;
-		for (IViewPart v: views) {
-			if (NamespaceBrowser.class.isInstance(v)) {
-				co = (NamespaceBrowser) v;
-				break;
+		if (activePage != null) {
+			IViewPart[] views = activePage.getViews();
+			for (IViewPart v : views) {
+				if (NamespaceBrowser.class.isInstance(v)) {
+					co = (NamespaceBrowser) v;
+					break;
+				}
 			}
 		}
+
 		if (co == null) {
 			return;
 		}
-
 		co.reset(repl);
 	}
-
 }

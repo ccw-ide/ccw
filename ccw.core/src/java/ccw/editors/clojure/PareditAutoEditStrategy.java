@@ -21,7 +21,7 @@ public class PareditAutoEditStrategy implements IAutoEditStrategy {
 
 	public final Ref state;
 	
-	public PareditAutoEditStrategy(IClojureEditor editor, IPreferenceStore prefs) {
+	public PareditAutoEditStrategy(IClojureAwarePart editor, IPreferenceStore prefs) {
 		state = (Ref) pareditAutoEditSupport._("init", editor, prefs);
 	}
 	
