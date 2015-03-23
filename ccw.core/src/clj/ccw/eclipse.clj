@@ -1,6 +1,7 @@
 (ns ^{:doc "Eclipse interop utilities"}
      ccw.eclipse
-  (:require [clojure.java.io :as io])
+     (:require [clojure.java.io :as io]
+               [clojure.test :refer [deftest testing is]])
   (:use [clojure.core.incubator :only [-?> -?>>]])
   (:import [org.eclipse.core.resources IResource
                                        IProject
@@ -35,7 +36,9 @@
            [java.io File IOException]
            [ccw CCWPlugin]
            [ccw.util PlatformUtil DisplayUtil]
-           [ccw.launching LaunchUtils]))
+           [ccw.launching LaunchUtils]
+           java.lang.System
+           ccw.core.StaticStrings))
 
 (defn adapter
   "Invokes Eclipse Platform machinery to try by all means to adapt object to 
@@ -913,22 +916,56 @@
         (when window-manager (name window-manager))
         type)))
 
-(defn bindings 
-  ([] (bindings (workbench))) 
-  ([service-locator] 
+(defn bindings
+  ([] (bindings (workbench)))
+  ([service-locator]
     (let [binding-service (service service-locator :bindings)]
       (into [] (.getBindings binding-service)))))
 
-(defn save-key-binding! 
+(defn save-key-binding!
   ([desc] (save-key-binding! (workbench) desc))
   ([service-locator desc]
     (let [binding-service (service service-locator :bindings)
           kb (key-binding desc)
           kb-id (-?> kb .getParameterizedCommand .getId)
-          id-binding-map (-?>> (bindings service-locator) 
+          id-binding-map (-?>> (bindings service-locator)
                            (group-by #(-?> % .getParameterizedCommand .getId)))
           id-binding-map (update-in id-binding-map [kb-id] (fnil conj []) kb)]
-      (.savePreferences binding-service 
-        (.getActiveScheme binding-service) 
-        (into-array org.eclipse.jface.bindings.Binding 
+      (.savePreferences binding-service
+        (.getActiveScheme binding-service)
+        (into-array org.eclipse.jface.bindings.Binding
                     (mapcat identity (vals id-binding-map)))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Properties utilities
+
+(def ^:private port-validating-regex #"[1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5]")
+
+(defn property-ccw-nrepl-port
+  "The no-arg function returns the nRepl port number (as Integer) passed
+  to Eclipse as property (see StaticStrings/CCW_PROPERTY_NREPL_PORT),
+  whereas if you pass in a port number, it will be just validated and
+  returned (good for testing). In both cases, if the validation fails
+  the return value is 0."
+  ([]
+    (if-let [nrepl-port (re-matches port-validating-regex
+                                    (System/getProperty StaticStrings/CCW_PROPERTY_NREPL_PORT "0"))]
+      (Integer/valueOf nrepl-port)
+      0))
+  ([port]
+   (if-let [nrepl-port (re-matches port-validating-regex (str port))]
+      (Integer/valueOf nrepl-port)
+      0)))
+
+(defn property-ccw-nrepl-cider-enable
+  "Returns the value of StaticStrings/CCW_PROPERTY_NREPL_CIDER_ENABLE property."
+  []
+  (System/getProperty StaticStrings/CCW_PROPERTY_NREPL_CIDER_ENABLE))
+
+(deftest property-tests
+  (testing "nRepl port validation tests"
+    (is (= 0 (property-ccw-nrepl-port 0)))
+    (is (= 0 (property-ccw-nrepl-port 65536)))
+    (is (= 4 (property-ccw-nrepl-port 4)))
+    (is (= 4 (property-ccw-nrepl-port "4")))
+    (is (= 65535 (property-ccw-nrepl-port 65535)))))

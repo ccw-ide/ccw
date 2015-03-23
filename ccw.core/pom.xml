@@ -17,7 +17,7 @@
   <packaging>eclipse-plugin</packaging>
 
   <properties>
-    <nrepl.version>0.2.3</nrepl.version>
+    <nrepl.version>0.2.5</nrepl.version>
     <leiningen.version>2.5.0</leiningen.version>
   </properties>
 
@@ -80,6 +80,16 @@
             <groupId>ccw</groupId>
             <artifactId>ccw.server</artifactId>
             <version>0.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.clojure</groupId>
+            <artifactId>java.classpath</artifactId>
+            <version>0.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>cider</groupId>
+            <artifactId>cider-nrepl</artifactId>
+            <version>0.8.2</version>
         </dependency>
     </dependencies>
 
