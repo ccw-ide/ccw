@@ -1,13 +1,13 @@
 (ns ccw.editors.clojure.PareditAutoEditStrategyImpl
   (:use [paredit [core :only [paredit]]])
-  (:use [clojure.core.incubator :only [-?>]])
-  (:require [ccw.editors.clojure.paredit-auto-edit-support :as support])  
+  (:require [ccw.editors.clojure.paredit-auto-edit-support :refer [apply-modif!]]
+            [ccw.eclipse :refer [boolean-ccw-pref]])
   (:import
     [org.eclipse.jface.text IAutoEditStrategy
                             IDocument
                             DocumentCommand]
-    [ccw.editors.clojure IClojureEditor PareditAutoEditStrategy]))
-   
+    [ccw.editors.clojure IClojureAwarePart PareditAutoEditStrategy]))
+
 #_(set! *warn-on-reflection* true)
 
 ; TODO move this into paredit itself ...
@@ -68,38 +68,38 @@
 
 (defn paredit-options [command]
   (when-let [options-prefs (command-preferences command)]
-    (mapcat (fn [[k pref]] [k (support/boolean-ccw-pref pref)]) 
+    (mapcat (fn [[k pref]] [k (boolean-ccw-pref pref)])
             options-prefs)))
 
 (defn do-command?
-  "Will do command if it is :strict and the editor allows it, or if it is not :strict"
-  [#^IClojureEditor editor par-command]
+  "Will do command if it is :strict and the source-viewer allows it, or if it is not :strict"
+  [#^IClojureAwarePart editor par-command]
   (cond
     (*strict-commands* par-command)
       (.isStructuralEditingEnabled editor)
     (*configuration-based-commands* par-command) ; works because I know no value can be nil in *configuration-based-commands*
-      (support/boolean-ccw-pref (*configuration-based-commands* par-command))
-    :else 
+      (boolean-ccw-pref (*configuration-based-commands* par-command))
+    :else
       true))
         
 (defn customizeDocumentCommand 
   [^PareditAutoEditStrategy this, #^IDocument document, #^DocumentCommand command]
-  (let [^IClojureEditor editor (-> this .state deref :editor)]
-    (when (and (.doit command) 
-               (not (.isInEscapeSequence editor)) 
-               (.isStructuralEditionPossible editor))
-      (let [signed-selection (bean (.getSignedSelection editor))
-            document-text {:text (.get document) 
-                           :caret-offset (+ (:offset signed-selection) (:length signed-selection)) 
+  (let [^IClojureAwarePart part (-> this .state deref :part)]
+    (when (and (.doit command)
+               (not (.isInEscapeSequence part))
+               (.isStructuralEditionPossible part))
+      (let [signed-selection (bean (.getSignedSelection part))
+            document-text {:text (.get document)
+                           :caret-offset (+ (:offset signed-selection) (:length signed-selection))
                            :selection-length (:length signed-selection)}
             par-command {:text (.text command) :offset (.offset command) :length (.length command)}
             [par-command par-text] (paredit-args par-command document-text)
-            result (and 
-                     par-command 
-                     (do-command? editor par-command)
+            result (and
+                     par-command
+                     (do-command? part par-command)
                      (apply paredit
                             par-command
-                            (.getParseState editor)
+                            (.getParseState part)
                             par-text
                             (paredit-options par-command)))]
-        (support/apply-modif! editor command result)))))
+        (apply-modif! part command result)))))
