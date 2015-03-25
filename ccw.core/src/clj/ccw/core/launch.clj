@@ -1,8 +1,8 @@
 (ns ccw.core.launch
-  (:require [ccw.eclipse :as e]
-            [clojure.tools.nrepl.server :refer [start-server stop-server default-handler]]
+  (:require [clojure.tools.nrepl.server :refer [start-server stop-server default-handler]]
             [clojure.tools.nrepl.ack :refer [handle-ack]]
-            [ccw.eclipse :as e])
+            [cider.nrepl :refer (cider-nrepl-handler)]
+            [ccw.eclipse :refer [property-ccw-nrepl-port property-ccw-nrepl-cider-enable]])
   (:import ccw.CCWPlugin
            ccw.core.StaticStrings
            java.lang.System))
@@ -35,7 +35,7 @@
     (try
       (l {:event-type :creation, :port port :project project})
       (catch Exception e
-        (ccw.CCWPlugin/logError
+        (CCWPlugin/logError
           (format "Error while notifying nrepl listener '%s' of %s event with params %s"
                   n (:type l) (dissoc l :type))
           e)))))
@@ -49,10 +49,10 @@
 
 (defn- fill-nrepl-start-delay
   "Starts an nRepl given the port number."
-  [server-map-delay port]
+  [server-map-delay port handler]
   (if server-map-delay
     server-map-delay
-    (delay (start-server :port port :handler (handle-ack (default-handler))))))
+    (delay (start-server :port port :handler handler))))
 
 (defn- fill-nrepl-stop-delay
   "Stops the instance of the running nRepl. Always returns nil."
@@ -72,10 +72,13 @@
   eclipse's runtime properties. The result is then stored in the
   ccw-nrepl-server-map atom. Returns the newly opened socket to it."
   []
-  (let [nrepl-port (e/property-ccw-nrepl-port)]
+  (let [nrepl-port (property-ccw-nrepl-port)
+        handler (if (property-ccw-nrepl-cider-enable)
+                  (handle-ack cider-nrepl-handler)
+                  (handle-ack (default-handler)))]
     (when (= 0 nrepl-port)
       (CCWPlugin/log (str "nRepl port will be automatically selected")))
-    (let [start-server-delay (swap! nrepl-server-map-delay fill-nrepl-start-delay nrepl-port)
+    (let [start-server-delay (swap! nrepl-server-map-delay fill-nrepl-start-delay nrepl-port handler)
           was-realized (realized? start-server-delay)
           server-map (force start-server-delay)]
       (if-not was-realized

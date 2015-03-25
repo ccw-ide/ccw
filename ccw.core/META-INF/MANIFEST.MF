@@ -124,7 +124,13 @@ Bundle-ClassPath: .,
  lib/junit.jar,
  lib/cljunit.jar,
  lib/hamcrest-core.jar,
- lib/pedantic.jar
+ lib/pedantic.jar,
+ lib/cider-nrepl.jar,
+ lib/java.classpath.jar,
+ lib/compliment.jar,
+ lib/cljs-tooling.jar,
+ lib/tools.namespace.jar,
+ lib/tools.trace.jar
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: Counterclockwise team
 Eclipse-BundleShape: dir

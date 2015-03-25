@@ -943,7 +943,6 @@
 
 (defn property-ccw-nrepl-port
   "The no-arg function returns the nRepl port number (as Integer) passed
-
   to Eclipse as property (see StaticStrings/CCW_PROPERTY_NREPL_PORT),
   whereas if you pass in a port number, it will be just validated and
   returned (good for testing). In both cases, if the validation fails
@@ -957,6 +956,11 @@
    (if-let [nrepl-port (re-matches port-validating-regex (str port))]
       (Integer/valueOf nrepl-port)
       0)))
+
+(defn property-ccw-nrepl-cider-enable
+  "Returns the value of StaticStrings/CCW_PROPERTY_NREPL_CIDER_ENABLE property."
+  []
+  (System/getProperty StaticStrings/CCW_PROPERTY_NREPL_CIDER_ENABLE))
 
 (deftest property-tests
   (testing "nRepl port validation tests"
