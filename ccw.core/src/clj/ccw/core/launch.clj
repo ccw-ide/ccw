@@ -20,9 +20,9 @@
   "Atom containing a Map of listener name -> listener fn.
    Listener fns will be called when interesting events occur wrt nrepl servers
    managed by Counterclockwise, like that: (a-listener-fn event-map).
-   Events currently handled: :creation, with keys :event-type :creation, 
+   Events currently handled: :creation, with keys :event-type :creation,
                              :port (Number, required) and :project (String, optional)" }
-  nrepl-servers-listeners 
+  nrepl-servers-listeners
   (atom {:ccw/default #'default-nrepl-server-listener}))
 
 
@@ -76,8 +76,10 @@
     (when (= 0 nrepl-port)
       (CCWPlugin/log (str "nRepl port will be automatically selected")))
     (let [start-server-delay (swap! nrepl-server-map-delay fill-nrepl-start-delay nrepl-port)
+          was-realized (realized? start-server-delay)
           server-map (force start-server-delay)]
-      (CCWPlugin/log (str "Started ccw nREPL server: nrepl://127.0.0.1:" (:port server-map))))))
+      (if-not was-realized
+        (CCWPlugin/log (str "Started ccw nREPL server: nrepl://127.0.0.1:" (:port server-map)))))))
 
 (defn ccw-nrepl-stop
   "Stops the instance of the running nRepl on the underlying atom. Always returns nil."
