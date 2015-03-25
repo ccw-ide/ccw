@@ -1,4 +1,4 @@
-= How to build the CCW plugin in Eclipse.
+= How to contribute to Counterclockwise development
 Laurent Petit <laurent dot petit at gmail dot com>
 :source-highlighter: coderay
 :experimental:
@@ -6,9 +6,24 @@ Laurent Petit <laurent dot petit at gmail dot com>
 :toc-title!:
 :toclevels: 2
 
-This page explains how to install a development environment for hacking on CCW.
+This page focuses on how to contribute code to Counterclockwise.
 
-== Prerequisites
+== General workflow
+
+- Wave your hand on the mailing list to inform people of what you have in mind.
+- Then at some point (when the discussion on the mailing list switches from discussing the relevance of the new proposed feature to specification / implementation detail) create an issue on Github. This will allow to narrow the focus on the feature, and keep track of the discussion. Mention the created issue on the mailing list thread
+- Create a new branch to host development of code for the issue. Create a pull request, mention the pull request in the issue comments.
+- Once discussion starts on the pull request, stop rewriting its history to help all people involved see the changes to the branch codebase that the discussion triggers.
+- Never work on several issues in a same branch (and so never create several Pull Requests for the same branch).
+- Always start new branches off the master branch (never off of another issue branch).
+- When the PR is ready, reviewed and accepted, it is time to merge. There's nothing wrong in keeping the history of the commits. Rebasing / rewriting history just before merging the branch is possible, but is not totally error prone, so think about it twice before doing it and please be careful.
+
+You can see the Github Flow page for a visual version of the workflow: https://guides.github.com/introduction/flow/
+
+
+== Developing within Eclipse
+
+=== Prerequisites
  
 - Java 7
 - Maven >= 3.1.1
@@ -17,8 +32,6 @@ This page explains how to install a development environment for hacking on CCW.
 - `Eclipse IDE for Java and DSL Developers` Luna sr1 (4.4.1) https://eclipse.org/downloads/packages/eclipse-ide-java-and-dsl-developers/lunasr1
 ** This packaging is preferred because it's the one embedding the more eclipse source code packages out of the box (see https://www.eclipse.org/downloads/compare.php?release=luna )
 
-
-== Developing within Eclipse
 
 === Install & Configure
 
