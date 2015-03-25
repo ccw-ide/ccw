@@ -3,7 +3,7 @@
 <schema targetNamespace="ccw.core" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appInfo>
-         <meta.schema plugin="ccw.core" id="cljEditorTextHovers" name="Clojure Editor Text Hovers"/>
+         <meta.schema plugin="ccw.core" id="ccw.core.cljEditorTextHovers" name="Clojure Editor Text Hovers"/>
       </appInfo>
       <documentation>
          extension point used to plug-in text hovers
