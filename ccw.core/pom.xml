@@ -10,14 +10,14 @@
     <version>0.31.2-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
-  
+
   <groupId>ccw</groupId>
   <artifactId>ccw.core</artifactId>
   <version>0.31.2-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
 
   <properties>
-    <nrepl.version>0.2.3</nrepl.version>
+    <nrepl.version>0.2.9</nrepl.version>
     <leiningen.version>2.5.0</leiningen.version>
   </properties>
 
@@ -158,6 +158,6 @@
           </executions>
         </plugin>
       </plugins>
-    </build> 
-  
+    </build>
+
 </project>
