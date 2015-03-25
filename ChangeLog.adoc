@@ -10,8 +10,12 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 == Changes between Counterclockwise 0.32.0 and 0.33.0
 
+=== Counterclockwise embedded nREPL
+
+Counterclockwise ships with an embedded nREPL server. The following enhancements have been applied:
+
 - Command line options: `-Dccw.nrepl.port=[1-65535]` allows to select the embedded nrepl port. `ccw.autostartrepl` has been renamed to `ccw.nrepl.autostart` for coherence.
-- Command line options: `-Dccw.nrepl.cider.enable` adds full support for Cider to the embedded nRepl.
+- Uses the cider-nrepl middleware instead of the bare default middleware.
 
 == Changes between Counterclockwise 0.31.2 and 0.32.0
 

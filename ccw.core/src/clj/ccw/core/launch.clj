@@ -2,7 +2,7 @@
   (:require [clojure.tools.nrepl.server :refer [start-server stop-server default-handler]]
             [clojure.tools.nrepl.ack :refer [handle-ack]]
             [cider.nrepl :refer (cider-nrepl-handler)]
-            [ccw.eclipse :refer [property-ccw-nrepl-port property-ccw-nrepl-cider-enable]])
+            [ccw.eclipse :refer [property-ccw-nrepl-port]])
   (:import ccw.CCWPlugin
            ccw.core.StaticStrings
            java.lang.System))
@@ -73,9 +73,7 @@
   ccw-nrepl-server-map atom. Returns the newly opened socket to it."
   []
   (let [nrepl-port (property-ccw-nrepl-port)
-        handler (if (property-ccw-nrepl-cider-enable)
-                  (handle-ack cider-nrepl-handler)
-                  (handle-ack (default-handler)))]
+        handler (handle-ack cider-nrepl-handler)]
     (when (= 0 nrepl-port)
       (CCWPlugin/log (str "nRepl port will be automatically selected")))
     (let [start-server-delay (swap! nrepl-server-map-delay fill-nrepl-start-delay nrepl-port handler)
