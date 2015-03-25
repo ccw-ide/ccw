@@ -61,8 +61,7 @@
             [clojure.test :refer [deftest is run-tests]]
             [paredit.loc-utils :refer [start-offset
                                        loc-count]]
-            ;; remove these
-            [clojure.pprint :refer [pprint]]))
+            [clojure.edn :as edn :refer [read-string]]))
 
 (set! *warn-on-reflection* true)
 
@@ -177,8 +176,7 @@
 (defn- read-and-sanitize-descriptor-string
   "Reads a descriptor list from the input string (in edn format, will use read-string."
   [edn-string]
-  (binding [*read-eval* false]
-    (map sanitize-descriptor (read-string edn-string))))
+  (map sanitize-descriptor (edn/read-string {:eof ""} edn-string)))
 
 (defn- read-descriptors-from-preference!
   "Loading what it is in the preferences, returns the hover descriptors accordingly."
