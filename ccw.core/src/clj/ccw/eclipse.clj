@@ -39,7 +39,9 @@
            [java.io File IOException]
            [ccw CCWPlugin]
            [ccw.util PlatformUtil DisplayUtil]
-           [ccw.launching LaunchUtils]))
+           [ccw.launching LaunchUtils]
+           java.lang.System
+           ccw.core.StaticStrings))
 
 (defn adapter
   "Invokes Eclipse Platform machinery to try by all means to adapt object to 
@@ -1059,12 +1061,3 @@
    (if-let [nrepl-port (re-matches port-validating-regex (str port))]
       (Integer/valueOf nrepl-port)
       0)))
-
-
-(deftest property-tests
-  (testing "nRepl port validation tests"
-    (is (= 0 (property-ccw-nrepl-port 0)))
-    (is (= 0 (property-ccw-nrepl-port 65536)))
-    (is (= 4 (property-ccw-nrepl-port 4)))
-    (is (= 4 (property-ccw-nrepl-port "4")))
-    (is (= 65535 (property-ccw-nrepl-port 65535)))))
