@@ -147,6 +147,15 @@ public class Messages extends NLS {
     public static String ClojureGeneralPreferencePage_launch_repls_in_debug_mode;
     public static String ClojureGeneralPreferencePage_use_leiningen_launcher;
 
+    public static String HoverPreferencePage_errorNoCheckedHovers;
+    public static String HoverPreferencePage_errorDefaultHoverNotUnique;
+    public static String HoverPreferencePage_errorStatusMaskAlreadyInUse;
+    public static String HoverPreferencePage_description;
+    public static String HoverPreferencePage_descriptionColumnTitle;
+    public static String HoverPreferencePage_labelColumnTitle;
+    public static String HoverPreferencePage_modifierColumnTitle;
+    public static String HoverPreferencePage_summaryGroupText;
+	
     static {
         // initialize resource bundle
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);

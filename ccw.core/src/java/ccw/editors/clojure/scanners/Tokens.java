@@ -8,7 +8,7 @@
  * Contributors: 
  *    Tuomas KARKKAINEN - initial API and implementation
  *******************************************************************************/
-package ccw.editors.clojure;
+package ccw.editors.clojure.scanners;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
@@ -21,30 +21,31 @@ import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.graphics.Color;
 
 import ccw.CCWPlugin;
+import ccw.editors.clojure.IClojureAwarePart;
 
 public class Tokens {
     private final ITokenScanner tokenScanner;
     private final IDocument document;
     private int caretOffset;
 
-    public Tokens(IDocument document, IClojureEditor clojureEditor, IPreferenceStore store, IRegion selection) {
-        this(document, clojureEditor, store);
+    public Tokens(IDocument document, IClojureAwarePart part, IPreferenceStore store, IRegion selection) {
+        this(document, part, store);
         this.caretOffset = selection.getOffset();
     }
 
-    public Tokens(IDocument document, IClojureEditor clojureEditor, IPreferenceStore store) {
-        this.tokenScanner = tokenScanner(clojureEditor, store);
+    public Tokens(IDocument document, IClojureAwarePart part, IPreferenceStore store) {
+        this.tokenScanner = tokenScanner(part, store);
         tokenScanner.setRange(document, 0, document.getLength());
         this.document = document;
     }
 
-    public Tokens(IDocument document, IClojureEditor clojureEditor, IPreferenceStore store, int caretOffset) {
-        this(document, clojureEditor, store);
+    public Tokens(IDocument document, IClojureAwarePart part, IPreferenceStore store, int caretOffset) {
+        this(document, part, store);
         this.caretOffset = caretOffset;
     }
 
-    public static ITokenScanner tokenScanner(IClojureEditor clojureEditor, IPreferenceStore store) {
-        return new ClojureTokenScanner(CCWPlugin.getDefault().getColorCache(), CCWPlugin.getDefault().getDefaultScanContext(), store, clojureEditor);
+    public static ITokenScanner tokenScanner(IClojureAwarePart part, IPreferenceStore store) {
+        return new ClojureTokenScanner(CCWPlugin.getDefault().getColorCache(), CCWPlugin.getDefault().getDefaultScanContext(), store, part);
     }
 
     public int offsetOfTokenUnderCaret() {

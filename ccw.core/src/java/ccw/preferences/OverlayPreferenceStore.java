@@ -17,10 +17,12 @@ import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
+import ccw.core.IPropertyPublisher;
+
 /**
  * An overlaying preference store.
  */
-public class OverlayPreferenceStore implements IPreferenceStore {
+public class OverlayPreferenceStore implements IPreferenceStore, IPropertyPublisher {
 
 
 	public static final class TypeDescriptor {

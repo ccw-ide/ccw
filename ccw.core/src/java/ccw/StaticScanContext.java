@@ -14,7 +14,7 @@ package ccw;
 import java.util.HashMap;
 import java.util.Map;
 
-import ccw.editors.clojure.IScanContext;
+import ccw.editors.clojure.scanners.IScanContext;
 import ccw.preferences.PreferenceConstants;
 import ccw.util.ClojureInvoker;
 import clojure.lang.Keyword;

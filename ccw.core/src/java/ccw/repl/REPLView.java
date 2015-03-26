@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.ILaunch;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -260,7 +261,7 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 		});
     }
 
-    public SafeConnection getSafeToolingConnection() {
+    public @Nullable SafeConnection getSafeToolingConnection() {
     	return safeToolConnection;
     }
 
@@ -588,12 +589,6 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
         // Enables logPanel to have same background, etc. colors than clojure
         // editors.
 		ClojureSourceViewer.initializeViewerColors(logPanel, prefs, logPanelEditorColors);
-		logPanel.addDisposeListener(new DisposeListener() {
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				logPanelEditorColors.unconfigure();
-			}
-		});
 
         structuralEditionModeStatusContributionItem = ClojureSourceViewer.createStructuralEditionModeStatusContributionItem();
         viewer = new ClojureSourceViewer(split, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL, prefs,
@@ -604,8 +599,8 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 					}
 				}) {
         	@Override
-			public REPLView getCorrespondingREPL() { return REPLView.this; };
-            private SafeConnection getCorrespondingREPLConnection () {
+			public @Nullable REPLView getCorrespondingREPL() { return REPLView.this; };
+			public @Nullable SafeConnection getSafeToolingConnection () {
                 // we'll be connected by the time this is called
                 return safeToolConnection;
             }
@@ -693,8 +688,11 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
          * initialized. Otherwise the very first Clojure editor will not
          * have any tokens colored.
          * TODO this is repeated in ClojureEditor...surely we can make the source viewer self-sufficient here
+         *
+         * AR - Solved by initializing the ClojureSourceViewerConfiguration at the very
+         * beginning of the ClojureSourceViewer
          */
-        viewer.propertyChange(null);
+//        viewer.propertyChange(null);
 
         viewerWidget.addFocusListener(new NamespaceRefreshFocusListener());
         logPanel.addFocusListener(new NamespaceRefreshFocusListener());

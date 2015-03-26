@@ -12,12 +12,14 @@
 
 package ccw.preferences;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.graphics.RGB;
 
@@ -82,54 +84,54 @@ public class PreferenceConstants {
 	public static final Set<Keyword> colorizableTokens;
 	
 	/** List of tokens, ordered to be displayed on the preferences page. */
-	public static final List<Keyword> orderedColorizableTokens; // FIXME: use it, or remove it
+	public static final Map<String, Keyword> colorKeyKeywordMap; // FIXME: use it, or remove it // AR - now we use it
 	
 	static {
-		orderedColorizableTokens = Collections.unmodifiableList(
-				new ArrayList<Keyword>() {
+		colorKeyKeywordMap = Collections.unmodifiableMap(
+				new HashMap<String, Keyword>() {
 			{
-				add(stringToken);
-				add(otherLiteralsToken);
-				add(regexToken);
-				add(intToken);
-				add(floatToken);
-				add(charToken);
-				add(FUNCTION_Token);
-				add(callableFUNCTION_Token);
-				add(MACRO_Token);
-				add(callableMACRO_Token);
-				add(SPECIAL_FORM_Token);
-				add(callableSPECIAL_FORM_Token);
-				add(GLOBAL_VAR_Token);
-				add(callableGLOBAL_VAR_Token);
-				add(JAVA_CLASS_Token);
-				add(callableJAVA_CLASS_Token);
-				add(JAVA_INSTANCE_METHOD_Token);
-				add(callableJAVA_INSTANCE_METHOD_Token);
-				add(JAVA_STATIC_METHOD_Token);
-				add(callableJAVA_STATIC_METHOD_Token);
-				add(RAW_SYMBOL_Token);
-				add(callable_RAW_SYMBOL_Token);
-				add(keywordToken);
-				add(commentToken);
-				add(metaToken);
-				add(readerLiteralTag);
-				add(deactivatedRainbowParen);
-				add(rainbowParenLevel1);
-				add(rainbowParenLevel2);
-				add(rainbowParenLevel3);
-				add(rainbowParenLevel4);
-				add(rainbowParenLevel5);
-				add(rainbowParenLevel6);
-				add(rainbowParenLevel7);
-				add(rainbowParenLevel8);
-				add(replLogValue);
-				add(replLogError);
+				put(getTokenColorPreferenceKey(stringToken), stringToken);
+				put(getTokenColorPreferenceKey(otherLiteralsToken), otherLiteralsToken);
+				put(getTokenColorPreferenceKey(regexToken), regexToken);
+				put(getTokenColorPreferenceKey(intToken), intToken);
+				put(getTokenColorPreferenceKey(floatToken), floatToken);
+				put(getTokenColorPreferenceKey(charToken), charToken);
+				put(getTokenColorPreferenceKey(FUNCTION_Token), FUNCTION_Token);
+				put(getTokenColorPreferenceKey(callableFUNCTION_Token), callableFUNCTION_Token);
+				put(getTokenColorPreferenceKey(MACRO_Token), MACRO_Token);
+				put(getTokenColorPreferenceKey(callableMACRO_Token), callableMACRO_Token);
+				put(getTokenColorPreferenceKey(SPECIAL_FORM_Token), SPECIAL_FORM_Token);
+				put(getTokenColorPreferenceKey(callableSPECIAL_FORM_Token), callableSPECIAL_FORM_Token);
+				put(getTokenColorPreferenceKey(GLOBAL_VAR_Token), GLOBAL_VAR_Token);
+				put(getTokenColorPreferenceKey(callableGLOBAL_VAR_Token), callableGLOBAL_VAR_Token);
+				put(getTokenColorPreferenceKey(JAVA_CLASS_Token), JAVA_CLASS_Token);
+				put(getTokenColorPreferenceKey(callableJAVA_CLASS_Token), callableJAVA_CLASS_Token);
+				put(getTokenColorPreferenceKey(JAVA_INSTANCE_METHOD_Token), JAVA_INSTANCE_METHOD_Token);
+				put(getTokenColorPreferenceKey(callableJAVA_INSTANCE_METHOD_Token), callableJAVA_INSTANCE_METHOD_Token);
+				put(getTokenColorPreferenceKey(JAVA_STATIC_METHOD_Token), JAVA_STATIC_METHOD_Token);
+				put(getTokenColorPreferenceKey(callableJAVA_STATIC_METHOD_Token), callableJAVA_STATIC_METHOD_Token);
+				put(getTokenColorPreferenceKey(RAW_SYMBOL_Token), RAW_SYMBOL_Token);
+				put(getTokenColorPreferenceKey(callable_RAW_SYMBOL_Token), callable_RAW_SYMBOL_Token);
+				put(getTokenColorPreferenceKey(keywordToken), keywordToken);
+				put(getTokenColorPreferenceKey(commentToken), commentToken);
+				put(getTokenColorPreferenceKey(metaToken), metaToken);
+				put(getTokenColorPreferenceKey(readerLiteralTag), readerLiteralTag);
+				put(getTokenColorPreferenceKey(deactivatedRainbowParen), deactivatedRainbowParen);
+				put(getTokenColorPreferenceKey(rainbowParenLevel1), rainbowParenLevel1);
+				put(getTokenColorPreferenceKey(rainbowParenLevel2), rainbowParenLevel2);
+				put(getTokenColorPreferenceKey(rainbowParenLevel3), rainbowParenLevel3);
+				put(getTokenColorPreferenceKey(rainbowParenLevel4), rainbowParenLevel4);
+				put(getTokenColorPreferenceKey(rainbowParenLevel5), rainbowParenLevel5);
+				put(getTokenColorPreferenceKey(rainbowParenLevel6), rainbowParenLevel6);
+				put(getTokenColorPreferenceKey(rainbowParenLevel7), rainbowParenLevel7);
+				put(getTokenColorPreferenceKey(rainbowParenLevel8), rainbowParenLevel8);
+				put(getTokenColorPreferenceKey(replLogValue), replLogValue);
+				put(getTokenColorPreferenceKey(replLogError), replLogError);
 			}
 		});
 		
 		colorizableTokens = Collections.unmodifiableSet(
-				new HashSet<Keyword>(orderedColorizableTokens));
+				new HashSet<Keyword>(colorKeyKeywordMap.values()));
 	}
 	
 	
@@ -179,30 +181,173 @@ public class PreferenceConstants {
     
     public static final String EDITOR_COLORING_ENABLED_SUFFIX = ".enabled"; //$NON-NLS-1$
 
+	/**
+	 * A named preference that defines the key for the hover modifier state masks.
+	 * The value is only used if the value of <code>EDITOR_TEXT_HOVER_MODIFIERS</code>
+	 * cannot be resolved to valid SWT modifier bits (taken from org.eclipse.jdt.ui).
+	 */
+	public static final String EDITOR_TEXT_HOVER_DESCRIPTORS = CCW_PREFERENCE_PREFIX + ".hover_descriptors"; //$NON-NLS-1$
+
+	/**
+     * A Boolean preference that defines whether to show the hint to make sticky hover.
+     */
+    public static final String EDITOR_SHOW_TEXT_HOVER_AFFORDANCE= CCW_PREFERENCE_PREFIX + ".show_hover_affordance"; //$NON-NLS-1$
+    
     public static class ColorizableToken {
-    	public final RGB rgb;
-    	public final Boolean isBold;
-    	public final Boolean isItalic;
-    	public ColorizableToken(RGB rgb, Boolean isBold, Boolean isItalic) {
+    	public final @NonNull RGB rgb;
+    	public final @Nullable Boolean isBold;
+    	public final @Nullable Boolean isItalic;
+    	public ColorizableToken(@NonNull RGB rgb, Boolean isBold, Boolean isItalic) {
     		this.rgb = rgb;
     		this.isBold = isBold;
     		this.isItalic = isItalic;
     	}
     }
     
-    public static String getTokenPreferenceKey(Keyword token) {
-    	return CCW_PREFERENCE_PREFIX + "." + EDITOR_COLORING_PREFIX + "." + token.getName(); //$NON-NLS-1$
-    }
-    public static ColorizableToken getColorizableToken(IPreferenceStore store, Keyword token, RGB defaultColor) {
-    	String tokenKey = getTokenPreferenceKey(token);
-    	return new ColorizableToken(
-    			CCWPlugin.getPreferenceRGB(store, tokenKey, defaultColor),
-    			store.getBoolean(SyntaxColoringHelper.getEnabledPreferenceKey(tokenKey)) 
-    				? store.getBoolean(SyntaxColoringHelper.getBoldPreferenceKey(tokenKey)) 
-    				: null,
-    			store.getBoolean(SyntaxColoringHelper.getEnabledPreferenceKey(tokenKey))
-    				? store.getBoolean(SyntaxColoringHelper.getItalicPreferenceKey(tokenKey)) 
-    				: null);
+    /**
+     * Strips the suffix from a previous suffixed preference key.
+     * @param suffixToStrip The suffix to strip off.
+     * @param suffixedTokenkey The string to process.
+     * @return A non-null stripped string.
+     */
+    public static @NonNull String stripPreferenceSuffix(String suffixToStrip, String suffixedTokenkey) {
+        int categoryIdx = suffixedTokenkey.indexOf(suffixToStrip);
+        if (categoryIdx == -1) {
+            return suffixedTokenkey;
+        }
+        return suffixedTokenkey.substring(0, categoryIdx);
     }
     
+    /**
+     * Preference Keyword->String
+     * @param keyword A keyword.
+     * @return A token key in String format, never null.
+     */
+    public static @NonNull String getTokenPreferenceKey(String categoryPrefix, Keyword keyword) {
+    	return CCW_PREFERENCE_PREFIX + "." + categoryPrefix + "." + keyword.getName(); //$NON-NLS-1$
+    }
+    
+    public static @Nullable Keyword guessPreferenceKeyword(String key) {
+        // AR - If more keyword->string are introduced,
+        // more attempts need to be added to this guessing method.
+        
+        // Strip bold suffix
+        String stripped = stripPreferenceSuffix(PreferenceConstants.EDITOR_BOLD_SUFFIX, key);
+        Keyword keyword = getTokenColorPreferenceKeyword(stripped);
+        if (keyword != null) {
+            return keyword;
+        }
+        
+        // Strip bold suffix
+        stripped = stripPreferenceSuffix(PreferenceConstants.EDITOR_ITALIC_SUFFIX, key);
+        keyword = getTokenColorPreferenceKeyword(stripped);
+        if (keyword != null) {
+            return keyword;
+        }
+        
+        keyword = getTokenColorPreferenceKeyword(key);
+        return keyword;
+    }
+    
+    /**
+     * Preference String->Keyword
+     * @param tokenKey A key generated with getTokenPreferenceKey.
+     * @return A keyword object, can be null if it has never been interned.
+     */
+    public static @Nullable Keyword getTokenPreferenceKeyword(String categoryPrefix, String tokenKey) {
+        int categoryIdx = tokenKey.indexOf(categoryPrefix);
+        if (categoryIdx == -1) {
+            return null;
+        }
+        String keywordString = tokenKey.substring(categoryIdx + categoryPrefix.length() + 1);
+        Keyword keyword = colorKeyKeywordMap.get(keywordString);
+        return keyword;
+    }
+    
+    /**
+     * Convenience method for getting Color preferences.
+     * @see PreferenceConstants#getTokenColorPreferenceKey(Keyword)
+     * @param keyword A keyword.
+     * @return A token key in String format, never null.
+     */
+    public static @NonNull String getTokenColorPreferenceKey(Keyword keyword) {
+        return getTokenPreferenceKey(EDITOR_COLORING_PREFIX, keyword);
+    }
+    
+    /**
+     * Convenience method for getting Color preferences.
+     * @see PreferenceConstants#getTokenPreferenceKeyword(Keyword)
+     * @param tokenKey A key generated with getTokenPreferenceKey.
+     * @return A keyword object, can be null if it has never been interned.
+     */
+    public static @Nullable Keyword getTokenColorPreferenceKeyword(String tokenKey) {
+        return colorKeyKeywordMap.get(tokenKey);
+    }
+    
+    /**
+     * A named preference that controls if the given Clojure syntax highlighting is enabled.
+     *
+     * @param the preference key
+     * @return the enabled preference key
+     */
+    public static String getEnabledPreferenceKey(String preferenceKey) {
+        return preferenceKey + PreferenceConstants.EDITOR_COLORING_ENABLED_SUFFIX;
+    }
+    
+    /**
+     * A named preference that controls if the given semantic highlighting has the text attribute bold.
+     *
+     * @param semanticHighlighting the semantic highlighting
+     * @return the bold preference key
+     */
+    public static String getBoldPreferenceKey(String keyPrefix) {
+        return keyPrefix + PreferenceConstants.EDITOR_BOLD_SUFFIX;
+    }
+
+    /**
+     * A named preference that controls if the given semantic highlighting has the text attribute italic.
+     *
+     * @param semanticHighlighting the semantic highlighting
+     * @return the italic preference key
+     */
+    public static String getItalicPreferenceKey(String keyPrefix) {
+        return keyPrefix + PreferenceConstants.EDITOR_ITALIC_SUFFIX;
+    }
+    
+    public static Boolean isBoldPreferenceKey(String key) {
+        return key.endsWith(PreferenceConstants.EDITOR_BOLD_SUFFIX);
+    }
+    
+    public static Boolean isItalicPreferenceKey(String key) {
+        return key.endsWith(PreferenceConstants.EDITOR_ITALIC_SUFFIX);
+    }
+    
+    /**
+     * Get the ColorizableToken for the given keyword key in the preference store.
+     * It does not accepts default value but tries to recover itself from missing colors.
+     * @param store A store
+     * @param token A keyword key (String)
+     * @return A ColorizableToken, never null.
+     */
+    public static @NonNull ColorizableToken getColorizableToken(IPreferenceStore store, String tokenKey) {
+        return new ColorizableToken(
+                CCWPlugin.getPreferenceRGB(store, tokenKey),
+                store.getBoolean(getEnabledPreferenceKey(tokenKey)) 
+                    ? store.getBoolean(getBoldPreferenceKey(tokenKey)) 
+                    : null,
+                store.getBoolean(getEnabledPreferenceKey(tokenKey))
+                    ? store.getBoolean(getItalicPreferenceKey(tokenKey)) 
+                    : null);
+    }
+    
+    /**
+     * Get the Colorizable token for the given keyword in the preference store.
+     * It does not accepts default value but tries to recover itself from missing colors.
+     * @param store A store
+     * @param token A keyword
+     * @return A ColorizableToken, never null.
+     */
+    public static @NonNull ColorizableToken getColorizableToken(IPreferenceStore store, Keyword token) {
+        return getColorizableToken(store, getTokenColorPreferenceKey(token));
+    }
 }

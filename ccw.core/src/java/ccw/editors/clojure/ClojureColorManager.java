@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Display;
 
 /**
  * Java color manager.
+ * AR - Do we need this one now that everything is handled through ColorRegistry?
  */
 public class ClojureColorManager implements IColorManager, IColorManagerExtension {
 
