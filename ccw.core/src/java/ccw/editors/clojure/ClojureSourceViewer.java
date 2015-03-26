@@ -120,21 +120,6 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements IC
     	 * The viewer's background color for the selected line
     	 */
 		public Color fCurrentLineBackgroundColor;
-
-		public void unconfigure() {
-			fForegroundColor = unconfigure(fForegroundColor);
-			fBackgroundColor = unconfigure(fBackgroundColor= null);
-			fSelectionForegroundColor = unconfigure(fSelectionForegroundColor);
-			fSelectionBackgroundColor = unconfigure(fSelectionBackgroundColor);
-			fCurrentLineBackgroundColor = unconfigure(fCurrentLineBackgroundColor);
-		}
-
-		private Color unconfigure(Color c) {
-			if (c != null) { 
-				c.dispose(); 
-			}
-			return null;
-		}
     }
     
     private EditorColors editorColors = new EditorColors();
@@ -302,9 +287,6 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements IC
 			    : CCWPlugin.getPreferenceColor(preferenceStore, AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND);
 			styledText.setForeground(color);
 
-			if (editorColors.fForegroundColor != null)
-				editorColors.fForegroundColor.dispose();
-
 			editorColors.fForegroundColor= color;
 
 			// ---------- background color ----------------------
@@ -312,9 +294,6 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements IC
 			    ? null
 			    : CCWPlugin.getPreferenceColor(preferenceStore, AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND);
 			styledText.setBackground(color);
-
-			if (editorColors.fBackgroundColor != null)
-				editorColors.fBackgroundColor.dispose();
 
 			editorColors.fBackgroundColor= color;
 
@@ -324,9 +303,6 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements IC
 				: CCWPlugin.getPreferenceColor(preferenceStore, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_COLOR);
 			styledText.setSelectionForeground(color);
 
-			if (editorColors.fSelectionForegroundColor != null)
-				editorColors.fSelectionForegroundColor.dispose();
-
 			editorColors.fSelectionForegroundColor= color;
 
 			// ---------- selection background color ----------------------
@@ -335,16 +311,10 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements IC
 				: CCWPlugin.getPreferenceColor(preferenceStore, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_COLOR);
 			styledText.setSelectionBackground(color);
 
-			if (editorColors.fSelectionBackgroundColor != null)
-				editorColors.fSelectionBackgroundColor.dispose();
-
 			editorColors.fSelectionBackgroundColor= color;
 
 			// ---------- current line background color ----------------------
 			color= CCWPlugin.getPreferenceColor(preferenceStore, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE_COLOR);
-
-			if (editorColors.fCurrentLineBackgroundColor != null)
-				editorColors.fCurrentLineBackgroundColor.dispose();
 
 			editorColors.fCurrentLineBackgroundColor= color;
 		}
@@ -355,8 +325,6 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements IC
 	 * @since 3.0
 	 */
 	public void unconfigure() {
-
-	    editorColors.unconfigure();
 
 	    removePropertyChangeListener(fConfiguration);
 

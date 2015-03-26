@@ -589,12 +589,6 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
         // Enables logPanel to have same background, etc. colors than clojure
         // editors.
 		ClojureSourceViewer.initializeViewerColors(logPanel, prefs, logPanelEditorColors);
-		logPanel.addDisposeListener(new DisposeListener() {
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				logPanelEditorColors.unconfigure();
-			}
-		});
 
         structuralEditionModeStatusContributionItem = ClojureSourceViewer.createStructuralEditionModeStatusContributionItem();
         viewer = new ClojureSourceViewer(split, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL, prefs,

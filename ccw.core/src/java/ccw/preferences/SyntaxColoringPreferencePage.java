@@ -22,7 +22,6 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.ColorSelector;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -68,7 +67,6 @@ import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.osgi.service.prefs.BackingStoreException;
 
 import ccw.CCWPlugin;
-import ccw.editors.clojure.ClojureColorManager;
 import ccw.editors.clojure.ClojureSourceViewer;
 import ccw.editors.clojure.SimpleSourceViewerConfiguration;
 import ccw.editors.clojure.scanners.ClojurePartitionScanner;
@@ -303,10 +301,6 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
      */
     private ClojureSourceViewer fPreviewViewer;
     /**
-     * The color manager.
-     */
-    private IColorManager fColorManager;
-    /**
      * The font metrics.
      */
     private FontMetrics fFontMetrics;
@@ -316,8 +310,6 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         
         fOverlayStore = new OverlayPreferenceStore(getPreferenceStore(), createOverlayStoreKeys());
 
-        fColorManager= new ClojureColorManager(false);
-        
         for (String[] modelItem: fSyntaxColorListModel)
             fListModel.add(new HighlightingColorListItem(
                     modelItem[0],
@@ -452,8 +444,6 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
      * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#dispose()
      */
     public void dispose() {
-        fColorManager.dispose();
-        
         if (fOverlayStore != null) {
             fOverlayStore.stop();
             fOverlayStore= null;

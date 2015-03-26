@@ -12,10 +12,7 @@
  *******************************************************************************/
 package ccw;
 
-import java.io.IOException;
-import java.net.ServerSocket;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.core.resources.IProject;
@@ -63,14 +60,12 @@ import ccw.nature.AutomaticNatureAdder;
 import ccw.preferences.PreferenceConstants;
 import ccw.repl.REPLView;
 import ccw.repl.SafeConnection;
-import ccw.util.BundleUtils;
 import ccw.util.ClojureInvoker;
 import ccw.util.DisplayUtil;
 import ccw.util.ITracer;
 import ccw.util.NullTracer;
 import ccw.util.Tracer;
 import clojure.lang.Keyword;
-import clojure.lang.Var;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -107,7 +102,6 @@ public class CCWPlugin extends AbstractUIPlugin {
     private ColorRegistry colorCache;
     
     private FontRegistry fontRegistry;
-    
     
 	private AutomaticNatureAdder synchronizedNatureAdapter;
 
@@ -242,8 +236,6 @@ public class CCWPlugin extends AbstractUIPlugin {
     private synchronized void createColorCache() {
     	if (colorCache == null) {
     	    colorCache = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry();
-//    		colorCache = new ColorRegistry(getWorkbench().getDisplay());
-//    		colorCache.put("ccw.editors.clojure.colors.repl.expressionBackground", new RGB(0xf0, 0xf0, 0xf0));
     	}
     }
     
@@ -507,9 +499,7 @@ public class CCWPlugin extends AbstractUIPlugin {
         for (Keyword token: PreferenceConstants.colorizableTokens) {
         	PreferenceConstants.ColorizableToken tokenStyle = PreferenceConstants.getColorizableToken(store, token);
         	String rgbString = StringConverter.asString(tokenStyle.rgb);
-        	if (!colorCache.hasValueFor(rgbString)) {
-        	    colorCache.put(rgbString, tokenStyle.rgb);
-        	}
+        	ensureColorInCache(colorCache, rgbString, tokenStyle.rgb);
         }
     }
 
