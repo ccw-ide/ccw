@@ -158,8 +158,9 @@ public final class ClojureTokenScanner implements ITokenScanner, IPropertyChange
         	currentOffset += count.intValue();
         	tokenSeq = tokenSeq.next();
         }
-        //System.out.println(tokenSeq.first());
+        
         currentToken = (Map<?,?>)tokenSeq.first();
+        System.out.println(currentToken);
         advanceTokenDuration += System.currentTimeMillis() - start;
     }
     
@@ -220,9 +221,9 @@ public final class ClojureTokenScanner implements ITokenScanner, IPropertyChange
         			result = parserTokenKeywordToJFaceToken.get(PreferenceConstants.deactivatedRainbowParen);
         		}
         	}
-        } else if (currentToken.get(tokenTypeKeyword).equals(whitespaceKeyword)) {
-            // AR - I don't need to process whitespaces
-            return nextToken();
+// AR - I don't need to process whitespaces
+//        } else if (currentToken.get(tokenTypeKeyword).equals(whitespaceKeyword)) {
+//            return nextToken();
         } else {
             result = toJFaceToken();
         }
