@@ -957,10 +957,6 @@
       (Integer/valueOf nrepl-port)
       0)))
 
-(defn property-ccw-nrepl-cider-enable
-  "Returns the value of StaticStrings/CCW_PROPERTY_NREPL_CIDER_ENABLE property."
-  []
-  (System/getProperty StaticStrings/CCW_PROPERTY_NREPL_CIDER_ENABLE))
 
 (deftest property-tests
   (testing "nRepl port validation tests"
