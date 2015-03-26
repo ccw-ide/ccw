@@ -646,7 +646,7 @@
 
 (defn ccw-combined-prefs
   ^IPreferenceStore []
-  (.getCombinedPreferenceStore (ccw.CCWPlugin/getDefault)))
+  (some-> (ccw.CCWPlugin/getDefault) .getCombinedPreferenceStore))
 
 (defn boolean-ccw-pref
   "Get the value of a boolean Preference set for CCW. The 2-arity
