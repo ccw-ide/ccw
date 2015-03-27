@@ -17,6 +17,10 @@ Counterclockwise ships with an embedded nREPL server. The following enhancements
 - Command line options: `-Dccw.nrepl.port=[1-65535]` allows to select the embedded nrepl port. `ccw.autostartrepl` has been renamed to `ccw.nrepl.autostart` for coherence.
 - Uses the cider-nrepl middleware instead of the bare default middleware.
 
+=== User Plugins
+
+- The keybinding cleaning function did concurrent modifications of an Eclipse Internal collection. Fix laurentpetit/ccw-plugin-manager#1
+
 == Changes between Counterclockwise 0.31.2 and 0.32.0
 
 `0.32.0` released on December xx, 2014

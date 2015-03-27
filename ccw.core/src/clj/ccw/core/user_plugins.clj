@@ -16,7 +16,7 @@
                           cmds)
         ;_ (println "to-remove:" to-remove)
         app-cmds (application-type-elements app)]
-    (doseq [c to-remove]
+    (doseq [c (doall to-remove)] ; prevents ConcurrentModificationExceptions in .remove
       (println "user-plugins gc, element to remove:" c)
       (.remove app-cmds c))))
 
@@ -48,7 +48,7 @@
                                 (.contains (m/tags key-binding) "ccw")
                                 (not= load-key (get (m/transient-data key-binding) "ccw/load-key")))]
                     [key-binding key-bindings])]
-    (doseq [[kb kbs] to-remove]
+    (doseq [[kb kbs] (doall to-remove)] ;; doall prevents ConcurrentModificationExceptions when calling .remove
       (println "user-plugins gc, key-binding to remove: " kb)
       (.remove kbs kb))))
 
@@ -63,7 +63,7 @@
               nil ; don't find a specific subclass of MUIElement
               ["ccw"])
        to-remove (remove #(not= load-key (get (m/transient-data %) "ccw/load-key")) elts)]
-   (doseq [e to-remove]
+   (doseq [e (doall to-remove)] ; prevents ConcurrentModificationExceptions in .remove
      (println "user-plugins gc, element to remove:" e)
      (-> e .getParent .getChildren (.remove e)))))
 
