@@ -130,7 +130,15 @@ Bundle-ClassPath: .,
  lib/compliment.jar,
  lib/cljs-tooling.jar,
  lib/tools.namespace.jar,
- lib/tools.trace.jar
+ lib/tools.trace.jar,
+ lib/clj-tuple.jar,
+ lib/cljfmt.jar,
+ lib/debugger.jar,
+ lib/defprecated.jar,
+ lib/potemkin.jar,
+ lib/rewrite-clj.jar,
+ lib/riddley.jar,
+ lib/tools.reader.jar
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: Counterclockwise team
 Eclipse-BundleShape: dir

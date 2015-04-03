@@ -88,5 +88,9 @@
 	<classpathentry kind="lib" path="lib/riddley.jar"/>
 	<classpathentry kind="lib" path="lib/tools.reader.jar"/>
 	<classpathentry kind="lib" path="lib/clojure-ccw.jar"/>
+	<classpathentry kind="lib" path="lib/cljfmt.jar"/>
+	<classpathentry kind="lib" path="lib/debugger.jar"/>
+	<classpathentry kind="lib" path="lib/defprecated.jar"/>
+	<classpathentry kind="lib" path="lib/rewrite-clj.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
