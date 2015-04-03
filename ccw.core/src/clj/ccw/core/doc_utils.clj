@@ -67,7 +67,12 @@
   (when-not (str/blank? doc)
     (render-section renderer
                     "Documentation"
-                    (str "<pre>" doc "</pre>"))))
+                    (str
+                      "<pre>"
+                      "  " ; We add 2 spaces because docstring are generally
+                           ; indented 2 spaces except the first line
+                      doc
+                      "</pre>"))))
 
 (defn var-doc-info [renderer m]
   (let [sections [(header-doc renderer m)
