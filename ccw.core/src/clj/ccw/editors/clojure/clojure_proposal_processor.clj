@@ -1,5 +1,6 @@
 (ns ccw.editors.clojure.clojure-proposal-processor
   (:require [clojure.string :as s]
+            [clojure.set :as set]
             [clojure.test :as test]
             [clojure.tools.nrepl :as repl]
             [paredit.parser :as p]
@@ -128,7 +129,7 @@
    display-string
    filter
    context-information
-   additional-proposal-info]
+   additional-proposal-info-delay]
   (let [cp (CompletionProposal.
              (or replacement-string "")
              replacement-offset
@@ -137,15 +138,15 @@
              image
              (or display-string "")
              context-information
-             (or additional-proposal-info ""))]
+             "")] ;; additional-proposal is computed on demand
     (reify 
       ICompletionProposal
       (apply [this document] (.apply cp document))
       (getSelection [this document] (.getSelection cp document))
-      (getAdditionalProposalInfo [this] (.getAdditionalProposalInfo cp))
+      (getAdditionalProposalInfo [this] @additional-proposal-info-delay)
       (getDisplayString [this] (.getDisplayString cp))
       (getImage [this] (.getImage cp))
-      (getContextInformation [this] (.getContextInformation cp))
+      (getContextInformation [this] @additional-proposal-info-delay)
       
       ICompletionProposalExtension6
       (getStyledDisplayString [this]
@@ -194,26 +195,61 @@
   "Sends message and keep tracks of safe-connections that have timeouts.
    When a safe-connection has had 2 timeouts, stop trying to use
    it and return nil."
-  [safe-connection command timeout]
+  [safe-connection message timeout]
   (let [nb-timeouts (@timed-out-safe-connections safe-connection 0)]
     (when (< nb-timeouts 3)
       (try
-        (common/send-message safe-connection command :timeout timeout)
+        (common/send-message safe-connection message :timeout timeout)
         (catch java.util.concurrent.TimeoutException e
+          (println " timeout !")
           (swap! timed-out-safe-connections update-in [safe-connection] (fnil inc 0)))))))
 
-(defn find-var-metadata
+(defn send-code
+  "Sends code and keep tracks of safe-connections that have timeouts.
+   When a safe-connection has had 2 timeouts, stop trying to use
+   it and return nil."
+  [safe-connection code timeout]
+  (send-message safe-connection {"op" "eval", "code" code} timeout))
+
+(defmulti find-var-metadata
+  (fn [current-namespace ^IClojureEditor editor var]
+    (when-let [repl (.getCorrespondingREPL editor)]
+      (some #{"info"} (.getAvailableOperations repl)))))
+
+(defmethod find-var-metadata :default
   [current-namespace ^IClojureEditor editor var]
   (when-let [repl (.getCorrespondingREPL editor)]
     (let [safe-connection (.getSafeToolingConnection repl)
-          command (format (str "(ccw.debug.serverrepl/var-info "
-                                 "(clojure.core/ns-resolve "
-                                   "(clojure.core/the-ns '%s) '%s))")
-                          current-namespace
-                          var)
-          response (send-message safe-connection command 1000)]
-      ;(println "response:" response)
-      (first response))))
+          code (format (str "(ccw.debug.serverrepl/var-info "
+                              "(clojure.core/ns-resolve "
+                                "(clojure.core/the-ns '%s) '%s))")
+                       current-namespace
+                       var)
+          response (first (send-code safe-connection code 1000))]
+      response)))
+
+(defmethod find-var-metadata "info"
+  [current-namespace ^IClojureEditor editor var]
+  (when-let [repl (.getCorrespondingREPL editor)]
+    (let [safe-connection (.getSafeToolingConnection repl)
+          response (-> (first
+                         (send-message safe-connection
+                           {"op" "info"
+                            "symbol" var
+                            "ns" current-namespace}
+                           1000))
+                     (set/rename-keys {:arglists-str :arglists
+                                       :resource :file}))]
+      response)))
+
+
+
+(defmulti find-suggestions
+  "For the given prefix, inside the current editor and in the current namespace,
+   query the remote REPL for code completions list"
+  (fn [current-namespace prefix ^IClojureEditor editor find-only-public]
+    (when-let [repl (.getCorrespondingREPL editor)]
+      (some #{"complete"} (.getAvailableOperations repl)))))
 
 ;; TODO encadrer les appels externes avec un timeout
 ;; si le timeout est depasse, ejecter la repl correspondante
@@ -222,18 +258,41 @@
 ;; A terme: decoupler la recuperation des infos et leur exploitation
 ;; - un dictionnaire de suggestions mis à jour en batch à des points clés (interactions avec repl)
 ;; - interrogation du dictionnaire en usage courant (tant pis si pas a jour)
-(defn find-suggestions
-  "For the given prefix, inside the current editor and in the current namespace,
-   query the remote REPL for code completions list"
+(defmethod find-suggestions :default
   [current-namespace prefix ^IClojureEditor editor find-only-public]
   (cond
-    (nil? namespace) []
+    (nil? current-namespace) []
     (s/blank? prefix) []
     :else (when-let [repl (.getCorrespondingREPL editor)]
             (let [safe-connection (.getSafeToolingConnection repl)
-                  command (complete-command current-namespace prefix false)
-                  response (send-message safe-connection command 1000)]
-              (first response)))))
+                  code (complete-command current-namespace prefix false)
+                  response (first (send-code safe-connection code 1000))]
+              response))))
+
+(defmethod find-suggestions "complete"
+  [current-namespace prefix ^IClojureEditor editor find-only-public]
+  (def ed editor)
+  (cond
+    (nil? current-namespace) []
+    (s/blank? prefix) []
+    :else (when-let [repl (.getCorrespondingREPL editor)]
+            (let [safe-connection (.getSafeToolingConnection repl)
+                  response (first (send-message safe-connection
+                                    {"op" "complete"
+                                     "symbol" prefix
+                                     "ns" current-namespace}
+                                    1000))]
+              (when-let [completions
+                         (seq (map
+                                #(hash-map
+                                   :completion (:candidate %)
+                                   :match (:candidate %)
+                                   :type (:type %)
+                                   :ns (:ns %)
+                                   :filter (serverrepl/textmate-filter (:candidate %) prefix)
+                                   :metadata nil)
+                                (:completions response)))]
+                completions)))))
 
 (defn context-info-data
   "Create a context-information from the data"
@@ -332,9 +391,9 @@
                                #_#(let [comparator (serverrepl/textmate-comparator prefix)]
                                     (comparator (:completion %1) (:completion %2)))
                                (concat repl-suggestions hippie-suggestions))]
-        (for [{:keys [completion match filter]
-               {:keys [arglists ns name added static 
-                       type doc line file] 
+        (for [{:keys [completion match filter type ns]
+               {:keys [arglists name added static 
+                       doc line file] 
                 :as metadata} :metadata
                } suggestions]
           (completion-proposal
@@ -343,10 +402,14 @@
             (- offset prefix-offset)
             (count completion)
             nil
-            (doc/join " - " completion ns)
+            (cond-> completion
+              (and ns (not (.startsWith completion (str ns "/"))))
+                (str " (" ns ")")
+              type
+                (str " - " type))
             filter
             (context-info-data completion (+ prefix-offset (count completion)) metadata)
-            (doc/var-doc-info-html metadata)))))))
+            (delay (doc/var-doc-info-html (find-var-metadata ns editor completion))))))))) ;; todo remove metadata
 
 (def activation-characters
   "Characters which will trigger auto-completion"

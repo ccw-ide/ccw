@@ -10,6 +10,23 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 == Changes between Counterclockwise 0.32.0 and 0.33.0
 
+=== Support for cider-nrepl in the REPL
+
+Enabling `cider-nrepl` for a project is as simple as adding or completing a `:plugins` section to the project's `project.clj` file:
+
+[source,clojure]
+----
+(defproject ...
+  :plugins [[cider/cider-nrepl "0.9.0-SNAPSHOT"]])
+----
+
+If `cider-nrepl` ( https://github.com/clojure-emacs/cider-nrepl ) middlewares are present in the nREPL server middleware stack of your project, then connecting to it via a `REPL View` will use its nREPL ops instead of those provided by CCW.
+
+This will allow CCW to focus on integrating `cider-nrepl` features, and is thus the promise of more stability, better user experience across several tools based on `cider-nrepl` (emacs, vim-fireplace, to name a few).
+
+`cider-nrepl` will also be a better and more rewarding place for CCW authors to contribute to. It will be good to fight our NIH bad-karma.
+
+
 === Counterclockwise embedded nREPL
 
 Counterclockwise ships with an embedded nREPL server. The following enhancements have been applied:
