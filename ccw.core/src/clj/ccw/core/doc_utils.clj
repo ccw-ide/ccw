@@ -3,7 +3,7 @@
 
 ;	potential documentation tags:
 ; :since, :author, :private, :test, :tag, :file, :line, :ns, :name, 
-; :macro, :arglists
+; :macro, :arglists(ccw.server)/:arglists-str(cider-nrepl)
 
 (defn join 
   "Join c elements with s as of clojure.string/join, except nil elements
@@ -42,10 +42,11 @@
         :text no-sections-text)
       s)))
 
-(defn- arglist-doc [renderer {:keys [arglists]}]
-  (when-not (str/blank? arglists)
-    (render-section renderer "Argument Lists"
-                    (render-lines renderer (arglists-seq arglists)))))
+(defn- arglist-doc [renderer {:keys [arglists arglists-str]}]
+  (let [arglists (or arglists arglists-str)]
+    (when-not (str/blank? arglists)
+      (render-section renderer "Argument Lists"
+        (render-lines renderer (arglists-seq arglists))))))
 
 (defn- optional-meta [{:keys [name macro private dynamic ns tag]}]
   (let [optional-meta (join ", " 
