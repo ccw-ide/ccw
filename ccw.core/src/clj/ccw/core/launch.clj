@@ -1,7 +1,8 @@
 (ns ccw.core.launch
   (:require [clojure.tools.nrepl.server :refer [start-server stop-server default-handler]]
             [clojure.tools.nrepl.ack :refer [handle-ack]]
-            [cider.nrepl :refer (cider-nrepl-handler)]
+            [cider.nrepl :refer [cider-nrepl-handler]]
+            [ccw.util :refer [delayed-atom-swap! delayed-atom-reset!]]
             [ccw.eclipse :refer [property-ccw-nrepl-port]])
   (:import ccw.CCWPlugin
            ccw.core.StaticStrings
@@ -47,19 +48,15 @@
 (defonce ^{:author "Andrea Richiardi" :doc "Atom containing the map returned by start-server."}
   nrepl-server-map-delay (atom nil))
 
-(defn- fill-nrepl-start-delay
+(defn- nrepl-start
   "Starts an nRepl given the port number."
-  [server-map-delay port handler]
-  (if server-map-delay
-    server-map-delay
-    (delay (start-server :port port :handler handler))))
+  [port handler]
+  (start-server :port port :handler handler))
 
-(defn- fill-nrepl-stop-delay
+(defn- nrepl-stop
   "Stops the instance of the running nRepl. Always returns nil."
-  [server-map-delay]
-  (if (and server-map-delay (realized? server-map-delay))
-    (delay (stop-server (force server-map-delay)) nil)
-    (delay nil)))
+  [server-map]
+  (stop-server server-map))
 
 ;; Public API
 (defn ccw-nrepl-port
@@ -76,7 +73,9 @@
         handler (handle-ack cider-nrepl-handler)]
     (when (= 0 nrepl-port)
       (CCWPlugin/log (str "nRepl port will be automatically selected")))
-    (let [start-server-delay (swap! nrepl-server-map-delay fill-nrepl-start-delay nrepl-port handler)
+    (let [start-server-delay (delayed-atom-swap! nrepl-server-map-delay
+                                                 nrepl-start
+                                                 nrepl-port handler)
           was-realized (realized? start-server-delay)
           server-map (force start-server-delay)]
       (if-not was-realized
@@ -86,4 +85,4 @@
   "Stops the instance of the running nRepl on the underlying atom. Always returns nil."
   []
   (CCWPlugin/log (str "Stopping ccw nREPL server..."))
-  (force (swap! nrepl-server-map-delay fill-nrepl-stop-delay)))
+  (delayed-atom-reset! nrepl-server-map-delay nrepl-stop))
