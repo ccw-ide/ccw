@@ -9,7 +9,7 @@
             [ccw.core.doc-utils :as doc]
             [ccw.debug.serverrepl :as serverrepl]
             [ccw.core.trace :as trace]
-            [ccw.editors.clojure.editor-common :as common])
+            [ccw.editors.clojure.editor-common :as common :refer (find-var-metadata)])
   (:use [clojure.core.incubator :only [-?>]])
   (:import [org.eclipse.jface.viewers StyledString
                                       StyledString$Styler]
@@ -187,56 +187,6 @@
           namespace
           completion-limit))
 
-(def timed-out-safe-connections 
-  "Keeps the timed out safe-connections in a map of [safe-connection nb-timeouts]"
-  (atom {}))
-
-(defn send-message
-  "Sends message and keep tracks of safe-connections that have timeouts.
-   When a safe-connection has had 2 timeouts, stop trying to use
-   it and return nil."
-  [safe-connection message timeout]
-  (let [nb-timeouts (@timed-out-safe-connections safe-connection 0)]
-    (when (< nb-timeouts 3)
-      (try
-        (common/send-message safe-connection message :timeout timeout)
-        (catch java.util.concurrent.TimeoutException e
-          (println " timeout !")
-          (swap! timed-out-safe-connections update-in [safe-connection] (fnil inc 0)))))))
-
-(defmulti find-var-metadata
-  (fn [current-namespace ^IClojureEditor editor var]
-    (when-let [repl (.getCorrespondingREPL editor)]
-      (some #{"info"} (.getAvailableOperations repl)))))
-
-(defmethod find-var-metadata :default
-  [current-namespace ^IClojureEditor editor var]
-  (when-let [repl (.getCorrespondingREPL editor)]
-    (let [safe-connection (.getSafeToolingConnection repl)
-          code (format (str "(ccw.debug.serverrepl/var-info "
-                              "(clojure.core/ns-resolve "
-                                "(clojure.core/the-ns '%s) '%s))")
-                       current-namespace
-                       var)
-          response (first (common/send-code safe-connection code :timeout 1000))]
-      response)))
-
-(defmethod find-var-metadata "info"
-  [current-namespace ^IClojureEditor editor var]
-  (when-let [repl (.getCorrespondingREPL editor)]
-    (let [safe-connection (.getSafeToolingConnection repl)
-          response (-> (first
-                         (send-message safe-connection
-                           {"op" "info"
-                            "symbol" var
-                            "ns" current-namespace}
-                           1000))
-                     (set/rename-keys {:arglists-str :arglists
-                                       :resource :file}))]
-      response)))
-
-
-
 (defmulti find-suggestions
   "For the given prefix, inside the current editor and in the current namespace,
    query the remote REPL for code completions list"
@@ -259,18 +209,18 @@
     :else (when-let [repl (.getCorrespondingREPL editor)]
             (let [safe-connection (.getSafeToolingConnection repl)
                   code (complete-command current-namespace prefix false)
-                  response (first (common/send-code safe-connection code :timeout 1000))]
+
+                  response (first (common/send-code safe-connection code 1000))]
               response))))
 
 (defmethod find-suggestions "complete"
   [current-namespace prefix ^IClojureEditor editor find-only-public]
-  (def ed editor)
   (cond
     (nil? current-namespace) []
     (s/blank? prefix) []
     :else (when-let [repl (.getCorrespondingREPL editor)]
             (let [safe-connection (.getSafeToolingConnection repl)
-                  response (first (send-message safe-connection
+                  response (first (common/send-message safe-connection
                                     {"op" "complete"
                                      "symbol" prefix
                                      "ns" current-namespace}
@@ -297,8 +247,6 @@
       message
       cursor-offset
       cursor-offset)))
-
-(def ca (atom nil))
 
 (defn find-hippie-suggestions
   [^String prefix offset parse-state]

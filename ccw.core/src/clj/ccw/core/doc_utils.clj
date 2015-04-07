@@ -77,11 +77,13 @@
 (defn var-doc-info [renderer m]
   (let [sections [(header-doc renderer m)
                   (arglist-doc renderer m)
-                  (doc-doc renderer m)]]
-    (render-sections 
-      renderer
-      sections
-      "no doc found")))
+                  (doc-doc renderer m)]
+        ret (render-sections 
+              renderer
+              sections
+              "no doc found")]
+    (prn "var-doc-info" renderer ret)
+    ret))
 
 (defn var-doc-info-html [m]
   (var-doc-info :html m))
@@ -104,5 +106,7 @@
         lines (if (> (count lines) nb-display-lines) 
                 (concat (take (dec nb-display-lines) lines)
                         [(str (nth lines (dec nb-display-lines)) " ...")]) 
-                lines)]
-    (str/join \newline (map str/trim lines))))
+                lines)
+        ret (str/join \newline (map str/trim lines))]
+    (prn "slim-doc" ret)
+    ret))
