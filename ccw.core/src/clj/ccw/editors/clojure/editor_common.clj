@@ -54,7 +54,7 @@
   "Same as send-message**, but guarded by a client timeout
    so that Eclipse cannot hang forever.
    timeout in milliseconds"
-  [safe-connection message & {:keys [timeout] :or {timeout 4000}}]
+  [safe-connection message & {:keys [timeout] :or {timeout 1000}}]
   (let [timeout-val (Object.)
         secure-call (future (send-message** safe-connection message))
         result (deref secure-call timeout timeout-val)]
@@ -108,7 +108,7 @@
                                 "(clojure.core/the-ns '%s) '%s))")
                        current-namespace
                        var)
-          response (first (send-code safe-connection code :timeout 1000))]
+          response (first (send-code safe-connection code))]
       response)))
 
 (defmethod find-var-metadata "info"
@@ -120,8 +120,7 @@
                            {"op" "info"
                             "symbol" var
                             "ns" current-namespace
-                            }
-                           :timeout 1000))
+                            }))
                      (set/rename-keys {:arglists-str :arglists
                                        :resource :file}))]
       response)))
