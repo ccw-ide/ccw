@@ -204,13 +204,6 @@
           (println " timeout !")
           (swap! timed-out-safe-connections update-in [safe-connection] (fnil inc 0)))))))
 
-(defn send-code
-  "Sends code and keep tracks of safe-connections that have timeouts.
-   When a safe-connection has had 2 timeouts, stop trying to use
-   it and return nil."
-  [safe-connection code timeout]
-  (send-message safe-connection {"op" "eval", "code" code} timeout))
-
 (defmulti find-var-metadata
   (fn [current-namespace ^IClojureEditor editor var]
     (when-let [repl (.getCorrespondingREPL editor)]
@@ -225,7 +218,7 @@
                                 "(clojure.core/the-ns '%s) '%s))")
                        current-namespace
                        var)
-          response (first (send-code safe-connection code 1000))]
+          response (first (common/send-code safe-connection code :timeout 1000))]
       response)))
 
 (defmethod find-var-metadata "info"
@@ -266,7 +259,7 @@
     :else (when-let [repl (.getCorrespondingREPL editor)]
             (let [safe-connection (.getSafeToolingConnection repl)
                   code (complete-command current-namespace prefix false)
-                  response (first (send-code safe-connection code 1000))]
+                  response (first (common/send-code safe-connection code :timeout 1000))]
               response))))
 
 (defmethod find-suggestions "complete"
@@ -409,7 +402,7 @@
                 (str " - " type))
             filter
             (context-info-data completion (+ prefix-offset (count completion)) metadata)
-            (delay (doc/var-doc-info-html (find-var-metadata ns editor completion))))))))) ;; todo remove metadata
+            (delay (doc/var-doc-info-html (find-var-metadata current-namespace editor completion))))))))) ;; todo remove metadata
 
 (def activation-characters
   "Characters which will trigger auto-completion"
