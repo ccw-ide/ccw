@@ -1,9 +1,21 @@
+;*******************************************************************************
+;* Copyright (c) 2015 Laurent PETIT.
+;* All rights reserved. This program and the accompanying materials
+;* are made available under the terms of the Eclipse Public License v1.0
+;* which accompanies this distribution, and is available at
+;* http://www.eclipse.org/legal/epl-v10.html
+;*
+;* Contributors:
+;*    Andrea Richiardi - initial tests for delayed atom
+;*******************************************************************************/
+
 (ns ccw.util_test
   (:use clojure.test
         ccw.util))
 
-(defmacro with-private-fns [[ns fns] & tests]
+(defmacro with-private-fns
   "Refers private fns from ns and runs tests in context."
+  [[ns fns] & tests]
   `(let ~(reduce #(conj %1 %2 `(ns-resolve '~ns '~%2)) [] fns)
      ~@tests))
 
