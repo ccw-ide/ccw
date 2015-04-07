@@ -64,8 +64,9 @@
         "timeout while calling send-message** for message "
         (pr-str message))))))
 
-(defn send-code*
-  "Send code, guarded by a client timeout, see 'send-message* options"
+(defn send-code
+  "Send code represented as String, guarded by a client timeout,
+   see 'send-message* options. Return a responses vector"
   [safe-connection code & rest]
   (when-let [r (apply send-message* safe-connection {"op" "eval", "code" code} rest)]
     (repl/response-values r)))
@@ -78,21 +79,14 @@
   "Sends message and keep tracks of safe-connections that have timeouts.
    When a safe-connection has had 2 timeouts, stop trying to use
    it and return nil."
-  [safe-connection message timeout]
+  [safe-connection message & rest]
   (let [nb-timeouts (@timed-out-safe-connections safe-connection 0)]
     (when (< nb-timeouts 3)
       (try
-        (send-message* safe-connection message :timeout timeout)
+        (apply send-message* safe-connection message rest)
         (catch java.util.concurrent.TimeoutException e
           (println " timeout !")
           (swap! timed-out-safe-connections update-in [safe-connection] (fnil inc 0)))))))
-
-(defn send-code
-  "Sends code and keep tracks of safe-connections that have timeouts.
-   When a safe-connection has had 2 timeouts, stop trying to use
-   it and return nil."
-  [safe-connection code timeout]
-  (send-code* safe-connection code :timeout timeout))
 
 (defn parse-symbol? 
   "If loc's node is a symbol, return the symbol String. Otherwise, return nil."
@@ -114,7 +108,7 @@
                                 "(clojure.core/the-ns '%s) '%s))")
                        current-namespace
                        var)
-          response (first (send-code safe-connection code 1000))]
+          response (first (send-code safe-connection code :timeout 1000))]
       response)))
 
 (defmethod find-var-metadata "info"
@@ -127,7 +121,7 @@
                             "symbol" var
                             "ns" current-namespace
                             }
-                           1000))
+                           :timeout 1000))
                      (set/rename-keys {:arglists-str :arglists
                                        :resource :file}))]
       response)))

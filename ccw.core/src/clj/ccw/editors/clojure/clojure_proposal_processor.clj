@@ -210,7 +210,7 @@
             (let [safe-connection (.getSafeToolingConnection repl)
                   code (complete-command current-namespace prefix false)
 
-                  response (first (common/send-code safe-connection code 1000))]
+                  response (first (common/send-code safe-connection code :timeout 1000))]
               response))))
 
 (defmethod find-suggestions "complete"
@@ -224,7 +224,7 @@
                                     {"op" "complete"
                                      "symbol" prefix
                                      "ns" current-namespace}
-                                    1000))]
+                                    :timeout 1000))]
               (when-let [completions
                          (seq (map
                                 #(hash-map
