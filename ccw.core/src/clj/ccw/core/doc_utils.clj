@@ -65,14 +65,14 @@
 
 (defn doc-doc [renderer {:keys [doc]}]
   (when-not (str/blank? doc)
-    (render-section renderer
-                    "Documentation"
-                    (str
-                      "<pre>"
-                      "  " ; We add 2 spaces because docstring are generally
-                           ; indented 2 spaces except the first line
-                      doc
-                      "</pre>"))))
+    (let [body (condp = renderer
+                 :html (str "<pre>" doc "</pre>")
+                 :text doc)
+          body (str
+                 "  " ; We add 2 spaces because docstring are generally
+                      ; indented 2 spaces except the first line
+                 body)]
+      (render-section renderer "Documentation" body))))
 
 (defn var-doc-info [renderer m]
   (let [sections [(header-doc renderer m)
