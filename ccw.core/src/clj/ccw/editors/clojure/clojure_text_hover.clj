@@ -5,18 +5,19 @@
   (:require [ccw.core.trace :as trace]
             [paredit.loc-utils :as lu]
             [ccw.editors.clojure.editor-common :as common]
-            [ccw.core.doc-utils :as doc-utils]))
+            [ccw.core.doc-utils :as doc-utils]
+            [ccw.editors.clojure.editor-support :as editor]))
    
 (defn hover-info
   "Return the documentation hover text to be displayed at offset offset for 
    editor. The text can be composed of a subset of html (e.g. <pre>, <i>, etc.)"
   [^IClojureEditor editor offset]
-  (let [loc (common/offset-loc editor offset)
+  (let [loc (common/offset-loc (-> editor .getParseState (editor/getParseTree)) offset)
         parse-symbol (common/parse-symbol? loc)]
     (when parse-symbol
       (let [m (common/find-var-metadata 
                 (.findDeclaringNamespace editor) 
-                editor
+                (.getCorrespondingREPL editor)
                 parse-symbol)]
         (doc-utils/var-doc-info-html m)))))
 
@@ -27,8 +28,8 @@
    hover as the one computed for offset will be used.
    This is a function for optimizing the number of times the hover-info
    function is called."
-  [editor offset]
-  (let [loc (common/offset-loc editor offset)]
+  [^IClojureEditor editor offset]
+  (let [loc (common/offset-loc (-> editor .getParseState (editor/getParseTree)) offset)]
     [(lu/start-offset loc) (lu/loc-count loc)]))
 
 (defn make-TextHover 

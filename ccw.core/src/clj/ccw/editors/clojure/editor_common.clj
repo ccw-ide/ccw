@@ -30,8 +30,8 @@
 
 (defn offset-loc 
   "Return the zip loc for offset in editor"
-  [^IClojureEditor editor offset]
-  (let [rloc (-> editor .getParseState (editor/getParseTree) lu/parsed-root-loc)]
+  [parse-tree offset]
+  (let [rloc (lu/parsed-root-loc parse-tree)]
     (lu/loc-for-offset rloc offset)))
 
 (defn send-message**
@@ -95,13 +95,13 @@
     (symbol (lu/loc-text loc))))
 
 (defmulti find-var-metadata
-  (fn [current-namespace ^IClojureEditor editor var]
-    (when-let [repl (.getCorrespondingREPL editor)]
+  (fn [current-namespace repl var]
+    (when repl
       (some #{"info"} (.getAvailableOperations repl)))))
 
 (defmethod find-var-metadata :default
-  [current-namespace ^IClojureEditor editor var]
-  (when-let [repl (.getCorrespondingREPL editor)]
+  [current-namespace repl var]
+  (when repl
     (let [safe-connection (.getSafeToolingConnection repl)
           code (format (str "(ccw.debug.serverrepl/var-info "
                               "(clojure.core/ns-resolve "
@@ -112,15 +112,14 @@
       response)))
 
 (defmethod find-var-metadata "info"
-  [current-namespace ^IClojureEditor editor var]
-  (when-let [repl (.getCorrespondingREPL editor)]
+  [current-namespace repl var]
+  (when repl
     (let [safe-connection (.getSafeToolingConnection repl)
           response (-> (first
                          (send-message safe-connection
                            {"op" "info"
                             "symbol" var
-                            "ns" current-namespace
-                            }))
+                            "ns" current-namespace}))
                      (set/rename-keys {:arglists-str :arglists
                                        :resource :file}))]
       response)))

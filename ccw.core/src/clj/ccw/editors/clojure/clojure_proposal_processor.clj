@@ -47,10 +47,10 @@
 (defn call-context-loc
   "for viewer, at offset 12, return the loc containing the encapsulating
    call, or nil"
-  [^IClojureEditor viewer offset]
+  [parse-tree offset]
   (when (pos? offset)
     (let [loc (lu/loc-containing-offset 
-                (-> viewer .getParseState :parse-tree lu/parsed-root-loc)
+                (lu/parsed-root-loc parse-tree)
                 offset)
           maybe-call-loc (-?> loc parent-call)]
       (when (-?> maybe-call-loc z/node call?)
@@ -190,8 +190,8 @@
 (defmulti find-suggestions
   "For the given prefix, inside the current editor and in the current namespace,
    query the remote REPL for code completions list"
-  (fn [current-namespace prefix ^IClojureEditor editor find-only-public]
-    (when-let [repl (.getCorrespondingREPL editor)]
+  (fn [current-namespace prefix repl find-only-public]
+    (when repl
       (some #{"complete"} (.getAvailableOperations repl)))))
 
 ;; TODO encadrer les appels externes avec un timeout
@@ -202,11 +202,11 @@
 ;; - un dictionnaire de suggestions mis à jour en batch à des points clés (interactions avec repl)
 ;; - interrogation du dictionnaire en usage courant (tant pis si pas a jour)
 (defmethod find-suggestions :default
-  [current-namespace prefix ^IClojureEditor editor find-only-public]
+  [current-namespace prefix repl find-only-public]
   (cond
     (nil? current-namespace) []
     (s/blank? prefix) []
-    :else (when-let [repl (.getCorrespondingREPL editor)]
+    :else (when repl
             (let [safe-connection (.getSafeToolingConnection repl)
                   code (complete-command current-namespace prefix false)
 
@@ -214,11 +214,11 @@
               response))))
 
 (defmethod find-suggestions "complete"
-  [current-namespace prefix ^IClojureEditor editor find-only-public]
+  [current-namespace prefix repl find-only-public]
   (cond
     (nil? current-namespace) []
     (s/blank? prefix) []
-    :else (when-let [repl (.getCorrespondingREPL editor)]
+    :else (when repl
             (let [safe-connection (.getSafeToolingConnection repl)
                   response (first (common/send-message safe-connection
                                     {"op" "complete"
@@ -307,30 +307,29 @@
   "Return the list of java completion objects to the Completion framework."
   [^IClojureEditor editor      content-assistant
    ^ITextViewer text-viewer offset]
-  (reset! ca content-assistant)
-  (let [prefix-offset (compute-prefix-offset 
-                        (-> text-viewer .getDocument .get)
-                        offset)
+  (let [prefix-offset     (compute-prefix-offset 
+                            (-> text-viewer .getDocument .get)
+                            offset)
         current-namespace (.findDeclaringNamespace editor)
-        prefix (.substring
-                 (-> text-viewer .getDocument .get)
-                 prefix-offset
-                 offset)]
+        repl              (.getCorrespondingREPL editor)
+        prefix            (.substring
+                            (-> text-viewer .getDocument .get)
+                            prefix-offset
+                            offset)]
     (when (pos? (count prefix))
       (let [hippie-suggestions (find-hippie-suggestions
                                  prefix
                                  offset
                                  (.getParseState editor))
-            repl-suggestions (find-suggestions 
-                               current-namespace
-                               prefix
-                               editor
-                               false)
-            suggestions (apply sorted-set-by 
-                               (adapt-args (serverrepl/textmate-comparator prefix) :completion :completion)
-                               #_#(let [comparator (serverrepl/textmate-comparator prefix)]
-                                    (comparator (:completion %1) (:completion %2)))
-                               (concat repl-suggestions hippie-suggestions))]
+            repl-suggestions   (find-suggestions 
+                                 current-namespace
+                                 prefix
+                                 repl
+                                 false)
+            suggestions        (apply sorted-set-by 
+                                      (adapt-args (serverrepl/textmate-comparator prefix)
+                                        :completion :completion)
+                                      (concat repl-suggestions hippie-suggestions))]
         (for [{:keys [completion match filter type ns]
                {:keys [arglists name added static 
                        doc line file] 
@@ -349,7 +348,7 @@
                 (str " - " type))
             filter
             (context-info-data completion (+ prefix-offset (count completion)) metadata)
-            (delay (doc/var-doc-info-html (find-var-metadata current-namespace editor completion))))))))) ;; todo remove metadata
+            (delay (doc/var-doc-info-html (find-var-metadata current-namespace repl completion))))))))) ;; todo remove metadata
 
 (def activation-characters
   "Characters which will trigger auto-completion"
@@ -364,13 +363,13 @@
    text-viewer new-offset]
   (into-array
     IContextInformation
-    (when-let [loc (call-context-loc text-viewer new-offset)]
+    (when-let [loc (call-context-loc (-> text-viewer .getParseState :parse-tree) new-offset)]
       (let [call-symbol (call-symbol loc)
             context-info (context-info-data 
                            call-symbol 
                            new-offset 
                            (find-var-metadata (.findDeclaringNamespace editor) 
-                                              editor
+                                              (.getCorrespondingREPL editor)
                                               call-symbol))]
         (when context-info [context-info])))))
 
