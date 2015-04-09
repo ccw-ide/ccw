@@ -1,5 +1,7 @@
 # Counterclockwise (aka CCW)
 
+[![Join the chat at https://gitter.im/laurentpetit/ccw](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/laurentpetit/ccw?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Counterclockwise is an Eclipse plugin helping developers write Clojure code
 
 [![Build Status](https://jenkins.ccw-ide.org/buildStatus/icon?job=ccw-master)](https://jenkins.ccw-ide.org/job/ccw-master/)
