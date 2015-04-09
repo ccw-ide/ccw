@@ -67,9 +67,11 @@
 (defn send-code
   "Send code represented as String, guarded by a client timeout,
    see 'send-message* options. Return a responses vector"
-  [safe-connection code & rest]
-  (when-let [r (apply send-message* safe-connection {"op" "eval", "code" code} rest)]
-    (repl/response-values r)))
+  [safe-connection code & {:keys [session] :as rest}]
+  (let [msg {"op" "eval", "code" code}
+        msg (if-not session msg (assoc msg "session" session))]
+    (when-let [r (apply send-message* safe-connection msg rest)]
+     (repl/response-values r))))
 
 (def timed-out-safe-connections 
   "Keeps the timed out safe-connections in a map of [safe-connection nb-timeouts]"
@@ -108,7 +110,12 @@
                                 "(clojure.core/the-ns '%s) '%s))")
                        current-namespace
                        var)
-          response (first (send-code safe-connection code))]
+          response (first (send-code safe-connection code
+                            ; we do not use session via send-code yet because
+                            ; we cannot distinguish between clojure or clojurescript
+                            ; back-end and adapt appropriately
+                            ;:session (.getSessionId repl)
+                            ))]
       response)))
 
 (defmethod find-var-metadata "info"
@@ -119,7 +126,8 @@
                          (send-message safe-connection
                            {"op" "info"
                             "symbol" var
-                            "ns" current-namespace}))
+                            "ns" current-namespace
+                            "session" (.getSessionId repl)}))
                      (set/rename-keys {:arglists-str :arglists
                                        :resource :file}))]
       response)))

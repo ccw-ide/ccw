@@ -210,7 +210,12 @@
             (let [safe-connection (.getSafeToolingConnection repl)
                   code (complete-command current-namespace prefix false)
 
-                  response (first (common/send-code safe-connection code))]
+                  response (first (common/send-code safe-connection code
+                                    ; we don't send code directly with the user session id
+                                    ; because we cannot guarantee the code will be interpreted
+                                    ; by the right back-end (clojure or clojurescript)
+                                    ; :session (.getSessionId repl)
+                                    ))]
               response))))
 
 (defmethod find-suggestions "complete"
@@ -223,7 +228,8 @@
                   response (first (common/send-message safe-connection
                                     {"op" "complete"
                                      "symbol" prefix
-                                     "ns" current-namespace}))]
+                                     "ns" current-namespace
+                                     "session"  (.getSessionId repl)}))]
               (when-let [completions
                          (seq (map
                                 #(hash-map
