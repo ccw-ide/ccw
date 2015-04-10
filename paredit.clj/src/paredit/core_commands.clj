@@ -626,6 +626,7 @@
     ["Miscellaneous"
      ["Tab"     :paredit-indent-line
               {
+               "   ^:private\n |foo" "   ^:private\n   |foo"
                "[a\n|b]"  "[a\n |b]"
                "([a1\n|b])"  "([a1\n  |b])"
                "([a1b\n  |b])" "([a1b\n  |b])"
