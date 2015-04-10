@@ -12,6 +12,7 @@
 (ns ^{:author "Laurent Petit"}
   ccw.editors.outline
   "Clojure back-end for the java class ClojureOutlinePage"
+  (:refer-clojure :exclude [read])
   (:import clojure.lang.LineNumberingPushbackReader)
   (:import java.io.StringReader)
   (:import clojure.lang.LispReader$ReaderException)
@@ -21,6 +22,17 @@
   "just return the underlying data structure"
   [tag form] form)
 
+(defn read
+  "Reads a form, and returns eof if a ReaderException occurs"
+  [reader eof]
+  (try
+    (clojure.core/read reader false eof)
+    (catch LispReader$ReaderException e
+      ; once a syntax error occurs (often because of a namespaced keyword)
+			; there's little chance that the rest of the data will be worthwhile...
+      (CCWPlugin/logWarning "Failed to read outline 'til the end", e)
+      eof)))
+
 (defn read-forms [s]
   (binding [*read-eval* false
            *default-data-reader-fn* silent-data-reader]
@@ -28,4 +40,4 @@
       (let [eof (Object.)]
         (into [] (take-while
                    (partial not= eof)
-                   (repeatedly #(read pushback-reader false eof))))))))
+                   (repeatedly #(read pushback-reader eof))))))))

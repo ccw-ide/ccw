@@ -52,7 +52,6 @@ import ccw.editors.clojure.ClojureEditor;
 import ccw.util.ClojureInvoker;
 import clojure.lang.IMapEntry;
 import clojure.lang.Keyword;
-import clojure.lang.LispReader.ReaderException;
 import clojure.lang.Obj;
 import clojure.lang.RT;
 import clojure.lang.Symbol;
@@ -307,12 +306,6 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 					ClojureOutlinePage.this.forms = (List<List>) outline._("read-forms", string);
 					setInputInUiThread(ClojureOutlinePage.this.forms);
 					return Status.OK_STATUS;
-				} catch (ReaderException e) {
-				    // once a syntax error occurs (often because of a namespaced keyword)
-				    // there's little chance that the rest of the data will be worthwhile...
-				    CCWPlugin.logWarning(String.format("Failed to read file %s (%s)",
-				            editor.getEditorInput().getName(), e.getMessage()));
-					throw new RuntimeException(e);
 				} catch (Exception e) {
 					throw new RuntimeException(e);
 				}
