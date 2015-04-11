@@ -46,6 +46,11 @@ Internally, Counterclockwise now uses Clojure 1.7.0-master. It adds a couple pat
 === Leiningen Support
 - Embedded Leiningen version upgraded from version 2.5.0 to 2.5.1
 
+
+=== Enhancements
+
+- Print maven coordinates of Counterclockwise dependencies at plugin startup in `.metadata/.log`. Fixes #741
+
 == Changes between Counterclockwise 0.31.1 and 0.31.2
 
 `0.31.2` released on December 4, 2014
