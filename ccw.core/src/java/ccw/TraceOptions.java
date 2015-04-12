@@ -8,6 +8,7 @@ import java.util.Map;
  */
 public class TraceOptions {
 
+	public static final String LOG_TRACE = "log/trace";
 	public static final String LOG_INFO = "log/info";
 	public static final String LOG_WARNING = "log/warning";
 	public static final String LOG_ERROR = "log/error";
@@ -24,6 +25,7 @@ public class TraceOptions {
 	public static final Map<String, Boolean> getTraceOptions() {
 		return new HashMap<String, Boolean>() {
 			{
+				put(LOG_TRACE, false);
 				put(LOG_INFO, false);
 				put(LOG_WARNING, false);
 				put(LOG_ERROR, false);

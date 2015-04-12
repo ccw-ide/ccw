@@ -13,6 +13,7 @@
   ccw.editors.outline
   "Clojure back-end for the java class ClojureOutlinePage"
   (:refer-clojure :exclude [read])
+  (:require [ccw.core.trace :as t])
   (:import clojure.lang.LineNumberingPushbackReader)
   (:import java.io.StringReader)
   (:import clojure.lang.LispReader$ReaderException)
@@ -29,8 +30,9 @@
     (clojure.core/read reader false eof)
     (catch LispReader$ReaderException e
       ; once a syntax error occurs (often because of a namespaced keyword)
-			; there's little chance that the rest of the data will be worthwhile...
-      (CCWPlugin/logWarning "Failed to read outline 'til the end", e)
+      ; there's little chance that the rest of the data will be worthwhile...
+      (t/trace :log/trace "Failed to read outline 'til the end" e)
+      ;(CCWPlugin/logWarning "Failed to read outline 'til the end", e)
       eof)))
 
 (defn read-forms [s]
@@ -38,6 +40,7 @@
            *default-data-reader-fn* silent-data-reader]
     (with-open [pushback-reader (LineNumberingPushbackReader. (StringReader. s))]
       (let [eof (Object.)]
-        (into [] (take-while
-                   (partial not= eof)
-                   (repeatedly #(read pushback-reader eof))))))))
+        (into [] (map #(if (instance? java.util.List %) % [%])
+                   (take-while
+                     (partial not= eof)
+                     (repeatedly #(read pushback-reader eof)))))))))
