@@ -119,47 +119,6 @@
 (def completion-limit 
   "Maximum number of returned results" 50)
 
-; TODO introduce polymorphism?
-(defn completion-proposal
-  [replacement-string
-   replacement-offset
-   replacement-length
-   cursor-position
-   image
-   display-string
-   filter
-   context-information
-   additional-proposal-info-delay]
-  (let [cp (CompletionProposal.
-             (or replacement-string "")
-             replacement-offset
-             replacement-length
-             cursor-position
-             image
-             (or display-string "")
-             context-information
-             "")] ;; additional-proposal is computed on demand
-    (reify 
-      ICompletionProposal
-      (apply [this document] (.apply cp document))
-      (getSelection [this document] (.getSelection cp document))
-      (getAdditionalProposalInfo [this] @additional-proposal-info-delay)
-      (getDisplayString [this] (.getDisplayString cp))
-      (getImage [this] (.getImage cp))
-      (getContextInformation [this] @additional-proposal-info-delay)
-      
-      ICompletionProposalExtension6
-      (getStyledDisplayString [this]
-        (let [s (StyledString. (or display-string ""))]
-          (when (seq filter)
-            (doseq [i (reductions (partial + 1) filter)]
-              (if (< i (count display-string))
-                (.setStyle s i 1 StyledString/COUNTER_STYLER)
-                (printf (str "ERROR: Completion proposal trying to apply color style"
-                             "at invalid offset %d for display-string '%s'")
-                        i display-string))))
-          s)))))
-
 (defn context-information
   [context-display-string
    image
@@ -177,6 +136,46 @@
        (getContextInformationPosition [this] position-start))
      {:start position-start
       :stop  position-stop}))
+
+(defn completion-proposal
+  [replacement-string
+   replacement-offset
+   replacement-length
+   cursor-position
+   image
+   display-string
+   filter
+   context-information-delay
+   additional-proposal-info-delay]
+  (let [cp (CompletionProposal.
+             (or replacement-string "")
+             replacement-offset
+             replacement-length
+             cursor-position
+             image
+             (or display-string "")
+             nil ;; context-information is computed on demand
+             nil)] ;; additional-proposal is computed on demand
+    (reify 
+      ICompletionProposal
+      (apply [this document] (.apply cp document))
+      (getSelection [this document] (.getSelection cp document))
+      (getAdditionalProposalInfo [this] @additional-proposal-info-delay)
+      (getDisplayString [this] (.getDisplayString cp))
+      (getImage [this] (.getImage cp))
+      (getContextInformation [this] @context-information-delay)
+      
+      ICompletionProposalExtension6
+      (getStyledDisplayString [this]
+        (let [s (StyledString. (or display-string ""))]
+          (when (seq filter)
+            (doseq [i (reductions (partial + 1) filter)]
+              (if (< i (count display-string))
+                (.setStyle s i 1 StyledString/COUNTER_STYLER)
+                (printf (str "ERROR: Completion proposal trying to apply color style"
+                             "at invalid offset %d for display-string '%s'")
+                        i display-string))))
+          s)))))
 
 (defn complete-command
   "Create the complete command to be sent remotely to get back a list of
@@ -343,20 +342,24 @@
                        doc line file] 
                 :as metadata} :metadata
                } suggestions]
-          (completion-proposal
-            completion
-            prefix-offset
-            (- offset prefix-offset)
-            (count completion)
-            nil
-            (cond-> completion
-              (and ns (not (.startsWith completion (str ns "/"))))
-                (str " (" ns ")")
-              type
-                (str " - " type))
-            filter
-            (context-info-data completion (+ prefix-offset (count completion)) metadata)
-            (delay (doc/var-doc-info-html (find-var-metadata current-namespace repl completion))))))))) ;; todo remove metadata
+          (let [md-ref (delay (find-var-metadata current-namespace repl completion))]
+            (completion-proposal
+              completion
+              prefix-offset
+              (- offset prefix-offset)
+              (count completion)
+              nil
+              (cond-> completion
+                (and ns (not (.startsWith completion (str ns "/"))))
+                  (str " (" ns ")")
+                type
+                  (str " - " type))
+              filter
+              (delay (context-info-data
+                       completion
+                       (+ prefix-offset (count completion))
+                       @md-ref))
+              (delay (doc/var-doc-info-html @md-ref)))))))))
 
 (def activation-characters
   "Characters which will trigger auto-completion"
