@@ -231,15 +231,17 @@
                                      "ns" current-namespace
                                      "session"  (.getSessionId repl)}))]
               (when-let [completions
-                         (seq (map
-                                #(hash-map
-                                   :completion (:candidate %)
-                                   :match (:candidate %)
-                                   :type (:type %)
-                                   :ns (:ns %)
-                                   :filter (serverrepl/textmate-filter (:candidate %) prefix)
-                                   :metadata nil)
-                                (:completions response)))]
+                         (seq (->>
+                                (:completions response)
+                                (filter :candidate) ; protection against nil candidates returned by compliment
+                                (map
+                                  #(hash-map
+                                     :completion (:candidate %)
+                                     :match (:candidate %)
+                                     :type (:type %)
+                                     :ns (:ns %)
+                                     :filter (serverrepl/textmate-filter (:candidate %) prefix)
+                                     :metadata nil))))]
                 completions)))))
 
 (defn context-info-data
