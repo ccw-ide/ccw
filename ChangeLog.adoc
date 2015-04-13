@@ -10,6 +10,9 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 == Changes between Counterclockwise 0.32.0 and 0.33.0
 
+This release upgrades the embedded Leiningen from 2.5.0 to 2.5.1.
+Apart from that, the release is mostly a bug-fixing release.
+
 === Support for cider-nrepl in the REPL
 
 ==== cider-nrepl and Clojure projects
@@ -79,7 +82,19 @@ Internally, Counterclockwise now uses Clojure 1.7.0-master. It adds a couple pat
 === Fix
 
 - New Clojure Project Wizard honors the 'use previous location' checkbox. Fixes #682
+- Better support for clojure extension files: `cljs`, `cljx`, `clja`
 
+=== Documentation
+- Add a mention about keyboard binding for switching between default and strict editing modes ( kbd:[Alt+D] ). Fixes #346
+
+
+=== Leiningen Support
+- Embedded Leiningen version upgraded from version 2.5.0 to 2.5.1
+
+
+=== Enhancements
+
+- Print maven coordinates of Counterclockwise dependencies at plugin startup in `.metadata/.log`. Fixes #741
 
 == Changes between Counterclockwise 0.31.1 and 0.31.2
 

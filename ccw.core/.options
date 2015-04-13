@@ -1,3 +1,4 @@
+ccw.core/log/trace=false
 ccw.core/log/info=false
 ccw.core/log/warning=false
 ccw.core/log/error=false

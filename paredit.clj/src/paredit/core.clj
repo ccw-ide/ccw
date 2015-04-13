@@ -307,6 +307,8 @@
       (cond
         (nil? loc)
           indent
+        (= :meta-prefix (loc-tag loc))
+          (loc-col loc)
         (punct-loc? loc)
           ; we reached the start of the parent form, indent depending on the form's type
           (if (#{"(" "#("} (loc-text loc))

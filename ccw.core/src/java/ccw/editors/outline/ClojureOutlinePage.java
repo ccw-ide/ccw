@@ -5,12 +5,11 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Manuel Woelker - initial prototype implementation
  *******************************************************************************/
 package ccw.editors.outline;
 
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -50,16 +49,16 @@ import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.editors.clojure.ClojureEditor;
+import ccw.util.ClojureInvoker;
 import clojure.lang.IMapEntry;
 import clojure.lang.Keyword;
-import clojure.lang.LineNumberingPushbackReader;
-import clojure.lang.LispReader;
-import clojure.lang.LispReader.ReaderException;
 import clojure.lang.Obj;
 import clojure.lang.RT;
 import clojure.lang.Symbol;
 
 public class ClojureOutlinePage extends ContentOutlinePage {
+
+	private final ClojureInvoker outline = ClojureInvoker.newInvoker(CCWPlugin.getDefault(), "ccw.editors.outline");
 
 	private final class OutlineLabelProvider extends LabelProvider implements
 			IStyledLabelProvider {
@@ -82,16 +81,18 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 			return kind;
 		}
 
+		@Override
 		public Image getImage(Object element) {
 			// TODO: different images for macros, fns, etc.
 		    // this is using results of reading analysis only... :-(
 		    if (isPrivate((List)element)) {
-		        return CCWPlugin.getDefault().getImageRegistry().get(CCWPlugin.PRIVATE_FUNCTION); 
+		        return CCWPlugin.getDefault().getImageRegistry().get(CCWPlugin.PRIVATE_FUNCTION);
 		    } else {
 		        return CCWPlugin.getDefault().getImageRegistry().get(CCWPlugin.PUBLIC_FUNCTION);
 		    }
 		}
 
+		@Override
 		public StyledString getStyledText(Object element) {
 			StyledString result;
 			if (element instanceof List<?>) {
@@ -111,10 +112,12 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 	}
 
 	private final class DocumentChangedListener implements IDocumentListener {
+		@Override
 		public void documentChanged(DocumentEvent event) {
 			refreshInput();
 		}
 
+		@Override
 		public void documentAboutToBeChanged(DocumentEvent event) {
 		}
 	}
@@ -125,6 +128,7 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 		private EditorSelectionChangedListener(TreeViewer viewer) {
 		}
 
+		@Override
 		public void selectionChanged(SelectionChangedEvent event) {
 			ISelection selection = event.getSelection();
 			selectInOutline(selection);
@@ -134,6 +138,7 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 
 	private final class TreeSelectionChangedListener implements
 			ISelectionChangedListener {
+		@Override
 		public void selectionChanged(SelectionChangedEvent event) {
 			ISelection selection = event.getSelection();
 			if (isActivePart()) {
@@ -150,7 +155,7 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 	private final Object REFRESH_OUTLINE_JOB_FAMILY = new Object();
 	private final IDocumentProvider documentProvider;
 	private final ClojureEditor editor;
-	
+
 	private List<List> forms = new ArrayList<List>(0);
 	private boolean sort = CCWPlugin.getDefault().getPreferenceStore().getBoolean("LexicalSortingAction.isChecked");
 
@@ -173,27 +178,33 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 		treeViewer = getTreeViewer();
 		treeViewer.setContentProvider(new ITreeContentProvider() {
 
+			@Override
 			public void inputChanged(Viewer viewer, Object oldInput,
 					Object newInput) {
 
 			}
 
+			@Override
 			public void dispose() {
 
 			}
 
+			@Override
 			public Object[] getElements(Object input) {
 				return ((List<?>) input).toArray();
 			}
 
+			@Override
 			public boolean hasChildren(Object arg0) {
 				return false;
 			}
 
+			@Override
 			public Object getParent(Object arg0) {
 				return null;
 			}
 
+			@Override
 			public Object[] getChildren(Object arg0) {
 				// TODO: handle children? Granularity, Bindings?
 				return null;
@@ -213,7 +224,7 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 		selectionProvider.addPostSelectionChangedListener(editorSelectionChangedListener);
 		ISelection selection = selectionProvider.getSelection();
 		selectInOutline(selection);
-		
+
 		registerToolbarActions();
 	}
 
@@ -232,16 +243,17 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 			setChecked(sort);
 		}
 
+		@Override
 		public void run() {
 		    CCWPlugin.getDefault().getPreferenceStore().setValue("LexicalSortingAction.isChecked", sort = isChecked());
 		    setInputInUiThread(forms);
 		}
 	}
-	
+
 	private static Symbol symbol (Object o) {
 	    return o instanceof Symbol ? (Symbol)o : null;
 	}
-	
+
 	private static boolean isPrivate (List form) {
 	    if (form.size() < 2) return false;
 	    Symbol def = symbol(RT.first(form));
@@ -253,7 +265,7 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 
 	/**
 	 * Find closest matching element to line
-	 * 
+	 *
 	 * @param toFind
 	 *            line to find
 	 * @return
@@ -290,29 +302,13 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				String string = document.get();
-				LineNumberingPushbackReader pushbackReader = new LineNumberingPushbackReader(
-						new StringReader(string));
-				Object EOF = new Object();
-				ArrayList<List> input = new ArrayList<List>();
-				Object result = null;
-				while (true) {
-					try {
-						result = LispReader.read(pushbackReader, false, EOF, false);
-						if (result == EOF) break;
-						if (result instanceof List) input.add((List)result);
-					} catch (ReaderException e) {
-					    // once a syntax error occurs (often because of a namespaced keyword)
-					    // there's little chance that the rest of the data will be worthwhile...
-					    CCWPlugin.logWarning(String.format("Failed to read file %s (%s)",
-					            editor.getEditorInput().getName(), e.getMessage()));
-					    break;
-					} catch (Exception e) {
-						throw new RuntimeException(e);
-					}
+				try {
+					ClojureOutlinePage.this.forms = (List<List>) outline._("read-forms", string);
+					setInputInUiThread(ClojureOutlinePage.this.forms);
+					return Status.OK_STATUS;
+				} catch (Exception e) {
+					throw new RuntimeException(e);
 				}
-				ClojureOutlinePage.this.forms = input;
-				setInputInUiThread(input);
-				return Status.OK_STATUS;
 			}
 
 			@Override
@@ -329,45 +325,47 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 	    if (sort) {
 	        List<List> sorted = new ArrayList(forms);
             Collections.sort(sorted, new Comparator<List> () {
-                public int compare(List o1, List o2) {
+                @Override
+				public int compare(List o1, List o2) {
                     Symbol s1 = symbol(RT.first(o1)),
                            s2 = symbol(RT.first(o2));
-                    
+
                     if (s1 == null && s2 == null) return 0; // mandatory for Comparator contract
                     if (s1 == null) return 1;
                     if (s2 == null) return -1;
-                    
+
                     if (s1.getName().equals("ns") && s2.getName().equals("ns")) {
                     	// fall through to order ns decls correctly
                     } else {
                     	if (s1.getName().equals("ns")) return -1;
                     	if (s2.getName().equals("ns")) return 1;
                     }
-                    
+
                     if (isPrivate(o1) != isPrivate(o2)) {
                         return isPrivate(o1) ? -1 : 1;
                     }
-                    
+
                     s1 = symbol(RT.second(o1));
                     s2 = symbol(RT.second(o2));
-                    
+
                     if (s1 == null && s2 == null) return 0; // mandatory for Comparator contract
                     if (s1 == null) return 1;
                     if (s2 == null) return -1;
-                    
+
                     return s1.getName().compareToIgnoreCase(s2.getName());
                 }
             });
             forms = sorted;
 	    }
 	    final List<List> theForms = forms;
-	    
+
 	    if (getControl() != null) {
     		getControl().getDisplay().asyncExec(new Runnable() {
-    			public void run() {
+    			@Override
+				public void run() {
     				if (getControl().isDisposed())
     					return;
-    				
+
     				TreeViewer treeViewer = getTreeViewer();
     				if (treeViewer != null) {
     					treeViewer.getTree().setRedraw(false);

@@ -140,12 +140,14 @@ public class ClojureLineBreakpointAdapter implements IToggleBreakpointsTarget {
 			throws CoreException {
 	}
 
+	public static boolean isCljExtension(String ext) {
+		return ext != null && ext.startsWith("clj");
+	}
+
 	public static boolean isCljFile(IEditorPart editorPart) {
 		IResource resource = (IResource) editorPart.getEditorInput()
 				.getAdapter(IResource.class);
-		if (resource != null
-			&& (   "clj".equals(resource.getFileExtension())
-			    || "cljx".equals(resource.getFileExtension()))) {
+		if (resource != null && isCljExtension(resource.getFileExtension())) {
 			return true;
 		}
 
@@ -153,8 +155,9 @@ public class ClojureLineBreakpointAdapter implements IToggleBreakpointsTarget {
 			try {
 				IStorageEditorInput input = (IStorageEditorInput) editorPart.getEditorInput();
 				final String name = input.getStorage().getName();
-				if (   name.endsWith(".clj")
-			        || name.endsWith(".cljx")) {
+				final int extDotIdx = name.lastIndexOf('.');
+				final String ext = (extDotIdx < 0) ? "" : name.substring(extDotIdx + 1);
+				if ( isCljExtension(ext) ) {
 					return true;
 				}
 			} catch (CoreException e) {
