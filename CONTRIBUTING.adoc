@@ -1,4 +1,4 @@
-= How to contribute to Counterclockwise development
+= How to contribute to Counterclockwise
 Laurent Petit <laurent dot petit at gmail dot com>
 :source-highlighter: coderay
 :experimental:
@@ -6,16 +6,31 @@ Laurent Petit <laurent dot petit at gmail dot com>
 :toc-title!:
 :toclevels: 2
 
-This page focuses on how to contribute code to Counterclockwise.
+If you discover issues, have ideas for improvements or new features, please report them to the
+https://github.com/laurentpetit/ccw/issues[issue tracker] of the repository or submit a pull request. Please,
+try to follow the guidelines when you do so.
 
-== General workflow
+== Issue reporting
 
-- Wave your hand on the mailing list to inform people of what you have in mind.
-- Then at some point (when the discussion on the mailing list switches from discussing the relevance of the new proposed feature to specification / implementation detail) create an issue on Github. This will allow to narrow the focus on the feature, and keep track of the discussion. Mention the created issue on the mailing list thread
-- Create a new branch to host development of code for the issue. Create a pull request, mention the pull request in the issue comments.
-- Once discussion starts on the pull request, stop rewriting its history. Instead, add commits while the discussion unfolds explicitely, as it will be easier for everyone involved to check what has been modified. Working this way might require a rebase at the end of the discussion to put the changes back where they belong (if small) or some rewording if more conspicuous.
-- Never work on several issues in a same branch (and so never create several Pull Requests for the same branch).
-- Always start new branches off the master branch (never off of another issue branch).
+- Check that the issue has not already been reported.
+- Check that the issue has not already been fixed in the latest code
+  (a.k.a. `master`).
+- Be clear, concise and precise in your description of the problem.
+- Open an issue with a descriptive title and a summary in grammatically correct,
+  complete sentences.
+- Include any relevant code to the issue summary.
+
+== Pull Requests
+
+- Discuss the Pull Request on the mailing list to maximize the chances it will be accepted
+- Read http://gun.io/blog/how-to-github-fork-branch-and-pull-request[how to properly contribute to open source projects on Github]
+- Centralize the collected knowledge in a new issue in the https://github.com/laurentpetit/ccw/issues[issue tracker]. Mention the created issue on the mailing list thread.
+- Open a https://help.github.com/articles/using-pull-requests[pull request] that relates to *only* one subject with a clear title and description in grammatically correct, complete sentences.
+- Create and Use a topic branch off of the master branch to easily amend the pull request later, if necessary. It is OK to rebase the topic branch on top of the master branch.
+- Respect a 1-1 relation between Topic Branches and Pull Requests.
+- During the review/adapt phase for the Pull Request, append commits to the topic branch, don't rewrite the history. This will make Reviewers life easier.
+- Once the Pull Request is Reviewed and Accepted, it is OK to squash related commits together before merging, if necessary.
+
 
 You can see the Github Flow page for a visual version of the workflow: https://guides.github.com/introduction/flow/
 
