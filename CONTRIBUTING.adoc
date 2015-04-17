@@ -8,7 +8,7 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 If you discover issues, have ideas for improvements or new features, please report them to the
 https://github.com/laurentpetit/ccw/issues[issue tracker] of the repository or submit a pull request. Please,
-try to follow the guidelines when you do so.
+try to follow these guidelines when you do so.
 
 == Issue reporting
 
