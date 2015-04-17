@@ -1,6 +1,7 @@
 (ns ccw.editors.clojure.editor-common
   (:require [clojure.string :as s]
             [clojure.test :as test]
+            [clojure.set :as set]
             [clojure.tools.nrepl :as repl]
             [paredit.parser :as p]
             [paredit.loc-utils :as lu]
@@ -29,41 +30,65 @@
 
 (defn offset-loc 
   "Return the zip loc for offset in editor"
-  [^IClojureEditor editor offset]
-  (let [rloc (-> editor .getParseState (editor/getParseTree) lu/parsed-root-loc)]
+  [parse-tree offset]
+  (let [rloc (lu/parsed-root-loc parse-tree)]
     (lu/loc-for-offset rloc offset)))
 
-(defn send-message* 
-  "Send the command over the nrepl connection. This version is \"bare\", ie it
+(defn send-message**
+  "Send the message over the nrepl connection. This version is \"bare\", ie it
    calls into the REPL without timeout protection. If you want to protect the 
    IDE to freeze if e.g. the REPL never times out, call send-message instead."
-  [^Connection safe-connection command]
+  [^Connection safe-connection message]
   (try
     (-> safe-connection 
       .getUnsafeConnection
       .client
-      (repl/message {"op"   "eval"
-                     "code" command})
-      repl/response-values)
+      (repl/message message))
     (catch Exception e
-      (ccw.CCWPlugin/logError (str "exception while sending command " command " to connection " (.getUnsafeConnection safe-connection)) e)
+      (ccw.CCWPlugin/logError (str "exception while sending message " message " to connection " (.getUnsafeConnection safe-connection)) e)
       (when (instance? java.net.SocketException e)
         (.connectionLost safe-connection))
       nil)))
 
-(defn send-message 
-  "Same as send-message*, but guarded by a client timeout
+(defn send-message*
+  "Same as send-message**, but guarded by a client timeout
    so that Eclipse cannot hang forever.
    timeout in milliseconds"
-  [safe-connection command & {:keys [timeout] :or {timeout 4000}}]
+  [safe-connection message & {:keys [timeout] :or {timeout 1000}}]
   (let [timeout-val (Object.)
-        secure-call (future (send-message* safe-connection command))
+        secure-call (future (send-message** safe-connection message))
         result (deref secure-call timeout timeout-val)]
     (if (not= result timeout-val)
       result
       (ccw.CCWPlugin/logError (str 
-        "timeout while calling command send-message* for command "
-        command)))))
+        "timeout while calling send-message** for message "
+        (pr-str message))))))
+
+(defn send-code
+  "Send code represented as String, guarded by a client timeout,
+   see 'send-message* options. Return a responses vector"
+  [safe-connection code & {:keys [session] :as rest}]
+  (let [msg {"op" "eval", "code" code}
+        msg (if-not session msg (assoc msg "session" session))]
+    (when-let [r (apply send-message* safe-connection msg rest)]
+     (repl/response-values r))))
+
+(def timed-out-safe-connections 
+  "Keeps the timed out safe-connections in a map of [safe-connection nb-timeouts]"
+  (atom {}))
+
+(defn send-message
+  "Sends message and keep tracks of safe-connections that have timeouts.
+   When a safe-connection has had 2 timeouts, stop trying to use
+   it and return nil."
+  [safe-connection message & rest]
+  (let [nb-timeouts (@timed-out-safe-connections safe-connection 0)]
+    (when (< nb-timeouts 3)
+      (try
+        (apply send-message* safe-connection message rest)
+        (catch java.util.concurrent.TimeoutException e
+          (println " timeout !")
+          (swap! timed-out-safe-connections update-in [safe-connection] (fnil inc 0)))))))
 
 (defn parse-symbol? 
   "If loc's node is a symbol, return the symbol String. Otherwise, return nil."
@@ -71,25 +96,41 @@
   (when (= :symbol (:tag (z/node loc)))
     (symbol (lu/loc-text loc))))
 
-(defn find-var-metadata
-  "Given editor, and an already resolved current-namespace, makes a call to 
-   the editor REPL to find metadata associated to symbol. If there's currently
-   no REPL, just return nil.
-   CURRENTLY works for namespace vars, and namespaces."
-  [current-namespace ^IClojureEditor editor var]
-  (when-let [repl (.getCorrespondingREPL editor)]
+(defmulti find-var-metadata
+  (fn [current-namespace repl var]
+    (when repl
+      (some #{"info"} (.getAvailableOperations repl)))))
+
+(defmethod find-var-metadata :default
+  [current-namespace repl var]
+  (when repl
     (let [safe-connection (.getSafeToolingConnection repl)
-          command (format (str "(ccw.debug.serverrepl/var-info "
-                               "  (or (try (clojure.core/ns-resolve "
-                               "             (clojure.core/the-ns '%s) '%s)"
-                               "        (catch Exception e nil))"
-                               "      (try (clojure.core/the-ns '%s)"
-                               "        (catch Exception e nil))))")
-                          current-namespace
-                          var var)
-          response (send-message safe-connection command
-                                 :timeout 1000)]
-      (first response))))
+          code (format (str "(ccw.debug.serverrepl/var-info "
+                              "(clojure.core/ns-resolve "
+                                "(clojure.core/the-ns '%s) '%s))")
+                       current-namespace
+                       var)
+          response (first (send-code safe-connection code
+                            ; we do not use session via send-code yet because
+                            ; we cannot distinguish between clojure or clojurescript
+                            ; back-end and adapt appropriately
+                            ;:session (.getSessionId repl)
+                            ))]
+      response)))
+
+(defmethod find-var-metadata "info"
+  [current-namespace repl var]
+  (when repl
+    (let [safe-connection (.getSafeToolingConnection repl)
+          response (-> (first
+                         (send-message safe-connection
+                           {"op" "info"
+                            "symbol" var
+                            "ns" current-namespace
+                            "session" (.getSessionId repl)}))
+                     (set/rename-keys {:arglists-str :arglists
+                                       :resource :file}))]
+      response)))
 
 (defn context-message
   "Creates the context message"

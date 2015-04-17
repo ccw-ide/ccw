@@ -13,6 +13,51 @@ Laurent Petit <laurent dot petit at gmail dot com>
 This release upgrades the embedded Leiningen from 2.5.0 to 2.5.1.
 Apart from that, the release is mostly a bug-fixing release.
 
+=== Support for cider-nrepl in the REPL
+
+==== cider-nrepl and Clojure projects
+Enabling `cider-nrepl` for a project is as simple as adding or completing a `:plugins` section to the project's `project.clj` file:
+
+[source,clojure]
+----
+(defproject ...
+  :plugins [[cider/cider-nrepl "0.9.0-SNAPSHOT"]])
+----
+
+If `cider-nrepl` ( https://github.com/clojure-emacs/cider-nrepl ) middlewares are present in the nREPL server middleware stack of your project, then connecting to it via a `REPL View` will use its nREPL ops instead of those provided by CCW.
+
+This will allow CCW to focus on integrating `cider-nrepl` features, and is thus the promise of more stability, better user experience across several tools based on `cider-nrepl` (emacs, vim-fireplace, to name a few).
+
+`cider-nrepl` will also be a better and more rewarding place for CCW authors to contribute to. It will be good to fight our NIH bad-karma.
+
+==== cider-nrepl and Clojurescript projects
+
+First add `cider-nrepl` and `piggieback` support for your project:
+
+[source,clojure]
+----
+(defproject ...
+  ;; cider-nrepl support
+  :plugins [[cider/cider-nrepl "0.9.0-SNAPSHOT"]]
+  ; piggieback support for clojurescript nrepls
+  :profiles {:dev {:dependencies [[com.cemerick/piggieback "0.2.0"]
+                                  [org.clojure/tools.nrepl "0.2.10"]]
+                   :repl-options {:nrepl-middleware
+                                  [cemerick.piggieback/wrap-cljs-repl]}}})
+----
+
+Then start a REPL in Counterclockwise as usual, e.g. from the project's node or some clojure file.
+
+Then invoke piggieback to start a Clojurescript REPL. Here's an example with a Rhino REPL:
+
+[source,clojure]
+----
+(cemerick.piggieback/cljs-repl (cljs.repl.rhino/repl-env))
+----
+
+The REPL is now a Clojurescript REPL. You now get code completion and documentation from the Clojurescript environment.
+
+
 === Counterclockwise embedded nREPL
 
 Counterclockwise ships with an embedded nREPL server. The following enhancements have been applied:

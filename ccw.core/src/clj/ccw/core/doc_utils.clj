@@ -3,7 +3,7 @@
 
 ;	potential documentation tags:
 ; :since, :author, :private, :test, :tag, :file, :line, :ns, :name, 
-; :macro, :arglists
+; :macro, :arglists(ccw.server)/:arglists-str(cider-nrepl)
 
 (defn join 
   "Join c elements with s as of clojure.string/join, except nil elements
@@ -42,10 +42,11 @@
         :text no-sections-text)
       s)))
 
-(defn- arglist-doc [renderer {:keys [arglists]}]
-  (when-not (str/blank? arglists)
-    (render-section renderer "Argument Lists"
-                    (render-lines renderer (arglists-seq arglists)))))
+(defn- arglist-doc [renderer {:keys [arglists arglists-str]}]
+  (let [arglists (or arglists arglists-str)]
+    (when-not (str/blank? arglists)
+      (render-section renderer "Argument Lists"
+        (render-lines renderer (arglists-seq arglists))))))
 
 (defn- optional-meta [{:keys [name macro private dynamic ns tag]}]
   (let [optional-meta (join ", " 
@@ -64,18 +65,25 @@
 
 (defn doc-doc [renderer {:keys [doc]}]
   (when-not (str/blank? doc)
-    (render-section renderer
-                    "Documentation"
-                    (str "<pre>" doc "</pre>"))))
+    (let [body (condp = renderer
+                 :html (str "<pre>" doc "</pre>")
+                 :text doc)
+          body (str
+                 "  " ; We add 2 spaces because docstring are generally
+                      ; indented 2 spaces except the first line
+                 body)]
+      (render-section renderer "Documentation" body))))
 
 (defn var-doc-info [renderer m]
   (let [sections [(header-doc renderer m)
                   (arglist-doc renderer m)
-                  (doc-doc renderer m)]]
-    (render-sections 
-      renderer
-      sections
-      "no doc found")))
+                  (doc-doc renderer m)]
+        ret (render-sections 
+              renderer
+              sections
+              "no doc found")]
+    (prn "var-doc-info" renderer ret)
+    ret))
 
 (defn var-doc-info-html [m]
   (var-doc-info :html m))
@@ -98,5 +106,7 @@
         lines (if (> (count lines) nb-display-lines) 
                 (concat (take (dec nb-display-lines) lines)
                         [(str (nth lines (dec nb-display-lines)) " ...")]) 
-                lines)]
-    (str/join \newline (map str/trim lines))))
+                lines)
+        ret (str/join \newline (map str/trim lines))]
+    (prn "slim-doc" ret)
+    ret))

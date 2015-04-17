@@ -1,5 +1,6 @@
 (ns ccw.editors.clojure.clojure-proposal-processor
   (:require [clojure.string :as s]
+            [clojure.set :as set]
             [clojure.test :as test]
             [clojure.tools.nrepl :as repl]
             [paredit.parser :as p]
@@ -8,7 +9,7 @@
             [ccw.core.doc-utils :as doc]
             [ccw.debug.serverrepl :as serverrepl]
             [ccw.core.trace :as trace]
-            [ccw.editors.clojure.editor-common :as common])
+            [ccw.editors.clojure.editor-common :as common :refer (find-var-metadata)])
   (:use [clojure.core.incubator :only [-?>]])
   (:import [org.eclipse.jface.viewers StyledString
                                       StyledString$Styler]
@@ -46,10 +47,10 @@
 (defn call-context-loc
   "for viewer, at offset 12, return the loc containing the encapsulating
    call, or nil"
-  [^IClojureEditor viewer offset]
+  [parse-tree offset]
   (when (pos? offset)
     (let [loc (lu/loc-containing-offset 
-                (-> viewer .getParseState :parse-tree lu/parsed-root-loc)
+                (lu/parsed-root-loc parse-tree)
                 offset)
           maybe-call-loc (-?> loc parent-call)]
       (when (-?> maybe-call-loc z/node call?)
@@ -118,47 +119,6 @@
 (def completion-limit 
   "Maximum number of returned results" 50)
 
-; TODO introduce polymorphism?
-(defn completion-proposal
-  [replacement-string
-   replacement-offset
-   replacement-length
-   cursor-position
-   image
-   display-string
-   filter
-   context-information
-   additional-proposal-info]
-  (let [cp (CompletionProposal.
-             (or replacement-string "")
-             replacement-offset
-             replacement-length
-             cursor-position
-             image
-             (or display-string "")
-             context-information
-             (or additional-proposal-info ""))]
-    (reify 
-      ICompletionProposal
-      (apply [this document] (.apply cp document))
-      (getSelection [this document] (.getSelection cp document))
-      (getAdditionalProposalInfo [this] (.getAdditionalProposalInfo cp))
-      (getDisplayString [this] (.getDisplayString cp))
-      (getImage [this] (.getImage cp))
-      (getContextInformation [this] (.getContextInformation cp))
-      
-      ICompletionProposalExtension6
-      (getStyledDisplayString [this]
-        (let [s (StyledString. (or display-string ""))]
-          (when (seq filter)
-            (doseq [i (reductions (partial + 1) filter)]
-              (if (< i (count display-string))
-                (.setStyle s i 1 StyledString/COUNTER_STYLER)
-                (printf (str "ERROR: Completion proposal trying to apply color style"
-                             "at invalid offset %d for display-string '%s'")
-                        i display-string))))
-          s)))))
-
 (defn context-information
   [context-display-string
    image
@@ -177,6 +137,46 @@
      {:start position-start
       :stop  position-stop}))
 
+(defn completion-proposal
+  [replacement-string
+   replacement-offset
+   replacement-length
+   cursor-position
+   image
+   display-string
+   filter
+   context-information-delay
+   additional-proposal-info-delay]
+  (let [cp (CompletionProposal.
+             (or replacement-string "")
+             replacement-offset
+             replacement-length
+             cursor-position
+             image
+             (or display-string "")
+             nil ;; context-information is computed on demand
+             nil)] ;; additional-proposal is computed on demand
+    (reify 
+      ICompletionProposal
+      (apply [this document] (.apply cp document))
+      (getSelection [this document] (.getSelection cp document))
+      (getAdditionalProposalInfo [this] @additional-proposal-info-delay)
+      (getDisplayString [this] (.getDisplayString cp))
+      (getImage [this] (.getImage cp))
+      (getContextInformation [this] @context-information-delay)
+      
+      ICompletionProposalExtension6
+      (getStyledDisplayString [this]
+        (let [s (StyledString. (or display-string ""))]
+          (when (seq filter)
+            (doseq [i (reductions (partial + 1) filter)]
+              (if (< i (count display-string))
+                (.setStyle s i 1 StyledString/COUNTER_STYLER)
+                (printf (str "ERROR: Completion proposal trying to apply color style"
+                             "at invalid offset %d for display-string '%s'")
+                        i display-string))))
+          s)))))
+
 (defn complete-command
   "Create the complete command to be sent remotely to get back a list of
    completion proposals."
@@ -186,34 +186,12 @@
           namespace
           completion-limit))
 
-(def timed-out-safe-connections 
-  "Keeps the timed out safe-connections in a map of [safe-connection nb-timeouts]"
-  (atom {}))
-
-(defn send-message
-  "Sends message and keep tracks of safe-connections that have timeouts.
-   When a safe-connection has had 2 timeouts, stop trying to use
-   it and return nil."
-  [safe-connection command timeout]
-  (let [nb-timeouts (@timed-out-safe-connections safe-connection 0)]
-    (when (< nb-timeouts 3)
-      (try
-        (common/send-message safe-connection command :timeout timeout)
-        (catch java.util.concurrent.TimeoutException e
-          (swap! timed-out-safe-connections update-in [safe-connection] (fnil inc 0)))))))
-
-(defn find-var-metadata
-  [current-namespace ^IClojureEditor editor var]
-  (when-let [repl (.getCorrespondingREPL editor)]
-    (let [safe-connection (.getSafeToolingConnection repl)
-          command (format (str "(ccw.debug.serverrepl/var-info "
-                                 "(clojure.core/ns-resolve "
-                                   "(clojure.core/the-ns '%s) '%s))")
-                          current-namespace
-                          var)
-          response (send-message safe-connection command 1000)]
-      ;(println "response:" response)
-      (first response))))
+(defmulti find-suggestions
+  "For the given prefix, inside the current editor and in the current namespace,
+   query the remote REPL for code completions list"
+  (fn [current-namespace prefix repl find-only-public]
+    (when repl
+      (some #{"complete"} (.getAvailableOperations repl)))))
 
 ;; TODO encadrer les appels externes avec un timeout
 ;; si le timeout est depasse, ejecter la repl correspondante
@@ -222,18 +200,48 @@
 ;; A terme: decoupler la recuperation des infos et leur exploitation
 ;; - un dictionnaire de suggestions mis à jour en batch à des points clés (interactions avec repl)
 ;; - interrogation du dictionnaire en usage courant (tant pis si pas a jour)
-(defn find-suggestions
-  "For the given prefix, inside the current editor and in the current namespace,
-   query the remote REPL for code completions list"
-  [current-namespace prefix ^IClojureEditor editor find-only-public]
+(defmethod find-suggestions :default
+  [current-namespace prefix repl find-only-public]
   (cond
-    (nil? namespace) []
+    (nil? current-namespace) []
     (s/blank? prefix) []
-    :else (when-let [repl (.getCorrespondingREPL editor)]
+    :else (when repl
             (let [safe-connection (.getSafeToolingConnection repl)
-                  command (complete-command current-namespace prefix false)
-                  response (send-message safe-connection command 1000)]
-              (first response)))))
+                  code (complete-command current-namespace prefix false)
+
+                  response (first (common/send-code safe-connection code
+                                    ; we don't send code directly with the user session id
+                                    ; because we cannot guarantee the code will be interpreted
+                                    ; by the right back-end (clojure or clojurescript)
+                                    ; :session (.getSessionId repl)
+                                    ))]
+              response))))
+
+(defmethod find-suggestions "complete"
+  [current-namespace prefix repl find-only-public]
+  (cond
+    (nil? current-namespace) []
+    (s/blank? prefix) []
+    :else (when repl
+            (let [safe-connection (.getSafeToolingConnection repl)
+                  response (first (common/send-message safe-connection
+                                    {"op" "complete"
+                                     "symbol" prefix
+                                     "ns" current-namespace
+                                     "session"  (.getSessionId repl)}))]
+              (when-let [completions
+                         (seq (->>
+                                (:completions response)
+                                (filter :candidate) ; protection against nil candidates returned by compliment
+                                (map
+                                  #(hash-map
+                                     :completion (:candidate %)
+                                     :match (:candidate %)
+                                     :type (:type %)
+                                     :ns (:ns %)
+                                     :filter (serverrepl/textmate-filter (:candidate %) prefix)
+                                     :metadata nil))))]
+                completions)))))
 
 (defn context-info-data
   "Create a context-information from the data"
@@ -245,8 +253,6 @@
       message
       cursor-offset
       cursor-offset)))
-
-(def ca (atom nil))
 
 (defn find-hippie-suggestions
   [^String prefix offset parse-state]
@@ -308,45 +314,52 @@
   "Return the list of java completion objects to the Completion framework."
   [^IClojureEditor editor      content-assistant
    ^ITextViewer text-viewer offset]
-  (reset! ca content-assistant)
-  (let [prefix-offset (compute-prefix-offset 
-                        (-> text-viewer .getDocument .get)
-                        offset)
+  (let [prefix-offset     (compute-prefix-offset 
+                            (-> text-viewer .getDocument .get)
+                            offset)
         current-namespace (.findDeclaringNamespace editor)
-        prefix (.substring
-                 (-> text-viewer .getDocument .get)
-                 prefix-offset
-                 offset)]
+        repl              (.getCorrespondingREPL editor)
+        prefix            (.substring
+                            (-> text-viewer .getDocument .get)
+                            prefix-offset
+                            offset)]
     (when (pos? (count prefix))
       (let [hippie-suggestions (find-hippie-suggestions
                                  prefix
                                  offset
                                  (.getParseState editor))
-            repl-suggestions (find-suggestions 
-                               current-namespace
-                               prefix
-                               editor
-                               false)
-            suggestions (apply sorted-set-by 
-                               (adapt-args (serverrepl/textmate-comparator prefix) :completion :completion)
-                               #_#(let [comparator (serverrepl/textmate-comparator prefix)]
-                                    (comparator (:completion %1) (:completion %2)))
-                               (concat repl-suggestions hippie-suggestions))]
-        (for [{:keys [completion match filter]
-               {:keys [arglists ns name added static 
-                       type doc line file] 
+            repl-suggestions   (find-suggestions 
+                                 current-namespace
+                                 prefix
+                                 repl
+                                 false)
+            suggestions        (apply sorted-set-by 
+                                      (adapt-args (serverrepl/textmate-comparator prefix)
+                                        :completion :completion)
+                                      (concat repl-suggestions hippie-suggestions))]
+        (for [{:keys [completion match filter type ns]
+               {:keys [arglists name added static 
+                       doc line file] 
                 :as metadata} :metadata
                } suggestions]
-          (completion-proposal
-            completion
-            prefix-offset
-            (- offset prefix-offset)
-            (count completion)
-            nil
-            (doc/join " - " completion ns)
-            filter
-            (context-info-data completion (+ prefix-offset (count completion)) metadata)
-            (doc/var-doc-info-html metadata)))))))
+          (let [md-ref (delay (find-var-metadata current-namespace repl completion))]
+            (completion-proposal
+              completion
+              prefix-offset
+              (- offset prefix-offset)
+              (count completion)
+              nil
+              (cond-> completion
+                (and ns (not (.startsWith completion (str ns "/"))))
+                  (str " (" ns ")")
+                type
+                  (str " - " type))
+              filter
+              (delay (context-info-data
+                       completion
+                       (+ prefix-offset (count completion))
+                       @md-ref))
+              (delay (doc/var-doc-info-html @md-ref)))))))))
 
 (def activation-characters
   "Characters which will trigger auto-completion"
@@ -361,13 +374,13 @@
    text-viewer new-offset]
   (into-array
     IContextInformation
-    (when-let [loc (call-context-loc text-viewer new-offset)]
+    (when-let [loc (call-context-loc (-> text-viewer .getParseState :parse-tree) new-offset)]
       (let [call-symbol (call-symbol loc)
             context-info (context-info-data 
                            call-symbol 
                            new-offset 
                            (find-var-metadata (.findDeclaringNamespace editor) 
-                                              editor
+                                              (.getCorrespondingREPL editor)
                                               call-symbol))]
         (when context-info [context-info])))))
 
