@@ -1,44 +1,60 @@
 package ccw;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
+ * These constants are used by Java code invoking Eclipse Tracing features.
+ * <p>
+ * Eclipse tracing features are exposed via <code>CCWPlugin.getTracer()</code>
+ * <p>
+ * Every trace option here must correspond to a trace option in the
+ * .options file of bundle ccw.core.
+ *
  * @author laurentpetit
  */
 public class TraceOptions {
 
-	public static final String LOG_TRACE = "log/trace";
+	/** Global trace options for enabling/disabling traces */
+	public static final String DEBUG = "debug";
+
+	/**
+	 * When true CCWPlugin/log() calls will be traced in trace.log
+	 * in addition of being logged in .log
+	 */
 	public static final String LOG_INFO = "log/info";
+
+	/**
+	 * When true CCWPlugin/logWarning() calls will be traced in trace.log
+	 * in addition of being logged in .log
+	 */
 	public static final String LOG_WARNING = "log/warning";
+
+	/**
+	 * When true CCWPlugin/logError() calls will be traced in trace.log
+	 * in addition of being logged in .log
+	 */
 	public static final String LOG_ERROR = "log/error";
 
+	/** REPLView related traces */
 	public static final String REPL = "repl";
+
+	/** REPLView related traces concerning View focus issues */
 	public static final String REPL_FOCUS = "repl/focus";
+
+	/** Project Builder related traces */
 	public static final String BUILDER = "builder";
+
+	/** Launch Configurations related traces */
 	public static final String LAUNCHER = "launcher";
+
+	/** Autocompletion (content assist) related traces */
 	public static final String AUTOCOMPLETION = "autocompletion";
+
+	/** Paredit related traces */
 	public static final String PAREDIT = "paredit";
+
+	/** Clojure OSGi integration related traces */
 	public static final String CLOJURE_OSGI = "clojure.osgi";
 
-	@SuppressWarnings("serial")
-	public static final Map<String, Boolean> getTraceOptions() {
-		return new HashMap<String, Boolean>() {
-			{
-				put(LOG_TRACE, false);
-				put(LOG_INFO, false);
-				put(LOG_WARNING, false);
-				put(LOG_ERROR, false);
-
-				put(REPL, false);
-				put(REPL_FOCUS, false);
-				put(BUILDER, false);
-				put(LAUNCHER, false);
-				put(AUTOCOMPLETION, false);
-				put(PAREDIT, false);
-				put(CLOJURE_OSGI, false);
-			}
-		};
-	}
+	/** Code Outline related traces */
+	public static final String OUTLINE = "outline";
 
 }

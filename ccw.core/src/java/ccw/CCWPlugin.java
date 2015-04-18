@@ -232,8 +232,11 @@ public class CCWPlugin extends AbstractUIPlugin {
     @Override
 	public void start(BundleContext context) throws Exception {
         super.start(context);
-        System.out.println("CCWPlugin.start: ENTER");
         plugin = this;
+        log("CCWPlugin.start(): ENTER");
+
+		tracer = new Tracer(context);
+
         logDependenciesInformation(context);
 
         context.addBundleListener(new BundleListener() {
@@ -242,8 +245,6 @@ public class CCWPlugin extends AbstractUIPlugin {
 			public void bundleChanged(BundleEvent evt) {
 				if (evt.getBundle() == CCWPlugin.this.getBundle()
 					&&	evt.getType() == BundleEvent.STARTED) {
-
-					tracer = new Tracer(evt.getBundle().getBundleContext(), TraceOptions.getTraceOptions());
 
 					// We immediately give control back to the OSGi framework application
 					// by starting the code in a new thread
@@ -310,7 +311,7 @@ public class CCWPlugin extends AbstractUIPlugin {
 				}
 			}
 		});
-        System.out.println("CCWPlugin.start: EXIT");
+        log("CCWPlugin.start(): EXIT");
     }
     
     private synchronized AutomaticNatureAdder getNatureAdapter() {

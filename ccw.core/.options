@@ -1,11 +1,48 @@
-ccw.core/log/trace=false
+#
+# These options are used by the Eclipse Tracing framework.
+# They are also read by Counterclockwise Clojure tracing macros to check at
+# compile time that the different tracing features are called with existing
+# tracing options.
+#
+# Every trace option here must have a corresponding trace option in the
+# ccw.TraceOptions java class (for java code consumption).
+#
+
+# Global trace options for enabling/disabling traces
+ccw.core/debug=false
+
+# When true CCWPlugin/log() calls will be traced in trace.log
+# in addition of being logged in .log
 ccw.core/log/info=false
+
+# When true CCWPlugin/logWarning() calls will be traced in trace.log
+# in addition of being logged in .log
 ccw.core/log/warning=false
+
+# When true CCWPlugin/logError() calls will be traced in trace.log
+# in addition of being logged in .log
 ccw.core/log/error=false
+
+# REPLView related traces
 ccw.core/repl=false
+
+# REPLView related traces concerning View focus issues
 ccw.core/repl/focus=false
+
+# Project Builder related traces
 ccw.core/builder=false
+
+# Launch Configurations related traces
 ccw.core/launcher=false
+
+# Autocompletion (content assist) related traces
 ccw.core/autocompletion=false
+
+# Paredit related traces
 ccw.core/paredit=false
+
+# Clojure OSGi integration related traces
 ccw.core/clojure.osgi=false
+
+# Code Outline related traces
+ccw.core/outline=false
