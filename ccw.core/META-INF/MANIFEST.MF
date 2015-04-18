@@ -44,7 +44,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.e4.ui.widgets,
  org.eclipse.e4.ui.workbench,
  org.eclipse.core.runtime.compatibility,
- org.eclipse.osgi.services
+ org.eclipse.osgi.services,
+ org.eclipse.ui.trace
 Bundle-ClassPath: .,
  src/clj/,
  lib/aether-api-jar/,

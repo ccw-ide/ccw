@@ -3389,4 +3389,14 @@
          </element>
       </processor>
    </extension>
+   <extension
+         point="org.eclipse.ui.trace.traceComponents">
+      <component
+            id="ccw.trace"
+            label="Counterclockwise Core">
+         <bundle
+               name="ccw.*">
+         </bundle>
+      </component>
+   </extension>
 </plugin>
