@@ -62,7 +62,7 @@
       (trace :support/hover (str "[DOCSTRING-HOVER] " (simple-name this) ".getHoverRegion called:\n"
                                  "text-viewer -> "(.toString text-viewer) "\n"
                                  "offset -> " offset "\n"))
-      (let [[offset length] (hover-region (CCWPlugin/getClojureEditor) offset)]
+      (let [[offset length] (hover-region text-viewer offset)]
         (Region. offset length)))))
 
 (defn create-docstring-hover [& params]
