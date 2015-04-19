@@ -98,7 +98,7 @@
         (doseq [status status]
           (case status
             "interrupted" (log repl-view log-component (eval-failure-msg status expr) :err)
-            "need-input" (ui-sync (.getStdIn repl-view))
+            "need-input" (.getStdIn repl-view)
             nil))))))
 
 (defn eval-expression
@@ -117,7 +117,7 @@
   (let [[history retain-expr-fn] (history/get-history (-?> repl-view
                                                         .getLaunch
                                                         ccw.launching.LaunchUtils/getProjectName))
-        ^StyledText input-widget (.viewerWidget repl-view)
+        ^StyledText input-widget (.inputStyledText repl-view)
         ; a bunch of atoms are just fine, since access to them is already
         ; serialized via the SWT event thread
         history (atom history)
