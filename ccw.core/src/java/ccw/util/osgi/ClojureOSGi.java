@@ -18,11 +18,11 @@ public class ClojureOSGi {
 	private static volatile boolean initialized;
 	private synchronized static void initialize() {
 		if (initialized) return;
-		
+
 		CCWPlugin plugin = CCWPlugin.getDefault();
 		if (plugin == null) {
-			System.out.println("======= ClojureOSGi.initialize will fail because ccw.core plugin not activated yet");
-			System.out.flush();
+			CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI,
+					"ClojureOSGi.initialize will fail because ccw.core plugin not activated yet");
 		}
 		ClassLoader loader = new BundleClassLoader(plugin.getBundle());
 		ClassLoader saved = Thread.currentThread().getContextClassLoader();
@@ -37,18 +37,18 @@ public class ClojureOSGi {
 		} finally {
 			Thread.currentThread().setContextClassLoader(saved);
 		}
-		
+
 	}
 	public synchronized static Object withBundle(Bundle aBundle, RunnableWithException aCode)
 			throws RuntimeException {
 		return withBundle(aBundle, aCode, null);
 	}
-	
+
 	public synchronized static Object withBundle(Bundle aBundle, RunnableWithException aCode, List<URL> additionalURLs)
 			throws RuntimeException {
-		
+
 		initialize();
-		
+
 		ClassLoader bundleLoader = new BundleClassLoader(aBundle);
 		final URL[] urls = (additionalURLs == null) ? new URL[] {} : additionalURLs.toArray(new URL[additionalURLs.size()]);
 		URLClassLoader loader = new URLClassLoader(urls, bundleLoader);
@@ -60,26 +60,22 @@ public class ClojureOSGi {
 
 		try {
 			Thread.currentThread().setContextClassLoader(loader);
-
 			try {
 				Var.pushThreadBindings(bindings);
 			} catch (RuntimeException aEx) {
 				pushed = false;
 				throw aEx;
 			}
-
 			return aCode.run();
-			
 		} catch (Exception e) {
-			String msg = "Exception while executing code from bundle " 
+			String msg = "Exception while executing code from bundle "
 					+ aBundle.getSymbolicName();
-			CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI, e,
-					msg);
+			CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI, e, msg);
 			throw new RuntimeException(msg, e);
 		} finally {
-			if (pushed)
+			if (pushed) {
 				Var.popThreadBindings();
-
+			}
 			Thread.currentThread().setContextClassLoader(saved);
 		}
 	}
@@ -90,7 +86,8 @@ public class ClojureOSGi {
 			public Object run() throws Exception {
 				try {
 					RT.var("clojure.core", "require").invoke(Symbol.intern(namespace));
-					CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI, "Namespace " + namespace + " loaded from bundle " + bundle.getSymbolicName());
+					String msg = "Namespace " + namespace + " loaded from bundle " + bundle.getSymbolicName();
+					CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI, msg);
 					return null;
 				} catch (Exception e) {
 					String msg = "Exception loading namespace " + namespace + " from bundle " + bundle.getSymbolicName();

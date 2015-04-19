@@ -35,7 +35,8 @@ public class ClojureContributionFactorySpi implements IContributionFactorySpi {
 	@Override
 	public Object create(final Bundle bundle, final String varAndParams,
 			final IEclipseContext context) {
-		CCWPlugin.getTracer().trace(TraceOptions.LOG_INFO, "create object for bundleclass://" + bundle.getSymbolicName() + "/" + "clojure" + "/" + varAndParams);
+		String msg = "create object for bundleclass://" + bundle.getSymbolicName() + "/" + "clojure" + "/" + varAndParams;
+		CCWPlugin.getTracer().trace(TraceOptions.LOG_INFO, msg);
 		try {
 			final String[] parts = varAndParams.split("\\/");
 			String var = parts[0] + "/" + parts[1];
