@@ -13,48 +13,48 @@ package ccw;
 public class TraceOptions {
 
 	/** Global trace options for enabling/disabling traces */
-	public static final String DEBUG = "debug";
+	public static final String DEBUG = "/debug";
 
 	/**
 	 * When true CCWPlugin/log() calls will be traced in trace.log
 	 * in addition of being logged in .log
 	 */
-	public static final String LOG_INFO = "log/info";
+	public static final String LOG_INFO = "/log/info";
 
 	/**
 	 * When true CCWPlugin/logWarning() calls will be traced in trace.log
 	 * in addition of being logged in .log
 	 */
-	public static final String LOG_WARNING = "log/warning";
+	public static final String LOG_WARNING = "/log/warning";
 
 	/**
 	 * When true CCWPlugin/logError() calls will be traced in trace.log
 	 * in addition of being logged in .log
 	 */
-	public static final String LOG_ERROR = "log/error";
+	public static final String LOG_ERROR = "/log/error";
 
 	/** REPLView related traces */
-	public static final String REPL = "repl";
+	public static final String REPL = "/repl";
 
 	/** REPLView related traces concerning View focus issues */
-	public static final String REPL_FOCUS = "repl/focus";
+	public static final String REPL_FOCUS = "/repl/focus";
 
 	/** Project Builder related traces */
-	public static final String BUILDER = "builder";
+	public static final String BUILDER = "/builder";
 
 	/** Launch Configurations related traces */
-	public static final String LAUNCHER = "launcher";
+	public static final String LAUNCHER = "/launcher";
 
 	/** Autocompletion (content assist) related traces */
-	public static final String AUTOCOMPLETION = "autocompletion";
+	public static final String AUTOCOMPLETION = "/autocompletion";
 
 	/** Paredit related traces */
-	public static final String PAREDIT = "paredit";
+	public static final String PAREDIT = "/paredit";
 
 	/** Clojure OSGi integration related traces */
-	public static final String CLOJURE_OSGI = "clojure.osgi";
+	public static final String CLOJURE_OSGI = "/clojure.osgi";
 
 	/** Code Outline related traces */
-	public static final String OUTLINE = "outline";
+	public static final String OUTLINE = "/outline";
 
 }

@@ -16,13 +16,12 @@ import org.osgi.framework.BundleContext;
  */
 public class Tracer implements ITracer {
 
-    private final String bundleSymbolicName;
+	private final String bundleSymbolicName;
 
-    private final PluginDebugOptionsListener traceOptionsListener = new PluginDebugOptionsListener();
+    private final PluginDebugOptionsListener traceOptionsListener;
 
     private class PluginDebugOptionsListener implements DebugOptionsListener {
-        @Override
-		public void optionsChanged(DebugOptions options) {
+        @Override public void optionsChanged(DebugOptions options) {
             if (options.isDebugEnabled()) {
                 debugTrace = options.newDebugTrace(bundleSymbolicName, Tracer.class);
             } else {
@@ -37,7 +36,8 @@ public class Tracer implements ITracer {
     private final Map<String, Boolean> options = new HashMap<String, Boolean>();
 
     public Tracer(final BundleContext bundleContext) {
-        this.bundleSymbolicName = bundleContext.getBundle().getSymbolicName();
+        bundleSymbolicName = bundleContext.getBundle().getSymbolicName();
+        traceOptionsListener = new PluginDebugOptionsListener();
         enableTracing(bundleContext);
     }
 
@@ -62,7 +62,7 @@ public class Tracer implements ITracer {
             return false;
         }
 
-        Boolean res = options.get(traceOption);
+        Boolean res = options.get(bundleSymbolicName + traceOption);
         if (res != null) {
             return res;
         } else {
@@ -81,49 +81,49 @@ public class Tracer implements ITracer {
     @Override
 	public void trace(String traceOption, Object... message) {
         if (isEnabled(traceOption)) {
-            debugTrace.trace("/" + traceOption, buildMessage(message));
+            debugTrace.trace(traceOption, buildMessage(message));
         }
     }
 
     @Override
 	public void trace(String traceOption, Throwable throwable, Object... message) {
         if (isEnabled(traceOption)) {
-            debugTrace.trace("/" + traceOption, buildMessage(message), throwable);
+            debugTrace.trace(traceOption, buildMessage(message), throwable);
         }
     }
 
     @Override
 	public void traceDumpStack(String traceOption) {
         if (isEnabled(traceOption)) {
-            debugTrace.traceDumpStack("/" + traceOption);
+            debugTrace.traceDumpStack(traceOption);
         }
     }
 
     @Override
 	public void traceEntry(String traceOption) {
         if (isEnabled(traceOption)) {
-            debugTrace.traceEntry("/" + traceOption);
+            debugTrace.traceEntry(traceOption);
         }
     }
 
     @Override
 	public void traceEntry(String traceOption, Object... arguments) {
         if (isEnabled(traceOption)) {
-            debugTrace.traceEntry("/" + traceOption, arguments);
+            debugTrace.traceEntry(traceOption, arguments);
         }
     }
 
     @Override
 	public void traceExit(String traceOption) {
         if (isEnabled(traceOption)) {
-            debugTrace.traceExit("/" + traceOption);
+            debugTrace.traceExit(traceOption);
         }
     }
 
     @Override
 	public void traceExit(String traceOption, Object returnValue) {
         if (isEnabled(traceOption)) {
-            debugTrace.traceExit("/" + traceOption, returnValue);
+            debugTrace.traceExit(traceOption, returnValue);
         }
     }
 
