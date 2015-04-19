@@ -712,24 +712,17 @@ public class REPLView extends ViewPart implements IAdaptable, LineStyleListener,
 						return structuralEditionModeStatusContributionItem;
 					}
 				}) {
-        	@Override
-			public REPLView getCorrespondingREPL() { return REPLView.this; };
-            private SafeConnection getCorrespondingREPLConnection () {
-                // we'll be connected by the time this is called
-                return safeToolConnection;
-            }
             @Override
-			public void setStatusLineErrorMessage(String msg) {
+            public void setStatusLineErrorMessage(String msg) {
             	if (msg != null) {
-	            	IStatusLineManager slm = REPLView.this.getViewSite().getActionBars().getStatusLineManager();
-
-	            	if (slm != null) {
-	            		slm.setErrorMessage(msg);
-	            	} else {
-	            		CCWPlugin.logWarning("Could not find status line manager to send the following message from the REPL: " + msg);
-	            	}
+            	    IStatusLineManager slm = REPLView.this.getViewSite().getActionBars().getStatusLineManager();
+            	    if (slm != null) {
+            	        slm.setErrorMessage(msg);
+            	    } else {
+            	        CCWPlugin.logWarning("Could not find status line manager to send the following message from the REPL: " + msg);
+            	    }
             	}
-            };
+            }
             @Override
 			public String findDeclaringNamespace() {
             	String inline = super.findDeclaringNamespace();
@@ -738,7 +731,7 @@ public class REPLView extends ViewPart implements IAdaptable, LineStyleListener,
             	} else {
             		return currentNamespace;
             	}
-            };
+            }
         };
         viewerConfig = new ClojureSourceViewerConfiguration(prefs, viewer);
         viewer.configure(viewerConfig);

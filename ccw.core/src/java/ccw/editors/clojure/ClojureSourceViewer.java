@@ -13,6 +13,7 @@ package ccw.editors.clojure;
 
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
@@ -54,6 +55,7 @@ import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.preferences.PreferenceConstants;
 import ccw.repl.REPLView;
+import ccw.repl.SafeConnection;
 import ccw.util.ClojureInvoker;
 import ccw.util.DisplayUtil;
 
@@ -545,11 +547,32 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements
         return null;
     }
     
-    public REPLView getCorrespondingREPL () {
-        // this gets overridden in REPLView as appropriate so that the toolConnection there gets returned
-        return null;
+    @Override
+    public @Nullable REPLView getCorrespondingREPL () {
+        // Experiment: always return the active REPL instead of a potentially
+        //             better match being a REPL started from same project as the file
+        //             IFile file = (IFile) getEditorInput().getAdapter(IFile.class);
+        //             if (file != null) {
+        //                     REPLView repl = CCWPlugin.getDefault().getProjectREPL(file.getProject());
+        //                     if (repl !=  null) {
+        //                             return repl;
+        //                     }
+        //             }
+        //            
+        // Last resort : we return the current active REPL, if any
+        return REPLView.activeREPL.get();
     }
     
+    @Override
+    public @Nullable SafeConnection getSafeToolingConnection() {
+        REPLView v = getCorrespondingREPL();
+        if (v != null) {
+            return v.getSafeToolingConnection();
+        } else {
+            return null;
+        }
+    }
+
     public void updateTabsToSpacesConverter () {}
     
     // TODO get rid of this way of handling document initialization

@@ -1,6 +1,7 @@
 package ccw.editors.clojure;
 
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -9,6 +10,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import ccw.repl.REPLView;
+import ccw.repl.SafeConnection;
 
 /**
  * A callback interface allowing various facilities to treat
@@ -86,7 +88,13 @@ public interface IClojureEditor extends IAdaptable {
     /**
      * Can be null...
      */
-    REPLView getCorrespondingREPL ();
+    @Nullable REPLView getCorrespondingREPL();
+    
+    /**
+     * Gets the connection.
+     * @return The connection, or null if none
+     */
+    @Nullable SafeConnection getSafeToolingConnection();
     
     void updateTabsToSpacesConverter ();
 
@@ -114,4 +122,6 @@ public interface IClojureEditor extends IAdaptable {
 	void markDamagedAndRedraw();
 	
 	boolean isForceRepair();
+	
+
 }
