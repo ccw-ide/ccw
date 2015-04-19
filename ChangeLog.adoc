@@ -82,7 +82,7 @@ Internally, Counterclockwise now uses Clojure 1.7.0-master. It adds a couple pat
 === Fix
 
 - New Clojure Project Wizard honors the 'use previous location' checkbox. Fixes #682
-- Better support for clojure extension files: `cljs`, `cljx`, `clja`
+- Better support for clojure extension files: `cljs`, `cljx`, `clja`, `cljc`
 
 === Documentation
 - Add a mention about keyboard binding for switching between default and strict editing modes ( kbd:[Alt+D] ). Fixes #346
