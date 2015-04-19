@@ -70,14 +70,12 @@ import ccw.preferences.PreferenceConstants;
 import ccw.preferences.SyntaxColoringHelper;
 import ccw.repl.REPLView;
 import ccw.repl.SafeConnection;
-import ccw.util.BundleUtils;
 import ccw.util.ClojureInvoker;
 import ccw.util.DisplayUtil;
 import ccw.util.ITracer;
 import ccw.util.NullTracer;
 import ccw.util.Tracer;
 import clojure.lang.Keyword;
-import clojure.lang.Var;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -120,9 +118,6 @@ public class CCWPlugin extends AbstractUIPlugin {
 
 	private ITracer tracer = NullTracer.INSTANCE;
 
-	/** Clojure Invokers **/
-	private ClojureInvoker hoverSupportInvoker;
-	
 	public static ITracer getTracer() {
 		CCWPlugin plugin = getDefault();
 		if (plugin != null && plugin.tracer != null)
@@ -252,7 +247,6 @@ public class CCWPlugin extends AbstractUIPlugin {
         plugin = this;
         logDependenciesInformation(context);
 
-        hoverSupportInvoker = ClojureInvoker.newInvoker(this, "ccw.editors.clojure.hover-support");
         ccwContext = initInjections(context);
         
         context.addBundleListener(new BundleListener() {
@@ -330,9 +324,10 @@ public class CCWPlugin extends AbstractUIPlugin {
 			}
 		});
 
-		// Adding hover extension listener 
-		hoverSupportInvoker._("add-registry-listener");
-		hoverSupportInvoker._("add-preference-listener");
+		// Adding hover extension listener
+		ClojureInvoker invoker = ClojureInvoker.newInvoker(this, "ccw.editors.clojure.hover-support");
+        invoker._("add-registry-listener");
+        invoker._("add-preference-listener");
 
 		System.out.println("CCWPlugin.start: EXIT");
 	}
@@ -668,7 +663,7 @@ public class CCWPlugin extends AbstractUIPlugin {
 	    // http://www.eclipse.org/forums/index.php/t/370090/
 	    c.set(Logger.class, null);
 
-	    hoverSupportInvoker._("init-injections", c);
+	    ClojureInvoker.newInvoker(this, "ccw.editors.clojure.hover-support")._("init-injections", c);
 	    return c;
 	}
 	

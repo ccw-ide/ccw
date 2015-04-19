@@ -4,23 +4,23 @@
   ccw.editors.clojure.hover-support
   (:import java.util.ArrayList
            [org.eclipse.core.databinding.observable.list ObservableList
-            WritableList]
+                                                         WritableList]
            [org.eclipse.core.runtime CoreException
-            IRegistryEventListener
-            IExtensionRegistry]
+                                    IRegistryEventListener
+                                    IExtensionRegistry]
            [org.eclipse.e4.core.contexts IEclipseContext
-            ContextInjectionFactory]
+                                         ContextInjectionFactory]
            [org.eclipse.jface.text Region
-            ITextHover
-            ITextHoverExtension
-            ITextHoverExtension2
-            ITextViewerExtension2
-            IDocument]
+                                   ITextHover
+                                   ITextHoverExtension
+                                   ITextHoverExtension2
+                                   ITextViewerExtension2
+                                   IDocument]
            org.eclipse.swt.SWT
            ccw.CCWPlugin
            ccw.core.StaticStrings
            [ccw.editors.clojure.hovers HoverModel
-            HoverDescriptor]
+                                       HoverDescriptor]
            ccw.util.EditorUtility
            ccw.preferences.PreferenceConstants
            ccw.TraceOptions)
@@ -30,6 +30,7 @@
             [ccw.bundle :refer [available? bundle]]
             [ccw.eclipse :refer [preference
                                  preference!
+                                 ccw-combined-prefs
                                  workbench-editor]]
             [ccw.editors.clojure.editor-support :refer [source-viewer]]
             [ccw.core.trace :refer [trace]]
@@ -169,20 +170,23 @@
 (defn- read-and-sanitize-descriptor-string
   "Reads a descriptor list from the input string (in edn format, will use read-string."
   [edn-string]
-  (binding [*read-eval* false]
-    (map sanitize-descriptor (edn/read-string {:eof ""} edn-string))))
+  (map sanitize-descriptor (edn/read-string {:eof ""} edn-string)))
 
 (defn- read-descriptors-from-preference!
   "Loading what it is in the preferences, returns the hover descriptors accordingly."
   []
-  (read-and-sanitize-descriptor-string (preference PreferenceConstants/EDITOR_TEXT_HOVER_DESCRIPTORS "")))
+  (let [pref PreferenceConstants/EDITOR_TEXT_HOVER_DESCRIPTORS
+        default (some-> (ccw-combined-prefs) (.getDefaultString pref))] 
+    (read-and-sanitize-descriptor-string (preference pref (or default "")))))
 
 (defn- merge-descriptors
   "Merges the key-values of the two hover lists in input. The first list
   gets its key-values replaced by the second in case. See merge."
   [first-descriptor-list second-descriptor-list]
-  (let [second-list-by-id (into {} (map (juxt :id identity) second-descriptor-list))]
-    (map #(merge %1 (get second-list-by-id (:id %1) {})) first-descriptor-list)))
+  (if (seq first-descriptor-list) 
+    (let [second-list-by-id (into {} (map (juxt :id identity) second-descriptor-list))]
+      (map #(merge %1 (get second-list-by-id (:id %1) {})) first-descriptor-list))
+    second-descriptor-list))
 
 (defn- remove-and-cons
   "Removes the items in coll for which (pred old-item) is true and then conses new-item.
@@ -384,4 +388,4 @@
   This function is called early, when the contributed-hovers atom is still empty, therefore needs
   to get its returned array from the preferences."
   [_ _]
-  (int-array (map #(%1 :state-mask) (read-descriptors-from-preference!))))
+  (int-array (map :state-mask (merge-from-preference @contributed-hovers)) ))

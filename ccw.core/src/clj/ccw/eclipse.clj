@@ -617,7 +617,7 @@
   ([preferences-or-node-name key value] (.put (as-preferences preferences-or-node-name) key value)))
 
 (defn ccw-combined-prefs
-  ^IPreferenceStore []
+  []
   (some-> (ccw.CCWPlugin/getDefault) .getCombinedPreferenceStore ))
 
 (defn boolean-ccw-pref
