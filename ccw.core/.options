@@ -13,15 +13,15 @@ ccw.core/debug=false
 
 # When true CCWPlugin/log() calls will be traced in trace.log
 # in addition of being logged in .log
-ccw.core/log/info=false
+ccw.core/log/info=true
 
 # When true CCWPlugin/logWarning() calls will be traced in trace.log
 # in addition of being logged in .log
-ccw.core/log/warning=false
+ccw.core/log/warning=true
 
 # When true CCWPlugin/logError() calls will be traced in trace.log
 # in addition of being logged in .log
-ccw.core/log/error=false
+ccw.core/log/error=true
 
 # REPLView related traces
 ccw.core/repl=false
