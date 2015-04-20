@@ -1,7 +1,8 @@
 (ns ccw.editors.clojure.PareditAutoEditStrategyImpl
   (:use [paredit [core :only [paredit]]])
   (:use [clojure.core.incubator :only [-?>]])
-  (:require [ccw.editors.clojure.paredit-auto-edit-support :as support])  
+  (:require [ccw.editors.clojure.paredit-auto-edit-support :refer [apply-modif!]]
+            [ccw.eclipse :refer [boolean-ccw-pref]])
   (:import
     [org.eclipse.jface.text IAutoEditStrategy
                             IDocument
@@ -68,7 +69,7 @@
 
 (defn paredit-options [command]
   (when-let [options-prefs (command-preferences command)]
-    (mapcat (fn [[k pref]] [k (support/boolean-ccw-pref pref)]) 
+    (mapcat (fn [[k pref]] [k (boolean-ccw-pref pref)])
             options-prefs)))
 
 (defn do-command?
@@ -78,8 +79,8 @@
     (*strict-commands* par-command)
       (.isStructuralEditingEnabled editor)
     (*configuration-based-commands* par-command) ; works because I know no value can be nil in *configuration-based-commands*
-      (support/boolean-ccw-pref (*configuration-based-commands* par-command))
-    :else 
+      (boolean-ccw-pref (*configuration-based-commands* par-command))
+    :else
       true))
         
 (defn customizeDocumentCommand 
@@ -102,4 +103,4 @@
                             (.getParseState editor)
                             par-text
                             (paredit-options par-command)))]
-        (support/apply-modif! editor command result)))))
+        (apply-modif! editor command result)))))

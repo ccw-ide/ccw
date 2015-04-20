@@ -2,6 +2,9 @@
 <?eclipse version="3.2"?>
 <plugin>
 
+ <!-- see http://help.eclipse.org/indigo/topic/org.eclipse.jdt.doc.isv/reference/extension-points/org_eclipse_jdt_ui_javaEditorTextHovers.html -->
+ <extension-point id="ccw.core.cljEditorTextHovers" name="%cljEditorTextHoversExtensionName" schema="schema/cljEditorTextHovers.exsd"/>
+
  <extension point="org.eclipse.ui.console.consolePatternMatchListeners">
     <consolePatternMatchListener
        id="ccw.editors.clojure.StacktraceHyperlink"
@@ -1640,6 +1643,12 @@
           class="ccw.preferences.REPLHistoryPreferencePage"
           id="ccw.preferences.REPLHistoryPreferencePage"
           name="%preferencePage.repl.history.name">
+    </page>
+    <page
+          name="%preferencePage.hover.name"
+          category="ccw.preferences.EditorPreferencePage"
+          class="ccw.preferences.HoverPreferencePage"
+          id="ccw.preferences.HoverPreferencePage">
     </page>
  </extension>
  <extension
@@ -3398,5 +3407,32 @@
                name="ccw.*">
          </bundle>
       </component>
+   </extension>
+   <extension
+         point="ccw.core.cljEditorTextHovers">
+      <hover
+            label="%docstringHover"
+            description="%docstringHoverDescription"
+            id="ccw.editors.clojure.hovers.docstringHover"
+            activate="true">
+            <run class="ccw.util.GenericExecutableExtension">
+              <parameter
+                name="factory"
+                value="ccw.editors.clojure.hovers.docstring-hover/create-docstring-hover">
+              </parameter>
+            </run>
+      </hover>
+      <!--<hover
+            label="%debugHover"
+            description="%debugHoverDescription"
+            id="ccw.editors.clojure.hovers.DebugHover"
+            activate="true">
+            <factory class="ccw.util.GenericExecutableExtension">
+              <parameter
+                name="factory"
+                value="ccw.editors.clojure.hovers.debug-hover/create-debug-hover">
+              </parameter>
+            </factory>
+      </hover>-->
    </extension>
 </plugin>

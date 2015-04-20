@@ -1,8 +1,7 @@
 (ns ^{:doc "Eclipse interop utilities"}
      ccw.eclipse
-     (:require [clojure.java.io :as io]
-               [clojure.test :refer [deftest testing is]])
-  (:use [clojure.core.incubator :only [-?> -?>>]])
+  (:require [clojure.java.io :as io]
+            [clojure.core.incubator :refer [.?.]])
   (:import [org.eclipse.core.resources IResource
                                        IProject
                                        IProjectDescription
@@ -28,9 +27,13 @@
            [org.eclipse.ui.handlers HandlerUtil]
            [org.eclipse.ui IEditorPart
                            PlatformUI
-                           IWorkbench]
+                           IWorkbench
+                           IWorkbenchWindow
+                           IWorkbenchPage]
            [org.eclipse.jface.viewers IStructuredSelection]
            [org.eclipse.jface.operation IRunnableWithProgress]
+           [org.eclipse.jface.util IPropertyChangeListener]
+           [org.eclipse.jface.preference IPreferenceStore]
            [org.eclipse.core.commands ExecutionEvent]
            [org.eclipse.ui.actions WorkspaceModifyDelegatingOperation]
            [java.io File IOException]
@@ -78,13 +81,17 @@
 (defn workbench-window
   "Return the Active workbench window" 
   ([] (workbench-window (workbench)))
-  ([workbench] (.getActiveWorkbenchWindow workbench)))
+  ([^IWorkbench workbench] (.?. workbench getActiveWorkbenchWindow)))
 
 (defn workbench-page
-  "Return the Active workbench page" 
+  "Return the Active workbench page, might return nil."
   ([] (workbench-page (workbench-window)))
-  ([workbench-window] (.getActivePage workbench-window)))
+  ([^IWorkbenchWindow workbench-window] (.?. workbench-window getActivePage)))
 
+(defn workbench-editor
+  "Return the Active workbench editor, might return nil."
+  ([] (workbench-editor (workbench-page)))
+  ([^IWorkbenchPage workbench-page] (.?. workbench-page getActiveEditor)))
 
 (defprotocol IProjectCoercion
   (project ^org.eclipse.core.resources.IProject [this] "Coerce this into an IProject"))
@@ -609,6 +616,52 @@
   ([key value] (preference! "ccw.core" key value))
   ([preferences-or-node-name key value] (.put (as-preferences preferences-or-node-name) key value)))
 
+(defn ccw-combined-prefs
+  []
+  (some-> (ccw.CCWPlugin/getDefault) .getCombinedPreferenceStore ))
+
+(defn boolean-ccw-pref
+  "Get the value of a boolean Preference set for CCW. The 2-arity
+  function allows to specify an IPreferenceStore."
+  ([pref-key] (boolean-ccw-pref (ccw-combined-prefs) pref-key))
+  ([ccw-prefs pref-key] (.getBoolean ccw-prefs pref-key)))
+
+(defn int-ccw-pref
+  "Get the value of an Int Preference set for CCW. The 2-arity function
+  allows to specify an IPreferenceStore."
+  ([pref-key] (int-ccw-pref (ccw-combined-prefs) pref-key))
+  ([ccw-prefs pref-key] (.getInt ccw-prefs pref-key)))
+
+(defn string-ccw-pref
+  "Get the value of an Int Preference set for CCW. The 2-arity function
+  allows to specify an IPreferenceStore."
+  ([pref-key] (string-ccw-pref (ccw-combined-prefs) pref-key))
+  ([ccw-combined-prefs pref-key] (.getString ccw-combined-prefs pref-key)))
+
+(defn ^IEclipsePreferences get-pref-node
+  "Get the preference node set for CCW"
+  [^String project-name ^String pref-node-id]
+  (some-> project-name
+    ccw.launching.LaunchUtils/getProject
+    org.eclipse.core.resources.ProjectScope.
+    (.getNode pref-node-id)
+    (doto .sync)))
+
+(defn add-preference-listener
+  "Adds a listener in order to react to changes in the pref-key
+  preference and executes the given closure if any. Note that this
+  function generates a IPropertyChangeListener every time it is
+  invoked. The version without preference store defaults to
+  ccw-combined-prefs."
+  ([pref-key closure]
+    (add-preference-listener (ccw-combined-prefs) pref-key closure))
+  ([^IPreferenceStore pref-store pref-key closure]
+    (-> pref-store (.addPropertyChangeListener (reify
+                                                 IPropertyChangeListener
+                                                 (propertyChange [this event]
+                                                   (when (= (.getProperty event) pref-key)
+                                                     (closure))))))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; SWT utilities
 
@@ -927,9 +980,9 @@
   ([service-locator desc]
     (let [binding-service (service service-locator :bindings)
           kb (key-binding desc)
-          kb-id (-?> kb .getParameterizedCommand .getId)
-          id-binding-map (-?>> (bindings service-locator) 
-                           (group-by #(-?> % .getParameterizedCommand .getId)))
+          kb-id (some-> kb .getParameterizedCommand .getId)
+          id-binding-map (some->> (bindings service-locator)
+                           (group-by #(some-> % .getParameterizedCommand .getId)))
           id-binding-map (update-in id-binding-map [kb-id] (fnil conj []) kb)]
       (.savePreferences binding-service 
         (.getActiveScheme binding-service) 
@@ -956,12 +1009,3 @@
    (if-let [nrepl-port (re-matches port-validating-regex (str port))]
       (Integer/valueOf nrepl-port)
       0)))
-
-
-(deftest property-tests
-  (testing "nRepl port validation tests"
-    (is (= 0 (property-ccw-nrepl-port 0)))
-    (is (= 0 (property-ccw-nrepl-port 65536)))
-    (is (= 4 (property-ccw-nrepl-port 4)))
-    (is (= 4 (property-ccw-nrepl-port "4")))
-    (is (= 65535 (property-ccw-nrepl-port 65535)))))

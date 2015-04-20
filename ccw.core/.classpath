@@ -39,6 +39,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/jackson-core-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/jackson-dataformat-smile-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/java.classpath-jar/"/>
+	<classpathentry exported="true" kind="lib" path="lib/java.data-jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jline-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/jsoup-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/junit-jar/"/>
@@ -74,6 +75,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/slingshot-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/stencil-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/tools.cli-jar/"/>
+	<classpathentry exported="true" kind="lib" path="lib/tools.logging-jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/tools.macro-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/tools.nrepl-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/tools.reader-jar/"/>

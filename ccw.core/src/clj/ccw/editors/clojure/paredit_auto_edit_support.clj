@@ -1,21 +1,11 @@
 (ns ccw.editors.clojure.paredit-auto-edit-support
   (:use [clojure.core.incubator :only [-?>]])  
   (:import [org.eclipse.jface.text DocumentCommand]
-           [org.eclipse.jface.preference IPreferenceStore]
            [ccw.editors.clojure IClojureEditor]))
 
 (defn init
   "State Initialization for a new AutoEditInstance"
   [editor preference-store] (ref {:editor editor :prefs-store preference-store}))
-
-(defn ccw-prefs
-  ^IPreferenceStore []
-  (.getCombinedPreferenceStore (ccw.CCWPlugin/getDefault)))
-
-(defn boolean-ccw-pref 
-  "Get the value of a boolean Preference set for CCW"
-  ([pref-key] (boolean-ccw-pref (ccw-prefs) pref-key))
-  ([ccw-prefs pref-key] (.getBoolean ccw-prefs pref-key)))
 
 (defn add-command! [command modif]
   (.addCommand command (:offset modif)
