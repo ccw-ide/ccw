@@ -65,6 +65,10 @@ Counterclockwise ships with an embedded nREPL server. The following enhancements
 - Command line options: `-Dccw.nrepl.port=[1-65535]` allows to select the embedded nrepl port. `ccw.autostartrepl` has been renamed to `ccw.nrepl.autostart` for coherence.
 - Uses the cider-nrepl middleware instead of the bare default middleware.
 
+=== Hover Framework
+- New preference page for CCW hovers under Preferences->Clojure->Editor. Keyboard modifiers can now been set for each hover.
+- Added the ability of contributing and configuring ITextHover* instances to Counterclockwise through the ccw.core.cljEditorTextHovers extension point.
+
 === User Plugins
 
 - The keybinding cleaning function did concurrent modifications of an Eclipse Internal collection. Fix laurentpetit/ccw-plugin-manager#1
