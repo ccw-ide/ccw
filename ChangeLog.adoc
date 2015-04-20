@@ -70,6 +70,10 @@ Counterclockwise ships with an embedded nREPL server. The following enhancements
 - The result of the evaluated form will be pprinted when it is possible to use pprint (currently only if `cider-nrepl` is enabled).
 - A new Preference has been added to menu:Preferences[Clojure > REPL View] for disabling the use of pprint
 
+=== Hover Framework
+- New preference page for CCW hovers under menu:Preferences[Clojure > Editor > Hovers]. Keyboard modifiers can now been set for each hover.
+- Added the ability of contributing and configuring ITextHover* instances to Counterclockwise through the ccw.core.cljEditorTextHovers extension point.
+
 === User Plugins
 
 - The keybinding cleaning function did concurrent modifications of an Eclipse Internal collection. Fix laurentpetit/ccw-plugin-manager#1
