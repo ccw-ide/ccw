@@ -504,3 +504,13 @@ This also demonstrates how to split a plugin into script + companion namespaces.
 
 WARNING: the `hello-world` subdirectory will only be recognized as a plugin if there is no `.clj` file inside `~/.ccw/`
 
+
+= Report a problem with Counterclockwise
+
+== Activate Tracing
+
+Counterclockwise can be more verbose on what's going on if you active `Tracing`.
+
+To activate Traces, follow this http://www.vogella.com/tutorials/EclipseCodeAccess/article.html#tracing_runonatruntime[good Lars Vogel's Tutorial]
+
+
