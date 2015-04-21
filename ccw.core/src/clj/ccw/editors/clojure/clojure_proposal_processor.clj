@@ -444,6 +444,5 @@
             (reset! context-info new-context-info))
           (isContextInformationValid 
             [this offset]
-            ;(println "isValid called for offset:" offset)
             (let [{:keys [start stop]} (meta @context-info)]
               (<= start offset stop))))))))

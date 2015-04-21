@@ -78,4 +78,7 @@ public class TraceOptions {
 	/** Eclipse clojure utilities related traces */
 	public static final String ECLIPSE = "/eclipse";
 
+	/** Clojure Editor related traces */
+	public static final String EDITOR = "/editor";
+
 }

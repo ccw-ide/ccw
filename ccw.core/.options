@@ -67,3 +67,6 @@ ccw.core/events=false
 
 # Eclipse clojure utilities related traces
 ccw.core/eclipse=false
+
+# Clojure Editor related traces
+ccw.core/editor=false

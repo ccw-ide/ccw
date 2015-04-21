@@ -2,7 +2,8 @@
   (:require [clojure.zip :as z]
             [paredit.loc-utils :as lu]
             [ccw.editors.clojure.editor-support :as editor]
-            [ccw.editors.clojure.hyperlink :as hyperlink])
+            [ccw.editors.clojure.hyperlink :as hyperlink]
+            [ccw.core.trace :as t])
   (:use [clojure.core.incubator :only [-?>]])
   (:import 
     [org.eclipse.jface.text BadLocationException
@@ -40,13 +41,12 @@
 
 (defn detect-hyperlinks
   [offset ^IDocument document]
-  ;(println "nrepl hyperlink")
   (let [region (.getLineInformationOfOffset document offset)
         [line-offset line-length] [(.getOffset region) (.getLength region)]
         line (.get document line-offset line-length)]
-    ;(println "line:" line)
+    (t/format :editor "line: %s" line)
     (when-let [[offset length [_ host port]] (find-match-for-offset pattern line (- offset line-offset))]
-      ;(println "nrepl hyperlink:" :offset (+ line-offset offset) :length length)
+      (t/format :editor "nrepl hyperlink: [:offset :length]: [%s %s]" (+ line-offset offset) length)
       [{:offset (+ line-offset offset) :length length
         :open #(ccw.repl.REPLView/connect (format "nrepl://%s:%s" host port) true)}])))
 
