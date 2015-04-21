@@ -81,4 +81,7 @@ public class TraceOptions {
 	/** Clojure Editor related traces */
 	public static final String EDITOR = "/editor";
 
+	/** Eclipse project management related traces */
+	public static final String PROJECT = "/project";
+
 }

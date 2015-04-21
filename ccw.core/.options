@@ -70,3 +70,6 @@ ccw.core/eclipse=false
 
 # Clojure Editor related traces
 ccw.core/editor=false
+
+# Eclipse project management related traces
+ccw.core/project=false
