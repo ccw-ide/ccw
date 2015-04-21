@@ -72,4 +72,7 @@ public class TraceOptions {
 	/** CCW API for User Plugins related traces */
 	public static final String API = "/api";
 
+	/** Eclipse Event Broker Clojure wrapper related traces */
+	public static final String EVENTS = "/events";
+
 }

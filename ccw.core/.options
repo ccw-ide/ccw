@@ -61,3 +61,6 @@ ccw.core/e4=false
 
 # CCW API for User Plugins related traces
 ccw.core/api=false
+
+# Eclipse Event Broker Clojure wrapper related traces
+ccw.core/events=false
