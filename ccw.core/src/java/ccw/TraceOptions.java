@@ -62,4 +62,7 @@ public class TraceOptions {
 
 	/** Syntax color - Damager related traces */
    public static final String SYNTAX_COLOR__DAMAGER = "/syntax-color/damager";
+
+   /** Leiningen support related traces */
+   public static final String LEININGEN = "/leiningen";
 }

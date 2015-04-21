@@ -52,3 +52,6 @@ ccw.core/user-plugins=false
 
 # Syntax color - Damager related traces
 ccw.core/syntax-color/damager=false
+
+# Leiningen support related traces
+ccw.core/leiningen=false

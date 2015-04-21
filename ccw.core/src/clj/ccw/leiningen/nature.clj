@@ -5,7 +5,8 @@
             [ccw.jdt                           :as jdt]
             [clojure.java.io                   :as io]
             [ccw.leiningen.util                :as u]
-            [ccw.bundle                        :as b])
+            [ccw.bundle                        :as b]
+            [ccw.core.trace                    :as t])
   (:import 
     [org.eclipse.core.resources     IProjectNature
                                     IWorkspaceRoot]
@@ -34,7 +35,7 @@
     [java.io                        File
                                     FilenameFilter]))
 
-(println "ccw.leiningen.nature load starts")
+(t/trace :leiningen "ccw.leiningen.nature load starts")
 
 (def NATURE-ID "ccw.leiningen.nature")
 
@@ -91,7 +92,7 @@
      - or if no JVM version specified in Lein, pick the default one
    - Install a Leiningen Classpath Container" 
   [java-proj]
-  (let [lein-proj        (u/lein-project (e/project java-proj) :enhance-fn #(do (println %) (dissoc % :hooks)))
+  (let [lein-proj        (u/lein-project (e/project java-proj) :enhance-fn #(do (t/trace :leiningen %) (dissoc % :hooks)))
         jvm-entry        (jvm-entry-or-default java-proj)
         source-folders   (lein-source-folders lein-proj)
         source-entries   (map (fn [path] 
@@ -189,4 +190,4 @@
           (.setRule (e/workspace-root))
           (.schedule))))))
 
-(println "ccw.leiningen.nature namespace loaded")
+(t/trace :leiningen "ccw.leiningen.nature namespace loaded")

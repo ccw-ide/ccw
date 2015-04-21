@@ -3,7 +3,8 @@
             [ccw.eclipse :as e]
             [ccw.leiningen.nature :as n]
             [ccw.leiningen.handlers :as handlers]
-            [clojure.java.io :as io])
+            [clojure.java.io :as io]
+            [ccw.core.trace :as t])
   (:import  [org.eclipse.core.resources IProject IResource]
             [org.eclipse.jdt.core JavaCore]))
 
@@ -23,9 +24,8 @@
 
 (defn perform-finish [lein-project-name ^IProject project template-name template-args]
   (let [project-file (-> project .getLocation .toFile)]
-    (println "lein-project-name:" lein-project-name
-             \newline
-             "project-file:" project-file)
+    (t/format :leiningen
+      "lein-project-name: %s\nproject-file: %s" lein-project-name project-file)
     (u/lein-new (.getAbsolutePath project-file) template-name lein-project-name template-args)
     (.refreshLocal project (IResource/DEPTH_INFINITE) nil)
     (handlers/add-natures
