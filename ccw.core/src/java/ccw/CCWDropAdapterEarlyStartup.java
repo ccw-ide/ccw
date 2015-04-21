@@ -78,7 +78,6 @@ public class CCWDropAdapterEarlyStartup implements IStartup {
 
 	@Override
 	public void earlyStartup() {
-		System.out.println("CCW EARLY STARTUP");
 		UIJob registerJob = new UIJob(Display.getDefault(),
 				"CCWDropAdapterEarlyStartup") {
 			{
@@ -211,26 +210,10 @@ public class CCWDropAdapterEarlyStartup implements IStartup {
 			for (int op : PREFERRED_DROP_OPERATIONS) {
 				if ((allowedOperations & op) != 0) {
 					e.detail = op;
-					traceDropOperation(e.detail);
 					return;
 				}
 			}
 			e.detail = allowedOperations;
-			traceDropOperation(e.detail);
-		}
-		private void traceDropOperation(int op) {
-/*
-			if ((op & DND.DROP_COPY) != 0)
-				System.out.println("DROP_COPY");
-			if (op  == DND.DROP_DEFAULT)
-				System.out.println("DROP_DEFAULT");
-			if ((op & DND.DROP_LINK) != 0)
-				System.out.println("DROP_LINK");
-			if ((op & DND.DROP_MOVE) != 0)
-				System.out.println("DROP_MOVE");
-			if (op == DND.DROP_NONE)
-				System.out.println("DROP_NONE");
-*/
 		}
 
 		private void updateDragDetails(DropTargetEvent e) {
@@ -245,7 +228,6 @@ public class CCWDropAdapterEarlyStartup implements IStartup {
 
 		@Override
 		public void drop(DropTargetEvent event) {
-			System.out.println("drop " + event.widget.hashCode());
 			if (urlTransfer.isSupportedType(event.currentDataType)) {
 				// TODO url fetching on windows more complex than that => check how Eclise market place does it
 				final String url = getUrlFromEvent(event);
