@@ -49,3 +49,6 @@ ccw.core/outline=false
 
 # User plugins loading related traces
 ccw.core/user-plugins=false
+
+# Syntax color - Damager related traces
+ccw.core/syntax-color/damager=false

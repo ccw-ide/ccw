@@ -60,4 +60,6 @@ public class TraceOptions {
 	/** User plugins loading related traces */
 	public static final String USER_PLUGINS = "/user-plugins";
 
+	/** Syntax color - Damager related traces */
+   public static final String SYNTAX_COLOR__DAMAGER = "/syntax-color/damager";
 }
