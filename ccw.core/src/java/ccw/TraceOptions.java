@@ -57,4 +57,7 @@ public class TraceOptions {
 	/** Code Outline related traces */
 	public static final String OUTLINE = "/outline";
 
+	/** User plugins loading related traces */
+	public static final String USER_PLUGINS = "/user-plugins";
+
 }

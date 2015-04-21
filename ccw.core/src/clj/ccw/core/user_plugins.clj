@@ -2,22 +2,23 @@
   (:require [clojure.java.io :as io]
             [ccw.file :as f]
             [ccw.e4.dsl :as dsl]
-            [ccw.e4.model :as m]))
+            [ccw.e4.model :as m]
+            [ccw.core.trace :as t]))
 
 (defn clean-type-elements!
   "Find all type elements with tag 'ccw', and remove all those that
    dont have 'ccw/load-key' transient key with value load-key."
   [find-type-elements-by-tags application-type-elements app load-key]
-  ;(println "clean-type-elements! load-key=" load-key)
+  (t/format :user-plugins "clean-type-elements! load-key=%s" load-key)
   (let [cmds (find-type-elements-by-tags app ["ccw"])
-        ;_ (println "ccw type elements:" cmds)
+        _ (t/format :user-plugins "ccw type elements: %s" cmds)
         to-remove (remove #(= load-key
                               (get (m/transient-data %) "ccw/load-key")) 
                           cmds)
-        ;_ (println "to-remove:" to-remove)
+        _ (t/format :user-plugins "to-remove: %s" to-remove)
         app-cmds (application-type-elements app)]
     (doseq [c (doall to-remove)] ; prevents ConcurrentModificationExceptions in .remove
-      (println "user-plugins gc, element to remove:" c)
+      (t/format :user-plugins "user-plugins gc, element to remove: %s" c)
       (.remove app-cmds c))))
 
 (defn clean-commands!
@@ -49,7 +50,7 @@
                                 (not= load-key (get (m/transient-data key-binding) "ccw/load-key")))]
                     [key-binding key-bindings])]
     (doseq [[kb kbs] (doall to-remove)] ;; doall prevents ConcurrentModificationExceptions when calling .remove
-      (println "user-plugins gc, key-binding to remove: " kb)
+      (t/format :user-plugins "user-plugins gc, key-binding to remove: %s" kb)
       (.remove kbs kb))))
 
 (defn clean-elements!
@@ -64,7 +65,7 @@
               ["ccw"])
        to-remove (remove #(not= load-key (get (m/transient-data %) "ccw/load-key")) elts)]
    (doseq [e (doall to-remove)] ; prevents ConcurrentModificationExceptions in .remove
-     (println "user-plugins gc, element to remove:" e)
+     (t/format :user-plugins "user-plugins gc, element to remove: %s" e)
      (-> e .getParent .getChildren (.remove e)))))
 
 (defn clean-model!

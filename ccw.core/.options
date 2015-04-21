@@ -46,3 +46,6 @@ ccw.core/clojure.osgi=false
 
 # Code Outline related traces
 ccw.core/outline=false
+
+# User plugins loading related traces
+ccw.core/user-plugins=false
