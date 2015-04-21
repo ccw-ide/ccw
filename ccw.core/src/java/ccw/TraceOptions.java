@@ -61,8 +61,12 @@ public class TraceOptions {
 	public static final String USER_PLUGINS = "/user-plugins";
 
 	/** Syntax color - Damager related traces */
-   public static final String SYNTAX_COLOR__DAMAGER = "/syntax-color/damager";
+	public static final String SYNTAX_COLOR__DAMAGER = "/syntax-color/damager";
 
-   /** Leiningen support related traces */
-   public static final String LEININGEN = "/leiningen";
+	/** Leiningen support related traces */
+	public static final String LEININGEN = "/leiningen";
+
+	/** Eclipse 4 Model/Workbench related traces */
+	public static final String E4 = "/e4";
+
 }

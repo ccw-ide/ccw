@@ -55,3 +55,6 @@ ccw.core/syntax-color/damager=false
 
 # Leiningen support related traces
 ccw.core/leiningen=false
+
+# Eclipse 4 Model/Workbench related traces
+ccw.core/e4=false
