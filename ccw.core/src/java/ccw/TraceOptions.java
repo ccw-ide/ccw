@@ -75,4 +75,7 @@ public class TraceOptions {
 	/** Eclipse Event Broker Clojure wrapper related traces */
 	public static final String EVENTS = "/events";
 
+	/** Eclipse clojure utilities related traces */
+	public static final String ECLIPSE = "/eclipse";
+
 }

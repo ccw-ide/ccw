@@ -64,3 +64,6 @@ ccw.core/api=false
 
 # Eclipse Event Broker Clojure wrapper related traces
 ccw.core/events=false
+
+# Eclipse clojure utilities related traces
+ccw.core/eclipse=false
