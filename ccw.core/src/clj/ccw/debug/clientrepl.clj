@@ -8,11 +8,11 @@
 ;* Contributors: 
 ;*    Laurent PETIT - initial API and implementation
 ;*******************************************************************************/
-(ns ccw.debug.clientrepl)
-
-(import '(java.net ServerSocket Socket SocketException)
-        '(java.io InputStreamReader OutputStreamWriter)
-        '(clojure.lang LineNumberingPushbackReader))
+(ns ccw.debug.clientrepl
+  (:require [ccw.core.trace :as t])
+  (:import [java.net ServerSocket Socket SocketException]
+           [java.io InputStreamReader OutputStreamWriter]
+           [clojure.lang LineNumberingPushbackReader]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; library code
@@ -20,34 +20,34 @@
 (def ^:dynamic *default-repl-port* 8503)
 
 (defn remote-load [^String s]
-  ;(println "remote-load: begin")
+  (t/trace :repl-client "remote-load: begin")
   (with-open [client (new Socket "127.0.0.1" (int *default-repl-port*))]
-    ;(println "remote-load: opened socket on port " *default-repl-port*)
+    (t/format :repl-client "remote-load: opened socket on port %s" *default-repl-port*)
     (with-open [dis (new java.io.DataInputStream 
                          (new java.io.BufferedInputStream (.getInputStream client)))]
-      ;(println "remote-load: opened input and output stream to socket")
+      (t/trace :repl-client "remote-load: opened input and output stream to socket")
       (with-open [dos (new java.io.DataOutputStream (.getOutputStream client))]
-        ;(println "remote-load: opened data outputstream to socket")
+        (t/trace :repl-client "remote-load: opened data outputstream to socket")
         (let [s-bytes (.getBytes s "UTF-8")]
           (.writeInt dos (alength s-bytes))
           (.write dos s-bytes 0 (alength s-bytes))
           (.flush dos)
-          ;(println "remote-load: question written to output stream : "\" s "\"")
+          (t/format :repl-client "remote-load: question written to output stream:\"%s\"" s)
           (let [response-type (.readInt dis) ; 0 = OK, -1 = KO (exception)
                 response-bytes-length (.readInt dis)
                 response-bytes (make-array Byte/TYPE response-bytes-length)]
-            ;(println "remote-load: answer read: nb bytes of the answer:" response-bytes-length)
+            (t/format :repl-client "remote-load: answer read: %s bytes of the answer" response-bytes-length)
             (.readFully dis response-bytes 0 response-bytes-length)
-            ;(println "remote-load: answer read: answer content:" (new String response-bytes "UTF-8"))
-            ;(println "remote-load: end")
+            (t/format :repl-client "remote-load: answer read: answer content: %s" (new String response-bytes "UTF-8"))
+            (t/trace :repl-client "remote-load: end")
             { "response-type" response-type
               "response" (new String response-bytes "UTF-8")}))))))
 
 (defn remote-load-read [s]
-  ;(println "remote-load-read: begin")
+  (t/trace :repl-client "remote-load-read: begin")
   (let [result (remote-load s)]
-    ;(println "result: " result)
-    ;(println "remote-load-read: end")
+    (t/format :repl-client "result: %s" result)
+    (t/trace :repl-client "remote-load-read: end")
     { "response-type" (result "response-type")
       "response" (read-string (result "response")) }))
 

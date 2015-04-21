@@ -73,3 +73,6 @@ ccw.core/editor=false
 
 # Eclipse project management related traces
 ccw.core/project=false
+
+# Repl client related traces
+ccw.core/repl-client=false

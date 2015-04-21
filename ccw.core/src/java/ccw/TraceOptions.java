@@ -84,4 +84,7 @@ public class TraceOptions {
 	/** Eclipse project management related traces */
 	public static final String PROJECT = "/project";
 
+	/** Repl client related traces */
+	public static final String REPL_CLIENT = "/repl-client";
+
 }
