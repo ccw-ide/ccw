@@ -1,5 +1,3 @@
-(println "ccw.leiningen.classpath-container before ns decl")
-
 (ns ccw.leiningen.classpath-container
   (:use [clojure.core.incubator :only [-?> -?>>]])
   (:require [leiningen.core.project :as p]

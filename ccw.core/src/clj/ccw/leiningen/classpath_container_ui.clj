@@ -7,8 +7,6 @@
            [org.eclipse.swt.widgets Composite]
            [ccw.leiningen Messages]))
 
-(println "ccw.leiningen.classpath-container-ui load starts")
-
 (defn page-factory 
   "Creates a IClasspathContainerPage instance for Leiningen Managed Dependencies"
   [_]
@@ -29,4 +27,3 @@
     (.setDescription (Messages/PageDesc))
     (.setPageComplete true)))
 
-(println "classpath-container-ui namespace loaded")
