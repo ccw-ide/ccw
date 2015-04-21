@@ -69,4 +69,7 @@ public class TraceOptions {
 	/** Eclipse 4 Model/Workbench related traces */
 	public static final String E4 = "/e4";
 
+	/** CCW API for User Plugins related traces */
+	public static final String API = "/api";
+
 }

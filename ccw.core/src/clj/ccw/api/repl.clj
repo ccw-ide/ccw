@@ -2,6 +2,7 @@
   "Functions related to repl [views] interactions.
    API for User Plugins."
   (:refer-clojure :exclude [send namespace])
+  (:require [ccw.core.trace :as t])
   (:import [ccw.repl REPLView
                      Actions]))
 
@@ -29,7 +30,7 @@
         (boolean add-to-history)
         (boolean print-to-log)
         (boolean repeat-last-eval)))
-    (println "done sending")))
+    (t/trace :api "done sending")))
 
 (defn namespace
   "Get the current namespace for the repl connection"

@@ -58,3 +58,6 @@ ccw.core/leiningen=false
 
 # Eclipse 4 Model/Workbench related traces
 ccw.core/e4=false
+
+# CCW API for User Plugins related traces
+ccw.core/api=false
