@@ -4,8 +4,7 @@ Bundle-Name: Paredit.clj
 Bundle-SymbolicName: paredit.clj;singleton:=true
 Bundle-Version: 0.31.2.qualifier
 Bundle-ClassPath: .,
- src/,
- classes/
+ src/
 Bundle-Vendor: Counterclockwise team
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: paredit
