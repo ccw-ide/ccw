@@ -27,7 +27,8 @@
             [paredit.static-analysis :as static-analysis]
             [ccw.jdt :as jdt]
             [ccw.events :as evt]
-            [ccw.eclipse :as e])
+            [ccw.eclipse :as e]
+            [ccw.core.trace :as t])
   (:import [ccw.editors.clojure IClojureEditor]
            [org.eclipse.ui.texteditor SourceViewerDecorationSupport]))
 
@@ -37,9 +38,10 @@
   (try
     (p/edit-buffer buffer offset len text)
     (catch Exception e
-      (println (str "--------------------------------------------------------------------------------" \newline
-                    "Error while editing parsley buffer. offset:" offset ", len:" len ", text:'" text "'" \newline
-                    "buffer text:'" (-> buffer (p/buffer-parse-tree 0) lu/node-text) "'"))
+      (t/trace :editor
+        (str "--------------------------------------------------------------------------------" \newline
+             "Error while editing parsley buffer. offset:" offset ", len:" len ", text:'" text "'" \newline
+             "buffer text:'" (-> buffer (p/buffer-parse-tree 0) lu/node-text) "'"))
       (p/edit-buffer nil 0 0 final-text))))
 
 (defn updateTextBuffer [r final-text offset len text]
@@ -50,14 +52,15 @@
               parse-tree (p/buffer-parse-tree buffer build-id)]
           (if-not true #_(= final-text (lu/node-text parse-tree)) ;;;;;;;;; TODO remove this potentially huge perf sucker!
             (do
-              (println (str 
-                         "Doh! the incremental update did not work well. "
-                         \newline
-                         "offset:" offset ", " "len:" len ", " (str "text:'" text "'")
-                         \newline
-                         "final-text passed as argument:'" final-text "'" ", but text recomputed from parse-tree: '" (lu/node-text parse-tree) "'"
-                         \newline
-                         "What happened ? Will throw away the current buffer and start with a fresh one..."))
+              (t/trace :editor
+                (str
+                  "Doh! the incremental update did not work well. "
+                  \newline
+                  "offset:" offset ", " "len:" len ", " (str "text:'" text "'")
+                  \newline
+                  "final-text passed as argument:'" final-text "'" ", but text recomputed from parse-tree: '" (lu/node-text parse-tree) "'"
+                  \newline
+                  "What happened ? Will throw away the current buffer and start with a fresh one..."))
               (let [buffer (p/edit-buffer nil 0 -1 final-text)
                     parse-tree (p/buffer-parse-tree buffer build-id)]
                 (ref-set r {:text final-text, :incremental-text-buffer buffer, :previous-parse-tree (:parse-tree @r), :parse-tree parse-tree, :build-id build-id})))
@@ -87,7 +90,7 @@
     (if (= text (:text rv))
       {:parse-tree (:parse-tree rv), :buffer (:incremental-text-buffer rv)}
       (do
-        (println (str "cached parse-tree miss: expected text='" (:text rv) "'" ", text received: '" text "'"))
+        (t/trace :editor (str "cached parse-tree miss: expected text='" (:text rv) "'" ", text received: '" text "'"))
         (updateTextBuffer r text 0 -1 text)
         (recur text r)))))
 

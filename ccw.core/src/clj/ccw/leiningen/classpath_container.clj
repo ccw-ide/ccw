@@ -1,5 +1,3 @@
-(println "ccw.leiningen.classpath-container before ns decl")
-
 (ns ccw.leiningen.classpath-container
   (:use [clojure.core.incubator :only [-?> -?>>]])
   (:require [leiningen.core.project :as p]
@@ -10,7 +8,8 @@
             [ccw.eclipse :as e]
             [ccw.jdt :as jdt]
             [clojure.java.io :as io]
-            [ccw.leiningen.util :as u])
+            [ccw.leiningen.util :as u]
+            [ccw.core.trace :as t])
   (:import [org.eclipse.core.runtime CoreException
                                      IPath
                                      IProgressMonitor
@@ -32,7 +31,7 @@
            [java.io File
                     FilenameFilter]))
 
-(println "ccw.leiningen.classpath-container load starts")
+(t/trace :leiningen "ccw.leiningen.classpath-container load starts")
 
 (def CONTAINER-PATH (Path. "ccw.LEININGEN_CONTAINER"))
 
@@ -170,7 +169,7 @@
   (let [dependencies (resolve-dependencies project-name :dependencies lein-project)
         default-native-platform-path (u/lein-native-platform-path lein-project)
         srcmap (get-source-map lein-project)]
-    ;(println "default-native-platform-path:" default-native-platform-path)
+    (t/format :leiningen "default-native-platform-path: %s" default-native-platform-path)
     (->> dependencies
       (filter #(re-find #"\.(jar|zip)$" (.getName ^File %)))
       (sort-by #(.getName ^File %))
@@ -258,8 +257,7 @@
 
 (defn- report-container-error [?project message ^Throwable e]
   (add-container-marker (e/resource ?project) message)
-  (println message)
-  (.printStackTrace e))
+  (t/trace :leiningen message e))
 
 (defn- unresolved-artifacts [artifact-results]
   (remove #(.isResolved %) artifact-results))
@@ -364,7 +362,7 @@
    do not touch the current lein container."
   [java-project] ;; TODO checks
   (try
-    (let [lein-project (u/lein-project java-project :enhance-fn #(do (println %) (dissoc % :hooks)))
+    (let [lein-project (u/lein-project java-project :enhance-fn #(do (t/trace :leiningen %) (dissoc % :hooks)))
           deps (get-project-dependencies (.getName (e/project java-project)) lein-project)]
       ;; Here, get-project-dependencies has succeeded or thrown an error
       ;; it can take a long time, so we do not put it inside the workspace job
@@ -432,4 +430,4 @@
     (getDescription [container-path, java-project]
       CONTAINER-DESCRIPTION)))
 
-(println "classpath-container namespace loaded")
+(t/trace :leiningen "classpath-container namespace loaded")

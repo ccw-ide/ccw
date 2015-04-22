@@ -1,7 +1,8 @@
 (ns ^{:doc "Eclipse 4 Core Model manipulation namespace"}
      ccw.e4.model
   (:require [clojure.java.io :as io]
-            [ccw.eclipse     :as e])
+            [ccw.eclipse     :as e]
+            [ccw.core.trace  :as t])
   (:import [org.eclipse.e4.core.contexts IEclipseContext]
            [org.eclipse.ui IWorkbenchPart]
            [org.eclipse.ui.services IServiceLocator]
@@ -732,10 +733,10 @@
   "Find transient data in (:transient-data spec) and add to the transient
    data of e"
   [e spec]
-  ;(println "update-transient-data!" (type e) e spec)
+  (t/format :e4 "(update-transient-data! e: %s, spec: %s) (type e): %s" e spec (type e))
   (let [td (transient-data e)]
     (doseq [[k v] (:transient-data spec)]
-      ;(println "transient data:" "k:" k "v:" v)
+      (t/format :e4 "transient data [k, v]=[%s, %s]" k v)
       (.put td k v))))
 
 (def default-cmd-spec
@@ -832,7 +833,7 @@
   (if-let [bt (find-binding-table app context)]
     bt
     (do 
-      (println "find-or-create-binding-table bt not found")
+      (t/trace :e4 "find-or-create-binding-table bt not found")
       (let [bt (create-binding-table)]
        (doto bt
          (binding-context context))
@@ -875,21 +876,22 @@
                                     (find-app-binding-context app
                                       (key-binding-context (:context spec) (:context spec)))
                                     (do
-                                      (println "merge-key-binding! error no binding context found for" (:context spec)
-                                        ". Falling back to :window context")
+                                      (t/format :e4
+                                        "merge-key-binding! error no binding context found for %s. Falling back to :window context"
+                                        (:context spec))
                                       (find-app-binding-context app
                                         (key-binding-context :window)))))
         spec (assoc spec :scheme (key-binding-scheme (:scheme spec) (:scheme spec)))
         spec (update-in spec [:key-sequence] (comp normalize-key-sequence desugarize-key-sequence))]
-    (println "merge-key-binding! spec" spec)
+    (t/format :e4 "merge-key-binding! spec: %s" spec)
     (if-let [kb (find-key-binding app spec)]
       (do 
-        (println "key binding found:" kb)
+        (t/format :e4 "key binding found: %s" kb)
         kb)
       (do
-        (println "key binding not found, let's create one")
+        (t/trace :e4 "key binding not found, let's create one")
         (let [kb (-> (create-key-binding) (update-key-binding! spec))]
-          (println "created key binding:" kb)
+          (t/format :e4 "created key binding: %s" kb)
           (add-key-binding! app (:context spec) kb)
-          (println "added key binding:" kb)
+          (t/format :e4 "added key binding: %s" kb)
           kb)))))

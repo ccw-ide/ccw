@@ -2,8 +2,9 @@
   "Eclipse 4 DSL namespace.
    You can consider using (:require [ccw.e4.dsl :refer-all])
    since the macros / functions exposed have been carefully chosen."
-  (:require [ccw.e4.model :as m]
-            [ccw.eclipse  :as e])
+  (:require [ccw.e4.model   :as m]
+            [ccw.eclipse    :as e]
+            [ccw.core.trace :as t])
   (:import [ccw.util GenericHandler]))
 
 (def ^:dynamic *load-key* "repl")
@@ -23,7 +24,7 @@
                    (update-in [:tags]
                               (fnil conj #{})
                               "ccw"))]
-       ;(println "spec#:" spec#)
+       (t/format :e4 "spec#: %s" spec#)
        (m/merge-command! @m/app spec#))))
 
 (defmacro defcommand
@@ -104,7 +105,7 @@
                      (update-in [:tags]
                        (fnil conj #{})
                        "ccw"))]
-         ;(println "spec#:" spec#)
+         (t/format :e4 "spec#: %s" spec#)
          (m/merge-handler! @m/app spec#)))))
 
 ;; TODO support options !!!
@@ -153,5 +154,5 @@
                    (update-in [:tags]
                               (fnil conj #{})
                               "ccw"))]
-     ;(println "spec#:" spec#)
+     (t/format :e4 "spec#: %s" spec#)
      (m/merge-key-binding! @m/app spec#)))

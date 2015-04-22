@@ -11,7 +11,8 @@
 (ns ccw.clojure-project-nature
   (:require [clojure.java.io :as io]
             [ccw.jdt         :as jdt]
-            [ccw.eclipse     :as e])
+            [ccw.eclipse     :as e]
+            [ccw.core.trace  :as t])
   (:import
     [ccw CCWPlugin ClojureCore]
     [java.io IOException File]
@@ -105,7 +106,7 @@
 
 (defn- add-lib-on-classpath!
   [java-project lib-path libSrc-path copy?]
-  (println "about to add lib-path=" lib-path ", libSrc-path=" libSrc-path)
+  (t/format :project "about to add lib-path: %s, libSrc-path: %s" lib-path libSrc-path)
   (io!
     (if (nil? lib-path)
       (throw (CoreException. (Status/CANCEL_STATUS)))
@@ -131,8 +132,8 @@
                (into-array 
                  (conj entries-old 
                    (JavaCore/newLibraryEntry (make-ws-path in-project-lib) (make-ws-path in-project-libSrc) nil)))]
-             (println "java-project:" java-project)
-             (println "entries-new:" (seq entries-new))
+             (t/format :project "java-project: %s" java-project)
+             (t/format :project "entries-new: %s" (seq entries-new))
       	      (doto java-project
       	        (.setRawClasspath entries-new nil)
       	        (.save nil false)

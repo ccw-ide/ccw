@@ -9,8 +9,6 @@
            [org.eclipse.core.resources IResource]
            [org.eclipse.core.runtime IPath]))
 
-(println "ccw.jdt load starts")
-
 ;; We do not directly reference org.eclipse.jdt.ui/PreferenceConstants
 ;; because depending on when the class is imported, its initialization may occur
 ;; too early, which can cause subtle issues such as SWT invalid thread access errors
@@ -145,5 +143,3 @@
         path
         (e/path (default-output-path java-project)))
       progress-monitor)))
-
-(println "ccw.jdt namespace loaded")

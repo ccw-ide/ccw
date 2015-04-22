@@ -1,7 +1,8 @@
 (ns ^{:doc "Eclipse interop utilities"}
      ccw.eclipse
      (:require [clojure.java.io :as io]
-               [clojure.test :refer [deftest testing is]])
+               [clojure.test :refer [deftest testing is]]
+               [ccw.core.trace :as t])
   (:use [clojure.core.incubator :only [-?> -?>>]])
   (:import [org.eclipse.core.resources IResource
                                        IProject
@@ -441,7 +442,7 @@
 
 (defn remove-desc-natures! [^IProjectDescription desc & nature-ids]
   (let [natures (.getNatureIds desc)]
-    (println "(some (set natures) nature-ids)" (some (set natures) nature-ids))
+    (t/format :eclipse "(some (set natures) nature-ids): %s" (some (set natures) nature-ids))
     (if (some (set natures) nature-ids)
       (let [new-natures (remove (set nature-ids) natures)]
         (desc-natures! desc new-natures))
@@ -470,9 +471,9 @@
 (defn context-map->project
   "Extract (if possible) a project from a context-map"
   [{:keys [active-selection active-part active-editor]}]
-  (println "active-selection:" active-selection)
-  (println "active-part:" active-part)
-  (println "active-editor:" active-editor)
+  (t/format :eclipse "active-selection: %s" active-selection)
+  (t/format :eclipse "active-part: %s" active-part)
+  (t/format :eclipse "active-editor: %s" active-editor)
   (cond
     (project active-part) (project active-part)
     (and
@@ -748,10 +749,10 @@
         id (name (:command-id hspec))
         prev-handler-activation (@global-handlers id)]
     (when prev-handler-activation
-      (println "deactivating previous handler")
+      (t/trace :eclipse "deactivating previous handler")
       (.deactivateHandler hdl-service prev-handler-activation))
     (let [handler-activation (define-handler!* hspec)]
-      (println "registering new handler")
+      (t/trace :eclipse "registering new handler")
       (swap! global-handlers assoc id handler-activation))))
 
 (def default-category

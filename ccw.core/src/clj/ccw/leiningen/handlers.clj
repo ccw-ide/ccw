@@ -5,7 +5,8 @@
             [ccw.leiningen.generic-launch      :as glaunch]
             [clojure.string                    :as str]
             [ccw.eclipse                       :as e]
-            [clojure.java.io                   :as io])
+            [clojure.java.io                   :as io]
+            [ccw.core.trace                    :as t])
   (:import [org.eclipse.core.runtime       CoreException
                                            IPath
                                            Path
@@ -32,7 +33,7 @@
            [java.io                        File
                                            FilenameFilter]))
 
-(println "ccw.leiningen.handlers load starts")
+(t/trace :leiningen "ccw.leiningen.handlers load starts")
 
 (defn update-dependencies
   "Pre-requisites:
@@ -167,4 +168,4 @@
   (when-let [java-project (e/event->java-project event)]
     (upgrade-project-build-path java-project false)))
 
-(println "ccw.leiningen.handlers namespace loaded")
+(t/trace :leiningen "ccw.leiningen.handlers namespace loaded")

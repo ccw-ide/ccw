@@ -5,20 +5,21 @@
             [leiningen.core.utils :as utils]
             [leiningen.core.classpath :as classpath]
             [classlojure.core :as c]
-            [clojure.java.io :as io])
+            [clojure.java.io :as io]
+            [ccw.core.trace :as t])
   (:import [org.eclipse.core.resources IProject]
            [java.io File]
            [org.eclipse.core.runtime Platform
                                      FileLocator]))
 
-(println "ccw.leiningen.util load starts")
+(t/trace :leiningen "ccw.leiningen.util load starts")
 
 ;; TODO port back to ccw.core for the nature (place in ccw.util)
 (defn bundle-file 
   "given bundle-name (a String), return the java.io.File corresponding to the
    currently loaded instance of this bundle"
   [bundle-name]
-  (println "bundle-file:" bundle-name)
+  (t/format :leiningen "bundle-file: %s" bundle-name)
   (-> bundle-name Platform/getBundle FileLocator/getBundleFile))
 
 (defn bundle-dir 
@@ -181,4 +182,4 @@
                 "--"
                 '~args)))))
 
-(println "util namespace loaded")
+(t/trace :leiningen "util namespace loaded")

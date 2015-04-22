@@ -7,13 +7,15 @@ import org.eclipse.core.runtime.Status;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
+import ccw.CCWPlugin;
+import ccw.TraceOptions;
 import ccw.util.osgi.ClojureOSGi;
 import ccw.util.osgi.RunnableWithException;
 import clojure.lang.RT;
 import clojure.lang.Var;
 
 public final class BundleUtils {
-	
+
 	private BundleUtils() {
 		// Not intended to be instanciated
 	}
@@ -21,7 +23,7 @@ public final class BundleUtils {
 	/**
 	 * Returns the var corresponding to <code>varName</code>, requiring its
 	 * namespace first if not already present in memory.
-	 * 
+	 *
 	 * @param bundleSymbolicName the symbolic name of the bundle from which the
 	 *        namespace would be loaded, if so needed
 	 * @param varName fully qualified var name
@@ -39,26 +41,26 @@ public final class BundleUtils {
 					try {
 						return RT.var(nsName, nsFn[1]);
 					} catch( Exception e) {
-						System.out.println("Error while getting var " + varName);
+						String msg = String.format("Error while getting var %s", varName);
+						CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI, msg);
 						throw e;
 					}
 				}
 			});
 		} catch (Exception e) {
-			System.out.println( 
-					"Problem requiring namespace/getting var " + varName 
-					+ " from bundle " + bundle.getSymbolicName());
-			IStatus status = new Status(IStatus.ERROR, bundle.getSymbolicName(), 
-					"Problem requiring namespace/getting var " + varName 
-					+ " from bundle " + bundle.getSymbolicName(), e);
+			String msg = String.format(
+					"Problem requiring namespace/getting var %s from bundle %s",
+					varName, bundle.getSymbolicName());
+			CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI, e, msg);
+			IStatus status = new Status(IStatus.ERROR, bundle.getSymbolicName(), msg, e);
 			throw new CoreException(status);
 		}
 	}
-	
+
 	/**
 	 * Returns the var corresponding to <code>varName</code>, requiring its
 	 * namespace first if not already present in memory.
-	 * 
+	 *
 	 * @param bundleSymbolicName the symbolic name of the bundle from which the
 	 *        namespace would be loaded, if so needed
 	 * @param varName fully qualified var name
@@ -68,7 +70,7 @@ public final class BundleUtils {
 	public static Var requireAndGetVar(final String bundleSymbolicName, final String varName) throws CoreException {
 		return requireAndGetVar(loadAndGetBundle(bundleSymbolicName), varName);
 	}
-	
+
 	public static Bundle loadAndGetBundle(String bundleSymbolicName) throws CoreException {
 		// TODO: not good??, maybe we will not catch the right bundle (the same the OSGi framework would use ...)
 		try {
@@ -78,7 +80,7 @@ public final class BundleUtils {
 			}
 			return b;
 		} catch (BundleException e) {
-			IStatus status = new Status(IStatus.ERROR, bundleSymbolicName, 
+			IStatus status = new Status(IStatus.ERROR, bundleSymbolicName,
 					"Unable to start bundle", e);
 			throw new CoreException(status);
 		}

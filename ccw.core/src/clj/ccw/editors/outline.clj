@@ -31,8 +31,7 @@
     (catch LispReader$ReaderException e
       ; once a syntax error occurs (often because of a namespaced keyword)
       ; there's little chance that the rest of the data will be worthwhile...
-      (t/trace :log/trace "Failed to read outline 'til the end" e)
-      ;(CCWPlugin/logWarning "Failed to read outline 'til the end", e)
+      (t/trace :outline "Failed to read outline 'til the end" e)
       eof)))
 
 (defn read-forms [s]

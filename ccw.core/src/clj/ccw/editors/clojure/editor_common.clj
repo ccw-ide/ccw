@@ -8,7 +8,7 @@
             [clojure.zip :as z]
             [ccw.core.doc-utils :as doc]
             [ccw.debug.serverrepl :as serverrepl]
-            [ccw.core.trace :as trace]
+            [ccw.core.trace :as t]
             [ccw.editors.clojure.editor-support :as editor])
   (:use [clojure.core.incubator :only [-?>]])
   (:import [org.eclipse.jface.viewers StyledString
@@ -87,7 +87,7 @@
       (try
         (apply send-message* safe-connection message rest)
         (catch java.util.concurrent.TimeoutException e
-          (println " timeout !")
+          (t/trace :editor "timeout sending message: %s" message)
           (swap! timed-out-safe-connections update-in [safe-connection] (fnil inc 0)))))))
 
 (defn parse-symbol? 
