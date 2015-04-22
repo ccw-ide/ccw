@@ -43,7 +43,8 @@
    - or the event's active Part can be coerced to a project and we can then try
      to check it.
    In both cases, the found project must be open, and with the Leiningen nature
-   enabled."
+   enabled.
+   Calls cpc/update-project-dependencies which will trigger a background job"
   [handler event]
   (when-let [java-project (e/event->java-project event)]
     (cpc/update-project-dependencies java-project)))
