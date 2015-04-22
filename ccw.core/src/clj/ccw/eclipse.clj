@@ -571,10 +571,14 @@
   [name f]
   (proxy [WorkspaceJob] [name]
     (runInWorkspace [^IProgressMonitor monitor]
-      (let [s (f monitor)]
-        (if (instance? IStatus s)
-          s
-          (Status/OK_STATUS))))))
+      (try
+        (let [s (f monitor)]
+          (if (instance? IStatus s)
+            s
+            (Status/OK_STATUS)))
+        (catch Exception e
+          (CCWPlugin/createErrorStatus (format "Unexpected exception while executing Job %s" name), e))))))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Preferences management utilities

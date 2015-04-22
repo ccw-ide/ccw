@@ -359,40 +359,46 @@
   "Get the dependencies.
    If deps fetched ok: sets lein container, save the dependencies list on disk.
    If an exception is thrown while fetching deps: report problem markers, 
-   do not touch the current lein container."
+   do not touch the current lein container.
+   Executes in a background workspace job."
   [java-project] ;; TODO checks
-  (try
-    (let [lein-project (u/lein-project java-project :enhance-fn #(do (t/trace :leiningen %) (dissoc % :hooks)))
-          deps (get-project-dependencies (.getName (e/project java-project)) lein-project)]
-      ;; Here, get-project-dependencies has succeeded or thrown an error
-      ;; it can take a long time, so we do not put it inside the workspace job
-      (doto
-        (e/workspace-job
-          (str "Upgrade project build path for project " (e/project-name java-project))
-          (fn [^IProgressMonitor monitor]
-            (set-lein-container java-project deps)
-            (delete-container-markers java-project)
-            (save-project-dependencies java-project deps)
-            (doto ;; we refresh the target folder outside the workspace-root lock
+  (doto
+    (e/workspace-job
+      (format "Update project dependencies for project %s" (e/project-name java-project))
+      (fn [^IProgressMonitor monitor]
+        (try
+          (let [lein-project (u/lein-project java-project :enhance-fn #(do (t/trace :leiningen %) (dissoc % :hooks)))
+                deps (get-project-dependencies (.getName (e/project java-project)) lein-project)]
+            ;; Here, get-project-dependencies has succeeded or thrown an error
+            ;; it can take a long time, so we do not put it inside the workspace job which blocks on the workspace root
+            (doto
               (e/workspace-job
-                (str "Refreshing project " (e/project-name java-project))
+                (format "Upgrade project build path for project %s" (e/project-name java-project))
                 (fn [^IProgressMonitor monitor]
-                  (refresh-target-folder java-project monitor)))
+                  (set-lein-container java-project deps)
+                  (delete-container-markers java-project)
+                  (save-project-dependencies java-project deps)
+                  (doto ;; we refresh the target folder outside the workspace-root lock
+                    (e/workspace-job
+                      (format "Refreshing project %s" (e/project-name java-project))
+                      (fn [^IProgressMonitor monitor]
+                        (refresh-target-folder java-project monitor)))
+                    (.setUser true)
+                    (.schedule))))
               (.setUser true)
-              (.schedule))))
-        (.setUser true)
-        ;; this rule is OK because we know the job needs it and will not take too long
-        (.setRule (e/workspace-root))
-        (.schedule)))
-    (catch Exception e
-      ;; TODO enhance this in the future ... (more accurate problem markers)
-      (let [[jresource message] (resource-message e java-project)
-            project-name (-> java-project e/resource .getName)]
-        (report-container-error
-          jresource
-          ;(str "Project '" project-name "', Leiningen classpath container problem: " message)
-          (str "Leiningen Managed Dependencies issue: " message)
-          e)))))
+              ;; this rule is OK because we know the job needs it and will not take too long
+              (.setRule (e/workspace-root))
+              (.schedule)))
+          (catch Exception e
+            ;; TODO enhance this in the future ... (more accurate problem markers)
+            (let [[jresource message] (resource-message e java-project)
+                  project-name (-> java-project e/resource .getName)]
+              (report-container-error
+                jresource
+                (format "Leiningen Managed Dependencies issue: %s" message)
+                e))))))
+    (.setUser true)
+    (.schedule)))
 
 (defn has-container? [java-project container-path]
   (let [entries (.getRawClasspath java-project)]
