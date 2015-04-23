@@ -62,7 +62,7 @@
       <import plugin="org.eclipse.core.runtime.compatibility"/>
       <import plugin="org.eclipse.osgi.services"/>
       <import plugin="org.eclipse.ui.trace"/>
-      <import feature="org.eclipse.rcp" version="4.3.2.v20140221-1700"/>
+      <import feature="org.eclipse.rcp"/>
    </requires>
 
    <plugin

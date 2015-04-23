@@ -15,7 +15,7 @@
                 <module>paredit.clj</module>
                 <module>ccw.feature</module>
                 <module>doc</module>
-                
+
                 <module>ccw.core.test</module>
         </modules>
 
@@ -37,15 +37,15 @@
                     </property>
                   </activation>
                   <properties>
-                    <maven.test.skip>true</maven.test.skip>
-                    </properties>
+                    <ui.test.skip>true</ui.test.skip>
+                  </properties>
                   </profile>
         </profiles>
 
         <properties>
                 <tycho-version>0.22.0</tycho-version>
                 <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-                <uitest.vmparams>-Dorg.eclipse.swtbot.search.timeout=30000 -Xmx1024m -XX:MaxPermSize=384m</uitest.vmparams>
+                <ui.test.vmparams>-Xmx1024m -XX:MaxPermSize=384m</ui.test.vmparams>
         </properties>
 
         <pluginRepositories>
@@ -66,7 +66,7 @@
                 </repository>
                 <repository>
                         <id>swtbot</id>
-                        <url>http://download.eclipse.org/technology/swtbot/snapshots</url>
+                        <url>http://download.eclipse.org/technology/swtbot/releases/latest/</url>
                         <layout>p2</layout>
                 </repository>
                 <repository>
@@ -177,9 +177,9 @@
                                         <dependency-resolution>
                                           <extraRequirements>
                                             <requirement>
-                                            <type>eclipse-feature</type>
-                                            <id>org.eclipse.rcp</id>
-                                            <versionRange>0.0.0</versionRange>
+                                              <type>eclipse-feature</type>
+                                              <id>org.eclipse.rcp</id>
+                                              <versionRange>0.0.0</versionRange>
                                             </requirement>
                                           </extraRequirements>
                                         </dependency-resolution>
