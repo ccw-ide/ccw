@@ -787,7 +787,7 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 
         stdinStyledText = stdinViewer.getTextWidget();
         stdinStyledText.setFont(JFaceResources.getFont(JFaceResources.TEXT_FONT));
-        stdinStyledText.setBackground(stdinStyledText.getShell().getDisplay().getSystemColor(SWT.COLOR_GRAY));
+        stdinStyledText.setBackground(stdinStyledText.getShell().getDisplay().getSystemColor(SWT.COLOR_BLACK));
         stdinStyledText.setForeground(stdinStyledText.getShell().getDisplay().getSystemColor(SWT.COLOR_DARK_GREEN));
         stdinStyledText.setToolTipText(InputAreaMode.STDIN.getPlaceHolder());
         // Display placeholder text when widget is empty and does not have focus
