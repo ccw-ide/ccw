@@ -63,7 +63,10 @@ The REPL is now a Clojurescript REPL. You now get code completion and documentat
 Counterclockwise ships with an embedded nREPL server. The following enhancements have been applied:
 
 - Command line options: `-Dccw.nrepl.port=[1-65535]` allows to select the embedded nrepl port. `ccw.autostartrepl` has been renamed to `ccw.nrepl.autostart` for coherence.
-- Uses the cider-nrepl middleware instead of the bare default middleware.
+-- Uses the cider-nrepl middleware instead of the bare default middleware.
+
+=== REPL View
+- If the REPL requires an input from the user, no blocking (modal) popup is used anymore. Instead, the Input Area is refocused to send its next content to *in* via the appropriate nREPL op.
 
 === User Plugins
 

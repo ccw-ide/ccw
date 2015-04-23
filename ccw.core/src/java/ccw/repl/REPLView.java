@@ -27,18 +27,19 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.projection.ProjectionViewer;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ST;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.VerifyKeyListener;
@@ -52,6 +53,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IViewSite;
@@ -160,11 +162,37 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
     /** record for colors used in logPanel */
     public final ClojureSourceViewer.EditorColors logPanelEditorColors = new ClojureSourceViewer.EditorColors();
 
+
+    /** SourceViewer for the zone where user can type code to send for evaluation */
     public ClojureSourceViewer viewer;
+    /** StyledText of the code SourceViewer */
+    public StyledText inputStyledText; // public only to simplify interop with helpers impl'd in Clojure
 
-    public StyledText viewerWidget; // public only to simplify interop with helpers impl'd in Clojure
+    /** ProjectionViewer for the zone where user can type text to send on stdin */
+    public ProjectionViewer stdinViewer;
+    /** StyledText for the stdin ProjectionViewer */
+    public StyledText stdinStyledText;
 
-    private StyledTextPlaceHolder placeholder;
+    /**
+     * Enum for the 2 modes of the input area: for typing code to send for
+     * evaluation, or text to send to stdin.
+     */
+    private static enum InputAreaMode {
+    	CODE("<type clojure code here>"),
+    	STDIN("<type text to send to stdin here>");
+
+    	private final String placeHolder;
+
+    	InputAreaMode(String placeHolder) {
+    		this.placeHolder = placeHolder;
+    	}
+
+        /** Text to display when the text control does not have the focus */
+        public String getPlaceHolder() { return placeHolder; }
+
+    }
+
+    private InputAreaMode inputAreaMode = InputAreaMode.CODE;
 
     private ClojureSourceViewerConfiguration viewerConfig;
 
@@ -249,9 +277,13 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 			    newSessionAction.setEnabled(false);
 			    showConsoleAction.setEnabled(false);
 				activeREPL.compareAndSet(REPLView.this, null);
-				if (viewerWidget != null && !viewerWidget.isDisposed()) {
-					viewerWidget.setEditable(false);
-					StyledTextUtil.lightenStyledTextColors(viewerWidget, 0.5);
+				if (inputStyledText != null && !inputStyledText.isDisposed()) {
+					inputStyledText.setEditable(false);
+					StyledTextUtil.lightenStyledTextColors(inputStyledText, 0.5);
+				}
+				if (stdinStyledText != null && !stdinStyledText.isDisposed()) {
+					stdinStyledText.setEditable(false);
+					StyledTextUtil.lightenStyledTextColors(stdinStyledText, 0.5);
 				}
 				if (logPanel != null && !logPanel.isDisposed()) {
 					StyledTextUtil.lightenStyledTextColors(logPanel, DISCONNECTED_REPL_FG_TRANSPARENCY_PCT);
@@ -284,7 +316,8 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
     private void resetFont () {
         Font font= JFaceResources.getTextFont();
         logPanel.setFont(font);
-        viewerWidget.setFont(font);
+        inputStyledText.setFont(font);
+        stdinStyledText.setFont(font);
     }
 
     private void copyToLog (StyledText s) {
@@ -306,17 +339,40 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
     private String removeTrailingSpaces(String s) {
     	return (String) str._("trimr", s);
     }
+
     private void evalExpression () {
-    	// We remove trailing spaces so that we do not embark extra spaces,
-    	// newlines, etc. for example when evaluating after having hit the
-    	// Enter key (which automatically adds a new line
-    	viewerWidget.setText(removeTrailingSpaces(viewerWidget.getText()));
-        evalExpression(viewerWidget.getText(), true, false, false);
-        if (viewerWidget.getText().trim().length() > 0) {
-        	lastExpressionSentFromREPL = viewerWidget.getText();
-        }
-        copyToLog(viewerWidget);
-        viewerWidget.setText("");
+        switch (inputAreaMode) {
+		case CODE:
+	    	// We remove trailing spaces so that we do not embark extra spaces,
+	    	// newlines, etc. for example when evaluating after having hit the
+	    	// Enter key (which automatically adds a new line
+	    	inputStyledText.setText(removeTrailingSpaces(inputStyledText.getText()));
+	        evalExpression(inputStyledText.getText(), true, false, false);
+            if (inputStyledText.getText().trim().length() > 0) {
+                lastExpressionSentFromREPL = inputStyledText.getText();
+	        }
+	        copyToLog(inputStyledText);
+	        inputStyledText.setText("");
+			break;
+		case STDIN:
+			String inputText = stdinStyledText.getText();
+			if (!inputText.endsWith("\n")) {
+				inputText += "\n";
+			}
+
+            // We need to first reset the inputArea before invoking evalExpression
+			// or else we're at risk of race conditions between remote code wanting
+			// to fetch stdin again and code in this thread switching back to CODE
+			// afterwards
+			inputAreaMode = InputAreaMode.CODE;
+            stdinStyledText.setText("");
+            updateInputControls();
+
+	        evalExpression.invoke(PersistentHashMap.create("op", "stdin", "stdin", inputText), false);
+			break;
+		default:
+			break;
+    	}
     }
 
     public String getLastExpressionSentFromREPL() {
@@ -384,16 +440,33 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
     public void sendInterrupt() {
         viewHelpers._("log", this, logPanel, ";; Interrupting...", inputExprLogType);
         evalExpression.invoke(PersistentHashMap.create("op", "interrupt"), false);
+        // If we were in STDIN mode, switch back to CODE
+        inputAreaMode = InputAreaMode.CODE;
+        stdinViewer.getDocument().set("");
+        updateInputControls();
     }
 
-    public void getStdIn () {
-        InputDialog dlg = new InputDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
-                "Input requested", String.format("A REPL expression sent to %s requires a line of *in* input:",
-                        interactive.url), "", null);
-        // no conditional here; what else would we do if they canceled the dialog?
-        // Just a recipe for *requiring* an interrupt...?
-        dlg.open();
-        evalExpression.invoke(PersistentHashMap.create("op", "stdin", "stdin", dlg.getValue() + "\n"), false);
+    public void getStdIn() {
+        // Switch the Input Area for sending content to STDIN
+        // instead of evaluating code
+    	inputAreaMode = InputAreaMode.STDIN;
+        updateInputControls();
+        stdinViewer.getTextWidget().setFocus();
+        final String text = InputAreaMode.STDIN.getPlaceHolder();
+        stdinViewer.getDocument().set(text);
+        stdinViewer.setSelectedRange(text.length(), - text.length());
+    }
+
+    private void updateInputControls() {
+        Control newVisibleControl =
+            ( inputAreaMode==InputAreaMode.STDIN )
+                    ? stdinStyledText
+                    : inputStyledText;
+
+        if (inputControlsLayout.topControl != newVisibleControl) {
+            inputControlsLayout.topControl = newVisibleControl;
+            inputControlsStack.layout();
+        }
     }
 
     /**
@@ -572,6 +645,9 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
     	return  CCWPlugin.getDefault().getCombinedPreferenceStore();
     }
 
+    private Composite inputControlsStack;
+    private StackLayout inputControlsLayout;
+
     @Override
     public void createPartControl(Composite parent) {
         final IPreferenceStore prefs = getPreferences();
@@ -596,7 +672,12 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 		});
 
         structuralEditionModeStatusContributionItem = ClojureSourceViewer.createStructuralEditionModeStatusContributionItem();
-        viewer = new ClojureSourceViewer(split, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL, prefs,
+
+        inputControlsStack = new Composite(split, SWT.NONE);
+        inputControlsLayout = new StackLayout();
+        inputControlsStack.setLayout(inputControlsLayout);
+
+        viewer = new ClojureSourceViewer(inputControlsStack, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL, prefs,
         		new ClojureSourceViewer.IStatusLineHandler() {
 					@Override
 					public StatusLineContributionItem getEditingModeStatusContributionItem() {
@@ -639,14 +720,16 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 
         getViewSite().setSelectionProvider(viewer);
         viewer.setDocument(ClojureDocumentProvider.configure(new Document()));
+
+        inputStyledText = viewer.getTextWidget();
+
+        inputControlsLayout.topControl = inputStyledText;
+        inputControlsStack.layout();
+
         // Display placeholder text when widget is empty and does not have focus
-        final StyledText st = (StyledText) viewer.getControl();
+        createPlaceHolder(inputStyledText, InputAreaMode.CODE.getPlaceHolder());
 
-        setPlaceHolder(st, "<type clojure code here>");
-
-        viewerWidget = viewer.getTextWidget();
-
-        viewerWidget.setFont(JFaceResources.getFont(JFaceResources.TEXT_FONT));
+        inputStyledText.setFont(JFaceResources.getFont(JFaceResources.TEXT_FONT));
 
 		// ensure decoration support has been created and configured.
 		getSourceViewerDecorationSupport(viewer).install(prefs);
@@ -660,9 +743,9 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 		prefs.addPropertyChangeListener(prefsListener);
 
         // page up/down in input area should control log
-        viewerWidget.setKeyBinding(SWT.PAGE_DOWN, SWT.NULL);
-        viewerWidget.setKeyBinding(SWT.PAGE_UP, SWT.NULL);
-        viewerWidget.addListener(SWT.KeyDown, new Listener () {
+        inputStyledText.setKeyBinding(SWT.PAGE_DOWN, SWT.NULL);
+        inputStyledText.setKeyBinding(SWT.PAGE_UP, SWT.NULL);
+        inputStyledText.addListener(SWT.KeyDown, new Listener () {
            @Override
 		public void handleEvent (Event e) {
                switch (e.keyCode) {
@@ -676,7 +759,7 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
            }
         });
 
-        installMessageDisplayer(viewerWidget, new MessageProvider() {
+        installMessageDisplayer(inputStyledText, new MessageProvider() {
 			@Override
 			public String getMessageText() {
 				return getEvaluationHint();
@@ -696,7 +779,23 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
          */
         viewer.propertyChange(null);
 
-        viewerWidget.addFocusListener(new NamespaceRefreshFocusListener());
+        inputStyledText.addFocusListener(new NamespaceRefreshFocusListener());
+
+        /* Viewer for when the User is asked to input raw text */
+        stdinViewer = new ProjectionViewer(inputControlsStack, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL);
+        stdinViewer.setDocument(new Document());
+
+        stdinStyledText = stdinViewer.getTextWidget();
+        stdinStyledText.setFont(JFaceResources.getFont(JFaceResources.TEXT_FONT));
+        stdinStyledText.setBackground(stdinStyledText.getShell().getDisplay().getSystemColor(SWT.COLOR_BLACK));
+        stdinStyledText.setForeground(stdinStyledText.getShell().getDisplay().getSystemColor(SWT.COLOR_DARK_GREEN));
+        stdinStyledText.setToolTipText(InputAreaMode.STDIN.getPlaceHolder());
+        // Display placeholder text when widget is empty and does not have focus
+        createPlaceHolder(stdinStyledText, InputAreaMode.STDIN.getPlaceHolder());
+        installAutoSendStdinTextOnEnter();
+
+        stdinStyledText.addFocusListener(new NamespaceRefreshFocusListener());
+
         logPanel.addFocusListener(new NamespaceRefreshFocusListener());
 
         split.setWeights(new int[] {100, 75});
@@ -747,11 +846,11 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
         activate(CCW_UI_CONTEXT_REPL);
     }
 
-	private void setPlaceHolder(final StyledText st, final String placeholder) {
+	private void createPlaceHolder(final StyledText st, final String placeholderMessage) {
 		final IPropertyChangeListener replHintsListener = new IPropertyChangeListener() {
 			@Override public void propertyChange(PropertyChangeEvent event) {
 				if (event.getProperty().equals(PreferenceConstants.REPL_VIEW_DISPLAY_HINTS)) {
-					updatePlaceHolder(st, placeholder);
+					updatePlaceHolder(st, placeholderMessage);
 				}
 			}
 		};
@@ -761,18 +860,20 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 				getPreferences().removePropertyChangeListener(replHintsListener);
 			}
 		});
-		updatePlaceHolder(st, placeholder);
+		updatePlaceHolder(st, placeholderMessage);
 	}
 
-	private void updatePlaceHolder(final StyledText st, final String placeholder) {
+	private void updatePlaceHolder(final StyledText st, final String placeholderMessage) {
+		StyledTextPlaceHolder styledTextPlaceHolder = (StyledTextPlaceHolder) st.getData(StyledTextPlaceHolder.class.getName());
 		if (getPreferences().getBoolean(PreferenceConstants.REPL_VIEW_DISPLAY_HINTS)) {
-			if (this.placeholder == null) {
-				this.placeholder = new StyledTextPlaceHolder(st, placeholder);
+			if (styledTextPlaceHolder == null) {
+				styledTextPlaceHolder = new StyledTextPlaceHolder(st, placeholderMessage);
+				st.setData(StyledTextPlaceHolder.class.getName(), styledTextPlaceHolder);
 			}
-			this.placeholder.setPlaceHolder(placeholder);
+			styledTextPlaceHolder.setPlaceHolder(placeholderMessage);
 		} else {
-			if (this.placeholder != null) {
-				this.placeholder.setPlaceHolder(null);
+			if (styledTextPlaceHolder != null) {
+				styledTextPlaceHolder.setPlaceHolder(null);
 			}
 		}
 	}
@@ -1045,31 +1146,35 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
     	}
     }
 
+    /* We don't try to share with <code>installAutoSendStdinTextOnEnter</code>
+     * because the variations are subtle but multiple
+     */
     private void installAutoEvalExpressionOnEnter() {
-        viewerWidget.addVerifyKeyListener(new VerifyKeyListener() {
+        inputStyledText.addVerifyKeyListener(new VerifyKeyListener() {
         	private boolean enterAlonePressed(VerifyEvent e) {
         		return (e.keyCode == SWT.LF || e.keyCode == SWT.CR)
 						&& e.stateMask == SWT.NONE;
         	}
         	private boolean noSelection() {
-        		return viewerWidget.getSelectionCount() == 0;
+        		return inputStyledText.getSelectionCount() == 0;
         	}
         	private String textAfterCaret() {
-        		return viewerWidget.getText().substring(
-        				viewerWidget.getSelection().x);
+        		return inputStyledText.getText().substring(
+        				inputStyledText.getSelection().x);
         	}
         	private boolean isAutoEvalOnEnterAllowed() {
         		return getPreferences().getBoolean(PreferenceConstants.REPL_VIEW_AUTO_EVAL_ON_ENTER_ACTIVE);
         	}
 			@Override
 			public void verifyKey(VerifyEvent e) {
+				if (inputAreaMode!=InputAreaMode.CODE) return;
 				if (    isAutoEvalOnEnterAllowed()
 						&& enterAlonePressed(e)
 						&& noSelection()
 						&& textAfterCaret().trim().isEmpty()
 						&& !viewer.isParseTreeBroken()) {
 
-					final String widgetText = viewerWidget.getText();
+					final String widgetText = inputStyledText.getText();
 
 					// Executing evalExpression() via SWT's asyncExec mechanism,
 					// we ensure all the normal behaviour is done by the Eclipse
@@ -1082,7 +1187,7 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 						public void run() {
 							// we do not execute auto eval if some non-blank text has
 							// been added between the check and the execution
-							final String text = viewerWidget.getText();
+							final String text = inputStyledText.getText();
 							int idx = text.indexOf(widgetText);
 							if (idx == 0 && text.substring(widgetText.length()).trim().isEmpty()) {
 								evalExpression();
@@ -1093,6 +1198,49 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
         });
     }
 
+    /* We don't try to share with <code>installAutoEvalExpressionOnEnter</code>
+     * because the variations are subtle but multiple
+     */
+    private void installAutoSendStdinTextOnEnter() {
+        stdinStyledText.addVerifyKeyListener(new VerifyKeyListener() {
+            private boolean enterAlonePressed(VerifyEvent e) {
+                return (e.keyCode == SWT.LF || e.keyCode == SWT.CR)
+                        && e.stateMask == SWT.NONE;
+            }
+            private boolean noSelection() {
+                return stdinStyledText.getSelectionCount() == 0;
+            }
+            private String textAfterCaret() {
+                return stdinStyledText.getText().substring(
+                        stdinStyledText.getSelection().x);
+            }
+            private boolean isAutoEvalOnEnterAllowed() {
+                // Let's share the preference with auto_eval_on_enter, this seems consistent
+                return getPreferences().getBoolean(PreferenceConstants.REPL_VIEW_AUTO_EVAL_ON_ENTER_ACTIVE);
+            }
+			@Override
+			public void verifyKey(VerifyEvent e) {
+				if (inputAreaMode!=InputAreaMode.STDIN) return;
+				if (    isAutoEvalOnEnterAllowed()
+						&& enterAlonePressed(e)
+						&& noSelection()
+						&& textAfterCaret().trim().isEmpty()) {
+
+					// Executing evalExpression() via SWT's asyncExec mechanism,
+					// we ensure all the normal behaviour is done by the Eclipse
+					// framework on the Enter key, before sending the code.
+					// For example, we are then able to get rid of a bug with
+					// the content assistant which ensures the text is completed
+					// with the selection before being sent for evaluation.
+					DisplayUtil.asyncExec(new Runnable() {
+						@Override
+						public void run() {
+							evalExpression();
+						}});
+				}
+			}
+        });
+    }
     IHandlerService getHandlerService() {
         return (IHandlerService) getViewSite().getService(IHandlerService.class);
     }
@@ -1197,12 +1345,12 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
     public boolean isDisposed () {
         // TODO we actually want to report whether the viewpart has been closed, not whether or not
         // the platform has disposed the widget peer
-        return viewerWidget.isDisposed();
+        return inputStyledText.isDisposed();
     }
 
     @Override
     public void setFocus() {
-        viewerWidget.setFocus();
+        inputControlsStack.setFocus();
     }
 
     private final class NamespaceRefreshFocusListener implements FocusListener {
