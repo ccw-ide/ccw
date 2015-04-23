@@ -59,6 +59,16 @@ import org.eclipse.ui.progress.UIJob;
 
 import ccw.util.DisplayUtil;
 
+/**
+ * Startup configuration that needs to be executed early in the lifecycle.<br/>
+ * <br/>
+ * Note:<br/>
+ * The two instance variables below have been removed as they were causing CCW 
+ * to hang during tests, they probably cause deadlock during SWT startup in the
+ * test/junit environment.<br/><br/>
+ * <code>private final FileTransfer fileTransfer = FileTransfer.getInstance();</code>
+ * <code>private final URLTransfer urlTransfer = URLTransfer.getInstance();</code>
+ */
 public class CCWDropAdapterEarlyStartup implements IStartup {
 
 	private static final int[] PREFERRED_DROP_OPERATIONS = {
@@ -68,9 +78,6 @@ public class CCWDropAdapterEarlyStartup implements IStartup {
 			| DND.DROP_LINK | DND.DROP_DEFAULT;
 
 	private final DropTargetListener dropListener = new CreateProjectDropTargetListener();
-
-	private final FileTransfer fileTransfer = FileTransfer.getInstance();
-	private final URLTransfer urlTransfer = URLTransfer.getInstance();
 
 	private final WorkbenchListener workbenchListener = new WorkbenchListener();
 
@@ -110,12 +117,12 @@ public class CCWDropAdapterEarlyStartup implements IStartup {
 		DropTarget target = findDropTarget(c);
 		if (target != null) {
 			// target exists, get it and check proper registration
-			registerWithExistingTarget(target, fileTransfer);
-			registerWithExistingTarget(target, urlTransfer);
+			registerWithExistingTarget(target, FileTransfer.getInstance());
+			registerWithExistingTarget(target, URLTransfer.getInstance());
 		} else {
 			target = new DropTarget(c, DROP_OPERATIONS);
 			if (transferAgents == null) {
-				transferAgents = new Transfer[] { fileTransfer, urlTransfer };
+				transferAgents = new Transfer[] { FileTransfer.getInstance(), URLTransfer.getInstance() };
 			}
 			target.setTransfer(transferAgents);
 		}
@@ -145,8 +152,8 @@ public class CCWDropAdapterEarlyStartup implements IStartup {
 		DropTarget target = findDropTarget(c);
 		if (target != null) {
 			// target exists, get it and check proper registration
-			registerWithExistingTarget(target, fileTransfer);
-			registerWithExistingTarget(target, urlTransfer);
+			registerWithExistingTarget(target, FileTransfer.getInstance());
+			registerWithExistingTarget(target, URLTransfer.getInstance());
 			registerDropListener(target, dropTargetListener);
 		}
 		hookChildren(c, dropTargetListener);
@@ -223,12 +230,12 @@ public class CCWDropAdapterEarlyStartup implements IStartup {
 		}
 
 		private boolean dropTargetIsValid(DropTargetEvent e) {
-			return fileTransfer.isSupportedType(e.currentDataType) || urlTransfer.isSupportedType(e.currentDataType);
+			return FileTransfer.getInstance().isSupportedType(e.currentDataType) || URLTransfer.getInstance().isSupportedType(e.currentDataType);
 		}
 
 		@Override
 		public void drop(DropTargetEvent event) {
-			if (urlTransfer.isSupportedType(event.currentDataType)) {
+			if (URLTransfer.getInstance().isSupportedType(event.currentDataType)) {
 				// TODO url fetching on windows more complex than that => check how Eclise market place does it
 				final String url = getUrlFromEvent(event);
 				if (url != null &&
@@ -254,7 +261,7 @@ public class CCWDropAdapterEarlyStartup implements IStartup {
 				}
 				return;
 			}
-			if (!fileTransfer.isSupportedType(event.currentDataType)) {
+			if (!FileTransfer.getInstance().isSupportedType(event.currentDataType)) {
 				// ignore
 				return;
 			}
