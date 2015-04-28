@@ -25,7 +25,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/commons-logging-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/core.incubator-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/data.xml-jar/"/>
-	<classpathentry exported="true" kind="lib" path="lib/debugger-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/drawbridge-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/dynapath-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/hamcrest-core-jar/"/>
