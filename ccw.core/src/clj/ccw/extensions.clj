@@ -1,12 +1,23 @@
-(ns
-    ^{:author "Andrea Richiardi"
-      :doc "Wrappers around IConfigurationElement and IExtensionRegistry classes.
-          The generated data structure follows Chapter 8 of The Joy of Clojure (try xml/emit after extension->map)." }
+;*******************************************************************************
+;* Copyright (c) 2015 Laurent PETIT.
+;* All rights reserved. This program and the accompanying materials
+;* are made available under the terms of the Eclipse Public License v1.0
+;* which accompanies this distribution, and is available at
+;* http://www.eclipse.org/legal/epl-v10.html
+;*
+;* Contributors:
+;*    Andrea Richiardi - initial implementation (code reviewed by Laurent Petit)
+;*******************************************************************************/
+
+(ns ^{:author "Andrea Richiardi" }
   ccw.extensions
+  "Wrappers around IConfigurationElement and IExtensionRegistry classes.
+   The generated data structure follows Chapter 8 of The Joy of
+   Clojure (try xml/emit after extension->map)."
   (:import [org.eclipse.core.runtime IConfigurationElement
-            IExtensionRegistry
-            Platform
-            IRegistryEventListener]))
+                                     IExtensionRegistry
+                                     Platform
+                                     IRegistryEventListener]))
 
 (defn configuration-elements
   "Returns the IConfigurationElement(s) associated with the input extension id."
@@ -45,8 +56,7 @@
    Empty if the element does not contain attributes."
   [^IConfigurationElement element]
   {:pre [(not (nil? element))]}
-  (apply hash-map (flatten (let [attr-names (.getAttributeNames element)]
-              (map #(vector (keyword %1) (.getAttribute element %1)) attr-names)))))
+  (reduce #(assoc %1 (keyword %2) (element-attribute element %2)) {} (.getAttributeNames element)))
 
 (defn element->map
   "Return a descriptor from an IConfigurationElement. It doesn't consider the element's children,
@@ -54,18 +64,18 @@
    Chapter 8 of The Joy of Clojure."
   [^IConfigurationElement element]
   {:pre [(not (nil? element))]}
-  (hash-map :tag (.getName element)
-            :attrs (attributes->map element)
-            :content (map element->map (element-children element))))
+  {:tag (.getName element)
+   :attrs (attributes->map element)
+   :content (map element->map (element-children element))})
 
 (defn extension->map
   "Return a map of the Eclipse extension point identified by the input id. The resulting structure follows
    Chapter 8 of The Joy of Clojure."
   [extension-id]
   (when-let [conf-elements (configuration-elements extension-id)]
-    (hash-map :tag 'extension
-              :attrs { :point extension-id }
-              :content (map #(element->map %1) conf-elements))))
+    {:tag 'extension
+     :attrs { :point extension-id }
+     :content (map #(element->map %1) conf-elements)}))
 
 (defn element-valid?
   "Check if the element is valid. Check IConfigurationElement's javadoc."

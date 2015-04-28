@@ -1,19 +1,34 @@
-(ns
-    ^{:author "Andrea Richiardi"
-      :doc "Implements the pluggable hover framework for ClojureEditor." }
+;*******************************************************************************
+;* Copyright (c) 2015 Laurent PETIT.
+;* All rights reserved. This program and the accompanying materials
+;* are made available under the terms of the Eclipse Public License v1.0
+;* which accompanies this distribution, and is available at
+;* http://www.eclipse.org/legal/epl-v10.html
+;*
+;* Contributors:
+;*    Andrea Richiardi - initial implementation (code reviewed by Laurent Petit)
+;*******************************************************************************/
+
+(ns ^{:author "Andrea Richiardi" }
   ccw.editors.clojure.hover-support
+  "Implements the pluggable hover framework for ClojureEditor. A hover
+  descriptor holds the configuration info. It is exposed to the java
+  world through the HoverDescriptor bean (see to-java, from-java)."
   (:import java.util.ArrayList
            [org.eclipse.core.databinding.observable.list ObservableList
                                                          WritableList]
            [org.eclipse.core.runtime CoreException
-                                    IRegistryEventListener
-                                    IExtensionRegistry]
+                                     IRegistryEventListener
+                                     IExtensionRegistry
+                                     IExtension
+                                     IExtensionPoint]
            [org.eclipse.e4.core.contexts IEclipseContext
                                          ContextInjectionFactory]
            [org.eclipse.jface.text Region
                                    ITextHover
                                    ITextHoverExtension
                                    ITextHoverExtension2
+                                   ITextViewer
                                    ITextViewerExtension2
                                    IDocument]
            org.eclipse.swt.SWT
@@ -24,8 +39,8 @@
            ccw.util.EditorUtility
            ccw.preferences.PreferenceConstants
            ccw.TraceOptions)
-  (:use clojure.java.data)
-  (:require [clojure.string :refer [blank? join]]
+  (:require [clojure.java.data :refer :all]
+            [clojure.string :refer [blank? join]]
             [clojure.test :refer [deftest is run-tests]]
             [ccw.bundle :refer [available? bundle]]
             [ccw.eclipse :refer [preference
@@ -49,13 +64,16 @@
 
 (set! *warn-on-reflection* true)
 
-(defn- create-hover
-  "When the bundle is available and the element has activate=true, adds
-  a closure that, when called, will create the hover.  Underneath, this
-  will call createExecutableExtension on the value of the class
-  attribute. The value, common in the Eclipse platform, needs to be a
-  class that extends either IExecutableExtension or
-  IExecutableExtensionFactory."
+(defn- create-hover!
+  "Creates a hover instance from the input extension element by calling
+  .createExecutableExtension on the \"run\" tag. See
+  schema/cljEditorTextHovers.exsd for the hover extension point.
+  
+  Two conditions need to be met:
+  1) The CCW bundle is available
+  2) The element has tag activate=true.
+  3) Thu \"run\" tag specifies a class that extends either
+  IExecutableExtension or IExecutableExtensionFactory."
   [element]
   {:pre [(not (nil? element))]}
   (when (or (available? (bundle CCWPlugin/PLUGIN_ID))
@@ -73,10 +91,9 @@
          :enabled true}
         (attributes->map hover-element)))
 
-(defn- ensure-hover-created
+(defn- ensure-hover-created!
   "Create the hover instance, modifying the descriptor if
-  necessary. Returns a descriptor (as customary in Clojure, it can be a
-  new instance."
+  necessary. Returns a potentially updated descriptor value."
   [descriptor]
   (if (nil? (:instance descriptor))
     (-> (assoc descriptor :instance ((descriptor :create-hover)))
@@ -88,7 +105,7 @@
   Preconditions: instance key must be nil."
   [descriptor]
   {:pre [(not (nil? descriptor)) (nil? (descriptor :instance))]}
-  (assoc descriptor :create-hover #(create-hover (descriptor :element))))
+  (assoc descriptor :create-hover #(create-hover! (descriptor :element))))
 
 (defn- descriptor->types
   [descriptor]
@@ -97,8 +114,10 @@
     (instance? ITextHoverExtension (:instance descriptor)) (conj 'ITextHoverExtension)
     (instance? ITextHover (:instance descriptor)) (conj 'ITextHover)))
 
-(def ^{ :const true :private true :doc "The list of persisted properties."}
-  descriptor-persisted-keys [:id :enabled :modifier-string])
+(def ^:private
+  descriptor-persisted-keys
+  "The list of persisted properties."
+  [:id :enabled :modifier-string])
 
 (defn- create-java-descriptor-list
   "Function that returns a list of Java hover descriptors."
@@ -117,12 +136,12 @@
 ;;; Selectors ;;;
 ;;;;;;;;;;;;;;;;;
 
-(def ^{:const true :private true} debug-hover-id "ccw.editors.clojure.hovers.DebugHover")
+(def ^:private debug-hover-id "ccw.editors.clojure.hovers.DebugHover")
 
 (defn- select-debug-descriptor
   "Always selects and returns the Debug Hover."
   [descriptors]
-  (first (filter #(= (%1 :id) debug-hover-id) descriptors)))
+  (first (filter #(= (:id %1) debug-hover-id) descriptors)))
 
 (defn- select-default-descriptor
   "Always selects and returns the enabled Default descriptor, that is the one with
@@ -130,26 +149,31 @@
   [descriptors]
   (first (filter
           #(let [state-mask (:state-mask %1)]
-             (and (%1 :enabled) (or (= SWT/DEFAULT state-mask) (= SWT/NONE state-mask))))
+             (and (:enabled %1) (or (= SWT/DEFAULT state-mask) (= SWT/NONE state-mask))))
           descriptors)))
 
 (defn- select-hover-by-state-mask
   "Selects the first enabled descriptor with the input state mask. No
   check on the uniqueness of the descriptor is performed.  The return
   value is a hover descriptor, or nil if nothing matching the state mask
-  can be found."
-  [_ state-mask descriptors]
-  (first (filter #(and (%1 :enabled) (= state-mask (%1 :state-mask))) descriptors)))
+  can be found.
 
-(defn- select-hover-or-default
+  Note: The Eclipse framework passes content-type AND state-mask to
+  select a hover. At the moment CCW does not define content types and
+  therefore we do not select hovers using the first parameter. It is
+  there though, as we will probably need it in the future"
+  [_content-type state-mask descriptors]
+  (first (filter #(and (:enabled %1) (= state-mask (:state-mask %1))) descriptors)))
+
+(defn- select-descriptor
   "This function wraps the input selecting function so that if the
   selected hover is nil the default hover (the one with blank string
   modifier/state mask), if enabled, is returned instead. If even the
-  default is not enabled, this function returns nil.  The selecting-fn
-  must accept three parameters in this order: the content type, the
-  state mask and the list of descriptors."
-  [selecting-fn content-type state-mask descriptors]
-  (if-let [selected-descriptor (selecting-fn content-type state-mask descriptors)]
+  default is not enabled, this function returns nil. The selecting-fn
+  must accept the descriptor as parameter and return the selected
+  descriptor or nil."
+  [selecting-fn descriptors]
+  (if-let [selected-descriptor (selecting-fn descriptors)]
     selected-descriptor
     (select-default-descriptor descriptors)))
 
@@ -157,8 +181,10 @@
 ;;; Private  ;;;
 ;;;;;;;;;;;;;;;;
 
-(def ^{:const true :doc "The hover extension point unique identifier."}
-  text-hover-extension-point "ccw.core.cljEditorTextHovers")
+(def ^:private
+  text-hover-extension-point
+  "The hover extension point unique identifier."
+  "ccw.core.cljEditorTextHovers")
 
 (defn- sanitize-descriptor
   "Sanitize function on a hover descriptor."
@@ -192,7 +218,7 @@
   "Removes the items in coll for which (pred old-item) is true and then conses new-item.
   Returns a lazy seq."
   [pred new-item coll]
-  (lazy-seq (cons new-item (remove pred coll))))
+  (cons new-item (remove pred coll)))
 
 (defn- merge-from-preference
   "Updates the contributed-hovers atom reading and merging from preferences as well."
@@ -222,9 +248,9 @@
 ;;; Observables ;;
 ;;;;;;;;;;;;;;;;;;
 
-(defonce ^{:doc "Var containing the ObservableList of HoverDescriptor(s). The underlaying
+(defonce ^:private ^{:doc "Var containing the ObservableList of HoverDescriptor(s). The underlaying
  implementation must be thread safe as this instance is injected early (its lifecycle coinciding
- with the plugin's) and will mutate." }
+ with the plugin's) and will mutate."} 
   observable-hovers (WritableList. (ArrayList.) HoverDescriptor))
 
 (defn- update-observables-atom
@@ -238,10 +264,10 @@
 ;;; Atoms ;;;
 ;;;;;;;;;;;;;
 
-(defonce ^{:doc "Atom containing the list of hover descriptors."}
+(defonce ^:private ^{:doc "Atom containing the list of hover descriptors."}
   contributed-hovers (atom nil))
 
-(defonce ^{:doc "Atom containing the hover instances"}
+(defonce ^:private ^{:doc "Atom containing the hover instances"}
   hover-instances (atom nil))
 
 (defn- reset-atoms
@@ -264,15 +290,17 @@
   {:pre [(not (nil? editor))]}
   (when-let [sv (source-viewer editor)]
     (condp instance? sv
-      ITextViewerExtension2 (.setTextHover sv nil content-type state-mask)
-      true (.setTextHover sv nil content-type))))
+      ITextViewerExtension2 (.setTextHover ^ITextViewerExtension2 sv nil content-type state-mask)
+      true (.setTextHover ^ITextViewer sv nil content-type))))
 
-(def ^{:doc "Function that resets the default hover of the input editor."}
+(def ^:private
   reset-default-hover-on-editor!
+  "Function that resets the default hover of the input editor."
   (partial reset-hover-on-editor! IDocument/DEFAULT_CONTENT_TYPE ITextViewerExtension2/DEFAULT_HOVER_STATE_MASK))
 
-(def ^{:doc "Function that resets the default hover of the active editor."}
+(def ^:private
   reset-default-hover-on-active-editor!
+  "Function that resets the default hover of the active editor."
   #(reset-default-hover-on-editor! (workbench-editor)))
 
 ;;;;;;;;;;;;;;;;;
@@ -281,33 +309,29 @@
 
 (defn add-registry-listener
   []
-  (println "Registering" text-hover-extension-point "extension point registry listener...")
+  (trace :support/hover (str "Registering" text-hover-extension-point "extension point registry listener..."))
   (add-extension-listener
    (reify
      IRegistryEventListener
      (^void added [this #^"[Lorg.eclipse.core.runtime.IExtension;" extensions]
-       (doall (map #(trace :support/hover (str "IRegistryEventListener added extension with id: "
-                                               (.getLabel ^org.eclipse.core.runtime.IExtension %1))) extensions))
+       (doseq [^IExtension ex extensions] (trace :support/hover (str "IRegistryEventListener added extension with id: " (.getLabel ex))))
        (trace :support/hover "Resetting hovers...")
        (reset-atoms)
        (reset-default-hover-on-active-editor!))
 
      (^void removed [this #^"[Lorg.eclipse.core.runtime.IExtension;" extensions]
-       (doall (map #(trace :support/hover (str "IRegistryEventListener removed extension with id: "
-                                               (.getLabel ^org.eclipse.core.runtime.IExtension %1))) extensions))
+       (doseq [^IExtension ex extensions] (trace :support/hover (str "IRegistryEventListener removed extension with id: " (.getLabel ex))))
        (trace :support/hover "Resetting hovers...")
        (reset-atoms)
-       ((reset-default-hover-on-active-editor!)))
+       (reset-default-hover-on-active-editor!))
 
-     (^void added [this #^"[Lorg.eclipse.core.runtime.IExtensionPoint;" extensionpoints]
-       (doall (map #(trace :support/hover (str "IRegistryEventListener removed extension point with id: "
-                                               (.getLabel ^org.eclipse.core.runtime.IExtension %1))) extensionpoints))
+     (^void added [this #^"[Lorg.eclipse.core.runtime.IExtensionPoint;" extension-points]
+       (doseq [^IExtensionPoint ep extension-points] (trace :support/hover (str "IRegistryEventListener added extension point with id: " (.getLabel ep))))
        (trace :support/hover "Resetting hovers...")
        (reset-default-hover-on-active-editor!))
 
-     (^void removed [this #^"[Lorg.eclipse.core.runtime.IExtensionPoint;" extensionpoints]
-       (doall (map #(trace :support/hover (str "IRegistryEventListener removed extension point with id: "
-                                               (.getLabel ^org.eclipse.core.runtime.IExtension %1))) extensionpoints))
+     (^void removed [this #^"[Lorg.eclipse.core.runtime.IExtensionPoint;" extension-points]
+       (doseq [^IExtensionPoint ep extension-points] (trace :support/hover (str "IRegistryEventListener removed extension point with id: " (.getLabel ep))))
        (trace :support/hover "Resetting hovers...")
        (reset-atoms)
        (reset-default-hover-on-active-editor!)))
@@ -353,15 +377,15 @@
 ;;;;;;;;;;;
 
 (defn hover-instance
-  "Returns an ITextHover (or extensions) instance give editor, content-type and state-mask."
+  "Returns an ITextHover (or extensions) instance given editor, content-type and state-mask."
   [editor content-type state-mask]
   ;; TODO The selection could be improved by indexing the descriptors by state-mask
   (init-atoms)
-  (let [select-descriptor (partial select-hover-or-default
-                                   select-hover-by-state-mask content-type state-mask)]
-    (when-let [selected-descriptor (select-descriptor @contributed-hovers)]
+  (let [select-f (partial select-descriptor
+                          (partial select-hover-by-state-mask content-type state-mask))]
+    (when-let [selected-descriptor (select-f @contributed-hovers)]
       ;; ensure non nil descriptor arrives here
-      (let [new-descriptor (ensure-hover-created selected-descriptor)
+      (let [new-descriptor (ensure-hover-created! selected-descriptor)
             remove-hover #(= (:id new-descriptor) (:id %1))]
         ;; TODO improve
         (if-not (identical? selected-descriptor new-descriptor)
@@ -370,7 +394,7 @@
         (new-descriptor :instance)))))
 
 (defn init-injections
-  "Sets the a new instance of HoverModel in the input context."
+  "Sets a new instance of HoverModel in the input context."
   [^IEclipseContext context]
   (trace :support/hover (str "Initializing Injections..."))
   (.set context StaticStrings/CCW_CONTEXT_VALUE_HOVERMODEL

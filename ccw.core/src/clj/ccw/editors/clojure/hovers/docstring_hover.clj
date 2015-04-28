@@ -1,4 +1,16 @@
-(ns ccw.editors.clojure.hovers.docstring-hover
+;*******************************************************************************
+;* Copyright (c) 2015 Laurent PETIT.
+;* All rights reserved. This program and the accompanying materials
+;* are made available under the terms of the Eclipse Public License v1.0
+;* which accompanies this distribution, and is available at
+;* http://www.eclipse.org/legal/epl-v10.html
+;*
+;* Contributors:
+;*    Andrea Richiardi - initial implementation (code reviewed by Laurent Petit)
+;*******************************************************************************/
+
+(ns ^{:author "Andrea Richiardi" }
+  ccw.editors.clojure.hovers.docstring-hover
   "Supports documentation hovers for Clojure Editor"
   (:import [org.eclipse.jface.text Region
                                    ITextHover
