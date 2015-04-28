@@ -305,12 +305,13 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 	/** Last expression sent via the REPL input area, as opposed to sent by CCW, or sent via an editor, etc. */
 	private String lastExpressionSentFromREPL;
 
-	/** Reflects the user's choice of using pprint (when available) on the result of eval */
-	public boolean usePPrint = true;
-
 	/** Which value for pprint's :right-margin option to use when using pprint? */
 	public long pprintRightMargin = 80;
 
+    /** Reflects the user's choice of using pprint (when available) on the result of eval */
+    public boolean usePPrint() {
+        return getPreferences().getBoolean(PreferenceConstants.REPL_VIEW_PPRINT_RESULT);
+    }
 
     public REPLView () {}
 

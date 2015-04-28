@@ -68,6 +68,7 @@ Counterclockwise ships with an embedded nREPL server. The following enhancements
 - If the REPL requires an input from the user, no blocking (modal) popup is used anymore. Instead, the Input Area is refocused to send its next content to *in* via the appropriate nREPL op.
 
 - The result of the evaluated form will be pprinted when it is possible to use pprint (currently only if `cider-nrepl` is enabled).
+- A new Preference has been added to menu:Preferences[Clojure > REPL View] for disabling the use of pprint
 
 === User Plugins
 
