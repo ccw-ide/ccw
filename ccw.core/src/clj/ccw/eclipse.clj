@@ -633,7 +633,7 @@
   ([ccw-prefs pref-key] (.getInt ccw-prefs pref-key)))
 
 (defn string-ccw-pref
-  "Get the value of an Int Preference set for CCW. The 2-arity function
+  "Get the value of an String Preference set for CCW. The 2-arity function
   allows to specify an IPreferenceStore."
   ([pref-key] (string-ccw-pref (ccw-combined-prefs) pref-key))
   ([ccw-combined-prefs pref-key] (.getString ccw-combined-prefs pref-key)))
@@ -649,18 +649,18 @@
 
 (defn add-preference-listener
   "Adds a listener in order to react to changes in the pref-key
-  preference and executes the given closure if any. Note that this
-  function generates a IPropertyChangeListener every time it is
-  invoked. The version without preference store defaults to
-  ccw-combined-prefs."
-  ([pref-key closure]
-    (add-preference-listener (ccw-combined-prefs) pref-key closure))
-  ([^IPreferenceStore pref-store pref-key closure]
+  preference and executes the given closure (f must be a zero-arity
+  function, presumably with side-effects). Note that this function
+  generates a IPropertyChangeListener every time it is invoked. The
+  version without preference store defaults to ccw-combined-prefs."
+  ([pref-key f]
+    (add-preference-listener (ccw-combined-prefs) pref-key f))
+  ([^IPreferenceStore pref-store pref-key f]
     (-> pref-store (.addPropertyChangeListener (reify
                                                  IPropertyChangeListener
                                                  (propertyChange [this event]
                                                    (when (= (.getProperty event) pref-key)
-                                                     (closure))))))))
+                                                     (f))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; SWT utilities
