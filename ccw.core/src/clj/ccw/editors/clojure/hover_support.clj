@@ -220,7 +220,7 @@
   [pred new-item coll]
   (cons new-item (remove pred coll)))
 
-(defn- merge-from-preference
+(defn- merge-from-preference!
   "Updates the contributed-hovers atom reading and merging from preferences as well."
   [old-values]
   (merge-descriptors old-values (read-descriptors-from-preference!)))
@@ -278,7 +278,7 @@
 (defn- init-atoms
   "Initializes the hover atoms."
   []
-  (swap! contributed-hovers (comp merge-from-preference load-descriptors-if-necessary)))
+  (swap! contributed-hovers (comp merge-from-preference! load-descriptors-if-necessary)))
 
 ;;;;;;;;;;;;;;;;;
 ;;;    API    ;;;
@@ -411,4 +411,4 @@
   This function is called early, when the contributed-hovers atom is still empty, therefore needs
   to get its returned array from the preferences."
   [_ _]
-  (int-array (map :state-mask (merge-from-preference @contributed-hovers)) ))
+  (int-array (map :state-mask (merge-from-preference! @contributed-hovers)) ))
