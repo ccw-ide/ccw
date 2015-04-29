@@ -12,6 +12,7 @@ package ccw.preferences;
 
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
+import org.eclipse.jface.preference.IntegerFieldEditor;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
@@ -43,6 +44,17 @@ public class REPLViewPreferencePage extends FieldEditorPreferencePage implements
     			ccw.preferences.PreferenceConstants.REPL_VIEW_DISPLAY_HINTS, 
     			Messages.REPLViewPreferencePage_displayHint, 
     			getFieldEditorParent()));
+
+        addField(new BooleanFieldEditor(
+                ccw.preferences.PreferenceConstants.REPL_VIEW_PPRINT_RESULT,
+                Messages.REPLViewPreferencePage_pprintResult,
+                getFieldEditorParent()));
+
+        addField(
+                new IntegerFieldEditor(
+                        ccw.preferences.PreferenceConstants.REPL_VIEW_PPRINT_RIGHT_MARGIN,
+                        Messages.REPLViewPreferencePage_pprintRightMargin,
+                        getFieldEditorParent()));
 
     }
 

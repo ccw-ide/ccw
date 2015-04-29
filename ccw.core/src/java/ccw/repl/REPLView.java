@@ -305,6 +305,18 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 	/** Last expression sent via the REPL input area, as opposed to sent by CCW, or sent via an editor, etc. */
 	private String lastExpressionSentFromREPL;
 
+	/** Which value for pprint's :right-margin option to use when using pprint? */
+	public long pprintRightMargin = 40;
+
+    /** Reflects the user's choice of using pprint (when available) on the result of eval */
+    public boolean usePPrint() {
+        return getPreferences().getBoolean(PreferenceConstants.REPL_VIEW_PPRINT_RESULT);
+    }
+
+    public long getPPrintRightMargin() {
+        return getPreferences().getLong(PreferenceConstants.REPL_VIEW_PPRINT_RIGHT_MARGIN);
+    }
+
     public REPLView () {}
 
     @Override
@@ -382,7 +394,9 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
     public void evalExpression (String s, boolean addToHistory, boolean printToLog, boolean repeatLastREPLEvalIfActive) {
         try {
         	if (s.trim().length() > 0) {
-                if (printToLog) viewHelpers._("log", this, logPanel, s, inputExprLogType);
+                if (printToLog) {
+                    viewHelpers._("log", this, logPanel, s, inputExprLogType);
+                }
                 if (evalExpression == null) {
                 	viewHelpers._("log", this, logPanel, "Invalid REPL", errLogType);
                 } else {
@@ -507,6 +521,18 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 			@Override public void run() {
 				setPartName(String.format("REPL @ %s (%s)", interactive.url, currentNamespace));
 			}});
+    }
+
+    /**
+     * @return whether the back-end REPL is able to pprint the result of the eval
+     * if asked to do so.
+     */
+    public boolean isPPrintAvailable() {
+        System.out.println("operations:" + getAvailableOperations());
+        return getAvailableOperations().contains("pprint")
+                // FIXME This second check is a hack while waiting for cider-nrepl
+                //       to properly expose the pprint middleware through :describe op
+                || getAvailableOperations().contains("complete");
     }
 
     public String getCurrentNamespace () {

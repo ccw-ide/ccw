@@ -166,7 +166,9 @@ public class PreferenceConstants {
 
     public static final String REPL_VIEW_AUTO_EVAL_ON_ENTER_ACTIVE = CCW_PREFERENCE_PREFIX + ".repl_view_autoeval_on_enter_active"; //$NON-NLS-1$
     public static final String REPL_VIEW_DISPLAY_HINTS = CCW_PREFERENCE_PREFIX + ".repl_view_display_hints"; //$NON-NLS-1$
-    
+    public static final String REPL_VIEW_PPRINT_RESULT = CCW_PREFERENCE_PREFIX + " .repl_view_pprint_result";
+	public static final String REPL_VIEW_PPRINT_RIGHT_MARGIN = CCW_PREFERENCE_PREFIX + " .repl_view_pprint_right_margin";
+
     public static final String REPL_HISTORY_MAX_SIZE = CCW_PREFERENCE_PREFIX + ".repl_history_max_size"; //$NON-NLS-1$
     public static final String REPL_HISTORY_PERSIST_SCHEDULE = CCW_PREFERENCE_PREFIX + ".repl_history_persist_schedule"; //$NON-NLS-1$
     

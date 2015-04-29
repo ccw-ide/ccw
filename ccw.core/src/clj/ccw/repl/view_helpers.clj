@@ -58,23 +58,26 @@
 
 (defn log
   [^ccw.repl.REPLView repl-view ^StyledText log ^String s type]
-  (ui-sync
-    (let [charcnt (.getCharCount log)
-          [log-style highlight-background] (get log-styles type [default-log-style nil])
-          linecnt (.getLineCount log)]
-      (.append log s)
-      (when-not (re-find #"(\n|\r)$" s) (.append log "\n"))
-      (doto log
-        cursor-at-end
-        .showSelection
-        (.setStyleRange (log-style charcnt (- (.getCharCount log) charcnt))))
-      (when highlight-background
-        (.setLineBackground log (dec linecnt) (- (.getLineCount log) linecnt)
-          (ccw.CCWPlugin/getColor
-            ;; We use RGB color because we cannot take the Color directly since
-            ;; we do not "own" it (it would be disposed when colors are changed
-            ;; from the preferences, not good)
-            (-> repl-view .logPanelEditorColors .fCurrentLineBackgroundColor .getRGB)))))))
+  ;; We don't log values if it has already been pprinted by the back-end
+  (when-not (and (= :value type)
+                 (.usePPrint repl-view) (.isPPrintAvailable repl-view))
+    (ui-sync
+      (let [charcnt (.getCharCount log)
+            [log-style highlight-background] (get log-styles type [default-log-style nil])
+            linecnt (.getLineCount log)]
+        (.append log s)
+        (when-not (re-find #"(\n|\r)$" s) (.append log "\n"))
+        (doto log
+          cursor-at-end
+          .showSelection
+          (.setStyleRange (log-style charcnt (- (.getCharCount log) charcnt))))
+        (when highlight-background
+          (.setLineBackground log (dec linecnt) (- (.getLineCount log) linecnt)
+            (ccw.CCWPlugin/getColor
+              ;; We use RGB color because we cannot take the Color directly since
+              ;; we do not "own" it (it would be disposed when colors are changed
+              ;; from the preferences, not good)
+              (-> repl-view .logPanelEditorColors .fCurrentLineBackgroundColor .getRGB))))))))
 
 (defn eval-failure-msg
   [status s]
@@ -102,12 +105,17 @@
             nil))))))
 
 (defn eval-expression
+  "evaluate expression. Will use the current value for use-pprint and pprint-right-margin
+   if `expr` is not already a map."
   [repl-view log-component client expr]
   (try
     (repl/message client
       (if (map? expr)
         expr
-        {:op "eval" :code expr :ns (.getCurrentNamespace repl-view)}))
+        (let [m {:op "eval" :code expr :ns (.getCurrentNamespace repl-view)}]
+          (if (and (.usePPrint repl-view) (.isPPrintAvailable repl-view))
+            (assoc m :pprint "true" :right-margin (.getPPrintRightMargin repl-view))
+            m))))
     (catch Throwable t
       (CCWPlugin/logError (eval-failure-msg nil expr) t)
       (log repl-view log-component (eval-failure-msg nil expr) :err))))

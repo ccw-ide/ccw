@@ -57,7 +57,6 @@ Then invoke piggieback to start a Clojurescript REPL. Here's an example with a R
 
 The REPL is now a Clojurescript REPL. You now get code completion and documentation from the Clojurescript environment.
 
-
 === Counterclockwise embedded nREPL
 
 Counterclockwise ships with an embedded nREPL server. The following enhancements have been applied:
@@ -67,6 +66,9 @@ Counterclockwise ships with an embedded nREPL server. The following enhancements
 
 === REPL View
 - If the REPL requires an input from the user, no blocking (modal) popup is used anymore. Instead, the Input Area is refocused to send its next content to *in* via the appropriate nREPL op.
+
+- The result of the evaluated form will be pprinted when it is possible to use pprint (currently only if `cider-nrepl` is enabled).
+- A new Preference has been added to menu:Preferences[Clojure > REPL View] for disabling the use of pprint
 
 === User Plugins
 
