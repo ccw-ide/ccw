@@ -160,8 +160,7 @@
 
   Note: The Eclipse framework passes content-type AND state-mask to
   select a hover. At the moment CCW does not define content types and
-  therefore we do not select hovers using the first parameter. It is
-  there though, as we will probably need it in the future"
+  therefore we do not select hovers using the first parameter."
   [state-mask descriptors]
   (first (filter #(and (:enabled %1) (= state-mask (:state-mask %1))) descriptors)))
 
