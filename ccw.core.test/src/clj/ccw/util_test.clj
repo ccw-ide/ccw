@@ -15,7 +15,7 @@
         ccw.util))
 
 (with-private-vars [ccw.util [delayed-atom-fill
-                             delayed-atom-clear]]
+                              delayed-atom-clear]]
   (deftest ccw-core-tests
     "Tests the ccw.core namespace."
 
@@ -52,7 +52,4 @@
       (is (some? (with-atom nil (do (delayed-atom-swap! a build) (deref a)))) "Swapping: deref'd delayed atom is not nil.")
 
       (is (some? (with-atom nil (do (delayed-atom-reset! a unbuild) (deref a)))) "Resetting: deref'd delayed atom is not nil (it is still a delay.")
-      (is (= nil (with-atom nil (force (delayed-atom-reset! a unbuild)))) "Resetting: delay's value is always nil."))
-
-))
-;; (run-tests)
+      (is (= nil (with-atom nil (force (delayed-atom-reset! a unbuild)))) "Resetting: delay's value is always nil."))))
