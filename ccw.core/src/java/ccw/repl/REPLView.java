@@ -306,11 +306,15 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 	private String lastExpressionSentFromREPL;
 
 	/** Which value for pprint's :right-margin option to use when using pprint? */
-	public long pprintRightMargin = 80;
+	public long pprintRightMargin = 40;
 
     /** Reflects the user's choice of using pprint (when available) on the result of eval */
     public boolean usePPrint() {
         return getPreferences().getBoolean(PreferenceConstants.REPL_VIEW_PPRINT_RESULT);
+    }
+
+    public long getPPrintRightMargin() {
+        return getPreferences().getLong(PreferenceConstants.REPL_VIEW_PPRINT_RIGHT_MARGIN);
     }
 
     public REPLView () {}

@@ -114,7 +114,7 @@
         expr
         (let [m {:op "eval" :code expr :ns (.getCurrentNamespace repl-view)}]
           (if (and (.usePPrint repl-view) (.isPPrintAvailable repl-view))
-            (assoc m :pprint "true" :right-margin (.pprintRightMargin repl-view))
+            (assoc m :pprint "true" :right-margin (.getPPrintRightMargin repl-view))
             m))))
     (catch Throwable t
       (CCWPlugin/logError (eval-failure-msg nil expr) t)
