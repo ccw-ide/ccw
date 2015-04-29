@@ -29,10 +29,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunch;
-import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.EclipseContextFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.core.services.log.Logger;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.ColorRegistry;
@@ -106,13 +104,9 @@ public class CCWPlugin extends AbstractUIPlugin {
     /** The shared instance */
     private static CCWPlugin plugin;
 
-    /** The CCW custom context **/
-    private static IEclipseContext ccwContext;
-
     private ColorRegistry colorCache;
 
     private FontRegistry fontRegistry;
-
 
 	private AutomaticNatureAdder synchronizedNatureAdapter;
 
@@ -247,7 +241,7 @@ public class CCWPlugin extends AbstractUIPlugin {
         plugin = this;
         logDependenciesInformation(context);
 
-        ccwContext = initInjections(context);
+        initInjections(context);
         
         context.addBundleListener(new BundleListener() {
 
@@ -650,28 +644,19 @@ public class CCWPlugin extends AbstractUIPlugin {
 	}
 	
 	/**
-	 * Waiting for e4, this is the place where I initialize custom injectable instances.
-	 */
-	private IEclipseContext initInjections(BundleContext bundleContext) {
-	    IEclipseContext c = EclipseContextFactory.getServiceContext(bundleContext)
-	            .createChild(StaticStrings.CCW_CONTEXT_NAME);
-
-	    ContextInjectionFactory.setDefault(c);
-
-	    // Here is a workaround to use the EventBroker without logger
-	    // Taken from here http://www.eclipse.org/forums/index.php/t/245307/ and here
-	    // http://www.eclipse.org/forums/index.php/t/370090/
-	    c.set(Logger.class, null);
-
+     * Called in AbstractUIPlugin in order to initialize application-context instances.
+     */
+	private void initInjections(BundleContext bundleContext) {
+	    IEclipseContext c = EclipseContextFactory.getServiceContext(bundleContext);
+	    
 	    ClojureInvoker.newInvoker(this, "ccw.editors.clojure.hover-support")._("init-injections", c);
-	    return c;
 	}
 	
     private void cleanInjections() {
         // Empty for now
     }
-
-	public static IEclipseContext getContext() {
-		return ccwContext;
-	}
+    
+    public static IEclipseContext getEclipseContext() {
+       return EclipseContextFactory.getServiceContext(CCWPlugin.getDefault().getBundle().getBundleContext());
+    }
 }

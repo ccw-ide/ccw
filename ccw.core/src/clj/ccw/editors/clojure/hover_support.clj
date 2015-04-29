@@ -162,7 +162,7 @@
   select a hover. At the moment CCW does not define content types and
   therefore we do not select hovers using the first parameter. It is
   there though, as we will probably need it in the future"
-  [_content-type state-mask descriptors]
+  [state-mask descriptors]
   (first (filter #(and (:enabled %1) (= state-mask (:state-mask %1))) descriptors)))
 
 (defn- select-descriptor
@@ -381,9 +381,8 @@
   [editor content-type state-mask]
   ;; TODO The selection could be improved by indexing the descriptors by state-mask
   (init-atoms)
-  (let [select-f (partial select-descriptor
-                          (partial select-hover-by-state-mask content-type state-mask))]
-    (when-let [selected-descriptor (select-f @contributed-hovers)]
+  (let [select (partial select-descriptor (partial select-hover-by-state-mask state-mask))]
+    (when-let [selected-descriptor (select @contributed-hovers)]
       ;; ensure non nil descriptor arrives here
       (let [new-descriptor (ensure-hover-created! selected-descriptor)
             remove-hover #(= (:id new-descriptor) (:id %1))]

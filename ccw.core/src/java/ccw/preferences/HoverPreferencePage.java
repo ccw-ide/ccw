@@ -98,12 +98,10 @@ public class HoverPreferencePage extends PreferencePage implements IWorkbenchPre
      * @wbp.parser.constructor
      */
     public HoverPreferencePage() {
-        // Injecting
-        ContextInjectionFactory.inject(this, CCWPlugin.getContext());
-
+        ContextInjectionFactory.inject(this, CCWPlugin.getEclipseContext());
         fViewModel = new HoverViewModel(fModel);
     }
-
+    
     /**
      * Creates page for hover preferences.
      *
