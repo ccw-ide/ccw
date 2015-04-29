@@ -7,33 +7,34 @@
      (def ~'symbolic-name (.getSymbolicName bundle#))
      (def ~'trace-options
        (with-open [io# (-> bundle#
-                         (.getEntry "/.options")
-                         io/input-stream)]
+                           (.getEntry "/.options")
+                           io/input-stream)]
          (into {} (doto (Properties.)
                     (.load io#)))))
      (def ~'trace-options-keys (set (keys ~'trace-options)))))
 
 (defn trace-option-str [trace-option]
-  (if (keyword? trace-option) 
-    (.substring (str trace-option) 1)
-    trace-option))
+  (str "/" (if (keyword? trace-option)
+             (.substring (str trace-option) 1)
+             trace-option)))
+       
 
 (defmacro mk-trace-macros
   "Install all necessary macros in the calling namespace for leveraging the
-   Eclipse Tracing API.
-   bundle-call is the code necessary to get the bundle for which tracing support
-   must be added.
-   get-tracer-call is the code necessary to get an instance of ccw.util.ITracer.
-   This means an initialization still needs to be done in the bundle Activator.
+  Eclipse Tracing API.
+  bundle-call is the code necessary to get the bundle for which tracing support
+  must be added.
+  get-tracer-call is the code necessary to get an instance of ccw.util.ITracer.
+  This means an initialization still needs to be done in the bundle Activator.
 
-   The macros that are installed wrap the org.eclipse.osgi.service.debug.DebugTrace
-   utility methods:
+  The macros that are installed wrap the org.eclipse.osgi.service.debug.DebugTrace
+  utility methods:
 
-   (trace trace-option message)
-   (trace trace-option message throwable)
-   (trace-dump-stack trace-option)
-   (trace-entry trace-option & method-args)
-   (trace-exit trace-option & result-value)
+  (trace trace-option message)
+  (trace trace-option message throwable)
+  (trace-dump-stack trace-option)
+  (trace-entry trace-option & method-args)
+  (trace-exit trace-option & result-value)
   "
   [bundle-call get-tracer-call]
   (let [caller-ns (name (ns-name *ns*))
@@ -45,61 +46,64 @@
        
        (defn ~'^ccw.util.ITracer tracer [] ~get-tracer-call)
        
-       (defmacro ~'tracer-call [trace-option# & body#]
-         (let [trace-option# (trace-option-str trace-option#)]
-           (when-not (~'trace-options-keys (str ~'symbolic-name "/" trace-option#))
-             (throw (RuntimeException. 
-                      (str "Compilation error: call to ccw.trace/trace"
-                           " with non existent trace-option: " trace-option#))))
-           `(when (.isEnabled (~'~caller-tracer) ~trace-option#)
-              ~@body#)))
+       (defmacro ~'tracer-call [trace-option-string# & body#]
+         (when-not (~'trace-options-keys (str ~'symbolic-name trace-option-string#))
+           (throw (RuntimeException. 
+                   (str "Compilation error: call to ccw.trace/trace"
+                        " with non existent trace-option: " trace-option-string#))))
+         `(when (.isEnabled (~'~caller-tracer) ~trace-option-string#)
+            ~@body#))
        
        (defmacro ~'trace 
          ([trace-option# string#]
-           `(~'~caller-tracer-call ~(trace-option-str trace-option#)
-                                   (.trace (~'~caller-tracer) 
-                                     (trace-option-str ~trace-option#)
-                                     (into-array Object [~string#]))))
+          (let [trace-option-string# (trace-option-str trace-option#)]
+            `(~'~caller-tracer-call ~trace-option-string#
+                                    (.trace (~'~caller-tracer)
+                                            ~trace-option-string#
+                                            (into-array Object [~string#]))) ))
          ([trace-option# string# throwable#]
-           `(~'~caller-tracer-call ~(trace-option-str trace-option#)
-                                   (.trace (~'~caller-tracer) 
-                                     (trace-option-str ~trace-option#)
-                                     ~throwable#
-                                     (into-array Object [~string#])))))
+          (let [trace-option-string# (trace-option-str trace-option#)] 
+            `(~'~caller-tracer-call ~trace-option-string#
+                                    (.trace (~'~caller-tracer) 
+                                            ~trace-option-string#
+                                            ~throwable#
+                                            (into-array Object [~string#]))))))
        
        (defmacro ~'trace-dump-stack 
          ([trace-option#]
-           `(~'~caller-tracer-call ~(trace-option-str trace-option#)
-                                   (.traceDumpStack (~'~caller-tracer) 
-                                     (trace-option-str ~trace-option#)))))
+          (let [trace-option-string# (trace-option-str trace-option#)]
+            `(~'~caller-tracer-call ~trace-option-string#
+                                    (.traceDumpStack (~'~caller-tracer)
+                                                     ~trace-option-string#)))))
        
        (defmacro ~'trace-entry
          ([trace-option# & method-args#]
-           (cond
-             (nil? (seq method-args#))
-               `(~'~caller-tracer-call ~(trace-option-str trace-option#)
-                                       (. (~'~caller-tracer) 
+          (let [trace-option-string# (trace-option-str trace-option#)]
+            (cond
+              (nil? (seq method-args#))
+              `(~'~caller-tracer-call ~trace-option-string#
+                                      (. (~'~caller-tracer)
                                          ~'~'traceEntry
-                                         (trace-option-str ~trace-option#)))
-             :else
-               `(~'~caller-tracer-call ~(trace-option-str trace-option#)
-                                       (. (~'~caller-tracer) 
+                                         ~trace-option-string#))
+              :else
+              `(~'~caller-tracer-call ~trace-option-string#
+                                      (. (~'~caller-tracer) 
                                          ~'~'traceEntry
-                                         (trace-option-str ~trace-option#)
-                                         (into-array Object [~@method-args#]))))))
-       
+                                         ~trace-option-string#
+                                         (into-array Object [~@method-args#])))))))
        (defmacro ~'trace-exit
          ([trace-option# & result#]
-           (if (seq result#)
-             `(~'~caller-tracer-call ~(trace-option-str trace-option#)
-                                     (. (~'~caller-tracer) 
-                                       ~'~'traceExit
-                                       (trace-option-str ~trace-option#)
-                                       ~(first result#)))
-             `(~'~caller-tracer-call ~(trace-option-str trace-option#)
-                                     (. (~'~caller-tracer) 
-                                       ~'~'traceExit
-                                       (trace-option-str ~trace-option#))))))
+          (if (seq result#)
+            (let [trace-option-string# (trace-option-str trace-option#)]
+              `(~'~caller-tracer-call ~trace-option-string#
+                                      (. (~'~caller-tracer) 
+                                         ~'~'traceExit
+                                         ~trace-option-string#
+                                         ~(first result#)))
+              `(~'~caller-tracer-call ~trace-option-string#
+                                      (. (~'~caller-tracer) 
+                                         ~'~'traceExit
+                                         ~trace-option-string#))))))
        
        (defmacro ~'format [trace-option# format-string# & format-args#]
-         `(~'~caller-trace ~(trace-option-str trace-option#) (format ~format-string# ~@format-args#))))))
+           `(~'~caller-trace ~trace-option# (format ~format-string# ~@format-args#))))))
