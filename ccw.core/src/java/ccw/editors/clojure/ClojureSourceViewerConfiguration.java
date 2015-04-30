@@ -177,7 +177,7 @@ public class ClojureSourceViewerConfiguration extends
 	
 	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
-		return (ITextHover) hoverSupportInvoker._("hover-instance", editor, contentType, stateMask);
+		return (ITextHover) hoverSupportInvoker._("hover-instance", contentType, stateMask);
 	}
 
 	@Override

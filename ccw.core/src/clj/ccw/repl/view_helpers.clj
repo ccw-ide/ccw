@@ -11,6 +11,10 @@
   (:import
     [org.eclipse.ui.handlers HandlerUtil]))
 
+(defn workbench-display
+  []
+  (-> (PlatformUI/getWorkbench) .getDisplay))
+
 (defmacro ui-async
   [& body]
   `(-> (PlatformUI/getWorkbench)

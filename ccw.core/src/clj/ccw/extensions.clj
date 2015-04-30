@@ -92,7 +92,7 @@
 (defn add-extension-listener
   "Adds a IRegistryEventListener to the registry for the associated extension-id."
   [^IRegistryEventListener listener extension-id]
-  (let [^IExtensionRegistry registry (Platform/getExtensionRegistry)]
+  (when-let [^IExtensionRegistry registry (Platform/getExtensionRegistry)]
     (.addListener registry listener extension-id)))
 
 (defn mock-element

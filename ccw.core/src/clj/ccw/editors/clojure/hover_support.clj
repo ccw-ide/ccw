@@ -14,7 +14,9 @@
   "Implements the pluggable hover framework for ClojureEditor. A hover
   descriptor holds the configuration info. It is exposed to the java
   world through the HoverDescriptor bean (see to-java, from-java)."
+  (:refer-clojure :exclude [read-string])
   (:import java.util.ArrayList
+           org.eclipse.jface.databinding.swt.SWTObservables
            [org.eclipse.core.databinding.observable.list ObservableList
                                                          WritableList]
            [org.eclipse.core.runtime CoreException
@@ -60,7 +62,8 @@
                                     add-extension-listener
                                     mock-element]]
             [ccw.interop :refer [simple-name]]
-            [clojure.edn :as edn :refer [read-string]]))
+            [clojure.edn :as edn :refer [read-string]]
+            [ccw.repl.view-helpers :refer [workbench-display]]))
 
 (set! *warn-on-reflection* true)
 
@@ -75,7 +78,8 @@
   3) Thu \"run\" tag specifies a class that extends either
   IExecutableExtension or IExecutableExtensionFactory."
   [element]
-  {:pre [(not (nil? element))]}
+  {:pre [(not (nil? element))]
+   :post [(not (nil? %))]}
   (when (or (available? (bundle CCWPlugin/PLUGIN_ID))
             (Boolean/valueOf ^String (element-attribute element "activate")))
     (try
@@ -87,24 +91,14 @@
   "Build a descriptor from a hover IConfigurationElement taken from plugin.xml."
   [hover-element]
   (into {:element hover-element
-         :instance nil
          :enabled true}
         (attributes->map hover-element)))
-
-(defn- ensure-hover-created!
-  "Create the hover instance, modifying the descriptor if
-  necessary. Returns a potentially updated descriptor value."
-  [descriptor]
-  (if (nil? (:instance descriptor))
-    (-> (assoc descriptor :instance ((descriptor :create-hover)))
-        (dissoc :element))
-    descriptor))
 
 (defn- assoc-create-hover-closure
   "Create the hover instance, modifying the descriptor if necessary.
   Preconditions: instance key must be nil."
   [descriptor]
-  {:pre [(not (nil? descriptor)) (nil? (descriptor :instance))]}
+  {:pre [(not (nil? descriptor))]}
   (assoc descriptor :create-hover #(create-hover! (descriptor :element))))
 
 (defn- descriptor->types
@@ -201,8 +195,9 @@
   "Loading what it is in the preferences, returns the hover descriptors accordingly."
   []
   (let [pref PreferenceConstants/EDITOR_TEXT_HOVER_DESCRIPTORS
-        default (some-> (ccw-combined-prefs) (.getDefaultString pref))] 
-    (read-and-sanitize-descriptor-string (preference pref (or default "")))))
+        default (some-> (ccw-combined-prefs) (.getDefaultString pref))
+        descriptors (read-and-sanitize-descriptor-string (preference pref (or default "")))] 
+    descriptors))
 
 (defn- merge-descriptors
   "Merges the key-values of the two hover lists in input. The first list
@@ -213,17 +208,6 @@
       (map #(merge %1 (get second-list-by-id (:id %1) {})) first-descriptor-list))
     second-descriptor-list))
 
-(defn- remove-and-cons
-  "Removes the items in coll for which (pred old-item) is true and then conses new-item.
-  Returns a lazy seq."
-  [pred new-item coll]
-  (cons new-item (remove pred coll)))
-
-(defn- merge-from-preference!
-  "Updates the contributed-hovers atom reading and merging from preferences as well."
-  [old-values]
-  (merge-descriptors old-values (read-descriptors-from-preference!)))
-
 (defn- persist-java-hover-descriptors!
   "Persists the input hover desrcriptors for later retrieval."
   [java-descriptors]
@@ -231,53 +215,95 @@
     (preference! PreferenceConstants/EDITOR_TEXT_HOVER_DESCRIPTORS
                  (pr-str (map #(select-keys %1 descriptor-persisted-keys) descriptors)))))
 
-(defn- load-extensions
-  "Loads hover extensions."
-  []
-  (configuration-elements text-hover-extension-point))
-
-(defn- load-descriptors-if-necessary
+(defn- load-extension-descriptors!
   "Processing closure on the hover data structure."
-  [old-values]
-  (if-not (nil? old-values)
-    old-values
-    (map (comp assoc-create-hover-closure hover-element->descriptor) (load-extensions))))
+  []
+  (map (comp sanitize-descriptor assoc-create-hover-closure hover-element->descriptor)
+       (configuration-elements text-hover-extension-point)))
 
-;;;;;;;;;;;;;;;;;;
-;;; Observables ;;
-;;;;;;;;;;;;;;;;;;
+(defn- load-descriptors!
+  "Reads from both preference and extension point the hover descriptors
+  and merges together, with the one in the preference always taking
+  precedence."
+  []
+  (merge-descriptors (load-extension-descriptors!) (read-descriptors-from-preference!)))
 
-(defonce ^:private ^{:doc "Var containing the ObservableList of HoverDescriptor(s). The underlaying
- implementation must be thread safe as this instance is injected early (its lifecycle coinciding
- with the plugin's) and will mutate."} 
-  observable-hovers (WritableList. (ArrayList.) HoverDescriptor))
-
-(defn- update-observables-atom
-  "Updates the observable-hovers mutable atom. Returns the new value."
-  [descriptors]
-  (.clear ^ObservableList observable-hovers)
-  (.addAll ^ObservableList observable-hovers (create-java-descriptor-list descriptors))
-  observable-hovers)
 
 ;;;;;;;;;;;;;
-;;; Atoms ;;;
+;;; State ;;;
 ;;;;;;;;;;;;;
 
-(defonce ^:private ^{:doc "Atom containing the list of hover descriptors."}
-  contributed-hovers (atom nil))
+(defrecord State [contributed-descriptors
+                  observable-descriptors
+                  hovers-by-state-mask
+                  dirty]
+  java.lang.Object
+  (toString [_]
+    (with-out-str (do (println "*** Descriptors: ")
+                      (clojure.pprint/pprint contributed-descriptors)
+                      (println "*** Hovers: ")
+                      (clojure.pprint/pprint hovers-by-state-mask)
+                      (println "*** Dirty: " dirty)))))
 
-(defonce ^:private ^{:doc "Atom containing the hover instances"}
-  hover-instances (atom nil))
+(defonce ^:private ^{:doc "Atom containing the state."}
+  state-atom (atom (->State nil
+                            (WritableList. (ArrayList.) HoverDescriptor)
+                            nil
+                            true)))
 
-(defn- reset-atoms
+(defn- swap-observable-descriptors
+  "Updates the observable-hovers part of the state. Returns new state."
+  [old-state descriptors]
+  (let [observable-hovers ^ObservableList (:observable-descriptors old-state)
+        realm (SWTObservables/getRealm (workbench-display))]
+    (.exec realm #(do (.clear observable-hovers) 
+                      (.addAll observable-hovers (create-java-descriptor-list descriptors))))
+    (assoc old-state :observable-descriptors observable-hovers)))
+
+(defn- set-state-dirty
   "Resets the hover atoms."
-  []
-  (reset! contributed-hovers nil))
+  [old-state]
+  (assoc old-state :dirty true))
 
-(defn- init-atoms
-  "Initializes the hover atoms."
+(def ^:private contributed-descriptors
+  "Var containing a function returning the contributed descriptors in
+  the state."
+  #(:contributed-descriptors @state-atom))
+
+(def ^:private observable-descriptors
+  "Var containing a function returning the state observable descriptors
+  in the state, for the Eclipse data binding framework."
+  #(:observable-descriptors @state-atom))
+
+(defn- state-dirty?
+  [state]
+  (:dirty state))
+
+(defn- swap-descriptors-in-state
+  "Fills up the old-state with new descriptors. Sets the dirty flag
+  to false. Returns the new state."
+  [old-state descriptors]
+  (-> old-state
+      (assoc :contributed-descriptors descriptors)
+      (swap-observable-descriptors descriptors)
+      (assoc :dirty false)))
+
+(defn- swap-hover-instance-in-state
+  "Fills up the old-state with new hover instance. Does not touch the
+  dirty flag."
+  [old-state state-mask instance]
+  (assoc old-state :hovers-by-state-mask (assoc (:hovers-by-state-mask old-state) state-mask instance)))
+
+(defn- descriptors-update!
+  "Updates the descriptors. Swaps in a new state, if necessary, returning the new one."
   []
-  (swap! contributed-hovers (comp merge-from-preference! load-descriptors-if-necessary)))
+  (if (state-dirty? @state-atom)
+    (let [new-state (swap! state-atom swap-descriptors-in-state (load-descriptors!))]
+      (trace :support/hover (str "State dirty, loaded:\n" new-state))
+      new-state)
+    (do (trace :support/hover (str "State NOT dirty, returning:\n" @state-atom))
+        @state-atom)))
+
 
 ;;;;;;;;;;;;;;;;;
 ;;;    API    ;;;
@@ -297,55 +323,60 @@
   "Function that resets the default hover of the input editor."
   (partial reset-hover-on-editor! IDocument/DEFAULT_CONTENT_TYPE ITextViewerExtension2/DEFAULT_HOVER_STATE_MASK))
 
-(def ^:private
-  reset-default-hover-on-active-editor!
-  "Function that resets the default hover of the active editor."
-  #(reset-default-hover-on-editor! (workbench-editor)))
-
 ;;;;;;;;;;;;;;;;;
 ;;; Listeners ;;;
 ;;;;;;;;;;;;;;;;;
 
 (defn add-registry-listener
   []
-  (trace :support/hover (str "Registering" text-hover-extension-point "extension point registry listener..."))
+  (trace :support/hover (str "Registering " text-hover-extension-point "extension point registry listener..."))
   (add-extension-listener
    (reify
      IRegistryEventListener
      (^void added [this #^"[Lorg.eclipse.core.runtime.IExtension;" extensions]
        (doseq [^IExtension ex extensions] (trace :support/hover (str "IRegistryEventListener added extension with id: " (.getLabel ex))))
        (trace :support/hover "Resetting hovers...")
-       (reset-atoms)
-       (reset-default-hover-on-active-editor!))
+       (swap! state-atom set-state-dirty)
+       (descriptors-update!)
+       ;; I need some protection because here i might not have active editor
+       (some-> (CCWPlugin/getClojureEditor) reset-default-hover-on-editor!))
 
      (^void removed [this #^"[Lorg.eclipse.core.runtime.IExtension;" extensions]
        (doseq [^IExtension ex extensions] (trace :support/hover (str "IRegistryEventListener removed extension with id: " (.getLabel ex))))
        (trace :support/hover "Resetting hovers...")
-       (reset-atoms)
-       (reset-default-hover-on-active-editor!))
+       (swap! state-atom set-state-dirty)
+       (descriptors-update!)
+       ;; I need some protection because here i might not have active editor
+       (some-> (CCWPlugin/getClojureEditor) reset-default-hover-on-editor!))
 
      (^void added [this #^"[Lorg.eclipse.core.runtime.IExtensionPoint;" extension-points]
        (doseq [^IExtensionPoint ep extension-points] (trace :support/hover (str "IRegistryEventListener added extension point with id: " (.getLabel ep))))
        (trace :support/hover "Resetting hovers...")
-       (reset-default-hover-on-active-editor!))
+       (swap! state-atom set-state-dirty)
+       (descriptors-update!)
+       ;; I need some protection because here i might not have active editor
+       (some-> (CCWPlugin/getClojureEditor) reset-default-hover-on-editor!))
 
      (^void removed [this #^"[Lorg.eclipse.core.runtime.IExtensionPoint;" extension-points]
        (doseq [^IExtensionPoint ep extension-points] (trace :support/hover (str "IRegistryEventListener removed extension point with id: " (.getLabel ep))))
        (trace :support/hover "Resetting hovers...")
-       (reset-atoms)
-       (reset-default-hover-on-active-editor!)))
+       (swap! state-atom set-state-dirty)
+       (descriptors-update!)
+       ;; I need some protection because here i might not have active editor
+       (some-> (CCWPlugin/getClojureEditor) reset-default-hover-on-editor!)))
 
    text-hover-extension-point))
 
 (defn add-preference-listener
   []
   (let [pref-key PreferenceConstants/EDITOR_TEXT_HOVER_DESCRIPTORS]
-    (trace :support/hover (str "Registering" pref-key " listener..."))
+    (trace :support/hover (str "Registering " pref-key " listener..."))
     (ccw.eclipse/add-preference-listener pref-key
                                          #(do
                                             (trace :support/hover (str "Preference " pref-key " has changed. Resetting hovers..."))
-                                            (reset-atoms)
-                                            (reset-default-hover-on-active-editor!)))))
+                                            (swap! state-atom set-state-dirty)
+                                            ;; I need some protection because here i might not have active editor
+                                            (some-> (CCWPlugin/getClojureEditor) reset-default-hover-on-editor!)))))
 
 ;;;;;;;;;;;;;;;;;;;
 ;;; Java Interop ;;
@@ -375,21 +406,33 @@
 ;;; API ;;;
 ;;;;;;;;;;;
 
-(defn hover-instance
-  "Returns an ITextHover (or extensions) instance given editor, content-type and state-mask."
-  [editor content-type state-mask]
+(defmacro ^{:private true} do-if-no-value
+  "Expands to the lookup of accessor in coll and the conditional execution of the side-effect form.
+  The side-effect is executed iff no value can be found in coll. The
+  form can access to a local named __a_value (the anaphora, from The Joy of
+  Clojure - 8.5.1) which will be bound either to not-found-value or to
+  nil. The macro returns the found key or not-found-value."
+  [coll accessor side-effect not-found-value]
+  `(let [~'__a_value (get ~coll ~accessor ~not-found-value)]
+     (if ~'__a_value
+       (do ~side-effect ~not-found-value)
+       ~'__a_value)))
+
+(defn- create-hover-instance
+  "Returns an ITextHover (or extensions) instance given, content-type and state-mask."
+  [descriptors content-type state-mask]
   ;; TODO The selection could be improved by indexing the descriptors by state-mask
-  (init-atoms)
-  (let [select (partial select-descriptor (partial select-hover-by-state-mask state-mask))]
-    (when-let [selected-descriptor (select @contributed-hovers)]
-      ;; ensure non nil descriptor arrives here
-      (let [new-descriptor (ensure-hover-created! selected-descriptor)
-            remove-hover #(= (:id new-descriptor) (:id %1))]
-        ;; TODO improve
-        (if-not (identical? selected-descriptor new-descriptor)
-          (swap! contributed-hovers (partial remove-and-cons
-                                             remove-hover new-descriptor)))
-        (new-descriptor :instance)))))
+  (when-let [selected-descriptor (select-descriptor (partial select-hover-by-state-mask state-mask) descriptors)]
+    ;; ensure non nil descriptor arrives here
+    (let [state-mask (selected-descriptor :state-mask)]
+      (do-if-no-value descriptors state-mask
+                      (swap! state-atom swap-hover-instance-in-state state-mask __a_value)
+                      ((selected-descriptor :create-hover))))))
+
+(defn hover-instance
+  "Public API which is called from java."
+  [content-type state-mask]
+  (create-hover-instance (:contributed-descriptors (descriptors-update!)) content-type state-mask))
 
 (defn init-injections
   "Sets a new instance of HoverModel in the input context."
@@ -399,15 +442,15 @@
         (reify
           HoverModel
           (observableHoverDescriptors [this]
-            (init-atoms)
-            (update-observables-atom @contributed-hovers))
+            (:observable-descriptors (descriptors-update!)))
 
           (persistHoverDescriptors [this list]
-            (persist-java-hover-descriptors! observable-hovers)))))
+            (persist-java-hover-descriptors! (observable-descriptors))))))
 
 (defn configured-state-masks
   "Returns the configured state masks (as array of int) given source viewer and content type.
-  This function is called early, when the contributed-hovers atom is still empty, therefore needs
-  to get its returned array from the preferences."
+  This function is called early, when the atom is still empty, and it is
+  the very true entry point of the hover framework, therefore we need to
+  load the descriptors."
   [_ _]
-  (int-array (map :state-mask (merge-from-preference! @contributed-hovers)) ))
+  (int-array (keep :state-mask (:contributed-descriptors (descriptors-update!)))))
