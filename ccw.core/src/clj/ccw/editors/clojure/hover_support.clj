@@ -15,8 +15,15 @@
   descriptor holds the configuration info. It is exposed to the java
   world through the HoverDescriptor bean (see to-java, from-java)."
   (:refer-clojure :exclude [read-string])
-  (:import java.util.ArrayList
-           org.eclipse.jface.databinding.swt.SWTObservables
+  (:import ccw.CCWPlugin
+           ccw.TraceOptions
+           ccw.core.StaticStrings
+           [ccw.editors.clojure.hovers HoverModel
+                                       HoverDescriptor]
+           ccw.preferences.PreferenceConstants
+           ccw.util.EditorUtility
+           java.util.ArrayList
+           org.eclipse.core.databinding.observable.Realm
            [org.eclipse.core.databinding.observable.list ObservableList
                                                          WritableList]
            [org.eclipse.core.runtime CoreException
@@ -26,6 +33,7 @@
                                      IExtensionPoint]
            [org.eclipse.e4.core.contexts IEclipseContext
                                          ContextInjectionFactory]
+           org.eclipse.jface.databinding.swt.SWTObservables
            [org.eclipse.jface.text Region
                                    ITextHover
                                    ITextHoverExtension
@@ -33,24 +41,14 @@
                                    ITextViewer
                                    ITextViewerExtension2
                                    IDocument]
-           org.eclipse.swt.SWT
-           ccw.CCWPlugin
-           ccw.core.StaticStrings
-           [ccw.editors.clojure.hovers HoverModel
-                                       HoverDescriptor]
-           ccw.util.EditorUtility
-           ccw.preferences.PreferenceConstants
-           ccw.TraceOptions)
-  (:require [clojure.java.data :refer :all]
-            [clojure.string :refer [blank? join]]
-            [clojure.test :refer [deftest is run-tests]]
-            [ccw.bundle :refer [available? bundle]]
+           org.eclipse.swt.SWT)
+  (:require [ccw.bundle :refer [available? bundle]]
+            [ccw.core.trace :refer [trace]]
             [ccw.eclipse :refer [preference
                                  preference!
                                  ccw-combined-prefs
                                  workbench-editor]]
             [ccw.editors.clojure.editor-support :refer [source-viewer]]
-            [ccw.core.trace :refer [trace]]
             [ccw.extensions :refer [configuration-elements
                                     attributes->map
                                     element->map
@@ -62,8 +60,11 @@
                                     add-extension-listener
                                     mock-element]]
             [ccw.interop :refer [simple-name]]
+            [ccw.repl.view-helpers :refer [workbench-display]]
             [clojure.edn :as edn :refer [read-string]]
-            [ccw.repl.view-helpers :refer [workbench-display]]))
+            [clojure.java.data :refer :all]
+            [clojure.string :refer [blank? join]]
+            [clojure.test :refer [deftest is run-tests]]))
 
 (set! *warn-on-reflection* true)
 

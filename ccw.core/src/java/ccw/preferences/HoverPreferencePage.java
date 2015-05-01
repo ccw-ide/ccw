@@ -17,8 +17,12 @@ import javax.inject.Named;
 
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
+import org.eclipse.core.databinding.UpdateSetStrategy;
 import org.eclipse.core.databinding.UpdateValueStrategy;
+import org.eclipse.core.databinding.observable.ChangeEvent;
+import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.core.databinding.observable.map.IObservableMap;
+import org.eclipse.core.databinding.observable.set.IObservableSet;
 import org.eclipse.core.databinding.observable.value.ComputedValue;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.property.Properties;
@@ -77,7 +81,7 @@ public class HoverPreferencePage extends PreferencePage implements IWorkbenchPre
     private @Inject @Named(StaticStrings.CCW_CONTEXT_VALUE_HOVERMODEL) HoverModel fModel; // Model
     
     // Manually Wired
-    private HoverViewModel fViewModel; // ViewModel
+    HoverViewModel fViewModel; // ViewModel
 
     // Widgets
     private CheckboxTableViewer fHoverTableViewer;
@@ -91,6 +95,10 @@ public class HoverPreferencePage extends PreferencePage implements IWorkbenchPre
 
     @Override
     public void init(IWorkbench workbench) {
+        // AR - Note: init() will always be called once, the constructor can be called multiple times
+        ContextInjectionFactory.inject(this, CCWPlugin.getEclipseContext());
+        fViewModel = new HoverViewModel(fModel);
+        
         setPreferenceStore(CCWPlugin.getDefault().getPreferenceStore());
     }
 
@@ -98,8 +106,6 @@ public class HoverPreferencePage extends PreferencePage implements IWorkbenchPre
      * @wbp.parser.constructor
      */
     public HoverPreferencePage() {
-        ContextInjectionFactory.inject(this, CCWPlugin.getEclipseContext());
-        fViewModel = new HoverViewModel(fModel);
     }
     
     /**
@@ -294,9 +300,23 @@ public class HoverPreferencePage extends PreferencePage implements IWorkbenchPre
         // Checked hovers logic \\
         //////////////////////////
 
-        context.bindSet(ViewersObservables.observeCheckedElements(fHoverTableViewer, HoverDescriptor.class),
-                fViewModel.checkedSet);
+        // AR - because of some ordering issue problem, I am disabling the automatic
+        // update from model to target of the checked hovers and...
+        final UpdateSetStrategy checkedModelToTargetStrategy = new UpdateSetStrategy(UpdateValueStrategy.POLICY_ON_REQUEST);
 
+        // AR - ... add an explicit binding that will be needed...
+        final Binding checkedBindSet = context.bindSet(ViewersObservables.observeCheckedElements(fHoverTableViewer, HoverDescriptor.class),
+                fViewModel.checkedSet, null, checkedModelToTargetStrategy);
+        
+        // AR - ...to manually trigger the update when new elements are added to the provider...
+        IObservableSet realizedElements = contentProvider.getRealizedElements();
+        realizedElements.addChangeListener(new IChangeListener() {
+            @Override
+            public void handleChange(ChangeEvent event) {
+                checkedBindSet.updateModelToTarget();
+            }
+        });
+        
         /////////////////
         // UI Bindings \\
         /////////////////
