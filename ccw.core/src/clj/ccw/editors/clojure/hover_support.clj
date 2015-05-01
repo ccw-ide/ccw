@@ -66,7 +66,7 @@
             [clojure.string :refer [blank? join]]
             [clojure.test :refer [deftest is run-tests]]))
 
-(set! *warn-on-reflection* true)
+#_(set! *warn-on-reflection* true)
 
 (defn- create-hover!
   "Creates a hover instance from the input extension element by calling
@@ -88,12 +88,20 @@
       (catch CoreException e
         (CCWPlugin/logError e)))))
 
+(defn true-string?
+  [s]
+  (= s "true"))
+
 (defn- hover-element->descriptor
   "Build a descriptor from a hover IConfigurationElement taken from plugin.xml."
   [hover-element]
-  (into {:element hover-element
-         :enabled true}
-        (attributes->map hover-element)))
+  (into {:element hover-element}
+        (let [{:keys [id label description modifier enabled]} (attributes->map hover-element)]
+          {:id id
+           :label label
+           :description description
+           :modifier-string modifier
+           :enabled (true-string? enabled)})))
 
 (defn- assoc-create-hover-closure
   "Create the hover instance, modifying the descriptor if necessary.
@@ -140,12 +148,10 @@
 
 (defn- select-default-descriptor
   "Always selects and returns the enabled Default descriptor, that is the one with
-  with blank string modifier/state mask. Returns null instead."
+  with blank string modifier/state mask = SWT.NONE. Returns if not found."
   [descriptors]
-  (first (filter
-          #(let [state-mask (:state-mask %1)]
-             (and (:enabled %1) (or (= SWT/DEFAULT state-mask) (= SWT/NONE state-mask))))
-          descriptors)))
+  (first (filter #(let [state-mask (:state-mask %1)] (and (:enabled %1) (= SWT/NONE state-mask)))
+                 descriptors)))
 
 (defn- select-hover-by-state-mask
   "Selects the first enabled descriptor with the input state mask. No
@@ -179,6 +185,34 @@
   text-hover-extension-point
   "The hover extension point unique identifier."
   "ccw.core.cljEditorTextHovers")
+
+(defn- apply-rules-to-descriptor
+  [descriptor]
+  (assoc descriptor :enabled (let [sm (:state-mask descriptor)
+                                   ms (:modifier-string descriptor)]
+                               (if (or (= sm nil) (= sm SWT/DEFAULT) (= ms nil))
+                                 (do (trace :support/hover (str "Disabling hover " (:id descriptor) ": invalid state mask/modifier"))
+                                     false)
+                                 (:enabled descriptor)))))
+
+(defn- apply-rules-to-descriptors
+  "Applies validation rules to the hover descriptors, disabling the one
+  that do not comply. Rules at the moment are:
+  
+  1) Hovers with :modifier-string=nil or :state-mask=SWT/DEFAULT will be disabled
+  2) No more than one descriptor with the same :modifier-string (empty string included) is allowed,
+     the first will be kept, the others disabled."
+  [descriptors]
+  (lazy-seq
+   (let [ds (map apply-rules-to-descriptor descriptors)
+         enabled-ds (filter :enabled ds)
+         disabled-set (into #{} (map :id (flatten
+                                          (for [m (distinct (map :modifier-string enabled-ds))]
+                                            (rest (filter #(= m (:modifier-string %1)) enabled-ds))))))]
+     (reduce #(if (and (:enabled %2) (contains? disabled-set (:id %2)))
+                (do (trace :support/hover (str "Disabling hover " (:id %2) ": duplicated state mask/modifier"))
+                    (conj %1 (assoc %2 :enabled false)))
+                (conj %1 %2)) [] ds))))
 
 (defn- sanitize-descriptor
   "Sanitize function on a hover descriptor."
@@ -227,8 +261,8 @@
   and merges together, with the one in the preference always taking
   precedence."
   []
-  (merge-descriptors (load-extension-descriptors!) (read-descriptors-from-preference!)))
-
+  (apply-rules-to-descriptors (merge-descriptors (load-extension-descriptors!)
+                                                 (read-descriptors-from-preference!))))
 
 ;;;;;;;;;;;;;
 ;;; State ;;;

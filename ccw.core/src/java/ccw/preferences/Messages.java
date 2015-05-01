@@ -11,7 +11,6 @@
 package ccw.preferences;
 
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.swt.SWT;
 
 public class Messages extends NLS {
     private static final String BUNDLE_NAME = "ccw.preferences.messages"; //$NON-NLS-1$
@@ -150,7 +149,6 @@ public class Messages extends NLS {
     public static String ClojureGeneralPreferencePage_launch_repls_in_debug_mode;
     public static String ClojureGeneralPreferencePage_use_leiningen_launcher;
 
-    public static String HoverPreferencePage_errorNoCheckedHovers;
     public static String HoverPreferencePage_errorDefaultHoverNotUnique;
     public static String HoverPreferencePage_errorStatusMaskAlreadyInUse;
     public static String HoverPreferencePage_description;

@@ -107,7 +107,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
         new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.replLogError), true, new RGB(0x80, 0, 0), false, false),
     };
     
-    public static final String DEFAULT_EDITOR_TEXT_HOVER_DESCRIPTORS = "({:id \"ccw.editors.clojure.hovers.docstringHover\", :enabled true, :modifier-string \"\"})";
+    public static final String DEFAULT_EDITOR_TEXT_HOVER_DESCRIPTORS = "()";
     
 	@Override
 	public void initializeDefaultPreferences() {

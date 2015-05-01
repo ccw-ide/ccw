@@ -82,7 +82,22 @@
          <attribute name="activate" type="boolean" use="default" value="false">
             <annotation>
                <documentation>
-                  if the attribute is set to &quot;true&quot; it will force this plug-in to be loaded on hover activation
+                  if the attribute is set to &quot;true&quot; it will force this plug-in to be loaded on hover activation (defaults to false).
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="modifier" type="string">
+            <annotation>
+               <documentation>
+                  the modifier set by the extension contributor (in a form understable by Action.findModifierString).
+An empty string indicates that the hover will be the one shown when the mouse hovers on a symbol and no modifier is pressed. If missing, the hover will be disabled.
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="enabled" type="boolean" use="default" value="false">
+            <annotation>
+               <documentation>
+                  if the attribute is set to &quot;true&quot; the hover will be enabled (defaults to false).
                </documentation>
             </annotation>
          </attribute>

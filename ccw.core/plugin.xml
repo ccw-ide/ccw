@@ -55,8 +55,8 @@
         </enablement>
     </consolePatternMatchListener>
  </extension>
-	
-   
+
+
    <extension
          point="org.eclipse.ui.newWizards">
       <category
@@ -91,10 +91,10 @@
          </selection>
       </wizard>
    </extension>
-   <extension 
-   	id="ccw.nature" 
-   	name="Clojure Nature" 
-   	point="org.eclipse.core.resources.natures"> 
+   <extension
+   	id="ccw.nature"
+   	name="Clojure Nature"
+   	point="org.eclipse.core.resources.natures">
       <builder id="ccw.builder"/>
       <requires-nature
             id="org.eclipse.jdt.core.javanature">
@@ -106,18 +106,18 @@
                   value="ccw.clojure-project-nature/factory">
             </parameter>
          </run>
-      </runtime> 
-   </extension> 
-   <extension 
-   	id="ccw.builder" 
-   	name="Clojure Builder" 
-   	point="org.eclipse.core.resources.builders"> 
+      </runtime>
+   </extension>
+   <extension
+   	id="ccw.builder"
+   	name="Clojure Builder"
+   	point="org.eclipse.core.resources.builders">
       <builder
             callOnEmptyDelta="false"
-            hasNature="true"> 
+            hasNature="true">
          <run class="ccw.builder.ClojureBuilder"/>
-      </builder> 
-   </extension> 
+      </builder>
+   </extension>
    <extension point="org.eclipse.debug.core.launchConfigurationTypes">
       <launchConfigurationType
             delegate="ccw.launching.ClojureLaunchDelegate"
@@ -257,7 +257,7 @@
             name="default">
       </scope>
    </extension>
-   
+
 <!-- =========================================================================== -->
 <!-- CCW command definitions                                              -->
 <!-- =========================================================================== -->
@@ -374,7 +374,7 @@
             description="%command.switchStructuralEditionMode.description"
             id="ccw.ui.edit.text.clojure.switch.structuraledition.mode"
             name="%command.switchStructuralEditionMode.name">
-      </command>	  
+      </command>
 <!-- navigate -->
 
       <command
@@ -426,7 +426,7 @@
             categoryId="org.eclipse.ui.category.navigate"
             id="ccw.ui.edit.text.clojure.launch.repl">
       </command>
-      
+
       <!-- remove 'run tests' no-op -->
       <!--
       <command
@@ -436,7 +436,7 @@
             id="ccw.ui.edit.text.clojure.run.tests">
       </command>
       -->
-     
+
      <!-- not considered stable enough -->
       <!--command
             name="%command.formatCode.name"
@@ -444,22 +444,22 @@
             categoryId="org.eclipse.ui.category.navigate"
             id="ccw.ui.edit.text.clojure.format.code">
       </command-->
-	  
+
 	  <command
             name="%command.reload.clojure.name"
             description="%command.reload.clojure.description"
             categoryId="org.eclipse.ui.category.navigate"
             id="ccw.ui.edit.text.clojure.reload">
       </command>
-	  
-	  
+
+
 	 <command
             name="%command.navigateToDefinition.name"
             description="%command.navigateToDefinition.description"
             categoryId="org.eclipse.ui.category.navigate"
             id="ccw.ui.edit.text.clojure.open.declaration">
       </command>
-	  
+
       <command
             categoryId="org.eclipse.debug.ui.category.run"
             defaultHandler="ccw.repl.Actions$Connect"
@@ -551,14 +551,14 @@
             id="ccw.core.command.toggle-clojure-nature"
             name="%ccw.core.command.toggle-clojure-nature.name">
       </command>
-      
+
    </extension>
-   
+
    <extension
          point="org.eclipse.ui.bindings">
       <!--  win32:  M1=CTRL,    M2=SHIFT, M3=ALT, M4=-
             carbon: M1=COMMAND, M2=SHIFT, M3=ALT, M4=CTRL -->
-<!-- navigate -->  
+<!-- navigate -->
       <key
             sequence="M1+M2+P"
             contextId="ccw.ui.clojureEditorScope"
@@ -897,7 +897,7 @@
             contextId="ccw.ui.clojureEditorScope"
             commandId="ccw.ui.edit.text.clojure.format.code"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/-->
-            
+
       <key
             commandId="ccw.ui.edit.text.clojure.reload"
             contextId="ccw.ui.context.repl"
@@ -918,13 +918,13 @@
             commandId="ccw.ui.edit.text.clojure.reload"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             platform="carbon"/>
-			
+
       <key
             sequence="F3"
             contextId="ccw.ui.clojureEditorScope"
             commandId="ccw.ui.edit.text.clojure.open.declaration"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-            
+
       <key
             sequence="M1+M3+Q R"
             contextId="org.eclipse.ui.contexts.window"
@@ -1151,13 +1151,13 @@
             <!--command
                   commandId="ccw.ui.edit.text.clojure.format.code"
                   label="Format clojure code"
-                  style="push">                  	
+                  style="push">
             </command-->
 
             <command
                   commandId="ccw.ui.edit.text.clojure.open.declaration"
                   label="Navigate to definition"
-                  style="push">                     
+                  style="push">
             </command>
             <visibleWhen
                   checkEnabled="false">
@@ -1266,13 +1266,13 @@
             <!--command
                   commandId="ccw.ui.edit.text.clojure.format.code"
                   label="Format clojure code"
-                  style="push">                     
+                  style="push">
             </command-->
 
             <command
                   commandId="ccw.ui.edit.text.clojure.open.declaration"
                   label="Navigate to definition"
-                  style="push">                     
+                  style="push">
             </command>
 
             <visibleWhen
@@ -1490,7 +1490,7 @@
          </menu>
       </menuContribution>
    </extension>
-   
+
 	<extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">
     <launchConfigurationTypeImage
           configTypeID="ccw.launching.clojure"
@@ -1692,7 +1692,7 @@
        </and>
     </definition>
  </extension>
- 
+
  <extension
        point="org.eclipse.ui.workbench.texteditor.hyperlinkDetectors">
     <hyperlinkDetector
@@ -1749,8 +1749,8 @@
              type="ccw.editors.clojure.IClojureEditor">
        </context>
     </target>
-    
-    
+
+
 </extension>
   <extension
         point="org.eclipse.ui.handlers">
@@ -1809,7 +1809,7 @@
               </iterate>
            </with>
         </activeWhen>
-        
+
      </handler>
      <handler
            class="ccw.repl.Actions$ReconnectHandler"
@@ -1927,7 +1927,7 @@
            </with>
         </activeWhen>
      </handler>
-     
+
      <handler
            commandId="ccw.ui.edit.text.clojure.forward-slurp">
         <class
@@ -1966,7 +1966,7 @@
            </with>
         </activeWhen>
      </handler>
-     
+
      <handler
            commandId="ccw.ui.edit.text.clojure.backward-slurp">
         <class
@@ -2005,7 +2005,7 @@
            </with>
         </activeWhen>
      </handler>
-     
+
      <handler
            commandId="ccw.ui.edit.text.clojure.forward-barf">
         <class
@@ -2044,7 +2044,7 @@
            </with>
         </activeWhen>
      </handler>
-     
+
           <handler
            commandId="ccw.ui.edit.text.clojure.backward-barf">
         <class
@@ -2083,7 +2083,7 @@
            </with>
         </activeWhen>
      </handler>
-          
+
      <handler
            commandId="ccw.ui.edit.text.clojure.select.raise">
         <class
@@ -2465,7 +2465,7 @@
            </with>
         </activeWhen>
      </handler>
-     
+
      <handler
            commandId="org.eclipse.ui.edit.text.contentAssist.proposals">
         <class
@@ -2504,7 +2504,7 @@
            </with>
         </activeWhen>
      </handler>
- 
+
      <handler
            commandId="ccw.ui.edit.text.clojure.switch.structuraledition.mode">
         <class
@@ -2776,7 +2776,7 @@
            commandId="ccw.core.command.toggle-clojure-nature">
      </handler>
   </extension>
-  
+
   <extension
         point="org.eclipse.core.contenttype.contentTypes">
      <content-type
@@ -2788,7 +2788,7 @@
            priority="high">
      </content-type>
   </extension>
-  
+
      <extension
          point="org.eclipse.jdt.core.classpathContainerInitializer">
    <classpathContainerInitializer
@@ -2802,7 +2802,7 @@
    id="ccw.LEININGEN_CONTAINER"
    name="%ccw.LEININGEN_CONTAINER"
    class="ccw.util.GenericExecutableExtension:ccw.leiningen.classpath-container-ui/page-factory">
-  </classpathContainerPage>         
+  </classpathContainerPage>
    </extension>
 <extension
        id="ccw.leiningen.problemmarkers.classpathcontainer"
@@ -3414,7 +3414,9 @@
             label="%docstringHover"
             description="%docstringHoverDescription"
             id="ccw.editors.clojure.hovers.docstringHover"
-            activate="true">
+            activate="true"
+            modifier=""
+            enabled="true">
             <run class="ccw.util.GenericExecutableExtension">
               <parameter
                 name="factory"
@@ -3426,13 +3428,14 @@
             label="%debugHover"
             description="%debugHoverDescription"
             id="ccw.editors.clojure.hovers.DebugHover"
-            activate="true">
-            <factory class="ccw.util.GenericExecutableExtension">
+            modifier="Ctrl"
+            enabled="true">
+            <run class="ccw.util.GenericExecutableExtension">
               <parameter
                 name="factory"
                 value="ccw.editors.clojure.hovers.debug-hover/create-debug-hover">
               </parameter>
-            </factory>
+            </run>
       </hover>-->
    </extension>
 </plugin>

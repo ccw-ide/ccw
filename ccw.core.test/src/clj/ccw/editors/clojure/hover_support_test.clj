@@ -60,7 +60,8 @@
                                                        select-hover-by-state-mask
                                                        select-descriptor
                                                        remove-and-cons
-                                                       create-hover-instance]]
+                                                       create-hover-instance
+                                                       apply-rules-to-descriptors]]
   (deftest hover-support-tests
 
     (testing "Descriptor validity"
@@ -79,6 +80,27 @@
                                               "Mock" true "Mock Description" SWT/DEFAULT nil)]
         (is (= java-descriptor (to-java HoverDescriptor descriptor))) 
         (is (= descriptor (from-java java-descriptor)))))
+
+    (testing "Descriptor apply rules"
+      (let [test-string-modifier "({:enabled true, :id \"Id1\"}
+                                   {:enabled true, :modifier-string \"\", :id \"Id2\"}
+                                   {:enabled false, :modifier-string \"\", :id \"Id3\"}
+                                   {:enabled true, :modifier-string \"Shift+Alt\", :id \"Id4\"}
+                                   {:enabled true, :modifier-string \"Ctrl\", :id \"Id5\"}
+                                   {:enabled true, :modifier-string \"Shift+Alt\", :id \"Id6\"}
+                                   {:enabled true, :modifier-string \"Shift+Alt\", :id \"Id7\"}
+                                   {:enabled false, :modifier-string \"Ctrt\", :id \"Id8\"}))"
+            test-descriptors (read-and-sanitize-descriptor-string test-string-modifier)
+            ruled-descriptors (apply-rules-to-descriptors test-descriptors)]
+        (is (= (count ruled-descriptors) (count test-descriptors)) "Should preserve the input count" )
+        (is (not (:enabled (nth ruled-descriptors 0))) "Should always be disabled if nil :modifier-string")
+        (is      (:enabled (nth ruled-descriptors 1)) "Should NOT change enable/disable if not nil :modifier-string")
+        (is (not (:enabled (nth ruled-descriptors 2))) "Should NOT change enable/disable if not nil :modifier-string") 
+        (is      (:enabled (nth ruled-descriptors 3)) "Should NOT change enable/disable the first of duplicated :modifier-string")
+        (is      (:enabled (nth ruled-descriptors 4)) "Should NOT change enable/disable if not nil :modifier-string")
+        (is (not (:enabled (nth ruled-descriptors 5))) "Should change disable if duplicated :modifier-string")
+        (is (not (:enabled (nth ruled-descriptors 6))) "Should change again disable if duplicated :modifier-string")
+        (is (not (:enabled (nth ruled-descriptors 7))) "Should NOT change enable/disable if already disabled")))
 
     (testing "Descriptors from preferences"
       (let [test-pref-descriptors (list {:id "ccw.editors.clojure.hovers.MockHover"
@@ -126,22 +148,16 @@
         (is (not= first-descriptor (select-hover-by-state-mask 262144 test-descriptors))) 
         (is (= second-descriptor (select-hover-by-state-mask 262144 test-descriptors))) 
 
-        ;; Test if the default is picked with nil or ""
+        ;; Test if the default is picked with "" (not nil anymore)
         (is (= "Id1" (:id (select-default-descriptor (read-and-sanitize-descriptor-string "({:modifier-string \"\", :enabled true, :id \"Id1\"})"))))) 
-        (is (= "Id1" (:id (select-default-descriptor (read-and-sanitize-descriptor-string "({:enabled true, :id \"Id1\"})"))))) 
 
         (is (= no-modifier-descriptor (select-default-descriptor no-modifier-descriptors))) 
         (is (= no-modifier-descriptor (select-descriptor (partial select-hover-by-state-mask 42) no-modifier-descriptors))) 
         (is (= ctrl-modifier-descriptor (select-descriptor (partial select-hover-by-state-mask 262144) no-modifier-descriptors))) 
         (is (not= ctrl-modifier-descriptor (select-descriptor (partial select-hover-by-state-mask 196608) no-modifier-descriptors)))))
 
-    (testing "Descriptor list ops"
-      (let [mock-descriptors (list {:id "Test1" :enabled true} {:id "Test2" :enabled false})]
-        (is (some #(= "Test3" (:id %1)) (remove-and-cons #(= (:id %1) "Test2") {:id "Test3"} mock-descriptors))) 
-        (is (not-any? #(= "Test2" (:id %1)) (remove-and-cons #(= (:id %1) "Test2") {:id "Test3"} mock-descriptors)))))
-
     (testing "Hover instances creation"
       (let [mock-contributed-hovers ({:id "mock-debug" :modifier-string "" :state-mask SWT/NONE :enabled true :create-hover! #(create-debug-hover) :label "Mock debug" :activate "true"},
                                      {:id "mock-docstring" :modifier-string "Ctrl" :state-mask 262144 :enabled true :create-hover! #(create-docstring-hover) :label "Mock docstring" :activate "true"})
             hover-proxy (create-hover-instance mock-contributed-hovers "" 262144)]
-      (is (identical? hover-proxy (create-hover-instance mock-contributed-hovers "" 262144)))))))
+        (is (identical? hover-proxy (create-hover-instance mock-contributed-hovers "" 262144)))))))
