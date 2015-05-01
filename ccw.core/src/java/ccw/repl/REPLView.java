@@ -528,11 +528,7 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
      * if asked to do so.
      */
     public boolean isPPrintAvailable() {
-        System.out.println("operations:" + getAvailableOperations());
-        return getAvailableOperations().contains("pprint")
-                // FIXME This second check is a hack while waiting for cider-nrepl
-                //       to properly expose the pprint middleware through :describe op
-                || getAvailableOperations().contains("complete");
+        return getAvailableOperations().contains("pprint-middleware");
     }
 
     public String getCurrentNamespace () {
