@@ -1415,7 +1415,10 @@ public class REPLView extends ViewPart implements IAdaptable, LineStyleListener,
         if (event == null || event.lineText == null || event.lineText.length() == 0)
             return;
         int length = event.lineText.length();
-		event.styles = logPanelStyleCache.getStyleRanges(event.lineOffset, length, true);
+        StyleRange[] styles = logPanelStyleCache.getStyleRanges(event.lineOffset, length, true);
+        if (styles != null && styles.length > 0) {
+            event.styles = styles;
+        }
 	}
     
 }
