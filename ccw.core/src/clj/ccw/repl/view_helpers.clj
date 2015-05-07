@@ -50,7 +50,8 @@
      :out [default-log-style nil]
      :value [(partial set-style-range #(colored-style value-rgb-key)) nil]
      :pprint-out [(partial set-style-range #(colored-style value-rgb-key)) nil]
-     :in-expr [default-log-style :highlight-background]}))
+     :in-expr [:skip   ;; skip :in-expr styling because it's done upstream
+               :highlight-background]}))
 
 (defn- cursor-at-end
   "Puts the cursor at the end of the text in the given widget."
@@ -62,13 +63,16 @@
   (ui-sync
     (let [charcnt (.getCharCount log)
           [log-style highlight-background] (get log-styles type [default-log-style nil])
-          linecnt (.getLineCount log)]
-      (.append log s)
-      (when-not (re-find #"(\n|\r)$" s) (.append log "\n"))
+           linecnt (.getLineCount log)
+           new-content (if (re-find #"(\n|\r)$" s) s (str s \newline))]
+      ; Add styles before adding text to the log panel
+      (when-not (= :skip log-style)
+        (let [style (log-style charcnt (.length new-content))]
+          (-> repl-view .logPanelStyleCache (.setStyleRange style))))
+      (.append log new-content)
       (doto log
         cursor-at-end
-        .showSelection
-        (.setStyleRange (log-style charcnt (- (.getCharCount log) charcnt))))
+        .showSelection)
       (when highlight-background
         (.setLineBackground log (dec linecnt) (- (.getLineCount log) linecnt)
           (ccw.CCWPlugin/getColor

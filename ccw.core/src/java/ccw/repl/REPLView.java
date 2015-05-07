@@ -37,6 +37,8 @@ import org.eclipse.jface.text.source.projection.ProjectionViewer;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.LineStyleEvent;
+import org.eclipse.swt.custom.LineStyleListener;
 import org.eclipse.swt.custom.ST;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.StackLayout;
@@ -92,7 +94,7 @@ import clojure.lang.PersistentHashMap;
 import clojure.tools.nrepl.Connection;
 import clojure.tools.nrepl.Connection.Response;
 
-public class REPLView extends ViewPart implements IAdaptable, SafeConnection.IConnectionLostListener {
+public class REPLView extends ViewPart implements IAdaptable, LineStyleListener, SafeConnection.IConnectionLostListener {
 
 	private static final double DISCONNECTED_REPL_FG_TRANSPARENCY_PCT = 0.5;
 
@@ -159,6 +161,8 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
     //     so that we can have one range that is still *highlighted* for clojure content (and not editable),
     //     and another range that is editable and has full paredit, code completion, etc.
     public StyledText logPanel;
+    // Style cache for the log panel
+    public StyleRangeCache logPanelStyleCache;
     /** record for colors used in logPanel */
     public final ClojureSourceViewer.EditorColors logPanelEditorColors = new ClojureSourceViewer.EditorColors();
 
@@ -327,6 +331,7 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 
     private void resetFont () {
         Font font= JFaceResources.getTextFont();
+        logPanelStyleCache.setFont(font);
         logPanel.setFont(font);
         inputStyledText.setFont(font);
         stdinStyledText.setFont(font);
@@ -337,11 +342,12 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
         s.setText(boostIndent.matcher(s.getText()).replaceAll("   ").replaceFirst("^\\s+", "=> "));
         int start = logPanel.getCharCount();
         try {
-            viewHelpers._("log", this, logPanel, s.getText(), inputExprLogType);
+        	// Add styles before adding text to the log panel
             for (StyleRange sr : s.getStyleRanges()) {
                 sr.start += start;
-                logPanel.setStyleRange(sr);
+                logPanelStyleCache.setStyleRange(sr);
             }
+            viewHelpers._("log", this, logPanel, s.getText(), inputExprLogType);
         } catch (Exception e) {
             // should never happen
             CCWPlugin.logError("Could not copy expression to log", e);
@@ -791,7 +797,12 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
         installAutoEvalExpressionOnEnter();
 
         installEvalTopLevelSExpressionCommand();
-
+        
+        // Install style listener for log panel
+        logPanelStyleCache = new StyleRangeCache(logPanel.getDisplay());
+        logPanelStyleCache.setFont(logPanel.getFont());
+        logPanel.addLineStyleListener(this);
+        
         /*
          * Need to hook up here to force a re-evaluation of the preferences
          * for the syntax coloring, after the token scanner has been
@@ -1014,6 +1025,7 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
 		clearLogAction = new Action("Clear REPL log") {
 			@Override
 			public void run() {
+				logPanelStyleCache.reset();
 				logPanel.setText("");
 			}
 		};
@@ -1398,5 +1410,15 @@ public class REPLView extends ViewPart implements IAdaptable, SafeConnection.ICo
     		return super.getAdapter(adapter);
     	}
     }
-
+	@Override
+	public void lineGetStyle(LineStyleEvent event) {
+        if (event == null || event.lineText == null || event.lineText.length() == 0)
+            return;
+        int length = event.lineText.length();
+        StyleRange[] styles = logPanelStyleCache.getStyleRanges(event.lineOffset, length, true);
+        if (styles != null && styles.length > 0) {
+            event.styles = styles;
+        }
+	}
+    
 }
