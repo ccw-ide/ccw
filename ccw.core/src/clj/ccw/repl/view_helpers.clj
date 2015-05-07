@@ -49,6 +49,7 @@
     {:err [(partial set-style-range #(colored-style error-rgb-key)) nil]
      :out [default-log-style nil]
      :value [(partial set-style-range #(colored-style value-rgb-key)) nil]
+     :pprint-out [(partial set-style-range #(colored-style value-rgb-key)) nil]
      :in-expr [default-log-style :highlight-background]}))
 
 (defn- cursor-at-end
@@ -58,26 +59,23 @@
 
 (defn log
   [^ccw.repl.REPLView repl-view ^StyledText log ^String s type]
-  ;; We don't log values if it has already been pprinted by the back-end
-  (when-not (and (= :value type)
-                 (.usePPrint repl-view) (.isPPrintAvailable repl-view))
-    (ui-sync
-      (let [charcnt (.getCharCount log)
-            [log-style highlight-background] (get log-styles type [default-log-style nil])
-            linecnt (.getLineCount log)]
-        (.append log s)
-        (when-not (re-find #"(\n|\r)$" s) (.append log "\n"))
-        (doto log
-          cursor-at-end
-          .showSelection
-          (.setStyleRange (log-style charcnt (- (.getCharCount log) charcnt))))
-        (when highlight-background
-          (.setLineBackground log (dec linecnt) (- (.getLineCount log) linecnt)
-            (ccw.CCWPlugin/getColor
-              ;; We use RGB color because we cannot take the Color directly since
-              ;; we do not "own" it (it would be disposed when colors are changed
-              ;; from the preferences, not good)
-              (-> repl-view .logPanelEditorColors .fCurrentLineBackgroundColor .getRGB))))))))
+  (ui-sync
+    (let [charcnt (.getCharCount log)
+          [log-style highlight-background] (get log-styles type [default-log-style nil])
+          linecnt (.getLineCount log)]
+      (.append log s)
+      (when-not (re-find #"(\n|\r)$" s) (.append log "\n"))
+      (doto log
+        cursor-at-end
+        .showSelection
+        (.setStyleRange (log-style charcnt (- (.getCharCount log) charcnt))))
+      (when highlight-background
+        (.setLineBackground log (dec linecnt) (- (.getLineCount log) linecnt)
+          (ccw.CCWPlugin/getColor
+            ;; We use RGB color because we cannot take the Color directly since
+            ;; we do not "own" it (it would be disposed when colors are changed
+            ;; from the preferences, not good)
+            (-> repl-view .logPanelEditorColors .fCurrentLineBackgroundColor .getRGB)))))))
 
 (defn eval-failure-msg
   [status s]
