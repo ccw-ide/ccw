@@ -5,6 +5,13 @@
             [ccw.e4.model :as m]
             [ccw.core.trace :as t]))
 
+(defmacro trace-execution-time [msg & body]
+  `(let [t0#  (System/currentTimeMillis)
+         res# (do ~@body)
+         t1#  (System/currentTimeMillis)]
+     (t/format :user-plugins "%s took %dms" ~msg (- t1# t0#))
+     res#))
+
 (defn clean-type-elements!
   "Find all type elements with tag 'ccw', and remove all those that
    dont have 'ccw/load-key' transient key with value load-key."
@@ -114,13 +121,14 @@
       (.getBundle (ccw.CCWPlugin/getDefault))
       [(io/as-url (io/file d))]
       #(try
-         (doseq [script scripts] 
-           (load-user-script script))
+         (doseq [script scripts]
+          (trace-execution-time (format "loading User plugin script %s" d)
+            (load-user-script script)))
          (ccw.CCWPlugin/log (str "Loaded User Plugin: " d))
          (catch Exception e
            (ccw.CCWPlugin/logError (str "Error while loading User Plugin " d) e))))))
 
-(defn plugins-root-dir 
+(defn plugins-root-dir
   "Return the user plugins dir (`~/.ccw/`) if it exists and is a directory.
    Or return nil."
   []
@@ -134,13 +142,15 @@
    (meaning they are now considered garbage).
    If no user plugin is found, remove all user plugin artifacts from the model."
   []
-  (if-let [user-plugins (some-> (plugins-root-dir) user-plugins)]
-    (binding [dsl/*load-key* (str (java.util.UUID/randomUUID))]
-      (try
-        (doseq [p user-plugins]
-          (start-user-plugin p))
-        (ccw.CCWPlugin/log (str "Loaded User Plugins"))
-        (catch Exception e
-          (ccw.CCWPlugin/logError "Error while loading User Plugins" e))
-        (finally (clean-model! @m/app dsl/*load-key*))))
-    (clean-model! @m/app)))
+  (future
+    (if-let [user-plugins (some-> (plugins-root-dir) user-plugins)]
+      (binding [dsl/*load-key* (str (java.util.UUID/randomUUID))]
+        (try
+          (doseq [p user-plugins]
+            (trace-execution-time (format "loading User plugin %s" p)
+              (start-user-plugin p)))
+          (ccw.CCWPlugin/log (str "Loaded User Plugins"))
+          (catch Exception e
+            (ccw.CCWPlugin/logError "Error while loading User Plugins" e))
+          (finally (clean-model! @m/app dsl/*load-key*))))
+      (clean-model! @m/app))))
