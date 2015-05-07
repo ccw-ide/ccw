@@ -4,6 +4,10 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.expressions.IEvaluationContext;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.ISources;
@@ -71,11 +75,31 @@ public class Actions {
     public static class ConnectToEclipseNREPL extends AbstractHandler {
 		@Override
 		public Object execute(ExecutionEvent event) throws ExecutionException {
-            try {
-                return REPLView.connect("nrepl://127.0.0.1:" + CCWPlugin.getDefault().getREPLServerPort(), true);
-            } catch (Exception e) {
-                throw new ExecutionException("Could not connect to Eclipse's internal nrepl server", e);
-            }
+			// Execute in a job because getREPLServerPort could take some time to proceed
+			// and we don't want to freeze the current thread
+			Job j = new Job("Connect to Eclipse' internal nREPL server") {
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+		            try {
+		                final int replServerPort = CCWPlugin.getDefault().getREPLServerPort();
+		                DisplayUtil.asyncExec(new Runnable() {
+							@Override public void run() {
+								try {
+									REPLView.connect("nrepl://127.0.0.1:" + replServerPort, true);
+								} catch (Exception e) {
+									CCWPlugin.logError("Could not connect to Eclipse's internal nrepl server", e);
+								}
+							}
+						});
+		                return Status.OK_STATUS;
+		            } catch (Exception e) {
+		            	return CCWPlugin.createErrorStatus("Could not connect to Eclipse's internal nrepl server", e);
+		            }
+				}
+			};
+			j.setUser(true);
+			j.schedule();
+			return null;
 		}
     }
 
