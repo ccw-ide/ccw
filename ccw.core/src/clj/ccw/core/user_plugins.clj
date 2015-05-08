@@ -3,14 +3,7 @@
             [ccw.file :as f]
             [ccw.e4.dsl :as dsl]
             [ccw.e4.model :as m]
-            [ccw.core.trace :as t]))
-
-(defmacro trace-execution-time [msg & body]
-  `(let [t0#  (System/currentTimeMillis)
-         res# (do ~@body)
-         t1#  (System/currentTimeMillis)]
-     (t/format :user-plugins "%s took %dms" ~msg (- t1# t0#))
-     res#))
+            [ccw.core.trace :as t :refer (trace-execution-time)]))
 
 (defn clean-type-elements!
   "Find all type elements with tag 'ccw', and remove all those that
@@ -122,7 +115,7 @@
       [(io/as-url (io/file d))]
       #(try
          (doseq [script scripts]
-          (trace-execution-time (format "loading User plugin script %s" d)
+          (trace-execution-time :user-plugins (format "loading User plugin script %s" d)
             (load-user-script script)))
          (ccw.CCWPlugin/log (str "Loaded User Plugin: " d))
          (catch Exception e
@@ -147,7 +140,7 @@
       (binding [dsl/*load-key* (str (java.util.UUID/randomUUID))]
         (try
           (doseq [p user-plugins]
-            (trace-execution-time (format "loading User plugin %s" p)
+            (trace-execution-time :user-plugins (format "loading User plugin %s" p)
               (start-user-plugin p)))
           (ccw.CCWPlugin/log (str "Loaded User Plugins"))
           (catch Exception e
