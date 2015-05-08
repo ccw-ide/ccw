@@ -15,7 +15,6 @@ package ccw.editors.clojure;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.jface.internal.text.html.HTMLTextPresenter;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IAutoEditStrategy;
@@ -24,12 +23,16 @@ import org.eclipse.jface.text.IDocumentExtension3;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.ITextHover;
+import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.text.contentassist.ContentAssistEvent;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.ICompletionListener;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
+import org.eclipse.jface.text.information.IInformationPresenter;
+import org.eclipse.jface.text.information.IInformationProvider;
+import org.eclipse.jface.text.information.InformationPresenter;
 import org.eclipse.jface.text.presentation.IPresentationDamager;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.IPresentationRepairer;
@@ -50,12 +53,15 @@ public class ClojureSourceViewerConfiguration extends
 	protected ITokenScanner tokenScanner;
 	private final IClojureEditor editor;
 
+	public static final int HOVER_CONSTRAINTS_MAX_WIDTH_IN_CHAR = 1000;
+	public static final int HOVER_CONSTRAINTS_MAX_HEIGHT_IN_CHAR = 50;
+
 	private final ClojureInvoker proposalProcessor = ClojureInvoker.newInvoker(
             CCWPlugin.getDefault(),
             "ccw.editors.clojure.clojure-proposal-processor");
-	private final ClojureInvoker textHover = ClojureInvoker.newInvoker(
-            CCWPlugin.getDefault(),
-            "ccw.editors.clojure.clojure-text-hover");
+	
+	ClojureInvoker hoverSupportInvoker = ClojureInvoker.newInvoker(CCWPlugin.getDefault(),
+            "ccw.editors.clojure.hover-support");
 	
 	public ClojureSourceViewerConfiguration(IPreferenceStore preferenceStore,
 			IClojureEditor editor) {
@@ -147,12 +153,13 @@ public class ClojureSourceViewerConfiguration extends
 
 	}
 
-	public IInformationControlCreator getInformationControlCreator(
-			ISourceViewer sourceViewer) {
+	/**
+	 * Returns the Information Control Creator for the configured SourceViewer.
+	 */
+	public IInformationControlCreator getInformationControlCreator(ISourceViewer sourceViewer) {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
-				return new DefaultInformationControl(parent,
-						new HTMLTextPresenter());
+				return new DefaultInformationControl(parent, false);
 			}
 		};
 	}
@@ -173,14 +180,24 @@ public class ClojureSourceViewerConfiguration extends
 		// and code, and spell check based on these partitions
 		return null;
 	}
+
 	
 	@Override
-	public ITextHover getTextHover(ISourceViewer sourceViewer,
-			String contentType) {
-		return (ITextHover) textHover._("make-TextHover", editor);
+	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
+		return (ITextHover) hoverSupportInvoker._("hover-instance", contentType, stateMask);
 	}
 
 	@Override
+	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType) {
+		return getTextHover(sourceViewer, contentType, ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK);
+	}
+
+	@Override
+    public int[] getConfiguredTextHoverStateMasks(ISourceViewer sourceViewer, String contentType) {
+	    return (int[])hoverSupportInvoker._("configured-state-masks", sourceViewer, contentType);
+    }
+
+    @Override
 	public IAutoEditStrategy[] getAutoEditStrategies(
 			ISourceViewer sourceViewer, final String contentType) {
 		
@@ -197,4 +214,23 @@ public class ClojureSourceViewerConfiguration extends
 		return map;
 	}
 	
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getInformationPresenter(org.eclipse.jface.text.source.ISourceViewer)
+     */
+    @Override
+    public IInformationPresenter getInformationPresenter(ISourceViewer sourceViewer) {
+        // [From org.eclipse.jdt]
+        InformationPresenter presenter= new InformationPresenter(getInformationControlCreator(sourceViewer));
+        presenter.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
+
+        IInformationProvider provider = (IInformationProvider) hoverSupportInvoker._("hover-information-provider");
+        String[] contentTypes= getConfiguredContentTypes(sourceViewer);
+        for (int i= 0; i < contentTypes.length; i++) {
+            presenter.setInformationProvider(provider, contentTypes[i]);
+        }
+        
+        // sizes: see org.eclipse.jface.text.TextViewer.TEXT_HOVER_*_CHARS
+        presenter.setSizeConstraints(HOVER_CONSTRAINTS_MAX_WIDTH_IN_CHAR, HOVER_CONSTRAINTS_MAX_HEIGHT_IN_CHAR, false, true);
+        return presenter;
+    }
 }

@@ -87,4 +87,6 @@ public class TraceOptions {
 	/** Repl client related traces */
 	public static final String REPL_CLIENT = "/repl-client";
 
+	/** Hover support related traces */
+	public static final String HOVER_SUPPORT = "/support/hover";
 }

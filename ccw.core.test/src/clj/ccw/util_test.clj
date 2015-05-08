@@ -6,29 +6,16 @@
 ;* http://www.eclipse.org/legal/epl-v10.html
 ;*
 ;* Contributors:
-;*    Andrea Richiardi - initial tests for delayed atom
+;*    Andrea Richiardi - initial test implementation
 ;*******************************************************************************/
 
 (ns ccw.util_test
   (:use clojure.test
+        ccw.common
         ccw.util))
 
-(defmacro with-private-fns
-  "Refers private fns from ns and runs tests in context."
-  [[ns fns] & tests]
-  `(let ~(reduce #(conj %1 %2 `(ns-resolve '~ns '~%2)) [] fns)
-     ~@tests))
-
-(defmacro with-atom
-  "Quick and dirty anaphoric macro to build an atom which can be
-  referred in the body with the symbol a."
-  [init & body]
-  `(let [~'a (atom ~init)]
-     ~@body))
-
-(with-private-fns [ccw.util [delayed-atom-fill
-                             delayed-atom-clear]]
-
+(with-private-vars [ccw.util [delayed-atom-fill
+                              delayed-atom-clear]]
   (deftest ccw-core-tests
     "Tests the ccw.core namespace."
 
@@ -65,7 +52,4 @@
       (is (some? (with-atom nil (do (delayed-atom-swap! a build) (deref a)))) "Swapping: deref'd delayed atom is not nil.")
 
       (is (some? (with-atom nil (do (delayed-atom-reset! a unbuild) (deref a)))) "Resetting: deref'd delayed atom is not nil (it is still a delay.")
-      (is (= nil (with-atom nil (force (delayed-atom-reset! a unbuild)))) "Resetting: delay's value is always nil."))
-
-))
-;; (run-tests)
+      (is (= nil (with-atom nil (force (delayed-atom-reset! a unbuild)))) "Resetting: delay's value is always nil."))))

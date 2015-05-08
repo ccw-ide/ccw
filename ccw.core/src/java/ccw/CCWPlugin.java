@@ -29,6 +29,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunch;
+import org.eclipse.e4.core.contexts.EclipseContextFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.ColorRegistry;
@@ -40,6 +42,8 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbench;
@@ -55,6 +59,8 @@ import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 
 import ccw.core.StaticStrings;
+import ccw.editors.clojure.ClojureEditor;
+import ccw.editors.clojure.IClojureEditor;
 import ccw.editors.clojure.IScanContext;
 import ccw.launching.LaunchUtils;
 import ccw.nature.AutomaticNatureAdder;
@@ -101,7 +107,6 @@ public class CCWPlugin extends AbstractUIPlugin {
     private ColorRegistry colorCache;
 
     private FontRegistry fontRegistry;
-
 
 	private AutomaticNatureAdder synchronizedNatureAdapter;
 
@@ -239,6 +244,8 @@ public class CCWPlugin extends AbstractUIPlugin {
 
         logDependenciesInformation(context);
 
+        initInjections(context);
+        
         context.addBundleListener(new BundleListener() {
 
 			@Override
@@ -311,8 +318,14 @@ public class CCWPlugin extends AbstractUIPlugin {
 				}
 			}
 		});
-        log("CCWPlugin.start(): EXIT");
-    }
+
+		// Adding hover extension listener
+		ClojureInvoker invoker = ClojureInvoker.newInvoker(this, "ccw.editors.clojure.hover-support");
+		invoker._("add-registry-listener");
+		invoker._("add-preference-listener");
+
+		log("CCWPlugin.start(): EXIT");
+	}
     
     private synchronized AutomaticNatureAdder getNatureAdapter() {
     	if (synchronizedNatureAdapter == null) {
@@ -570,6 +583,23 @@ public class CCWPlugin extends AbstractUIPlugin {
         
     }
     
+    /**
+	 * Return the Active editor or null if there is no focus.
+	 * 
+	 * @return An IEditorPart.
+	 */
+	public static IEditorPart getActiveEditor() {
+		IEditorPart clojureEditor = null;
+		
+		IWorkbenchPage activePage = getDefault().internalGetActivePage();
+		if (activePage != null) {
+			clojureEditor = activePage.getActiveEditor();
+		}
+		
+		
+		return clojureEditor;
+	}
+
 	public static IWorkbenchPage getActivePage() {
 		return getDefault().internalGetActivePage();
 	}
@@ -581,4 +611,53 @@ public class CCWPlugin extends AbstractUIPlugin {
 			return null;
 		return window.getActivePage();
 	}
+
+	/**
+	 * Gets an instance of ccw.clojureeditor. 
+	 * @return
+	 */
+	public static IClojureEditor getClojureEditor() {
+	    ClojureEditor clojureEditor = null;
+	    
+	    // Dirty hack to get the Active Editor if out of focus (while stepping for instance).
+	    IWorkbenchWindow[] windows = PlatformUI.getWorkbench().getWorkbenchWindows();
+	    if (windows != null) {
+
+	        for (IWorkbenchWindow window : windows) {
+	            IWorkbenchPage[] pages = window.getPages();
+
+	            for (IWorkbenchPage page : pages) {
+	                for (IEditorReference editorRef : page.getEditorReferences()) {
+	                    if (editorRef.getId().equals(ClojureEditor.ID)) {
+	                        clojureEditor = (ClojureEditor) editorRef.getEditor(false);
+	                        if (clojureEditor != null) {
+	                            break;
+	                        }
+	                    }
+	                }
+	                if (clojureEditor != null) {
+	                    break;
+	                }
+	            }
+	        }
+	    }
+        return clojureEditor;
+	}
+	
+	/**
+     * Called in AbstractUIPlugin in order to initialize application-context instances.
+     */
+	private void initInjections(BundleContext bundleContext) {
+	    IEclipseContext c = EclipseContextFactory.getServiceContext(bundleContext);
+	    
+	    ClojureInvoker.newInvoker(this, "ccw.editors.clojure.hover-support")._("init-injections", c);
+	}
+	
+    private void cleanInjections() {
+        // Empty for now
+    }
+    
+    public static IEclipseContext getEclipseContext() {
+       return EclipseContextFactory.getServiceContext(CCWPlugin.getDefault().getBundle().getBundleContext());
+    }
 }

@@ -7,31 +7,28 @@
             [paredit.loc-utils :as lu]
             [clojure.zip :as z]
             [ccw.core.doc-utils :as doc]
-            [ccw.debug.serverrepl :as serverrepl]
             [ccw.core.trace :as t]
             [ccw.editors.clojure.editor-support :as editor])
-  (:use [clojure.core.incubator :only [-?>]])
   (:import [org.eclipse.jface.viewers StyledString
                                       StyledString$Styler]
-           [org.eclipse.jface.text.contentassist 
-            IContentAssistProcessor
-            ContentAssistant
-            CompletionProposal
-            ICompletionProposal
-            ICompletionProposalExtension6
-            IContextInformation
-            IContextInformationExtension
-            IContextInformationValidator]
+           [org.eclipse.jface.text.contentassist IContentAssistProcessor
+                                                 ContentAssistant
+                                                 CompletionProposal
+                                                 ICompletionProposal
+                                                 ICompletionProposalExtension6
+                                                 IContextInformation
+                                                 IContextInformationExtension
+                                                 IContextInformationValidator]
            [org.eclipse.jdt.core JavaCore
                                  IMethod
                                  IType]
            [ccw.editors.clojure IClojureEditor]
            [clojure.tools.nrepl Connection]))
 
-(defn offset-loc 
-  "Return the zip loc for offset in editor"
-  [parse-tree offset]
-  (let [rloc (lu/parsed-root-loc parse-tree)]
+(defn offset-loc
+  "Return the zip loc for offset in part"
+  [^IClojureEditor part offset]
+  (let [rloc (-> part .getParseState (editor/getParseTree) lu/parsed-root-loc)]
     (lu/loc-for-offset rloc offset)))
 
 (defn send-message**
@@ -103,6 +100,7 @@
 
 (defmethod find-var-metadata :default
   [current-namespace repl var]
+  (t/trace :support/hover "In fvm default")
   (when repl
     (let [safe-connection (.getSafeToolingConnection repl)
           code (format (str "(ccw.debug.serverrepl/var-info "
@@ -120,6 +118,7 @@
 
 (defmethod find-var-metadata "info"
   [current-namespace repl var]
+  (t/trace :support/hover "In fvm info")
   (when repl
     (let [safe-connection (.getSafeToolingConnection repl)
           response (-> (first

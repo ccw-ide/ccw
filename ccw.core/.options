@@ -76,3 +76,6 @@ ccw.core/project=false
 
 # Repl client related traces
 ccw.core/repl-client=false
+
+# Hover support
+ccw.core/support/hover=false

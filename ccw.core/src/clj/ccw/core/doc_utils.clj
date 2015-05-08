@@ -1,4 +1,6 @@
 (ns ccw.core.doc-utils
+  (:import org.eclipse.jface.internal.text.html.HTMLPrinter
+           ccw.editors.clojure.ClojureEditorMessages)
   (:require [clojure.string :as str]))
 
 ;	potential documentation tags:
@@ -13,7 +15,7 @@
 
 (defn- arglists-seq [arglists]
   (let [arglists (read-string arglists)]
-      (map pr-str arglists)))
+    (map pr-str arglists)))
 
 (defn- render-lines [renderer lines]
   (condp = renderer
@@ -22,46 +24,52 @@
 
 (defn- render-section [renderer title body]
   (condp = renderer
-    :html (format "<p><b>%s:</b><br/>%s" title body)
+    :html (format "<h4>%s:</h4>%s" title body)
     :text (format "%s:\n%s" title body)))
 
 (defn render-identity [renderer name ns]
-  (when-not (str/blank? name) 
-    (condp = renderer
-      :html (format "<b>%s</b> %s" name (or ns ""))
-      :text (format "%s %s" name (or ns "")))))
-
-(defn- render-sections [renderer sections no-sections-text]
-  (let [s (condp = renderer
-            :html (when-let [sections (keep identity sections)]
-                    (apply str (mapcat vector (repeat "<p>") sections (repeat "</p>"))))
-            :text (str/join "\n\n" (keep identity sections)))]
-    (if (str/blank? s)
+  (when-not (str/blank? name)
+    (let [parsed-ns (if ns (str ns "/" name) "")] 
       (condp = renderer
-        :html (format "<i>%s</i>" no-sections-text)
-        :text no-sections-text)
-      s)))
+        :html (str "<h1>" name "</h1>" (when-not (str/blank? parsed-ns) (str " " parsed-ns)))
+        :text (str name (when-not (str/blank? parsed-ns) (str "\n" parsed-ns)))))))
+
+(defn- render-sections [renderer sections]
+  "Renders the sections according to the renderer param, returning nil if sections where empty or
+  some issue arises."
+  (when-let [sections (keep identity sections)]
+    (condp = renderer
+      :html (apply str (mapcat vector (repeat "<p>") sections (repeat "</p>")))
+      :text (str/join "\n\n" sections))))
 
 (defn- arglist-doc [renderer {:keys [arglists arglists-str]}]
   (let [arglists (or arglists arglists-str)]
     (when-not (str/blank? arglists)
-      (render-section renderer "Argument Lists"
-        (render-lines renderer (arglists-seq arglists))))))
+      (render-section renderer
+                      ClojureEditorMessages/HoverInfo_args_label
+                      (let [lines (render-lines renderer (arglists-seq arglists))] 
+                        (condp = renderer
+                          :html (str "<pre>" lines "</pre>") 
+                          :text lines))))))
 
-(defn- optional-meta [{:keys [name macro private dynamic ns tag]}]
+(defn- optional-meta [renderer {:keys [name macro private dynamic ns tag]}]
   (let [optional-meta (join ", " 
                             (when private "private")
                             (when macro "macro")
                             (when dynamic "dynamic")
                             tag)] 
     (when-not (str/blank? optional-meta)
-      (str "(" optional-meta ")"))))
+      (condp = renderer
+        :html (str "<i>" "(" optional-meta ")" "</i>") 
+        :text (str "(" optional-meta ")")))))
 
 (defn header-doc [renderer {:keys [name ns] :as m}]
   (when-not (str/blank? name)
-    (render-lines renderer
-                  [(render-identity renderer name ns)
-                   (optional-meta m)])))
+    (str (render-identity renderer name ns)
+         (condp = renderer
+           :html "&nbsp"
+           :text " ")
+         (optional-meta renderer m))))
 
 (defn doc-doc [renderer {:keys [doc]}]
   (when-not (str/blank? doc)
@@ -69,26 +77,38 @@
                  :html (str "<pre>" doc "</pre>")
                  :text doc)
           body (str
-                 "  " ; We add 2 spaces because docstring are generally
-                      ; indented 2 spaces except the first line
-                 body)]
-      (render-section renderer "Documentation" body))))
+                "  " ; We add 2 spaces because docstring are generally
+                     ; indented 2 spaces except the first line
+                body)]
+      (render-section renderer
+                      ClojureEditorMessages/HoverInfo_doc_label
+                      body))))
 
 (defn var-doc-info [renderer m]
-  (let [sections [(header-doc renderer m)
-                  (arglist-doc renderer m)
-                  (doc-doc renderer m)]
-        ret (render-sections 
-              renderer
-              sections
-              "no doc found")]
-    (prn "var-doc-info" renderer ret)
-    ret))
+  "Renders the info map according to the renderer param, returning nil if sections where empty or
+  some issue arises."
+  (when-not (empty? m)
+    (let [header (header-doc renderer m)
+          sections [(arglist-doc renderer m)
+                    (doc-doc renderer m)]
+          rendered-sections (render-sections 
+                             renderer
+                             sections)
+          info-string (str header
+                           (when-not (str/blank? rendered-sections)
+                             (str "\n\n" rendered-sections))
+                           (when (= :html renderer) ;; AR - Hack for carving space for the last line
+                             :html "<h4></h4>"))]
+      (when-not (str/blank? info-string)
+        info-string))))
 
 (defn var-doc-info-html [m]
+  "Renders the sections using html, returning nil if sections where empty or some issue arises."
   (var-doc-info :html m))
 
 (defn var-doc-info-text [m]
+  "Renders the sections using plain text, returning nil if sections where empty or some issue
+  arises."
   (var-doc-info :text m))
 
 (defn safe-split-lines 
@@ -106,7 +126,5 @@
         lines (if (> (count lines) nb-display-lines) 
                 (concat (take (dec nb-display-lines) lines)
                         [(str (nth lines (dec nb-display-lines)) " ...")]) 
-                lines)
-        ret (str/join \newline (map str/trim lines))]
-    (prn "slim-doc" ret)
-    ret))
+                lines)]
+    (str/join \newline (map str/trim lines))))

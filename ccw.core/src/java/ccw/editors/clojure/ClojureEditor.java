@@ -13,6 +13,7 @@ package ccw.editors.clojure;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.action.Action;
@@ -45,6 +46,7 @@ import ccw.editors.outline.ClojureOutlinePage;
 import ccw.launching.ClojureLaunchShortcut;
 import ccw.preferences.PreferenceConstants;
 import ccw.repl.REPLView;
+import ccw.repl.SafeConnection;
 import ccw.util.ClojureInvoker;
 import ccw.util.StringUtils;
 
@@ -593,20 +595,16 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 	public String findDeclaringNamespace () {
 		return ((IClojureEditor)getSourceViewer()).findDeclaringNamespace();
 	}
-	
-	public REPLView getCorrespondingREPL () {
-		// Experiment: always return the active REPL instead of a potentially
-		//             better match being a REPL started from same project as the file
-//		IFile file = (IFile) getEditorInput().getAdapter(IFile.class);
-//		if (file != null) {
-//			REPLView repl = CCWPlugin.getDefault().getProjectREPL(file.getProject());
-//			if (repl !=  null) {
-//				return repl;
-//			}
-//		}
-//		// Last resort : we return the current active REPL, if any
-		return REPLView.activeREPL.get();
-	}
+
+    @Override
+    public @Nullable REPLView getCorrespondingREPL () {
+        return sourceViewer().getCorrespondingREPL();
+    }
+
+    @Override
+    public @Nullable SafeConnection getSafeToolingConnection() {
+        return sourceViewer().getSafeToolingConnection();
+    }
 
 	/*
      * @see org.eclipse.ui.texteditor.AbstractTextEditor#setPreferenceStore(org.eclipse.jface.preference.IPreferenceStore)
@@ -624,7 +622,6 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
         return (ClojureSourceViewer) super.getSourceViewer();
     }
 
-    /** Change the visibility of the method to public */
     @Override
     public void setStatusLineErrorMessage(String message) {
         super.setStatusLineErrorMessage(message);

@@ -7,6 +7,7 @@
 ;*
 ;* Contributors: 
 ;*    Laurent PETIT - initial API and implementation
+;*    Andrea Richiardi - SourceViewer* wrapper
 ;*******************************************************************************/
 (ns
   ^{:doc 
@@ -126,3 +127,17 @@
     {:namespace     (.findDeclaringNamespace editor)
      :absolute-path (some-> editor .getEditorInput e/resource e/path .toOSString)
      :repl          (-> editor .getCorrespondingREPL)}))
+
+(defn source-viewer
+  "Return the ClojureSourceViewer of the input IClojureEditor, might
+  return nil. The 0-arity tries to get it from the Active editor."
+  ([] (source-viewer (e/workbench-active-editor)))
+  ([^IClojureEditor editor]
+   {:pre [(not (nil? editor))]}
+   (.sourceViewer editor)))
+
+(defn set-status-line-error-msg-async
+  "The function wraps IClojureAwarePart.setStatusLineErrorMessage in an async ui-only call.
+  Remember that passing nil as message resets the status line."
+  [^IClojureEditor part message]
+  (e/ui (.setStatusLineErrorMessage part message)))
