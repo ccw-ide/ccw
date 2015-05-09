@@ -14,7 +14,11 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 
 public class DisplayUtil {
-	
+
+	public static boolean isUIThread() {
+		return Display.getCurrent() != null;
+	}
+
 	public static void asyncExec(Runnable r) {
 		Display display = PlatformUI.getWorkbench().getDisplay();
 		if (!display.isDisposed()) {
