@@ -8,6 +8,7 @@ import org.osgi.framework.Bundle;
 
 import ccw.CCWPlugin;
 import ccw.TraceOptions;
+import ccw.util.DisplayUtil;
 import clojure.lang.Compiler;
 import clojure.lang.IPersistentMap;
 import clojure.lang.RT;
@@ -46,6 +47,11 @@ public class ClojureOSGi {
 
 	public synchronized static Object withBundle(Bundle aBundle, RunnableWithException aCode, List<URL> additionalURLs)
 			throws RuntimeException {
+
+		if (DisplayUtil.isUIThread()) {
+			CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI, "should not be called from UI Tread");
+			CCWPlugin.getTracer().traceDumpStack(TraceOptions.CLOJURE_OSGI);
+		}
 
 		initialize();
 
