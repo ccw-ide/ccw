@@ -32,11 +32,3 @@ strong       { font-weight: bold; }
 em           { font-style: italic; }
 var          { font-style: italic; }
 th           { font-weight: bold; }
-
-/* Workarounds for new Javadoc stylesheet (1.7) */
-ul.blockList li.blockList, ul.blockListLast li.blockList {
-    list-style:none;
-}
-ul.blockList ul.blockList ul.blockList ul.blockList li.blockListLast {
-    list-style:none;
-}

@@ -75,11 +75,7 @@
   (when-not (str/blank? doc)
     (let [body (condp = renderer
                  :html (str "<pre>" doc "</pre>")
-                 :text doc)
-          body (str
-                "  " ; We add 2 spaces because docstring are generally
-                     ; indented 2 spaces except the first line
-                body)]
+                 :text doc)]
       (render-section renderer
                       ClojureEditorMessages/HoverInfo_doc_label
                       body))))
@@ -96,9 +92,7 @@
                              sections)
           info-string (str header
                            (when-not (str/blank? rendered-sections)
-                             (str "\n\n" rendered-sections))
-                           (when (= :html renderer) ;; AR - Hack for carving space for the last line
-                             :html "<h4></h4>"))]
+                             (str "\n\n" rendered-sections)))]
       (when-not (str/blank? info-string)
         info-string))))
 

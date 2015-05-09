@@ -7,7 +7,12 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jface.action.Action;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Device;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.graphics.TextLayout;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.keys.IBindingService;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
@@ -173,5 +178,16 @@ public class UiUtils {
                 (int) (complement * bg.green + factor * fg.green),
                 (int) (complement * bg.blue + factor * fg.blue)
         );
+        
+    }
+    
+    public static Point estimateSizeHint(Device device, Font font, String text) {
+        // Fake widget
+        TextLayout t = new TextLayout(device);
+        t.setFont(font);
+        t.setText(text);
+        
+        Rectangle bounds = t.getBounds();
+        return new Point(bounds.x + bounds.width, bounds.y + bounds.height);
     }
 }

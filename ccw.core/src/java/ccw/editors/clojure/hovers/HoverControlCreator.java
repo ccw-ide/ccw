@@ -47,16 +47,12 @@ public class HoverControlCreator extends AbstractHoverControlCreator {
         IInformationControl control = null;
         
         if (BrowserInformationControl.isAvailable(parent)) {
-            control = new BrowserInformationControl(parent, symbolicFontName(), UiUtils.getTooltipAffordanceString()) {
-                /*
-                 * @see org.eclipse.jface.text.IInformationControlExtension5#getInformationPresenterControlCreator()
-                 */
+            control = new CCWBrowserInformationControl(parent, symbolicFontName(), UiUtils.getTooltipAffordanceString()) {
+                
                 @Override
                 public IInformationControlCreator getInformationPresenterControlCreator() {
                     return fEnrichedInformationControlCreator;
                 }
-                
-                
             };
         } else {
             control = new DefaultInformationControl(parent, false);
