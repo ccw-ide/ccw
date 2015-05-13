@@ -40,8 +40,6 @@
 (def LEININGEN_CLASSPATH_CONTAINER_PROBLEM_MARKER_TYPE
   "ccw.leiningen.problemmarkers.classpathcontainer")
 
-(def logger (Logger. (ccw.CCWPlugin/PLUGIN_ID)))
-
 (defmacro with-exc-logged [& body]
   `(try ~@body
      (catch Exception e#

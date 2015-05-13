@@ -2,16 +2,17 @@
   (:require [clojure.java.io :as io])
   (:import [java.util Properties]))
 
-(defmacro def-trace-options-keys [bundle]
-  `(let [bundle# ~bundle]
-     (def ~'symbolic-name (.getSymbolicName bundle#))
-     (def ~'trace-options
-       (with-open [io# (-> bundle#
-                           (.getEntry "/.options")
-                           io/input-stream)]
-         (into {} (doto (Properties.)
-                    (.load io#)))))
-     (def ~'trace-options-keys (set (keys ~'trace-options)))))
+#_(defmacro def-trace-options-keys [bundle-call]
+   `(do
+      (def ~'symbolic-name (delay (.getSymbolicName ~bundle-call)))
+      (def ~'trace-options
+        (delay
+          (with-open [io# (-> ~bundle-call
+                            (.getEntry "/.options")
+                            io/input-stream)]
+            (into {} (doto (Properties.)
+                       (.load io#))))))
+      (defn ~'trace-options-keys [] (set (keys ~'trace-options)))))
 
 (defn trace-option-str [trace-option]
   (str "/" (if (keyword? trace-option)
@@ -42,15 +43,15 @@
         caller-tracer-call (symbol caller-ns "tracer-call")
         caller-trace (symbol caller-ns "trace")]
     `(do
-       (def-trace-options-keys ~bundle-call)
+       #_(def-trace-options-keys ~bundle-call)
        
        (defn ~'^ccw.util.ITracer tracer [] ~get-tracer-call)
        
        (defmacro ~'tracer-call [trace-option-string# & body#]
-         (when-not (~'trace-options-keys (str ~'symbolic-name trace-option-string#))
-           (throw (RuntimeException. 
-                   (str "Compilation error: call to ccw.trace/trace"
-                        " with non existent trace-option: " trace-option-string#))))
+         #_(when-not (~'trace-options-keys (str ~'symbolic-name trace-option-string#))
+            (throw (RuntimeException. 
+                    (str "Compilation error: call to ccw.trace/trace"
+                         " with non existent trace-option: " trace-option-string#))))
          `(when (.isEnabled (~'~caller-tracer) ~trace-option-string#)
             ~@body#))
        

@@ -1,7 +1,6 @@
 package ccw.util.osgi;
 
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.List;
 
 import org.osgi.framework.Bundle;
@@ -10,6 +9,7 @@ import ccw.CCWPlugin;
 import ccw.TraceOptions;
 import ccw.util.DisplayUtil;
 import clojure.lang.Compiler;
+import clojure.lang.DynamicClassLoader;
 import clojure.lang.IPersistentMap;
 import clojure.lang.RT;
 import clojure.lang.Symbol;
@@ -59,10 +59,16 @@ public class ClojureOSGi {
 
 		initialize();
 
+		// TODO cache the dynamic class loader
 		ClassLoader bundleLoader = new BundleClassLoader(aBundle);
-		final URL[] urls = (additionalURLs == null) ? new URL[] {} : additionalURLs.toArray(new URL[additionalURLs.size()]);
-		URLClassLoader loader = new URLClassLoader(urls, bundleLoader);
+		DynamicClassLoader loader = new DynamicClassLoader(bundleLoader);
+		if (additionalURLs != null) {
+			for (URL url: additionalURLs) {
+				loader.addURL(url);
+			}
+		}
 		IPersistentMap bindings = RT.map(Compiler.LOADER, loader);
+		bindings = bindings.assoc(RT.USE_CONTEXT_CLASSLOADER, true);
 
 		boolean pushed = true;
 

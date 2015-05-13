@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *    Casey Marshall - initial API and implementation
  *******************************************************************************/
 /*
@@ -75,10 +75,10 @@ import clojure.lang.Var;
 
 /**
  * This class acts as a Facade for all SDT core functionality.
- * 
+ *
  */
 public final class ClojureCore {
-	
+
 	private static ClojureInvoker staticAnalysis = ClojureInvoker.newInvoker(CCWPlugin.getDefault(), "paredit.static-analysis");
 	static public final String NATURE_ID = "ccw.nature";
     /**
@@ -99,7 +99,7 @@ public final class ClojureCore {
 
     /**
      * Gets the SDT core preferences
-     * 
+     *
      * @return the preferences root node
      */
     public Preferences getPreferences() {
@@ -132,7 +132,7 @@ public final class ClojureCore {
 
     /**
      * Adds tha Scala nature to the given project
-     * 
+     *
      * @param project
      *            the project
      * @return <code>true</code> if the nature was correctly added,
@@ -144,7 +144,7 @@ public final class ClojureCore {
 
     /**
      * Adds tha Java nature to the given project
-     * 
+     *
      * @param project
      *            the project
      * @return <code>true</code> if the nature was correctly added,
@@ -160,7 +160,7 @@ public final class ClojureCore {
 
     /**
      * Gets the Java project associated to the given project
-     * 
+     *
      * @param project
      *            the Eclipse project
      * @return the associated Java project
@@ -178,7 +178,7 @@ public final class ClojureCore {
             CCWPlugin.logError(e);
             return null;
         }
-        IJavaProject p = (IJavaProject) javaProjects.get(project);
+        IJavaProject p = javaProjects.get(project);
         if (p == null) {
             p = JavaCore.create(project);
             javaProjects.put(project, p);
@@ -188,7 +188,7 @@ public final class ClojureCore {
 
     /**
      * Gets the Clojure project associated to the given project
-     * 
+     *
      * @param project
      *            the Eclipse project
      * @return the associated Scala project
@@ -198,7 +198,7 @@ public final class ClojureCore {
         if (p != null)
             return p;
         try {
-            if (!project.exists() 
+            if (!project.exists()
             		|| !project.isOpen()
                     || !project.hasNature(NATURE_ID))
                 return null;
@@ -213,16 +213,16 @@ public final class ClojureCore {
 
     /**
      * Gets all the Clojure projects in the workspace
-     * 
+     *
      * @return an array containing all the Scala projects
      */
     public static ClojureProject[] getClojureProjects() {
         return clojureProjects.values().toArray(new ClojureProject[] {});
     }
-    
+
 	/*
      *  TODO Still 1 more case to handle:
-     *  - when a LIBRARY does not have source file in its classpath, then search attached source files folder/archive 
+     *  - when a LIBRARY does not have source file in its classpath, then search attached source files folder/archive
      */
     public static void openInEditor(String searchedNS, String searchedFileName, int line) {
 		try {
@@ -235,13 +235,13 @@ public final class ClojureCore {
 			CCWPlugin.logError("error while trying to obtain project's name from configuration, while trying to show source file of a symbol", e);
 		}
 	}
-    
+
     /**
      * Tries to open a clojure file in an editor
      * @return an editor input if the file has been found, or null
      */
     private static IEditorInput findEditorInput(IPackageFragmentRoot packageFragmentRoot, IPackageFragment packageFragment, String searchedPackage, String searchedFileName) throws JavaModelException {
-			if (packageFragment.exists() 
+			if (packageFragment.exists()
 					&& packageFragment.getElementName().equals(searchedPackage)) {
 				for (Object njr: packageFragment.isDefaultPackage() ? packageFragmentRoot.getNonJavaResources() : packageFragment.getNonJavaResources()) {
 					if (njr instanceof IJarEntryResource) {
@@ -271,43 +271,43 @@ public final class ClojureCore {
      * @return an editor input if the file has been found, or null
      */
     private static IEditorInput findEditorInput(
-    		IPackageFragmentRoot packageFragmentRoot, 
-    		String searchedPackage, 
-    		String searchedFileName) 
+    		IPackageFragmentRoot packageFragmentRoot,
+    		String searchedPackage,
+    		String searchedFileName)
     				throws JavaModelException {
-    	
+
     	// Find in package fragment
     	IPackageFragment packageFragment = packageFragmentRoot.getPackageFragment(searchedPackage);
-    	
+
 		IEditorInput editorInput = findEditorInput(packageFragmentRoot,
-				                                   packageFragment, 
-				                                   searchedPackage, 
+				                                   packageFragment,
+				                                   searchedPackage,
 				                                   searchedFileName);
 		if (editorInput != null) {
 			return editorInput;
 		}
-    	
+
     	return findEditorInputInSourceAttachment(
-    				packageFragmentRoot, 
+    				packageFragmentRoot,
     				searchedPackage,
     				searchedFileName);
     }
 
 	private static IEditorInput findEditorInputInSourceAttachment(
-			IPackageFragmentRoot packageFragmentRoot, 
+			IPackageFragmentRoot packageFragmentRoot,
 			String searchedPackage,
 			String searchedFileName) throws JavaModelException {
-		
+
     	final IPath sourceAttachmentPath = packageFragmentRoot.getSourceAttachmentPath();
-    	
+
     	if (sourceAttachmentPath == null) {
     		return null;
     	}
-    	
+
     	final String searchedPath = searchedPackage.replaceAll("\\.", "/");
-		
+
 		final IResource workspaceResource = ResourcesPlugin.getWorkspace().getRoot().findMember(sourceAttachmentPath);
-		
+
 		// Find in workspace
 		if (workspaceResource != null) {
 			if (workspaceResource.getType() == IResource.FOLDER) {
@@ -320,11 +320,11 @@ public final class ClojureCore {
 				// Don't know what to do here
 			}
 		}
-		
-		
-		// Find outside workspace or in archive 
+
+
+		// Find outside workspace or in archive
 		final IPath sourceAbsolutePath = toOSAbsoluteIPath(sourceAttachmentPath);
-		
+
 		final File sourceFile = sourceAbsolutePath.toFile();
 		if (!sourceFile.exists()) {
 			CCWPlugin.logWarning("sourceFile " + sourceFile + " does not exist form sourceAttachmentPath " + sourceAttachmentPath);
@@ -359,42 +359,42 @@ public final class ClojureCore {
      * File name, without extension
      */
     private static String getFileName(final String path) {
-    	return ( path.contains("/") )  
-    			? path.substring(1 + path.lastIndexOf('/')) 
-    			: path; 
+    	return ( path.contains("/") )
+    			? path.substring(1 + path.lastIndexOf('/'))
+    			: path;
     }
-    
-    private static boolean openInEditor(final String searchedNS, 
-    		                            final String initialSearchedFileName, 
-    		                            final int line, 
-    		                            final String projectName, 
-    		                            final boolean onlyExportedEntries) 
+
+    private static boolean openInEditor(final String searchedNS,
+    		                            final String initialSearchedFileName,
+    		                            final int line,
+    		                            final String projectName,
+    		                            final boolean onlyExportedEntries)
     		                            		throws PartInitException {
-    	
+
     	if (initialSearchedFileName == null) {
     		return false;
     	}
-    	
+
     	final String searchedFileName = getFileName(initialSearchedFileName);
-    	
+
 		final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-		
+
 		final IJavaProject javaProject = JavaCore.create(project);
-		
+
 		try {
 			System.out.println("search file name : " + searchedFileName);
 			System.out.println("searched ns : " + searchedNS);
-			
+
 			final String searchedPackage = namespaceToPackage(searchedNS);
 			System.out.println("searched package: " + searchedPackage);
-			
+
 			for (IPackageFragmentRoot packageFragmentRoot: javaProject.getAllPackageFragmentRoots()) {
-				
-				final IEditorInput editorInput = 
-						findEditorInput(packageFragmentRoot, 
-								        searchedPackage, 
+
+				final IEditorInput editorInput =
+						findEditorInput(packageFragmentRoot,
+								        searchedPackage,
 								        searchedFileName);
-				
+
 				if (editorInput != null) {
 					IEditorPart editor = IDE.openEditor(CCWPlugin.getActivePage(), editorInput, ClojureEditor.ID);
 					gotoEditorLine(editor, line);
@@ -411,10 +411,10 @@ public final class ClojureCore {
 
 	private static String namespaceToPackage(final String searchedNS) {
 		String packagePart = (searchedNS.contains(".")) ? searchedNS.substring(0, searchedNS.lastIndexOf(".")) : "";
-		
+
 		return packagePart.replace('-', '_');
 	}
-    
+
     public static IPath toOSAbsoluteIPath(IPath path) {
 		if (ClojureCore.isWorkspaceRelativeIPath(path)) {
 			boolean isFolder = path.getFileExtension() == null;
@@ -426,7 +426,7 @@ public final class ClojureCore {
 		}
 		return path;
     }
-    
+
     public static boolean isWorkspaceRelativeIPath(IPath path) {
     	return ResourcesPlugin.getWorkspace().getRoot().exists(path);
 	}
@@ -438,14 +438,14 @@ public final class ClojureCore {
 	public static String getNamespaceNameFromPackageName(String packageName) {
 		return packageName.toString().replace('/', '.').replace('_', '-');
 	}
-	
+
 	private final static Pattern SEARCH_DECLARING_NAMESPACE_PATTERN
-		= Pattern.compile("\\(\\s*(?:in-)?ns\\s+([^\\s\\)#\\[\\'\\{]+)"); 
+		= Pattern.compile("\\(\\s*(?:in-)?ns\\s+([^\\s\\)#\\[\\'\\{]+)");
 
 	public static String findDeclaringNamespace(String sourceText) {
 		Var sexp = RT.var("paredit.parser", "sexp");
 		try {
-			return (String) findDeclaringNamespace((Map) sexp.invoke(sourceText));
+			return findDeclaringNamespace((Map) sexp.invoke(sourceText));
 		} catch (Exception e) {
 			return null;
 		}
@@ -458,14 +458,14 @@ public final class ClojureCore {
 			return null;
 		}
 	}
-	
+
 	private final static Pattern HAS_NS_CALL_PATTERN = Pattern.compile("^\\s*\\(ns(\\s.*|$)", Pattern.MULTILINE);
 	/**
 	 * @return true if a ns call is detected by a regex-based heuristic
 	 */
 	private static boolean hasNsCall(String sourceCode) {
 		Matcher matcher = HAS_NS_CALL_PATTERN.matcher(sourceCode);
-		return matcher.find(); 
+		return matcher.find();
 	}
 
 	/**
@@ -480,7 +480,7 @@ public final class ClojureCore {
 	 * If check is ko, returns nil, the file does not correspond to a 'lib'
 	 * <br/>
 	 * If check is ok, deduce the 'lib' name from the file path, e.g. a file
-	 * path such as <code>/projectName/src/foo/bar_baz/core.clj</code> will 
+	 * path such as <code>/projectName/src/foo/bar_baz/core.clj</code> will
 	 * return "foo.bar-baz.core".
 	 * </p>
 	 * <p>
@@ -508,7 +508,7 @@ public final class ClojureCore {
 		}
 		return null;
     }
-    
+
     /**
      * @return starting with a leading slash "/", the root classpath relative
      *         path of this file
@@ -528,7 +528,7 @@ public final class ClojureCore {
 		}
 		return null;
     }
-    
+
     /**
      * @see <code>findMaybeLibNamespace(IFile file)</code>
      */
@@ -551,11 +551,11 @@ public final class ClojureCore {
 			}
 		}
     }
-    
+
     public static String getFileText(String pathname) {
         return getFileText(new File(pathname));
     }
-    
+
     public static String getFileText(File file) {
         try {
             return (String) RT.var("clojure.core", "slurp").invoke(file);
@@ -564,7 +564,7 @@ public final class ClojureCore {
             return null;
         }
     }
-    
+
     public static String getFileText(IFile file) {
     	try {
 			return (String) RT.var("clojure.core", "slurp").invoke(file.getLocation().toOSString());
@@ -573,7 +573,7 @@ public final class ClojureCore {
 			return null;
 		}
     }
-    
+
     private static boolean tryNonJavaResources(Object[] nonJavaResources, String searchedFileName, int line) throws PartInitException {
 		for (Object nonJavaResource: nonJavaResources) {
 			String nonJavaResourceName = null;
