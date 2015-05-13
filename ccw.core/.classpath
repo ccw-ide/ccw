@@ -14,8 +14,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/clj-http-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/clj-stacktrace-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/clj-tuple-jar/"/>
-	<classpathentry exported="true" kind="lib" path="lib/cljfmt-jar/"/>
-	<classpathentry exported="true" kind="lib" path="lib/cljs-tooling-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/cljunit-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/clojure-ccw-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/clojure-complete-jar/"/>
@@ -25,10 +23,8 @@
 	<classpathentry exported="true" kind="lib" path="lib/commons-io-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-lang-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-logging-jar/"/>
-	<classpathentry exported="true" kind="lib" path="lib/compliment-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/core.incubator-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/data.xml-jar/"/>
-	<classpathentry exported="true" kind="lib" path="lib/defprecated-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/drawbridge-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/dynapath-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/hamcrest-core-jar/"/>
@@ -42,7 +38,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/jackson-core-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/jackson-dataformat-smile-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/java.classpath-jar/"/>
-	<classpathentry exported="true" kind="lib" path="lib/java.data-jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/java.data-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/jline-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/jsoup-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/junit-jar/"/>
@@ -67,7 +63,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/quoin-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/regex-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/reply-jar/"/>
-	<classpathentry exported="true" kind="lib" path="lib/rewrite-clj-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/riddley-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/ring-core-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/scout-jar/"/>
@@ -79,12 +74,10 @@
 	<classpathentry exported="true" kind="lib" path="lib/slingshot-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/stencil-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/tools.cli-jar/"/>
-	<classpathentry exported="true" kind="lib" path="lib/tools.logging-jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/tools.logging-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/tools.macro-jar/"/>
-	<classpathentry exported="true" kind="lib" path="lib/tools.namespace-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/tools.nrepl-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/tools.reader-jar/"/>
-	<classpathentry exported="true" kind="lib" path="lib/tools.trace-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/useful-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/versioneer-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/wagon-http-jar/"/>
