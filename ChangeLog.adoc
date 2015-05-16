@@ -76,6 +76,7 @@ Counterclockwise ships with an embedded nREPL server. The following enhancements
 
 === User Plugins
 
+- Faster Eclipse Startup: with lots of user plugins installed, CCW used to freeze while the user plugins where launched. They are now launched in the background.
 - The keybinding cleaning function did concurrent modifications of an Eclipse Internal collection. Fix laurentpetit/ccw-plugin-manager#1
 
 == Changes between Counterclockwise 0.31.2 and 0.32.0
