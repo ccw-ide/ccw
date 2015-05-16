@@ -125,10 +125,9 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements IC
     private EditorColors editorColors = new EditorColors();
 
     /**
-     * The source viewer configuration. Needed for property change events
-     * for reconfiguring.
+     * The source viewer configuration instance, only needed for property change events.
      */
-    private SimpleSourceViewerConfiguration fConfiguration;
+    private IPropertyChangeListener fConfiguration;
 
     private boolean inEscapeSequence;
     
@@ -255,9 +254,12 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements IC
     }
 
     public void configure(SourceViewerConfiguration configuration) {
+        assert(configuration instanceof IPropertyChangeListener);
         super.configure(configuration);
+        
         initializeViewerColors();
-        fConfiguration = (SimpleSourceViewerConfiguration) configuration;
+        fConfiguration = (IPropertyChangeListener)configuration;
+        
         fSelectionHistory = new SelectionHistory(this);
         
         // AR - In order to respect the configure/unconfigure life-cycle while propagating
