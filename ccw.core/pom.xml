@@ -35,10 +35,17 @@
                 </exclusion>
             </exclusions>
           </dependency>
+        <!--
         <dependency>
             <groupId>ccw</groupId>
             <artifactId>clojure-ccw</artifactId>
             <version>1.7.0-04</version>
+        </dependency>
+        -->
+        <dependency>
+            <groupId>org.skummet</groupId>
+            <artifactId>clojure</artifactId>
+            <version>1.7.0-beta3-r1</version>
         </dependency>
         <dependency>
             <groupId>org.clojure</groupId>
@@ -154,6 +161,7 @@
 
     <build>
       <plugins>
+        <!--
         <plugin>
           <groupId>ccw</groupId>
           <artifactId>clojure-maven-plugin</artifactId>
@@ -165,12 +173,6 @@
             </sourceDirectories>
             <cleanAOTNamespaces>true</cleanAOTNamespaces>
             <namespaces>
-              <!-- 
-                The following namespaces do not play well with AOT due to the way
-                cider.nrepl.middleware.util.java.parser is dynamically loaded
-                by cider.nrepl.middleware.util.java and JDK's tools.jar is added
-                to the classpath.
-              -->
               <namespace>!cider.nrepl.middleware.util.java</namespace>
               <namespace>!cider.nrepl.middleware.util.java.parser</namespace>
             </namespaces>
@@ -178,13 +180,14 @@
           <executions>
             <execution>
               <id>aot-compile</id>
-              <phase>process-classes</phase><!-- this way AOT compilation is not performed via compile, saving time, but performed before tests -->
+              <phase>process-classes</phase>
               <goals>
                 <goal>compile</goal>
               </goals>
             </execution>
          </executions>
         </plugin>
+        -->
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-dependency-plugin</artifactId>
@@ -201,7 +204,7 @@
                 <outputDirectory>${project.basedir}/lib</outputDirectory>
                 <useSubDirectoryPerArtifact>true</useSubDirectoryPerArtifact>
                 <excludeGroupIds>p2.eclipse-plugin</excludeGroupIds>
-                <excludeArtifactIds>clojure,paredit.clj,ccw.feature,ccw.branding,ccw.core</excludeArtifactIds>
+                <excludeArtifactIds>paredit.clj,ccw.feature,ccw.branding,ccw.core</excludeArtifactIds>
               </configuration>
             </execution>
          </executions>

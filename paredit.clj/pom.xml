@@ -19,6 +19,7 @@
 
   <build>
     <plugins>
+      <!--
       <plugin>
         <groupId>com.theoryinpractise</groupId>
         <artifactId>clojure-maven-plugin</artifactId>
@@ -43,15 +44,23 @@
         </execution>
         </executions>
       </plugin>
+      -->
     </plugins>
   </build>
 
   <dependencies>
+    <!--
     <dependency>
       <groupId>ccw</groupId>
       <artifactId>clojure-ccw</artifactId>
       <version>1.7.0-01</version>
       <scope>test</scope>
+    </dependency>
+    -->
+    <dependency>
+        <groupId>org.skummet</groupId>
+        <artifactId>clojure</artifactId>
+        <version>1.7.0-beta3-r1</version>
     </dependency>
     <dependency>
       <groupId>org.clojure</groupId>

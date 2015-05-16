@@ -15,9 +15,9 @@
 	<classpathentry exported="true" kind="lib" path="lib/clj-stacktrace-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/clj-tuple-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/cljunit-jar/"/>
-	<classpathentry exported="true" kind="lib" path="lib/clojure-ccw-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/clojure-complete-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/clojure-contrib-jar/"/>
+	<classpathentry exported="true" kind="lib" path="lib/clojure-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-codec-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-fileupload-jar/"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-io-jar/"/>
