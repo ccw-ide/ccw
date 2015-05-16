@@ -41,6 +41,10 @@
                         <id>tycho</id>
                         <url>https://oss.sonatype.org/content/groups/public/</url>
                 </pluginRepository>
+                <pluginRepository>
+                        <id>clojars.org</id>
+                        <url>http://clojars.org/repo</url>
+                </pluginRepository>
         </pluginRepositories>
 
         <repositories>
