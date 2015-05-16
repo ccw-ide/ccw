@@ -19,6 +19,10 @@ public class ClojureOSGi {
 	private static volatile boolean initialized;
 	private synchronized static void initialize() {
 		if (initialized) return;
+		synchronizedInitialize();
+	}
+	private synchronized static void synchronizedInitialize() {
+		if (initialized) return;
 
 		CCWPlugin plugin = CCWPlugin.getDefault();
 		if (plugin == null) {
@@ -40,12 +44,12 @@ public class ClojureOSGi {
 		}
 
 	}
-	public synchronized static Object withBundle(Bundle aBundle, RunnableWithException aCode)
+	public static Object withBundle(Bundle aBundle, RunnableWithException aCode)
 			throws RuntimeException {
 		return withBundle(aBundle, aCode, null);
 	}
 
-	public synchronized static Object withBundle(Bundle aBundle, RunnableWithException aCode, List<URL> additionalURLs)
+	public static Object withBundle(Bundle aBundle, RunnableWithException aCode, List<URL> additionalURLs)
 			throws RuntimeException {
 
 		if (DisplayUtil.isUIThread()) {
