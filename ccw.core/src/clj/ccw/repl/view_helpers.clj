@@ -44,12 +44,12 @@
 
 (def ^{:private true} log-styles
   (let [colored-style #(let [s (StyleRange.)
-                             color-rgb (ccw.editors.clojure.ClojureSourceViewer/getRGBColor (.getCombinedPreferenceStore (CCWPlugin/getDefault)) %)
+                             color-rgb (CCWPlugin/getPreferenceRGB (.getCombinedPreferenceStore (CCWPlugin/getDefault)) %)
                              color (CCWPlugin/getColor color-rgb)]
                          (when color (set! (.foreground s) color))
                          s)
-        error-rgb-key (ccw.preferences.PreferenceConstants/getTokenPreferenceKey ccw.preferences.PreferenceConstants/replLogError)
-        value-rgb-key (ccw.preferences.PreferenceConstants/getTokenPreferenceKey ccw.preferences.PreferenceConstants/replLogValue)]
+        error-rgb-key (ccw.preferences.PreferenceConstants/getTokenColorPreferenceKey ccw.preferences.PreferenceConstants/replLogError)
+        value-rgb-key (ccw.preferences.PreferenceConstants/getTokenColorPreferenceKey ccw.preferences.PreferenceConstants/replLogValue)]
     {:err [(partial set-style-range #(colored-style error-rgb-key)) nil]
      :out [default-log-style nil]
      :value [(partial set-style-range #(colored-style value-rgb-key)) nil]
@@ -137,7 +137,7 @@
         history (atom history)
         current-step (atom -1)
         retained-input (atom nil)
-        history-action-fn 
+        history-action-fn
         (fn [history-shift]
           (swap! current-step history-shift)
           (cond
@@ -157,11 +157,11 @@
         session-client (repl/client-session repl-client :session session-id)
         responses-promise (promise)]
     (.setHistoryActionFn repl-view history-action-fn)
-    
+
     ;; TODO need to make client-session accept a single arg to avoid
     ;; dummy message sends
     (handle-responses repl-view log-panel nil (session-client {:op "describe"}))
-    
+
     (comp (partial eval-expression repl-view log-panel session-client)
       (fn [expr add-to-history?]
         (reset! retained-input nil)

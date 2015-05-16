@@ -692,12 +692,6 @@ public class REPLView extends ViewPart implements IAdaptable, LineStyleListener,
         // Enables logPanel to have same background, etc. colors than clojure
         // editors.
 		ClojureSourceViewer.initializeViewerColors(logPanel, prefs, logPanelEditorColors);
-		logPanel.addDisposeListener(new DisposeListener() {
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				logPanelEditorColors.unconfigure();
-			}
-		});
 
         structuralEditionModeStatusContributionItem = ClojureSourceViewer.createStructuralEditionModeStatusContributionItem();
 
@@ -802,8 +796,11 @@ public class REPLView extends ViewPart implements IAdaptable, LineStyleListener,
          * initialized. Otherwise the very first Clojure editor will not
          * have any tokens colored.
          * TODO this is repeated in ClojureEditor...surely we can make the source viewer self-sufficient here
+         *
+         * AR - Solved by initializing the ClojureSourceViewerConfiguration at the very
+         * beginning of the ClojureSourceViewer
          */
-        viewer.propertyChange(null);
+//        viewer.propertyChange(null);
 
         inputStyledText.addFocusListener(new NamespaceRefreshFocusListener());
 

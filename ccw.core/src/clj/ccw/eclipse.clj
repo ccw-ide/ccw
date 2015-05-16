@@ -690,20 +690,45 @@
     (.getNode pref-node-id)
     (doto .sync)))
 
-(defn add-preference-listener
-  "Adds a listener in order to react to changes in the pref-key
-  preference and executes the given closure (f must be a zero-arity
-  function, presumably with side-effects). Note that this function
-  generates a IPropertyChangeListener every time it is invoked. The
-  version without preference store defaults to ccw-combined-prefs."
-  ([pref-key f]
-    (add-preference-listener (ccw-combined-prefs) pref-key f))
-  ([^IPreferenceStore pref-store pref-key f]
-    (-> pref-store (.addPropertyChangeListener (reify
-                                                 IPropertyChangeListener
-                                                 (propertyChange [this event]
-                                                   (when (= (.getProperty event) pref-key)
-                                                     (f))))))))
+(defn ^{:author "Andrea Richiardi"}
+  add-property-listener
+  "Adds a listener in order to react to property changes. Taking
+  advantange of duck typing, it calls .addPropertyChangeListener on the
+  input instance with the result of (apply listener-generator args)
+  function call."
+  [property-publisher listener-generator & args]
+  {:pre [(some? property-publisher)]}
+  (-> property-publisher (.addPropertyChangeListener (apply listener-generator args))))
+
+(defn ^{:author "Andrea Richiardi"}
+  remove-property-listener
+  "Adds a listener in order to react to property changes. Taking
+  advantange of duck typing, it calls .addPropertyChangeListener on the
+  input instance with the result of listener-generator function call."
+  [property-publisher ^IPropertyChangeListener listener]
+  {:pre [(some? property-publisher) (some? listener)]}
+  (-> property-publisher (.removePropertyChangeListener listener)))
+
+(defn ^{:author "Andrea Richiardi"}
+  add-preference-listener
+  "Adds a listener in order to react to changes in the pref-key preference and executes
+   the given closure if any. Note that this function generates a IPropertyChangeListener
+   every time it is invoked. The version without preference store defaults toccw-combined-prefs."
+  ([pref-key closure]
+    (add-preference-listener (ccw-combined-prefs) pref-key closure))
+  ([^IPreferenceStore pref-store pref-key closure]
+   (add-property-listener pref-store #(reify
+                                       IPropertyChangeListener
+                                       (propertyChange [this event]
+                                         (when (= (.getProperty event) pref-key)
+                                           (closure)))))))
+
+(def ^{:author "Andrea Richiardi" }
+  remove-preference-listener
+  "Removes a preference listener. Under the hood, the simbol is simply
+  bound to remove-property-listener, accepting an object to remove from
+  and the actual listener to remove."
+  remove-property-listener)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; SWT utilities

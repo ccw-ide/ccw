@@ -89,13 +89,16 @@ public interface IClojureEditor extends IAdaptable {
      * Can be null...
      */
     @Nullable REPLView getCorrespondingREPL();
-    
+        
     /**
      * Gets the connection.
      * @return The connection, or null if none
      */
     @Nullable SafeConnection getSafeToolingConnection();
     
+    /**
+	 * Install/uninstall the Tab-to-Space converter.
+	 */
     void updateTabsToSpacesConverter ();
 
 	IDocument getDocument();
@@ -123,5 +126,8 @@ public interface IClojureEditor extends IAdaptable {
 	
 	boolean isForceRepair();
 	
-
+	/**
+	 * Initializes the viewer colors, adding them in the color cache.
+	 */
+	void initializeViewerColors();
 }

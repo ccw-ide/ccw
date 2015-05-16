@@ -24,42 +24,6 @@ import ccw.CCWPlugin;
 
 public class PreferenceInitializer extends AbstractPreferenceInitializer {
 
-    private class SyntaxColoringDefault {
-        String preferenceConstant;
-        boolean defaultEnabled;
-        RGB defaultColor;
-        boolean isBold;
-        boolean isItalic;
-        
-        SyntaxColoringDefault(String preferenceConstant, boolean defaultEnabled, RGB defaultColor, boolean isBold, boolean isItalic) {
-            this.preferenceConstant = preferenceConstant;
-            this.defaultEnabled = defaultEnabled;
-            this.defaultColor = defaultColor;
-            this.isBold = isBold;
-            this.isItalic = isItalic;
-        }
-
-        public String getPreferenceConstant() {
-            return preferenceConstant;
-        }
-
-        public RGB getDefaultColor() {
-            return defaultColor;
-        }
-
-        public boolean isDefaultEnabled() {
-            return defaultEnabled;
-        }
-        
-        public boolean isBold() {
-        	return isBold;
-        }
-        
-        public boolean isItalic() {
-        	return isItalic;
-        }
-    }
-    
     RGB callableRGB = new RGB(127, 0, 85);
 //    RGB literalRGB = new RGB(34, 139, 34);
     RGB literalRGB = new RGB(63, 95, 191);
@@ -67,44 +31,44 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
     RGB commentRGB = new RGB(63, 127, 95);
     RGB stringKeywordLiteralRGB = new RGB(42, 0, 255);
     RGB characterLiteralRGB = new RGB(0, 0, 192);
-    private SyntaxColoringDefault[] coloringDefaults = new SyntaxColoringDefault[] {
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.FUNCTION_Token), false, new RGB(0,0,0), false, false),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.callableFUNCTION_Token), true, callableRGB, false, false),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.SPECIAL_FORM_Token), false, new RGB(0, 0, 0), false, false),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.callableSPECIAL_FORM_Token), true, callableRGB, true, false),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.RAW_SYMBOL_Token), false, new RGB(0, 0, 0), false, false),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.callable_RAW_SYMBOL_Token), true, callableRGB, false, false),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.commentToken), true, commentRGB, false, true),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.GLOBAL_VAR_Token), true, literalRGB, false, false), /* rename in earMuffedVar */
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.callableGLOBAL_VAR_Token), true, literalRGB, true, false),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.keywordToken), true, stringKeywordLiteralRGB, false, false),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.metaToken), true, metaRGB, false, true),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.readerLiteralTag), true, metaRGB, false, true),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.MACRO_Token), false, new RGB(0, 0, 0), false, false),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.callableMACRO_Token), true, callableRGB, true, false),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.stringToken), true, stringKeywordLiteralRGB, false, false),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.otherLiteralsToken), true, literalRGB, false, false),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.regexToken), true, stringKeywordLiteralRGB, false, false),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.intToken), false, new RGB(0, 0, 0), false, false),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.floatToken), false, new RGB(0, 0, 0), false, false),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.charToken), true, characterLiteralRGB, false, false),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.JAVA_CLASS_Token), true, new RGB(0, 0, 0), false, true),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.callableJAVA_CLASS_Token), true, callableRGB, false, true),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.JAVA_INSTANCE_METHOD_Token), true, new RGB(0, 0, 0), false, true),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.callableJAVA_INSTANCE_METHOD_Token), true, callableRGB, false, true),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.JAVA_STATIC_METHOD_Token), true, new RGB(0, 0, 0), false, true),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.callableJAVA_STATIC_METHOD_Token), true, callableRGB, false, true),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.deactivatedRainbowParen), true, new RGB(145, 145, 145), false, false),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.rainbowParenLevel1), true, new RGB(204, 122, 122), false, false),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.rainbowParenLevel2), true, new RGB(204, 176, 122), false, false),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.rainbowParenLevel3), true, new RGB(122, 204, 122), false, false),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.rainbowParenLevel4), true, new RGB(122, 204, 176), false, false),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.rainbowParenLevel5), true, new RGB(122, 176, 204), false, false),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.rainbowParenLevel6), true, new RGB(122, 122, 204), false, false),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.rainbowParenLevel7), true, new RGB(176, 122, 204), false, false),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.rainbowParenLevel8), true, new RGB(204, 122, 176), false, false),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.replLogValue), true, new RGB(0, 0x80, 0), false, false),
-        new SyntaxColoringDefault(PreferenceConstants.getTokenPreferenceKey(PreferenceConstants.replLogError), true, new RGB(0x80, 0, 0), false, false),
+    private SyntaxColoringPreference[] coloringDefaults = new SyntaxColoringPreference[] {
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.FUNCTION_Token), false, new RGB(0,0,0), false, false),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.callableFUNCTION_Token), true, callableRGB, false, false),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.SPECIAL_FORM_Token), false, new RGB(0, 0, 0), false, false),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.callableSPECIAL_FORM_Token), true, callableRGB, true, false),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.RAW_SYMBOL_Token), false, new RGB(0, 0, 0), false, false),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.callable_RAW_SYMBOL_Token), true, callableRGB, false, false),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.commentToken), true, commentRGB, false, true),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.GLOBAL_VAR_Token), true, literalRGB, false, false), /* rename in earMuffedVar */
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.callableGLOBAL_VAR_Token), true, literalRGB, true, false),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.keywordToken), true, stringKeywordLiteralRGB, false, false),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.metaToken), true, metaRGB, false, true),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.readerLiteralTag), true, metaRGB, false, true),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.MACRO_Token), false, new RGB(0, 0, 0), false, false),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.callableMACRO_Token), true, callableRGB, true, false),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.stringToken), true, stringKeywordLiteralRGB, false, false),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.otherLiteralsToken), true, literalRGB, false, false),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.regexToken), true, stringKeywordLiteralRGB, false, false),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.intToken), false, new RGB(0, 0, 0), false, false),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.floatToken), false, new RGB(0, 0, 0), false, false),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.charToken), true, characterLiteralRGB, false, false),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.JAVA_CLASS_Token), true, new RGB(0, 0, 0), false, true),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.callableJAVA_CLASS_Token), true, callableRGB, false, true),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.JAVA_INSTANCE_METHOD_Token), true, new RGB(0, 0, 0), false, true),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.callableJAVA_INSTANCE_METHOD_Token), true, callableRGB, false, true),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.JAVA_STATIC_METHOD_Token), true, new RGB(0, 0, 0), false, true),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.callableJAVA_STATIC_METHOD_Token), true, callableRGB, false, true),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.deactivatedRainbowParen), true, new RGB(145, 145, 145), false, false),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.rainbowParenLevel1), true, new RGB(204, 122, 122), false, false),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.rainbowParenLevel2), true, new RGB(204, 176, 122), false, false),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.rainbowParenLevel3), true, new RGB(122, 204, 122), false, false),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.rainbowParenLevel4), true, new RGB(122, 204, 176), false, false),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.rainbowParenLevel5), true, new RGB(122, 176, 204), false, false),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.rainbowParenLevel6), true, new RGB(122, 122, 204), false, false),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.rainbowParenLevel7), true, new RGB(176, 122, 204), false, false),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.rainbowParenLevel8), true, new RGB(204, 122, 176), false, false),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.replLogValue), true, new RGB(0, 0x80, 0), false, false),
+        new SyntaxColoringPreference(PreferenceConstants.getTokenColorPreferenceKey(PreferenceConstants.replLogError), true, new RGB(0x80, 0, 0), false, false)
     };
     
     public static final String DEFAULT_EDITOR_TEXT_HOVER_DESCRIPTORS = "()";
@@ -139,18 +103,21 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	    store.setDefault(PreferenceConstants.REPL_HISTORY_MAX_SIZE, 1000);
 	    store.setDefault(PreferenceConstants.REPL_HISTORY_PERSIST_SCHEDULE, 30000);
 	    
-	    for (SyntaxColoringDefault d: coloringDefaults) {
+	    for (SyntaxColoringPreference d: coloringDefaults) {
 	        store.setDefault(d.getPreferenceConstant(),
 	                StringConverter.asString(d.getDefaultColor()));
-	        store.setDefault(SyntaxColoringHelper.getEnabledPreferenceKey(d.getPreferenceConstant()),
+	        store.setDefault(PreferenceConstants.getEnabledPreferenceKey(d.getPreferenceConstant()),
                     d.isDefaultEnabled());
-	        store.setDefault(SyntaxColoringHelper.getBoldPreferenceKey(d.getPreferenceConstant()), d.isBold());
-	        store.setDefault(SyntaxColoringHelper.getItalicPreferenceKey(d.getPreferenceConstant()), d.isItalic());
+	        store.setDefault(PreferenceConstants.getBoldPreferenceKey(d.getPreferenceConstant()), d.isBold());
+	        store.setDefault(PreferenceConstants.getItalicPreferenceKey(d.getPreferenceConstant()), d.isItalic());
 	    }
 	    
 	    // Experimental Features
 	    store.setDefault(PreferenceConstants.EXPERIMENTAL_AUTOSHIFT_ENABLED, true);
 	    
+	    // Necessary to get the correct coloring after preference initialization
+	    CCWPlugin.registerEditorColors(store);
+
 	    // Hover pref
 	    store.setDefault(PreferenceConstants.EDITOR_TEXT_HOVER_DESCRIPTORS, DEFAULT_EDITOR_TEXT_HOVER_DESCRIPTORS);
 	}
