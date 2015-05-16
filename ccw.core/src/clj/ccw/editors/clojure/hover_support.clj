@@ -62,12 +62,6 @@
                                  preference!
                                  ccw-combined-prefs
                                  workbench-active-editor]]
-            [paredit.loc-utils :refer [start-offset
-                                       loc-count]]
-            [ccw.core.doc-utils :refer [var-doc-info-html]]
-            [ccw.editors.clojure.editor-common :refer [offset-loc
-                                                       find-var-metadata
-                                                       parse-symbol?]]
             [ccw.editors.clojure.editor-support :refer [source-viewer set-status-line-error-msg-async]]
             [ccw.core.trace :refer [trace]]
             [ccw.extensions :refer [configuration-elements
@@ -321,39 +315,13 @@
     (HTMLPrinter/addPageEpilog buffer)
     (.toString buffer)))
 
-(defn hover-info
-  "Return the documentation hover text to be displayed at offset offset
-  for editor. The text can be composed of a subset of html (e.g. <pre>,
-  <i>, etc.). If no info is available or the REPL is nil, it returns
-  nil."
-  [^IClojureEditor part offset]
-  (let [loc (offset-loc part offset)
-        parse-symbol (parse-symbol? loc)]
-    (trace :support/hover (str "hover-info:\n" "offset -> " offset "\n" "parse-symbol -> " parse-symbol "\n"))
-    (when parse-symbol
-      (let [m (find-var-metadata (.findDeclaringNamespace part)
-                                 (.getCorrespondingREPL part)
-                                 parse-symbol)]
-        (var-doc-info-html m)))))
-
-(defn hover-region
-  "For editor, given the character offset, return a vector of [offset
-  length] representing a region of the editor (containing offset).  The
-  idea is that for every offset in that region, the same documentation
-  hover as the one computed for offset will be used.  This is a function
-  for optimizing the number of times the hover-info function is called."
-  [^IClojureEditor part offset]
-  (let [loc (offset-loc part offset)]
-    [(start-offset loc) (loc-count loc)]))
-
 (defn hover-html
-  "Given a IClojureEditor and an offset, builds the html file to be displayed.
-  Simlarly to hover-info, if no info is available or the REPL is nil, it
-  returns nil."
-  [^IClojureEditor part offset]
-  (let [info (hover-info part offset)]
-    (if-not (blank? info)
-      (hover-prepend-prolog info))))
+  "Embellishes the input html by prepending the hover css, makinp it
+  ready for being displayed. Returns nil if html-string is nil of
+  empty."
+  [html-string]
+  (when-not (blank? html-string)
+    (hover-prepend-prolog html-string)))
 
 ;;;;;;;;;;;;;
 ;;; State ;;;
