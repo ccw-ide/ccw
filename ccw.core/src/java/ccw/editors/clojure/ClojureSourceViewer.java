@@ -676,5 +676,9 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements IC
         fPreferenceStore.removePropertyChangeListener(listener);
     }
 
-	
+    @Override
+    public @Nullable String getTopLevelSExpression(int caretOffset) {
+        String form = (String) editorSupport._("top-level-code-form", getParseState(), caretOffset);
+        return form;
+    }
 }

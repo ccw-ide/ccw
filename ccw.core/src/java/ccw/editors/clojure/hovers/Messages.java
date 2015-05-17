@@ -6,6 +6,7 @@ public class Messages extends NLS {
     private static final String BUNDLE_NAME = "ccw.editors.clojure.hovers.messages";
     
     public static String You_need_a_running_repl_docstring;
+    public static String You_need_a_running_repl_macro;
     
     static {
         // initialize resource bundle

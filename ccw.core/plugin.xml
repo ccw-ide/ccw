@@ -3443,6 +3443,20 @@
               </parameter>
             </run>
       </hover>-->
+      <hover
+            label="%macroHover"
+            description="%macroHoverDescription"
+            id="ccw.editors.clojure.hovers.macroHover"
+            activate="true"
+            modifier="Ctrl"
+            enabled="true">
+            <run class="ccw.util.GenericExecutableExtension">
+              <parameter
+                name="factory"
+                value="ccw.editors.clojure.hovers.macro-hover/create-macro-hover">
+              </parameter>
+            </run>
+      </hover>
    </extension>
    <extension
          point="org.eclipse.ui.themes">

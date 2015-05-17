@@ -62,7 +62,8 @@
                                  preference!
                                  ccw-combined-prefs
                                  workbench-active-editor]]
-            [ccw.editors.clojure.editor-support :refer [source-viewer set-status-line-error-msg-async]]
+            [ccw.editors.clojure.editor-support :refer [source-viewer
+                                                        set-status-line-error-msg-async]]
             [ccw.core.trace :refer [trace]]
             [ccw.extensions :refer [configuration-elements
                                     attributes->map

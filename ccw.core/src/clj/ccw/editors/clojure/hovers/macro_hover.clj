@@ -6,11 +6,11 @@
 ;* http://www.eclipse.org/legal/epl-v10.html
 ;*
 ;* Contributors:
-;*    Andrea Richiardi - initial implementation (code reviewed by Laurent Petit)
+;*    Andrea Richiardi - initial implementation reviewed by Laurent Petit)
 ;*******************************************************************************/
 (ns ^{:author "Andrea Richiardi" }
-  ccw.editors.clojure.hovers.docstring-hover
-  "Supports documentation hovers for Clojure Editor"
+  ccw.editors.clojure.hovers.macro-hover
+  "Supports macro expansion hovers for Clojure Editor"
   (:import [org.eclipse.jface.text Region
                                    ITextHover
                                    ITextHoverExtension
@@ -32,22 +32,42 @@
             [ccw.interop :as interop]
             [ccw.editors.clojure.hover-support :as hsupport]))
 
-#_(set! *warn-on-reflection* true)
+(set! *warn-on-reflection* true)
 
-(defn- docstring-hover-html
-  "Return the documentation hover text to be displayed at offset offset
-  for editor. The text can be composed of a subset of html (e.g. <pre>,
-  <i>, etc.). If no info is available or the REPL is nil, it returns
-  nil."
-  [^IClojureEditor part offset]
-  (hsupport/hover-html (when-let [parse-symbol (ecommon/parse-symbol (ecommon/offset-loc part offset))]
-                         (let [ns (.findDeclaringNamespace part)
-                               m (ecommon/find-var-metadata ns
-                                                            (.getCorrespondingREPL part)
-                                                            parse-symbol)]
-                           (trace :support/hover (str "ns -> " ns "\n"
-                                                      "find-var-metadata -> " m "\n"))
-                           (doc/var-doc-info-html m)))))
+(defn- macro-expand!
+  "Returns the result of the expasion in a format that
+  ccw.core/doc-utils can understand and render."
+  [part offset]
+  (when-let [offset-loc (ecommon/offset-loc part offset)]
+    (let [parse-symbol (ecommon/parse-symbol offset-loc)
+          ns (.findDeclaringNamespace part)
+          metadata (ecommon/find-var-metadata ns
+                                              (.getCorrespondingREPL part)
+                                              parse-symbol)
+          is-macro? (:macro metadata)
+          symbol-ns (:ns metadata) ]
+      (trace :support/hover (str "current-ns -> " ns "\n"
+                                 "parse-symbol -> " parse-symbol "\n"
+                                 "metadata -> " metadata "\n"
+                                 "is-macro? -> " is-macro? "\n"
+                                 "symbol-ns -> " symbol-ns))
+      (when is-macro?
+        (let [form (ecommon/offset-parent-text offset-loc)
+              expansion (ecommon/expand-macro-form (.getCorrespondingREPL part)
+                                                   ns
+                                                   form)]
+          (trace :support/hover (str "form -> " form))
+          (trace :support/hover (str "expansion -> " expansion))
+          {:name (str parse-symbol)
+           :ns (str symbol-ns)
+           :macro (str is-macro?)
+           :macro-source (str form)
+           :macro-expanded (str expansion)})))))
+
+(defn- macro-expand-html!
+  "Returns the result of expanding the macro at the given offset."
+  [part offset]
+  (hsupport/hover-html (doc/var-doc-info-html (macro-expand! part offset))))
 
 (defn- ensure-control-created
   "Creates the IInformationControlCreator for this hover."
@@ -63,43 +83,41 @@
     value
     (HoverEnrichedControlCreator.)))
 
-(defn- make-TextHover
+(defn create-macro-hover
   "Factory function for creating an ITextHover instance for the editor."
-  []
+  [& params]
   (let [hover-control (atom nil)
         hover-enriched-control (atom nil)]
     (reify
       IClojureHover
       (getHoverInfo2 [this text-viewer hover-region]
-        (trace :support/hover (str "[DOCSTRING-HOVER] " (interop/simple-name this) ".getHoverInfo2 called:\n"
+        (trace :support/hover (str "[MACRO-HOVER] " (interop/simple-name this) ".getHoverInfo2 called:\n"
                                    "text-viewer -> " (.toString text-viewer) "\n"
                                    "region -> " (.toString hover-region) "\n"))
-        (let [[i msg] (if-let [info (docstring-hover-html text-viewer (.getOffset hover-region))]
+        (let [[i msg] (if-let [info (macro-expand-html! text-viewer (.getOffset hover-region))]
                         [info nil]
-                        [nil Messages/You_need_a_running_repl_docstring])]
+                        [nil Messages/You_need_a_running_repl_macro])]
           (do (esupport/set-status-line-error-msg-async text-viewer msg) i)))
 
       (getHoverControlCreator [this]
-        (trace :support/hover (str "[DOCSTRING-HOVER] " (interop/simple-name this) ".getHoverControlCreator called"))
+        (trace :support/hover (str "[MACRO-HOVER] " (interop/simple-name this) ".getHoverControlCreator called"))
         (swap! hover-control (partial ensure-control-created (swap! hover-enriched-control ensure-enriched-control-created))))
 
       (getHoverInfo [this text-viewer hover-region]
-        (trace :support/hover (str "[DOCSTRING-HOVER] " (interop/simple-name this) ".getHoverInfo called:\n"
+        (trace :support/hover (str "[MACRO-HOVER] " (interop/simple-name this) ".getHoverInfo called:\n"
                                    "text-viewer -> " (.toString text-viewer) "\n"
                                    "region -> " (.toString hover-region) "\n"))
         ;; AR - Deprecated (hover-info text-viewer (.getOffset hover-region))
         nil)
 
       (getHoverRegion [this text-viewer offset]
-        (trace :support/hover (str "[DOCSTRING-HOVER] " (interop/simple-name this) ".getHoverRegion called:\n"
+        (trace :support/hover (str "[MACRO-HOVER] " (interop/simple-name this) ".getHoverRegion called:\n"
                                    "text-viewer -> "(.toString text-viewer) "\n"
                                    "offset -> " offset "\n"))
         (let [[offset length] (ecommon/offset-region text-viewer offset)]
           (Region. offset length)))
 
       (getInformationPresenterControlCreator [this]
-        (trace :support/hover (str "[DOCSTRING-HOVER] " (interop/simple-name this) ".getInformationPresenterControlCreator called"))
+        (trace :support/hover (str "[MACRO-HOVER] " (interop/simple-name this) ".getInformationPresenterControlCreator called"))
         (swap! hover-enriched-control ensure-enriched-control-created)))))
 
-(defn create-docstring-hover [& params]
-  (make-TextHover))

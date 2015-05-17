@@ -480,29 +480,36 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 			selectAndReveal(r.getOffset(), r.getLength());
 	}
 
-	private IRegion getTopLevelSExpression() {
+	private @Nullable IRegion getTopLevelSExpression() {
 		if (!checkSelectionAndWarnUserIfProblem(ClojureEditorMessages.GotoMatchingBracketAction_error_invalidSelection))
 			return null;
 
-		int sourceCaretOffset = getSourceCaretOffset();
-		
-		int endOffset = getEndOfCurrentOrNextTopLevelSExpressionFor(sourceCaretOffset);
-		int beginningOffset = getBeginningOfCurrentOrPrecedingTopLevelSExpressionFor(endOffset);
-
-		if (beginningOffset>=0 && endOffset>=0) {
-			// length made to not include end position but
-			// (end position - 1)
-			int length = endOffset - beginningOffset;
-			return new Region(beginningOffset, length);
-		} else {
-			return null;
-		}
+		return getTopLevelRegion(getSourceCaretOffset());
 	}
 
-	public String getCurrentTopLevelSExpression() {
-		return (String) editorSupport._("top-level-code-form", getParseState(), getSourceCaretOffset());
-	}
-	
+    public String getCurrentTopLevelSExpression() {
+        return sourceViewer().getTopLevelSExpression(getSourceCaretOffset());
+    }
+
+    @Override
+    public String getTopLevelSExpression(final int caretOffset) {
+        return sourceViewer().getTopLevelSExpression(caretOffset);
+    }
+
+    private @Nullable IRegion getTopLevelRegion(final int caretOffset) {
+        int endOffset = getEndOfCurrentOrNextTopLevelSExpressionFor(caretOffset);
+        int beginningOffset = getBeginningOfCurrentOrPrecedingTopLevelSExpressionFor(endOffset);
+
+        if (beginningOffset>=0 && endOffset>=0) {
+            // length made to not include end position but
+            // (end position - 1)
+            int length = endOffset - beginningOffset;
+            return new Region(beginningOffset, length);
+        } else {
+            return null;
+        }
+    }
+    
 	/**
 	 * Move to end of current or following defun (end-of-defun).
 	 */

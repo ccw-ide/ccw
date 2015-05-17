@@ -130,4 +130,11 @@ public interface IClojureEditor extends IAdaptable {
 	 * Initializes the viewer colors, adding them in the color cache.
 	 */
 	void initializeViewerColors();
+
+	/**
+	 * Given an offset, returns its top level sexp.
+	 * @param caretOffset The offset.
+	 * @return The top level sexp.
+	 */
+	@Nullable String getTopLevelSExpression(final int caretOffset);
 }

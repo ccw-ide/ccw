@@ -41,6 +41,20 @@
   (let [loc (offset-loc part offset)]
     [(lu/start-offset loc) (lu/loc-count loc)]))
 
+(defn offset-parent-loc
+  "Given either an already computed (paredit) loc or a part and an
+  offset, returns the (paredit) loc of its immediate parent."
+  ([offset-loc] (z/up offset-loc))
+  ([^IClojureEditor part offset]
+   (let [loc (offset-loc part offset)]
+     (offset-parent-loc loc))))
+
+(defn offset-parent-text
+  "Given either an already computed (paredit) loc or a part and an
+  offset, returns the textual form of its immediate parent."
+  ([offset-loc] (lu/loc-text (offset-parent-loc offset-loc)))
+  ([^IClojureEditor part offset] (lu/loc-text (offset-parent-loc part offset))))
+
 (defn send-message**
   "Send the message over the nrepl connection. This version is \"bare\", ie it
    calls into the REPL without timeout protection. If you want to protect the 
@@ -103,10 +117,17 @@
   (when (= :symbol (:tag (z/node loc)))
     (symbol (lu/loc-text loc))))
 
+(defn get-repl-available-op!
+  "Returns the available operation of the input repl instance."
+  [repl op-string]
+  (when repl
+    (some #{op-string} (let [ops (.getAvailableOperations repl)]
+                         (t/trace :editor (str "available ops at repl: " ops))
+                         ops))))
+
 (defmulti find-var-metadata
   (fn [current-namespace repl var]
-    (when repl
-      (some #{"info"} (.getAvailableOperations repl)))))
+   (get-repl-available-op! repl "info") ))
 
 (defmethod find-var-metadata :default
   [current-namespace repl var]
@@ -147,3 +168,37 @@
       callee-name
       (or (:arglists callee-metadata) "")
       (doc/slim-doc (:doc callee-metadata)))))
+
+(defmulti expand-macro-form
+  "Multi method which expands a macro form using the middleware
+  supported by the input repl."
+  (fn [repl current-namespace form]
+    (get-repl-available-op! repl "macroexpand")))
+
+(defmethod expand-macro-form :default
+  [repl current-namespace form]
+  (when repl
+    (let [safe-connection (.getSafeToolingConnection repl)
+          code (str "(clojure.core/macroexpand '" form ")")]
+      (first (send-code safe-connection code
+                            ; we do not use session via send-code yet because
+                            ; we cannot distinguish between clojure or clojurescript
+                            ; back-end and adapt appropriately
+                            ;:session (.getSessionId repl)
+                            )))))
+
+(defmethod expand-macro-form "macroexpand"
+  [repl current-namespace form]
+  (when repl
+    (let [safe-connection (.getSafeToolingConnection repl)
+          response (-> (first
+                         (send-message safe-connection
+                           {"op" "macroexpand"
+                            "expander" "macroexpand"
+                            "code" form
+                            "ns" current-namespace
+                            "session" (.getSessionId repl)
+                            "display-namespaces" "tidy"}))
+                     (set/rename-keys {:arglists-str :arglists
+                                       :resource :file}))]
+      (:expansion response))))
