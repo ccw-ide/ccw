@@ -39,8 +39,6 @@
 
 (def NATURE-ID "ccw.leiningen.nature")
 
-(def logger (Logger. (ccw.CCWPlugin/PLUGIN_ID)))
-
 ;; TODO copie de ccw.core, exporter dans ccw.util
 
 (defn jvm-entry
