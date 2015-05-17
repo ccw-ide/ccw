@@ -31,6 +31,16 @@
   (let [rloc (-> part .getParseState (editor/getParseTree) lu/parsed-root-loc)]
     (lu/loc-for-offset rloc offset)))
 
+(defn offset-region
+  "For editor, given the character offset, return a vector of [offset
+  length] representing a region of the editor (containing offset).  The
+  idea is that for every offset in that region, the same documentation
+  hover as the one computed for offset will be used.  This is a function
+  for optimizing the number of times the hover-info function is called."
+  [^IClojureEditor part offset]
+  (let [loc (offset-loc part offset)]
+    [(lu/start-offset loc) (lu/loc-count loc)]))
+
 (defn send-message**
   "Send the message over the nrepl connection. This version is \"bare\", ie it
    calls into the REPL without timeout protection. If you want to protect the 
@@ -87,7 +97,7 @@
           (t/trace :editor "timeout sending message: %s" message)
           (swap! timed-out-safe-connections update-in [safe-connection] (fnil inc 0)))))))
 
-(defn parse-symbol? 
+(defn parse-symbol
   "If loc's node is a symbol, return the symbol String. Otherwise, return nil."
   [loc]
   (when (= :symbol (:tag (z/node loc)))
@@ -100,7 +110,6 @@
 
 (defmethod find-var-metadata :default
   [current-namespace repl var]
-  (t/trace :support/hover "In fvm default")
   (when repl
     (let [safe-connection (.getSafeToolingConnection repl)
           code (format (str "(ccw.debug.serverrepl/var-info "
@@ -118,7 +127,6 @@
 
 (defmethod find-var-metadata "info"
   [current-namespace repl var]
-  (t/trace :support/hover "In fvm info")
   (when repl
     (let [safe-connection (.getSafeToolingConnection repl)
           response (-> (first

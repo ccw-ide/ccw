@@ -17,11 +17,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
-import org.eclipse.swt.graphics.FontMetrics;
-import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.TextLayout;
-import org.eclipse.swt.graphics.TextStyle;
+
+import ccw.util.SWTFontUtils;
 
 /**
  * Stores StyleRanges, merging them as necessary.
@@ -158,24 +155,16 @@ public class StyleRangeCacheStore {
 		switch (style) {
 			case SWT.BOLD:
 				if (boldFont != null) return boldFont;
-				return boldFont = new Font(device, getFontData(style));
+				return boldFont = new Font(device, SWTFontUtils.newStyleFontData(boldFont.getFontData(), style));
 			case SWT.ITALIC:
 				if (italicFont != null) return italicFont;
-				return italicFont = new Font(device, getFontData(style));
+				return italicFont = new Font(device, SWTFontUtils.newStyleFontData(boldFont.getFontData(), style));
 			case SWT.BOLD | SWT.ITALIC:
 				if (boldItalicFont != null) return boldItalicFont;
-				return boldItalicFont = new Font(device, getFontData(style));
+				return boldItalicFont = new Font(device, SWTFontUtils.newStyleFontData(boldFont.getFontData(), style));
 			default:
 				return regularFont;
 		}
-	}
-
-	FontData[] getFontData(int style) {
-		FontData[] fontDatas = regularFont.getFontData();
-		for (int i = 0; i < fontDatas.length; i++) {
-			fontDatas[i].setStyle(style);
-		}
-		return fontDatas;
 	}
 
 	int getRangeIndex(int offset, int low, int high) {
