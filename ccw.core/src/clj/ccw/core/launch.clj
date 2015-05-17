@@ -1,12 +1,22 @@
 (ns ccw.core.launch
   (:require [clojure.tools.nrepl.server :refer [start-server stop-server default-handler]]
             [clojure.tools.nrepl.ack :refer [handle-ack]]
-            [cider.nrepl :refer [cider-nrepl-handler]]
             [ccw.util :refer [delayed-atom-swap! delayed-atom-reset!]]
-            [ccw.eclipse :refer [property-ccw-nrepl-port]])
+            [ccw.eclipse :as e :refer [property-ccw-nrepl-port]])
   (:import ccw.CCWPlugin
            ccw.core.StaticStrings
            java.lang.System))
+
+(def nrepl-handler
+  "The nrepl handler to use: either the default one provided by nrepl, or, if
+   the user has required to autostart the CCW nrepl server, the cider nrepl hander.
+   The load of the cider namespace is delayed since it takes time. This allow saving
+   time when the user first starts a REPL."
+  (if (System/getProperty StaticStrings/CCW_PROPERTY_NREPL_AUTOSTART)
+    (do
+      (require '[cider.nrepl :refer [cider-nrepl-handler]])
+      @(resolve 'cider-nrepl-handler))
+    (default-handler)))
 
 (defn default-nrepl-server-listener
   "Default listener printing on *out* the nrepl url"
@@ -70,7 +80,7 @@
   ccw-nrepl-server-map atom. Returns the newly opened socket to it."
   []
   (let [nrepl-port (property-ccw-nrepl-port)
-        handler (handle-ack cider-nrepl-handler)]
+        handler (handle-ack nrepl-handler)]
     (when (= 0 nrepl-port)
       (CCWPlugin/log (str "nRepl port will be automatically selected")))
     (let [start-server-delay (delayed-atom-swap! nrepl-server-map-delay
