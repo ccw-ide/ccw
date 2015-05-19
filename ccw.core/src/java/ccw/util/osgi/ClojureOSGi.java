@@ -17,7 +17,7 @@ import clojure.lang.Var;
 
 public class ClojureOSGi {
 	private static volatile boolean initialized;
-	private synchronized static void initialize() {
+	private static void initialize() {
 		if (initialized) return;
 		synchronizedInitialize();
 	}
