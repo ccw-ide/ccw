@@ -37,7 +37,7 @@
 (defn- macro-expand!
   "Returns the result of the expasion in a format that
   ccw.core/doc-utils can understand and render."
-  [part offset]
+  [expander part offset]
   (when-let [offset-loc (ecommon/offset-loc part offset)]
     (let [parse-symbol (ecommon/parse-symbol offset-loc)
           ns (.findDeclaringNamespace part)
@@ -54,6 +54,7 @@
       (when is-macro?
         (let [form (ecommon/offset-parent-text offset-loc)
               expansion (ecommon/expand-macro-form (.getCorrespondingREPL part)
+                                                   expander
                                                    ns
                                                    form)]
           (trace :support/hover (str "form -> " form))
@@ -66,8 +67,8 @@
 
 (defn- macro-expand-html!
   "Returns the result of expanding the macro at the given offset."
-  [part offset]
-  (hsupport/hover-html (doc/var-doc-info-html (macro-expand! part offset))))
+  [expander part offset]
+  (hsupport/hover-html (doc/var-doc-info-html (macro-expand! expander part offset))))
 
 (defn- ensure-control-created
   "Creates the IInformationControlCreator for this hover."
@@ -83,18 +84,22 @@
     value
     (HoverEnrichedControlCreator.)))
 
-(defn create-macro-hover
-  "Factory function for creating an ITextHover instance for the editor."
-  [& params]
+(defn reify-macro-hover
+  "Reifies an instance of ITextHover, with expander identifying the the
+  desired expander (\"macroexpand\" or \"macroexpand-all\" are supported
+  at the moment)."
+  [expander-string-or-keyword]
+  (trace :support/hover (str "[MACRO-HOVER] expander will be: " expander-string-or-keyword))
   (let [hover-control (atom nil)
-        hover-enriched-control (atom nil)]
+        hover-enriched-control (atom nil)
+        expand! (partial macro-expand-html! (name expander-string-or-keyword))]
     (reify
       IClojureHover
       (getHoverInfo2 [this text-viewer hover-region]
         (trace :support/hover (str "[MACRO-HOVER] " (interop/simple-name this) ".getHoverInfo2 called:\n"
                                    "text-viewer -> " (.toString text-viewer) "\n"
                                    "region -> " (.toString hover-region) "\n"))
-        (let [[i msg] (if-let [info (macro-expand-html! text-viewer (.getOffset hover-region))]
+        (let [[i msg] (if-let [info (expand! text-viewer (.getOffset hover-region))]
                         [info nil]
                         [nil Messages/You_need_a_running_repl_macro])]
           (do (esupport/set-status-line-error-msg-async text-viewer msg) i)))
@@ -121,3 +126,7 @@
         (trace :support/hover (str "[MACRO-HOVER] " (interop/simple-name this) ".getInformationPresenterControlCreator called"))
         (swap! hover-enriched-control ensure-enriched-control-created)))))
 
+(defn create-macro-hover
+  "IExecutableExtension entry point."
+  [& params]
+  (reify-macro-hover (get (first params) "expander" "macroexpand")))
