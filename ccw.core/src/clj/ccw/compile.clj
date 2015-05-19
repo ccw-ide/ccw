@@ -8,18 +8,9 @@
 ;* Contributors: 
 ;*    Laurent PETIT - initial API and implementation
 ;*******************************************************************************/
-(ns ccw.compile)
-
-(defn all []
-  (dorun   
-    (map
-      compile
-      ['ccw.reload-clojure
-       'ccw.debug.clientrepl
-       'ccw.debug.serverrepl
-       'ccw.editors.clojure.PareditAutoEditStrategyImpl
-;       'ccw.editors.clojure.ClojureFormat
-       'ccw.editors.clojure.editor-support
-       'ccw.editors.clojure.hyperlink
-       ])))
+(ns ccw.compile
+  "This namespace is here only to force require some namespaces that otherwise
+   would not necessarily have been compiled transitively"
+   (:require [cider.nrepl] ; cider.nrepl is not compiled through ccw.core.launch since it is only dynamically required
+   ))
 
