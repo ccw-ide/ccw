@@ -2,12 +2,14 @@ package ccw.util.osgi;
 
 import java.net.URL;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.osgi.framework.Bundle;
 
 import ccw.CCWPlugin;
 import ccw.TraceOptions;
 import ccw.util.DisplayUtil;
+import clojure.java.api.Clojure;
 import clojure.lang.Compiler;
 import clojure.lang.DynamicClassLoader;
 import clojure.lang.IPersistentMap;
@@ -49,24 +51,39 @@ public class ClojureOSGi {
 		return withBundle(aBundle, aCode, null);
 	}
 
+	private static final ConcurrentHashMap<Bundle,DynamicClassLoader> bundleClassLoaders = new ConcurrentHashMap<Bundle,DynamicClassLoader>();
+	
+	/**
+	 * Note: if method called with a different list of additionalURLs for same bundle which is already
+	 * cached, the list will not be used...
+	 */
+	private static DynamicClassLoader getDynamicClassLoader(Bundle bundle, List<URL> additionalURLs) {
+		DynamicClassLoader l = bundleClassLoaders.get(bundle);
+		if (l == null) {
+			synchronized (bundleClassLoaders) {
+				l = bundleClassLoaders.get(bundle);
+				if (l == null) {
+					ClassLoader bundleLoader = new BundleClassLoader(bundle);
+					l = new DynamicClassLoader(bundleLoader);
+					if (additionalURLs != null) {
+						for (URL url: additionalURLs) {
+							l.addURL(url);
+						}
+					}
+					bundleClassLoaders.put(bundle, l);
+				}
+			}
+		}
+		return l;
+	}
+	
 	public static Object withBundle(Bundle aBundle, RunnableWithException aCode, List<URL> additionalURLs)
 			throws RuntimeException {
 
-		if (DisplayUtil.isUIThread()) {
-			CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI, "should not be called from UI Tread");
-			CCWPlugin.getTracer().traceDumpStack(TraceOptions.CLOJURE_OSGI);
-		}
-
 		initialize();
 
-		// TODO cache the dynamic class loader
-		ClassLoader bundleLoader = new BundleClassLoader(aBundle);
-		DynamicClassLoader loader = new DynamicClassLoader(bundleLoader);
-		if (additionalURLs != null) {
-			for (URL url: additionalURLs) {
-				loader.addURL(url);
-			}
-		}
+		DynamicClassLoader loader = getDynamicClassLoader(aBundle, additionalURLs);
+		
 		IPersistentMap bindings = RT.map(Compiler.LOADER, loader);
 		bindings = bindings.assoc(RT.USE_CONTEXT_CLASSLOADER, true);
 
@@ -96,14 +113,26 @@ public class ClojureOSGi {
 		}
 	}
 
+	private static final ConcurrentHashMap<String,String> alreadyRequiredNamespaces = new ConcurrentHashMap<String,String>();
+	
 	public synchronized static void require(final Bundle bundle, final String namespace) {
+		if (DisplayUtil.isUIThread()) {
+			CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI_UI_THREAD, "should not be called from UI Tread");
+			CCWPlugin.getTracer().traceDumpStack(TraceOptions.CLOJURE_OSGI_UI_THREAD);
+		}
+		
+		if (alreadyRequiredNamespaces.containsKey(namespace)) {
+			return;
+		}
+		
 		ClojureOSGi.withBundle(bundle, new RunnableWithException() {
 			@Override
 			public Object run() throws Exception {
 				try {
-					RT.var("clojure.core", "require").invoke(Symbol.intern(namespace));
+					Clojure.var("clojure.core", "require").invoke(Clojure.read(namespace));
 					String msg = "Namespace " + namespace + " loaded from bundle " + bundle.getSymbolicName();
 					CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI, msg);
+					alreadyRequiredNamespaces.put(namespace, namespace);
 					return null;
 				} catch (Exception e) {
 					String msg = "Exception loading namespace " + namespace + " from bundle " + bundle.getSymbolicName();
