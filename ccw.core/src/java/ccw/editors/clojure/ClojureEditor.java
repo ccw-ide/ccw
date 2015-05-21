@@ -45,16 +45,18 @@ import org.eclipse.ui.texteditor.StatusLineContributionItem;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import ccw.CCWPlugin;
+import ccw.editors.clojure.ClojureSourceViewer.IStatusLineHandler;
 import ccw.editors.clojure.scanners.ClojurePartitionScanner;
 import ccw.editors.outline.ClojureOutlinePage;
 import ccw.launching.ClojureLaunchShortcut;
 import ccw.preferences.PreferenceConstants;
+import ccw.repl.IReplProvider;
 import ccw.repl.REPLView;
 import ccw.repl.SafeConnection;
 import ccw.util.ClojureInvoker;
 import ccw.util.StringUtils;
 
-public class ClojureEditor extends TextEditor implements IClojureEditor {
+public class ClojureEditor extends TextEditor implements IClojureEditor, IReplProvider {
 	/**
 	 * Shortens a namespace name,
 	 * e.g. net.cgrand.parsley.core => n.c.parsley.core.
@@ -136,13 +138,14 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 	 */
 	private ClojureSourceViewer createClojureSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
 	    
-	    ClojureSourceViewer viewer= new ClojureSourceViewer(parent, ruler, getOverviewRuler(), isOverviewRulerVisible(), styles, getPreferenceStore(),
-                new ClojureSourceViewer.IStatusLineHandler() {
-                    public StatusLineContributionItem getEditingModeStatusContributionItem() {
-                        return (StatusLineContributionItem) ClojureEditor.this.getStatusField(ClojureSourceViewer.STATUS_CATEGORY_STRUCTURAL_EDITION);
-                    }
-                }) {
+	    IStatusLineHandler statusLineHandler = new ClojureSourceViewer.IStatusLineHandler() {
+            public StatusLineContributionItem getEditingModeStatusContributionItem() {
+                return (StatusLineContributionItem) ClojureEditor.this.getStatusField(ClojureSourceViewer.STATUS_CATEGORY_STRUCTURAL_EDITION);
+            }
             
+        };
+
+        ClojureSourceViewer viewer= new ClojureSourceViewer(parent, ruler, getOverviewRuler(), isOverviewRulerVisible(), styles, getPreferenceStore(), statusLineHandler) {
             @Override
             public void setStatusLineErrorMessage(String message) {
                 ClojureEditor.this.setStatusLineErrorMessage(message);
@@ -150,22 +153,12 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 
             @Override
             public @Nullable REPLView getCorrespondingREPL() {
-             // Experiment: always return the active REPL instead of a potentially
-                //             better match being a REPL started from same project as the file
-//              IFile file = (IFile) getEditorInput().getAdapter(IFile.class);
-//              if (file != null) {
-//                  REPLView repl = CCWPlugin.getDefault().getProjectREPL(file.getProject());
-//                  if (repl !=  null) {
-//                      return repl;
-//                  }
-//              }
-//              // Last resort : we return the current active REPL, if any
-                return REPLView.activeREPL.get();
+                return ClojureEditor.this.getCorrespondingREPL();
             }
 
             @Override
             public @Nullable SafeConnection getSafeToolingConnection() {
-                return REPLView.activeREPL.get().getSafeToolingConnection();
+                return ClojureEditor.this.getSafeToolingConnection();
             }
         };
         
@@ -354,7 +347,7 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 				new ClojureLaunchShortcut().launch(
 						ClojureEditor.this, 
 						null /* default run mode*/);
-			};
+			}
 		};
 		action.setActionDefinitionId(IClojureEditorActionDefinitionIds.LAUNCH_REPL);
 		setAction("ClojureLaunchAction", action);
@@ -668,14 +661,24 @@ public class ClojureEditor extends TextEditor implements IClojureEditor {
 		return sourceViewer().findDeclaringNamespace();
 	}
 	
-	public REPLView getCorrespondingREPL () {
-		return sourceViewer().getCorrespondingREPL();
+	@Override
+	public @Nullable REPLView getCorrespondingREPL () {
+        // Experiment: always return the active REPL instead of a potentially
+        //             better match being a REPL started from same project as the file
+//	    IFile file = (IFile) getEditorInput().getAdapter(IFile.class);
+//      if (file != null) {
+//          REPLView repl = CCWPlugin.getDefault().getProjectREPL(file.getProject());
+//          if (repl !=  null) {
+//              return repl;
+//          }
+//      }
+//      // Last resort : we return the current active REPL, if any
+        return REPLView.activeREPL.get();
 	}
 	
 	@Override
-    @Nullable
-    public SafeConnection getSafeToolingConnection() {
-        return sourceViewer().getSafeToolingConnection();
+    public @Nullable SafeConnection getSafeToolingConnection() {
+        return REPLView.activeREPL.get().getSafeToolingConnection();
     }
 
 	/**

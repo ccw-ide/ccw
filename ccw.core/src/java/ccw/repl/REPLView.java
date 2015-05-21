@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.ILaunch;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -76,6 +77,7 @@ import ccw.CCWPlugin;
 import ccw.TraceOptions;
 import ccw.editors.clojure.ClojureDocumentProvider;
 import ccw.editors.clojure.ClojureSourceViewer;
+import ccw.editors.clojure.ClojureSourceViewer.IStatusLineHandler;
 import ccw.editors.clojure.ClojureSourceViewerConfiguration;
 import ccw.editors.clojure.IClojureEditor;
 import ccw.editors.clojure.IClojureEditorActionDefinitionIds;
@@ -94,7 +96,7 @@ import clojure.lang.PersistentHashMap;
 import clojure.tools.nrepl.Connection;
 import clojure.tools.nrepl.Connection.Response;
 
-public class REPLView extends ViewPart implements IAdaptable, LineStyleListener, SafeConnection.IConnectionLostListener {
+public class REPLView extends ViewPart implements IAdaptable, IReplProvider, LineStyleListener, SafeConnection.IConnectionLostListener {
 
 	private static final double DISCONNECTED_REPL_FG_TRANSPARENCY_PCT = 0.5;
 
@@ -296,6 +298,12 @@ public class REPLView extends ViewPart implements IAdaptable, LineStyleListener,
 		});
     }
 
+    @Override
+    public @Nullable REPLView getCorrespondingREPL() {
+        return activeREPL.get();
+    }
+
+    @Override
     public SafeConnection getSafeToolingConnection() {
     	return safeToolConnection;
     }
@@ -699,13 +707,14 @@ public class REPLView extends ViewPart implements IAdaptable, LineStyleListener,
         inputControlsLayout = new StackLayout();
         inputControlsStack.setLayout(inputControlsLayout);
 
-        viewer = new ClojureSourceViewer(inputControlsStack, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL, prefs,
-        		new ClojureSourceViewer.IStatusLineHandler() {
-					@Override
-					public StatusLineContributionItem getEditingModeStatusContributionItem() {
-						return structuralEditionModeStatusContributionItem;
-					}
-				}) {
+        IStatusLineHandler statusLineHandler = new ClojureSourceViewer.IStatusLineHandler() {
+            @Override
+            public StatusLineContributionItem getEditingModeStatusContributionItem() {
+                return structuralEditionModeStatusContributionItem;
+            }
+        };
+        
+        viewer = new ClojureSourceViewer(inputControlsStack, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL, prefs, statusLineHandler) {
             @Override
             public void setStatusLineErrorMessage(String msg) {
             	if (msg != null) {
@@ -725,6 +734,15 @@ public class REPLView extends ViewPart implements IAdaptable, LineStyleListener,
             	} else {
             		return currentNamespace;
             	}
+            }
+
+            @Override
+            public @Nullable REPLView getCorrespondingREPL() {
+                return REPLView.this.getCorrespondingREPL();
+            }
+            @Override
+            public @Nullable SafeConnection getSafeToolingConnection() {
+                return REPLView.this.getSafeToolingConnection();
             }
         };
         viewerConfig = new ClojureSourceViewerConfiguration(prefs, viewer);
@@ -1410,5 +1428,4 @@ public class REPLView extends ViewPart implements IAdaptable, LineStyleListener,
             event.styles = styles;
         }
 	}
-    
 }

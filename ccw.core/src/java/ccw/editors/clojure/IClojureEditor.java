@@ -9,9 +9,6 @@ import org.eclipse.jface.text.source.DefaultCharacterPairMatcher;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
-import ccw.repl.REPLView;
-import ccw.repl.SafeConnection;
-
 /**
  * A callback interface allowing various facilities to treat
  * the {@link ClojureEditor} and {@link ClojureSourceViewer}
@@ -84,17 +81,6 @@ public interface IClojureEditor extends IAdaptable {
 
     Object getParseState ();
     Object getPreviousParseTree ();
-    
-    /**
-     * Can be null...
-     */
-    @Nullable REPLView getCorrespondingREPL();
-        
-    /**
-     * Gets the connection.
-     * @return The connection, or null if none
-     */
-    @Nullable SafeConnection getSafeToolingConnection();
     
     /**
 	 * Install/uninstall the Tab-to-Space converter.
