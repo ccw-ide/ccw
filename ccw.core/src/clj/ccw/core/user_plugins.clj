@@ -94,7 +94,9 @@
 
 (defn user-plugins [d]
   (if (and d (plugin-folder? d))
-    [d]
+    (if-not (f/exists? (io/file d "skip"))
+      [d]
+      [])
     (mapcat user-plugins 
             (filter f/directory?
                     (.listFiles (io/file d))))))
