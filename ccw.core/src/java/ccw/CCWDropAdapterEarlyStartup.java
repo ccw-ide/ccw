@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2015 Laurent Petit.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors: 
+ *    Andrea Richiardi - removed fields FileTransfer and UrlTransfer that were deadlocking tests
+ *******************************************************************************/
 package ccw;
 
 import java.io.File;
@@ -61,13 +71,6 @@ import ccw.util.DisplayUtil;
 
 /**
  * Startup configuration that needs to be executed early in the lifecycle.<br/>
- * <br/>
- * Note:<br/>
- * The two instance variables below have been removed as they were causing CCW 
- * to hang during tests, they probably cause deadlock during SWT startup in the
- * test/junit environment.<br/><br/>
- * <code>private final FileTransfer fileTransfer = FileTransfer.getInstance();</code>
- * <code>private final URLTransfer urlTransfer = URLTransfer.getInstance();</code>
  */
 public class CCWDropAdapterEarlyStartup implements IStartup {
 
