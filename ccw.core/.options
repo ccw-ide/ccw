@@ -44,6 +44,9 @@ ccw.core/paredit=false
 # Clojure OSGi integration related traces
 ccw.core/clojure.osgi=false
 
+# Clojure OSGi namespace loading on UI Thread related traces
+ccw.core/clojure.osgi/ui-thread=false
+
 # Code Outline related traces
 ccw.core/outline=false
 

@@ -54,6 +54,9 @@ public class TraceOptions {
 	/** Clojure OSGi integration related traces */
 	public static final String CLOJURE_OSGI = "/clojure.osgi";
 
+	/** Clojure OSGi namespace loading on UI Thread related traces */
+	public static final String CLOJURE_OSGI_UI_THREAD = "/clojure.osgi/ui-thread";
+
 	/** Code Outline related traces */
 	public static final String OUTLINE = "/outline";
 
