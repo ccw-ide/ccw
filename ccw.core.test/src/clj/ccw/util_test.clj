@@ -9,7 +9,7 @@
 ;*    Andrea Richiardi - initial tests for delayed atom
 ;*******************************************************************************/
 
-(ns ccw.util_test
+(ns ccw.util-test
   (:use clojure.test
         ccw.util))
 
