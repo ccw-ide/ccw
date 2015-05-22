@@ -1,7 +1,9 @@
 package ccw.util.osgi;
 
 import java.net.URL;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.osgi.framework.Bundle;
@@ -113,7 +115,7 @@ public class ClojureOSGi {
 		}
 	}
 
-	private static final ConcurrentHashMap<String,String> alreadyRequiredNamespaces = new ConcurrentHashMap<String,String>();
+	private static final Set<String> synchronizedAlreadyRequiredNamespaces = new HashSet<String>();
 	
 	public synchronized static void require(final Bundle bundle, final String namespace) {
 		if (DisplayUtil.isUIThread()) {
@@ -121,7 +123,7 @@ public class ClojureOSGi {
 			CCWPlugin.getTracer().traceDumpStack(TraceOptions.CLOJURE_OSGI_UI_THREAD);
 		}
 		
-		if (alreadyRequiredNamespaces.containsKey(namespace)) {
+		if (synchronizedAlreadyRequiredNamespaces.contains(namespace)) {
 			return;
 		}
 		
@@ -132,7 +134,7 @@ public class ClojureOSGi {
 					Clojure.var("clojure.core", "require").invoke(Clojure.read(namespace));
 					String msg = "Namespace " + namespace + " loaded from bundle " + bundle.getSymbolicName();
 					CCWPlugin.getTracer().trace(TraceOptions.CLOJURE_OSGI, msg);
-					alreadyRequiredNamespaces.put(namespace, namespace);
+					synchronizedAlreadyRequiredNamespaces.add(namespace);
 					return null;
 				} catch (Exception e) {
 					String msg = "Exception loading namespace " + namespace + " from bundle " + bundle.getSymbolicName();
