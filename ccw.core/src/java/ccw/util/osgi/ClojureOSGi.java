@@ -81,6 +81,10 @@ public class ClojureOSGi {
 	public static Object withBundle(Bundle aBundle, RunnableWithException aCode, List<URL> additionalURLs)
 			throws RuntimeException {
 
+		if (Thread.currentThread().isInterrupted() || CCWPlugin.canLoadCodeInBundle()) {
+			return null;
+		}
+		
 		initialize();
 
 		DynamicClassLoader loader = getDynamicClassLoader(aBundle, additionalURLs);

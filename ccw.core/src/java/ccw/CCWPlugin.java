@@ -234,6 +234,17 @@ public class CCWPlugin extends AbstractUIPlugin {
 
     public CCWPlugin() { }
 
+    private volatile int bundleState = Bundle.UNINSTALLED;
+
+    /**
+     * Can code be loaded in the current bundle?
+     * @return True or false.
+     */
+    public static boolean canLoadCodeInBundle() {
+        CCWPlugin plugin = CCWPlugin.getDefault();
+        return (plugin != null && plugin.bundleState == Bundle.ACTIVE);
+    }
+    
     @Override
 	public void start(BundleContext context) throws Exception {
         super.start(context);
@@ -250,71 +261,74 @@ public class CCWPlugin extends AbstractUIPlugin {
 
 			@Override
 			public void bundleChanged(BundleEvent evt) {
-				if (evt.getBundle() == CCWPlugin.this.getBundle()
-					&&	evt.getType() == BundleEvent.STARTED) {
+				if (evt.getBundle() == CCWPlugin.this.getBundle()) {
+					bundleState = evt.getType();
 
-					// We immediately give control back to the OSGi framework application
-					// by starting the code in a new thread
-					new Thread(new Runnable() {
-						@Override public void run() {
-							// Some Eclipse plugins, such as LaunchingResourceManager
-							// call PlatformUI.getWorbench() and checking for null,
-							// even though null is not a valid return value
-							// (instead, an exception is thrown), resulting
-							// in the whole Eclipse to collapse.
-						    // Let's protect this code once and for all by ensuring
-							// That the Workbench has been initialized before calling
-							// the initialization code
-							while(!PlatformUI.isWorkbenchRunning()) {
-								try {
-									if (CCWPlugin.this.getBundle().getState()!=Bundle.ACTIVE)
-										return;
-									Thread.sleep(200);
-								} catch (InterruptedException e) {
-									logError("Error while querying for the active bundle", e);
-								}
-							}
+					if (evt.getType() == BundleEvent.STARTED) {
 
-							// The Workbench may not be initialized, causing weird issues e.g. in Kepler
-							// WorkbenchThemeManager.getInstance() in Kepler for instance does
-							// not ensure the instance is created in the UI Thread
-							// Once the Workbench is initialized, WorkbenchThemeManager & all
-							// are ensured to be created, so this removes a bunch of plugin startup
-							// race conditions
-							final IWorkbench workbench = PlatformUI.getWorkbench();
-							final AtomicBoolean isWorkbenchInitialized = new AtomicBoolean();
-							while (true) {
-								workbench.getDisplay().syncExec(new Runnable() {
-									@Override public void run() {
-										if (workbench.getActiveWorkbenchWindow() != null) {
-											// we've got an active window, so workbench is initialized!
-											isWorkbenchInitialized.set(true);
-										}
-									}});
-								if (isWorkbenchInitialized.get()) {
-									break;
-								} else {
+						// We immediately give control back to the OSGi framework application
+						// by starting the code in a new thread
+						new Thread(new Runnable() {
+							@Override public void run() {
+								// Some Eclipse plugins, such as LaunchingResourceManager
+								// call PlatformUI.getWorbench() and checking for null,
+								// even though null is not a valid return value
+								// (instead, an exception is thrown), resulting
+								// in the whole Eclipse to collapse.
+								// Let's protect this code once and for all by ensuring
+								// That the Workbench has been initialized before calling
+								// the initialization code
+								while(!PlatformUI.isWorkbenchRunning()) {
 									try {
+										if (CCWPlugin.this.getBundle().getState()!=Bundle.ACTIVE)
+											return;
 										Thread.sleep(200);
 									} catch (InterruptedException e) {
-										logError("Error while trying to Thread.sleep.", e);
+										logError("Error while querying for the active bundle", e);
 									}
 								}
-							}
 
-							// Here, the workbench is initialized
-							if (System.getProperty(StaticStrings.CCW_PROPERTY_NREPL_AUTOSTART) != null) {
-								try {
-									startREPLServer();
-								} catch (Exception e) {
-									logError("Error while querying for property: " + StaticStrings.CCW_PROPERTY_NREPL_AUTOSTART, e);
+								// The Workbench may not be initialized, causing weird issues e.g. in Kepler
+								// WorkbenchThemeManager.getInstance() in Kepler for instance does
+								// not ensure the instance is created in the UI Thread
+								// Once the Workbench is initialized, WorkbenchThemeManager & all
+								// are ensured to be created, so this removes a bunch of plugin startup
+								// race conditions
+								final IWorkbench workbench = PlatformUI.getWorkbench();
+								final AtomicBoolean isWorkbenchInitialized = new AtomicBoolean();
+								while (true) {
+									workbench.getDisplay().syncExec(new Runnable() {
+										@Override public void run() {
+											if (workbench.getActiveWorkbenchWindow() != null) {
+												// we've got an active window, so workbench is initialized!
+												isWorkbenchInitialized.set(true);
+											}
+										}});
+									if (isWorkbenchInitialized.get()) {
+										break;
+									} else {
+										try {
+											Thread.sleep(200);
+										} catch (InterruptedException e) {
+											logError("Error while trying to Thread.sleep.", e);
+										}
+									}
 								}
+
+								// Here, the workbench is initialized
+								if (System.getProperty(StaticStrings.CCW_PROPERTY_NREPL_AUTOSTART) != null) {
+									try {
+										startREPLServer();
+									} catch (Exception e) {
+										logError("Error while querying for property: " + StaticStrings.CCW_PROPERTY_NREPL_AUTOSTART, e);
+									}
+								}
+
+								getNatureAdapter().start();
 							}
 
-							getNatureAdapter().start();
-						}
-						
-					}).start();
+						}).start();
+					}
 				}
 			}
 		});
