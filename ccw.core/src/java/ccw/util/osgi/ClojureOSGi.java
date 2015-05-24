@@ -16,12 +16,11 @@ import clojure.lang.Compiler;
 import clojure.lang.DynamicClassLoader;
 import clojure.lang.IPersistentMap;
 import clojure.lang.RT;
-import clojure.lang.Symbol;
 import clojure.lang.Var;
 
 public class ClojureOSGi {
 	private static volatile boolean initialized;
-	private synchronized static void initialize() {
+	private static void initialize() {
 		if (initialized) return;
 		synchronizedInitialize();
 	}
