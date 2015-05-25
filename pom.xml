@@ -33,7 +33,7 @@
         </profiles>
 
         <properties>
-                <tycho-version>0.21.0</tycho-version>
+                <tycho-version>0.22.0</tycho-version>
         </properties>
 
         <pluginRepositories>
