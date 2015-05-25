@@ -29,17 +29,6 @@
                                 <module>ccw.product</module>
                         </modules>
                 </profile>
-                <profile>
-                  <id>skip-ui-tests</id>
-                  <activation>
-                    <property>
-                      <name>skip-ui-tests</name>
-                    </property>
-                  </activation>
-                  <properties>
-                    <ui.test.skip>true</ui.test.skip>
-                  </properties>
-                  </profile>
         </profiles>
 
         <properties>

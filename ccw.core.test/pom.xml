@@ -43,7 +43,6 @@
         <configuration>
           <testFailureIgnore>true</testFailureIgnore>
           <redirectTestOutputToFile>true</redirectTestOutputToFile>
-          <skipTests>${ui.test.skip}</skipTests>
           <useUIHarness>true</useUIHarness>
           <useUIThread>false</useUIThread>
           <product>ccw.branding.ccw</product>
