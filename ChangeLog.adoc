@@ -4,11 +4,11 @@ Laurent Petit <laurent dot petit at gmail dot com>
 :sectlinks:
 :source-highlighter: coderay
 :experimental:
-:toc:
-:toc-title!:
+:toc: left
+:toc-title: ChangeLog
 :toclevels: 0
 
-== Changes between Counterclockwise 0.32.0 and 0.33.0
+== Counterclockwise 0.33.0
 
 This release upgrades the embedded Leiningen from 2.5.0 to 2.5.1.
 Apart from that, the release is mostly a bug-fixing release.
@@ -79,7 +79,7 @@ Counterclockwise ships with an embedded nREPL server. The following enhancements
 - Faster Eclipse Startup: with lots of user plugins installed, CCW used to freeze while the user plugins where launched. They are now launched in the background.
 - The keybinding cleaning function did concurrent modifications of an Eclipse Internal collection. Fix laurentpetit/ccw-plugin-manager#1
 
-== Changes between Counterclockwise 0.31.2 and 0.32.0
+== Counterclockwise 0.32.0
 
 `0.32.0` released on December xx, 2014
 
@@ -106,7 +106,7 @@ Internally, Counterclockwise now uses Clojure 1.7.0-master. It adds a couple pat
 
 - Print maven coordinates of Counterclockwise dependencies at plugin startup in `.metadata/.log`. Fixes #741
 
-== Changes between Counterclockwise 0.31.1 and 0.31.2
+== Counterclockwise 0.31.2
 
 `0.31.2` released on December 4, 2014
 
@@ -132,7 +132,7 @@ Example: creating a new type of marker `ccw-plugin-clj-lint`, simply inheriting 
 ----
 
 
-== Changes between Counterclockwise 0.31.0 and 0.31.1
+== Counterclockwise 0.31.1
 
 `0.31.1` released on December 4, 2014
 
@@ -167,7 +167,7 @@ Examples:
 - Added function `ccw.api.repl/show-repl` for bringing to front / optionally giving focus to a (or the last active) REPL. Demonstration of the feature for creating a new command in the [ccw-plugin-repl](https://github.com/laurentpetit/ccw-plugin-repl/) user plugin, in script file `repl-keybindings.clj`.
 
 
-== Changes between Counterclockwise 0.30.0 and 0.31.0
+== Counterclockwise 0.31.0
 
 `0.31.0` released on December 4, 2014
 
@@ -196,7 +196,7 @@ Everytime a Clojure editor is saved, a map with the namespace String, the absolu
 Everytime a response is received from an nrepl connection, the response data is posted to the Eclipse 4 Event Broker to the "ccw/repl/response" topic (just use :ccw.repl.response in your user plugins to refer to the topic, the conversion from :ccw.repl.reponse to "ccw/repl/response" is done by `ccw.events` functions).
 
 
-== Changes between Counterclockwise 0.29.1 and 0.30.0
+== Counterclockwise 0.30.0
 
 `0.30.0` released on November 16, 2014
 
@@ -223,7 +223,7 @@ It has not been labelled 0.29.2 because one fix involved a new way of building t
 The project does not suggest the Eclipse workspace as default location anymore. +
 Instead, the last value for the location field is suggested.
 
-== Changes between Counterclockwise 0.29.0 and 0.29.1
+== Counterclockwise 0.29.1
 
 `0.29.1` released on November 13, 2014
 
@@ -236,7 +236,7 @@ Instead, the last value for the location field is suggested.
 - Make Leiningen created projects honor the Java Preference `Java > Build Path > Output folder name`.
 
 
-== Changes between Counterclockwise 0.28.1 and 0.29.0
+== Counterclockwise 0.29.0
 
 `0.29.0` released on October 20, 2014
 
@@ -255,7 +255,7 @@ This release is mostly a maintenance release. It is also the first release embed
 - REPL View visual hint (<type clojure code here>) is displayed according to the menu:Preferences[Clojure > REPL View > Show hints] Preference. Fixes #662 - Toggle REPL hint (Settings)
 
 
-== Changes between Counterclockwise 0.28.0 and 0.28.1
+== Counterclockwise 0.28.1
 
 `0.28.1` released on September 28, 2014
 
@@ -271,7 +271,7 @@ This release is mostly a maintenance release. It is also the first release embed
 - Better User feedback for Drag & Drop folder actions
 
 
-== Changes between Counterclockwise 0.27.1 and 0.28.0
+== Counterclockwise 0.28.0
 
 `0.28.0` released on September 25, 2014
 
@@ -304,7 +304,7 @@ Fix Issue #560
 
 - Leiningen dependencies are updated in the background. They do not block the UI until they're finished anymore.
 
-== Changes between Counterclockwise 0.27.0 and 0.27.1
+== Counterclockwise 0.27.1
 
 `0.27.1` released on August 28, 2014
 
@@ -313,7 +313,7 @@ Fix Issue #560
 - Fix Issue with Eclipse Kepler (race conditions on plugin startup). Fix Issue #652 - should also prevent some other problems as well
 - Fix Issue with `Namespace Browser View` which was broken in version 0.27.0
 
-== Changes between Counterclockwise 0.26.0 and 0.27.0
+== Counterclockwise 0.27.0
 
 `0.27.0` released on August 21, 2014
 
@@ -338,7 +338,7 @@ If source jars for dependencies are available on the repositories, they are down
 - Fixed race conditions during Eclipse startup between CCW and the JDT indirectly starting the DebugUIPlugin while the workbench has not been created yet (why the stack towards getting a JDT classpath check leads to trying to start the DebugUIPlugin in Eclipse is an exercise left to the reader). Fix Issue #651
 
 
-== Changes between Counterclockwise 0.25.2 and 0.26.0
+== Counterclockwise 0.26.0
 
 `0.26.0` released on July 10, 2014
 
@@ -373,7 +373,7 @@ The wizard now accepts `lein new` template arguments. Simply put them after the 
 - `Editor`: In strict/paredit mode, forward/backward delete do not prevent to remove `#` in front of `()` or `{}` or `""`. Also, fixed a bug where forward delete allowed to remove `(` or `{` or `"` if there was a leading `#`. Fix Issue #523
   - Also changed a behavior: the cursor is not stuck, either something is deleted, either the cursors moves forward or backward
 
-== Changes between Counterclockwise 0.25.1 and 0.25.2
+== Counterclockwise 0.25.2
 
 `0.25.2` released on May 17, 2014
 
@@ -381,7 +381,7 @@ The wizard now accepts `lein new` template arguments. Simply put them after the 
 
 - Upgraded dependency on `ccw.server 0.1.1` which is where the fix for Code Completion not succeeding sometimes is located!
 
-== Changes between Counterclockwise 0.25.0 and 0.25.1
+== Counterclockwise 0.25.1
 
 `0.25.1` released on May 17, 2014
 
@@ -397,7 +397,7 @@ Thus the "Headless Leiningen REPL" command has been resurrected. You can find it
 - Project wizard issue if you (only) unselect the default location checkbox. Fix Issue #637
 - Code Completion would not succeed sometimes and NullPointerExceptions would be logged instead. Fix Issue #631
 
-== Changes between Counterclockwise 0.24.2 and 0.25.0
+== Counterclockwise 0.25.0
 
 `0.25.0` released on April 25, 2014
 
@@ -434,7 +434,7 @@ The console stack trace hyperlinks where wrong if the namespace was separate in 
 
 Counterclockwise `Automatic detection of Clojure projects` and Maven m2e `Update Maven projects on startup` preferences do not play well when both set to true. Counterclockwise code has been carefully audited and updated to prevent IResource locks, but the problem remains anyway. It is strongly suggested to not use m2e `Update Maven projects on startup`. Fixes Issue #633
 
-== Changes between Counterclockwise 0.24.1 and 0.24.2
+== Counterclockwise 0.24.2
 
 `0.24.2` released on April 11, 2014
 
@@ -467,13 +467,13 @@ Motivation: some users have reported real blocking issues which cannot be addres
 When both of these issues are addressed, removing this Preference from the GUI may be considered.
 
 
-== Changes between Counterclockwise 0.24.0 and 0.24.1
+== Counterclockwise 0.24.1
 
 `0.24.1` released on March 30, 2014
 
 Bug Fix: The System environment was not correctly passed to the launched project process, causing all sorts of trouble (X Window session not found, java.io.tmpdir not set correctly, etc.)
 
-== Changes between Counterclockwise 0.23.0 and 0.24.0
+== Counterclockwise 0.24.0
 
 `0.24.0` released on March 20, 2014
 
@@ -496,7 +496,7 @@ Also now by default, keyboard shortcut kbd:[Ctrl+Alt S] starts the project in de
 - For OS X, the zip now contains a root folder named Counterclockwise-<version>.app ; it is thus recognized as an OS X Application folder
 
 
-== Changes between Counterclockwise 0.22.0 and 0.23.0
+== Counterclockwise 0.23.0
 
 `0.23.0` released on January 23, 2014
 
@@ -515,7 +515,7 @@ Fixes the compatibility problems with Eclipse Indigo!
 - now mentions the Counterclockwise version number (in the text, and the corresponding links)
 
 
-== Changes between Counterclockwise 0.21.0 and 0.22.0
+== Counterclockwise 0.22.0
 
 `0.22.0` released on January 10, 2014
 
@@ -564,7 +564,7 @@ Counterclockwise will create 2 source path entries:
 All paths are marked as 'optional' so that if folders for these paths are missing, no exception is reported by Eclipse.
 
 
-== Changes between Counterclockwise 0.20.0 and 0.21.0
+== Counterclockwise 0.21.0
 
 `0.21.0` released on January 9, 2014
 
@@ -654,7 +654,7 @@ Moar sensible default preferences:
 ** automatic refresh of the Workspace resources without asking the user
 
 
-== Changes between Counterclockwise 0.12.3 and 0.20.0
+== Counterclockwise 0.20.0
 
 `0.20.0` released on October 10, 2013
 
