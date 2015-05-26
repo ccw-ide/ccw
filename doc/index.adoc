@@ -1,8 +1,8 @@
-Counterclockwise Documentation Site
-===================================
+= Counterclockwise Documentation Site
 Laurent Petit <laurent.petit@gmail.com>
 :highlight: highlightjs
 :experimental:
+:icons: font
 
 Welcome to Counterclockwise's Documentation Site.
 
