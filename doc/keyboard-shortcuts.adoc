@@ -1,12 +1,12 @@
-= Editor Keyboard Shortcuts
+= Keyboard Shortcuts
 Laurent Petit <laurent.petit@gmail.com>
 :sectanchors:
 :sectlinks:
 :source-highlighter: coderay
 :experimental:
-:toc: 
-:toc-title!:
-:toclevels: 5
+:toc: left
+:toc-title: Keyboard Shortcuts
+:toclevels: 2
 
 == Editor general shortcuts
 
@@ -263,9 +263,7 @@ Toggle single line comments for selected lines.
 === Strict Structural Editing Mode (paredit-style)
 In addition to the features of the Default Structural Editing mode, this mode does its best to prevent you from breaking the structure of your code.
 
-Note
-+++
-You'll only feel "at home" in this mode if you know the following commands
+Note: You'll only feel "at home" in this mode if you know the following commands
 
 ==== Reindend line
 Reindent the line properly
@@ -364,7 +362,7 @@ Will suppress the whole parens/brackets at once if empty and (currently) right a
 |===
 
 
-== Interaction with the REPL
+=== Interaction with the REPL
 
 REPL stands for "Read Eval Print Loop" an is the clojure/lisp equivalent of so called "interactive shells" of dynamic languages.
 
