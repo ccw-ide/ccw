@@ -25,10 +25,9 @@
                                         <sourceDirectory>${basedir}</sourceDirectory>
                                         <outputDirectory>${project.build.directory}/html</outputDirectory>
                                         <backend>html5</backend> <!-- html5 or docbook -->
-                                        <doctype>article</doctype> <!-- article or book -->
+                                        <doctype>book</doctype> <!-- article or book -->
                                         <sourceHighlighter>coderay</sourceHighlighter> <!-- coderay or highlightjs -->
                                         <embedAssets>true</embedAssets>
-                                        <compact>true></compact><!-- TODO keep or not? Experiment -->
                                 </configuration>
                                 <executions>
                                         <execution>
@@ -41,8 +40,7 @@
                                                 <phase>generate-resources</phase>
                                                 <goals><goal>process-asciidoc</goal></goals>
                                                 <configuration> 
-                                                        <sourceDirectory>${basedir}/..</sourceDirectory>
-                                                        <sourceDocumentName>ChangeLog.adoc</sourceDocumentName>
+                                                        <sourceDocumentName>../ChangeLog.adoc</sourceDocumentName>
                                                 </configuration>
                                         </execution>
                                         <execution>
@@ -50,8 +48,7 @@
                                                 <phase>generate-resources</phase>
                                                 <goals><goal>process-asciidoc</goal></goals>
                                                 <configuration> 
-                                                        <sourceDirectory>${basedir}/..</sourceDirectory>
-                                                        <sourceDocumentName>CONTRIBUTING.adoc</sourceDocumentName>
+                                                        <sourceDocumentName>../CONTRIBUTING.adoc</sourceDocumentName>
                                                 </configuration>
                                         </execution>
                                         <execution>
@@ -59,8 +56,7 @@
                                                 <phase>generate-resources</phase>
                                                 <goals><goal>process-asciidoc</goal></goals>
                                                 <configuration> 
-                                                        <sourceDirectory>${basedir}/..</sourceDirectory>
-                                                        <sourceDocumentName>AUTHORS.adoc</sourceDocumentName>
+                                                        <sourceDocumentName>../AUTHORS.adoc</sourceDocumentName>
                                                 </configuration>
                                         </execution>
                                 </executions>
