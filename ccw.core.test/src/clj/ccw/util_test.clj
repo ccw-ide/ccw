@@ -9,7 +9,7 @@
 ;*    Andrea Richiardi - initial test implementation
 ;*******************************************************************************/
 
-(ns ccw.util_test
+(ns ccw.util-test
   (:use clojure.test
         ccw.common
         ccw.util))

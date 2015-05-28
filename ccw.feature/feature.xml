@@ -6,11 +6,11 @@
       provider-name="%providerName"
       plugin="ccw.branding">
 
-   <description url="http://code.google.com/p/counterclockwise">
+   <description url="https://github.com/laurentpetit/ccw">
       %description
    </description>
 
-   <copyright url="http://code.google.com/p/counterclockwise">
+   <copyright url="https://github.com/laurentpetit/ccw">
       %copyright
    </copyright>
 
@@ -22,24 +22,22 @@
       <update label="Counterclockwise Update Site" url="http://updatesite.ccw-ide.org/stable/"/>
    </url>
 
-   <!--
-   <requires>
-      <import plugin="org.eclipse.equinox.app"/>
-   </requires>
-   -->
-
    <requires>
       <import plugin="org.eclipse.help"/>
+      <import plugin="org.eclipse.ui.intro.universal"/>
+      <import plugin="org.eclipse.ui.intro"/>
       <import plugin="org.eclipse.ui"/>
-      <import plugin="org.eclipse.core.runtime" version="3.4.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.ui.ide" version="3.4.2" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.ui.ide"/>
       <import plugin="org.eclipse.jdt.launching"/>
       <import plugin="org.eclipse.jdt.core"/>
+      <import plugin="org.eclipse.jface"/>
       <import plugin="org.eclipse.jdt.ui"/>
+      <import plugin="org.eclipse.platform"/>
       <import plugin="org.eclipse.ui.console"/>
       <import plugin="org.eclipse.ui.editors"/>
       <import plugin="org.eclipse.jface.text"/>
-      <import plugin="org.eclipse.ui.views" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.ui.views"/>
       <import plugin="org.eclipse.core.filesystem"/>
       <import plugin="org.eclipse.core.expressions"/>
       <import plugin="org.eclipse.ui.forms"/>
@@ -48,12 +46,23 @@
       <import plugin="org.eclipse.jdt.debug"/>
       <import plugin="org.eclipse.jdt.debug.ui"/>
       <import plugin="org.eclipse.ui.workbench.texteditor"/>
-      <import plugin="org.eclipse.ui.intro.universal"/>
-      <import plugin="org.eclipse.ui.intro"/>
-      <import plugin="org.eclipse.jface"/>
-      <import plugin="org.eclipse.platform"/>
       <import plugin="org.eclipse.jgit"/>
       <import plugin="org.eclipse.egit.ui"/>
+      <import plugin="org.eclipse.e4.core.contexts"/>
+      <import plugin="org.eclipse.e4.core.commands"/>
+      <import plugin="org.eclipse.e4.core.di"/>
+      <import plugin="org.eclipse.e4.core.di.extensions"/>
+      <import plugin="org.eclipse.e4.core.services"/>
+      <import plugin="org.eclipse.e4.ui.bindings"/>
+      <import plugin="org.eclipse.e4.ui.di"/>
+      <import plugin="org.eclipse.e4.ui.model.workbench"/>
+      <import plugin="org.eclipse.e4.ui.services"/>
+      <import plugin="org.eclipse.e4.ui.widgets"/>
+      <import plugin="org.eclipse.e4.ui.workbench"/>
+      <import plugin="org.eclipse.core.runtime.compatibility"/>
+      <import plugin="org.eclipse.osgi.services"/>
+      <import plugin="org.eclipse.ui.trace"/>
+      <import feature="org.eclipse.rcp"/>
    </requires>
 
    <plugin
@@ -74,21 +83,5 @@
          install-size="0"
          version="0.0.0"
          fragment="true"/>
-
-<!--
-   <plugin
-         id="org.eclipse.ui.themes"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.ui.themes.source"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
--->
 
 </feature>

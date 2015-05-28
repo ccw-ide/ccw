@@ -15,9 +15,8 @@
                 <module>paredit.clj</module>
                 <module>ccw.feature</module>
                 <module>doc</module>
-                <!--
-                <module>../ccw.core.test</module>
-                -->
+
+                <module>ccw.core.test</module>
         </modules>
 
         <profiles>
@@ -30,10 +29,23 @@
                                 <module>ccw.product</module>
                         </modules>
                 </profile>
+                <profile>
+                  <id>skip-ui-tests</id>
+                  <activation>
+                    <property>
+                      <name>skip-ui-tests</name>
+                    </property>
+                  </activation>
+                  <properties>
+                    <ui.test.skip>true</ui.test.skip>
+                  </properties>
+                  </profile>
         </profiles>
 
         <properties>
                 <tycho-version>0.21.0</tycho-version>
+                <ui.test.vmparams>-Xmx1024m -XX:MaxPermSize=384m</ui.test.vmparams>
+                <ui.test.skip>false</ui.test.skip>
         </properties>
 
         <pluginRepositories>
@@ -52,11 +64,11 @@
                         <id>clojars.org</id>
                         <url>http://clojars.org/repo</url>
                 </repository>
-                <!--repository>
+                <repository>
                         <id>swtbot</id>
                         <url>http://download.eclipse.org/technology/swtbot/releases/latest/</url>
                         <layout>p2</layout>
-                </repository-->
+                </repository>
                 <repository>
                         <id>eclipse-color-theme</id>
                         <url>http://eclipse-color-theme.github.io/update/</url>
@@ -162,6 +174,15 @@
                                                 </artifact>
                                         </target>
                                         -->
+                                        <dependency-resolution>
+                                          <extraRequirements>
+                                            <requirement>
+                                              <type>eclipse-feature</type>
+                                              <id>org.eclipse.rcp</id>
+                                              <versionRange>0.0.0</versionRange>
+                                            </requirement>
+                                          </extraRequirements>
+                                        </dependency-resolution>
                                 </configuration>
                         </plugin>
                 </plugins>

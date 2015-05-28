@@ -6,19 +6,19 @@
   <parent>
     <groupId>ccw</groupId>
     <artifactId>ccw.parent</artifactId>
-    <version>0.29.2-SNAPSHOT</version>
+    <version>0.31.2-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
 
   <groupId>ccw</groupId>
   <artifactId>ccw.core.test</artifactId>
-  <version>0.29.2-SNAPSHOT</version>
+  <version>0.31.2-SNAPSHOT</version>
   <packaging>eclipse-test-plugin</packaging>
 
   <properties>
      <os-jvm-flags/>
   </properties>
-  
+
   <build>
     <plugins>
       <plugin>
@@ -41,10 +41,14 @@
         <artifactId>tycho-surefire-plugin</artifactId>
         <version>${tycho-version}</version>
         <configuration>
+          <testFailureIgnore>true</testFailureIgnore>
+          <redirectTestOutputToFile>true</redirectTestOutputToFile>
+          <skipTests>${ui.test.skip}</skipTests>
           <useUIHarness>true</useUIHarness>
           <useUIThread>false</useUIThread>
           <product>ccw.branding.ccw</product>
-          <argLine>-XX:MaxPermSize=128m -Xms40m -Xmx512m -ea ${os-jvm-flags}</argLine>
+          <application>org.eclipse.ui.ide.workbench</application>
+          <argLine>${ui.test.vmargs}</argLine>
           <includes>
             <include>**/*Test.java</include>
             <include>**/*Tests.java</include>
@@ -52,11 +56,33 @@
           <showEclipseLog>true</showEclipseLog>
           <redirectTestOutputToFile>false</redirectTestOutputToFile>
           <useFile>false</useFile>
+          <systemProperties>
+             <org.eclipse.swtbot.screenshots.dir>${project.build.directory}/screenshots</org.eclipse.swtbot.screenshots.dir>
+             <org.eclipse.swtbot.search.timeout>5000</org.eclipse.swtbot.search.timeout>
+             <org.eclipse.swtbot.playback.delay>10</org.eclipse.swtbot.playback.delay>
+          </systemProperties>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-report-plugin</artifactId>
+        <version>2.18.1</version>
+        <executions>
+            <execution>
+              <id>generate-html</id>
+              <phase>post-integration-test</phase>
+              <goals>
+                <goal>report-only</goal>
+              </goals>
+              <configuration>
+                <outputName>ccw-core-test-report</outputName>
+              </configuration>
+            </execution>
+          </executions>
       </plugin>
     </plugins>
   </build>
-  
+
   <profiles>
     <profile>
       <id>macosx-jvm-flags</id>
