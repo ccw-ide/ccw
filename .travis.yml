@@ -12,17 +12,16 @@ env:
     - secure: "ngfDTSbLJ9suMJ+hUJws7wKbP184+Poyd09Rc3MEdpD8oq2mW8+XYi1bjmnA\n04bxqQ+hnLCdxjVqaXjp7nMB8pCHxWaraoOyU1uJJxFSNO1y1f2k09eAexA+\nLN4fXIU8HjPLvXz2u8oZITYCWKuCyAIuiFus7N9RZ+Kk/mYE0lg="
     - secure: "YDLYUZiLuoNCRpdIMxycacPOyJkIw/lfycpEiIfoyuVQCTf0Sig/KZpjDyHj\nlU8gPqwYewp//lTyczuJIFq8IOghO3QejGaqlNGNLOmFPIsfdThMGOYn9IOJ\nkqO4enPLfxjnEAxvcKQDboUrCETjsimCvMccgIZDcvlQ6iFAdzA="
   matrix:
-    - ECLIPSE_TARGET=kepler
+    - ECLIPSE_TARGET=luna
 install: true
 cache:
   directories:
-  # Maven local repository cache
-  - ${HOME}/.m2
+    - ${HOME}/.m2
 before_install:
   - echo "#-#-#-# BEFORE INSTALL"
   - date
   # Maven 3.1.1
-  - echo "#-#-#-# DOWNLOAD AND INSTALL MAVEN 3.1.1 - START "
+  - echo "#-#-#-# DOWNLOAD AND INSTALL MAVEN 3.1.1 - START"
   - date
   - wget http://www.us.apache.org/dist/maven/maven-3/3.1.1/binaries/apache-maven-3.1.1-bin.tar.gz
   - tar xvf apache-maven-3.1.1-bin.tar.gz > /dev/null
@@ -53,11 +52,11 @@ script:
   - date
   - mvn clean verify --batch-mode -e -DforceContextQualifier=${QUALIFIER}
 after_success: 
-  - test ${ECLIPSE_TARGET} = "kepler" && chmod 777 ./scripts/travis-deploy.sh
-  - test ${ECLIPSE_TARGET} = "kepler" && echo "#-#-#-#- deploying " 
-  - test ${ECLIPSE_TARGET} = "kepler" && date
-  - test ${ECLIPSE_TARGET} = "kepler" && ./scripts/travis-deploy.sh
-  - test ${ECLIPSE_TARGET} = "kepler" && echo "#-#-#-#- deployed "
-  - test ${ECLIPSE_TARGET} = "kepler" && echo date
+  - test ${ECLIPSE_TARGET} = "luna" && chmod 777 ./scripts/travis-deploy.sh
+  - test ${ECLIPSE_TARGET} = "luna" && echo "#-#-#-#- deploying " 
+  - test ${ECLIPSE_TARGET} = "luna" && date
+  - test ${ECLIPSE_TARGET} = "luna" && ./scripts/travis-deploy.sh
+  - test ${ECLIPSE_TARGET} = "luna" && echo "#-#-#-#- deployed "
+  - test ${ECLIPSE_TARGET} = "luna" && echo date
 after_failure:
   - chmod 777 ./scripts/travis-test-report.sh && ./scripts/travis-test-report.sh
