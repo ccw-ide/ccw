@@ -34,7 +34,6 @@
         <properties>
                 <tycho-version>0.22.0</tycho-version>
                 <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-                <ui.test.vmparams>-Xmx1024m -XX:MaxPermSize=384m</ui.test.vmparams>
         </properties>
 
         <pluginRepositories>
