@@ -52,11 +52,11 @@ script:
   - date
   - mvn clean verify --batch-mode -e -DforceContextQualifier=${QUALIFIER}
 after_success: 
-  - test ${ECLIPSE_TARGET} = "luna" && chmod 777 ./scripts/travis-deploy.sh
-  - test ${ECLIPSE_TARGET} = "luna" && echo "#-#-#-#- deploying " 
-  - test ${ECLIPSE_TARGET} = "luna" && date
-  - test ${ECLIPSE_TARGET} = "luna" && ./scripts/travis-deploy.sh
-  - test ${ECLIPSE_TARGET} = "luna" && echo "#-#-#-#- deployed "
-  - test ${ECLIPSE_TARGET} = "luna" && echo date
+  - test ${ECLIPSE_TARGET} = "luna" && test ${TRAVIS_SECURE_ENV_VARS} && chmod 777 ./scripts/travis-deploy.sh
+  - test ${ECLIPSE_TARGET} = "luna" && test ${TRAVIS_SECURE_ENV_VARS} && echo "#-#-#-#- deploying " 
+  - test ${ECLIPSE_TARGET} = "luna" && test ${TRAVIS_SECURE_ENV_VARS} && date
+  - test ${ECLIPSE_TARGET} = "luna" && test ${TRAVIS_SECURE_ENV_VARS} && ./scripts/travis-deploy.sh
+  - test ${ECLIPSE_TARGET} = "luna" && test ${TRAVIS_SECURE_ENV_VARS} && echo "#-#-#-#- deployed "
+  - test ${ECLIPSE_TARGET} = "luna" && test ${TRAVIS_SECURE_ENV_VARS} && echo date
 after_failure:
-  - chmod 777 ./scripts/travis-test-report.sh && ./scripts/travis-test-report.sh
+  - test ${TRAVIS_SECURE_ENV_VARS} && chmod 777 ./scripts/travis-test-report.sh && ./scripts/travis-test-report.sh
