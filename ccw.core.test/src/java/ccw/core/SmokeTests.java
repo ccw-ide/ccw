@@ -9,6 +9,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
+import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
@@ -56,8 +57,8 @@ public class SmokeTests {
 		}
 		return ret;
 	}
-	
-	public static SWTBotShell activateShell(SWTWorkbenchBot bot, String shell) {
+
+	public static SWTBotShell activateShell(SWTBot bot, String shell) {
 		SWTBotShell s = bot.shell(shell);
 		s.activate();
 		return s;
@@ -72,16 +73,20 @@ public class SmokeTests {
 			}, new NullProgressMonitor());
 	}
 	
-	public static SWTWorkbenchBot createClojureProject(SWTWorkbenchBot bot, String projectName) throws Exception {
-		menu(bot, "File", "New", "Project...").click();
+
+	public static SWTBot createClojureProject(SWTWorkbenchBot bot, String projectName) throws Exception {
+		menu(bot, "File", "New", "Project...")
+			.click();
 		return fillNewProject(bot, projectName);
 	}
 
-	public static SWTWorkbenchBot fillNewProject(SWTWorkbenchBot bot, String projectName) throws Exception {
-		activateShell(bot, "New Project");
+	/** Create new project in the workspace root folder */
+	public static SWTBot fillNewProject(SWTBot bot, String projectName) throws Exception {
+		bot = activateShell(bot, "New Project").bot();
 		bot.tree().expandNode("Clojure").select("Clojure Project");
 		bot.button("Next >").click();
 		bot.textWithLabel("Project name:").setText(projectName);
+		bot.textWithId("location").setText(ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString());
 		bot.button("Finish").click();
 		waitForWorkspace();
 		return bot;
@@ -101,17 +106,9 @@ public class SmokeTests {
 	@BeforeClass
 	public static void setupClass() throws Exception {
 		bot = eclipseBot();
-		//checkProductDefaultConfiguration();
 		closeWelcome(bot);
 	}
-	
-	private static void checkProductDefaultConfiguration() throws Exception {
-		bot.viewByTitle("Welcome").setFocus();
-		bot.link("New Clojure Project").click();
-		fillNewProject(bot, "ProjectFromWelcomePageLink");
-		assertProjectExists(bot,  "ProjectFromWelcomePageLink");
-	}
-	
+
 	@Before
 	public void beforeTest() {
 		openJavaPerspective(bot);
@@ -125,8 +122,8 @@ public class SmokeTests {
 	
 	@Test
 	public void canCreateANewClojureProject() throws Exception {
-		createClojureProject(bot, "MyFirstClojureProject");
-		assertProjectExists(bot,  "MyFirstClojureProject");
+		createClojureProject(bot, "my-first-clojure-project");
+		assertProjectExists(bot, "my-first-clojure-project");
 	}
  
 }
