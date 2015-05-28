@@ -1,13 +1,12 @@
-= Contributors
+= Counterclockwise Contributors
 Laurent Petit <laurent dot petit at gmail dot com>
 :source-highlighter: coderay
 :experimental:
-:toc: 
-:toc-title!:
+:toc: left
+:toc-title: Contributors List
 :toclevels: 2
 
 Contributors to Counterclockwise, sorted by name (ascending alphabetical order):
-
 
 - Jean-Fancois Brouillet
 - Chas Emerick
@@ -20,6 +19,7 @@ Contributors to Counterclockwise, sorted by name (ascending alphabetical order):
 - Stephan Mühlstrasser
 - Jeff Palmucci
 - Laurent Petit
+- Andrea Richiardi
 - Dale Thatcher
 - Manuel Woelker
 - Zhang Yaokun
@@ -29,8 +29,4 @@ Some code borrowed from other projects:
 - VimClojure (used to) (Meikel Brandmeyer)
 - Clojure Complete
 - lein-ubersource ( https://github.com/puppetlabs/lein-ubersource )
-
-Because contributions are not always code contributions:
-
-- Andrea Richiardi (File Issue, and find how to fix it!) (arichiardi on github)
 

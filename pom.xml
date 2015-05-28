@@ -33,7 +33,8 @@
         </profiles>
 
         <properties>
-                <tycho-version>0.21.0</tycho-version>
+                <tycho-version>0.22.0</tycho-version>
+                <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         </properties>
 
         <pluginRepositories>

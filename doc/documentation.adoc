@@ -1,25 +1,23 @@
-Counterclockwise User Guide
-===========================
+= Counterclockwise User Guide
 Laurent Petit <laurent.petit@gmail.com>
-:toc:
-:toclevels: 0
+:toc: left
+:toc-title: User Guide
+:toclevels: 2
 :sectlinks:
 :sectanchors:
 :highlight: highlightjs
 :experimental:
 :icons: font
 
-Counterclockwise User Documentation
-
-= What is Counterclockwise ?
+== What is Counterclockwise ?
 
 Counterclockwise is best described as an Integrated Development Environment for the http://www.clojure.org[Clojure] language. +
-It is an extension of the popular http://www.eclipse.org[Eclipse IDE].
+It is an extension of the popular http://www.eclipse.org/ide[Eclipse IDE].
 
 Goals of Counterclockwise:
 
 - be as easy as possible for Clojure beginners
-- integrate nicely into the Eclipse IDE
+- integrate nicely into the http://www.eclipse.org/ide[Eclipse IDE]
 
 Counterclockwise bundles everything for hacking Clojure Code:
 
@@ -29,7 +27,7 @@ Counterclockwise bundles everything for hacking Clojure Code:
 - Tight integration with http://leiningen.org[Leiningen] (http://leiningen.org[Leiningen] is the most popular build tool used for clojure projects)
 
 
-= Install Counterclockwise
+== Install Counterclockwise
 
 - No Eclipse? <<install-as-standalone-product,Install as a Standalone Product>>
 
@@ -38,7 +36,7 @@ Counterclockwise bundles everything for hacking Clojure Code:
 - or <<install-as-plugin,Install as an Eclipse Plugin>> into an existing Eclipse
 
 [[install-as-standalone-product]]
-== Install as a Standalone Product
+=== Install as a Standalone Product
 
 Current Version is %%VERSION%%
 
@@ -69,29 +67,33 @@ Having a problem? Check the <<configure,Configure Counterclockwise>> Section or 
 
 
 [[install-as-plugin]]
-== Install as an Eclipse Plugin
+=== Install as an Eclipse Plugin
 
 [NOTE]
 ====
 Pre-requisites
 
 - Java Virtual Machine (JVM) 7 running Eclipse
-- Eclipse 4.4 (Luna) or Eclipse 4.5 (Mars). Eclipse 3 (Indigo, Eclipse 3.8.x) not supported since version 0.30 of Counterclockwise.
-** any Eclipse packaging which includes JDT (Java Development Tools) will work:  "Eclipse SDK" package, "Eclipse for Java Developers" package, "Eclipse for Java EE Developers" package, etc.
+- http://www.eclipse.org/downloads/packages/eclipse-ide-java-developers/lunasr2[Eclipse 4.4 (Luna)] or http://www.eclipse.org/downloads/packages/eclipse-ide-java-developers/marsrc1[Eclipse 4.5 (Mars)].
+
+any Eclipse packaging which includes JDT (Java Development Tools) will work:  "Eclipse SDK" package, "Eclipse for Java Developers" package, "Eclipse for Java EE Developers" package, etc.
 ====
 
-=== TL;DR
+[WARNING]
+====
+Eclipse 3 (Indigo, Eclipse 3.8.x) is no longer supported, but you can still install a version < 0.30 of Counterclockwise
+====
 
-- via the Eclipse Marketplace Client: search for `Counterclockwise`
-- via the Eclipse Software Update Site: http://updatesite.ccw-ide.org/stable
+Counterclockwise is available via the Eclipse Marketplace Client: search for `Counterclockwise`
+
 
 You may now want to <<first-project,create your first project>> or <<open-project,open an existing project>>. +
 Having a problem? Check the <<configure,Configure Counterclockwise>> Section or the https://code.google.com/p/counterclockwise/wiki/FAQ[Troubleshooting page].
 
 [[configure]]
-== Configure Counterclockwise
+=== Configure Counterclockwise
 
-=== Proxy Settings (optional)
+==== Proxy Settings (optional)
 
 Currently Counterclockwise does not use the menu:Window[Preferences > General >Network Connections] Proxy Preference for use with the embedded Leiningen.
 
@@ -108,7 +110,7 @@ See the https://github.com/technomancy/leiningen/wiki/HTTP-Proxies[Leiningen HTT
 
 
 [[first-project]]
-= Create your first project
+== Create your first project
 
 - Open the Java perspective (unnecessary step for `Counterclockwise Standalone product` users)
 ** menu:Window[Open Perspective > Java] '''(a perspective is a predefined layout of views, suitable for a particular type of development)'''
@@ -133,7 +135,7 @@ nil
 
 
 [[create-new-project]]
-= Create a new project
+== Create a new project
 
 Use the wizard named `Clojure Project`.
 
@@ -164,7 +166,7 @@ If you don't see the menu:File[New > Clojure Project] menu entry:
 ====
 
 [[open-project]]
-= Open a project
+== Open a project
 
 Drag a folder from your OS filesystem browser (Windows Explorer, Nautilus, Finder, etc.) and drop it over Counterclockwise's Window.
 
@@ -177,13 +179,13 @@ If the preference is disabled, it is possible to manually trigger leiningen dete
 ====
 
 
-= Leiningen Support
+== Leiningen Support
 
 http://leiningen.org[Leiningen] is the de-facto standard build tool used for Clojure projects.
 
 Counterclockwise automatically detects Leiningen projects.
 
-== Project classpath management
+=== Project classpath management
 
 Eclipse has its own way of managing the Classpath, and so does Leiningen. Counterclockwise reconciles the two:
 
@@ -203,7 +205,7 @@ Of course, when you have an active REPL, and once a namespace from a dependency'
 NOTE: Native deps are also correctly supported. Meaning you can start hacking with Overtone or Quil and their Sound / OpenGL supports right now!!!
 
 [[lein-generic-launcher]]
-== Generic Command launcher
+=== Generic Command launcher
 
 It is possible to invoke arbitrary leiningen command, as if done from the command line, via the kbd:[Alt+L L] keyboard shortcut.
 
@@ -219,22 +221,22 @@ The text `<task>` is already selected in the text input, ready to be replaced by
 
 Wait for a second, and see the `Console View` show the progress of the process' output. You can also interact with the process input stream by typing inside the `Console View`.
 
-== Keyboard Shortcuts for Leiningen Commands 
+=== Keyboard Shortcuts for Leiningen Commands 
 
-=== Starting a Headless Leiningen REPL
+==== Starting a Headless Leiningen REPL
 
 kbd:[Alt+L H] is a shortcut for launching a headless leiningen REPL. It is similar to doing kbd:[Alt+L L] + typing `your-project $ lein repl :headless`.
 
-=== Resetting the Project Classpath
+==== Resetting the Project Classpath
 
 kbd:[Alt+L R] resets the project classpath, using Leiningen to compute the classpath.
 
-=== Updating the Project Dependencies
+==== Updating the Project Dependencies
 
 kbd:[Alt+L U] is a shortcut for updating the project dependencies in the classpath, using Leiningen
 
 
-= Clojure Support
+== Clojure Support
 
 Clojure Support (aka `Clojure Nature` in Eclipse terminology) is automatic. +
 It is triggered by the presence of the `clojure.core` namespace in the classpath.
@@ -247,9 +249,9 @@ It is possible, though, to fall back to a manual mode if this automatic feature 
 - to manually remove Clojure support, please use the menu:Clojure[Remove Clojure Support] command in the project's contextual menu.
 
 
-= Evaluate Clojure code
+== Evaluate Clojure code
 
-== From a specific clojure file
+=== From a specific clojure file
 
 - Select the file
 // TODO fix @cgrand reported bug: this action should create a new JVM if the file is not in any exising repl's classpath
@@ -257,7 +259,7 @@ It is possible, though, to fall back to a manual mode if this automatic feature 
 
 Note: a REPL will also be created. By default, if the selected file contains a `(ns)` call, the name of its namespace will be used. You can disable this behavior via the menu:Clojure[General > Automatic namespace load on start and on save] checkbox in the Eclipse Preference.footnoteref:[preferences]
 
-== Launch a REPL for the project ==
+=== Launch a REPL for the project
 - Select your project in the `Package Explorer View`
 ** in the project's contextual menu : menu:Run as ...[Run configurations > Clojure > New]
 ** Press btn:[Run]
@@ -273,7 +275,7 @@ IMPORTANT: YOU MUST HIT kbd:[Ctrl + Enter] (kbd:[Cmd + Enter] on OS X) to send t
 NOTE: It is possible to configure which files should be automatically loaded on project java process startup.
 
 
-== Namespace Browser View
+=== Namespace Browser View
 
 The `Namespace Browser View` displays all symbols of all namespaces of the active REPL.footnote:[active-repl,The active REPL is the last REPL you interacted with]. +
 It allows you to jump to the definition of symbols in the relevant files (including inside jars): just double-click on the symbol name in the `Namespace Browser View`.
@@ -292,20 +294,20 @@ Just type a regexp in the menu:[Find :] text zone at the top of the `Namespace B
 The `Namespace Browser View` should be stacked behind the `Outline View` (if you are in the `Java Perspective`.footnoteref:[perspective,In Eclipse a Perspective is a named layout of Views. You can switch Perspectives while working, depending on the task at hand. Eclipse offers a Java Perspective and a Java Debugging Perspective among others] and don't see the `Namespace Browser View`, you may reset the `Java Perspective`.footnoteref[perspective] to its default value via the menu:Window[Reset Perspective ...] menu, or find it manually via the menu:Window[Show View > Namespace Browser] menu)
 
 
-== How does it work ?
+=== How does it work ?
 
 When you have launched the REPL, Counterclockwise has embedded "server code" in the launched clojure environment. This server code is contacted by Counterclockwise to give information on the running clojure environment. The `Namespace Browser` feature uses this server to provide you with the most possible up to date information on Clojure Namespaces and their contents.
 
-= Debug Clojure code
+== Debug Clojure code
 
 // TODO put images of the bug / running man icons instead of mentioning them
 - Use the Eclipse Debugger Runner instead of the standard Runner (menu:[Debug as...] menu instead of menu:[Run as...] menu (the `bug` icon instead of the `running man` icon).
 
 - You place Breakpoints in Clojure Editors by double-clicking on the column located to the left of the text.
 
-= Edit Clojure code
+== Edit Clojure code
 
-== Create a new Clojure file
+=== Create a new Clojure file
 
 Clojure files must be located in java source directories.
 
@@ -320,16 +322,16 @@ WARNING: If you place Clojure files outside of a java source directory, you will
 - Inside a java source directory, follow the classical Clojure conventions to place your files, according to the namespace it belongs to. (e.g. you want to create namespace 'tests.clojure.first , then create java package "tests.clojure", and create clojure file first.clj in it.
 
 
-== Clojure Editor Features
+=== Clojure Editor Features
 
-=== Syntax higlighting
+==== Syntax higlighting
 
 - Rainbow parenthesis (different colors for different nesting levels)
 - Higlights as an error closing parens/brackets which have no corresponding opening ones
 
 NOTE: You can customize Syntax Highlighting via the menu:Clojure[Colors and Fonts] Eclipse Preferences.footnoteref[preferences]
 
-=== Code Completion
+==== Code Completion
 
 Code Completion is automatically suggested as you type.
 
@@ -348,37 +350,37 @@ You would then activate Code Completion suggestions by typing kbd:[Ctrl + Space]
 ====
 
 // TODO: see in what respect the following section still holds. Should we remove the section from the doc? Plan to re-add the feature in a future release?
-=== Errors reporting
+==== Errors reporting
 
 _to be confirmed_
 
 In conjunction with auto-compile functionality, compilation problems are reported as problem markers : you see a summary of the problems in the problems view, you see the files that have problems in the package explorer, you see the problems at the correct line in the corresponding editor, you can jump to the editor at the correct line by double clicking on the problem in the problems view.
 
-=== Keyboard Shortcuts
+==== Keyboard Shortcuts
 
 The Editor is really keyboard commands friendly. 
 See the list of Keyboard Bindings: link:keyboard-shortcuts.html[List of Keyboard Shortcuts]
 
-=== Interaction with a launched REPL
+==== Interaction with a launched REPL
 
 You'll find the commands for interacting with a REPL from an Editor in the link:keyboard-shortcuts.html[Keyboard Shortcuts] page
 
-= Auto-build feature
+== Auto-build feature
 
 // TODO the sentence is badly written
 Once you have started a REPL for your project, and when the menu:Project[Build automatically] menu entry is selected, Eclipse will use a background connection to this REPL to automatically compile and evaluate the files you edit.
 
-= Package your work
+== Package your work
 
 // TODO consider packaging Fat Jar with the Standalone Package
 // TODO change to explain how to do this with Leiningen
 
-== Distribute as a jar
+=== Distribute as a jar
 
 // TODO find the right menu labels
 - Use the Eclipse menu:File[Export as Jar] Wizard
 
-== Create a "fat" executable jar with all dependencies packaged into
+=== Create a "fat" executable jar with all dependencies packaged into
 
 There's a community contributed Eclipse Plugin for this task, called `Fat Jar`.
 
@@ -396,7 +398,7 @@ Please refer to the http://fjep.sourceforge.net[Fat Jar plugin homepage] for mor
 
 NOTE: There is also an out-of-the-box "create Executable Jar" feature in Eclipse, but we encountered problems with it when the main class is not located in the source folders of the project, as is the case when you generate the main class from a clojure namespace.
 
-= User Plugins
+== User Plugins
 
 User Plugins allow you to customize Counterclockwise / Eclipse with Clojure!!
 
@@ -407,7 +409,7 @@ User Plugins are...
 - *Powerful*: user plugins are added to Counterclockwise's classpath and can access the same Eclipse services Counterclockwise has access to.
 - *Agile*: updating a user plugin is as simple as 1. git checkout 2. Alt+U S (re[S]tart plugins)
 
-== How User Plugins work
+=== How User Plugins work
 
 User Plugins must be placed in `.clj` files inside your `~/.ccw/` folder.
 
@@ -430,7 +432,7 @@ INFO: It is strongly suggested that User Plugins be available as git repositorie
 
 INFO: a User Plugin is dynamic. To remove it, just delete its folder inside `~/.ccw/`.
 
-== User Plugins List
+=== User Plugins List
 
 Counterclockwise offers a number of User Plugins available as Github projects. Each one comes with a README file explaining its intent, status, installation and usage.
 
@@ -438,9 +440,9 @@ Counterclockwise offers a number of User Plugins available as Github projects. E
 - `ccw-plugin-hello-world`: if you want to learn how to write User Plugins, start studying this one. https://github.com/laurentpetit/ccw-plugin-hello-world.git
 
 
-== HISP - Hello (world) In Small Pieces
+=== HISP - Hello (world) In Small Pieces
 
-=== Example 1: Hello World - single script file
+==== Example 1: Hello World - single script file
 
 .~/.ccw/hello_world.clj
 [source,clojure]
@@ -464,7 +466,7 @@ Counterclockwise offers a number of User Plugins available as Github projects. E
 
 NOTE: The script is placed directly inside `~/.ccw/` to demonstrate how easy it is to start contributing. In real world situations you will probably create one folder per plugin.
 
-=== Example 2: Hello World - script file and companion namespaces
+==== Example 2: Hello World - script file and companion namespaces
 
 Here the Hello World user plugin is placed in its own subdirectory. +
 This also demonstrates how to split a plugin into script + companion namespaces.
@@ -505,9 +507,9 @@ This also demonstrates how to split a plugin into script + companion namespaces.
 WARNING: the `hello-world` subdirectory will only be recognized as a plugin if there is no `.clj` file inside `~/.ccw/`
 
 
-= Report a problem with Counterclockwise
+== Report a problem with Counterclockwise
 
-== Activate Tracing
+=== Activate Tracing
 
 Counterclockwise can be more verbose on what's going on if you active `Tracing`.
 
