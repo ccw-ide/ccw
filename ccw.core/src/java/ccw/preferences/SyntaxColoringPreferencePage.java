@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.ColorSelector;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -71,6 +72,8 @@ import ccw.editors.clojure.ClojureSourceViewer;
 import ccw.editors.clojure.SimpleSourceViewerConfiguration;
 import ccw.editors.clojure.scanners.ClojurePartitionScanner;
 import ccw.editors.clojure.scanners.ClojurePartitioner;
+import ccw.repl.REPLView;
+import ccw.repl.SafeConnection;
 
 /**
  * Configures Clojure Editor syntax coloring preferences.
@@ -776,6 +779,12 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         fPreviewViewer= new ClojureSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER, store, null) {
 			public void setStatusLineErrorMessage(String you_need_a_running_repl) {
 				// Do nothing
+			}
+			@Override @Nullable public REPLView getCorrespondingREPL() {
+				return null;
+			}
+			@Override @Nullable public SafeConnection getSafeToolingConnection() {
+				return null;
 			}
         };
         
