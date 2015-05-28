@@ -9,9 +9,9 @@
 ;*    Andrea Richiardi - initial test implementation
 ;*******************************************************************************/
 
-(ns ccw.util_test
+(ns ccw.util-test
   (:use clojure.test
-        ccw.common
+        ccw.test-common
         ccw.util))
 
 (with-private-vars [ccw.util [delayed-atom-fill

@@ -15,9 +15,8 @@
                 <module>paredit.clj</module>
                 <module>ccw.feature</module>
                 <module>doc</module>
-                <!--
-                <module>../ccw.core.test</module>
-                -->
+
+                <module>ccw.core.test</module>
         </modules>
 
         <profiles>
@@ -53,11 +52,11 @@
                         <id>clojars.org</id>
                         <url>http://clojars.org/repo</url>
                 </repository>
-                <!--repository>
+                <repository>
                         <id>swtbot</id>
                         <url>http://download.eclipse.org/technology/swtbot/releases/latest/</url>
                         <layout>p2</layout>
-                </repository-->
+                </repository>
                 <repository>
                         <id>eclipse-color-theme</id>
                         <url>http://eclipse-color-theme.github.io/update/</url>
@@ -163,6 +162,15 @@
                                                 </artifact>
                                         </target>
                                         -->
+                                        <dependency-resolution>
+                                          <extraRequirements>
+                                            <requirement>
+                                              <type>eclipse-feature</type>
+                                              <id>org.eclipse.rcp</id>
+                                              <versionRange>0.0.0</versionRange>
+                                            </requirement>
+                                          </extraRequirements>
+                                        </dependency-resolution>
                                 </configuration>
                         </plugin>
                 </plugins>

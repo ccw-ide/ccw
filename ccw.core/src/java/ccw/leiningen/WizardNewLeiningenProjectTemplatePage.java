@@ -1,5 +1,7 @@
 package ccw.leiningen;
 
+import static ccw.util.TestUtil.setTestId;
+
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
@@ -36,6 +38,7 @@ import org.eclipse.ui.internal.ide.IIDEHelpContextIds;
 
 import ccw.CCWPlugin;
 import ccw.util.ClojureInvoker;
+import ccw.util.TestUtil;
 
 public final class WizardNewLeiningenProjectTemplatePage extends WizardPage {
 
@@ -144,6 +147,7 @@ public final class WizardNewLeiningenProjectTemplatePage extends WizardPage {
     	previousLocationCheckbox.setLayoutData(previousLocationCheckboxData);
 
     	locationText = new Text(composite, SWT.BORDER);
+    	setTestId(locationText, "location");
     	FormData locationData = new FormData();
     	locationData.top = new FormAttachment(previousLocationCheckbox);
     	locationData.left = new FormAttachment(previousLocationCheckbox, 0, SWT.LEFT);

@@ -6,29 +6,23 @@
 (defn new-project []
   (reify
     IProject
-    (getName [this] "some-name")
-    ))
+    (getName [this] "some-name")))
 
 (deftest test-lein-launch-configuration
   (testing "lein-launch-configuration"
            (testing "returns quoted bootclasspath with fixed path"
-                    (let [config (lein-launch-configuration new-project "some-command" {:leiningen-standalone-path "some.jar"})]
+                    (let [config (lein-launch-configuration (new-project) "some-command" {:leiningen-standalone-path "some.jar"})]
                       (is (map? config))
                       (let [matches (re-seq #"-Xbootclasspath/a:([^\s]*)" (:java/vm-arguments config))]
                         (let [bootclasspath (second (first matches))]
                           (is (= \" (first bootclasspath)))
-                          (is (= \" (last bootclasspath)))
-                          )
-                        )
-                      ))
+                          (is (= \" (last bootclasspath)))))))
            (testing "returns quoted bootclasspath without fixed path"
-                    (let [config (lein-launch-configuration new-project "some-command")]
+                    (let [config (lein-launch-configuration (new-project) "some-command")]
                       (is (map? config))
-                      (let [matches (re-seq #"-Xbootclasspath/a:([^\s]*)" (:java/vm-arguments config))]
+                      (let [matches (re-seq #"-Xbootclasspath/a:(\"[^\"]*\")" (:java/vm-arguments config))]
                         (let [bootclasspath (second (first matches))]
+                          (prn "bootclasspath:" bootclasspath)
                           (is (= \" (first bootclasspath)))
                           (is (= \" (last bootclasspath)))
-                          )
-                        ))
-                    ))
-  )
+                          (is (< 2 (count bootclasspath)))))))))
