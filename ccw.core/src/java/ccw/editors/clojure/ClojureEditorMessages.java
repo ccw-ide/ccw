@@ -79,8 +79,9 @@ public final class ClojureEditorMessages extends NLS {
     public static String ShowInformation_description;
     public static String ShowInformation_image;
     
-    public static String HoverInfo_args_label;
-    public static String HoverInfo_doc_label;
+    public static String DocUtils_args_label;
+    public static String DocUtils_doc_label;
+    public static String DocUtils_macro_label;
     
     static {
         NLS.initializeMessages(BUNDLE_NAME, ClojureEditorMessages.class);

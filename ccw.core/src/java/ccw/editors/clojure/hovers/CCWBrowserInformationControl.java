@@ -22,6 +22,9 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.graphics.TextLayout;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -31,7 +34,6 @@ import org.jsoup.select.Elements;
 import ccw.CCWPlugin;
 import ccw.TraceOptions;
 import ccw.util.SWTFontUtils;
-import ccw.util.UiUtils;
 
 /**
  * From pull request <a href="https://github.com/laurentpetit/ccw/pull/763">#763</a>:<br/>
@@ -52,6 +54,8 @@ public class CCWBrowserInformationControl extends BrowserInformationControl {
 
     protected final String fSymbolicFontName;
     
+    private TextLayout fTestWidget;
+    
     public CCWBrowserInformationControl(Shell parent, String symbolicFontName, boolean resizable) {
         super(parent, symbolicFontName, resizable);
         fSymbolicFontName = symbolicFontName;
@@ -67,6 +71,54 @@ public class CCWBrowserInformationControl extends BrowserInformationControl {
         fSymbolicFontName = symbolicFontName;
     }
 
+    private void createTestWidget() {
+        fTestWidget= new TextLayout(getShell().getDisplay());
+
+        // Initialize fonts
+        Font font= JFaceResources.getFont(fSymbolicFontName == null ? JFaceResources.DIALOG_FONT : fSymbolicFontName);
+        fTestWidget.setFont(font);
+        fTestWidget.setWidth(-1);
+
+        // Compute and set tab width
+        fTestWidget.setText("    "); //$NON-NLS-1$
+        int tabWidth = fTestWidget.getBounds().width;
+        fTestWidget.setTabs(new int[] { tabWidth });
+        fTestWidget.setText(""); //$NON-NLS-1$
+    }
+    
+    @Override
+    protected void createContent(Composite parent) {
+        super.createContent(parent);
+        createTestWidget();
+    }
+
+    @Override
+    protected void handleDispose() {
+        super.handleDispose();
+        if (fTestWidget != null) {
+            fTestWidget.dispose();
+            fTestWidget= null;
+        }
+    }
+
+    private Point estimateSizeHint(Font font, String text) {
+        fTestWidget.setFont(font);
+        fTestWidget.setText(text);
+        
+        Rectangle bounds= fTestWidget.getBounds(); // does not return minimum width, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=217446
+        int height = bounds.height;
+                
+        int lineCount= fTestWidget.getLineCount();
+        int width= 0;
+        for (int i= 0; i < lineCount; i++) {
+            Rectangle rect= fTestWidget.getLineBounds(i);
+            width = Math.max(width, rect.x + rect.width);
+        }
+        fTestWidget.setText("");
+
+        return new Point(bounds.x + width + 16, bounds.y + height + 16);
+    }
+    
     @Override
     public Point computeSizeHint() {
         // AR - this hack is necessary because BrowserInformationControl does not take into consideration
@@ -109,19 +161,26 @@ public class CCWBrowserInformationControl extends BrowserInformationControl {
                 String txt = el.text();
 
                 // AR - Estimate with original font
-                Point originalSize = UiUtils.estimateSizeHint(getShell().getDisplay(), originalFont, txt);
+                Point originalSize = estimateSizeHint(originalFont, txt);
 
                 // AR - Jsoup flattens all the tag's texts. 
-                Point monospaceSize = UiUtils.estimateSizeHint(getShell().getDisplay(), monospaceFont, txt);
+                Point monospaceSize = estimateSizeHint(monospaceFont, txt);
 
                 // AR - Canonical "+ something" as in BrowserInformationControl.computeSizeHint
-                newSizeHint = new Point(Math.max(newSizeHint.x, monospaceSize.x + 16),
-                        Math.max(newSizeHint.y, newSizeHint.y - originalSize.y + monospaceSize.y  + 8));
+                newSizeHint = new Point(Math.max(newSizeHint.x, monospaceSize.x),
+                        Math.max(newSizeHint.y, newSizeHint.y - originalSize.y + monospaceSize.y));
             }
-
             monospaceFont.dispose();
+            
+            // AR - Considering <p> as occuping more than nothing in height 
+            Elements pElements = doc.getElementsByTag("p");
+            
+            // AR - Trim for taking into consideration the scrollbars
+            Rectangle trim = computeTrim();
+            
+            // AR - final sum
+            newSizeHint = new Point(newSizeHint.x + trim.width, newSizeHint.y + trim.height + pElements.size() * 6);
         }
         return newSizeHint;
     }
-
 }

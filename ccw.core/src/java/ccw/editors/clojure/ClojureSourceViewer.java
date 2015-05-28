@@ -55,12 +55,18 @@ import ccw.ClojureCore;
 import ccw.core.IPropertyPublisher;
 import ccw.editors.clojure.scanners.ClojurePartitionScanner;
 import ccw.preferences.PreferenceConstants;
-import ccw.repl.REPLView;
-import ccw.repl.SafeConnection;
+import ccw.repl.IReplProvider;
 import ccw.util.ClojureInvoker;
 import ccw.util.DisplayUtil;
 
-public abstract class ClojureSourceViewer extends ProjectionViewer implements IClojureEditor, IPropertyPublisher {
+/**
+ * The Counterclockwise SourceViewer.<br/>
+ * <br/>
+ * <i>Note: the IReplProvider is only temporarily part of the contract of this class, as it does not make sense to have a SourceViewer as Repl provider.
+ * It is necessary at the moment because the SourceViewer is passed to ITextHover (and extensions) in input and in turn ITextHover implementations needs a Repl.
+ * This will be reworked soon in some better way.</i>
+ */
+public abstract class ClojureSourceViewer extends ProjectionViewer implements IClojureEditor, IReplProvider, IPropertyPublisher {
 
 	private final ClojureInvoker editorSupport = ClojureInvoker.newInvoker(
             CCWPlugin.getDefault(),
@@ -454,16 +460,6 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements IC
         return null;
     }
 
-    public @Nullable REPLView getCorrespondingREPL () {
-        // this gets overridden in REPLView as appropriate so that the toolConnection there gets returned
-        return null;
-    }
-    
-    public @Nullable SafeConnection getSafeToolingConnection () {
-        // this gets overridden in REPLView as appropriate so that the toolConnection there gets returned
-        return null;
-    }
-    
     public void updateTabsToSpacesConverter () {}
     
     // TODO get rid of this way of handling document initialization
@@ -676,5 +672,9 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements IC
         fPreferenceStore.removePropertyChangeListener(listener);
     }
 
-	
+    @Override
+    public @Nullable String getTopLevelSExpression(int caretOffset) {
+        String form = (String) editorSupport._("top-level-code-form", getParseState(), caretOffset);
+        return form;
+    }
 }

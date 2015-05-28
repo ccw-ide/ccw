@@ -9,9 +9,6 @@ import org.eclipse.jface.text.source.DefaultCharacterPairMatcher;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
-import ccw.repl.REPLView;
-import ccw.repl.SafeConnection;
-
 /**
  * A callback interface allowing various facilities to treat
  * the {@link ClojureEditor} and {@link ClojureSourceViewer}
@@ -86,17 +83,6 @@ public interface IClojureEditor extends IAdaptable {
     Object getPreviousParseTree ();
     
     /**
-     * Can be null...
-     */
-    @Nullable REPLView getCorrespondingREPL();
-        
-    /**
-     * Gets the connection.
-     * @return The connection, or null if none
-     */
-    @Nullable SafeConnection getSafeToolingConnection();
-    
-    /**
 	 * Install/uninstall the Tab-to-Space converter.
 	 */
     void updateTabsToSpacesConverter ();
@@ -130,4 +116,11 @@ public interface IClojureEditor extends IAdaptable {
 	 * Initializes the viewer colors, adding them in the color cache.
 	 */
 	void initializeViewerColors();
+
+	/**
+	 * Given an offset, returns its top level sexp.
+	 * @param caretOffset The offset.
+	 * @return The top level sexp.
+	 */
+	@Nullable String getTopLevelSExpression(final int caretOffset);
 }

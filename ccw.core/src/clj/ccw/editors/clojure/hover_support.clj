@@ -62,7 +62,8 @@
                                  preference!
                                  ccw-combined-prefs
                                  workbench-active-editor]]
-            [ccw.editors.clojure.editor-support :refer [source-viewer set-status-line-error-msg-async]]
+            [ccw.editors.clojure.editor-support :refer [source-viewer
+                                                        set-status-line-error-msg-async]]
             [ccw.core.trace :refer [trace]]
             [ccw.extensions :refer [configuration-elements
                                     attributes->map
@@ -301,8 +302,8 @@
       [hover result])))
 
 (defonce ^{:private true :doc "The common hover css."} hover-css
-  (memoize
-    (fn []
+  (delay
+    (do
       (trace :support/hover (str "Processing " StaticStrings/CCW_HOVER_CSS "..."))
       (slurp StaticStrings/CCW_HOVER_CSS))))
 
@@ -310,7 +311,7 @@
   "Prepend text to hover information."
   [hover-info]
   (let [buffer (java.lang.StringBuffer. hover-info)
-        prepend-text (HTMLPrinter/convertTopLevelFont (hover-css)
+        prepend-text (HTMLPrinter/convertTopLevelFont (force hover-css)
                                                       (aget (-> (JFaceResources/getFontRegistry)
                                                                 (.getFontData StaticStrings/CCW_HOVER_FONT)) 0))]
     (HTMLPrinter/insertPageProlog buffer 0 prepend-text)
@@ -342,10 +343,10 @@
                       (println "*** Dirty: " dirty)))))
 
 (defonce ^:private ^{:doc "Atom containing the state."}
-  state-atom (memoize (fn [] (atom (->State nil
-                                          (WritableList. (ArrayList.) HoverDescriptor)
-                                          nil
-                                          true)))))
+  state-atom (delay (atom (->State nil
+                                   (WritableList. (ArrayList.) HoverDescriptor)
+                                   nil
+                                   true))))
 
 (defn- swap-observable-descriptors
   "Updates the observable-hovers part of the state. Returns new state."
@@ -364,12 +365,12 @@
 (def ^:private contributed-descriptors
   "Var containing a function returning the contributed descriptors in
   the state."
-  #(:contributed-descriptors @(state-atom)))
+  #(:contributed-descriptors @(force state-atom)))
 
 (def ^:private observable-descriptors
   "Var containing a function returning the state observable descriptors
   in the state, for the Eclipse data binding framework."
-  #(:observable-descriptors @(state-atom)))
+  #(:observable-descriptors @(force state-atom)))
 
 (defn- state-dirty?
   [state]
@@ -393,12 +394,12 @@
 (defn- descriptors-update!
   "Updates the descriptors. Swaps in a new state, if necessary, returning the new one."
   []
-  (if (state-dirty? @(state-atom))
-    (let [new-state (swap! (state-atom) swap-descriptors-in-state (load-descriptors!))]
+  (if (state-dirty? @(force state-atom))
+    (let [new-state (swap! (force state-atom) swap-descriptors-in-state (load-descriptors!))]
       (trace :support/hover (str "State dirty, loaded:\n" new-state))
       new-state)
-    (do (trace :support/hover (str "State NOT dirty, returning:\n" @(state-atom)))
-        @(state-atom))))
+    (do (trace :support/hover (str "State NOT dirty, returning:\n" @(force state-atom)))
+        @(force state-atom))))
 
 
 ;;;;;;;;;;;;;;;;;
@@ -432,7 +433,7 @@
      (^void added [this #^"[Lorg.eclipse.core.runtime.IExtension;" extensions]
        (doseq [^IExtension ex extensions] (trace :support/hover (str "IRegistryEventListener added extension with id: " (.getLabel ex))))
        (trace :support/hover "Resetting hovers...")
-       (swap! (state-atom) set-state-dirty)
+       (swap! (force state-atom) set-state-dirty)
        (descriptors-update!)
        ;; I need some protection because here i might not have active editor
        (some-> (CCWPlugin/getClojureEditor) reset-default-hover-on-editor!))
@@ -440,7 +441,7 @@
      (^void removed [this #^"[Lorg.eclipse.core.runtime.IExtension;" extensions]
        (doseq [^IExtension ex extensions] (trace :support/hover (str "IRegistryEventListener removed extension with id: " (.getLabel ex))))
        (trace :support/hover "Resetting hovers...")
-       (swap! (state-atom) set-state-dirty)
+       (swap! (force state-atom) set-state-dirty)
        (descriptors-update!)
        ;; I need some protection because here i might not have active editor
        (some-> (CCWPlugin/getClojureEditor) reset-default-hover-on-editor!))
@@ -448,7 +449,7 @@
      (^void added [this #^"[Lorg.eclipse.core.runtime.IExtensionPoint;" extension-points]
        (doseq [^IExtensionPoint ep extension-points] (trace :support/hover (str "IRegistryEventListener added extension point with id: " (.getLabel ep))))
        (trace :support/hover "Resetting hovers...")
-       (swap! (state-atom) set-state-dirty)
+       (swap! (force state-atom) set-state-dirty)
        (descriptors-update!)
        ;; I need some protection because here i might not have active editor
        (some-> (CCWPlugin/getClojureEditor) reset-default-hover-on-editor!))
@@ -456,7 +457,7 @@
      (^void removed [this #^"[Lorg.eclipse.core.runtime.IExtensionPoint;" extension-points]
        (doseq [^IExtensionPoint ep extension-points] (trace :support/hover (str "IRegistryEventListener removed extension point with id: " (.getLabel ep))))
        (trace :support/hover "Resetting hovers...")
-       (swap! (state-atom) set-state-dirty)
+       (swap! (force state-atom) set-state-dirty)
        (descriptors-update!)
        ;; I need some protection because here i might not have active editor
        (some-> (CCWPlugin/getClojureEditor) reset-default-hover-on-editor!)))
@@ -470,7 +471,7 @@
     (ccw.eclipse/add-preference-listener pref-key
                                          #(do
                                             (trace :support/hover (str "Preference " pref-key " has changed. Resetting hovers..."))
-                                            (swap! (state-atom) set-state-dirty)
+                                            (swap! (force state-atom) set-state-dirty)
                                             ;; I need some protection because here i might not have active editor
                                             (some-> (CCWPlugin/getClojureEditor) reset-default-hover-on-editor!)))))
 
@@ -522,7 +523,7 @@
     ;; ensure non nil descriptor arrives here
     (let [state-mask (selected-descriptor :state-mask)]
       (do-if-no-value descriptors state-mask
-                      (swap! (state-atom) swap-hover-instance-in-state state-mask __a_value)
+                      (swap! (force state-atom) swap-hover-instance-in-state state-mask __a_value)
                       ((selected-descriptor :create-hover))))))
 
 (defn hover-instance
@@ -561,7 +562,7 @@
         (trace :support/hover (str (simple-name this) ": offset-> " offset))
         (let [[_ region] (hover-result-pair #(.getHoverRegion %1 text-viewer offset)
                                             (complement nil?)
-                                            (:hovers-by-state-mask @(state-atom))
+                                            (:hovers-by-state-mask @(force state-atom))
                                             @previous-hover
                                             (fn [[hover _]] (reset! previous-hover hover)))]
           region))

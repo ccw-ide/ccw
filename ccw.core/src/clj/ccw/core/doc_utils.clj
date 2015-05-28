@@ -4,10 +4,10 @@
   (:require [clojure.string :as str]))
 
 ;	potential documentation tags:
-; :since, :author, :private, :test, :tag, :file, :line, :ns, :name, 
+; :since, :author, :private, :test, :tag, :file, :line, :ns, :name,
 ; :macro, :arglists(ccw.server)/:arglists-str(cider-nrepl)
 
-(defn join 
+(defn join
   "Join c elements with s as of clojure.string/join, except nil elements
    are discarded"
   [s & c]
@@ -29,7 +29,7 @@
 
 (defn render-identity [renderer name ns]
   (when-not (str/blank? name)
-    (let [parsed-ns (if ns (str ns "/" name) "")] 
+    (let [parsed-ns (if ns (str ns "/" name) "")]
       (condp = renderer
         :html (str "<h1>" name "</h1>" (when-not (str/blank? parsed-ns) (str " " parsed-ns)))
         :text (str name (when-not (str/blank? parsed-ns) (str "\n" parsed-ns)))))))
@@ -46,21 +46,29 @@
   (let [arglists (or arglists arglists-str)]
     (when-not (str/blank? arglists)
       (render-section renderer
-                      ClojureEditorMessages/HoverInfo_args_label
+                      ClojureEditorMessages/DocUtils_args_label
                       (let [lines (render-lines renderer (arglists-seq arglists))] 
                         (condp = renderer
-                          :html (str "<pre>" lines "</pre>") 
+                          :html (str "<pre>" lines "</pre>")
                           :text lines))))))
 
+(defn- macro-expansion-doc [renderer {:keys [macro-source macro-expanded]}]
+  (when-not (and (str/blank? macro-source) (str/blank? macro-expanded))
+    (condp = renderer
+      :html (str "<pre>" macro-source "</pre>"
+                 "<p style=\"text-align: center;\">" ClojureEditorMessages/DocUtils_macro_label "</p>"
+                 "<pre>" macro-expanded "</pre>")
+      :text (str macro-source "\n" ClojureEditorMessages/DocUtils_macro_label "\n" macro-expanded))))
+
 (defn- optional-meta [renderer {:keys [name macro private dynamic ns tag]}]
-  (let [optional-meta (join ", " 
+  (let [optional-meta (join ", "
                             (when private "private")
                             (when macro "macro")
                             (when dynamic "dynamic")
-                            tag)] 
+                            tag)]
     (when-not (str/blank? optional-meta)
       (condp = renderer
-        :html (str "<i>" "(" optional-meta ")" "</i>") 
+        :html (str "<i>" "(" optional-meta ")" "</i>")
         :text (str "(" optional-meta ")")))))
 
 (defn header-doc [renderer {:keys [name ns] :as m}]
@@ -77,7 +85,7 @@
                  :html (str "<pre>" doc "</pre>")
                  :text doc)]
       (render-section renderer
-                      ClojureEditorMessages/HoverInfo_doc_label
+                      ClojureEditorMessages/DocUtils_doc_label
                       body))))
 
 (defn var-doc-info [renderer m]
@@ -86,8 +94,9 @@
   (when-not (empty? m)
     (let [header (header-doc renderer m)
           sections [(arglist-doc renderer m)
-                    (doc-doc renderer m)]
-          rendered-sections (render-sections 
+                    (doc-doc renderer m)
+                    (macro-expansion-doc renderer m)]
+          rendered-sections (render-sections
                              renderer
                              sections)
           info-string (str header
@@ -105,20 +114,20 @@
   arises."
   (var-doc-info :text m))
 
-(defn safe-split-lines 
+(defn safe-split-lines
   "Same as clojure.string/split-lines but accepts a nil input and returns nil
    instead of throwing an exception."
   [s]
   (when s (str/split-lines s)))
 
-(defn slim-doc 
+(defn slim-doc
   "Summary of the documentation (arglist + start of the doc) taking up to 3
    lines. Used e.g. for context information."
   [s]
   (let [lines (safe-split-lines s)
         nb-display-lines 2
-        lines (if (> (count lines) nb-display-lines) 
+        lines (if (> (count lines) nb-display-lines)
                 (concat (take (dec nb-display-lines) lines)
-                        [(str (nth lines (dec nb-display-lines)) " ...")]) 
+                        [(str (nth lines (dec nb-display-lines)) " ...")])
                 lines)]
     (str/join \newline (map str/trim lines))))

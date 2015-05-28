@@ -73,6 +73,7 @@ Counterclockwise ships with an embedded nREPL server. The following enhancements
 === Hover Framework
 - New preference page for CCW hovers under menu:Preferences[Clojure > Editor > Hovers]. Keyboard modifiers can now been set for each hover.
 - Added the ability of contributing and configuring ITextHover* instances to Counterclockwise through the ccw.core.cljEditorTextHovers extension point.
+- Two hovers added: "Macro expansion" (using `macroexpand`) and "Recursive macro expansion" (using `macroexpand-all`), both leveraging `cider-nrepl` wrappers if found.
 
 === User Plugins
 
