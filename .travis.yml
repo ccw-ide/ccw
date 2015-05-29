@@ -1,4 +1,4 @@
-sudo: false # explicitly ask for using the new docker-based infrastructure
+sudo: true # explicitly ask for using the new docker-based infrastructure
 branches:
   except:
     # workaround to prevent version tags from being built in addition to the build commit
