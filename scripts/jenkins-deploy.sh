@@ -1,5 +1,4 @@
 #!/bin/bash
-exit 1
 
 echo ${FTP_HOST}
 echo ${FTP_USER}
