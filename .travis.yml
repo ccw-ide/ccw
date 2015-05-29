@@ -25,6 +25,7 @@ before_script:
   - echo "#-#-#- xvfb started"
   - date
   - sleep 5 # give xvfb some time to start
+  - sudo apt-get install fluxbox
   - fluxbox &
   - sleep 5
 #  - echo "#-#-#-# installling metacity"
