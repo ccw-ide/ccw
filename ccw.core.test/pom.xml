@@ -16,8 +16,25 @@
   <packaging>eclipse-test-plugin</packaging>
 
   <properties>
-     <os-jvm-flags/>
+     <uitest.vmparams>-Xmx1024m -XX:MaxPermSize=384m</uitest.vmparams>
   </properties>
+
+  <profiles>
+    <profile>
+      <id>macosx</id>
+      <activation><os><family>mac</family></os></activation>
+      <properties>
+        <uitest.argLine>${uitest.vmparams} -XstartOnFirstThread</uitest.argLine>
+      </properties>
+    </profile>
+    <profile>
+      <id>other-os</id>
+      <activation><os><family>!mac</family></os></activation>
+      <properties>
+        <uitest.argLine>${uitest.vmparams}</uitest.argLine>
+      </properties>
+    </profile>
+  </profiles>
 
   <build>
     <plugins>
@@ -42,12 +59,11 @@
         <version>${tycho-version}</version>
         <configuration>
           <forkedProcessTimeoutInSeconds>180</forkedProcessTimeoutInSeconds>
-          <!--testFailureIgnore>true</testFailureIgnore-->
           <redirectTestOutputToFile>true</redirectTestOutputToFile>
           <useUIHarness>true</useUIHarness>
           <useUIThread>false</useUIThread>
           <product>ccw.branding.ccw</product>
-          <argLine>${os-jvm-flags}</argLine>
+          <argLine>${uitest.argLine}</argLine>
           <includes>
             <include>**/*Test.java</include>
             <include>**/*Tests.java</include>
@@ -70,9 +86,7 @@
             <execution>
               <id>generate-html</id>
               <phase>post-integration-test</phase>
-              <goals>
-                <goal>report-only</goal>
-              </goals>
+              <goals><goal>report-only</goal></goals>
               <configuration>
                 <outputName>ccw-core-test-report</outputName>
               </configuration>
@@ -81,17 +95,5 @@
       </plugin>
     </plugins>
   </build>
-
-  <profiles>
-    <profile>
-      <id>macosx-jvm-flags</id>
-      <activation>
-        <os><family>mac</family></os>
-      </activation>
-      <properties>
-        <os-jvm-flags>-XstartOnFirstThread</os-jvm-flags>
-      </properties>
-    </profile>
-  </profiles>
 
 </project>
