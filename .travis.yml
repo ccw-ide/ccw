@@ -37,6 +37,7 @@ before_script:
 #  - date
 #  - sleep 5 # give xvfb some time to start
   - export QUALIFIER=CI$(printf "%0*d" 6 ${TRAVIS_BUILD_NUMBER})-${TRAVIS_BRANCH}-git${TRAVIS_COMMIT}
+  - export BRANCH=${TRAVIS_BRANCH}
 script: 
   - echo "#-#-#-# calling maven "
   - date

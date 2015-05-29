@@ -17,8 +17,8 @@ quote PASS ${FTP_PASSWORD}
 bin
 prompt off
 cd ${FTP_UPDATESITE_ROOT}
-mkdir ${TRAVIS_BRANCH}
-cd ${TRAVIS_BRANCH}
+mkdir ${BRANCH}
+cd ${BRANCH}
 mkdir ${UPDATESITE}
 cd ${UPDATESITE}
 mkdir ${ERROR}
@@ -33,7 +33,7 @@ quote USER ${FTP_USER}
 quote PASS ${FTP_PASSWORD}
 bin
 prompt off
-cd ${FTP_UPDATESITE_ROOT}/${TRAVIS_BRANCH}/${UPDATESITE}/${ERROR}
+cd ${FTP_UPDATESITE_ROOT}/${BRANCH}/${UPDATESITE}/${ERROR}
 mkdir paredit
 cd paredit
 lcd ${PAREDIT_TESTS_DIR}
@@ -49,7 +49,7 @@ quote USER ${FTP_USER}
 quote PASS ${FTP_PASSWORD}
 bin
 prompt off
-cd ${FTP_UPDATESITE_ROOT}/${TRAVIS_BRANCH}/${UPDATESITE}/${ERROR}
+cd ${FTP_UPDATESITE_ROOT}/${BRANCH}/${UPDATESITE}/${ERROR}
 lcd ${TESTS_DIR}
 mput *
 quit
@@ -62,7 +62,7 @@ quote USER ${FTP_USER}
 quote PASS ${FTP_PASSWORD}
 bin
 prompt off
-cd ${FTP_UPDATESITE_ROOT}/${TRAVIS_BRANCH}/${UPDATESITE}/${ERROR}
+cd ${FTP_UPDATESITE_ROOT}/${BRANCH}/${UPDATESITE}/${ERROR}
 lcd ${SCREENSHOTS_DIR}
 mput *
 quit
