@@ -17,19 +17,6 @@ install: true
 cache:
   directories:
     - ${HOME}/.m2
-before_install:
-  - echo "#-#-#-# BEFORE INSTALL"
-  - date
-  # Maven 3.1.1
-  - echo "#-#-#-# DOWNLOAD AND INSTALL MAVEN 3.1.1 - START"
-  - date
-  - wget http://www.us.apache.org/dist/maven/maven-3/3.1.1/binaries/apache-maven-3.1.1-bin.tar.gz
-  - tar xvf apache-maven-3.1.1-bin.tar.gz > /dev/null
-  - export MVN_HOME=`pwd`/apache-maven-3.1.1
-  - export PATH=${MVN_HOME}/bin/:${PATH}
-  - mvn --version
-  - echo "#-#-#-# MAVEN 3.1.1 INSTALLED"
-  - date
 before_script:
   - "export DISPLAY=:99.0"
   - echo "#-#-#-# starting xvfb "
