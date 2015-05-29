@@ -1,11 +1,15 @@
 sudo: true # explicitly ask for using the new docker-based infrastructure
+
 branches:
   except:
     # workaround to prevent version tags from being built in addition to the build commit
     - /^v?[0-9]/
+
 language: java
+
 jdk:
   - openjdk7
+
 env:
   global:
     - secure: "VK+IqyTFmEf5sv8OYOa6vLqcs0SAjC/ODklIDs0rr1zU/w21mZI2eH1w5YVk\ngwWA1QR7JOxWM6S9ED4NqHymK6QOj85W4FUv0seRv5LGJ1ATAUSzyElP0BXS\n46XsROFj9itTRwZkLdFaGGO14PRAQAznS6XM22uyQO3dg1wB4bQ="
@@ -13,10 +17,13 @@ env:
     - secure: "YDLYUZiLuoNCRpdIMxycacPOyJkIw/lfycpEiIfoyuVQCTf0Sig/KZpjDyHj\nlU8gPqwYewp//lTyczuJIFq8IOghO3QejGaqlNGNLOmFPIsfdThMGOYn9IOJ\nkqO4enPLfxjnEAxvcKQDboUrCETjsimCvMccgIZDcvlQ6iFAdzA="
   matrix:
     - ECLIPSE_TARGET=luna
+
 install: true
+
 cache:
   directories:
     - ${HOME}/.m2
+
 before_script:
   - "export DISPLAY=:99.0" # ou mettre dans env: DISPLAY=:99 see https://github.com/mozilla/mozmill/pull/116/files
   - echo "#-#-#-# starting xvfb "
@@ -27,7 +34,7 @@ before_script:
   - sleep 5 # give xvfb some time to start
   - sudo apt-get install fluxbox
   - fluxbox &
-  - sleep 5
+  - sleep 5 # give fluxbox some time to start
 #  - echo "#-#-#-# installling metacity"
 #  - date
 #  - sudo apt-get update
@@ -42,6 +49,8 @@ script:
   - echo "#-#-#-# calling maven "
   - date
   - mvn clean verify --batch-mode -e -DforceContextQualifier=${QUALIFIER}
+  - echo "#-#-#-# maven called"
+  - date
 after_success: 
 #  - test ${ECLIPSE_TARGET} = "luna" && test ${TRAVIS_SECURE_ENV_VARS} && chmod 777 ./scripts/travis-deploy.sh
 #  - test ${ECLIPSE_TARGET} = "luna" && test ${TRAVIS_SECURE_ENV_VARS} && echo "#-#-#-#- deploying " 
