@@ -38,7 +38,7 @@
         <dependency>
             <groupId>ccw</groupId>
             <artifactId>clojure-ccw</artifactId>
-            <version>1.7.0-04</version>
+            <version>1.7.0-05</version>
         </dependency>
         <dependency>
             <groupId>org.clojure</groupId>
