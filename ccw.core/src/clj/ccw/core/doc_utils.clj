@@ -79,11 +79,25 @@
            :text " ")
          (optional-meta renderer m))))
 
+(defn adjust-docstring-indent
+  "docstrings Generally have their first line start at column 0, while
+   the following lines may start at column 0, 1, 2, 3, etc.
+   This function finds the minimum number of spaces of each line but the first,
+   and removes this number of spaces from the head of each line, but the first."
+  [d]
+  (let [lines (str/split-lines d)
+        padding (apply min (map #(- (count %) (count (str/triml %))) (remove str/blank? (rest lines))))]
+    (str/join "\n"
+      (concat
+        [(first lines)]
+        (map #(subs % (min padding (count %))) (rest lines))))))
+
 (defn doc-doc [renderer {:keys [doc]}]
   (when-not (str/blank? doc)
-    (let [body (condp = renderer
-                 :html (str "<pre>" doc "</pre>")
-                 :text doc)]
+    (let [d (adjust-docstring-indent doc)
+          body (condp = renderer
+                 :html (str "<pre>" d "</pre>")
+                 :text d)]
       (render-section renderer
                       ClojureEditorMessages/DocUtils_doc_label
                       body))))
