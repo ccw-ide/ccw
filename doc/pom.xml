@@ -7,13 +7,13 @@
         <parent>
                 <groupId>ccw</groupId>
                 <artifactId>ccw.parent</artifactId>
-                <version>0.31.2-SNAPSHOT</version>
+                <version>0.32.0-SNAPSHOT</version>
                 <relativePath>..</relativePath>
         </parent>
 
         <groupId>ccw</groupId>
         <artifactId>doc</artifactId>
-        <version>0.31.2-SNAPSHOT</version>
+        <version>0.32.0-SNAPSHOT</version>
 
         <build>
                 <plugins>
