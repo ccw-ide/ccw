@@ -8,10 +8,12 @@ Laurent Petit <laurent dot petit at gmail dot com>
 :toc-title: ChangeLog
 :toclevels: 0
 
-== Counterclockwise 0.33.0
+== Counterclockwise 0.32.0
 
-This release upgrades the embedded Leiningen from 2.5.0 to 2.5.1.
-Apart from that, the release is mostly a bug-fixing release.
+`0.32.0` released on June xx, 2015
+
+- Note that Counterclockwise drops Eclipse 3.x support, and now only supports Eclipse 4
+- This release upgrades the embedded Leiningen from 2.5.0 to 2.5.1.
 
 === Support for cider-nrepl in the REPL
 
@@ -31,7 +33,6 @@ This will allow CCW to focus on integrating `cider-nrepl` features, and is thus 
 `cider-nrepl` will also be a better and more rewarding place for CCW authors to contribute to. It will be good to fight our NIH bad-karma.
 
 ==== cider-nrepl and Clojurescript projects
-
 First add `cider-nrepl` and `piggieback` support for your project:
 
 [source,clojure]
@@ -57,16 +58,8 @@ Then invoke piggieback to start a Clojurescript REPL. Here's an example with a R
 
 The REPL is now a Clojurescript REPL. You now get code completion and documentation from the Clojurescript environment.
 
-=== Counterclockwise embedded nREPL
-
-Counterclockwise ships with an embedded nREPL server. The following enhancements have been applied:
-
-- Command line options: `-Dccw.nrepl.port=[1-65535]` allows to select the embedded nrepl port. `ccw.autostartrepl` has been renamed to `ccw.nrepl.autostart` for coherence.
--- Uses the cider-nrepl middleware instead of the bare default middleware.
-
 === REPL View
 - If the REPL requires an input from the user, no blocking (modal) popup is used anymore. Instead, the Input Area is refocused to send its next content to *in* via the appropriate nREPL op.
-
 - The result of the evaluated form will be pprinted when it is possible to use pprint (currently only if `cider-nrepl` is enabled).
 - A new Preference has been added to menu:Preferences[Clojure > REPL View] for disabling the use of pprint
 
@@ -76,36 +69,29 @@ Counterclockwise ships with an embedded nREPL server. The following enhancements
 - Two hovers added: "Macro expansion" (using `macroexpand`) and "Recursive macro expansion" (using `macroexpand-all`), both leveraging `cider-nrepl` wrappers if found.
 
 === User Plugins
-
 - Faster Eclipse Startup: with lots of user plugins installed, CCW used to freeze while the user plugins where launched. They are now launched in the background.
 - The keybinding cleaning function did concurrent modifications of an Eclipse Internal collection. Fix laurentpetit/ccw-plugin-manager#1
-
-== Counterclockwise 0.32.0
-
-`0.32.0` released on December xx, 2014
-
-Internal Refactoring: merge of the Eclipse 4 code into the main Counterclockwise Plugin.
-
-From now on, Counterclockwise drops Eclipse 3.x support, and only supports Eclipse 4.
-
-Internally, Counterclockwise now uses Clojure 1.7.0-master. It adds a couple patches to it, waiting for the relevant JIRA tickets to be applied mainstream.
-
-=== Fix
-
-- New Clojure Project Wizard honors the 'use previous location' checkbox. Fixes #682
-- Better support for clojure extension files: `cljs`, `cljx`, `clja`, `cljc`
 
 === Documentation
 - Add a mention about keyboard binding for switching between default and strict editing modes ( kbd:[Alt+D] ). Fixes #346
 
-
 === Leiningen Support
 - Embedded Leiningen version upgraded from version 2.5.0 to 2.5.1
 
+=== Miscellaneous Fixes
+- New Clojure Project Wizard honors the 'use previous location' checkbox. Fixes #682
+- Better support for clojure extension files: `cljs`, `cljx`, `clja`, `cljc`
 
-=== Enhancements
-
+=== Miscellaneous Enhancements
 - Print maven coordinates of Counterclockwise dependencies at plugin startup in `.metadata/.log`. Fixes #741
+
+=== Counterclockwise embedded nREPL
+Counterclockwise ships with an embedded nREPL server. The following enhancements have been applied:
+
+- New Command Line option `-Dccw.nrepl.port=[1-65535]`: allows to select the embedded nrepl port.
+- Command Line option `ccw.autostartrepl` has been renamed to `ccw.nrepl.autostart`.
+- When Command Line option `ccw.autostartrepl` is specified, the `cider-nrepl` middleware is used instead of the nRepl default middleware.
+
 
 == Counterclockwise 0.31.2
 
