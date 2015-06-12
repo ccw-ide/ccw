@@ -201,7 +201,8 @@
                 <outputDirectory>${project.basedir}/lib</outputDirectory>
                 <useSubDirectoryPerArtifact>true</useSubDirectoryPerArtifact>
                 <excludeGroupIds>p2.eclipse-plugin</excludeGroupIds>
-                <excludeArtifactIds>clojure,paredit.clj,ccw.feature,ccw.branding,ccw.core</excludeArtifactIds>
+                <excludeScope>system</excludeScope>
+                <excludeArtifactIds>org.eclipse.e4.rcp-jar,org.eclipse.emf.common-jar,org.eclipse.emf.ecore-jar,org.eclipse.rcp-jar,clojure,paredit.clj,ccw.feature,ccw.branding,ccw.core</excludeArtifactIds>
               </configuration>
             </execution>
          </executions>
