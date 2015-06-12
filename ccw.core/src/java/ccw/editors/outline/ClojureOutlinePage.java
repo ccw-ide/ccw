@@ -359,7 +359,7 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 	    }
 	    final List<List> theForms = forms;
 
-	    if (getControl() != null) {
+	    if (getControl() != null && !getControl().isDisposed()) {
     		getControl().getDisplay().asyncExec(new Runnable() {
     			@Override
 				public void run() {
