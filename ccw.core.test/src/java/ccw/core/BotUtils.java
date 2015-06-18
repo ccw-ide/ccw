@@ -1,5 +1,7 @@
 package ccw.core;
 
+import static org.junit.Assert.fail;
+
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -8,8 +10,10 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.SWTBot;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotCheckBox;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 
 public class BotUtils {
@@ -80,7 +84,19 @@ public class BotUtils {
 		bot.tree().expandNode("Clojure").select("Clojure Project");
 		bot.button("Next >").click();
 		bot.textWithLabel("Project name:").setText(projectName);
-		bot.textWithId("location").setText(ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString());
+		SWTBotCheckBox sameLocation = bot.checkBoxWithId("same-location");
+		SWTBotText location = bot.textWithId("location");
+		final String testLocation = ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString();
+		if (!testLocation.equals(location.getText())) {
+			if (!location.isEnabled()) {
+				if (sameLocation.isEnabled() && sameLocation.isChecked()) {
+					sameLocation.deselect(); // should have side effect of enabling location widget
+				} else {
+					fail("Location should only be disabled if sameLocation is enabled and checked");
+				}
+			}
+		}
+		location.setText(testLocation);
 		bot.button("Finish").click();
 		waitForWorkspace();
 		return this;
