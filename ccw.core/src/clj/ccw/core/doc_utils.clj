@@ -85,12 +85,15 @@
    This function finds the minimum number of spaces of each line but the first,
    and removes this number of spaces from the head of each line, but the first."
   [d]
-  (let [lines (str/split-lines d)
-        padding (apply min (map #(- (count %) (count (str/triml %))) (remove str/blank? (rest lines))))]
-    (str/join "\n"
-      (concat
-        [(first lines)]
-        (map #(subs % (min padding (count %))) (rest lines))))))
+  (let [lines (str/split-lines d)]
+    (if-let [paddings (seq (map #(- (count %) (count (str/triml %)))
+                                (remove str/blank? (rest lines))))]
+      (let [padding (apply min paddings)]
+        (str/join "\n"
+                  (concat
+                    [(first lines)]
+                    (map #(subs % (min padding (count %))) (rest lines)))))
+      d)))
 
 (defn doc-doc [renderer {:keys [doc]}]
   (when-not (str/blank? doc)
