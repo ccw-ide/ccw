@@ -52,6 +52,7 @@ import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
+import ccw.TraceOptions;
 import ccw.editors.clojure.ClojureEditor;
 import ccw.editors.clojure.LoadFileAction;
 import ccw.preferences.PreferenceConstants;
@@ -166,7 +167,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
      * @param filesToLaunch
      * @param mode
      */
-    protected void launchProjectCheckRunning(IProject project, IFile[] filesToLaunch, String mode, boolean forceLeinLaunchWhenPossible, IWithREPLView runOnceREPLAvailable) {
+    protected void launchProjectCheckRunning(final IProject project, IFile[] filesToLaunch, String mode, boolean forceLeinLaunchWhenPossible, IWithREPLView runOnceREPLAvailable) {
     	assert mode != null;
     	
     	String projectName = project.getName();
@@ -178,12 +179,16 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     	        userConfirmsNewLaunch(project, running.size())) {
     		launchProject(project, filesToLaunch, mode, forceLeinLaunchWhenPossible, runOnceREPLAvailable);
     	} else {
-			IViewPart replView = CCWPlugin.getDefault().getProjectREPL(project);
-			if (replView != null) {
-				replView.getViewSite().getPage().activate(replView);
-			} else {
-				System.out.println("Should not be there: because in the normal course of things, a Launch does not survive its REPLView");
-			}
+    		DisplayUtil.asyncExec(new Runnable() {
+				@Override public void run() {
+					IViewPart replView = CCWPlugin.getDefault().getProjectREPL(project);
+					if (replView != null) {
+						replView.getViewSite().getPage().activate(replView);
+					} else {
+						CCWPlugin.getTracer().trace(TraceOptions.LAUNCHER, "Should not be there: because in the normal course of things, a Launch does not survive its REPLView");
+					}
+				}
+			});
     	}
     }    
     
