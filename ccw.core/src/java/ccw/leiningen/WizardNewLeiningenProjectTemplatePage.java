@@ -138,6 +138,7 @@ public final class WizardNewLeiningenProjectTemplatePage extends WizardPage {
     	final boolean doesPreviousLocationExist = (getDefaultParentLocationDialogSettings() != null);
 
     	previousLocationCheckbox = new Button(composite, SWT.CHECK);
+    	setTestId(previousLocationCheckbox, "same-as-previous-location");
     	previousLocationCheckbox.setText("same location as previous wizard run");
     	previousLocationCheckbox.setSelection(doesPreviousLocationExist);
     	previousLocationCheckbox.setEnabled(doesPreviousLocationExist);

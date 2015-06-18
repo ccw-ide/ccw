@@ -84,7 +84,7 @@ public class BotUtils {
 		bot.tree().expandNode("Clojure").select("Clojure Project");
 		bot.button("Next >").click();
 		bot.textWithLabel("Project name:").setText(projectName);
-		SWTBotCheckBox sameLocation = bot.checkBoxWithId("same-location");
+		SWTBotCheckBox sameLocation = bot.checkBoxWithId("same-as-previous-location");
 		SWTBotText location = bot.textWithId("location");
 		final String testLocation = ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString();
 		if (!testLocation.equals(location.getText())) {
