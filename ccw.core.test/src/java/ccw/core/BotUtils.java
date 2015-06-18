@@ -95,8 +95,8 @@ public class BotUtils {
 					fail("Location should only be disabled if sameLocation is enabled and checked");
 				}
 			}
+			location.setText(testLocation);
 		}
-		location.setText(testLocation);
 		bot.button("Finish").click();
 		waitForWorkspace();
 		return this;
