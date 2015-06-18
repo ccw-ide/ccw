@@ -396,10 +396,12 @@
    feature.
    This predicate is there to restore the truth :-)"
   [^IClojureEditor editor offset]
-  (let [parse-tree     ((-> editor .getParseState :parse-tree :abstract-node) 
-                         p/parse-tree-view)
-        last-token-tag (-> parse-tree :content peek :tag)]
-    (not= last-token-tag :comment)))
+  (if (not= offset (-> editor .getDocument .get count))
+    true
+    (let [parse-tree     ((-> editor .getParseState :parse-tree :abstract-node) 
+                          p/parse-tree-view)
+         last-token-tag (-> parse-tree :content peek :tag)]
+     (not= last-token-tag :comment))))
 
 (defn make-process [editor ^ContentAssistant content-assistant]
   (reify IContentAssistProcessor

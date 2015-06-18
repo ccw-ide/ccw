@@ -82,6 +82,7 @@ The REPL is now a Clojurescript REPL. You now get code completion and documentat
 - New Clojure Project Wizard honors the 'use previous location' checkbox. Fixes #682
 - Better support for opening with the editor files ending with clojure extensions: `cljs`, `cljx`, `clja`, `cljc`
 - When launching a REPL for a project it a REPL is already running for it, there is now no exception thrown when accepting to reuse the existing one
+- Code completion works even if there's a comment at the end of the document. Fixes #777
 
 === Miscellaneous Enhancements
 - Print maven coordinates of Counterclockwise dependencies at plugin startup in `.metadata/.log`. Fixes #741
