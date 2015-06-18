@@ -44,7 +44,9 @@ import org.eclipse.ui.console.IConsoleListener;
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.ClojureProject;
+import ccw.TraceOptions;
 import ccw.launching.ClojureLaunchShortcut.IWithREPLView;
+import ccw.preferences.PreferenceConstants;
 import ccw.repl.REPLView;
 import ccw.util.BundleUtils;
 import ccw.util.ClojureInvoker;
@@ -272,7 +274,8 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 			// Process will print a line with nRepl URL so that the Console
 			// hyperlink listener can automatically open the REPL
 			String nREPLInit = "(require 'clojure.tools.nrepl.server)" + 
-			"(do (let [server (clojure.tools.nrepl.server/start-server)] " + 
+					getNreplHandlerRequire() +
+			"(do (let [server (clojure.tools.nrepl.server/start-server " + getNreplHandlerKeywordOption() + ")] " + 
 				  "(println (str \\\"nREPL server started on port \\\" (:port server) \\\" on host 127.0.0.1 - nrepl://127.0.0.1:\\\" (:port server)))))";
 			String args = String.format("-i \"%s\" -e \"%s\" %s %s", toolingFile, nREPLInit,
 			        filesToLaunchArguments, userProgramArguments);
@@ -286,6 +289,17 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 		}
 	}
 	
+	private String getNreplHandlerRequire() {
+		return isUseCiderNrepl() ? "(require 'cider.nrepl)" : "";
+	}
+	private String getNreplHandlerKeywordOption() {
+		return isUseCiderNrepl() ? ":handler cider.nrepl/cider-nrepl-handler" : "" /* default handler */;
+	}
+	
+	private boolean isUseCiderNrepl() {
+		return CCWPlugin.getDefault().getCombinedPreferenceStore().getBoolean(PreferenceConstants.CCW_GENERAL_USE_CIDER_NREPL);
+	}
+
 	private String createFileLoadInjections(List<IFile> filesToLaunch) {
 		
 		assert filesToLaunch.size() > 0;
@@ -338,6 +352,8 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
     		// Leiningen configurations don't need last minute classpath tweaks (yet)
     		return super.getClasspath(configuration);
     	}
+    	
+    	// Here we know the project is not a leiningen project, will trying launching differently
        
         List<String> classpath = new ArrayList<String>(Arrays.asList(super.getClasspath(configuration)));
        
@@ -353,32 +369,18 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
             classpath.add(0, sourcePath);
         }
         
-        
+        // Add nrepl to the classpath if not already on the project classpath
         if (clojureProject.getJavaProject().findElement(new Path("clojure/tools/nrepl")) == null) {
             try {
-                File ccwPluginDir = FileLocator.getBundleFile(CCWPlugin.getDefault().getBundle());
-                System.out.println("ccwPluginDir: " + ccwPluginDir);
-                // this should *always* be a file, *unless* the user is getting nREPL from a clone of its
-                // project, in which case we need to reach into that project's directory...
-                ArrayList replAdditions = new ArrayList();
-                if (ccwPluginDir.isFile()) {
-                	throw new WorkbenchException("Bundle ccw.core is a file. Cannot install nrepl");
-                } else {
-                    //replAdditions.add(new File(repllib, "src/main/clojure").getAbsolutePath());
-                    //replAdditions.add(new File(repllib, "target/classes").getAbsolutePath());
-                	
-                	// Hack, until the project is launched via leiningen instead
-                	File nreplFile = new File(ccwPluginDir, "lib/tools.nrepl.jar");
-					String nreplPath = nreplFile.getAbsolutePath();
-					if (!nreplFile.exists()) {
-						throw new WorkbenchException("nreplFile not found: " + nreplFile);
-					}
-                	System.out.println("nreplPath for classpath:" + nreplPath);
-                	replAdditions.add(nreplPath);
-                }
-                
+                File ccwPluginDir = getCCWPluginDirectory();
+                ArrayList<String> replAdditions = new ArrayList<String>();
+            	File nreplFile = new File(ccwPluginDir, "lib/tools.nrepl-jar");
+				String nreplPath = nreplFile.getAbsolutePath();
+				if (!nreplFile.exists()) {
+					throw new WorkbenchException("nreplFile not found: " + nreplFile);
+				}
+            	replAdditions.add(nreplPath);
                 CCWPlugin.log("Adding to project's classpath to support nREPL: " + replAdditions);
-                
                 classpath.addAll(replAdditions);
             } catch (IOException e) {
                 throw new WorkbenchException("Failed to find nrepl library", e);
@@ -387,6 +389,42 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
         	System.out.println("Found package clojure.tools.nrepl in the project classpath, won't try to add ccw's nrepl to it then");
         }
         
+        if (isUseCiderNrepl()) {
+	        // Add cider-nrepl to the classpath if not already on the project classpath
+	        if (clojureProject.getJavaProject().findElement(new Path("cider/nrepl/middleware")) == null) {
+	            try {
+	                File ccwPluginDir = getCCWPluginDirectory();
+	                ArrayList<String> replAdditions = new ArrayList<String>();
+                	File ciderNreplFile = new File(ccwPluginDir, "lib/cider-nrepl-jar");
+					if (!ciderNreplFile.exists()) {
+						throw new WorkbenchException("cider-nrepl not found: " + ciderNreplFile);
+					}
+                	replAdditions.add(ciderNreplFile.getAbsolutePath());
+                	File dynapathFile = new File(ccwPluginDir,"lib/dynapath-jar");
+                	if (!dynapathFile.exists()) {
+                		throw new WorkbenchException("dynapath, a required dependency of cider-nrepl, not found: " + dynapathFile);
+                	}
+                	replAdditions.add(dynapathFile.getAbsolutePath());
+	                CCWPlugin.log("Adding to project's classpath to support cider-nrepl: " + replAdditions);
+	                classpath.addAll(replAdditions);
+	            } catch (IOException e) {
+	                throw new WorkbenchException("Failed to find cider-nrepl library", e);
+	            }
+	        } else {
+	        	System.out.println("Found package cider/nrepl/middleware in the project classpath, won't try to add ccw's cider-nrepl to it then");
+	        }
+    	}
+
         return classpath.toArray(new String[classpath.size()]);
+    }
+    
+    private File getCCWPluginDirectory() throws IOException, WorkbenchException {
+        File ccwPluginDir = FileLocator.getBundleFile(CCWPlugin.getDefault().getBundle());
+        CCWPlugin.getTracer().trace(TraceOptions.LAUNCHER, "ccwPluginDir: " + ccwPluginDir);
+        if (ccwPluginDir.isFile()) {
+        	throw new WorkbenchException("Bundle ccw.core cannot be returned as a file.");
+        } else {
+        	return ccwPluginDir;
+        }
     }
 }

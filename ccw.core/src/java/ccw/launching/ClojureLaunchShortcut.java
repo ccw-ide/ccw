@@ -258,11 +258,16 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     }
 
     private ILaunchConfiguration createLeiningenLaunchConfiguration(IProject project, boolean createInDebugMode) {
-    	String command = 
-    			// Adding ccw/ccw.server for enabling ccw custom code completion, etc.
-    			" update-in :dependencies conj \"[ccw/ccw.server \\\"0.1.1\\\"]\" "
-    			+ "-- update-in :injections conj \"(require 'ccw.debug.serverrepl)\" "
-
+    	
+    	String injectCCWServer = " update-in :dependencies conj \"[ccw/ccw.server \\\"0.1.1\\\"]\" "
+    			             + "-- update-in :injections conj \"(require 'ccw.debug.serverrepl)\" ";
+    	String injectCiderNrepl = " update-in :plugins conj \"[cider/cider-nrepl \\\"0.9.0\\\"]\" "
+                					// we force nrepl 0.2.10 because cider 0.9.0 requires 0.2.7 at least but leiningen forces 0.2.6
+    								// the cider-nrepl plugin will automatically register the cider-nrepl handler with leiningen
+	                          + "-- update-in :dependencies conj \"[org.clojure/tools.nrepl \\\"0.2.10\\\"]\" ";
+    	
+    	// Adding ccw/ccw.server or cider/cider-nrepl for enabling ccw custom code completion, etc.
+    	String command = ( isUseCiderNrepl() ? injectCiderNrepl : injectCCWServer )
     			// Starting repl :headless ; removing :main attribute because
     			// it is causing problems: "leiningen repl :headless" defaults
     			// to automatically requiring the namespace symbol found in the
@@ -407,4 +412,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     private static IPreferenceStore getPreferences() {
     	return  CCWPlugin.getDefault().getCombinedPreferenceStore();
     }
+	private boolean isUseCiderNrepl() {
+		return CCWPlugin.getDefault().getCombinedPreferenceStore().getBoolean(PreferenceConstants.CCW_GENERAL_USE_CIDER_NREPL);
+	}
 }
