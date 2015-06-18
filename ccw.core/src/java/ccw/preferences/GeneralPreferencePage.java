@@ -60,6 +60,12 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements
                     getFieldEditorParent()));
 
         addField(
+                new BooleanFieldEditor(
+                	ccw.preferences.PreferenceConstants.CCW_GENERAL_USE_CIDER_NREPL,
+                    Messages.ClojureGeneralPreferencePage_use_cider_nrepl,
+                    getFieldEditorParent()));
+
+        addField(
         		new FileFieldEditor(
         	        "ccw.leiningen.standalone-path.pref",
         	        "Leiningen jar (empty = use embedded):",
