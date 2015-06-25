@@ -18,28 +18,28 @@ Laurent Petit <laurent dot petit at gmail dot com>
 === Support for cider-nrepl in the REPL
 
 ==== cider-nrepl and Clojure projects
-Enabling `cider-nrepl` for a project is as simple as adding or completing a `:plugins` section to the project's `project.clj` file:
 
-[source,clojure]
-----
-(defproject ...
-  :plugins [[cider/cider-nrepl "0.9.0"]])
-----
+`cider-nrepl` ( https://github.com/clojure-emacs/cider-nrepl ) is a community effort to provide editor-agnostic nREPL middlewares. +
+CCW is now able to use `cider-nrepl` middlewares for providing the same features available in the `ccw.server` lib, though not all features of `cider-nrepl` are exposed by CCW yet.
 
-If `cider-nrepl` ( https://github.com/clojure-emacs/cider-nrepl ) middlewares are present in the nREPL server middleware stack of your project, then connecting to it via a `REPL View` will use its nREPL ops instead of those provided by CCW.
+- There is a Clojure Preference menu:Preferences[Clojure > General > Launch REPLs with cider-nrepl] that is turned on by default.
+- This Preference automatically creates a `cider-nrepl` enabled REPL when you use the Clojure launchers via `Run as ...` menus or contextual menus or keyboard shortcuts (e.g. kbd:[Ctrl + Alt + S])
+- Note that if CCW detects `cider-nrepl` in the project classpath, then the project version will be used.
+- This works both for Leiningen projects or any Java project having the Clojure jar in their classpath.
 
-This will allow CCW to focus on integrating `cider-nrepl` features, and is thus the promise of more stability, better user experience across several tools based on `cider-nrepl` (emacs, vim-fireplace, to name a few).
-
-`cider-nrepl` will also be a better and more rewarding place for CCW authors to contribute to. It will be good to fight our NIH bad-karma.
+WARNING: CCW only works with `cider-nrepl` > 0.9.1
 
 ==== cider-nrepl and Clojurescript projects
+
+More manual work is required if your project also has ClojureScript.
+
 First add `cider-nrepl` and `piggieback` support for your project:
 
 [source,clojure]
 ----
 (defproject ...
   ;; cider-nrepl support
-  :plugins [[cider/cider-nrepl "0.9.0-SNAPSHOT"]]
+  :plugins [[cider/cider-nrepl "0.9.1"]]
   ; piggieback support for clojurescript nrepls
   :profiles {:dev {:dependencies [[com.cemerick/piggieback "0.2.0"]
                                   [org.clojure/tools.nrepl "0.2.10"]]
@@ -47,7 +47,7 @@ First add `cider-nrepl` and `piggieback` support for your project:
                                   [cemerick.piggieback/wrap-cljs-repl]}}})
 ----
 
-Then start a REPL in Counterclockwise as usual, e.g. from the project's node or some clojure file.
+Then you can a REPL in Counterclockwise as usual, e.g. from the project's node or some clojure file.
 
 Then invoke piggieback to start a Clojurescript REPL. Here's an example with a Rhino REPL:
 
@@ -63,10 +63,10 @@ The REPL is now a Clojurescript REPL. You now get code completion and documentat
 - The result of the evaluated form will be pprinted when it is possible to use pprint (currently only if `cider-nrepl` is enabled).
 - A new Preference has been added to menu:Preferences[Clojure > REPL View] for disabling the use of pprint
 
-=== Hover Framework
-- New preference page for CCW hovers under menu:Preferences[Clojure > Editor > Hovers]. Keyboard modifiers can now been set for each hover.
-- Added the ability of contributing and configuring ITextHover* instances to Counterclockwise through the ccw.core.cljEditorTextHovers extension point.
+=== Editor Hover Framework
 - Two hovers added: "Macro expansion" (using `macroexpand`) and "Recursive macro expansion" (using `macroexpand-all`), both leveraging `cider-nrepl` wrappers if found.
+- New preference page for CCW hovers under menu:Preferences[Clojure > Editor > Hovers]. Keyboard modifiers can now be set for each hover.
+- Eclipse Extension point for third party plugins to contribute new kinds of hovers (see the `ccw.core.cljEditorTextHovers` extension point and the `ITextHover` interface)
 
 === User Plugins
 - Faster Eclipse Startup: with lots of user plugins installed, CCW used to freeze while the user plugins where launched. They are now launched in the background.

@@ -365,6 +365,50 @@ See the list of Keyboard Bindings: link:keyboard-shortcuts.html[List of Keyboard
 
 You'll find the commands for interacting with a REPL from an Editor in the link:keyboard-shortcuts.html[Keyboard Shortcuts] page
 
+
+== cider-nrepl support
+
+=== cider-nrepl and Clojure projects
+
+`cider-nrepl` ( https://github.com/clojure-emacs/cider-nrepl ) is a community effort to provide editor-agnostic nREPL middlewares. +
+CounterClockWise is now able to use `cider-nrepl` middlewares for providing the same features available in the `ccw.server` lib, though not all features of `cider-nrepl` are exposed by CCW yet.
+
+- There is a Clojure Preference menu:Preferences[Clojure > General > Launch REPLs with cider-nrepl] that is turned on by default.
+- This Preference automatically creates a `cider-nrepl` enabled REPL when you use the Clojure launchers via `Run as ...` menus or contextual menus or keyboard shortcuts (e.g. kbd:[Ctrl + Alt + S])
+- Note that if CCW detects `cider-nrepl` in the project classpath, then the project version will be used.
+- This works both for Leiningen projects or any Java project having the Clojure jar in their classpath.
+
+WARNING: CCW only works with `cider-nrepl` > 0.9.1
+
+=== cider-nrepl and Clojurescript projects
+
+More manual work is required if your project also has ClojureScript.
+
+First add `cider-nrepl` and `piggieback` support for your project:
+
+[source,clojure]
+----
+(defproject ...
+  ;; cider-nrepl support
+  :plugins [[cider/cider-nrepl "0.9.1"]]
+  ; piggieback support for clojurescript nrepls
+  :profiles {:dev {:dependencies [[com.cemerick/piggieback "0.2.0"]
+                                  [org.clojure/tools.nrepl "0.2.10"]]
+                   :repl-options {:nrepl-middleware
+                                  [cemerick.piggieback/wrap-cljs-repl]}}})
+----
+
+Then you can a REPL in Counterclockwise as usual, e.g. from the project's node or some clojure file.
+
+Then invoke piggieback to start a Clojurescript REPL. Here's an example with a Rhino REPL:
+
+[source,clojure]
+----
+(cemerick.piggieback/cljs-repl (cljs.repl.rhino/repl-env))
+----
+
+The REPL is now a Clojurescript REPL. You now get code completion and documentation from the Clojurescript environment.
+
 == Auto-build feature
 
 // TODO the sentence is badly written
