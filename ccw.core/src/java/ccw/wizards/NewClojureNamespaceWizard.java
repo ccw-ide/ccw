@@ -14,7 +14,9 @@ import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -219,50 +221,27 @@ public class NewClojureNamespaceWizard extends BasicNewResourceWizard implements
         super.initializeDefaultPageImageDescriptor();
     }
 
-    protected String name() {
-        String name = mainPage.text.getText().trim().replaceAll("-", "_"); // FIXME should call clojure.core/munge
-        if (name.endsWith(".clj"))
-            name = name.substring(0, name.length() - (".clj").length());
-        else if (name.endsWith(".cljs")) {
-        	name = name.substring(0, name.length() - (".cljs").length());
-        }
-        else if (name.endsWith(".clja")) {
-        	name = name.substring(0, name.length() - (".clja").length());
-        }
-        else if (name.endsWith(".cljc")) {
-        	name = name.substring(0, name.length() - (".cljc").length());
-        }
-        else if (name.endsWith(".cljx")) {
-        	name = name.substring(0, name.length() - (".cljx").length());
-        }
-        return name;
-    }
-
-    protected String suffix() {
-        String name = mainPage.text.getText().trim().replaceAll("-", "_"); // FIXME should call clojure.core/munge
-        int index = name.lastIndexOf(".");
-        if (index >= 0) {
-        	return name.substring(index);
-        } else {
-        	return ".clj";
-        }
-    }
-
-    /**
-     * 
-     * @param parts the parts. Can be modified if extension is extracted
-     * @return the extension
-     */
-    private String extractExtension(List<String> parts) {
-    	String extension;
-    	final String s = parts.get(parts.size() - 1);
-    	 if (s.equals("clj") || s.equals("cljs")) {
-     		extension = parts.remove(parts.size() - 1);
-    	 } else {
-    		 extension = "clj";
-    	 }
-    	 return extension;
-    }
+    public static Set<String> clojureEditorExtensions = new HashSet<String>() {
+	    	{
+	    		add("clj"); add("cljs"); add("cljc"); add("cljx"); add("clja"); add("dtm"); add("edn");
+	    	}
+    };
+    
+	/**
+	 * @param parts
+	 *            the parts. This input is modified if extension is extracted
+	 * @return the extension
+	 */
+	private String extractExtension(List<String> parts) {
+		String extension;
+		final String lastPart = parts.get(parts.size() - 1);
+		if (clojureEditorExtensions.contains(lastPart)) {
+			extension = parts.remove(parts.size() - 1);
+		} else {
+			extension = "clj";
+		}
+		return extension;
+	}
 
     private String checkNamespaceSegment(String name) {
     	if (StringUtils.isBlank(name)) {
