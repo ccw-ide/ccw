@@ -15,7 +15,6 @@
                 <module>paredit.clj</module>
                 <module>ccw.feature</module>
                 <module>doc</module>
-
                 <module>ccw.core.test</module>
         </modules>
 
