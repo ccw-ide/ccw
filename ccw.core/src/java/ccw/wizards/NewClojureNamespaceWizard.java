@@ -226,6 +226,15 @@ public class NewClojureNamespaceWizard extends BasicNewResourceWizard implements
         else if (name.endsWith(".cljs")) {
         	name = name.substring(0, name.length() - (".cljs").length());
         }
+        else if (name.endsWith(".clja")) {
+        	name = name.substring(0, name.length() - (".clja").length());
+        }
+        else if (name.endsWith(".cljc")) {
+        	name = name.substring(0, name.length() - (".cljc").length());
+        }
+        else if (name.endsWith(".cljx")) {
+        	name = name.substring(0, name.length() - (".cljx").length());
+        }
         return name;
     }
 
