@@ -49,12 +49,18 @@ import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 
 import ccw.CCWPlugin;
 import ccw.ClojureCore;
+import ccw.util.ClojureInvoker;
 import ccw.util.CollectionUtils;
 import ccw.util.PlatformUtil;
 import ccw.util.StringUtils;
 
 public class NewClojureNamespaceWizard extends BasicNewResourceWizard implements INewWizard {
 
+	private final ClojureInvoker wizard = ClojureInvoker.newInvoker(
+            CCWPlugin.getDefault(),
+            "ccw.wizards.new-namespace");
+
+	
     public String kind() { return "Namespace"; }
 
     public String adjective() {
@@ -221,12 +227,6 @@ public class NewClojureNamespaceWizard extends BasicNewResourceWizard implements
         super.initializeDefaultPageImageDescriptor();
     }
 
-    public static Set<String> clojureEditorExtensions = new HashSet<String>() {
-	    	{
-	    		add("clj"); add("cljs"); add("cljc"); add("cljx"); add("clja"); add("dtm"); add("edn");
-	    	}
-    };
-    
 	/**
 	 * @param parts
 	 *            the parts. This input is modified if extension is extracted
@@ -235,7 +235,7 @@ public class NewClojureNamespaceWizard extends BasicNewResourceWizard implements
 	private String extractExtension(List<String> parts) {
 		String extension;
 		final String lastPart = parts.get(parts.size() - 1);
-		if (clojureEditorExtensions.contains(lastPart)) {
+		if (wizard._("clojure-editor-extensions", lastPart) != null) {
 			extension = parts.remove(parts.size() - 1);
 		} else {
 			extension = "clj";
@@ -321,15 +321,15 @@ public class NewClojureNamespaceWizard extends BasicNewResourceWizard implements
         }
 
         try {
-        	final String contents = "(ns " + namespace + ")\n\n";
+        	final String content = content(namespace, extension);
         	ccw.util.ResourceUtil.createMissingParentFolders(file);
-            file.create(stringToStream(contents, ResourcesPlugin.getEncoding()), true, null);
+            file.create(stringToStream(content(namespace, extension), ResourcesPlugin.getEncoding()), true, null);
             IWorkbenchWindow dw = getWorkbench().getActiveWorkbenchWindow();
             if (dw != null) {
                 IWorkbenchPage page = dw.getActivePage();
                 if (page != null) {
                     TextEditor editor = (TextEditor) IDE.openEditor(page, file, true);
-                    editor.selectAndReveal(contents.length(), 0);
+                    editor.selectAndReveal(content.length(), 0);
                 }
             }
         }
@@ -354,8 +354,8 @@ public class NewClojureNamespaceWizard extends BasicNewResourceWizard implements
 		}
     }
 
-    protected String body() {
-        return "";
+    private String content(String namespace, String extension) {
+    		return (String) wizard._("content", namespace, extension);
     }
 
 }

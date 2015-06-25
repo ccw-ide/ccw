@@ -78,9 +78,12 @@ The REPL is now a Clojurescript REPL. You now get code completion and documentat
 === Leiningen Support
 - Embedded Leiningen version upgraded from version 2.5.0 to 2.5.1
 
+=== New Namespace Wizard
+- Better support for opening with the editor files ending with clojure extensions: `cljs`, `cljx`, `clja`, `cljc`
+- Better support for extension via User Plugins: creation of namespace `ccw.wizards.new-namespace`
+
 === Miscellaneous Fixes
 - New Clojure Project Wizard honors the 'use previous location' checkbox. Fixes #682
-- Better support for opening with the editor files ending with clojure extensions: `cljs`, `cljx`, `clja`, `cljc`
 - When launching a REPL for a project it a REPL is already running for it, there is now no exception thrown when accepting to reuse the existing one
 - Code completion works even if there's a comment at the end of the document. Fixes #777
 
