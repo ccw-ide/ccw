@@ -22,7 +22,7 @@ Apache Software Foundation http://www.apache.org/
    </configIni>
 
    <launcherArgs>
-      <vmArgs>-XX:MaxPermSize=256m -Xms40m -Xmx512m -XX:+UseParallelGC</vmArgs>
+      <vmArgs>-server -Dosgi.requiredJavaVersion=1.7 -XX:MaxPermSize=256m -Xms256m -Xmx1024m -XX:+UseParallelGC -Xverify:none</vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts</vmArgsMac>
    </launcherArgs>
 

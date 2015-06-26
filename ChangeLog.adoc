@@ -97,6 +97,9 @@ Counterclockwise ships with an embedded nREPL server. The following enhancements
 - Command Line option `ccw.autostartrepl` has been renamed to `ccw.nrepl.autostart`.
 - When Command Line option `ccw.autostartrepl` is specified, the `cider-nrepl` middleware is used instead of the nRepl default middleware.
 
+=== Counterclockwise/Standalone
+- Adjusted JVM parameters to have a faster startup (-server, -Xverify:none, -Xms256m -Xmx1024m)
+
 
 == Counterclockwise 0.31.2
 
