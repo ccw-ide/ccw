@@ -24,3 +24,10 @@
   "Return the absolute path (filesystem/OS dependent) of f"
   [f] (and f (.getAbsolutePath f)))
 
+(defn name
+  "Return the file name, aka the last part of the path"
+  [f] (.getName f))
+
+(defn canonical-path
+  "Return the canonical path for f"
+  [f] (.getCanonicalPath f))

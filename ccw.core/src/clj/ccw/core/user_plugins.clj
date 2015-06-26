@@ -3,6 +3,7 @@
             [ccw.file :as f]
             [ccw.e4.dsl :as dsl]
             [ccw.e4.model :as m]
+            [ccw.eclipse :as e]
             [ccw.core.trace :as t :refer (trace-execution-time)]))
 
 (defn clean-type-elements!
@@ -131,6 +132,51 @@
                                       ".ccw"))]
     d))
 
+(defn ccw-plugins-root-dir
+  "Return the user plugins dir embedded by CCW to provide out-of-the-box plugin versions."
+  []
+  (e/get-file-inside-plugin "ccw.core" "ccw-plugins"))
+  
+
+(defn- load-user-plugins
+  "Load all user plugins and return a list of plugins duplicates in the form
+  [[skipped-plugin plugin] ...].
+  skipped-plugin is a plugin with the same id as plugin, which has been loaded first.
+  Do not call directly, it does not manage eclipse model cleanup."
+  [user-plugins]
+  (loop [user-plugins (next user-plugins), seen-plugins-names #{}, seen-plugins #{}, skipped-plugins []]
+    (if-not user-plugins
+      skipped-plugins
+      (let [p (first user-plugins)
+            p-name (f/name p)]
+        (if (seen-plugins-names p-name)
+          (recur (next user-plugins)
+            seen-plugins-names
+            seen-plugins
+            (conj skipped-plugins [p (some #(when (= p-name (f/name %)) %) seen-plugins)]))
+          (do
+            (trace-execution-time
+              :user-plugins (format "loading User plugin %s" p)
+              (start-user-plugin p))
+            (recur (next user-plugins)
+              (conj seen-plugins-names p-name)
+              (conj seen-plugins p)
+              skipped-plugins)))))))
+
+(defn skipped-plugin-message
+  [[skipped installed]]
+  (str "plugin "
+    (f/canonical-path skipped)
+    " not installed because plugin with same identity "
+    (f/canonical-path installed)
+    " was already installed."))
+
+(defn trace-skipped-plugins
+  "Trace the list of plugins that have been skipped because there were duplicates"
+  [skipped-plugins]
+  (doseq [skipped-plugin skipped-plugins]
+    (t/trace :user-plugins (skipped-plugin-message skipped-plugin))))
+
 (defn start-user-plugins
   "Find user plugins, load them, and then clean the Eclipse Application model
    to remove traces of user plugin artifacts that have not yet been loaded
@@ -138,13 +184,17 @@
    If no user plugin is found, remove all user plugin artifacts from the model."
   []
   (future
-    (if-let [user-plugins (some-> (plugins-root-dir) user-plugins)]
+    (if-let [user-plugins (concat
+                            (some-> (plugins-root-dir) user-plugins)
+                            ; ccw plugins are loaded after user plugins, so they don't take
+                            ; precedence over them
+                            (some-> (ccw-plugins-root-dir) user-plugins))]
       (binding [dsl/*load-key* (str (java.util.UUID/randomUUID))]
         (try
-          (doseq [p user-plugins]
-            (trace-execution-time :user-plugins (format "loading User plugin %s" p)
-              (start-user-plugin p)))
-          (ccw.CCWPlugin/log (str "Loaded User Plugins"))
+          (let [skipped-plugins (load-user-plugins user-plugins)]
+            (ccw.CCWPlugin/log (str "Loaded User Plugins"))
+            (trace-skipped-plugins skipped-plugins)
+            skipped-plugins)
           (catch Exception e
             (ccw.CCWPlugin/logError "Error while loading User Plugins" e))
           (finally (clean-model! @m/app dsl/*load-key*))))
