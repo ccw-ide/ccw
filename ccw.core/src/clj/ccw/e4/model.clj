@@ -887,7 +887,7 @@
     (if-let [kb (find-key-binding app spec)]
       (do 
         (t/format :e4 "key binding found: %s" kb)
-        kb)
+        (update-key-binding! kb spec))
       (do
         (t/trace :e4 "key binding not found, let's create one")
         (let [kb (-> (create-key-binding) (update-key-binding! spec))]
