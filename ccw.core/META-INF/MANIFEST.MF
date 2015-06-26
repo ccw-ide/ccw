@@ -140,7 +140,8 @@ Bundle-ClassPath: .,
  lib/wagon-http-shared-jar/,
  lib/wagon-provider-api-jar/,
  ccw-plugins/ccw-plugin-zoom/,
- ccw-plugins/ccw-plugin-manager/
+ ccw-plugins/ccw-plugin-manager/,
+ ccw-plugins/ccw-plugin-hello-world/
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: Counterclockwise team
 Eclipse-BundleShape: dir

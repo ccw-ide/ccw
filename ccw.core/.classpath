@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="ccw-plugins/ccw-plugin-hello-world/"/>
 	<classpathentry exported="true" kind="lib" path="ccw-plugins/ccw-plugin-manager/"/>
 	<classpathentry exported="true" kind="lib" path="ccw-plugins/ccw-plugin-zoom/"/>
 	<classpathentry exported="true" kind="lib" path="lib/aether-api-jar/"/>

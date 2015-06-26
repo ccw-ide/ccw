@@ -4,3 +4,6 @@
 [submodule "ccw.core/ccw-plugins/ccw-plugin-manager"]
 	path = ccw.core/ccw-plugins/ccw-plugin-manager
 	url = https://github.com/ccw-ide/ccw-plugin-manager.git
+[submodule "ccw.core/ccw-plugins/ccw-plugin-hello-world"]
+	path = ccw.core/ccw-plugins/ccw-plugin-hello-world
+	url = https://github.com/ccw-ide/ccw-plugin-hello-world
