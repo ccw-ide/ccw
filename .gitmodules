@@ -1,0 +1,3 @@
+[submodule "ccw.core/ccw-plugins/ccw-plugin-zoom"]
+	path = ccw.core/ccw-plugins/ccw-plugin-zoom
+	url = https://github.com/ccw-ide/ccw-plugin-zoom.git

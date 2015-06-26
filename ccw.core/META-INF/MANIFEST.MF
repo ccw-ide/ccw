@@ -138,7 +138,8 @@ Bundle-ClassPath: .,
  lib/versioneer-jar/,
  lib/wagon-http-jar/,
  lib/wagon-http-shared-jar/,
- lib/wagon-provider-api-jar/
+ lib/wagon-provider-api-jar/,
+ ccw-plugins/ccw-plugin-zoom/
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: Counterclockwise team
 Eclipse-BundleShape: dir
