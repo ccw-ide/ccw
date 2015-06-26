@@ -16,7 +16,7 @@
         to-remove (remove #(= load-key
                               (get (m/transient-data %) "ccw/load-key")) 
                           cmds)
-        _ (t/format :user-plugins "to-remove: %s" to-remove)
+        _ (t/format :user-plugins "to-remove: %s" (seq to-remove))
         app-cmds (application-type-elements app)]
     (doseq [c (doall to-remove)] ; prevents ConcurrentModificationExceptions in .remove
       (t/format :user-plugins "user-plugins gc, element to remove: %s" c)
@@ -94,13 +94,16 @@
         (.listFiles (io/file d))))
 
 (defn user-plugins [d]
-  (if (and d (plugin-folder? d))
-    (if-not (f/exists? (io/file d "skip"))
-      [d]
-      [])
-    (mapcat user-plugins 
-            (filter f/directory?
-                    (.listFiles (io/file d))))))
+  (cond
+    (not d)
+      []
+    (plugin-folder? d)
+      (if-not (f/exists? (io/file d "skip"))
+        [d]
+        [])
+    :else
+      (mapcat user-plugins 
+        (filter f/directory? (.listFiles (io/file d))))))
 
 (defn load-user-script [f]
   (try
@@ -144,7 +147,7 @@
   skipped-plugin is a plugin with the same id as plugin, which has been loaded first.
   Do not call directly, it does not manage eclipse model cleanup."
   [user-plugins]
-  (loop [user-plugins (next user-plugins), seen-plugins-names #{}, seen-plugins #{}, skipped-plugins []]
+  (loop [user-plugins (seq user-plugins), seen-plugins-names #{}, seen-plugins #{}, skipped-plugins []]
     (if-not user-plugins
       skipped-plugins
       (let [p (first user-plugins)
