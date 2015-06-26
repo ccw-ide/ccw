@@ -453,6 +453,17 @@ User Plugins are...
 - *Powerful*: user plugins are added to Counterclockwise's classpath and can access the same Eclipse services Counterclockwise has access to.
 - *Agile*: updating a user plugin is as simple as 1. git checkout 2. Alt+U S (re[S]tart plugins)
 
+=== Counterclockwise provided User Plugins
+
+Counterclockwise ships with some User Plugins included:
+
+- Hello World - https://github.com/ccw-ide/ccw-plugin-hello-world. Try kbd:[Alt+U H], you should see a welcome popup in the pure Hello World style.
+- Zoom - https://github.com/ccw-ide/ccw-plugin-zoom. Try kbd:[Cmd+ +] or kbd:[Cmd+ -], you should see the fonts sizes change accordingly.
+- User Plugins Manager - https://github.com/ccw-ide/ccw-plugin-manager. Try kbd:[Alt+U], you should see several commands listed to restart user plugins, import them in the workspace, and even create a new user plugin from scratch.
+
+In case you have already checked out a User Plugin in you `~/.ccw/` folder, yours will always take precedence over the one embeded in Counterclockwise (as long as you've kept the same directory name).
+
+
 === How User Plugins work
 
 User Plugins must be placed in `.clj` files inside your `~/.ccw/` folder.

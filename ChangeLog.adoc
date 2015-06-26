@@ -69,8 +69,17 @@ The REPL is now a Clojurescript REPL. You now get code completion and documentat
 - Eclipse Extension point for third party plugins to contribute new kinds of hovers (see the `ccw.core.cljEditorTextHovers` extension point and the `ITextHover` interface)
 
 === User Plugins
+
+Counterclockwise now ships with some User Plugins out of the box. In this release, the following User Plugins are included:
+- Hello World - https://github.com/ccw-ide/ccw-plugin-hello-world
+- Zoom - https://github.com/ccw-ide/ccw-plugin-zoom
+- User Plugins Manager - https://github.com/ccw-ide/ccw-plugin-manager
+
+In case you have already checked out a User Plugin in you `~/.ccw/` folder, yours will always take precedence over the one embeded in Counterclockwise (as long as you've kept the same directory name).
+
 - Faster Eclipse Startup: with lots of user plugins installed, CCW used to freeze while the user plugins where launched. They are now launched in the background.
 - The keybinding cleaning function did concurrent modifications of an Eclipse Internal collection. Fix laurentpetit/ccw-plugin-manager#1
+- The keybinding cleaning function had a bug which made keybindings seem to erratically work. It has been fixed
 
 === Documentation
 - Add a mention about keyboard binding for switching between default and strict editing modes ( kbd:[Alt+D] ). Fixes #346
