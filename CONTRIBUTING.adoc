@@ -49,7 +49,9 @@ You can see the Github Flow page for a visual version of the workflow: https://g
 
 === Install & Configure
 
-- Clone CCW Repository 
+WARNING: The Git repository contains submodules in `ccw.core/ccw-plugins/`. you must clone with the `--recursive` option
+
+- Clone CCW Repository `with the --recursive option` (this is a submodule option, see references below for more on submodules)
 ** https://github.com/laurentpetit/ccw
 - In Eclipse, import the repository projects (`ccw.aggregator`, `ccw.branding`, `ccw.core`, `ccw.core.test`, `ccw.feature`, `ccw.parent`, `ccw.product`, `doc`, `paredit.clj`)
 - cd into `ccw.core` and invoke `mvn clean verify`
@@ -145,10 +147,24 @@ ccw$ script/set-version.sh 0.20.0-SNAPSHOT
     git commit -a -m"chore(mvn): Upgrade version to 3.4.10-SNAPSHOT"
 ----
 
+== How To ...
+
+=== Add a new user plugin as a submodule
+
+- First clone the plugin as a submodule in the right directory
+----
+    cd ccw.core/ccw-plugins/
+    git submodule add https://github.com/ccw-ide/ccw-plugin-xxx.git
+----
+- Then open `ccw.core/plugin.xml`
+** In the `Runtime` Tab, add `ccw-plugins/ccw-plugin-xxx` to the classpath
+** In the `Build` Tab, in the `Binary Build` group, ensure that `ccw-plugins/ccw-plugin-xxx` is checked (everything inside `ccw-plugins` should be checked)
+
 == References
 
 - http://software.2206966.n2.nabble.com/Good-solution-for-non-osgi-jars-td5098103.html : original idea for using maven-dependency-plugin to copy deps into `lib/`
 - https://github.com/reficio/p2-maven-plugin : easy to grok tutorial for beginning with maven tycho
 - https://maven.apache.org/plugins/maven-dependency-plugin/copy-mojo.html : maven `dependency:copy` reference
 - https://maven.apache.org/plugins/maven-dependency-plugin/unpack-dependencies-mojo.html : maven `dependency:unpack-dependencies` reference
+- Working with Git Submodules: https://git-scm.com/book/en/v2/Git-Tools-Submodules
 
