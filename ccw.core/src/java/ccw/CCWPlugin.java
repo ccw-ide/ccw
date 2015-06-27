@@ -560,9 +560,20 @@ public class CCWPlugin extends AbstractUIPlugin {
 	}
 	
 	public static @NonNull RGB getPreferenceRGB(IPreferenceStore store, String preferenceKey) {
-	    return store.getBoolean(PreferenceConstants.getEnabledPreferenceKey(preferenceKey))
-                ? PreferenceConverter.getColor(store, preferenceKey)
-                : PreferenceConverter.getDefaultColor(store, preferenceKey);
+		String enabledKey = PreferenceConstants.getEnabledPreferenceKey(preferenceKey);
+		if (store.contains(enabledKey)) {
+		    return store.getBoolean(PreferenceConstants.getEnabledPreferenceKey(preferenceKey))
+	                ? PreferenceConverter.getColor(store, preferenceKey)
+	                : PreferenceConverter.getDefaultColor(store, preferenceKey);
+		} else if (store.contains(preferenceKey)) {
+			if (store.isDefault(preferenceKey)) {
+				return PreferenceConverter.getDefaultColor(store, preferenceKey);
+			} else {
+				return PreferenceConverter.getColor(store, preferenceKey);
+			}
+		} else {
+			throw new RuntimeException("No color preference for key " + preferenceKey);
+		}
 	}
 	
 	private static void ensureColorInCache(ColorRegistry registry, String id, RGB rgb) {
