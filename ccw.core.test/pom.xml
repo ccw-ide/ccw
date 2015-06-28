@@ -58,7 +58,7 @@
         <artifactId>tycho-surefire-plugin</artifactId>
         <version>${tycho-version}</version>
         <configuration>
-          <forkedProcessTimeoutInSeconds>240</forkedProcessTimeoutInSeconds>
+          <forkedProcessTimeoutInSeconds>480</forkedProcessTimeoutInSeconds>
           <redirectTestOutputToFile>true</redirectTestOutputToFile>
           <useUIHarness>true</useUIHarness>
           <useUIThread>false</useUIThread>
