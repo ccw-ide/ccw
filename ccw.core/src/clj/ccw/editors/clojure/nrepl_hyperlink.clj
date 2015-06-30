@@ -2,7 +2,8 @@
   (:require [ccw.string :as s]
             [ccw.eclipse :as e])
   (:use [clojure.test])
-  (:import [org.eclipse.ui.console PatternMatchEvent TextConsole]))
+  (:import [org.eclipse.ui.console PatternMatchEvent TextConsole]
+           [ccw CCWPlugin]))
 
 ;; TODO share it with editor hyperlink
 (def ^:private pattern #"nrepl://([^':',' ']+):(\d+)")
@@ -10,6 +11,8 @@
 (defn deliver-url
   "Deliver the port to every waiter behind the repl-port-promise (if any)."
   [name port]
+  (CCWPlugin/log (str "reading in launchNameREPLURLPromiseAndWithREPLView the key: " name
+                   " for getting the promise to set the port to " port))
   (if-let [repl-url-promise (some-> 
                               (ccw.launching.ClojureLaunchShortcut/launchNameREPLURLPromiseAndWithREPLView)
                               (.get name)
@@ -56,6 +59,7 @@
         (.remove 
           (ccw.launching.ClojureLaunchShortcut/launchNameREPLURLPromiseAndWithREPLView) 
           (console-name (:console @state)))
+        (CCWPlugin/log (str "removed from launchNameREPLURLPromiseAndWithREPLView the key " (console-name (:console @state))))
         (reset! state nil))
       (matchFound [this event] 
         (swap! state (partial match-found event))

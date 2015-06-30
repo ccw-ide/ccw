@@ -87,12 +87,13 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
             protected org.eclipse.core.runtime.IStatus run(final IProgressMonitor monitor) {
 	            final String launchName = launch.getLaunchConfiguration().getName();
 				final Pair<Object,IWithREPLView> o = ClojureLaunchShortcut.launchNameREPLURLPromiseAndWithREPLView.get(launchName);
-				final Object replURLPromise = o.e1;
-	            
-	            if (replURLPromise==null) {
-	            	CCWPlugin.log("No REPL required for launch " + launchName);
+            	CCWPlugin.log("reading in launchNameREPLURLPromiseAndWithREPLView the key: " + launchName);
+
+	            if (o==null || o.e1==null) {
+	            	CCWPlugin.log("No REPL required for launch " + launchName + "o = " + o);
 	            	return Status.OK_STATUS;
 	            } else {
+	            	final Object replURLPromise = o.e1;
 	            	try {
 	            		final Object cancelObject = new Object();
 	            		

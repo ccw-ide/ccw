@@ -234,6 +234,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
             if (config != null) {
             	final String name = config.getName() + " #" + incTempLaunchCount(project.getName());
             	launchNameREPLURLPromiseAndWithREPLView.put(name, new Pair<Object,IWithREPLView>(promise(), runOnceREPLAvailable));
+            	CCWPlugin.log("putting in launchNameREPLURLPromiseAndWithREPLView the key: " + name);
 				ILaunchConfigurationWorkingCopy runnableConfiguration =
             	    config.copy(name);
             	try {
