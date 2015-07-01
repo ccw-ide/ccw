@@ -402,6 +402,27 @@ Works from any editor or from the REPL, as long as there is an already open REPL
 |kbd:[Cmd + Enter]
 |===
 
+==== Macro Expand macro call
+Works from any editor or from the REPL, as long as there is an already open REPL.
+
+`macroexpand-1`-like:
+
+[cols="1,1", options="header"]
+|===
+|Win/Linux/OS X
+
+|kbd:[Ctrl + hover over selection]
+|===
+
+`macroexpand-all`-like:
+
+[cols="1,1", options="header"]
+|===
+|Win/Linux/OS X
+
+|kbd:[Ctrl+Shift + hover over selection]
+|===
+
 ==== Load editor content in active REPL
 Loads the editors' content into the active REPL, starting a REPL if no active REPL found.
 

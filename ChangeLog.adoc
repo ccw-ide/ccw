@@ -64,7 +64,7 @@ The REPL is now a Clojurescript REPL. You now get code completion and documentat
 - A new Preference has been added to menu:Preferences[Clojure > REPL View] for disabling the use of pprint
 
 === Editor Hover Framework
-- Two hovers added: "Macro expansion" (using `macroexpand`) and "Recursive macro expansion" (using `macroexpand-all`), both leveraging `cider-nrepl` wrappers if found.
+- Two hovers added: "Macro expansion" (using `macroexpand`, kbd:[Ctrl]) and "Recursive macro expansion" (using `macroexpand-all`, kbd:[Ctrl+Shift]), both leveraging `cider-nrepl` wrappers if found.
 - New preference page for CCW hovers under menu:Preferences[Clojure > Editor > Hovers]. Keyboard modifiers can now be set for each hover.
 - Eclipse Extension point for third party plugins to contribute new kinds of hovers (see the `ccw.core.cljEditorTextHovers` extension point and the `ITextHover` interface)
 

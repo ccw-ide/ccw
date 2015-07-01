@@ -350,6 +350,14 @@ You would then activate Code Completion suggestions by typing kbd:[Ctrl + Space]
 ====
 
 // TODO: see in what respect the following section still holds. Should we remove the section from the doc? Plan to re-add the feature in a future release?
+
+
+==== Macro Expansion
+
+You can both get `macroexpand-1` (kbd:[Ctrl + hover over selection]) like and `macroexpand-all` (kbd:[Ctrl+Shift + hover over selection]) like behaviours (but much prettier), via Hovers, by selecting the macro-call and typing 
+
+NOTE: This works only if you have an active REPL connection where macroexpansion will be evaluated
+
 ==== Errors reporting
 
 _to be confirmed_
