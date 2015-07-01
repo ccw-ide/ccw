@@ -502,22 +502,20 @@ Counterclockwise offers a number of User Plugins available as Github projects. E
 .~/.ccw/hello_world.clj
 [source,clojure]
 ----
-(ns hello-world
-  (:require [ccw.e4.dsl  :refer :all]
-            [ccw.eclipse :as e]))
+(ns ccw-plugin.hello-world
+  (:require [ccw.eclipse :as e]
+            [ccw.e4.dsl :refer :all]))
 
-(def msg  
-  "This popup provided to you from a user script")
-
-(defn greet [context]                                ; <1>
-  (e/info-dialog "Hello world" msg))
-
-(defcommand greeter "Hello from CCW")                ; <2>
-(defhandler greeter greet)
-(defkeybinding greeter "Ctrl+Alt+Y")
+(defcommand greeter "Hello World from Counterclockwise" "Alt+U H"                          ; <1>
+  [context]                                                                                ; <2>
+  (e/info-dialog                                                                           ; <3>
+    "Hello world from Counterclockwise" "This popup provided to you from a user script!"))
 ----
-<1> `greet` is the function that implements the command behavior, it takes a `context` argument which in real-world situations can be used to gather contextualized information concerning the execution (what's the current editor/view, the current selection, gather a preference value by key, etc.)
-<2> `defcommand`, `defhandler` and `defkeybinding` are macros from namespace `ccw.e4.dsl`. They dynamically contribute to the Eclipse Application Model. Those contributions are tagged specifically so that it is easy to manage them from CCW (automatic removal, for instance, should you remove the plugin, or update the command name, etc.)
+<1> Give the command a name, a description, and a keybinding
+<2> A command implementation takes a `context` argument which in real-world situations can be used to gather contextualized information concerning the execution (what's the current editor/view, the current selection, gather a preference value by key, etc.)
+<3> Body of the command implementation. Can do whatever you want.
+
+NOTE: `defcommand` is a macro from namespace `ccw.e4.dsl`. It dynamically contribute to the Eclipse Application Model. Those contributions are tagged specifically so that it is easy to manage them from CCW (automatic removal, for instance, should you remove the plugin, or update the command name, etc.)
 
 NOTE: The script is placed directly inside `~/.ccw/` to demonstrate how easy it is to start contributing. In real world situations you will probably create one folder per plugin.
 
@@ -526,21 +524,19 @@ NOTE: The script is placed directly inside `~/.ccw/` to demonstrate how easy it 
 Here the Hello World user plugin is placed in its own subdirectory. +
 This also demonstrates how to split a plugin into script + companion namespaces.
 
-.~/.ccw/hello-world/hello_world.clj
+.~/.ccw/ccw-ide/ccw-plugin-hello-world/hello-world.clj
 [source,clojure]
 ----
-(ns hello-world
+(ns ccw-plugin.hello-world
   (:require [ccw.e4.dsl :refer :all]
             [user.greet :as g]))
 
-(defn greet [context] (g/greet-popup))
-
-(defcommand greeter "Hello from CCW")
-(defhandler greeter greet)
-(defkeybinding greeter "Ctrl+Alt+Y")
+(defcommand greeter "Hello World from Counterclockwise" "Alt+U H"
+  [context]
+  (g/greet-popup))
 ----
 
-.~/.ccw/hello-world/user/greet.clj
+.~/.ccw/ccw-ide/ccw-plugin-hello-world/user/greet.clj
 [source,clojure]
 ----
 (ns user.greet
@@ -551,7 +547,7 @@ This also demonstrates how to split a plugin into script + companion namespaces.
   (e/info-dialog "Hello world" (text)))
 ----
 
-.~/.ccw/hello-world/user/util.clj
+.~/.ccw/ccw-ide/ccw-plugin-hello-world/user/util.clj
 [source,clojure]
 ----
 (ns user.util)
@@ -559,7 +555,7 @@ This also demonstrates how to split a plugin into script + companion namespaces.
 (defn text [] "This popup provided to you from a user script")
 ----
 
-WARNING: the `hello-world` subdirectory will only be recognized as a plugin if there is no `.clj` file inside `~/.ccw/`
+WARNING: the `ccw-plugin-hello-world` subdirectory will only be recognized as a plugin if there is no `.clj` file inside `~/.ccw/` and `~/.ccw/ccw-ide/`
 
 
 == Report a problem with Counterclockwise
