@@ -499,8 +499,7 @@ INFO: a User Plugin is dynamic. To remove it, just delete its folder inside `~/.
 
 Counterclockwise offers a number of User Plugins available as Github projects. Each one comes with a README file explaining its intent, status, installation and usage.
 
-- `ccw-plugin-manager`: mandatory user plugin if you want to develop your own user plugins (and not just consume existing user plugins). https://github.com/laurentpetit/ccw-plugin-manager.git
-- `ccw-plugin-hello-world`: if you want to learn how to write User Plugins, start studying this one. https://github.com/laurentpetit/ccw-plugin-hello-world.git
+The User Plugins are repositories whose names start with `ccw-plugin-`. They are available on the `ccw-ide` github organization: `https:/github.com/ccw-ide/`.
 
 
 === HISP - Hello (world) In Small Pieces
