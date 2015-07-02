@@ -233,8 +233,6 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
         		
             if (config != null) {
             	final String name = config.getName() + " #" + incTempLaunchCount(project.getName());
-            	launchNameREPLURLPromiseAndWithREPLView.put(name, new Pair<Object,IWithREPLView>(promise(), runOnceREPLAvailable));
-            	CCWPlugin.log("putting in launchNameREPLURLPromiseAndWithREPLView the key: " + name);
 				ILaunchConfigurationWorkingCopy runnableConfiguration =
             	    config.copy(name);
             	try {
@@ -253,11 +251,6 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
         }
     }
     
-    private Object promise() {
-    	IFn promise = clojure.java.api.Clojure.var("clojure.core", "promise");
-    	return promise.invoke();
-    }
-
     private ILaunchConfiguration createLeiningenLaunchConfiguration(IProject project, boolean createInDebugMode) {
     	
     	String injectCCWServer = " update-in :dependencies conj \"[ccw/ccw.server \\\"0.1.1\\\"]\" "

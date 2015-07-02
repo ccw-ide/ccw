@@ -215,6 +215,11 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
     	
     	Boolean activateAutoReload = CCWPlugin.isAutoReloadOnStartupSaveEnabled();
         launch.setAttribute(LaunchUtils.ATTR_IS_AUTO_RELOAD_ENABLED, Boolean.toString(activateAutoReload));
+
+    	final String name = configuration.getName();
+    	ClojureLaunchShortcut.launchNameREPLURLPromiseAndWithREPLView.put(name, new Pair<Object,IWithREPLView>(promise(), null));
+    	CCWPlugin.log("putting in launchNameREPLURLPromiseAndWithREPLView the key: " + name);
+        
         
         BundleUtils.requireAndGetVar(CCWPlugin.getDefault().getBundle().getSymbolicName(), "clojure.tools.nrepl.ack/reset-ack-port!").invoke();
         try {
@@ -428,4 +433,10 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
         	return ccwPluginDir;
         }
     }
+
+    private Object promise() {
+    	IFn promise = clojure.java.api.Clojure.var("clojure.core", "promise");
+    	return promise.invoke();
+    }
+
 }
