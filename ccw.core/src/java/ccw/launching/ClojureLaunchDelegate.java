@@ -90,7 +90,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
             	CCWPlugin.log("reading in launchNameREPLURLPromiseAndWithREPLView the key: " + launchName);
 
 	            if (o==null || o.e1==null) {
-	            	CCWPlugin.log("No REPL required for launch " + launchName + "o = " + o);
+	            	CCWPlugin.log("No REPL required for launch " + launchName + " o = " + o);
 	            	return Status.OK_STATUS;
 	            } else {
 	            	final Object replURLPromise = o.e1;
