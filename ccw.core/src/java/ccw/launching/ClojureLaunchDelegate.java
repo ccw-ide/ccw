@@ -228,7 +228,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
             super.launch(configuration, mode, launch, monitor);
             
             for(IProcess p: launch.getProcesses()) {
-            	System.out.println("Launched process with command line: " + p.getAttribute(IProcess.ATTR_CMDLINE));
+            	CCWPlugin.log("Launched process with command line: " + p.getAttribute(IProcess.ATTR_CMDLINE));
             }
             if (isLaunchREPL(configuration)) {
 				new REPLURLOpener(launch, true).done();
@@ -252,14 +252,34 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 		String superProgramArguments = super.getProgramArguments(configuration);
 		if (isLeiningenConfiguration(configuration)) {
 			List<IFile> filesToLaunch = LaunchUtils.getFilesToLaunchList(configuration);
+
+	    	String injectCCWServer = " update-in :dependencies conj \"[ccw/ccw.server \\\"0.1.1\\\"]\" "
+		             + "-- update-in :injections conj \"(require 'ccw.debug.serverrepl)\" ";
+	    	String injectCiderNrepl = " update-in :plugins conj \"[cider/cider-nrepl \\\"0.9.0\\\"]\" "
+       					// we force nrepl 0.2.10 because cider 0.9.0 requires 0.2.7 at least but leiningen forces 0.2.6
+						// the cider-nrepl plugin will automatically register the cider-nrepl handler with leiningen
+                     + "-- update-in :dependencies conj \"[org.clojure/tools.nrepl \\\"0.2.10\\\"]\" ";
+
+	    	// Addind systematically ccw/ccw.server since e.g. NamespaceBrowser uses it currently
+	    	String command = injectCCWServer;
+	    	
+	    	// Conditionally adding ider/cider-nrepl for enabling ccw custom code completion, etc.
+	    	if (isUseCiderNrepl()) {
+	    		command += " -- " + injectCiderNrepl;
+	    	}
+	    	
+			int headlessReplOffset = superProgramArguments.indexOf("repl :headless");
+			command = superProgramArguments.substring(0, headlessReplOffset) +
+					command + " -- " + superProgramArguments.substring(headlessReplOffset);
+			
 			if (filesToLaunch.size() > 0) {
-				int headlessReplOffset = superProgramArguments.indexOf("repl :headless");
-				String arguments = superProgramArguments.substring(0, headlessReplOffset) +
+				headlessReplOffset = command.indexOf("repl :headless");
+				String arguments = command.substring(0, headlessReplOffset) +
 						" " + createFileLoadInjections(filesToLaunch) +
-						" -- " + superProgramArguments.substring(headlessReplOffset);
+						" -- " + command.substring(headlessReplOffset);
 				return arguments;
 			} else {
-				return superProgramArguments;
+				return command;
 			}
 		}
 		
@@ -392,7 +412,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
                 throw new WorkbenchException("Failed to find nrepl library", e);
             }
         } else {
-        	System.out.println("Found package clojure.tools.nrepl in the project classpath, won't try to add ccw's nrepl to it then");
+        	CCWPlugin.log("Found package clojure.tools.nrepl in the project classpath, won't try to add ccw's nrepl to it then");
         }
         
         if (isUseCiderNrepl()) {
@@ -417,7 +437,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 	                throw new WorkbenchException("Failed to find cider-nrepl library", e);
 	            }
 	        } else {
-	        	System.out.println("Found package cider/nrepl/middleware in the project classpath, won't try to add ccw's cider-nrepl to it then");
+	        	CCWPlugin.log("Found package cider/nrepl/middleware in the project classpath, won't try to add ccw's cider-nrepl to it then");
 	        }
     	}
 

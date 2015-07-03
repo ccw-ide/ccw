@@ -253,22 +253,12 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     
     private ILaunchConfiguration createLeiningenLaunchConfiguration(IProject project, boolean createInDebugMode) {
     	
-    	String injectCCWServer = " update-in :dependencies conj \"[ccw/ccw.server \\\"0.1.1\\\"]\" "
-    			             + "-- update-in :injections conj \"(require 'ccw.debug.serverrepl)\" ";
-    	String injectCiderNrepl = " update-in :plugins conj \"[cider/cider-nrepl \\\"0.9.0\\\"]\" "
-                					// we force nrepl 0.2.10 because cider 0.9.0 requires 0.2.7 at least but leiningen forces 0.2.6
-    								// the cider-nrepl plugin will automatically register the cider-nrepl handler with leiningen
-	                          + "-- update-in :dependencies conj \"[org.clojure/tools.nrepl \\\"0.2.10\\\"]\" ";
-    	
-    	// Adding ccw/ccw.server or cider/cider-nrepl for enabling ccw custom code completion, etc.
-    	String command = ( isUseCiderNrepl() ? injectCiderNrepl : injectCCWServer )
-    			// Starting repl :headless ; removing :main attribute because
-    			// it is causing problems: "leiningen repl :headless" defaults
-    			// to automatically requiring the namespace symbol found in the
-    			// [:main] project.clj key if there's no namespace symbol defined in the
-    			// the [:repl-options :init-ns] project.clj key.
-    			+ "-- update-in : dissoc :main " // here ':' refers to project.clj's root
-    			+ "-- repl :headless ";
+    	// Starting repl :headless ; removing :main attribute because
+	    // it is causing problems: "leiningen repl :headless" defaults
+	    // to automatically requiring the namespace symbol found in the
+	    // [:main] project.clj key if there's no namespace symbol defined in the
+	    // the [:repl-options :init-ns] project.clj key.
+    	String command = " update-in : dissoc :main -- repl :headless"; // here ':' refers to project.clj's root
     	
         if (createInDebugMode) {
         	command = " update-in :jvm-opts concat \"[\\\"-Xdebug\\\" \\\"-Xrunjdwp:transport=dt_socket,server=y,suspend=n\\\"]\" -- "
@@ -278,7 +268,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     	clojure.lang.IPersistentMap configMap = 
 				(clojure.lang.IPersistentMap) 
 				leiningenConfiguration._("lein-launch-configuration",
-			    project,	
+			    project,
 			    command);
 		configMap = configMap.assoc(Keyword.intern("type-id"), Keyword.intern("ccw"));
 		configMap = configMap.assoc(Keyword.intern("name"), project.getName() + " Leiningen VM");
