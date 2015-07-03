@@ -99,6 +99,7 @@ In case you have already checked out a User Plugin in you `~/.ccw/` folder, your
 === Miscellaneous Enhancements
 - Print maven coordinates of Counterclockwise dependencies at plugin startup in `.metadata/.log`. Fixes #741
 - Launching REPLs from launch configurations now correctly opens up a `REPL View` if the process outputs an nrepl URL in the stdout Console
+- Namespace Browser now opens external files correctly when double clicking on a var label (e.g. will open internal Eclipse files, user plugin files, etc.)
 
 === Counterclockwise embedded nREPL
 Counterclockwise ships with an embedded nREPL server. The following enhancements have been applied:

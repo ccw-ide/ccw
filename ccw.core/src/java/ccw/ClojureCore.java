@@ -25,6 +25,8 @@ package ccw;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.jar.JarFile;
@@ -42,7 +44,9 @@ import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.debug.core.sourcelookup.containers.LocalFileStorage;
 import org.eclipse.debug.core.sourcelookup.containers.ZipEntryStorage;
@@ -228,8 +232,41 @@ public final class ClojureCore {
 		try {
 		    REPLView replView = REPLView.activeREPL.get();
 		    if (replView != null) {
-    			String projectName = replView.getLaunch().getLaunchConfiguration().getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, (String) null);
-    	    	openInEditor(searchedNS, searchedFileName, line, projectName, false);
+		    	String projectName;
+		    	if (replView.getLaunch() != null) {
+		    		// the repl view is consecutive to a launch
+		    		projectName = replView.getLaunch().getLaunchConfiguration().getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, (String) null);
+		    		openInEditor(searchedNS, searchedFileName, line, projectName, false);
+		    	} else {
+		    		// the repl view is not associated to a launch
+		    		
+		    		// is direct filesystem path?
+		    		File f = new File(searchedFileName);
+		    		if (f.exists()) {
+		    			try {
+							f = f.getCanonicalFile(); // displaying canonical file to user is easier to read!
+							IFileStore store = EFS.getLocalFileSystem().getStore(f.toURI());
+							openExternalFileInEditor(searchedNS, searchedFileName, line, store);
+						} catch (IOException e) {
+							CCWPlugin.logError("unable to open file " + f.getAbsolutePath(), e);
+						}
+		    			return;
+		    		}
+		    		
+		    		// Find in ccw.core classpath
+		    		URL resource = CCWPlugin.getDefault().getBundle().getResource(searchedFileName);
+		    			
+		    		if (resource != null) {
+		    			try {
+		    				URL fileURL = FileLocator.toFileURL(resource);
+							IFileStore store = EFS.getLocalFileSystem().getStore(new Path(fileURL.getPath()));
+							openExternalFileInEditor(searchedNS, searchedFileName, line, store);
+						} catch (IOException e) { 
+							CCWPlugin.logError("error while tryping to open editor for file " + resource, e);
+						}
+		    		}
+		    	}
+		    
 		    }
 		} catch (CoreException e) {
 			CCWPlugin.logError("error while trying to obtain project's name from configuration, while trying to show source file of a symbol", e);
@@ -382,11 +419,11 @@ public final class ClojureCore {
 		final IJavaProject javaProject = JavaCore.create(project);
 
 		try {
-			System.out.println("search file name : " + searchedFileName);
-			System.out.println("searched ns : " + searchedNS);
+			CCWPlugin.log("search file name : " + searchedFileName);
+			CCWPlugin.log("searched ns : " + searchedNS);
 
 			final String searchedPackage = namespaceToPackage(searchedNS);
-			System.out.println("searched package: " + searchedPackage);
+			CCWPlugin.log("searched package: " + searchedPackage);
 
 			for (IPackageFragmentRoot packageFragmentRoot: javaProject.getAllPackageFragmentRoots()) {
 
@@ -409,6 +446,18 @@ public final class ClojureCore {
 		return false;
 	}
 
+	private static boolean openExternalFileInEditor(final String searchedNS, final String initialSearchedFileName, final int line,
+			IFileStore store) throws PartInitException {
+
+		if (initialSearchedFileName == null) {
+			return false;
+		}
+		CCWPlugin.log("searched ns : " + searchedNS);
+		IEditorPart editor = IDE.openInternalEditorOnFileStore(CCWPlugin.getActivePage(), store);
+		gotoEditorLine(editor, line);
+		return false;
+	}
+    
 	private static String namespaceToPackage(final String searchedNS) {
 		String packagePart = (searchedNS.contains(".")) ? searchedNS.substring(0, searchedNS.lastIndexOf(".")) : "";
 
