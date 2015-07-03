@@ -114,6 +114,11 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     	launch(selection, mode, false);
     }
     
+    /**
+     * @param selection
+     * @param mode
+     * @param forceLeinLaunchWhenPossible Used to force usage of Leiningen when possible, e.g. via lein launcher
+     */
     public void launch(ISelection selection, final String mode, final boolean forceLeinLaunchWhenPossible) {
         if (selection instanceof IStructuredSelection) {
             IStructuredSelection strSel = (IStructuredSelection) selection;
