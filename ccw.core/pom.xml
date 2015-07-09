@@ -142,7 +142,7 @@
         <dependency>
             <groupId>cider</groupId>
             <artifactId>cider-nrepl</artifactId>
-            <version>0.9.0</version>
+            <version>0.9.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.clojure</groupId>
