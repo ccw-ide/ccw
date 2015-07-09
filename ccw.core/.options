@@ -74,6 +74,9 @@ ccw.core/eclipse=false
 # Clojure Editor related traces
 ccw.core/editor=false
 
+# Clojure Editor, partitioner (within scanners package) traces
+ccw.core/editor/scanners/partitioners=false
+
 # Eclipse project management related traces
 ccw.core/project=false
 
