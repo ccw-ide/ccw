@@ -31,10 +31,18 @@
  (defn available? [bundle]
   (and bundle (start-states (.getState bundle))))
 
- (defn bundle 
+ (defn bundle
    "Return the bundle object associated with the bundle-symbolic-name (a String)"
    [bundle-symbolic-name]
    (Platform/getBundle bundle-symbolic-name))
+ 
+ (defn bundle-version
+   "Return the Version object for the bundle"
+   [bundle]
+   (.getVersion bundle))
+ 
+ (defn string->version "Create a version from a String"
+   [s] (Version. s))
  
  (defn version 
    "Create a version object from a map with keys
@@ -62,7 +70,17 @@
    "Return truethiness if version1 is > than version2"
    [v1 v2]
    (pos? (compareTo v1 v2)))
- 
+
+(defn expect-bundle
+  "Expect that bundle represented by `bundle-symbolic-name` exists and its version is at minimum equal to `bundle-version-string`"
+  [bundle-symbolic-name bundle-version-string]
+  (let [expected-version (string->version bundle-version-string)
+        actual-version   (.getVersion (bundle bundle-symbolic-name))]
+    (when (< actual-version expected-version)
+      (throw (ex-info (format "user plugin %s can only work with a Counterclockwise version at least equal to %s (%s found)."
+                        *ns* expected-version actual-version) {})))))
+
+
  (defn load-and-get-bundle [bundle-symbolic-name]
    ;; TODO: not good??, maybe we will not catch the right bundle (the same the OSGi framework would use ...)
    (try 
