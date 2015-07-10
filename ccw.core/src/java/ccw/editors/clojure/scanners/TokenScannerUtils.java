@@ -7,7 +7,8 @@
  *
  * Contributors: 
  *    Laurent PETIT - initial API and implementation
- *    Andrea RICHIARDI - added readToken for ClojureCharRule
+ *    Andrea RICHIARDI - removed state and pasted useful keywords
+ *                       added readToken for ClojureCharRule
  *******************************************************************************/
 package ccw.editors.clojure.scanners;
 
@@ -21,8 +22,27 @@ import org.eclipse.swt.graphics.RGB;
 import ccw.CCWPlugin;
 import clojure.lang.Keyword;
 
-
+/**
+ * Common utils for scanning tokens using Paredit's parse tree
+ */
 public class TokenScannerUtils {
+    
+    public static Keyword symbolKeyword = Keyword.intern("symbol");
+    public static Keyword tokenTypeKeyword = Keyword.intern("token-type");
+    public static Keyword tokenLengthKeyword = Keyword.intern("token-length");
+    public static Keyword nestKeyword = Keyword.intern("nest");
+    public static Keyword unnestKeyword = Keyword.intern("unnest");
+    public static Keyword openListKeyword = Keyword.intern("open-list");
+    public static Keyword openFnKeyword = Keyword.intern("open-fn");
+    public static Keyword openChimeraKeyword = Keyword.intern("open-chimera");
+    public static Keyword closeListKeyword = Keyword.intern("close-list");
+    public static Keyword closeFnKeyword = Keyword.intern("close-fn");
+    public static Keyword closeChimeraKeyword = Keyword.intern("close-chimera");
+    public static Keyword metaKeyword = Keyword.intern("meta");
+    public static Keyword readerLiteralTagKeyword = Keyword.intern("reader-literal");
+    public static Keyword whitespaceKeyword = Keyword.intern("whitespace");
+
+	private TokenScannerUtils() {}
 
 	/**
      * Creates the data to feed an IToken.
