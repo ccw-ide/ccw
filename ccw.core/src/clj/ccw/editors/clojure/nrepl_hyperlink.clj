@@ -1,6 +1,6 @@
 (ns ccw.editors.clojure.nrepl-hyperlink
   (:require [ccw.string :as s]
-            [ccw.eclipse :as e])
+            [ccw.swt :as swt])
   (:use [clojure.test])
   (:import [org.eclipse.ui.console PatternMatchEvent TextConsole]
            [ccw CCWPlugin]))
@@ -13,7 +13,7 @@
   [name port]
   (CCWPlugin/log (str "reading in launchNameREPLURLPromiseAndWithREPLView the key: " name
                    " for getting the promise to set the port to " port))
-  (if-let [repl-url-promise (some-> 
+  (if-let [repl-url-promise (some->
                               (ccw.launching.ClojureLaunchShortcut/launchNameREPLURLPromiseAndWithREPLView)
                               (.get name)
                               .e1)]
@@ -41,7 +41,7 @@
                     (linkEntered [this]))]
     (.addHyperlink console hyperlink offset length)
     (when-not (nrepl-urls url)
-      (e/ui*
+      (swt/ui
         ; We wait a little bit for the console to finish printing
         ; (and thus not steal focus from other widgets)
         (Thread/sleep 100)

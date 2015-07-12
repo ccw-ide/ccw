@@ -29,9 +29,11 @@
             [ccw.jdt :as jdt]
             [ccw.events :as evt]
             [ccw.eclipse :as e]
-            [ccw.core.trace :as t])
-  (:import [ccw.editors.clojure IClojureEditor]
-           [org.eclipse.ui.texteditor SourceViewerDecorationSupport]))
+            [ccw.core.trace :as t]
+            [ccw.swt :as swt])
+  (:import ccw.editors.clojure.IClojureEditor
+           org.eclipse.ui.texteditor.SourceViewerDecorationSupport
+           ccw.util.DisplayUtil))
 
 #_(set! *warn-on-reflection* true)
 
@@ -140,4 +142,4 @@
   "The function wraps IClojureAwarePart.setStatusLineErrorMessage in an async ui-only call.
   Remember that passing nil as message resets the status line."
   [^IClojureEditor part message]
-  (e/ui (.setStatusLineErrorMessage part message)))
+  (DisplayUtil/asyncExec #(.setStatusLineErrorMessage part message)))

@@ -50,6 +50,7 @@ import ccw.CCWPlugin;
 import ccw.ClojureCore;
 import ccw.editors.clojure.ClojureEditor;
 import ccw.util.ClojureInvoker;
+import ccw.util.DisplayUtil;
 import clojure.lang.IMapEntry;
 import clojure.lang.Keyword;
 import clojure.lang.Obj;
@@ -359,27 +360,23 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 	    }
 	    final List<List> theForms = forms;
 
-	    if (getControl() != null && !getControl().isDisposed()) {
-    		getControl().getDisplay().asyncExec(new Runnable() {
-    			@Override
-				public void run() {
-    				if (getControl().isDisposed())
-    					return;
-
-    				TreeViewer treeViewer = getTreeViewer();
-    				if (treeViewer != null) {
-    					treeViewer.getTree().setRedraw(false);
-    					treeViewer.setInput(theForms);
-    					ISelection treeSelection = treeViewer.getSelection();
-    					if (treeSelection == null || treeSelection.isEmpty()) {
-    						selectInOutline(lastSelection);
-    					}
-    					treeViewer.getTree().setRedraw(true);
-    				}
-    			}
-    		});
-	    }
-	}
+        DisplayUtil.asyncExec(new Runnable() {
+            @Override
+            public void run() {
+                TreeViewer treeViewer = getTreeViewer();
+                if (treeViewer != null) {
+                    treeViewer.getTree().setRedraw(false);
+                    treeViewer.setInput(theForms);
+                    ISelection treeSelection = treeViewer.getSelection();
+                    if (treeSelection == null || treeSelection.isEmpty()) {
+                        selectInOutline(lastSelection);
+                    }
+                    treeViewer.getTree().setRedraw(true);
+                }
+                
+            }
+        });
+    }
 
 	private void selectInEditor(ISelection selection) {
 		IStructuredSelection sel = (IStructuredSelection) selection;
