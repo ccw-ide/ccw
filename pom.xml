@@ -67,8 +67,8 @@
                         <layout>p2</layout>
                 </repository-->
                 <repository>
-                        <id>mars-M3</id>
-                        <url>http://download.eclipse.org/eclipse/updates/4.5milestones/S-4.5M3-201410292000/</url>
+                        <id>mars</id>
+                        <url>http://download.eclipse.org/releases/mars</url>
                         <layout>p2</layout>
                 </repository>
                 <!--repository>
