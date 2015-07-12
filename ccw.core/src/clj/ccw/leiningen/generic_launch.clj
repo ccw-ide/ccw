@@ -26,16 +26,16 @@
         args (str/trim args)]
     (launch/lein project-name args)))
 
-(defn generic-launch 
+(defn generic-launch
   "Open a popup asking the user the Leiningen command to issue,
    and then dynamically create a Java launch configuration invoking the command"
   [project]
-  (swt/ui display
-    (let [dialog	 (doto (swt/new-shell display
-                                       SWT/ON_TOP
-                                       ;SWT/TITLE
-                                       ;SWT/CLOSE
-                                       SWT/APPLICATION_MODAL)
+  (swt/ui (let [display (swt/display)
+                dialog (doto (swt/new-shell display
+                                            SWT/ON_TOP
+                                            ;SWT/TITLE
+                                            ;SWT/CLOSE
+                                            SWT/APPLICATION_MODAL)
                     (.setText "Leiningen command line")
                     (.setLayout (swt/form-layout :spacing 0
                                                  :margin-left 5

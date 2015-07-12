@@ -1,4 +1,5 @@
-(ns ccw.swt)
+(ns ccw.swt
+  (:import ccw.util.DisplayUtil))
 
 (import 'org.eclipse.swt.SWT)
 (import 'org.eclipse.swt.layout.FormAttachment)
@@ -92,17 +93,15 @@
 ;;;;;;
 (import 'org.eclipse.swt.widgets.Display)
 (import 'org.eclipse.swt.widgets.Shell)
-(defmacro ui [display-name & body]
-  `(if-let [~display-name (Display/getCurrent)]
-     ~@body
-     (.asyncExec (Display/getDefault)
-       (fn []
-         (let [~display-name (Display/getCurrent)]
-           ~@body)))))
+
+(defmacro ui
+  [& body]
+  `(if (Display/getCurrent)
+     (do ~@body)
+     (DisplayUtil/asyncExec (fn [] ~@body))))
 
 (defn display [] (Display/getCurrent))
 
-;;; RECOPIE DE ccw.eclipse TODO fusionner
 (defn active-shell []
   (-> (org.eclipse.swt.widgets.Display/getDefault)
     .getActiveShell))
@@ -114,46 +113,3 @@
   ([] (new-shell (display)))
   ([display & options] ; Subject to change 
     (Shell. display (apply bit-or options))))
-
-
-;;; OBJECTIF : montrer comment on peut faire du dynamique en clojure pour les IHMs
-
-(require '[ccw.leiningen.launch :as launch])
-(defn do-stuff [text] (launch/lein "foobar" text))
-;;; TEST
-(defn ts []
-  (ui display
-    (let [dialog	 (doto (new-shell display
-                                   SWT/ON_TOP
-                                   SWT/TITLE
-                                   SWT/APPLICATION_MODAL)
-                    (.setText "Leiningen command line")
-                    (.setLayout (form-layout :spacing 0
-                                             :margin-left 5
-                                             :margin-right 5
-                                             :margin-bottom 5
-                                             :margin-top 5))
-              (.addListener org.eclipse.swt.SWT/Traverse
-                (listener e
-                  (when (= org.eclipse.swt.SWT/TRAVERSE_ESCAPE (.detail e))
-                    (.close (.widget e))
-                    (set! (.detail e) org.eclipse.swt.SWT/TRAVERSE_NONE)
-                    (set! (.doit e) false)))))
-          command-input (doto (org.eclipse.swt.widgets.Text. dialog 0)
-                          (.setText "<command line, e.g. run or repl :server, etc.>")
-                          (.setToolTipText "Click Enter to execute, Click Esc to cancel")
-                          (.setLayoutData (form-data :width 400)))
-
-          _ (doto command-input
-              (.setSelection 0 (count (.getText command-input)))
-              (.addKeyListener (key-listener e
-                                             (when (= \return (.character e))
-                                               (do-stuff (.getText command-input))
-                                               (.close dialog)))))
-          cursor (.getCursorLocation display)]
-      (doto dialog
-        .pack
-        (.setLocation (.x cursor) (.y cursor))
-        .open)
-      (.setFocus command-input))))
-

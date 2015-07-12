@@ -62,6 +62,7 @@
                                  preference!
                                  ccw-combined-prefs
                                  workbench-active-editor]]
+            [ccw.swt :as swt :refer [display]]
             [ccw.editors.clojure.editor-support :refer [source-viewer
                                                         set-status-line-error-msg-async]]
             [ccw.core.trace :refer [trace]]
@@ -76,7 +77,6 @@
                                     add-extension-listener
                                     mock-element]]
             [ccw.interop :refer [simple-name]]
-            [ccw.repl.view-helpers :refer [workbench-display]]
             [clojure.edn :as edn :refer [read-string]]
             [clojure.java.data :refer :all]
             [clojure.string :refer [blank? join]]
@@ -352,8 +352,8 @@
   "Updates the observable-hovers part of the state. Returns new state."
   [old-state descriptors]
   (let [observable-hovers ^ObservableList (:observable-descriptors old-state)
-        realm (SWTObservables/getRealm (workbench-display))]
-    (.exec realm #(do (.clear observable-hovers) 
+        realm (SWTObservables/getRealm (swt/display))]
+    (.exec realm #(do (.clear observable-hovers)
                       (.addAll observable-hovers (create-java-descriptor-list descriptors))))
     (assoc old-state :observable-descriptors observable-hovers)))
 

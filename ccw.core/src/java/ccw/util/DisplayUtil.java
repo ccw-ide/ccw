@@ -11,7 +11,10 @@
 package ccw.util;
 
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
+
+import ccw.CCWPlugin;
 
 public class DisplayUtil {
 
@@ -20,21 +23,43 @@ public class DisplayUtil {
 	}
 
 	public static void asyncExec(Runnable r) {
-		Display display = PlatformUI.getWorkbench().getDisplay();
-		if (!display.isDisposed()) {
-			display.asyncExec(r);
-		}
+	    boolean launched = false;
+	    
+	    IWorkbench workbench = PlatformUI.getWorkbench();
+	    if (workbench != null) {
+	        Display display = workbench.getDisplay();
+	        if (display != null && !display.isDisposed()) {
+	            display.asyncExec(r);
+	            launched = true;
+	        }
+	    }
+	    
+	    if (launched == false) {
+	        CCWPlugin.logWarning("Either the Workbench or the Display was null, cannot asyncExec runnable");
+	    }
 	}
 
 	public static void syncExec(Runnable r) {
-		if (Display.getCurrent() == null) {
-			Display display = PlatformUI.getWorkbench().getDisplay();
-			if (!display.isDisposed()) {
-				display.syncExec(r);
-			}
+	    if (Display.getCurrent() == null) {
+	        IWorkbench workbench = PlatformUI.getWorkbench();
+	        if (workbench != null) {
+	            Display display = workbench.getDisplay();
+	            if (display != null && !display.isDisposed()) {
+	                display.syncExec(r);
+	            }
+	        }
 		} else {
 			r.run();
 		}
 	}
 
+	public static void beep() {
+	    IWorkbench workbench = PlatformUI.getWorkbench();
+	    if (workbench != null) {
+	        Display display = workbench.getDisplay();
+	        if (display != null && !display.isDisposed()) {
+	            display.beep();
+	        }
+	    }
+	}
 }
