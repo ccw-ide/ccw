@@ -52,6 +52,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jface.databinding,
  org.eclipse.core.databinding.observable,
  org.eclipse.osgi,
+ org.eclipse.swtbot.generator,
  org.eclipse.jdt.annotation;bundle-version="[1.1.0,2.0.0)";resolution:=optional
 Bundle-ClassPath: .,
  src/clj/,
