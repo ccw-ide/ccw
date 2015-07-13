@@ -559,6 +559,47 @@
             id="ccw.core.command.toggle-clojure-nature"
             name="%ccw.core.command.toggle-clojure-nature.name">
       </command>
+      <category
+         description="%ccw.leiningen.category"
+         id="ccw.leiningen.category"
+         name="%ccw.leiningen.category">
+   </category>
+   <command
+         categoryId="ccw.leiningen.category"
+         description="%ccw.leiningen.command.update-dependencies.description"
+         id="ccw.leiningen.command.update-dependencies"
+         name="%ccw.leiningen.command.update-dependencies.name">
+   </command>
+   <command
+         categoryId="ccw.leiningen.category"
+         description="%ccw.leiningen.command.add-leiningen-nature.description"
+         id="ccw.leiningen.command.add-leiningen-nature"
+         name="%ccw.leiningen.command.add-leiningen-nature.name">
+   </command>
+   <command
+         categoryId="ccw.leiningen.category"
+         description="%ccw.leiningen.command.remove-leiningen-nature.description"
+         id="ccw.leiningen.command.remove-leiningen-nature"
+         name="%ccw.leiningen.command.remove-leiningen-nature.name">
+   </command>
+   <command
+         categoryId="ccw.leiningen.category"
+         description="%ccw.leiningen.command.reset-project-classpath.description"
+         id="ccw.leiningen.command.reset-project-classpath"
+         name="%ccw.leiningen.command.reset-project-classpath.name">
+   </command>
+   <command
+         categoryId="ccw.leiningen.category"
+         description="%ccw.leiningen.command.generic-launch.description"
+         id="ccw.leiningen.command.generic-launch"
+         name="%ccw.leiningen.command.generic-launch.name">
+   </command>
+   <command
+         categoryId="ccw.leiningen.category"
+         description="%ccw.leiningen.command.launch-headless-repl.description"
+         id="ccw.leiningen.command.launch-headless-repl"
+         name="%ccw.leiningen.command.launch-headless-repl.name">
+   </command>
 
    </extension>
 
@@ -1168,15 +1209,27 @@
                   label="Navigate to definition"
                   style="push">
             </command>
-            <visibleWhen
-                  checkEnabled="false">
-               <with
-                     variable="activePartId">
-                  <equals
-                        value="ccw.clojureeditor">
-                  </equals>
-               </with>
-            </visibleWhen>
+            <separator
+                  name="ccw.menus.separator4"
+                  visible="true">
+            </separator>
+            <menu
+                id="ccw.menus.clojure.test"
+                label="%menu.test.label">
+              <command
+                  commandId="ccw.ui.test.commands.testGenerator"
+                  description="%command.testGenerator.description"
+                  icon="icons/swtbot16.png"
+                  label="%command.testGenerator.label"
+                  mnemonic="G"
+                  tooltip="%menuitem.testGenerator.tooltip">
+                <visibleWhen checkEnabled="false">
+                  <and>
+                    <reference definitionId="ccw.core.isCcwBundleInstalled"/>
+                  </and>
+                </visibleWhen>
+              </command>
+            </menu>
          </menu>
       </menuContribution>
       <menuContribution
@@ -1699,6 +1752,11 @@
              </adapt>
           </iterate>
        </and>
+    </definition>
+    <definition id="ccw.core.isCcwBundleInstalled">
+      <with variable="org.eclipse.core.runtime.Platform">
+        <test property="org.eclipse.core.runtime.isBundleInstalled" args="ccw.core"/>
+      </with>
     </definition>
  </extension>
 
@@ -2823,50 +2881,6 @@
     </super>
  </extension>
 <extension
-      point="org.eclipse.ui.commands">
-   <category
-         description="%ccw.leiningen.category"
-         id="ccw.leiningen.category"
-         name="%ccw.leiningen.category">
-   </category>
-   <command
-         categoryId="ccw.leiningen.category"
-         description="%ccw.leiningen.command.update-dependencies.description"
-         id="ccw.leiningen.command.update-dependencies"
-         name="%ccw.leiningen.command.update-dependencies.name">
-   </command>
-   <command
-         categoryId="ccw.leiningen.category"
-         description="%ccw.leiningen.command.add-leiningen-nature.description"
-         id="ccw.leiningen.command.add-leiningen-nature"
-         name="%ccw.leiningen.command.add-leiningen-nature.name">
-   </command>
-   <command
-         categoryId="ccw.leiningen.category"
-         description="%ccw.leiningen.command.remove-leiningen-nature.description"
-         id="ccw.leiningen.command.remove-leiningen-nature"
-         name="%ccw.leiningen.command.remove-leiningen-nature.name">
-   </command>
-   <command
-         categoryId="ccw.leiningen.category"
-         description="%ccw.leiningen.command.reset-project-classpath.description"
-         id="ccw.leiningen.command.reset-project-classpath"
-         name="%ccw.leiningen.command.reset-project-classpath.name">
-   </command>
-   <command
-         categoryId="ccw.leiningen.category"
-         description="%ccw.leiningen.command.generic-launch.description"
-         id="ccw.leiningen.command.generic-launch"
-         name="%ccw.leiningen.command.generic-launch.name">
-   </command>
-   <command
-         categoryId="ccw.leiningen.category"
-         description="%ccw.leiningen.command.launch-headless-repl.description"
-         id="ccw.leiningen.command.launch-headless-repl"
-         name="%ccw.leiningen.command.launch-headless-repl.name">
-   </command>
-</extension>
-<extension
       point="org.eclipse.ui.bindings">
    <key
          commandId="ccw.leiningen.command.generic-launch"
@@ -3186,6 +3200,10 @@
            </with>
          </or>
       </activeWhen>
+   </handler>
+   <handler
+       class="ccw.editors.clojure.TestGeneratorHandler"
+       commandId="ccw.ui.test.commands.testGenerator">
    </handler>
 </extension>
 <extension
