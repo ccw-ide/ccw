@@ -10,6 +10,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.SWTBot;
+import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotCheckBox;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
@@ -98,7 +99,11 @@ public class BotUtils {
 			location.setText(testLocation);
 		}
 		bot.button("Finish").click();
-		waitForWorkspace();
+		try {
+		    bot.buttonWithLabel("Run in background");
+		} catch (WidgetNotFoundException e) {
+		    // wooosh
+		}
 		return this;
 	}
 	/** Test if a project exists by checking the Package Explorer View */
@@ -108,7 +113,7 @@ public class BotUtils {
 		projectsTree.expandNode(projectName);
 		return this;
 	}
-	
+
 	public SWTWorkbenchBot bot() {
 		return bot;
 	}
