@@ -253,7 +253,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 		if (isLeiningenConfiguration(configuration)) {
 			List<IFile> filesToLaunch = LaunchUtils.getFilesToLaunchList(configuration);
 
-	    	String injectCCWServer = " update-in :dependencies conj \"[ccw/ccw.server \\\"0.1.1\\\"]\" "
+	    	String injectCCWServer = " update-in :dependencies conj \"[ccw/ccw.server \\\"0.2.0\\\"]\" "
 		             + "-- update-in :injections conj \"(require 'ccw.debug.serverrepl)\" ";
 	    	String injectCiderNrepl = " update-in :plugins conj \"[cider/cider-nrepl \\\"0.9.0\\\"]\" "
        					// we force nrepl 0.2.10 because cider 0.9.0 requires 0.2.7 at least but leiningen forces 0.2.6
