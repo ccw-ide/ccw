@@ -15,6 +15,9 @@ Laurent Petit <laurent dot petit at gmail dot com>
 - Note that Counterclockwise drops Eclipse 3.x support, and now only supports Eclipse 4
 - This release upgrades the embedded Leiningen from 2.5.0 to 2.5.1.
 
+=== Support of Clojure 1.7.0
+- Fix bug preventing to go to symbol declaration (upgrade of `ccw.server` version to `0.2.0`)
+
 === Support for cider-nrepl in the REPL
 
 ==== cider-nrepl and Clojure projects
