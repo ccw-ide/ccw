@@ -7,9 +7,7 @@ addRepository(type:0,location:http${#58}//eclipse-color-theme.github.io/update/,
 addRepository(type:1,location:http${#58}//eclipse-color-theme.github.io/update/,name:Eclipse Color Theme);\
 addRepository(type:0,location:http${#58}//download.eclipse.org/egit/updates/,name:EGit);\
 addRepository(type:1,location:http${#58}//download.eclipse.org/egit/updates/,name:EGit);\
-addRepository(type:0,location:http${#58}//download.eclipse.org/eclipse/updates/4.5milestones/,name:Eclipse Mars Milestones);\
-addRepository(type:1,location:http${#58}//download.eclipse.org/eclipse/updates/4.5milestones/,name:Eclipse Mars Milestones);
-# addRepository(type:0,location:http${#58}//download.eclipse.org/releases/luna/,name:Eclipse Luna Release);\
-# addRepository(type:1,location:http${#58}//download.eclipse.org/releases/luna/,name:Eclipse Luna Release);\
-# addRepository(type:0,location:http${#58}//download.eclipse.org/eclipse/updates/4.4/,name:Eclipse Luna Updates);\
-# addRepository(type:1,location:http${#58}//download.eclipse.org/eclipse/updates/4.4/,name:Eclipse Luna Updates);
+addRepository(type:0,location:http${#58}//download.eclipse.org/releases/mars/,name:Eclipse Mars Release);\
+addRepository(type:1,location:http${#58}//download.eclipse.org/releases/mars/,name:Eclipse Mars Release);\
+addRepository(type:0,location:http${#58}//download.eclipse.org/eclipse/updates/4.5/,name:Eclipse Mars Updates);\
+addRepository(type:1,location:http${#58}//download.eclipse.org/eclipse/updates/4.5/,name:Eclipse Mars Updates);

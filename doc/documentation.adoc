@@ -74,7 +74,7 @@ Having a problem? Check the <<configure,Configure Counterclockwise>> Section or 
 Pre-requisites
 
 - Java Virtual Machine (JVM) 7 running Eclipse
-- http://www.eclipse.org/downloads/packages/eclipse-ide-java-developers/lunasr2[Eclipse 4.4 (Luna)] or http://www.eclipse.org/downloads/packages/eclipse-ide-java-developers/marsrc1[Eclipse 4.5 (Mars)].
+- http://www.eclipse.org/downloads/packages/eclipse-ide-java-developers/marsrc1[Eclipse 4.5 (Mars)].
 
 any Eclipse packaging which includes JDT (Java Development Tools) will work:  "Eclipse SDK" package, "Eclipse for Java Developers" package, "Eclipse for Java EE Developers" package, etc.
 ====

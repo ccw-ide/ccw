@@ -20,7 +20,7 @@
 
         <profiles>
                 <profile>
-                        <id>luna</id>
+                        <id>mars</id>
                         <activation>
                                 <activeByDefault>true</activeByDefault>
                         </activation>
@@ -61,11 +61,6 @@
                         <url>http://eclipse-color-theme.github.io/update/</url>
                         <layout>p2</layout>
                 </repository>
-                <!--repository>
-                        <id>luna</id>
-                        <url>http://download.eclipse.org/releases/luna/</url>
-                        <layout>p2</layout>
-                </repository-->
                 <repository>
                         <id>mars</id>
                         <url>http://download.eclipse.org/releases/mars</url>

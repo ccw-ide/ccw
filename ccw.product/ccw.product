@@ -328,12 +328,9 @@ litigation.
    <repositories>
       <repository location="http://updatesite.ccw-ide.org/stable/" enabled="true" />
       <repository location="http://eclipse-color-theme.github.io/update/" enabled="true" />
-      <repository location="http://download.eclipse.org/eclipse/updates/4.5milestones/" enabled="true" />
       <repository location="http://download.eclipse.org/egit/updates/" enabled="true" />
-      <!--
-      <repository location="http://download.eclipse.org/releases/luna/" enabled="true" />
-      <repository location="http://download.eclipse.org/eclipse/updates/4.4/" enabled="true" />
-      -->
+      <repository location="http://download.eclipse.org/releases/mars/" enabled="true" />
+      <repository location="http://download.eclipse.org/eclipse/updates/4.5/" enabled="true" />
    </repositories>
 
 </product>
