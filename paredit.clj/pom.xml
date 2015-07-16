@@ -20,9 +20,9 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>com.theoryinpractise</groupId>
+        <groupId>ccw</groupId>
         <artifactId>clojure-maven-plugin</artifactId>
-        <version>1.3.20</version>
+        <version>1.3.24-SNAPSHOT</version>
         <extensions>true</extensions>
         <configuration>
           <sourceDirectories>
