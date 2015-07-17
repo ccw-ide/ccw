@@ -23,7 +23,7 @@ Counterclockwise bundles everything for hacking Clojure Code:
 
 - Wizards for creating / importing existing Clojure projects from scratch or from http://leiningen.org[Leiningen] project definitions
 - Clojure Editor with advanced editing features
-- Starting Clojure REPLs, interacting between Clojure Editors and Clojure REPLs 
+- Starting Clojure REPLs, interacting between Clojure Editors and Clojure REPLs
 - Tight integration with http://leiningen.org[Leiningen] (http://leiningen.org[Leiningen] is the most popular build tool used for clojure projects)
 
 
@@ -114,12 +114,12 @@ See the https://github.com/technomancy/leiningen/wiki/HTTP-Proxies[Leiningen HTT
 
 - Open the Java perspective (unnecessary step for `Counterclockwise Standalone product` users)
 ** menu:Window[Open Perspective > Java] '''(a perspective is a predefined layout of views, suitable for a particular type of development)'''
-- Create a Clojure project 
+- Create a Clojure project
 ** Menu menu:File[New > Clojure Project], name it `myproject`
 ** The project is created using the `default` http://leiningen.org[Leiningen] Template, which creates a Clojure project with a predefined `myproject.core` namespace in `src/myproject/core.clj`
-- Run the project: 
+- Run the project:
 ** Click on the editor pane containing the code in `core.clj` and then select `Load file in REPL` from the `Clojure` menu. This sends the whole file's code to the REPL (and also takes care of starting a REPL for the project if none is currently started).
-- Switch to the REPL in the namespace of your file: 
+- Switch to the REPL in the namespace of your file:
 ** Click on the bottom of the REPL inside the "text input area"
 - Call your function (Hit kbd:[Enter] to send the expression if the cursor is at the end, or hit kbd:[Ctrl+Enter] / kbd:[Cmd+Enter] if the cursor is not at the end of the text):
 
@@ -217,11 +217,11 @@ If called from a place in Eclipse where no project has been inferred from the cu
 
   <noproject> $ lein <task>
 
-The text `<task>` is already selected in the text input, ready to be replaced by the real command you want to invoke. Replace the text with the command, `uberjar` or `do clean, uberjar` for instance, then hit kbd:[Enter]. 
+The text `<task>` is already selected in the text input, ready to be replaced by the real command you want to invoke. Replace the text with the command, `uberjar` or `do clean, uberjar` for instance, then hit kbd:[Enter].
 
 Wait for a second, and see the `Console View` show the progress of the process' output. You can also interact with the process input stream by typing inside the `Console View`.
 
-=== Keyboard Shortcuts for Leiningen Commands 
+=== Keyboard Shortcuts for Leiningen Commands
 
 ==== Starting a Headless Leiningen REPL
 
@@ -287,7 +287,7 @@ It allows you to jump to the definition of symbols in the relevant files (includ
 Just type a regexp in the menu:[Find :] text zone at the top of the `Namespace Browser View`. It will filter the tree for those symbols matching the regex (also when the symbol documentation matches the regex).
 ====
 
-- To see the `Namespace Browser View`, you either 
+- To see the `Namespace Browser View`, you either
 ** select it via the menu:Window[Show View > Other > Counterclockwise Views > Namespace Browser] menu
 ** open the java perspective.
 +
@@ -354,7 +354,7 @@ You would then activate Code Completion suggestions by typing kbd:[Ctrl + Space]
 
 ==== Macro Expansion
 
-You can both get `macroexpand-1` (kbd:[Ctrl + hover over selection]) like and `macroexpand-all` (kbd:[Ctrl+Shift + hover over selection]) like behaviours (but much prettier), via Hovers, by selecting the macro-call and typing 
+You can both get `macroexpand-1` (kbd:[Ctrl + hover over selection]) like and `macroexpand-all` (kbd:[Ctrl+Shift + hover over selection]) like behaviours (but much prettier), via Hovers, by selecting the macro-call and typing
 
 NOTE: This works only if you have an active REPL connection where macroexpansion will be evaluated
 
@@ -366,7 +366,7 @@ In conjunction with auto-compile functionality, compilation problems are reporte
 
 ==== Keyboard Shortcuts
 
-The Editor is really keyboard commands friendly. 
+The Editor is really keyboard commands friendly.
 See the list of Keyboard Bindings: link:keyboard-shortcuts.html[List of Keyboard Shortcuts]
 
 ==== Interaction with a launched REPL
@@ -436,7 +436,7 @@ Once you have started a REPL for your project, and when the menu:Project[Build a
 
 There's a community contributed Eclipse Plugin for this task, called `Fat Jar`.
 
-Install the Fat Jar plugin 
+Install the Fat Jar plugin
 
 - updatesite: http://kurucz-grafika.de/fatjar/
 
@@ -482,7 +482,7 @@ Content in `~/.ccw/` folder is processed as such:
 - Everytime a folder contains a `.clj` file, it is considered a 'plugin' folder.
 ** a plugin folder cannot contain nested plugin folders, only top-level scripts and non-top-level namespaces.
 - Plugin folders are processed in no specific order (plugins must be independent)
-- Processing a plugin folder consists of 
+- Processing a plugin folder consists of
 ** placing the folder inside Counterclockwise's classpath (so that you can use/require namespaces provided by the plugin)
 ** launching all the `.clj` files located at the root of the plugin, one after the other, in no particular order
 - If a plugin has several scripts, one script failing does not prevent other scripts to execute
@@ -573,4 +573,7 @@ Counterclockwise can be more verbose on what's going on if you active `Tracing`.
 
 To activate Traces, follow this http://www.vogella.com/tutorials/EclipseCodeAccess/article.html#tracing_runonatruntime[good Lars Vogel's Tutorial]
 
+=== Test Menu
 
+The Test Menu has the following use-cases in mind: help qualifying an issue and aid contributing some test to Counterclockwise.
+From menu:Clojure[Test > Generator...] you can launch what will allow you to record the UI steps needed to reproduce the problem and that most importantly will generate the necessary code for a ready-to-paste test case. This kind of contributions are very welcome as not only they provide feedback but also they consolidate the test code base.
