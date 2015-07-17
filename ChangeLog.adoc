@@ -121,6 +121,7 @@ In case you have already checked out a User Plugin in you `~/.ccw/` folder, your
 - The keybinding cleaning function did concurrent modifications of an Eclipse Internal collection. Fix laurentpetit/ccw-plugin-manager#1
 - The keybinding cleaning function had a bug which made keybindings seem to erratically work. It has been fixed
 
+
 === Documentation
 - Add a mention about keyboard binding for switching between default and strict editing modes ( kbd:[Alt+D] ). Fixes #346
 
@@ -150,6 +151,9 @@ Counterclockwise ships with an embedded nREPL server. The following enhancements
 - New Command Line option `-Dccw.nrepl.port=[1-65535]`: allows to select the embedded nrepl port.
 - Command Line option `ccw.autostartrepl` has been renamed to `ccw.nrepl.autostart`.
 - When Command Line option `ccw.autostartrepl` is specified, the `cider-nrepl` middleware is used instead of the nRepl default middleware.
+
+=== Counterclockwise Testing
+ -  menu:Clojure[Test -> Generator...] shows the SWTBot generator which monitors UI events as they are performed and then generates pieces of code that can be reused later in automated tests.
 
 === Counterclockwise/Standalone
 - Adjusted JVM parameters to have a faster startup (-server, -Xverify:none, -Xms256m -Xmx1024m)
