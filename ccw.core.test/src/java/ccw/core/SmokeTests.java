@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2015 Laurent Petit.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Laurent PETIT - initial implementation
+ *     Andrea RICHIARDI - additional tests: ui thread, repl, test menu
+ *******************************************************************************/
 package ccw.core;
 
 import static org.junit.Assert.assertEquals;
@@ -38,8 +49,10 @@ public class SmokeTests {
 	@Test
 	public void canCreateANewClojureProject() throws Exception {
 		bot
-		.createClojureProject("my-first-clojure-project")
-		.assertProjectExists("my-first-clojure-project");
+		.createClojureProject(PROJECT_NAME)
+		.sendUpdateDependeciesToBackground()
+		.assertProjectExists(PROJECT_NAME)
+		.purgeProject(PROJECT_NAME);
 	}
 	
 	@Test
@@ -55,6 +68,6 @@ public class SmokeTests {
 
     @Test
     public void canShowTestGeneratorEntryInClojureMenu() throws Exception {
-        SWTBotAssert.assertVisible(bot.menu("Clojure", "Test", "Generator..."));
+        SWTBotAssert.assertVisible(bot.menu("Clojure", MenuLabels.TEST, MenuLabels.TEST_GENERATOR));
     }
 }
