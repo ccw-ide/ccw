@@ -20,7 +20,7 @@
 
         <profiles>
                 <profile>
-                        <id>mars</id>
+                        <id>standalone</id>
                         <activation>
                                 <activeByDefault>true</activeByDefault>
                         </activation>
