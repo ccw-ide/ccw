@@ -7,3 +7,6 @@
 [submodule "ccw.core/ccw-plugins/ccw-plugin-hello-world"]
 	path = ccw.core/ccw-plugins/ccw-plugin-hello-world
 	url = https://github.com/ccw-ide/ccw-plugin-hello-world
+[submodule "ccw.core/ccw-plugins/ccw-plugin-ansi-repl"]
+	path = ccw.core/ccw-plugins/ccw-plugin-ansi-repl
+	url = https://github.com/ccw-ide/ccw-plugin-ansi-repl.git
