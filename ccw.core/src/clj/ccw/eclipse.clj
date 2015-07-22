@@ -30,7 +30,9 @@
                                      IAdaptable
                                      IProgressMonitor
                                      IStatus
-                                     Status]
+                                     Status
+                                     CoreException
+                                     OperationCanceledException]
            [org.eclipse.core.runtime.preferences IEclipsePreferences
                                                  InstanceScope]
            [org.eclipse.jdt.core IJavaProject
@@ -238,6 +240,35 @@
   File
   (path [f] (Path. (.getAbsolutePath f))))
 
+(defn- resource-identifier
+  "From Eclipse's doc: Resources are identified by type and by their path, which is similar to a file system path."
+  [r]
+  (into [] ((juxt #(.getType %1) #(.getFullPath %1)) r)))
+
+(defprotocol GenerateIdentifier
+  (identifier [this] "Coerce this to an immutable unique identifier according to its type"))
+
+(extend-protocol GenerateIdentifier
+  nil
+  (identifier [_] nil)
+
+  Object
+  (identifier [_] (java.util.UUID/randomUUID))
+
+  IPath
+  (identifier [this] (resource-identifier (resource this)))
+
+  IJavaProject
+  (identifier [this] (resource-identifier (resource this)))
+
+  IResource
+  (identifier [this] (resource-identifier this))
+
+  String
+  (identifier [this] this)
+
+  File
+  (identifier [this] (resource-identifier (resource this))))
 
  (def ^:private resource-refresh-depth
    {IResource/DEPTH_ZERO     IResource/DEPTH_ZERO
@@ -620,10 +651,58 @@
         (let [s (f monitor)]
           (if (instance? IStatus s)
             s
-            (Status/OK_STATUS)))
+            Status/OK_STATUS))
         (catch Exception e
           (CCWPlugin/createErrorStatus (format "Unexpected exception while executing Job %s" name), e))))))
 
+(defn cancelable-workspace-job
+  "Create a WorkspaceJob with name, error-handler, cancel-handler and finally-handler.
+  Delegate runInWorkspace to (f monitor).
+  Takes care of returning Status/OK_STATUS, STATUS/CANCEL_STATUS or error.
+  The handlers finally-handler! and cancel-handler! should accept the
+  WorkspaceJob as parameter while error-handler should accept the
+  WorkspaceJob and the Exception (in a vector).
+
+  Note1: f should always check for (.isCanceled monitor) and break the
+  computation (throwing either InterruptedException or
+  OperationCanceledException) in order to react to user's cancel action.
+  Note2: error-handler! should accept the exception and if returns
+  something, it will interpreted as the message (string) together with
+  the returned error status."
+  [name f & {:keys [error-handler! cancel-handler! finally-handler!]
+             :or {error-handler! identity, cancel-handler! identity, finally-handler! identity}}]
+  (proxy [WorkspaceJob] [name]
+    (runInWorkspace [^IProgressMonitor monitor]
+      (.beginTask monitor (str "Computing for: " name) IProgressMonitor/UNKNOWN)
+      (try
+        (let [s (f monitor)]
+          (if (instance? IStatus s)
+            s
+            Status/OK_STATUS))
+        (catch OperationCanceledException e
+          (t/format :eclipse "OperationCanceledException while executing Job %s" name)
+          (cancel-handler! this)
+          (Status/CANCEL_STATUS))
+        (catch InterruptedException e
+          (t/format :eclipse "InterruptedException while executing Job %s" name)
+          (cancel-handler! this)
+          (Status/CANCEL_STATUS))
+        (catch Exception e
+          (t/trace :eclipse (str "Exception caught: " (.getMessage e)))
+          (if-let [error-msg (error-handler! [this e])]
+            (CCWPlugin/createErrorStatus error-msg e)
+            (CCWPlugin/createErrorStatus (format "Unexpected Exception while executing Job %s" name) e)))
+        (finally
+          (finally-handler! this)
+          (.done monitor))))
+    (canceling []
+      (t/format :eclipse "Canceling %s" name)
+      (proxy-super canceling))))
+
+(defn throw-op-canceled!
+  [message monitor]
+  (when (.isCanceled monitor)
+    (throw (OperationCanceledException. message))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Preferences management utilities

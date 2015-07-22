@@ -1,5 +1,4 @@
 (ns ccw.leiningen.classpath-container
-  (:use [clojure.core.incubator :only [-?> -?>>]])
   (:require [leiningen.core.project :as p]
             [leiningen.core.classpath :as cp]
             [leiningen.core.user :as lcu]
@@ -13,7 +12,9 @@
   (:import [org.eclipse.core.runtime CoreException
                                      IPath
                                      IProgressMonitor
-                                     Path]
+                                     Path
+                                     Status
+                                     jobs.IJobChangeListener]
            [org.eclipse.jdt.core ClasspathContainerInitializer
                                  IClasspathContainer
                                  IClasspathEntry
@@ -39,6 +40,13 @@
 
 (def LEININGEN_CLASSPATH_CONTAINER_PROBLEM_MARKER_TYPE
   "ccw.leiningen.problemmarkers.classpathcontainer")
+
+(defonce ^{:private true
+           :author "Andrea Richiardi"
+           :doc "Atom containing the state of this namespace.
+                 :update-dependencies will contain a map project->{:updating? , :can-update?}
+                                      indicating that a project is currently updating or can update."}
+  state (atom {:update-dependencies nil}))
 
 (defmacro with-exc-logged [& body]
   `(try ~@body
@@ -162,19 +170,22 @@
 
 (defn get-project-dependencies
   "Return the dependencies sorted alphabetically via their file name.
-   Throws Aether exceptions if a problem occured"
-  [project-name lein-project]
+   Throws Aether exceptions if a problem occurred. Supports thread
+  interruption. The function break!, a function that presumably throws
+  an exception), is called were appropriate to break execution."
+  [break! project-name lein-project]
   (let [dependencies (resolve-dependencies project-name :dependencies lein-project)
         default-native-platform-path (u/lein-native-platform-path lein-project)
         srcmap (get-source-map lein-project)]
     (t/format :leiningen "default-native-platform-path: %s" default-native-platform-path)
-    (->> dependencies
-      (filter #(re-find #"\.(jar|zip)$" (.getName ^File %)))
-      (sort-by #(.getName ^File %))
-      (map #(ser-dep %
-                     default-native-platform-path
-                     (get srcmap %)
-                     #_(or #_(u/lein-native-dependency-path lein-project %) ;; TODO make this work :-(
+    (for [dep (->> dependencies
+                   (filter #(re-find #"\.(jar|zip)$" (.getName ^File %)))
+                   (sort-by #(.getName ^File %)))]
+      (do (break!)
+          (ser-dep dep
+                   default-native-platform-path
+                   (get srcmap dep)
+                   #_(or #_(u/lein-native-dependency-path lein-project dep) ;; TODO make this work :-(
                          default-native-platform-path))))))
 
 (defn- delete-container-markers [?project]
@@ -300,7 +311,7 @@
    Use it when you can't use instance?, e.g. when classes are same but from 
    different classloaders."
   [c o]
-  (let [o-class-name (-?> o .getClass .getName)
+  (let [o-class-name (some-> o .getClass .getName)
         c-classname (-> c .getName)]
     (= o-class-name c-classname)))
 
@@ -353,50 +364,102 @@
   (if-let [target-folder (.getFolder (e/project project-coercible) "target")]
     (.refreshLocal target-folder (IResource/DEPTH_INFINITE) monitor)))
 
+(defn- start-updating
+  "Return the state that signals that the update is going to
+  start/already started and there is no need for other (threads) to
+  perform it."
+  [old-state project-id workspace-job]
+  (if (get-in old-state [:update-dependencies project-id :updating?])
+    (assoc-in old-state [:update-dependencies project-id :can-update?] false)
+    (-> (assoc-in old-state [:update-dependencies project-id :can-update?] true)
+        (assoc-in [:update-dependencies project-id :updating?] true)
+        (assoc-in [:update-dependencies project-id :update-job] workspace-job))))
+
+(defn- finish-updating
+  "Return the state that signals that the update is finished"
+  [old-state project-id]
+  (-> (assoc-in old-state [:update-dependencies project-id :updating?] false)
+      (assoc-in [:update-dependencies project-id :update-job] nil)))
+
+(defn- can-update?
+  "Check in state if the project id in input can update"
+  [current-state project-id]
+  (get-in current-state [:update-dependencies project-id :can-update?]))
+
+(defn- project-job
+  "Check in state if the project id in input can update"
+  [current-state project-id]
+  (get-in current-state [:update-dependencies project-id :update-job]))
+
 (defn update-project-dependencies
   "Get the dependencies.
    If deps fetched ok: sets lein container, save the dependencies list on disk.
-   If an exception is thrown while fetching deps: report problem markers, 
+   If an exception is thrown while fetching deps: report problem markers,
    do not touch the current lein container.
    Executes in a background workspace job."
   [java-project] ;; TODO checks
-  (doto
-    (e/workspace-job
-      (format "Update project dependencies for project %s" (e/project-name java-project))
-      (fn [^IProgressMonitor monitor]
-        (try
-          (let [lein-project (u/lein-project java-project :enhance-fn #(do (t/trace :leiningen %) (dissoc % :hooks)))
-                deps (get-project-dependencies (.getName (e/project java-project)) lein-project)]
-            ;; Here, get-project-dependencies has succeeded or thrown an error
-            ;; it can take a long time, so we do not put it inside the workspace job which blocks on the workspace root
-            (doto
-              (e/workspace-job
-                (format "Upgrade project build path for project %s" (e/project-name java-project))
-                (fn [^IProgressMonitor monitor]
-                  (set-lein-container java-project deps)
-                  (delete-container-markers java-project)
-                  (save-project-dependencies java-project deps)
-                  (doto ;; we refresh the target folder outside the workspace-root lock
-                    (e/workspace-job
-                      (format "Refreshing project %s" (e/project-name java-project))
-                      (fn [^IProgressMonitor monitor]
-                        (refresh-target-folder java-project monitor)))
-                    (.setUser true)
-                    (.schedule))))
-              (.setUser true)
-              ;; this rule is OK because we know the job needs it and will not take too long
-              (.setRule (e/workspace-root))
-              (.schedule)))
-          (catch Exception e
-            ;; TODO enhance this in the future ... (more accurate problem markers)
-            (let [[jresource message] (resource-message e java-project)
-                  project-name (-> java-project e/resource .getName)]
-              (report-container-error
-                jresource
-                (format "Leiningen Managed Dependencies issue: %s" message)
-                e))))))
-    (.setUser true)
-    (.schedule)))
+  (let [project-id (e/identifier java-project)
+        project-name (e/project-name java-project)
+        error-fn (fn [[workspace-job exception]]
+                   (let [[jresource message] (resource-message exception java-project)
+                         error-message (format "Leiningen Managed Dependencies issue: %s" message)]
+                     ;; TODO enhance this in the future ... (more accurate problem markers)
+                     (report-container-error jresource error-message exception)
+                     error-message))
+        finally-fn (fn [workspace-job] (doto ;; we refresh the target folder outside the workspace-root lock
+                             (e/workspace-job
+                              (format "Refreshing project %s" project-name)
+                              (fn [^IProgressMonitor monitor]
+                                (refresh-target-folder java-project monitor)
+                                Status/OK_STATUS))
+                           (.setUser true)
+                           (.schedule)))
+        job (e/cancelable-workspace-job
+             (format "Update project dependencies for project %s" project-name)
+             (fn [^IProgressMonitor monitor]
+               (letfn [(cancel! [] (e/throw-op-canceled! (format "The update of %s was canceled" project-name) monitor))]
+                 (let [_ (cancel!)
+                       lein-project (u/lein-project java-project :enhance-fn #(do (t/trace :leiningen %) (dissoc % :hooks)))
+                       deps (get-project-dependencies cancel! (.getName (e/project java-project)) lein-project)]
+                   (t/trace :leiningen "Project dependencies calculated, setting up the workspace...")
+                   ;; Here, get-project-dependencies has succeeded or thrown an error
+                   ;; it can take a long time, so we do not put it inside the workspace job which blocks on the workspace root
+                   (cancel!)
+                   (doto
+                       (e/workspace-job
+                        (format "Upgrade project build path for project %s" (e/project-name java-project))
+                        (fn [^IProgressMonitor monitor]
+                          (set-lein-container java-project deps)
+                          (delete-container-markers java-project)
+                          (save-project-dependencies java-project deps)
+                          Status/OK_STATUS))
+                     (.setUser true)
+                     ;; this rule is OK because we know the job needs it and will not take too long
+                     (.setRule (e/workspace-root))
+                     (.schedule))))
+               (if-not (.isCanceled monitor)
+                 Status/OK_STATUS
+                 Status/CANCEL_STATUS))
+             :error-handler! error-fn
+             :finally-handler! finally-fn)
+        new-state (swap! state start-updating project-id job)]
+    (when (can-update? new-state project-id)
+      (doto (project-job new-state project-id)
+        (.addJobChangeListener (reify
+                                 IJobChangeListener
+                                 (running [this ijobchangeevent])
+
+                                 (done [this ijobchangeevent]
+                                   (t/trace :leiningen (str "Job completed with status -> " (-> (.getResult ijobchangeevent))
+                                                            ", name was " (-> (.getJob ijobchangeevent) (.getName))))
+                                   (swap! state finish-updating project-id))
+
+                                 (scheduled [this ijobchangeevent])
+                                 (aboutToRun [this ijobchangeevent])
+                                 (awake [this ijobchangeevent])
+                                 (sleeping [this ijobchangeevent])))
+        (.setUser true)
+        (.schedule)))))
 
 (defn has-container? [java-project container-path]
   (let [entries (.getRawClasspath java-project)]
