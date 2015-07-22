@@ -25,6 +25,7 @@ import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
+import org.eclipse.swtbot.swt.finder.widgets.AbstractSWTBot;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotCheckBox;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
@@ -57,9 +58,28 @@ public class BotUtils {
     public static final String NAME_REPLVIEW = "REPL";
 
     public final SWTWorkbenchBot bot;
+	public final SWTBotShell mainShell;
 	
 	public BotUtils() throws Exception {
 		bot = createSWTBot();
+		mainShell = findMainShell();
+	}
+
+	// AR - from https://wiki.eclipse.org/Linux_Tools_Project/SWTBot_Workarounds#Main_Menu_Items_Not_Found
+	private SWTBotShell findMainShell() {
+	    SWTBotShell mainShell = null;
+
+	    // AR - from https://wiki.eclipse.org/Linux_Tools_Project/SWTBot_Workarounds#Main_Menu_Items_Not_Found
+	    for (int i = 0, attempts = 100; i < attempts; i++) {
+	        for (SWTBotShell shell : bot.shells()) {
+	            if (shell.getText().contains("Eclipse SDK") || shell.getText().contains("Counterclockwise")) {
+	                mainShell = shell;
+	                shell.setFocus();
+	                break;
+	            }
+	        }
+	    }
+	    return mainShell;
 	}
 
 	public SWTWorkbenchBot createSWTBot() {
@@ -72,7 +92,7 @@ public class BotUtils {
 		bot.perspectiveByLabel("Java").activate();
 		return this;
 	}
-	
+
 	public BotUtils closeWelcome() {
 		try {
 			SWTBotView v = bot.viewByTitle("Welcome");
@@ -86,12 +106,42 @@ public class BotUtils {
 		
 	}
 	public SWTBotMenu menu(String menu, String... subMenus) {
+	    mainShell.setFocus();
 		SWTBotMenu ret = bot.menu(menu);
 		for (String subMenu: subMenus) {
 			ret = ret.menu(subMenu);
 		}
 		return ret;
 	}
+
+	public <T extends Widget> SWTBotMenu contextMenu(AbstractSWTBot<T> node, String menu, String... subMenus) {
+	    // AR - quick and dirty, could not find a way with waitForMenu or anything else
+	    node.setFocus();
+	    SWTBotMenu m = null;
+        boolean found = false;
+        long elapsed = 0;
+
+        while (!found && elapsed < 5000) { // standard SWTBot timeout
+            try {
+                m = node.contextMenu(menu);
+                for (String subMenu: subMenus) {
+                    m = m.menu(subMenu);
+                }
+                found = true;
+            } catch (Exception e) {
+                try {
+                    Thread.sleep(250);
+                } catch (InterruptedException e1) {
+                    // wooosh
+                }
+                elapsed += 250;
+            }
+        }
+        if (found == false) {
+            throw new WidgetNotFoundException("Could not find menu: " + MenuLabels.LEININGEN);
+        }
+        return m;
+    }
 
 	public BotUtils activateShell(String shell) {
 		SWTBotShell s = bot.shell(shell);
@@ -154,7 +204,7 @@ public class BotUtils {
         try {
             bot.waitUntil(Conditions.waitForWidget(matcher), timeout, delay);
             bot.button("Run in Background").click();
-        } catch (WidgetNotFoundException e) {
+        } catch (Exception e) {
             // wooosh
         }
         return this;
@@ -178,16 +228,17 @@ public class BotUtils {
         return sendToBackground(MATCHER_WIDGET_UPDATE_DEPENDENCIES, TIMEOUT_UPDATE_DEPENDENCIES, DELAY_UPDATE_DEPENDENCIES);
     }
 
-    public BotUtils whenSelectInClojureMenu(String entryLabel) throws Exception {
+    public BotUtils selectInClojureMenu(String entryLabel) throws Exception {
         menu("Clojure", entryLabel).click();
         return this;
     }
 
-    public BotUtils whenSelectInLeiningenContextMenu(String projectName, String entryLabel) throws Exception {
+    public BotUtils clickInLeiningenMenuForProject(String projectName, String...labels) {
         SWTBotView packageExplorer = bot.viewByTitle("Package Explorer");
         SWTBotTree projectsTree = packageExplorer.bot().tree();
         SWTBotTreeItem node = projectsTree.getTreeItem(projectName);
-        node.contextMenu("Leiningen").menu(entryLabel).click();
+
+        contextMenu(node, MenuLabels.LEININGEN, labels).click();
         return this;
     }
 
@@ -204,7 +255,7 @@ public class BotUtils {
     public BotUtils quietlyCloseRepl() throws Exception {
         try {
             bot.viewByPartName(NAME_REPLVIEW).close();
-        } catch (WidgetNotFoundException e) {
+        } catch (Exception e) {
             // wooosh
         }
         return this;
