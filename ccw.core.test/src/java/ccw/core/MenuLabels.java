@@ -49,11 +49,11 @@ public class MenuLabels {
     public static final String TEST_GENERATOR="Generator...";
 
     // Leiningen
+    public static final String LEININGEN = "Leiningen";
     public static final String UPDATE_DEPENDENCIES = "Update dependencies";
     public static final String GENERIC_COMMAND_LINE = "Generic Leiningen Command Line";
     public static final String CONVERT_TO_LEIN_PROJECT = "Convert to Leiningen Project";
     public static final String RESET_PROJECT_CONFIGURATION = "Reset project configuration";
     public static final String REMOVE_LEIN_NATURE = "Remove Leiningen Support";
     public static final String LAUNCH_HEADLESS_REPL = "Launch Headless REPL for the project";
-
 }
