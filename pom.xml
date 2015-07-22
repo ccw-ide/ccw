@@ -96,6 +96,11 @@
                         <url>http://download.vogella.com/p2/C-MASTER-e4tools-master/lastSuccessful/archive/build/org.eclipse.e4.core.tools.update/target/repository/</url>
                         <layout>p2</layout>
                 </repository-->
+                <repository>
+                        <id>ansi-econsole</id>
+                        <url>http://www.mihai-nita.net/eclipse</url>
+                        <layout>p2</layout>
+                </repository>
 
         </repositories>
 
