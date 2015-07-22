@@ -78,6 +78,7 @@ Counterclockwise now ships with some User Plugins out of the box. In this releas
 - Zoom - https://github.com/ccw-ide/ccw-plugin-zoom
 - User Plugins Manager - https://github.com/ccw-ide/ccw-plugin-manager
 - ANSI Colors in REPL - https://github.com/ccw-ide/ccw-plugin-ansi-repl
+    For the ANSI Colors plugin to work, one needs to install the ANSI EConsole Eclipse plugin from the Market Place. The ANSI EConsole plugin is embedded with CCW/Standalone.
 
 In case you have already checked out a User Plugin in you `~/.ccw/` folder, yours will always take precedence over the one embeded in Counterclockwise (as long as you've kept the same directory name).
 
