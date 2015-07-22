@@ -100,6 +100,7 @@ In case you have already checked out a User Plugin in you `~/.ccw/` folder, your
 - New Clojure Project Wizard honors the 'use previous location' checkbox. Fixes #682
 - When launching a REPL for a project it a REPL is already running for it, there is now no exception thrown when accepting to reuse the existing one
 - Code completion works even if there's a comment at the end of the document. Fixes #777
+- When creating a leiningen project, the dependencies were updated twice. Fixes #817
 
 === Miscellaneous Enhancements
 - Print maven coordinates of Counterclockwise dependencies at plugin startup in `.metadata/.log`. Fixes #741
