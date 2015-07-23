@@ -260,7 +260,7 @@ litigation.
       <feature id="com.github.eclipsecolortheme.feature" installMode="root"/>
       <feature id="net.mihai-nita.ansicon" installMode="root"/> <!-- ansi console -->
 
-      <!--feature id="org.eclipse.pde"/-->
+      <feature id="org.eclipse.pde"/>
 
       <feature id="org.eclipse.e4.rcp"/>
       <feature id="org.eclipse.platform"/>
