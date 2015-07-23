@@ -64,6 +64,13 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements
                 	ccw.preferences.PreferenceConstants.CCW_GENERAL_USE_CIDER_NREPL,
                     Messages.ClojureGeneralPreferencePage_use_cider_nrepl,
                     getFieldEditorParent()));
+        
+        addField(
+                new BooleanFieldEditor(
+                	ccw.preferences.PreferenceConstants.CCW_GENERAL_USE_CLOJURE_1_6_PRINT_OBJECT_HACK,
+                    Messages.ClojureGeneralPreferencePage_use_clojure_1_6_print_object_hack,
+                    getFieldEditorParent()));
+        
 
         addField(
         		new FileFieldEditor(

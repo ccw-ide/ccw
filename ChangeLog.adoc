@@ -17,6 +17,7 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 === Support of Clojure 1.7.0
 - Fix bug preventing to go to symbol declaration (upgrade of `ccw.server` version to `0.2.0`)
+- Preference to revert printing of namespaces and exceptions in the REPL to the 1.6.0 behavior
 
 === Support for cider-nrepl in the REPL
 

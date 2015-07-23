@@ -268,10 +268,12 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 	    		command += " -- " + injectCiderNrepl;
 	    	}
 	    	
-	    	// Add code for getting back human-readable prints of e.g. namespaces
-	    	command += " -- update-in :injections conj " + alterPrintObject;
+	    	if (isInstallClojure1_6_print_object_hack()) {
+	    		// Add code for getting back human-readable prints of e.g. namespaces
+	    		command += " -- update-in :injections conj " + alterPrintObject;
+	    	}
 	    	
-	    	// Add code for pretty printing vars correctly
+	    	// Add code for pretty printing vars correctly. Can be removed once clojure 1.8 is out and oldier not used
 	    	command += " -- update-in :injections conj " + pprintVarsCorrectly;
 	    	
 			int headlessReplOffset = superProgramArguments.indexOf("repl :headless");
@@ -312,7 +314,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 			String args = String.format("-i \"%s\" -e %s -e %s -e %s %s %s",
 					toolingFile,
 			    	// Add code for getting back human-readable prints of e.g. namespaces
-			        alterPrintObject,
+					isInstallClojure1_6_print_object_hack() ? alterPrintObject : "nil",
 			        // Add code for pretty-printing vars correctly
 			        pprintVarsCorrectly,
 					nREPLInit,
@@ -337,6 +339,10 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 	
 	private boolean isUseCiderNrepl() {
 		return CCWPlugin.getDefault().getCombinedPreferenceStore().getBoolean(PreferenceConstants.CCW_GENERAL_USE_CIDER_NREPL);
+	}
+	
+	private boolean isInstallClojure1_6_print_object_hack() {
+		return CCWPlugin.getDefault().getCombinedPreferenceStore().getBoolean(PreferenceConstants.CCW_GENERAL_USE_CLOJURE_1_6_PRINT_OBJECT_HACK);
 	}
 
 	private String createFileLoadInjections(List<IFile> filesToLaunch) {

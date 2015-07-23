@@ -149,6 +149,7 @@ public class Messages extends NLS {
     public static String ClojureGeneralPreferencePage_launch_repls_in_debug_mode;
     public static String ClojureGeneralPreferencePage_use_leiningen_launcher;
     public static String ClojureGeneralPreferencePage_use_cider_nrepl;
+    public static String ClojureGeneralPreferencePage_use_clojure_1_6_print_object_hack;
 
     public static String HoverPreferencePage_errorDefaultHoverNotUnique;
     public static String HoverPreferencePage_errorStatusMaskAlreadyInUse;

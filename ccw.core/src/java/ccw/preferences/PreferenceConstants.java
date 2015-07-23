@@ -149,6 +149,9 @@ public class PreferenceConstants {
     /** Will ccw try to install cider-nrepl middlewares or ccw.server functions in launched repls ? */
     public static final String CCW_GENERAL_USE_CIDER_NREPL = CCW_PREFERENCE_PREFIX + ".user_cider_nrepl";
     
+    /** When starting a REPL, inject code to reset clojure.core/print-object to the clojure 1.6 version */
+    public static final String CCW_GENERAL_USE_CLOJURE_1_6_PRINT_OBJECT_HACK = CCW_PREFERENCE_PREFIX + ".use_clojure_1_6_print_object_hack";
+    
     public static final String SWITCH_TO_NS_ON_REPL_STARTUP = CCW_PREFERENCE_PREFIX + ".switch_to_ns_on_repl_startup"; //$NON-NLS-1$
 
 	public static final String USE_STRICT_STRUCTURAL_EDITING_MODE_BY_DEFAULT = CCW_PREFERENCE_PREFIX + ".use_strict_structural_editing_mode_by_default"; //$NON-NLS-1$
