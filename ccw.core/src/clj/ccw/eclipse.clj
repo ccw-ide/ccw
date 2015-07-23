@@ -8,12 +8,14 @@
 ;* Contributors:
 ;*    Laurant PETIT - initial implementation
 ;*    Andrea RICHIARDI - workbench getters
+;*                     - async ui part refactored to swt.clj (as per TODO)
 ;*******************************************************************************/
 
 (ns ^{:doc "Eclipse interop utilities"}
-     ccw.eclipse
+  ccw.eclipse
   (:require [ccw.core.trace :as t]
-            [clojure.java.io :as io])
+            [clojure.java.io :as io]
+            [ccw.swt :as swt])
   (:import [org.eclipse.core.resources IResource
                                        IProject
                                        IProjectDescription
@@ -50,7 +52,7 @@
            [org.eclipse.ui.actions WorkspaceModifyDelegatingOperation]
            [java.io File IOException]
            [ccw CCWPlugin]
-           [ccw.util PlatformUtil DisplayUtil]
+           [ccw.util PlatformUtil]
            [ccw.launching LaunchUtils]
            java.lang.System
            ccw.core.StaticStrings))
@@ -131,6 +133,12 @@
   "Gets the active editor of the first page of the first window in the workbench."
   []
   (workbench-active-editor (first (workbench-pages (first (workbench-windows (workbench)))))))
+
+(defn workbench-display
+  "Return the workbench display. The 0-arity function will try to get
+  the display of the Eclipse workbench."
+  ([] (workbench-display (workbench)))
+  ([^IWorkbench workbench] (some-> workbench .getDisplay)))
 
 (defprotocol IProjectCoercion
   (project ^org.eclipse.core.resources.IProject [this] "Coerce this into an IProject"))
@@ -731,90 +739,56 @@
   remove-property-listener)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; SWT utilities
-
-;;; TODO fusionner avec swt.clj
-(defn ui*
-  "Calls f with (optionally) args on the UI Thread, using
-   Display/asyncExec.
-   Return a promise which can be used to get back the
-   eventual result of the execution of f.
-   If calling f throws an Exception, the exception itself is delivered
-   to the promise."
-  [f & args] 
-  (let [a (promise)]
-    (-> 
-      (org.eclipse.swt.widgets.Display/getDefault)
-      (.asyncExec 
-        #(deliver a (try
-                      (apply f args)
-                      (catch Exception e e)))))
-    a))
-
-(defmacro async-ui [& args]
-  "Executes args on the UI Thread, using Display/asyncExec."
-  `(ui* (fn [] ~@args)))
-
-(defmacro ui [& args]
-  `(if (org.eclipse.swt.widgets.Display/getCurrent)
-     (atom (do ~@args))
-     (ui* (fn [] ~@args))))
-
-(defn active-shell []
-  (-> (org.eclipse.swt.widgets.Display/getDefault)
-    .getActiveShell))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Message dialogs
 
-(defn info-dialog 
+(defn info-dialog
   ([title message] (info-dialog nil title message))
   ([shell title message]
-    (ui
-      (let [shell (or shell (active-shell))]
+    (swt/ui
+      (let [shell (or shell (swt/active-shell))]
         (org.eclipse.jface.dialogs.MessageDialog/openInformation
           shell title message)))))
 
 (defn confirm-dialog
   ([title message] (info-dialog nil title message))
   ([shell title message]
-    (ui
-      (let [shell (or shell (active-shell))]
+    (swt/ui
+      (let [shell (or shell (swt/active-shell))]
         (org.eclipse.jface.dialogs.MessageDialog/openConfirm
           shell title message)))))
 
-(defn error-dialog 
+(defn error-dialog
   ([title message] (info-dialog nil title message))
   ([shell title message]
-    (ui
-      (let [shell (or shell (active-shell))]
+    (swt/ui
+      (let [shell (or shell (swt/active-shell))]
         (org.eclipse.jface.dialogs.MessageDialog/openError
           shell title message)))))
 
-(defn warning-dialog 
+(defn warning-dialog
   ([title message] (info-dialog nil title message))
   ([shell title message]
-    (ui
-      (let [shell (or shell (active-shell))]
+    (swt/ui
+      (let [shell (or shell (swt/active-shell))]
         (org.eclipse.jface.dialogs.MessageDialog/openWarning
           shell title message)))))
 
-(defn question-dialog 
+(defn question-dialog
   ([title message] (info-dialog nil title message))
   ([shell title message]
-    (ui
-      (let [shell (or shell (active-shell))]
+    (swt/ui
+      (let [shell (or shell (swt/active-shell))]
         (org.eclipse.jface.dialogs.MessageDialog/openQuestion
           shell title message)))))
 
-(defn input-dialog 
+(defn input-dialog
   "validator is a fn taking the String to validate and returning
    either nil if no error, or the error message if error"
   ([title message initial-value] (input-dialog title message initial-value nil))
   ([title message initial-value validator] (input-dialog nil title message initial-value validator))
   ([shell title message initial-value validator]
-    (ui
-      (let [shell (or shell (active-shell))
+    (swt/ui
+      (let [shell (or shell (swt/active-shell))
             d     (org.eclipse.jface.dialogs.InputDialog.
                     shell
                     title

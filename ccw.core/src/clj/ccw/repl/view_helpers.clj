@@ -1,37 +1,32 @@
 (ns ccw.repl.view-helpers
   (:require [clojure.tools.nrepl :as repl]
-    [ccw.repl.cmdhistory :as history]
-    [ccw.events :as evt])
-  (:use [clojure.core.incubator :only (-?>)]
-        [clojure.tools.nrepl.misc :only (uuid)])
+            [clojure.tools.nrepl.misc :refer (uuid)]
+            [ccw.repl.cmdhistory :as history]
+            [ccw.events :as evt]
+            [ccw.eclipse :as eclipse])
   (:import ccw.CCWPlugin
-    org.eclipse.ui.PlatformUI
-    org.eclipse.swt.SWT
-    (org.eclipse.swt.custom StyledText StyleRange))
-  (:import
-    [org.eclipse.ui.handlers HandlerUtil]))
+           org.eclipse.ui.PlatformUI
+           org.eclipse.swt.SWT
+           [org.eclipse.swt.custom StyledText StyleRange]
+           org.eclipse.ui.handlers.HandlerUtil
+           ccw.util.DisplayUtil))
 
-(defn workbench-display
-  []
-  (-> (PlatformUI/getWorkbench) .getDisplay))
+(def workbench-display eclipse/workbench-display)
 
-(defmacro ui-async
-  [& body]
-  `(-> (PlatformUI/getWorkbench)
-     .getDisplay
-     (.asyncExec (fn [] ~@body))))
+(defn ui-async
+  "Executes f asynchronously (non-blocking) on the user-interface thread"
+  [f]
+  (DisplayUtil/asyncExec f))
 
-(defmacro ui-sync
-  [& body]
-  `(-> (PlatformUI/getWorkbench)
-     .getDisplay
-     (.syncExec (fn [] ~@body))))
+(defn ui-sync
+  "Executes f synchronously (blocking) on the user-interface thread"
+  [f]
+  (DisplayUtil/syncExec f))
 
 (defn beep
+  "Executes a beep sound"
   []
-  (-> (PlatformUI/getWorkbench)
-     .getDisplay
-     .beep))
+  (DisplayUtil/beep))
 
 (defn- set-style-range
   [style-range-fn start length]
@@ -89,7 +84,7 @@
   [status s]
   (format "Expression %s: %s"
     ({"timeout" "timed out", "interrupted" "was interrupted"} status "failed")
-    (-?> s
+    (some-> s
       (.substring 0 (min 30 (count s)))
       (str (when (> (count s) 30) "..."))
       (.replaceAll "\\n|\\r" " "))))
@@ -128,7 +123,7 @@
 
 (defn configure-repl-view
   [repl-view log-panel repl-client session-id]
-  (let [[history retain-expr-fn] (history/get-history (-?> repl-view
+  (let [[history retain-expr-fn] (history/get-history (some-> repl-view
                                                         .getLaunch
                                                         ccw.launching.LaunchUtils/getProjectName))
         ^StyledText input-widget (.inputStyledText repl-view)

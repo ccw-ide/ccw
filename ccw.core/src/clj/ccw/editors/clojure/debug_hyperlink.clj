@@ -5,7 +5,8 @@
    will automatically start a remote process for connecting to this port"
   (:require [ccw.string :as s]
             [ccw.launch :as launch]
-            [ccw.eclipse :as e])
+            [ccw.eclipse :as e]
+            [ccw.swt :as swt])
   (:use [clojure.test])
   (:import [org.eclipse.ui.console PatternMatchEvent TextConsole]))
 
@@ -43,8 +44,8 @@
                     (linkExited [this])
                     (linkEntered [this]))]
     (.addHyperlink console hyperlink offset length)
-    (when-not (debug-ports debug-port) 
-      (e/ui (remote-connect)))
+    (when-not (debug-ports debug-port)
+      (swt/ui (remote-connect)))
     (update-in state [:debug-ports] conj debug-port)))
 
 (defn make []
