@@ -268,6 +268,12 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 	    		command += " -- " + injectCiderNrepl;
 	    	}
 	    	
+	    	// Add code for getting back human-readable prints of e.g. namespaces
+	    	command += " -- update-in :injections conj " + alterPrintObject;
+	    	
+	    	// Add code for pretty printing vars correctly
+	    	command += " -- update-in :injections conj " + pprintVarsCorrectly;
+	    	
 			int headlessReplOffset = superProgramArguments.indexOf("repl :headless");
 			command = superProgramArguments.substring(0, headlessReplOffset) +
 					command + " -- " + superProgramArguments.substring(headlessReplOffset);
@@ -299,12 +305,19 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 			
 			// Process will print a line with nRepl URL so that the Console
 			// hyperlink listener can automatically open the REPL
-			String nREPLInit = "(require 'clojure.tools.nrepl.server)" + 
+			String nREPLInit = "\"(require 'clojure.tools.nrepl.server)" + 
 					getNreplHandlerRequire() +
-			"(do (let [server (clojure.tools.nrepl.server/start-server " + getNreplHandlerKeywordOption() + ")] " + 
-				  "(println (str \\\"nREPL server started on port \\\" (:port server) \\\" on host 127.0.0.1 - nrepl://127.0.0.1:\\\" (:port server)))))";
-			String args = String.format("-i \"%s\" -e \"%s\" %s %s", toolingFile, nREPLInit,
-			        filesToLaunchArguments, userProgramArguments);
+			"(let [server (clojure.tools.nrepl.server/start-server " + getNreplHandlerKeywordOption() + ")] " + 
+				  "(println (str \\\"nREPL server started on port \\\" (:port server) \\\" on host 127.0.0.1 - nrepl://127.0.0.1:\\\" (:port server))))\"";
+			String args = String.format("-i \"%s\" -e %s -e %s -e %s %s %s",
+					toolingFile,
+			    	// Add code for getting back human-readable prints of e.g. namespaces
+			        alterPrintObject,
+			        // Add code for pretty-printing vars correctly
+			        pprintVarsCorrectly,
+					nREPLInit,
+			        filesToLaunchArguments,
+			        userProgramArguments);
 			
 			CCWPlugin.log("Starting REPL with program args: " + args);
 			return args;
@@ -341,7 +354,13 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 		sb.append("\" ");
 		return sb.toString();
 	}
+	
+	/** Code for altering clojure.core/print-object for getting back human-readable prints of e.g. namespaces */
+	private static final String alterPrintObject = "\"(alter-var-root #'clojure.core/print-object (fn [old-print-object] (fn [o, ^java.io.Writer w] (when (instance? clojure.lang.IMeta o)      (#'clojure.core/print-meta o w))         (.write w \\\"#<\\\")         (let [name (.getSimpleName (class o))]           (when (seq name)             (.write w name)             (.write w \\\" \\\")))         (.write w (str o))         (.write w \\\">\\\"))))\""; 
 
+	/** Code for correct handling of Var objects in pprint - can be removed after clojure 1.8 is released */
+	private static final String pprintVarsCorrectly = "\"(do (require 'clojure.pprint) (@(find-var 'clojure.pprint/use-method) @(find-var 'clojure.pprint/simple-dispatch) clojure.lang.Var @(find-var 'clojure.pprint/pprint-simple-default)))\"";
+	
 	private static boolean isLaunchREPL(ILaunchConfiguration configuration) throws CoreException {
         return configuration.getAttribute(LaunchUtils.ATTR_CLOJURE_START_REPL, true);
     }
