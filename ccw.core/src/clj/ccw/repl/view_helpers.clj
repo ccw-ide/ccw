@@ -3,30 +3,27 @@
             [clojure.tools.nrepl.misc :refer (uuid)]
             [ccw.repl.cmdhistory :as history]
             [ccw.events :as evt]
-            [ccw.eclipse :as eclipse])
+            [ccw.eclipse :as eclipse]
+            [ccw.swt :as swt])
   (:import ccw.CCWPlugin
            org.eclipse.ui.PlatformUI
            org.eclipse.swt.SWT
            [org.eclipse.swt.custom StyledText StyleRange]
-           org.eclipse.ui.handlers.HandlerUtil
-           ccw.util.DisplayUtil))
+           org.eclipse.ui.handlers.HandlerUtil))
 
 (def workbench-display eclipse/workbench-display)
 
-(defn ui-async
-  "Executes f asynchronously (non-blocking) on the user-interface thread"
-  [f]
-  (DisplayUtil/asyncExec f))
+(defn ^:deprecated ui-async
+  "deprecated - use ccw.swt/ui-async instead. Executes f asynchronously (non-blocking) on the user-interface thread"
+  [f] (swt/ui-async f))
 
-(defn ui-sync
-  "Executes f synchronously (blocking) on the user-interface thread"
-  [f]
-  (DisplayUtil/syncExec f))
+(defn ^:deprecated ui-sync
+  "deprecated - use ccw.swt/ui-sync instead. Executes f synchronously (blocking) on the user-interface thread"
+  [f] (swt/ui-sync f))
 
-(defn beep
-  "Executes a beep sound"
-  []
-  (DisplayUtil/beep))
+(defn ^:deprecated beep
+  "deprecated - use ccw.swt/ui-sync instead. Executes a beep sound"
+  [] (swt/beep))
 
 (defn- set-style-range
   [style-range-fn start length]
