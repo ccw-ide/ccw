@@ -99,12 +99,53 @@
   `(if (Display/getCurrent)
      (do ~@body)
      (DisplayUtil/asyncExec (fn [] ~@body))))
+;(defmacro ui [display-name & body]
+;  `(if-let [~display-name (Display/getCurrent)]
+;     ~@body
+;     (.asyncExec (Display/getDefault)
+;       (fn []
+;         (let [~display-name (Display/getCurrent)]
+;           ~@body)))))
 
 (defn display [] (Display/getCurrent))
 
 (defn active-shell []
   (-> (org.eclipse.swt.widgets.Display/getDefault)
     .getActiveShell))
+
+(defn ui-async
+  "Executes f asynchronously (non-blocking) on the user-interface thread"
+  [f]
+  (DisplayUtil/asyncExec f))
+
+(defn ui-sync
+  "Executes f synchronously (blocking) on the user-interface thread"
+  [f]
+  (DisplayUtil/syncExec f))
+
+(defn ui*
+  "Calls f with (optionally) args on the UI Thread, using
+   Display/asyncExec.
+   Return a promise which can be used to get back the
+   eventual result of the execution of f.
+   If calling f throws an Exception, the exception itself is delivered
+   to the promise."
+  [f & args]
+  (let [a (promise)]
+    (DisplayUtil/asyncExec #(deliver a (try
+                                         (apply f args)
+                                         (catch Exception e e))))
+    a))
+
+(defmacro do-ui* [& args]
+  `(if (org.eclipse.swt.widgets.Display/getCurrent)
+     (atom (do ~@args))
+     (ui* (fn [] ~@args))))
+
+(defn beep
+  "Executes a beep sound"
+  []
+  (DisplayUtil/beep))
 
 ;; Shell SWT.<> Styles:
 ; BORDER, CLOSE, MIN, MAX, NO_TRIM, RESIZE, TITLE, ON_TOP, TOOL, SHEET
