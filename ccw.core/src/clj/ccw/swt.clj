@@ -1,5 +1,5 @@
 (ns ccw.swt
-  (:refer-clojure :exlude (dosync))
+  (:refer-clojure :exclude (dosync))
   (:import ccw.util.DisplayUtil))
 
 (import 'org.eclipse.swt.SWT)
@@ -132,7 +132,7 @@
          (deliver a (f))
          (catch Exception exc (deliver e exc))))
     (if (realized? e)
-      (throw e)
+      (throw (deref e))
       (deref a))))
 
 (defmacro doasync
