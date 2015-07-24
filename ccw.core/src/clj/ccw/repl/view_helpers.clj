@@ -57,25 +57,25 @@
 (defn log
   [^ccw.repl.REPLView repl-view ^StyledText log ^String s type]
   (ui-sync
-    (let [charcnt (.getCharCount log)
-          [log-style highlight-background] (get log-styles type [default-log-style nil])
+    #(let [charcnt (.getCharCount log)
+           [log-style highlight-background] (get log-styles type [default-log-style nil])
            linecnt (.getLineCount log)
            new-content (if (re-find #"(\n|\r)$" s) s (str s \newline))]
-      ; Add styles before adding text to the log panel
-      (when-not (= :skip log-style)
-        (let [style (log-style charcnt (.length new-content))]
-          (-> repl-view .logPanelStyleCache (.setStyleRange style))))
-      (.append log new-content)
-      (doto log
-        cursor-at-end
-        .showSelection)
-      (when highlight-background
-        (.setLineBackground log (dec linecnt) (- (.getLineCount log) linecnt)
-          (ccw.CCWPlugin/getColor
-            ;; We use RGB color because we cannot take the Color directly since
-            ;; we do not "own" it (it would be disposed when colors are changed
-            ;; from the preferences, not good)
-            (-> repl-view .logPanelEditorColors .fCurrentLineBackgroundColor .getRGB)))))))
+       ; Add styles before adding text to the log panel
+       (when-not (= :skip log-style)
+         (let [style (log-style charcnt (.length new-content))]
+           (-> repl-view .logPanelStyleCache (.setStyleRange style))))
+       (.append log new-content)
+       (doto log
+         cursor-at-end
+         .showSelection)
+       (when highlight-background
+         (.setLineBackground log (dec linecnt) (- (.getLineCount log) linecnt)
+           (ccw.CCWPlugin/getColor
+             ;; We use RGB color because we cannot take the Color directly since
+             ;; we do not "own" it (it would be disposed when colors are changed
+             ;; from the preferences, not good)
+             (-> repl-view .logPanelEditorColors .fCurrentLineBackgroundColor .getRGB)))))))
 
 (defn eval-failure-msg
   [status s]
@@ -92,15 +92,16 @@
     (doseq [{:keys [out err value ns status] :as resp} responses]
       (evt/post-event :ccw.repl.response resp)
       (ui-sync
-        (when ns (.setCurrentNamespace repl-view ns))
-        (doseq [[k v] (dissoc resp :id :ns :status :session)
-                :when (log-styles k)]
-          (log repl-view log-component v k))
-        (doseq [status status]
-          (case status
-            "interrupted" (log repl-view log-component (eval-failure-msg status expr) :err)
-            "need-input" (.getStdIn repl-view)
-            nil))))))
+        #(do
+           (when ns (.setCurrentNamespace repl-view ns))
+           (doseq [[k v] (dissoc resp :id :ns :status :session)
+                   :when (log-styles k)]
+             (log repl-view log-component v k))
+           (doseq [status status]
+             (case status
+               "interrupted" (log repl-view log-component (eval-failure-msg status expr) :err)
+               "need-input" (.getStdIn repl-view)
+               nil)))))))
 
 (defn eval-expression
   "evaluate expression. Will use the current value for use-pprint and pprint-right-margin
