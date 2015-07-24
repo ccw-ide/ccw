@@ -752,7 +752,7 @@
           shell title message)))))
 
 (defn error-dialog
-  ([title message] (info-dialog nil title message))
+  ([title message] (error-dialog nil title message))
   ([shell title message]
     (swt/dosync
       (let [shell (or shell (swt/active-shell))]
@@ -760,7 +760,7 @@
           shell title message)))))
 
 (defn warning-dialog
-  ([title message] (info-dialog nil title message))
+  ([title message] (warning-dialog nil title message))
   ([shell title message]
     (swt/dosync
       (let [shell (or shell (swt/active-shell))]
@@ -768,7 +768,7 @@
           shell title message)))))
 
 (defn question-dialog
-  ([title message] (info-dialog nil title message))
+  ([title message] (question-dialog nil title message))
   ([shell title message]
     (swt/dosync
       (let [shell (or shell (swt/active-shell))]
