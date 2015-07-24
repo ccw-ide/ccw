@@ -3,6 +3,7 @@
             [clojure.set :as set]
             [clojure.test :as test]
             [clojure.tools.nrepl :as repl]
+            [paredit.core   :as pc]
             [paredit.parser :as p]
             [paredit.loc-utils :as lu]
             [clojure.zip :as z]
