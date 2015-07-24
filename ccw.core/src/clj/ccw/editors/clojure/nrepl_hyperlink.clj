@@ -41,7 +41,7 @@
                     (linkEntered [this]))]
     (.addHyperlink console hyperlink offset length)
     (when-not (nrepl-urls url)
-      (swt/ui
+      (swt/dosync
         ; We wait a little bit for the console to finish printing
         ; (and thus not steal focus from other widgets)
         (Thread/sleep 100)
@@ -56,7 +56,7 @@
                        :nrepl-urls #{}}))
       (disconnect [this]
         ;; remove the repl url promise since the console / process is stopped
-        (.remove 
+        (.remove
           (ccw.launching.ClojureLaunchShortcut/launchNameREPLURLPromiseAndWithREPLView) 
           (console-name (:console @state)))
         (CCWPlugin/log (str "removed from launchNameREPLURLPromiseAndWithREPLView the key " (console-name (:console @state))))

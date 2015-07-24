@@ -141,4 +141,4 @@
   "The function wraps IClojureAwarePart.setStatusLineErrorMessage in an async ui-only call.
   Remember that passing nil as message resets the status line."
   [^IClojureEditor part message]
-  (swt/ui-async #(.setStatusLineErrorMessage part message)))
+  (swt/doasync (.setStatusLineErrorMessage part message)))

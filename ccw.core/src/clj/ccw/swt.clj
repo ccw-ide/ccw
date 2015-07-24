@@ -100,48 +100,59 @@
   (-> (org.eclipse.swt.widgets.Display/getDefault)
     .getActiveShell))
 
-(defmacro ui
+(defn doasync*
+  "function f will be called on the UI Thread asynchronously.
+   Non-blocking operation.
+   Returns a promise to which the return value of f, or the exception
+   thrown by f, will be delivered.
+   Note: use the promise with care, or you could create deadlocks
+   (especially if you call doasync* from the UI thread and wait there
+   for the promise to be delivered! - won't ever have a chance to happen)"
+  [f]
+  (let [a (promise)]
+    (DisplayUtil/asyncExec
+      #(deliver
+         a
+         (try
+           (f)
+           (catch Exception e e))))
+    a))
+
+(defn dosync*
+  "function f will be called on the UI Thread either right away if the current
+   thread is already the UI thread, either asap asynchronously.
+   In any case, will block until f has executed.
+   Returns the value returned by the body, or rethrows the thrown exception"
+  [f]
+  (let [a (promise)
+        e (promise)]
+    (DisplayUtil/syncExec
+      #(try
+         (deliver a (f))
+         (catch Exception exc (deliver e exc))))
+    (if (realized? e)
+      (throw e)
+      (deref a))))
+
+(defmacro doasync
+  "body will be executed on the UI Thread asynchronously.
+   Non-blocking operation.
+   Returns a promise to which the return value of the body excution, or the exception
+   thrown while executing the body, will be delivered.
+   Note: use the promise with care, or you could create deadlocks
+   (especially if you call doasync* from the UI thread and wait there
+   for the promise to be delivered! - won't ever have a chance to happen)"
   [& body]
-  `(if (Display/getCurrent)
-     (do ~@body)
-     (DisplayUtil/asyncExec (fn [] ~@body))))
-;(defmacro ui [display-name & body]
-;  `(if-let [~display-name (Display/getCurrent)]
-;     ~@body
-;     (.asyncExec (Display/getDefault)
-;       (fn []
-;         (let [~display-name (Display/getCurrent)]
-;           ~@body)))))
+  `(doasync* (fn [] ~@body)))
+  
+(defmacro dosync
+  "body will be executed on the UI Thread either right away if the current
+   thread is already the UI thread, either asap asynchronously.
+   In any case, will block until the body has executed.
+   Returns the value returned by the body, or rethrows the thrown exception"
+  [& body]
+  `(dosync* (fn [] ~@body)))
 
-(defn ui-async
-  "Executes f asynchronously (non-blocking) on the user-interface thread"
-  [f]
-  (DisplayUtil/asyncExec f))
-
-(defn ui-sync
-  "Executes f synchronously (blocking) on the user-interface thread"
-  [f]
-  (DisplayUtil/syncExec f))
-
-;; not called anymore: remove?
-;(defn ui*
-;  "Calls f with (optionally) args on the UI Thread, using
-;   Display/asyncExec.
-;   Return a promise which can be used to get back the
-;   eventual result of the execution of f.
-;   If calling f throws an Exception, the exception itself is delivered
-;   to the promise."
-;  [f & args]
-;  (let [a (promise)]
-;    (DisplayUtil/asyncExec #(deliver a (try
-;                                         (apply f args)
-;                                         (catch Exception e e))))
-;    a))
-;
-;(defmacro do-ui* [& args]
-;  `(if (org.eclipse.swt.widgets.Display/getCurrent)
-;     (atom (do ~@args))
-;     (ui* (fn [] ~@args))))
 
 (defn beep
   "Executes a beep sound"

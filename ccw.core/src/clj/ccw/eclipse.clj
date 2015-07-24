@@ -134,12 +134,6 @@
   []
   (workbench-active-editor (first (workbench-pages (first (workbench-windows (workbench)))))))
 
-(defn workbench-display
-  "Return the workbench display. The 0-arity function will try to get
-  the display of the Eclipse workbench."
-  ([] (workbench-display (workbench)))
-  ([^IWorkbench workbench] (some-> workbench .getDisplay)))
-
 (defprotocol IProjectCoercion
   (project ^org.eclipse.core.resources.IProject [this] "Coerce this into an IProject"))
 
@@ -744,15 +738,15 @@
 (defn info-dialog
   ([title message] (info-dialog nil title message))
   ([shell title message]
-    (swt/ui
+    (swt/dosync
       (let [shell (or shell (swt/active-shell))]
         (org.eclipse.jface.dialogs.MessageDialog/openInformation
           shell title message)))))
 
 (defn confirm-dialog
-  ([title message] (info-dialog nil title message))
+  ([title message] (confirm-dialog nil title message))
   ([shell title message]
-    (swt/ui
+    (swt/dosync
       (let [shell (or shell (swt/active-shell))]
         (org.eclipse.jface.dialogs.MessageDialog/openConfirm
           shell title message)))))
@@ -760,7 +754,7 @@
 (defn error-dialog
   ([title message] (info-dialog nil title message))
   ([shell title message]
-    (swt/ui
+    (swt/dosync
       (let [shell (or shell (swt/active-shell))]
         (org.eclipse.jface.dialogs.MessageDialog/openError
           shell title message)))))
@@ -768,7 +762,7 @@
 (defn warning-dialog
   ([title message] (info-dialog nil title message))
   ([shell title message]
-    (swt/ui
+    (swt/dosync
       (let [shell (or shell (swt/active-shell))]
         (org.eclipse.jface.dialogs.MessageDialog/openWarning
           shell title message)))))
@@ -776,7 +770,7 @@
 (defn question-dialog
   ([title message] (info-dialog nil title message))
   ([shell title message]
-    (swt/ui
+    (swt/dosync
       (let [shell (or shell (swt/active-shell))]
         (org.eclipse.jface.dialogs.MessageDialog/openQuestion
           shell title message)))))
@@ -787,7 +781,7 @@
   ([title message initial-value] (input-dialog title message initial-value nil))
   ([title message initial-value validator] (input-dialog nil title message initial-value validator))
   ([shell title message initial-value validator]
-    (swt/ui
+    (swt/dosync
       (let [shell (or shell (swt/active-shell))
             d     (org.eclipse.jface.dialogs.InputDialog.
                     shell

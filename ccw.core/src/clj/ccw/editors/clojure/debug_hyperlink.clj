@@ -45,7 +45,7 @@
                     (linkEntered [this]))]
     (.addHyperlink console hyperlink offset length)
     (when-not (debug-ports debug-port)
-      (swt/ui (remote-connect)))
+      (swt/doasync (remote-connect)))
     (update-in state [:debug-ports] conj debug-port)))
 
 (defn make []

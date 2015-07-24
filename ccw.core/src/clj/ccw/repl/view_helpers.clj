@@ -11,20 +11,6 @@
            [org.eclipse.swt.custom StyledText StyleRange]
            org.eclipse.ui.handlers.HandlerUtil))
 
-(def workbench-display eclipse/workbench-display)
-
-(defn ^:deprecated ui-async
-  "deprecated - use ccw.swt/ui-async instead. Executes f asynchronously (non-blocking) on the user-interface thread"
-  [f] (swt/ui-async f))
-
-(defn ^:deprecated ui-sync
-  "deprecated - use ccw.swt/ui-sync instead. Executes f synchronously (blocking) on the user-interface thread"
-  [f] (swt/ui-sync f))
-
-(defn ^:deprecated beep
-  "deprecated - use ccw.swt/beep instead. Executes a beep sound"
-  [] (swt/beep))
-
 (defn- set-style-range
   [style-range-fn start length]
   (let [^StyleRange style (style-range-fn)]
@@ -56,26 +42,26 @@
 
 (defn log
   [^ccw.repl.REPLView repl-view ^StyledText log ^String s type]
-  (ui-sync
-    #(let [charcnt (.getCharCount log)
-           [log-style highlight-background] (get log-styles type [default-log-style nil])
-           linecnt (.getLineCount log)
-           new-content (if (re-find #"(\n|\r)$" s) s (str s \newline))]
-       ; Add styles before adding text to the log panel
-       (when-not (= :skip log-style)
-         (let [style (log-style charcnt (.length new-content))]
-           (-> repl-view .logPanelStyleCache (.setStyleRange style))))
-       (.append log new-content)
-       (doto log
-         cursor-at-end
-         .showSelection)
-       (when highlight-background
-         (.setLineBackground log (dec linecnt) (- (.getLineCount log) linecnt)
-           (ccw.CCWPlugin/getColor
-             ;; We use RGB color because we cannot take the Color directly since
-             ;; we do not "own" it (it would be disposed when colors are changed
-             ;; from the preferences, not good)
-             (-> repl-view .logPanelEditorColors .fCurrentLineBackgroundColor .getRGB)))))))
+  (swt/dosync
+    (let [charcnt (.getCharCount log)
+          [log-style highlight-background] (get log-styles type [default-log-style nil])
+          linecnt (.getLineCount log)
+          new-content (if (re-find #"(\n|\r)$" s) s (str s \newline))]
+      ; Add styles before adding text to the log panel
+      (when-not (= :skip log-style)
+        (let [style (log-style charcnt (.length new-content))]
+          (-> repl-view .logPanelStyleCache (.setStyleRange style))))
+      (.append log new-content)
+      (doto log
+        cursor-at-end
+        .showSelection)
+      (when highlight-background
+        (.setLineBackground log (dec linecnt) (- (.getLineCount log) linecnt)
+          (ccw.CCWPlugin/getColor
+            ;; We use RGB color because we cannot take the Color directly since
+            ;; we do not "own" it (it would be disposed when colors are changed
+            ;; from the preferences, not good)
+            (-> repl-view .logPanelEditorColors .fCurrentLineBackgroundColor .getRGB)))))))
 
 (defn eval-failure-msg
   [status s]
@@ -91,17 +77,16 @@
   (future
     (doseq [{:keys [out err value ns status] :as resp} responses]
       (evt/post-event :ccw.repl.response resp)
-      (ui-sync
-        #(do
-           (when ns (.setCurrentNamespace repl-view ns))
-           (doseq [[k v] (dissoc resp :id :ns :status :session)
-                   :when (log-styles k)]
-             (log repl-view log-component v k))
-           (doseq [status status]
-             (case status
-               "interrupted" (log repl-view log-component (eval-failure-msg status expr) :err)
-               "need-input" (.getStdIn repl-view)
-               nil)))))))
+      (swt/dosync
+        (when ns (.setCurrentNamespace repl-view ns))
+        (doseq [[k v] (dissoc resp :id :ns :status :session)
+                :when (log-styles k)]
+          (log repl-view log-component v k))
+        (doseq [status status]
+          (case status
+            "interrupted" (log repl-view log-component (eval-failure-msg status expr) :err)
+            "need-input" (.getStdIn repl-view)
+            nil))))))
 
 (defn eval-expression
   "evaluate expression. Will use the current value for use-pprint and pprint-right-margin
@@ -134,7 +119,7 @@
         (fn [history-shift]
           (swap! current-step history-shift)
           (cond
-            (>= @current-step (count @history)) (do (swap! current-step dec) (beep))
+            (>= @current-step (count @history)) (do (swap! current-step dec) (swt/beep))
             (neg? @current-step) (do (reset! current-step -1)
                                    (when @retained-input
                                      (doto input-widget
