@@ -94,6 +94,12 @@
 (import 'org.eclipse.swt.widgets.Display)
 (import 'org.eclipse.swt.widgets.Shell)
 
+(defn display [] (Display/getCurrent))
+
+(defn active-shell []
+  (-> (org.eclipse.swt.widgets.Display/getDefault)
+    .getActiveShell))
+
 (defmacro ui
   [& body]
   `(if (Display/getCurrent)
@@ -106,12 +112,6 @@
 ;       (fn []
 ;         (let [~display-name (Display/getCurrent)]
 ;           ~@body)))))
-
-(defn display [] (Display/getCurrent))
-
-(defn active-shell []
-  (-> (org.eclipse.swt.widgets.Display/getDefault)
-    .getActiveShell))
 
 (defn ui-async
   "Executes f asynchronously (non-blocking) on the user-interface thread"
