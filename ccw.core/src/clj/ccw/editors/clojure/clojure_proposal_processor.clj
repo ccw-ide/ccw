@@ -274,7 +274,7 @@
           serverrepl/index-of-distance
           compare
           compare))
-      (for [token tokens
+      (for [token (concat pc/lisp-forms tokens)
 ;            :when (not (or 
 ;                         (= token (str ":" prefix))
 ;                         (= token prefix)
