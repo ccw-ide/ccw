@@ -22,7 +22,7 @@
   [f] (swt/ui-sync f))
 
 (defn ^:deprecated beep
-  "deprecated - use ccw.swt/ui-sync instead. Executes a beep sound"
+  "deprecated - use ccw.swt/beep instead. Executes a beep sound"
   [] (swt/beep))
 
 (defn- set-style-range
