@@ -1,4 +1,5 @@
 (ns ccw.swt
+  (:refer-clojure :exlude (dosync))
   (:import ccw.util.DisplayUtil))
 
 (import 'org.eclipse.swt.SWT)
