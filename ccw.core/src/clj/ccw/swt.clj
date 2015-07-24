@@ -123,24 +123,25 @@
   [f]
   (DisplayUtil/syncExec f))
 
-(defn ui*
-  "Calls f with (optionally) args on the UI Thread, using
-   Display/asyncExec.
-   Return a promise which can be used to get back the
-   eventual result of the execution of f.
-   If calling f throws an Exception, the exception itself is delivered
-   to the promise."
-  [f & args]
-  (let [a (promise)]
-    (DisplayUtil/asyncExec #(deliver a (try
-                                         (apply f args)
-                                         (catch Exception e e))))
-    a))
-
-(defmacro do-ui* [& args]
-  `(if (org.eclipse.swt.widgets.Display/getCurrent)
-     (atom (do ~@args))
-     (ui* (fn [] ~@args))))
+;; not called anymore: remove?
+;(defn ui*
+;  "Calls f with (optionally) args on the UI Thread, using
+;   Display/asyncExec.
+;   Return a promise which can be used to get back the
+;   eventual result of the execution of f.
+;   If calling f throws an Exception, the exception itself is delivered
+;   to the promise."
+;  [f & args]
+;  (let [a (promise)]
+;    (DisplayUtil/asyncExec #(deliver a (try
+;                                         (apply f args)
+;                                         (catch Exception e e))))
+;    a))
+;
+;(defmacro do-ui* [& args]
+;  `(if (org.eclipse.swt.widgets.Display/getCurrent)
+;     (atom (do ~@args))
+;     (ui* (fn [] ~@args))))
 
 (defn beep
   "Executes a beep sound"
