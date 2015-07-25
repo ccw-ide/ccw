@@ -1,4 +1,5 @@
 (ns ccw.core.trace
+  (:refer-clojure :exclude (format))
   (:require ccw.trace))
 
 (ccw.trace/mk-trace-macros

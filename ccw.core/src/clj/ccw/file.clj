@@ -1,6 +1,7 @@
 (ns ccw.file
   "Small utility functions for manipulating java.io.Files
    in the context of Counterclockwise"
+  (:refer-clojure :exclude (name))
   (:require [clojure.java.io :as io]))
 
 (defn exists?
