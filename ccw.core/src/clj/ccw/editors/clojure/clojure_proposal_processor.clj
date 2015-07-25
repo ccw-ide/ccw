@@ -266,30 +266,21 @@
                  (if (.startsWith prefix ":")
                    p/hippie-keyword-view
                    p/hippie-symbol-view))]
-    (sort-by
-      :completion
-      (if (<= (count tokens) 50) ; TODO remove magic number
-        (serverrepl/textmate-comparator prefix)
-        (serverrepl/distance-comparator
-          prefix
-          serverrepl/index-of-distance
-          compare
-          compare))
-      (for [token (concat pc/lisp-forms tokens)
-;            :when (not (or 
-;                         (= token (str ":" prefix))
-;                         (= token prefix)
-;                         (.contains token "/")))
-            :let [filter (ccw.debug.serverrepl/textmate-filter token prefix)]
-            :when filter]
-        {:completion token
-         :match token
-         :filter filter
-         :metadata nil #_{:doc (.substring
-                                 (-> editor .getDocument .get)
-                         (max 0 (- offset 50))
-                         (min (+ offset 50) (-> editor .getDocument .get .length))
-                         )}}))))
+    (for [token (concat pc/lisp-forms tokens)
+          ;            :when (not (or 
+          ;                         (= token (str ":" prefix))
+          ;                         (= token prefix)
+          ;                         (.contains token "/")))
+          :let [filter (ccw.debug.serverrepl/textmate-filter token prefix)]
+          :when filter]
+      {:completion token
+       :match token
+       :filter filter
+       :metadata nil #_{:doc (.substring
+                               (-> editor .getDocument .get)
+                               (max 0 (- offset 50))
+                               (min (+ offset 50) (-> editor .getDocument .get .length))
+                               )}})))
 
 ;; TODO move to in ccw.util.core in ccw.util bundle
 (defn adapt-args 

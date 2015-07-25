@@ -103,6 +103,7 @@ In case you have already checked out a User Plugin in you `~/.ccw/` folder, your
 - Code completion works even if there's a comment at the end of the document. Fixes #777
 - When creating a leiningen project, the dependencies were updated twice. Fixes #817
 - Editor code completion suggests Clojure special forms (`do let etc.`) appropriately. Fixes #823
+- Editor hippie completion a little faster by removing unnecessary intermediate sort (probably negligible, but he, clojurers know the value of things ;-)
 
 === Miscellaneous Enhancements
 - Print maven coordinates of Counterclockwise dependencies at plugin startup in `.metadata/.log`. Fixes #741
