@@ -27,7 +27,6 @@ public class ReplTests {
     @BeforeClass
     public static void setupClass() throws Exception {
         bot = new BotUtils();
-        bot.openJavaPerspective();
     }
 
     @AfterClass
@@ -39,8 +38,7 @@ public class ReplTests {
     @Before
     public void beforeTest() {
         bot.openJavaPerspective()
-           .createClojureProject(PROJECT_NAME)
-           .sendUpdateDependeciesToBackground()
+           .createAndWaitForProject(PROJECT_NAME)
            .clickInLeiningenMenuForProject(PROJECT_NAME, MenuLabels.LAUNCH_HEADLESS_REPL);
     }
 

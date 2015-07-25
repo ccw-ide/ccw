@@ -13,6 +13,8 @@ package ccw.core;
 
 import static org.junit.Assert.fail;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -48,8 +50,7 @@ public class BotUtils {
 
     public static final long TIMEOUT_REPL = 60000;
     public static final long TIMEOUT_UPDATE_DEPENDENCIES = 25000;
-
-    public static final long DELAY_UPDATE_DEPENDENCIES = 1000;
+    public static final long TIMEOUT_FIND_ITEM_IN_PROJECT = 15000;
 
     public static final Matcher<Widget> MATCHER_WIDGET_UPDATE_DEPENDENCIES = WidgetMatcherFactory.withRegex(".*project dependencies.*");
     public static final Matcher<Widget> MATCHER_WIDGET_REPL_LOG = WidgetMatcherFactory.withRegex("^;; Clojure.*");
@@ -92,6 +93,44 @@ public class BotUtils {
 		bot.perspectiveByLabel("Java").activate();
 		return this;
 	}
+
+    /**
+     * Opens a file in a given project, simulating a double click.
+     * The file name should contain "/" as segment divider.</br>
+     * For example, "src/editor_test/core.clj", will expand "src", then "editor_test",
+     * and finally double click on "core.clj"
+     *
+     * @param projectName
+     * @param fileName
+     * @return
+     */
+    public BotUtils doubleClickOnFileInProject(String projectName, String fileName) {
+        SWTBotTree packageExplorerTree = bot.viewByTitle("Package Explorer").bot().tree();
+
+        // splitting on "/";
+        String [] segments = fileName.split("/");
+        SWTBotTreeItem prj = packageExplorerTree.getTreeItem(projectName);
+        boolean found = false;
+        long elapsed = 0;
+        prj.expand();
+        prj.setFocus();
+
+        // AR -I need to wait for the correct display of the tree or it won't work! 
+        // TODO find another way?
+        while (!found && elapsed < TIMEOUT_FIND_ITEM_IN_PROJECT) {
+            try {
+                prj.expandNode(segments).doubleClick();
+                found = true;
+            } catch (Exception e) {
+                bot.sleep(500);
+                elapsed += 500;
+            }
+        }
+        if (found == false) {
+            throw new WidgetNotFoundException("Could not find the file " + fileName + " in " + projectName);
+        }
+        return this;
+    }
 
 	public BotUtils closeWelcome() {
 		try {
@@ -149,6 +188,20 @@ public class BotUtils {
 		return this;
 	}
 	
+	public BotUtils waitForProject(String projName) {
+	    IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projName);
+	    return waitForResource(project);
+	}
+
+	public BotUtils waitForResource(IResource resource) {
+        boolean isSync = false;
+        while (isSync) {
+            bot.sleep(500);
+            isSync = resource.isSynchronized(IResource.DEPTH_INFINITE);
+        }
+        return this;
+    }
+
 	public BotUtils waitForWorkspace() {
 	    // ensure that all queued workspace operations and locks are released
 	    try {
@@ -200,6 +253,12 @@ public class BotUtils {
 		return this;
 	}
 
+	public BotUtils createAndWaitForProject(String projectName) {
+	    return createClojureProject(projectName)
+               .waitForWorkspace()
+               .quietlySendUpdateDependenciesToBackground()
+               .waitForProject(projectName);
+	}
     public <T extends Widget> BotUtils sendToBackground(Matcher<T> matcher, long timeout, long delay) {
         try {
             bot.waitUntil(Conditions.waitForWidget(matcher), timeout, delay);
@@ -221,11 +280,22 @@ public class BotUtils {
     }
 
     /**
-     * Wrapper around sendToBackground, we need custom timeouts.
+     * Quietly sends the UpdateDependencies widget to the background.
+     * Funnily this widget does not always appear and therefore this 
+     * method ignores SWTBot exceptions.
      * @return
      */
-    public <T extends Widget> BotUtils sendUpdateDependeciesToBackground() {
-        return sendToBackground(MATCHER_WIDGET_UPDATE_DEPENDENCIES, TIMEOUT_UPDATE_DEPENDENCIES, DELAY_UPDATE_DEPENDENCIES);
+    public <T extends Widget> BotUtils quietlySendUpdateDependenciesToBackground() {
+        try {
+            sendToBackground(MATCHER_WIDGET_UPDATE_DEPENDENCIES, TIMEOUT_UPDATE_DEPENDENCIES);
+        } catch (WidgetNotFoundException e) {
+            Logger.getLogger(this.getClass()).info("Caught exception in quietlySendUpdateDependenciesToBackground: " + e.getMessage());
+        } catch (SWTException e) {
+            Logger.getLogger(this.getClass()).info("Caught exception in quietlySendUpdateDependenciesToBackground: " + e.getMessage());
+        } catch (TimeoutException e) {
+            Logger.getLogger(this.getClass()).info("Caught exception in quietlySendUpdateDependenciesToBackground: " + e.getMessage());
+        }
+        return this;
     }
 
     public BotUtils selectInClojureMenu(String entryLabel) throws Exception {

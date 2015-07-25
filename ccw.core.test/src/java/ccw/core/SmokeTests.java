@@ -48,11 +48,8 @@ public class SmokeTests {
 	
 	@Test
 	public void canCreateANewClojureProject() throws Exception {
-		bot
-		.createClojureProject(PROJECT_NAME)
-		.sendUpdateDependeciesToBackground()
-		.assertProjectExists(PROJECT_NAME)
-		.purgeProject(PROJECT_NAME);
+		bot.createAndWaitForProject("my-first-clojure-project")
+		   .purgeProject("my-first-clojure-project");
 	}
 	
 	@Test

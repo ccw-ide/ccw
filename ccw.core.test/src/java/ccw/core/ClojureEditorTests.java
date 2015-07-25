@@ -1,55 +1,56 @@
+/*******************************************************************************
+ * Copyright (c) 2015 Laurent Petit.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Laurent PETIT - initial implementation
+ *     Andrea RICHIARDI - additions using new BotUtils API
+ *******************************************************************************/
 package ccw.core;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.Path;
+import static org.eclipse.swtbot.swt.finder.SWTBotAssert.assertTextContains;
+
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotEclipseEditor;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.ide.IDE;
-import org.junit.Before;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import ccw.util.DisplayUtil;
 
 @RunWith(SWTBotJunit4ClassRunner.class)
 public class ClojureEditorTests {
 
 	// TODO voir si on peut enlever le static
 	public static BotUtils bot = null;
-
+	public static final String PROJECT_NAME = "editor-test";
+	public static final String CORE_CLJ_NAME = "src/editor_test/core.clj";
+	
 	@BeforeClass
 	public static void setupClass() throws Exception {
 		bot = new BotUtils();
+		bot.openJavaPerspective().createAndWaitForProject(PROJECT_NAME);
 	}
 
-	@Before
-	public void beforeTest() {
-		bot.openJavaPerspective();
-	}
+	@AfterClass
+    public static void cleanClass() throws Exception {
+        bot.purgeProject(PROJECT_NAME);
+    }
 
 	@Test
-	public void canCreateANewClojureProject() throws Exception {
-		bot
-		.createClojureProject("editor-test");
-		final IFile f = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path("editor-test/src/editor_test/core.clj"));
-		DisplayUtil.syncExec(new Runnable() {
-			@Override public void run() {
-				IEditorPart ep;
-				try {
-					ep = IDE.openEditor(bot.bot().activeView().getReference().getPage(), f);
-					ep.setFocus();
-					SWTBotEclipseEditor e = bot.bot().activeEditor().toTextEditor();
-					e.insertText("salut laurent");
-					e.saveAndClose();
-					
-				} catch (PartInitException e) {
-					e.printStackTrace();
-				}
-			}});
+    public void canOpenEditor() throws Exception {
+        bot.doubleClickOnFileInProject(PROJECT_NAME, CORE_CLJ_NAME);
+        bot.bot().activeEditor().toTextEditor();
+    }
+	
+	@Test
+	public void canOpenEditorAndInsertText() throws Exception {
+		bot.doubleClickOnFileInProject(PROJECT_NAME, CORE_CLJ_NAME);
+		SWTBotEclipseEditor e = bot.bot().activeEditor().toTextEditor();
+		e.insertText("salut laurent");
+		e.save();
+		assertTextContains("salut laurent", e.bot().getFocusedWidget());
 	}
-
 }
