@@ -1,5 +1,6 @@
 (ns ccw.editors.clojure.clojure-hyperlink-detector
   (:require [clojure.zip :as z]
+            [clojure.string :as str]
             [paredit.loc-utils :as lu]
             [clojure.tools.nrepl :as repl]
             [ccw.editors.clojure.editor-support :as ed]
@@ -43,13 +44,13 @@
                                                (let [client (.client connection)]
                                                  (repl/response-values (repl/message client {:op :eval :code command})))))
                                            1000)]
-        (if (and file line ns)
-          {"file" file
-           "line" (Integer/valueOf line)
-           "ns" ns}
+        (if (every? str/blank? [file line ns])
           (do
             (.setStatusLineErrorMessage editor ClojureEditorMessages/Cannot_find_declaration)
-            nil))))))
+            nil)
+          {"file" file
+           "line" (Integer/valueOf line)
+           "ns" ns})))))
 
 (defn detect-hyperlinks
   [offset ^IClojureEditor editor]
