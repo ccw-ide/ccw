@@ -31,7 +31,7 @@ public class ReplTests {
 
     @AfterClass
     public static void cleanClass() throws Exception {
-        bot.quietlyCloseRepl()
+        bot.closeRepl()
            .purgeProject(PROJECT_NAME);
     }
 
