@@ -13,6 +13,7 @@ package ccw.core;
 
 import static org.junit.Assert.fail;
 
+import org.apache.log4j.Logger;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRunnable;
@@ -20,6 +21,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.swt.SWTException;
 import org.eclipse.swt.widgets.Widget;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
@@ -89,7 +91,7 @@ public class BotUtils {
 	}
 
 	public BotUtils openJavaPerspective() {
-		closeWelcome();
+		quietlyCloseWelcome();
 		bot.perspectiveByLabel("Java").activate();
 		return this;
 	}
@@ -121,7 +123,16 @@ public class BotUtils {
             try {
                 prj.expandNode(segments).doubleClick();
                 found = true;
-            } catch (Exception e) {
+            } catch (WidgetNotFoundException e) {
+                Logger.getLogger(this.getClass()).debug("Caught and handled exception: " + e.getMessage());
+                bot.sleep(500);
+                elapsed += 500;
+            } catch (SWTException e) {
+                Logger.getLogger(this.getClass()).debug("Caught and handled exception: " + e.getMessage());
+                bot.sleep(500);
+                elapsed += 500;
+            } catch (TimeoutException e) {
+                Logger.getLogger(this.getClass()).debug("Caught and handled exception: " + e.getMessage());
                 bot.sleep(500);
                 elapsed += 500;
             }
@@ -132,15 +143,26 @@ public class BotUtils {
         return this;
     }
 
-	public BotUtils closeWelcome() {
-		try {
-			SWTBotView v = bot.viewByTitle("Welcome");
-			if (v != null) {
-				v.close();
-			}
-		} catch (Exception e) { 
-			// Nevermind
-		}
+    /**
+     * The welcome screen is shown only the first time we execute Eclipse.
+     * The problem is, we don't know which test will be executed first,
+     * therefore all but the first test should ignore the welcome screen.
+     * This is why the exceptions inside here are not rethrown.
+     * @return
+     */
+	public BotUtils quietlyCloseWelcome() {
+	    try {
+	        SWTBotView v = bot.viewByTitle("Welcome");
+	        if (v != null) {
+	            v.close();
+	        }
+	    } catch (WidgetNotFoundException e) {
+	        Logger.getLogger(this.getClass()).info("Caught exception in quietlyCloseWelcome: " + e.getMessage());
+	    } catch (SWTException e) {
+            Logger.getLogger(this.getClass()).info("Caught exception in quietlyCloseWelcome: " + e.getMessage());
+        } catch (TimeoutException e) {
+            Logger.getLogger(this.getClass()).info("Caught exception in quietlyCloseWelcome: " + e.getMessage());
+        }
 		return this;
 		
 	}
@@ -167,13 +189,18 @@ public class BotUtils {
                     m = m.menu(subMenu);
                 }
                 found = true;
-            } catch (Exception e) {
-                try {
-                    Thread.sleep(250);
-                } catch (InterruptedException e1) {
-                    // wooosh
-                }
+            } catch (WidgetNotFoundException e) {
+                Logger.getLogger(this.getClass()).debug("Caught and handled exception: " + e.getMessage());
+                bot.sleep(250);
                 elapsed += 250;
+            } catch (SWTException e) {
+                Logger.getLogger(this.getClass()).debug("Caught and handled exception: " + e.getMessage());
+                bot.sleep(500);
+                elapsed += 500;
+            } catch (TimeoutException e) {
+                Logger.getLogger(this.getClass()).debug("Caught and handled exception: " + e.getMessage());
+                bot.sleep(500);
+                elapsed += 500;
             }
         }
         if (found == false) {
@@ -259,13 +286,10 @@ public class BotUtils {
                .quietlySendUpdateDependenciesToBackground()
                .waitForProject(projectName);
 	}
+
     public <T extends Widget> BotUtils sendToBackground(Matcher<T> matcher, long timeout, long delay) {
-        try {
-            bot.waitUntil(Conditions.waitForWidget(matcher), timeout, delay);
-            bot.button("Run in Background").click();
-        } catch (Exception e) {
-            // wooosh
-        }
+        bot.waitUntil(Conditions.waitForWidget(matcher), timeout, delay);
+        bot.button("Run in Background").click();
         return this;
     }
     public <T extends Widget> BotUtils sendToBackground(Matcher<T> matcher, long timeout) {
@@ -313,21 +337,12 @@ public class BotUtils {
     }
 
     public BotUtils waitForRepl() throws Exception {
-        try {
-            bot.waitUntil(Conditions.waitForWidget(MATCHER_WIDGET_REPL_LOG), TIMEOUT_REPL);
-        } catch (TimeoutException e) {
-            String message = "Could not find repl widget"; //$NON-NLS-1$
-            throw new WidgetNotFoundException(message, e);
-        }
+        bot.waitUntil(Conditions.waitForWidget(MATCHER_WIDGET_REPL_LOG), TIMEOUT_REPL);
         return this;
     }
 
-    public BotUtils quietlyCloseRepl() throws Exception {
-        try {
-            bot.viewByPartName(NAME_REPLVIEW).close();
-        } catch (Exception e) {
-            // wooosh
-        }
+    public BotUtils closeRepl() throws Exception {
+        bot.viewByPartName(NAME_REPLVIEW).close();
         return this;
     }
 
@@ -350,11 +365,20 @@ public class BotUtils {
         return this;
     }
 
+    /**
+     * The warning of not synced resources can o cannot appear,
+     * that is why the SWTBot exceptions here are not rethrown.
+     * @return
+     */
     public BotUtils quietlyContinuingIfNotInSync() {
         try {
             bot.button("Continue").click();
-        } catch (Exception e) {
-            // wooosh
+        } catch (WidgetNotFoundException e) {
+            Logger.getLogger(this.getClass()).info("Caught exception in quietlyContinuingIfNotInSync: " + e.getMessage());
+        } catch (SWTException e) {
+            Logger.getLogger(this.getClass()).info("Caught exception in quietlyContinuingIfNotInSync: " + e.getMessage());
+        } catch (TimeoutException e) {
+            Logger.getLogger(this.getClass()).info("Caught exception in quietlyContinuingIfNotInSync: " + e.getMessage());
         }
         return this;
     }
