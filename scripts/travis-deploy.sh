@@ -4,12 +4,12 @@ sudo apt-get install -qq ftp
 
 FTP_UPDATESITE_ROOT=/www/updatesite/branch
 REPOSITORY_DIR="${TRAVIS_BUILD_DIR}/ccw.product/target/repository"
-UPDATESITE=${QUALIFIER}
+UPDATESITE=travis${QUALIFIER}
 
 PRODUCTS_DIR="${TRAVIS_BUILD_DIR}/ccw.product/target/products"
 
 
-## Push the p2 repository for the build <travisbuild>-<branch>-<gitSha1>
+## Push the p2 repository for the build $UPDATESITE
 ## and also the documentation files
 ftp -pn ${FTP_HOST} <<EOF
 quote USER ${FTP_USER}
@@ -43,8 +43,8 @@ put content.jar
 lcd ${TRAVIS_BUILD_DIR}/doc/target/html
 mput * 
 cd ${FTP_UPDATESITE_ROOT}/${BRANCH}
-mkdir doc
-cd doc
+mkdir travis-doc
+cd travis-doc
 mput *
 quit
 EOF

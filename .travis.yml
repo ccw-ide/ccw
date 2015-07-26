@@ -52,11 +52,11 @@ script:
   - echo "#-#-#-# maven called"
   - date
 after_success: 
-#  - test ${ECLIPSE_TARGET} = "luna" && test ${TRAVIS_SECURE_ENV_VARS} && chmod 777 ./scripts/travis-deploy.sh
-#  - test ${ECLIPSE_TARGET} = "luna" && test ${TRAVIS_SECURE_ENV_VARS} && echo "#-#-#-#- deploying " 
-#  - test ${ECLIPSE_TARGET} = "luna" && test ${TRAVIS_SECURE_ENV_VARS} && date
-#  - test ${ECLIPSE_TARGET} = "luna" && test ${TRAVIS_SECURE_ENV_VARS} && ./scripts/travis-deploy.sh
-#  - test ${ECLIPSE_TARGET} = "luna" && test ${TRAVIS_SECURE_ENV_VARS} && echo "#-#-#-#- deployed "
-#  - test ${ECLIPSE_TARGET} = "luna" && test ${TRAVIS_SECURE_ENV_VARS} && echo date
+  - test ${ECLIPSE_TARGET} = "luna" && test ${TRAVIS_SECURE_ENV_VARS} && chmod 777 ./scripts/travis-deploy.sh
+  - test ${ECLIPSE_TARGET} = "luna" && test ${TRAVIS_SECURE_ENV_VARS} && echo "#-#-#-#- deploying " 
+  - test ${ECLIPSE_TARGET} = "luna" && test ${TRAVIS_SECURE_ENV_VARS} && date
+  - test ${ECLIPSE_TARGET} = "luna" && test ${TRAVIS_SECURE_ENV_VARS} && ./scripts/travis-deploy.sh
+  - test ${ECLIPSE_TARGET} = "luna" && test ${TRAVIS_SECURE_ENV_VARS} && echo "#-#-#-#- deployed "
+  - test ${ECLIPSE_TARGET} = "luna" && test ${TRAVIS_SECURE_ENV_VARS} && echo date
 after_failure:
-#  - test ${TRAVIS_SECURE_ENV_VARS} && chmod 777 ./scripts/travis-test-report.sh && ./scripts/travis-test-report.sh
+  - test ${TRAVIS_SECURE_ENV_VARS} && chmod 777 ./scripts/travis-test-report.sh && ./scripts/travis-test-report.sh
