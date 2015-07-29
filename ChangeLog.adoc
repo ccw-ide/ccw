@@ -10,7 +10,7 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 == Counterclockwise 0.32.0
 
-`0.32.0` released on July xx, 2015
+`0.32.0` released on July 29, 2015
 
 - Note that Counterclockwise drops Eclipse 3.x support, and now only supports Eclipse 4
 - This release upgrades the embedded Leiningen from 2.5.0 to 2.5.1.
