@@ -66,7 +66,6 @@ public final class ClojureTokenScanner implements ITokenScanner, IPropertyChange
 
     private IClojureEditor clojureEditor;
     private IPreferenceStore preferenceStore;
-    private TokenScannerUtils utils;
     
     protected static final IToken errorToken = new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_WHITE), Display.getDefault().getSystemColor(SWT.COLOR_DARK_RED), TextAttribute.UNDERLINE));
     private int currentParenLevel = 0;
@@ -94,24 +93,23 @@ public final class ClojureTokenScanner implements ITokenScanner, IPropertyChange
         this.preferenceStore = preferenceStore;
         this.clojureEditor = clojureEditor;
         parserTokenKeywordToJFaceToken = new HashMap<Keyword, IToken>();
-        utils = new TokenScannerUtils(this);
-        initClojureTokenTypeToJFaceTokenMap(utils);
+        initClojureTokenTypeToJFaceTokenMap();
     }
 
-	protected void initClojureTokenTypeToJFaceTokenMap(TokenScannerUtils u) {
-		u.addTokenType(Keyword.intern("unexpected"), ClojureTokenScanner.errorToken);
-		u.addTokenType(Keyword.intern("eof"), Token.EOF);
-		u.addTokenType(Keyword.intern("whitespace"), Token.WHITESPACE);
+    protected void initClojureTokenTypeToJFaceTokenMap() {
+        TokenScannerUtils.addTokenType(this, Keyword.intern("unexpected"), ClojureTokenScanner.errorToken);
+        TokenScannerUtils.addTokenType(this, Keyword.intern("eof"), Token.EOF);
+        TokenScannerUtils.addTokenType(this, Keyword.intern("whitespace"), Token.WHITESPACE);
 
-		for (Keyword token: PreferenceConstants.colorizableTokens) {
-			PreferenceConstants.ColorizableToken tokenStyle = PreferenceConstants.getColorizableToken(preferenceStore, token);
-			u.addTokenType(
-					token,
-					StringConverter.asString(tokenStyle.rgb),
-					tokenStyle.isBold,
-					tokenStyle.isItalic);
-		}
-	}
+        for (Keyword token: PreferenceConstants.colorizableTokens) {
+            PreferenceConstants.ColorizableToken tokenStyle = PreferenceConstants.getColorizableToken(preferenceStore, token);
+            TokenScannerUtils.addTokenType(this,
+                    token,
+                    StringConverter.asString(tokenStyle.rgb),
+                    tokenStyle.isBold,
+                    tokenStyle.isItalic);
+        }
+    }
 
     
     public final void addTokenType(Keyword tokenIndex, org.eclipse.jface.text.rules.IToken token) {
@@ -355,7 +353,7 @@ public final class ClojureTokenScanner implements ITokenScanner, IPropertyChange
         Keyword keyword = PreferenceConstants.guessPreferenceKeyword(event.getProperty());
         if (PreferenceConstants.colorizableTokens.contains(keyword)) {
             IToken eclipseToken = parserTokenKeywordToJFaceToken.get(keyword);
-            utils.addTokenType(keyword, adaptToken(eclipseToken, event.getProperty(), event.getNewValue()));
+            TokenScannerUtils.addTokenType(this, keyword, adaptToken(eclipseToken, event.getProperty(), event.getNewValue()));
             clojureEditor.markDamagedAndRedraw();
         }
     }
