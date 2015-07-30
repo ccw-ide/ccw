@@ -23,7 +23,9 @@ import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
+import org.eclipse.jface.text.ITextDoubleClickStrategy;
 import org.eclipse.jface.text.ITextHover;
+import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.text.contentassist.ContentAssistEvent;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
@@ -54,6 +56,9 @@ public class ClojureSourceViewerConfiguration extends SimpleSourceViewerConfigur
     
     ClojureInvoker hoverSupportInvoker = ClojureInvoker.newInvoker(CCWPlugin.getDefault(),
             "ccw.editors.clojure.hover-support");
+    
+    ClojureInvoker doubleClickStrategy = ClojureInvoker.newInvoker(CCWPlugin.getDefault(),
+    		"ccw.editors.clojure.double-click-strategy");
     
     public ClojureSourceViewerConfiguration(IPreferenceStore preferenceStore,
             IClojureEditor editor) {
@@ -176,5 +181,15 @@ public class ClojureSourceViewerConfiguration extends SimpleSourceViewerConfigur
         // sizes: see org.eclipse.jface.text.TextViewer.TEXT_HOVER_*_CHARS
         presenter.setSizeConstraints(HOVER_CONSTRAINTS_MAX_WIDTH_IN_CHAR, HOVER_CONSTRAINTS_MAX_HEIGHT_IN_CHAR, false, true);
         return presenter;
+    }
+    
+    @Override
+    public ITextDoubleClickStrategy getDoubleClickStrategy(ISourceViewer sourceViewer, String contentType) {
+    	final ITextDoubleClickStrategy defaultStrategy = super.getDoubleClickStrategy(sourceViewer, contentType);
+    	return new ITextDoubleClickStrategy() {
+			@Override public void doubleClicked(ITextViewer viewer) {
+				doubleClickStrategy._("double-clicked", viewer, defaultStrategy);
+			}
+		};
     }
 }

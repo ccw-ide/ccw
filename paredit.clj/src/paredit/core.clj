@@ -98,7 +98,14 @@
   [loc] 
   (when-let [loc-tag (loc-tag (parse-node loc))]
     (not (*not-in-code* loc-tag))))
-  
+
+(defn in-code-at-offset?
+  "Is the offset in the parse tree in a 'code partition' or not?"
+  [parse-tree offset]
+  (with-important-memoized 
+    (let [offset-loc (-> parse-tree parsed-root-loc (loc-for-offset offset))] 
+      (in-code? offset-loc))))
+
 (defmulti paredit (fn [k & args] k))
 
 (defn insert-balanced

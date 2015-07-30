@@ -32,13 +32,14 @@
     (finally (-> editor .getSelectionHistory .listenToSelectionChanges))))
 
 ;; TODO remove duplications with appli-paredit-command
-(defn- apply-paredit-selection-command [editor command-key & options]
+;; This function is also now called from the outside, e.g. for double-click-strategy
+(defn apply-paredit-selection-command [editor command-key & options]
   (let [{:keys #{length offset}} (bean (.getUnSignedSelection editor))
         text  (.get (.getDocument editor))
         {new-length :length, new-offset :offset} 
           (apply pc/paredit 
                  command-key
-                 (.getParseState editor) 
+                 (.getParseState editor)
                  {:text text :offset offset :length length}
                  (pimpl/paredit-options command-key))]
     (-> editor .getSelectionHistory (.remember (SourceRange. offset length)))
