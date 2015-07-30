@@ -8,6 +8,7 @@
  * Contributors: 
  *    Casey Marshall - initial API and implementation
  *    Laurent Petit  - evolution and maintenance
+ *    Andrea Richiardi - new ClojureCharRule
  *******************************************************************************/
 package ccw.editors.clojure.scanners;
 
@@ -15,12 +16,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.text.rules.EndOfLineRule;
-import org.eclipse.jface.text.rules.ICharacterScanner;
 import org.eclipse.jface.text.rules.IPredicateRule;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.MultiLineRule;
 import org.eclipse.jface.text.rules.RuleBasedPartitionScanner;
 import org.eclipse.jface.text.rules.Token;
+
+import ccw.editors.clojure.scanners.rules.ClojureCharRule;
 
 public class ClojurePartitionScanner extends RuleBasedPartitionScanner {
 	public static final String CLOJURE_PARTITIONING = "__clojure_partitioning";
@@ -46,67 +48,4 @@ public class ClojurePartitionScanner extends RuleBasedPartitionScanner {
          
         setPredicateRules(rules.toArray(new IPredicateRule[rules.size()]));
     }
-    
-    public static class ClojureCharRule implements IPredicateRule {
-    	private final IToken tokenToReturn;
-    	public ClojureCharRule(IToken tokenToReturn) {
-    		this.tokenToReturn = tokenToReturn; 
-    	}
-
-		public IToken evaluate(ICharacterScanner scanner, boolean resume) {
-			if (resume == true) {
-				throw new IllegalArgumentException("unhandled case when resume = true");
-			} else {
-				return evaluate(scanner);
-			}
-		}
-
-		public IToken getSuccessToken() {
-			return tokenToReturn;
-		}
-
-		public IToken evaluate(ICharacterScanner scanner) {
-			int firstChar = scanner.read();
-			if ((char)firstChar != '\\') {
-				scanner.unread();
-				return Token.UNDEFINED;
-			} else {
-				int next = scanner.read();
-				if (Character.isWhitespace(next)) {
-					scanner.unread();
-					return Token.UNDEFINED;
-				}
-//				if ((char)next == 'n') {
-//					int second = scanner.read();
-//					if ((char)second != 'e') {
-//						scanner.unread();
-//						return getSuccessToken();
-//					} else {
-//						
-//					}
-//				}
-//				if ((char)next == 's') {
-//					int second = scanner.read();
-//					if ((char)second != 'p') {
-//						scanner.unread();
-//						return getSuccessToken();
-//					} else {
-//						
-//					}
-//				}
-//				if ((char)next == 't') {
-//					int second = scanner.read();
-//					if ((char)second != 'a') {
-//						scanner.unread();
-//						return getSuccessToken();
-//					} else {
-//						
-//					}
-//				}
-				return getSuccessToken();
-			}
-		}
-    	
-    }
-    
 }
