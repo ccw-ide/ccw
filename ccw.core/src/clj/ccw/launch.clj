@@ -14,7 +14,8 @@
                                    ILaunchesListener2
                                    IStreamListener]
            [org.eclipse.debug.core.model IProcess]
-           [org.eclipse.debug.core.sourcelookup ISourcePathComputer]))
+           [org.eclipse.debug.core.sourcelookup ISourcePathComputer]
+           [ccw.launching          EnhancedJavaLaunchDelegate]))
 
 ;;;; UTILITY FOR JDT
   ;; Specify a classpath. This is more or less easy depending on where it comes from
@@ -70,7 +71,9 @@
   "Pre-defined types of launch configurations"
   {:ccw 
      "ccw.launching.clojure"
-   :java 
+   :java ;; enhanced LaunchDelegate based on the :java launcher  
+     EnhancedJavaLaunchDelegate/ID_JAVA_APPLICATION
+   :raw-java 
      IJavaLaunchConfigurationConstants/ID_JAVA_APPLICATION
    :remote-java
      IJavaLaunchConfigurationConstants/ID_REMOTE_JAVA_APPLICATION})

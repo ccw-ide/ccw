@@ -12,6 +12,9 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 `0.32.1` released on July ..., 2015
 
+=== Process Launcher
+- Fix an issue on OS X to preventively fix the PATH environement variable which is generally not even set with `/usr/local/bin` included. Fixes #709
+
 == Counterclockwise 0.32.0
 
 `0.32.0` released on July 29, 2015
