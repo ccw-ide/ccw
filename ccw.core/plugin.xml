@@ -120,6 +120,14 @@
    </extension>
    <extension point="org.eclipse.debug.core.launchConfigurationTypes">
       <launchConfigurationType
+            delegate="ccw.launching.EnhancedJavaLaunchDelegate"
+            delegateName="Enhanced Java Launcher"
+            id="ccw.launching.enhanced-java"
+            modes="run, debug"
+            name="Enhanced Java Launch"
+            public="false">
+      </launchConfigurationType>
+      <launchConfigurationType
             delegate="ccw.launching.ClojureLaunchDelegate"
             delegateName="Clojure Launcher"
             id="ccw.launching.clojure"
