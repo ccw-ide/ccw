@@ -8,6 +8,10 @@ Laurent Petit <laurent dot petit at gmail dot com>
 :toc-title: ChangeLog
 :toclevels: 0
 
+== Counterclockwise 0.32.1
+
+`0.32.1` released on July ..., 2015
+
 == Counterclockwise 0.32.0
 
 `0.32.0` released on July 29, 2015
