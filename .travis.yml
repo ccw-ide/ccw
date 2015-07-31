@@ -1,4 +1,13 @@
-sudo: true # explicitly ask for using the new docker-based infrastructure
+sudo: false # explicitly ask for using the new docker-based infrastructure
+
+addons:
+  apt:
+    packages:
+    - metacity
+
+cache:
+  directories:
+    - ${HOME}/.m2
 
 branches:
   except:
@@ -16,34 +25,25 @@ env:
     - secure: "ngfDTSbLJ9suMJ+hUJws7wKbP184+Poyd09Rc3MEdpD8oq2mW8+XYi1bjmnA\n04bxqQ+hnLCdxjVqaXjp7nMB8pCHxWaraoOyU1uJJxFSNO1y1f2k09eAexA+\nLN4fXIU8HjPLvXz2u8oZITYCWKuCyAIuiFus7N9RZ+Kk/mYE0lg="
     - secure: "YDLYUZiLuoNCRpdIMxycacPOyJkIw/lfycpEiIfoyuVQCTf0Sig/KZpjDyHj\nlU8gPqwYewp//lTyczuJIFq8IOghO3QejGaqlNGNLOmFPIsfdThMGOYn9IOJ\nkqO4enPLfxjnEAxvcKQDboUrCETjsimCvMccgIZDcvlQ6iFAdzA="
 
-install: true
-
-cache:
-  directories:
-    - ${HOME}/.m2
-
-before_script:
-  - sudo apt-get update
-  - "export DISPLAY=:99.0" # ou mettre dans env: DISPLAY=:99 see https://github.com/mozilla/mozmill/pull/116/files
+before_install:
+  - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
   - sleep 5 # give xvfb some time to start
-
-  - sudo apt-get install -qq metacity
   - metacity --sm-disable --replace &
   - sleep 5 # give metacity some time to start
 
+install: true
+
+before_script:
   - export QUALIFIER=CI$(printf "%0*d" 6 ${TRAVIS_BUILD_NUMBER})-${TRAVIS_BRANCH}-git${TRAVIS_COMMIT}
   - export BRANCH=${TRAVIS_BRANCH}
 
 script: 
-  - echo "#-#-#-# calling maven "
-  - date
   - mvn clean verify --batch-mode -e -DforceContextQualifier=${QUALIFIER}
-  - echo "#-#-#-# maven called"
-  - date
 
 after_success: 
   - test ${TRAVIS_SECURE_ENV_VARS} && chmod 777 ./scripts/travis-deploy.sh && ./scripts/travis-deploy.sh
 
 after_failure:
   - test ${TRAVIS_SECURE_ENV_VARS} && chmod 777 ./scripts/travis-test-report.sh && ./scripts/travis-test-report.sh
+
