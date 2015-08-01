@@ -146,7 +146,8 @@
 ;; http://www.ibm.com/developerworks/opensource/library/os-ecl-dynext/
 (defn add-contribution!
   "s: the contribution, as a String, in the form
-      '<plugin>
+        <?eclipse version=\"4.5\"?>
+        <plugin>
           <extension
              id=\"a-dynamic-marker-type-id\"
              name=\"A dynamic marker type\"
@@ -178,10 +179,17 @@
 
 (defn xml-map->extension [ext-map]
   (let [m {:tag "plugin" :content [ext-map]}]
-    (with-out-str (xml/emit-element m))))
+    (str
+      "<?eclipse version=\"4.5\"?>"  ;; adding this version information is necessary so that namespace extraction 
+                                     ;; is turned on. This guarantees same behavior between static plugin.xml
+                                     ;; and dynamic registration wrt simpleId / namespace parse behavior
+                                     ;; See org.eclipse.core.internal.registry.initializeExtractNamespace()
+                                     ;; and the use of extractNamespaces in method parseExtensionAttributes() 
+      (with-out-str (xml/emit-element m)))))
 
 ;(ccw.bundle/add-contribution! 
 ;     "
+;   <?eclipse version="4.5"?>
 ;   <plugin>
 ;      <extension
 ;            point='org.eclipse.ui.menus'>
@@ -200,6 +208,7 @@
 
 ;(ccw.bundle/add-contribution! 
 ;     "
+;   <?eclipse version="4.5"?>
 ;   <plugin>
 ;      <extension
 ;            point='org.eclipse.ui.commands'>
@@ -218,6 +227,7 @@
 
 ;(ccw.bundle/add-contribution! 
 ;     "
+;   <?eclipse version="4.5"?>
 ;   <plugin>
 ;      <extension
 ;            point='org.eclipse.ui.handlers'>
@@ -256,6 +266,7 @@
       
 ;(ccw.bundle/add-contribution! 
 ;     "
+;<?eclipse version="4.5"?>
 ;<plugin>
 ;<extension
 ;       point='org.eclipse.ui.views'>
