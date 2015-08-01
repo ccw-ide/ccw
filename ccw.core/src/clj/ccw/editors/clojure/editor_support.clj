@@ -70,6 +70,30 @@
           )))
     r))
 
+(defn init-text-buffer
+  "Initialize that input parse state with the input initial-text. Return
+  the new parse state."
+  [parse-state initial-text]
+  {:pre [(nil? parse-state)]
+   :post [(= (:build-id (deref %)) 0)]}
+  (let [parse-state (ref nil)
+        build-id 0]
+    (dosync
+     ;; AR - The buffer needs to be recalculated if the transaction is retried
+     (let [buffer (p/edit-buffer nil 0 -1 initial-text)
+           parse-tree (p/buffer-parse-tree buffer build-id)]
+       (ref-set parse-state {:text initial-text
+                             :incremental-text-buffer buffer
+                             :previous-parse-tree nil
+                             :parse-tree parse-tree
+                             :build-id build-id})))
+    (t/trace :editor (str "Parse state initialized!"
+                          \newline
+                          "text:" :text
+                          \newline
+                          "parse tree elements:" (count (:parse-tree @parse-state))))
+    parse-state))
+
 (defn startWatchParseRef [r editor]
   (add-watch r :track-state (fn [_ _ _ new-state] 
                               (.setStructuralEditionPossible editor 
