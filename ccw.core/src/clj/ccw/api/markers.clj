@@ -3,7 +3,8 @@
    References:
    - https://www.eclipse.org/articles/Article-Mark%20My%20Words/mark-my-words.html"
   (:require [ccw.eclipse :as e]
-            [ccw.bundle :as b])
+            [ccw.bundle :as b]
+            [ccw.core.trace :as t])
   (:import [org.eclipse.ui.texteditor MarkerUtilities]
            [org.eclipse.core.resources IMarker IResource]))
 
@@ -26,15 +27,16 @@
    :message     (fn [m v] (MarkerUtilities/setMessage m v))
    :severity    (fn [m v] (.put m IMarker/SEVERITY (severity v v)))})
 
-(def ^:private type-map
+(def ^:private type-ids
   "Map containing standard eclipse marker types, as well as those provided
    by ccw by default."
-  {:ccw ccw.builder.ClojureBuilder/CLOJURE_COMPILER_PROBLEM_MARKER_TYPE
-   :marker IMarker/MARKER ; base marker
-   :problem IMarker/PROBLEM
-   :task IMarker/TASK
-   :text IMarker/TEXT
-   :bookmark IMarker/BOOKMARK})
+  {:marker   IMarker/MARKER ; base marker
+   :problem  IMarker/PROBLEM
+   :task     IMarker/TASK
+   :text     IMarker/TEXT
+   :bookmark IMarker/BOOKMARK
+   :ccw      ccw.builder.ClojureBuilder/CLOJURE_COMPILER_PROBLEM_MARKER_TYPE
+   :all      nil})
 
 (def depth-map
   "Used to declare how deep below a given resource (a project or a folder,
@@ -47,6 +49,24 @@
    :one      IResource/DEPTH_ONE
    :infinite IResource/DEPTH_INFINITE})
 
+(defn- eclipse-type-id
+  "If type-id is nil then it represents all type-ids. Not all places where a type-id is expected accept nil.
+   If type-id is a keyword, ccw.api.markers/type-ids will be used to resolve the eclipse-type-id.
+   If type-id is a String, it will be returned as-is or with \"ccw.markers.\" preprended if it contains no dot (Eclipse work-around).
+   In case type-id is a keyword missing from ccw.api.markers/type-ids or anything else, will throw an exception."
+  [type-id]
+  (let [r (letfn [(throw-ex [type-id] (throw (ex-info (str "unknown ccw.api.markers type id " type-id))))]
+          (cond
+            (nil? type-id)     nil
+            (keyword? type-id) (if (contains? type-ids type-id)
+                                 (type-ids type-id)
+                                 (throw-ex type-id))
+            (string? type-id)  (if (.contains type-id ".")
+                                 type-id
+                                 (str "ccw.markers." type-id))
+            :else (throw-ex type-id)))]
+    r))
+
 (defn create-marker!
   "Create a marker for the given resource-coercible.
    the marker map must contain keys :type, :severity, :message,
@@ -55,23 +75,20 @@
    Example:
    (ma/create-marker!
      (e/workspace-resource \"ccw.core/src/clj/ccw/api/markers.clj\")
-     {:type \"ccw-plugin-xyz\"
+     {:type-id \"ccw-plugin-xyz\"
       :severity :error
       :char-start 0 :char-end 1
       :message \"Dynamically created, how cool is that?\"})"
   [resource marker-map]
-  (let [type (type-map (:type marker-map)
-               (if-not (.contains (:type marker-map) ".")
-                 (str (.getSymbolicName (b/bundle "ccw.core")) "." (:type marker-map))
-                 (:type marker-map)))
+  (let [type-id (eclipse-type-id (:type-id marker-map))
         attrs (java.util.HashMap.)]
-     (doseq [[k v] (dissoc marker-map :type)]
+     (doseq [[k v] (dissoc marker-map :type-id)]
        (let [f (keyword-to-attr-key k)]
          (f attrs v)))
      (MarkerUtilities/createMarker
        (e/resource resource)
        attrs
-       type)))
+       type-id)))
 
 (defn delete-markers!
   "Delete markers for the resource.
@@ -83,14 +100,14 @@
           deep below it should the deletion broaden."
   ([resource]
     (delete-markers! resource nil))
-  ([resource marker-type]
-    (delete-markers! resource marker-type true))
-  ([resource marker-type include-subtypes]
-    (delete-markers! resource marker-type include-subtypes :infinite))
-  ([resource marker-type include-subtypes depth]
+  ([resource type-id]
+    (delete-markers! resource type-id true))
+  ([resource type-id include-subtypes]
+    (delete-markers! resource type-id include-subtypes :infinite))
+  ([resource type-id include-subtypes depth]
     (.deleteMarkers
       (e/resource resource)
-      (type-map marker-type marker-type)
+      (eclipse-type-id type-id) ; it is ok to call deleteMarkers with type-id set to nil (delete all markers)
       include-subtypes
       (depth-map depth depth))))
 
@@ -116,7 +133,8 @@
     (.setAccessible instance-field true)
     (.set instance-field nil nil)))
 
-(defn- reset-marker-types! []
+(defn- reset-marker-types!
+  []
   (reset-marker-manager-cache!)
   (reset-marker-MarkerTypesModel!))
 
@@ -124,13 +142,11 @@
   "Transforms a map defining a type into a String representing a valid Eclipse
    xml extension."
   [type-def]
-  (when (.contains (:id type-def) ".")
-        (throw (RuntimeException. (str "id" (:id type-def) " must not contain dots"))))
   (b/xml-map->extension 
     {:tag "extension"
      :attrs {:point "org.eclipse.core.resources.markers"
-             :id (:id type-def)
-             :name (or (:name type-def) (:id type-def) "<unknown>")}
+             :id (eclipse-type-id (:type-id type-def))
+             :name (or (:name type-def) (eclipse-type-id (:type-id type-def)) "<unknown>")}
      :content (into []
                 (concat
                   [{:tag "persistent"
@@ -138,13 +154,13 @@
                                      "true"
                                      "false")}}]
                   (map
-                    (fn [parent]
+                    (fn [parent-type-id]
                       {:tag "super"
-                       :attrs {:type (type-map parent parent)}})
+                       :attrs {:type (eclipse-type-id parent-type-id)}})
                     (or (seq (:parents type-def))
                       [:ccw]))))}))
 
-(defn find-marker-extensions-in-registry
+(defn- find-marker-extensions-in-registry
   "Find all marker extensions whose unique name contain the string s.
    Useful for debuggin in the REPL."
   [s]
@@ -170,7 +186,7 @@
                 always remove all ccw or ccw-plugin markers).
 
    Example 1: create a new marker type, non persistent across Eclipse restarts
-   (register-marker-type! {:id \"ccw-plugin-foo.my-fun-id\"})
+   (register-marker-type! {:id \"ccw-plugin-foo-my-fun-id\"})
 
    Example 2: create a marker type deriving directly from the eclipse problem marker
                type (but not ccw type), and make it persistent across Eclipse restarts 
@@ -178,13 +194,12 @@
      {:id \"ccw-plugin-my-other-id\", :persistent true, :parents [:problem]})"
   ([type-def] (register-marker-type! (b/bundle "ccw.core") type-def))
   ([bundle type-def]
-    (b/remove-extension! (str (.getSymbolicName bundle) "." (:id type-def)))
+    (b/remove-extension! (eclipse-type-id (:type-id type-def)))
     (let [ext-str (as-extension type-def)]
       (b/add-contribution!
-        (or (:name type-def) (:id type-def))
+        (or (:name type-def) (eclipse-type-id (:type-id type-def)))
         ext-str
         bundle
-        true ; we must force persistence, or markers disappear when Eclipse restarts
+        true ; we must force persistence, or markers disappear when Eclipse restarts because the extension would not be reused
         (b/master-token)))
     (reset-marker-types!)))
-
