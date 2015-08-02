@@ -29,10 +29,21 @@
   ;; we get consistent behavior in the handler
   (.post (event-broker) (as-topic topic) [data]))
 
+(defn unsubscribe
+  "event-handler-var is either a var with ::event-handler metadata attached to it,
+   or a true org.osgi.service.event.EventHandler"
+  [event-handler-var]
+  (if (var? event-handler-var)
+    (when-let [event-handler (some-> event-handler-var meta ::event-handler)]
+      (alter-meta! event-handler-var dissoc ::event-handler)
+      (.unsubscribe (event-broker) event-handler))
+    (.unsubscribe (event-broker) event-handler-var)))
+
 (defn subscribe
   ([topic event-handler-var] (subscribe topic false event-handler-var))
   ([topic require-ui? event-handler-var]
     (t/format :events "subscribing to topic %s" (as-topic topic))
+    (unsubscribe event-handler-var)
     (let [event-handler
           (reify org.osgi.service.event.EventHandler
             (handleEvent [this event]
@@ -45,7 +56,7 @@
               nil
               event-handler
               (boolean require-ui?))
+        (when (var? event-handler-var)
+          (alter-meta! event-handler-var assoc ::event-handler event-handler))
         event-handler))))
 
-(defn unsubscribe [event-handler]
-  (.unsubscribe (event-broker) event-handler))
