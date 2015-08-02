@@ -4,6 +4,7 @@ addons:
   apt:
     packages:
     - metacity
+    - lftp
 
 cache:
   directories:
