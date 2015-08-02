@@ -1,60 +1,38 @@
 #!/bin/bash
 
-FTP_UPDATESITE_ROOT=/www/updatesite/branch
-REPOSITORY_DIR="${TRAVIS_BUILD_DIR}/ccw.product/target/repository"
 UPDATESITE=travis${QUALIFIER}
 
+# FTP dirs are prefixed with FTP. Local dirs have no prefix.
+REPOSITORY_DIR="${TRAVIS_BUILD_DIR}/ccw.product/target/repository"
 PRODUCTS_DIR="${TRAVIS_BUILD_DIR}/ccw.product/target/products"
 
+FTP_BRANCH_DIR=/www/updatesite/branch/${BRANCH}
+FTP_UPDATESITE_DIR=${FTP_BRANCH_DIR}/${UPDATESITE}
 
 ## Push the p2 repository for the build $UPDATESITE
 ## and also the documentation files
-ftp -pn ${FTP_HOST} <<EOF
-quote USER ${FTP_USER}
-quote PASS ${FTP_PASSWORD}
-bin
-prompt off
-lcd ${REPOSITORY_DIR}
-cd ${FTP_UPDATESITE_ROOT}
-mkdir ${BRANCH}
-cd ${BRANCH}
-mkdir ${UPDATESITE}
-cd ${UPDATESITE}
-lcd features
-mkdir features
-cd features
-mput *
-lcd ../binary
-cd ..
-mkdir binary
-cd binary
-mput *
-lcd ../plugins
-cd ..
-mkdir plugins
-cd plugins
-mput *
-lcd ..
-cd ..
-put artifacts.jar
-put content.jar
-lcd ${TRAVIS_BUILD_DIR}/doc/target/html
-mput * 
-cd ${FTP_UPDATESITE_ROOT}/${BRANCH}
-mkdir travis-doc
-cd travis-doc
-mput *
+lftp <<EOF
+user ${FTP_USER} ${FTP_PASSWORD}
+open ${FTP_HOST}
+
+# put p2 repository in the right branch / versioned subdirecty updatesite
+mirror -R -e -v ${REPOSITORY_DIR}/ ${FTP_UPDATESITE_DIR}/
+
+# put documentation at the root of the update site so that it is self-documented
+mirror -R -e v ${TRAVIS_BUILD_DIR}/doc/target/html/ ${FTP_UPDATESITE_DIR}/
+
+# put documentation at the root of the branch site to serve as the up to date travis generated documentation
+mirror -R -e v ${TRAVIS_BUILD_DIR}/doc/target/html/ ${FTP_BRANCH_DIR}/travis-doc/
 quit
 EOF
 
-test $? || ( echo "FTP Push for build ${UPDATESITE} failed with error code $?" ; exit $? )
+test $? || exit $?
 
-wget http://updatesite.ccw-ide.org/branch/${BRANCH}/${UPDATESITE}/content.jar || ( echo "Test that FTP Push for build ${UPDATESITE} worked failed: was unable to fetch http://updatesite.ccw-ide.org/branch/${BRANCH}/${UPDATESITE}/content.jar" ; exit 1 )
+wget http://updatesite.ccw-ide.org/branch/${BRANCH}/${UPDATESITE}/content.jar || exit 1
 
-wget http://updatesite.ccw-ide.org/branch/${BRANCH}/${UPDATESITE}/documentation.html || ( echo "Test that FTP Push for build ${UPDATESITE} worked failed: was unable to fetch http://updatesite.ccw-ide.org/branch/${BRANCH}/${UPDATESITE}/documentation.html" ; exit 1 )
+wget http://updatesite.ccw-ide.org/branch/${BRANCH}/${UPDATESITE}/documentation.html || exit 1
 
 ## UPDATE The branch p2 repository by referencing this build's p2 repository
-
 # Create compositeArtifacts.xml 
 cat <<EOF > ${TRAVIS_BUILD_DIR}/compositeArtifacts.xml
 <?xml version='1.0' encoding='UTF-8'?>
@@ -69,8 +47,6 @@ cat <<EOF > ${TRAVIS_BUILD_DIR}/compositeArtifacts.xml
   </children>
 </repository>
 EOF
-
-test $? || ( echo "Problem while creating file compositeArtifacts.xml for build ${UPDATESITE}" ; exit $? )
 
 # Create compositeContent.xml
 cat <<EOF > ${TRAVIS_BUILD_DIR}/compositeContent.xml
@@ -87,57 +63,38 @@ cat <<EOF > ${TRAVIS_BUILD_DIR}/compositeContent.xml
 </repository>
 EOF
 
-test $? || ( echo "Problem while creating file compositeContent.xml for build ${UPDATESITE}" ; exit $? )
+# DEACTIVATED : Jenkins' the boss atm
+## Push branch p2 repository files via FTP
+#ftp -pn ${FTP_HOST} <<EOF
+#quote USER ${FTP_USER}
+#quote PASS ${FTP_PASSWORD}
+#bin
+#prompt off
+#lcd ${TRAVIS_BUILD_DIR}
+#cd ${FTP_UPDATESITE_ROOT}/${BRANCH}
+#put compositeArtifacts.xml
+#put compositeContent.xml
+#quit
+#EOF
+#test $? || ( echo "Problem while updating branch ${BRANCH} repository artifacts for build ${UPDATESITE}" ; exit $? )
 
-# Push branch p2 repository files via FTP
-ftp -pn ${FTP_HOST} <<EOF
-quote USER ${FTP_USER}
-quote PASS ${FTP_PASSWORD}
-bin
-prompt off
-lcd ${TRAVIS_BUILD_DIR}
-cd ${FTP_UPDATESITE_ROOT}/${BRANCH}
-put compositeArtifacts.xml
-put compositeContent.xml
-quit
-EOF
-test $? || ( echo "Problem while updating branch ${BRANCH} repository artifacts for build ${UPDATESITE}" ; exit $? )
 
-
-[ -d ${PRODUCTS_DIR} ] || ( echo "Skipping ftp publication of CCW products for missing directory ${PRODUCTS_DIR}"; exit 1; )
-
-# Create directory products in ftp
-ftp -pn ${FTP_HOST} <<EOF
-quote USER ${FTP_USER}
-quote PASS ${FTP_PASSWORD}
-bin
-prompt off
-lcd ${PRODUCTS_DIR}
-cd ${FTP_UPDATESITE_ROOT}/${BRANCH}/${UPDATESITE}
-mkdir products 
-quit
-EOF
+[ -d ${PRODUCTS_DIR} ] || exit 1
 
 # iterate over the products to push in parallel
-cd ${PRODUCTS_DIR}
-PRODUCTS="`ls Counterclockwise*.zip`"
-for PRODUCT in ${PRODUCTS}
-do
-# Push CCW products files via FTP
-ftp -pn ${FTP_HOST} <<EOF &
-quote USER ${FTP_USER}
-quote PASS ${FTP_PASSWORD}
-bin
-prompt off
-lcd ${PRODUCTS_DIR}
-cd ${FTP_UPDATESITE_ROOT}/${BRANCH}/${UPDATESITE}/products
-put ${PRODUCT}
+
+lftp <<EOF
+user ${FTP_USER} ${FTP_PASSWORD}
+open ${FTP_HOST}
+
+# TODO exclude some things ?
+mirror -R -e -v ${PRODUCTS_DIR}/ ${FTP_UPDATESITE_DIR}/products/
 quit
 EOF
-done
-
 wait
 
+cd ${PRODUCTS_DIR}
+PRODUCTS="`ls Counterclockwise*.zip`"
 for PRODUCT in ${PRODUCTS}
 do
 # --spider option only checks for file presence, without downloading it
