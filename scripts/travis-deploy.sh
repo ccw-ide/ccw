@@ -1,7 +1,5 @@
 #!/bin/bash
 
-sudo apt-get install -qq ftp
-
 FTP_UPDATESITE_ROOT=/www/updatesite/branch
 REPOSITORY_DIR="${TRAVIS_BUILD_DIR}/ccw.product/target/repository"
 UPDATESITE=travis${QUALIFIER}
