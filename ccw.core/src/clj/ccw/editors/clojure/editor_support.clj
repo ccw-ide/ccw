@@ -126,7 +126,7 @@
 (defn editor-saved [editor]
   (evt/post-event :ccw.editor.saved
     {:namespace     (.findDeclaringNamespace editor)
-     :absolute-path (some-> editor .getEditorInput e/resource e/path .toOSString)
+     :absolute-path (some-> editor .getEditorInput e/resource .getLocation .toOSString)
      :repl          (-> editor .getCorrespondingREPL)}))
 
 (defn source-viewer
