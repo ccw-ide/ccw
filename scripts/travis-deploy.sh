@@ -12,17 +12,18 @@ FTP_UPDATESITE_DIR=${FTP_BRANCH_DIR}/${UPDATESITE}
 ## Push the p2 repository for the build $UPDATESITE
 ## and also the documentation files
 lftp <<EOF
+set ftp:passive-mode true
 user ${FTP_USER} ${FTP_PASSWORD}
 open ${FTP_HOST}
 
 # put p2 repository in the right branch / versioned subdirecty updatesite
-mirror -R -e -v ${REPOSITORY_DIR}/ ${FTP_UPDATESITE_DIR}/
+mirror -R -e -v ${REPOSITORY_DIR}/ ${FTP_UPDATESITE_DIR}
 
 # put documentation at the root of the update site so that it is self-documented
-mirror -R -e v ${TRAVIS_BUILD_DIR}/doc/target/html/ ${FTP_UPDATESITE_DIR}/
+mirror -R -e -v ${TRAVIS_BUILD_DIR}/doc/target/html/ ${FTP_UPDATESITE_DIR}
 
 # put documentation at the root of the branch site to serve as the up to date travis generated documentation
-mirror -R -e v ${TRAVIS_BUILD_DIR}/doc/target/html/ ${FTP_BRANCH_DIR}/travis-doc/
+mirror -R -e -v ${TRAVIS_BUILD_DIR}/doc/target/html/ ${FTP_BRANCH_DIR}/travis-doc
 quit
 EOF
 
@@ -84,11 +85,12 @@ EOF
 # iterate over the products to push in parallel
 
 lftp <<EOF
+set ftp:passive-mode true
 user ${FTP_USER} ${FTP_PASSWORD}
 open ${FTP_HOST}
 
 # TODO exclude some things ?
-mirror -R -e -v ${PRODUCTS_DIR}/ ${FTP_UPDATESITE_DIR}/products/
+mirror -R -e -v ${PRODUCTS_DIR}/ ${FTP_UPDATESITE_DIR}/products
 quit
 EOF
 wait
