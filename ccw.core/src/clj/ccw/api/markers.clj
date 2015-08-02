@@ -4,7 +4,8 @@
    - https://www.eclipse.org/articles/Article-Mark%20My%20Words/mark-my-words.html"
   (:require [ccw.eclipse :as e]
             [ccw.bundle :as b]
-            [ccw.core.trace :as t])
+            [ccw.core.trace :as t]
+            [clojure.set :as set])
   (:import [org.eclipse.ui.texteditor MarkerUtilities]
            [org.eclipse.core.resources IMarker IResource]))
 
@@ -13,6 +14,10 @@
   {:error   IMarker/SEVERITY_ERROR
    :warning IMarker/SEVERITY_WARNING
    :info    IMarker/SEVERITY_INFO})
+
+(def severity-invert
+  "eclipse severity code to keywords"
+  (set/map-invert severity))
 
 (def keyword-to-attr-key
   "Standard marker attributes recoginzed by Eclipse.
@@ -26,6 +31,19 @@
    :char-end    (fn [m v] (MarkerUtilities/setCharEnd m v))
    :message     (fn [m v] (MarkerUtilities/setMessage m v))
    :severity    (fn [m v] (.put m IMarker/SEVERITY (severity v v)))})
+
+(def attr-key-to-keyword
+  "Standard marker attributes recoginzed by Eclipse.
+   :line-number is mutually exclusive with :char-start + :char-end
+   :line-number considers first line number is 1
+   :char-start / :char-end consider first char is at index 0
+   :message must be a string
+   :severity must be a keyword from the severity map keys, or a String"
+  {IMarker/LINE_NUMBER (fn [v] [:line-number v])
+   IMarker/CHAR_START  (fn [v] [:char-start v])
+   IMarker/CHAR_END    (fn [v] [:char-end v])
+   IMarker/MESSAGE     (fn [v] [:message v])
+   IMarker/SEVERITY    (fn [v] [:severity (severity-invert v v)])})
 
 (def ^:private type-ids
   "Map containing standard eclipse marker types, as well as those provided
@@ -65,6 +83,7 @@
                                  type-id
                                  (str "ccw.markers." type-id))
             :else (throw-ex type-id)))]
+    #_(e/info-dialog "ccw.api.markers" (str "(eclipse-type-id " type-id ")=" r))
     r))
 
 (defn create-marker!
@@ -80,15 +99,37 @@
       :char-start 0 :char-end 1
       :message \"Dynamically created, how cool is that?\"})"
   [resource marker-map]
+  #_(e/info-dialog "ccw.api.markers" (str "create-marker! " resource ", " marker-map))
   (let [type-id (eclipse-type-id (:type-id marker-map))
         attrs (java.util.HashMap.)]
-     (doseq [[k v] (dissoc marker-map :type-id)]
-       (let [f (keyword-to-attr-key k)]
-         (f attrs v)))
+     (doseq [[k v] (dissoc marker-map :type-id)
+             :let [f (keyword-to-attr-key k)]]
+       (f attrs v))
+     #_(e/info-dialog "markers" (str "type id:" type-id))
+     #_(e/info-dialog "markers" (str "attrs:" (str attrs)))
      (MarkerUtilities/createMarker
        (e/resource resource)
        attrs
        type-id)))
+
+(defn marker-map
+  "Retrieves the marker map from an eclipse marker."
+  [marker]
+  (let [m {:type-id (MarkerUtilities/getMarkerType marker)}
+        attrs (.getAttributes marker)]
+    (into m (map (fn [[k v]] ((attr-key-to-keyword k) v)) attrs))))
+
+(defn marker-into!
+  "Adds all attributes in attrs-map to the eclipse marker.
+   It's not possible to change the type id. If it is set, it will be ignored
+   Returns the eclipse marker."
+  [marker attrs-map]
+  (let [attrs (java.util.HashMap.)]
+     (doseq [[k v] (dissoc attrs-map :type-id)
+             :let [f (keyword-to-attr-key k)]]
+       (f attrs v))
+     (doto marker
+       (.setAttributes (into-array String (keys attrs)) (into-array Object (vals attrs))))))
 
 (defn delete-markers!
   "Delete markers for the resource.
@@ -108,8 +149,20 @@
     (.deleteMarkers
       (e/resource resource)
       (eclipse-type-id type-id) ; it is ok to call deleteMarkers with type-id set to nil (delete all markers)
-      include-subtypes
+      (boolean include-subtypes)
       (depth-map depth depth))))
+
+(defn find-markers
+  "Return a vector containing all the marker instances (eclipse objects) for resource, of type-id, optionally including marker type subtypes,
+   and the given resource subfolder depth"
+  ([resource type-id] (find-markers resource type-id true))
+  ([resource type-id include-subtypes] (find-markers resource type-id include-subtypes :infinite))
+  ([resource type-id include-subtypes depth]
+    (into [] (seq (.findMarkers
+                   (e/resource resource)
+                   (eclipse-type-id type-id)
+                   (boolean include-subtypes)
+                   (depth-map depth depth))))))
 
 (defn- reset-marker-manager-cache!
   "The Eclipse Marker API does not dynamically update its marker type list when
@@ -196,6 +249,7 @@
   ([bundle type-def]
     (b/remove-extension! (eclipse-type-id (:type-id type-def)))
     (let [ext-str (as-extension type-def)]
+      #_(e/info-dialog "ccw.api.markers" (str "create extension for " type-def ": " ext-str))
       (b/add-contribution!
         (or (:name type-def) (eclipse-type-id (:type-id type-def)))
         ext-str
