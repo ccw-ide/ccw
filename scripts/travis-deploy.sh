@@ -90,7 +90,7 @@ user ${FTP_USER} ${FTP_PASSWORD}
 open ${FTP_HOST}
 
 # TODO exclude some things ?
-mirror -R -e -v ${PRODUCTS_DIR}/ ${FTP_UPDATESITE_DIR}/products
+mirror -R -r -e -v ${PRODUCTS_DIR}/ ${FTP_UPDATESITE_DIR}/products
 quit
 EOF
 wait
