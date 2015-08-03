@@ -55,6 +55,7 @@ import ccw.ClojureCore;
 import ccw.TraceOptions;
 import ccw.editors.clojure.ClojureEditor;
 import ccw.editors.clojure.LoadFileAction;
+import ccw.launching.ClojureLaunchShortcut.IWithREPLView;
 import ccw.preferences.PreferenceConstants;
 import ccw.repl.REPLView;
 import ccw.util.ClojureInvoker;
@@ -172,7 +173,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
      * @param filesToLaunch
      * @param mode
      */
-    protected void launchProjectCheckRunning(final IProject project, IFile[] filesToLaunch, String mode, boolean forceLeinLaunchWhenPossible, IWithREPLView runOnceREPLAvailable) {
+    protected void launchProjectCheckRunning(final IProject project, IFile[] filesToLaunch, String mode, boolean forceLeinLaunchWhenPossible, final IWithREPLView runOnceREPLAvailable) {
     	assert mode != null;
     	
     	String projectName = project.getName();
@@ -186,9 +187,12 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
     	} else {
     		DisplayUtil.asyncExec(new Runnable() {
 				@Override public void run() {
-					IViewPart replView = CCWPlugin.getDefault().getProjectREPL(project);
+					REPLView replView = CCWPlugin.getProjectREPL(project);
 					if (replView != null) {
 						replView.getViewSite().getPage().activate(replView);
+						if (runOnceREPLAvailable != null) {
+							runOnceREPLAvailable.run(replView);
+						}
 					} else {
 						CCWPlugin.getTracer().trace(TraceOptions.LAUNCHER, "Should not be there: because in the normal course of things, a Launch does not survive its REPLView");
 					}
@@ -231,7 +235,6 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
 			} else {
 				config = findLaunchConfiguration(project);
 				if (config == null) {
-    				System.out.println("creating basic configuration (no lein configuration)");
             		config = createConfiguration(project, null);
     			}
         	}
@@ -241,6 +244,10 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
 				ILaunchConfigurationWorkingCopy runnableConfiguration =
             	    config.copy(name);
             	try {
+                	ClojureLaunchShortcut.launchNameREPLURLPromiseAndWithREPLView.put(name, new Pair<Object,IWithREPLView>(ClojureLaunchDelegate.promise(), runOnceREPLAvailable));
+                	CCWPlugin.log("putting in launchNameREPLURLPromiseAndWithREPLView the key: " + name);
+
+            		
         			LaunchUtils.setFilesToLaunchString(runnableConfiguration, Arrays.asList(filesToLaunch));
 	            	if (filesToLaunch.length > 0) {
 	            		runnableConfiguration.setAttribute(LaunchUtils.ATTR_NS_TO_START_IN, ClojureCore.findMaybeLibNamespace(filesToLaunch[0]));

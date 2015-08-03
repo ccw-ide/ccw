@@ -217,8 +217,11 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
         launch.setAttribute(LaunchUtils.ATTR_IS_AUTO_RELOAD_ENABLED, Boolean.toString(activateAutoReload));
 
     	final String name = configuration.getName();
-    	ClojureLaunchShortcut.launchNameREPLURLPromiseAndWithREPLView.put(name, new Pair<Object,IWithREPLView>(promise(), null));
-    	CCWPlugin.log("putting in launchNameREPLURLPromiseAndWithREPLView the key: " + name);
+    	if (!ClojureLaunchShortcut.launchNameREPLURLPromiseAndWithREPLView.containsKey(name)) {
+    		// Set a key since it's used both for getting an instance of IWithREPLView and dataflow via the promise
+    		ClojureLaunchShortcut.launchNameREPLURLPromiseAndWithREPLView.put(name, new Pair<Object,IWithREPLView>(promise(), null));
+    		CCWPlugin.log("putting in launchNameREPLURLPromiseAndWithREPLView the key: " + name);
+    	}
         
         
         BundleUtils.requireAndGetVar(CCWPlugin.getDefault().getBundle().getSymbolicName(), "clojure.tools.nrepl.ack/reset-ack-port!").invoke();
@@ -479,7 +482,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
         }
     }
 
-    private Object promise() {
+    public static Object promise() {
     	IFn promise = clojure.java.api.Clojure.var("clojure.core", "promise");
     	return promise.invoke();
     }

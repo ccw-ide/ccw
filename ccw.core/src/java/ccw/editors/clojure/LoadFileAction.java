@@ -70,7 +70,6 @@ public class LoadFileAction extends Action {
         if (repl != null && !repl.isDisposed())  {
         	try {
         		evaluateFileText(repl, editor.getDocument().get(), filePath, sourcePath, fileName);
-        		//	FIXME: normal that we switch in namespace if start (if no repl), and not if not start ... ?
         	} catch (Exception e) {
         		CCWPlugin.logError("Could not start a REPL for loading file " + filePath, e);
         	}
