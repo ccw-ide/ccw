@@ -19,6 +19,9 @@ Laurent Petit <laurent dot petit at gmail dot com>
 - Fix an issue on OS X to preventively fix the PATH environement variable which is generally not even set with `/usr/local/bin` included. Fixes #709
 - Launching a new REPL now works similarly from within an editor or from the contextual menu of a clojure file: the editor content or file content is loaded, and the REPL switches to the corresponding namespace. Fixes #833
 
+=== Preferences
+- Fix spurious exceptions thrown after having changed text color preferences
+
 == Counterclockwise 0.32.0
 
 `0.32.0` released on July 29, 2015

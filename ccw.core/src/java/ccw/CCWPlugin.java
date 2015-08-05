@@ -559,7 +559,10 @@ public class CCWPlugin extends AbstractUIPlugin {
 		return scanContext;
 	}
 	
-	public static @NonNull RGB getPreferenceRGB(IPreferenceStore store, String preferenceKey) {
+	/**
+	 * @return null if a default color must be used (e.g. System color)
+	 */
+	public static RGB getPreferenceRGB(IPreferenceStore store, String preferenceKey) {
 		String enabledKey = PreferenceConstants.getEnabledPreferenceKey(preferenceKey);
 		if (store.contains(enabledKey)) {
 		    return store.getBoolean(PreferenceConstants.getEnabledPreferenceKey(preferenceKey))
@@ -572,7 +575,7 @@ public class CCWPlugin extends AbstractUIPlugin {
 				return PreferenceConverter.getColor(store, preferenceKey);
 			}
 		} else {
-			throw new RuntimeException("No color preference for key " + preferenceKey);
+			return null;
 		}
 	}
 	
@@ -611,7 +614,8 @@ public class CCWPlugin extends AbstractUIPlugin {
 	}
 	
 	public static Color getPreferenceColor(IPreferenceStore store, String preferenceKey) {
-		return getColor(getPreferenceRGB(store, preferenceKey));
+		RGB rgb = getPreferenceRGB(store, preferenceKey);
+		return rgb!=null ? getColor(rgb) : null;
 	}
 	
 	/**
