@@ -25,9 +25,9 @@ EOF
 
 test $? || exit $?
 
-wget http://updatesite.ccw-ide.org/branch/${BRANCH}/${UPDATESITE}/content.jar || exit 1
+wget http://updatesite.ccw-ide.org/branch/${BRANCH}/${UPDATESITE}/content.jar || exit $?
 
-wget http://updatesite.ccw-ide.org/branch/${BRANCH}/${UPDATESITE}/documentation.html || exit 1
+wget http://updatesite.ccw-ide.org/branch/${BRANCH}/${UPDATESITE}/documentation.html || exit $?
 
 ## UPDATE The branch p2 repository by referencing this build's p2 repository
 # Create compositeArtifacts.xml 
@@ -60,9 +60,6 @@ cat <<EOF > ${WORKSPACE}/compositeContent.xml
 </repository>
 EOF
 
-
-test $? || exit $?
-
 # Push branch p2 repository files via FTP
 ftp -pn ${FTP_HOST} <<EOF
 quote USER ${FTP_USER}
@@ -77,30 +74,15 @@ quit
 EOF
 test $? || exit $?
 
-[ -d ${PRODUCTS_DIR} ] || ( echo "Skipping ftp publication of CCW products for missing directory ${PRODUCTS_DIR}"; exit 1; )
-
-# Create directory products in ftp
-ftp -pn ${FTP_HOST} <<EOF
-quote USER ${FTP_USER}
-quote PASS ${FTP_PASSWORD}
-bin
-prompt off
-lcd ${PRODUCTS_DIR}
-cd ${FTP_UPDATESITE_ROOT}/${BRANCH}/${UPDATESITE}
-mkdir products 
-quit
-EOF
+[ -d ${PRODUCTS_DIR} ] || exit $?
 
 # iterate over the products to push in parallel
 
 lftp ftp://${FTP_USER}:${FTP_PASSWORD}@${FTP_HOST} <<EOF
 set ftp:passive-mode true
-user ${FTP_USER} ${FTP_PASSWORD}
-open ${FTP_HOST}
 mirror -R -v ${PRODUCTS_DIR}/ ${FTP_UPDATESITE_DIR}/products
 quit
 EOF
-wait
 
 cd ${PRODUCTS_DIR}
 PRODUCTS="`ls Counterclockwise*.zip`"

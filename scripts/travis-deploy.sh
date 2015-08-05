@@ -70,21 +70,18 @@ EOF
 #put compositeContent.xml
 #quit
 #EOF
-#test $? || ( echo "Problem while updating branch ${BRANCH} repository artifacts for build ${UPDATESITE}" ; exit $? )
+#test $? || exit $?
 
 
-[ -d ${PRODUCTS_DIR} ] || exit 1
+[ -d ${PRODUCTS_DIR} ] || exit $?
 
 # iterate over the products to push in parallel
 
 lftp ftp://${FTP_USER}:${FTP_PASSWORD}@${FTP_HOST} <<EOF
 set ftp:passive-mode true
-user ${FTP_USER} ${FTP_PASSWORD}
-open ${FTP_HOST}
 mirror -R -v ${PRODUCTS_DIR}/ ${FTP_UPDATESITE_DIR}/products
 quit
 EOF
-wait
 
 cd ${PRODUCTS_DIR}
 PRODUCTS="`ls Counterclockwise*.zip`"
