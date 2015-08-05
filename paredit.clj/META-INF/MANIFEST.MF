@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Paredit.clj
 Bundle-SymbolicName: paredit.clj;singleton:=true
-Bundle-Version: 0.32.1.qualifier
+Bundle-Version: 0.33.0.STABLE001
 Bundle-ClassPath: .,
  src/
 Bundle-Vendor: Counterclockwise team

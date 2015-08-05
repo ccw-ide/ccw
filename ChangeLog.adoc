@@ -8,9 +8,9 @@ Laurent Petit <laurent dot petit at gmail dot com>
 :toc-title: ChangeLog
 :toclevels: 0
 
-== Counterclockwise 0.32.1
+== Counterclockwise 0.33.0
 
-`0.32.1` released on July ..., 2015
+`0.33.0` released on August 5, 2015
 
 === Editor
 - double-click when in code now does the same as if the user had triggered the `Expand Selection Right` command. The net result is that you can select entire forms by double clicking on their start character ; you can also select entire symbols even if there are hypens inside, etc. Fixes #516
@@ -21,6 +21,7 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 === Preferences
 - Fix spurious exceptions thrown after having changed text color preferences
+
 
 == Counterclockwise 0.32.0
 
