@@ -21,7 +21,7 @@ addons:
   apt:
     packages:
     - metacity
-#    - lftp
+    - lftp
 
 branches:
   except:
