@@ -103,8 +103,9 @@
   "Is the offset in the parse tree in a 'code partition' or not?"
   [parse-tree offset]
   (with-important-memoized 
-    (let [offset-loc (-> parse-tree parsed-root-loc (loc-for-offset offset))] 
-      (in-code? offset-loc))))
+    (if-let [offset-loc (-> parse-tree parsed-root-loc (loc-for-offset offset))]
+      (in-code? offset-loc)
+      true)))
 
 (defmulti paredit (fn [k & args] k))
 
