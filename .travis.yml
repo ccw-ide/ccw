@@ -1,42 +1,39 @@
-sudo: false # explicitly ask for using the new docker-based infrastructure
+sudo: false # trigger new docker infrastructure
+
+language: java
+
+jdk: oraclejdk7
+
+cache:
+  directories:
+    - ${HOME}/.m2
+
+env:
+  global:
+    - DISPLAY=:99.0
+    - secure: "VK+IqyTFmEf5sv8OYOa6vLqcs0SAjC/ODklIDs0rr1zU/w21mZI2eH1w5YVk\ngwWA1QR7JOxWM6S9ED4NqHymK6QOj85W4FUv0seRv5LGJ1ATAUSzyElP0BXS\n46XsROFj9itTRwZkLdFaGGO14PRAQAznS6XM22uyQO3dg1wB4bQ="
+    - secure: "ngfDTSbLJ9suMJ+hUJws7wKbP184+Poyd09Rc3MEdpD8oq2mW8+XYi1bjmnA\n04bxqQ+hnLCdxjVqaXjp7nMB8pCHxWaraoOyU1uJJxFSNO1y1f2k09eAexA+\nLN4fXIU8HjPLvXz2u8oZITYCWKuCyAIuiFus7N9RZ+Kk/mYE0lg="
+    - secure: "YDLYUZiLuoNCRpdIMxycacPOyJkIw/lfycpEiIfoyuVQCTf0Sig/KZpjDyHj\nlU8gPqwYewp//lTyczuJIFq8IOghO3QejGaqlNGNLOmFPIsfdThMGOYn9IOJ\nkqO4enPLfxjnEAxvcKQDboUrCETjsimCvMccgIZDcvlQ6iFAdzA="
+
+install: true
 
 addons:
   apt:
     packages:
     - metacity
-    - ftp
-    - lftp
-
-cache:
-  directories:
-    - ${HOME}/.m2
+#    - lftp
 
 branches:
   except:
     # workaround to prevent version tags from being built in addition to the build commit
     - /^v?[0-9]/
 
-language: java
-
-jdk:
-  - openjdk7
-
-env:
-  global:
-    - secure: "VK+IqyTFmEf5sv8OYOa6vLqcs0SAjC/ODklIDs0rr1zU/w21mZI2eH1w5YVk\ngwWA1QR7JOxWM6S9ED4NqHymK6QOj85W4FUv0seRv5LGJ1ATAUSzyElP0BXS\n46XsROFj9itTRwZkLdFaGGO14PRAQAznS6XM22uyQO3dg1wB4bQ="
-    - secure: "ngfDTSbLJ9suMJ+hUJws7wKbP184+Poyd09Rc3MEdpD8oq2mW8+XYi1bjmnA\n04bxqQ+hnLCdxjVqaXjp7nMB8pCHxWaraoOyU1uJJxFSNO1y1f2k09eAexA+\nLN4fXIU8HjPLvXz2u8oZITYCWKuCyAIuiFus7N9RZ+Kk/mYE0lg="
-    - secure: "YDLYUZiLuoNCRpdIMxycacPOyJkIw/lfycpEiIfoyuVQCTf0Sig/KZpjDyHj\nlU8gPqwYewp//lTyczuJIFq8IOghO3QejGaqlNGNLOmFPIsfdThMGOYn9IOJ\nkqO4enPLfxjnEAxvcKQDboUrCETjsimCvMccgIZDcvlQ6iFAdzA="
-
-before_install:
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
-  - sleep 5 # give xvfb some time to start
-  - metacity --sm-disable --replace &
-  - sleep 5 # give metacity some time to start
-
-install: true
 
 before_script:
+  - sh -e /etc/init.d/xvfb start
+  - sleep 10 # give xvfb some time to start
+  - metacity --sm-disable --replace 2> metacity.err &
+  - sleep 10 # give metacity some time to start
   - export QUALIFIER=CI$(printf "%0*d" 6 ${TRAVIS_BUILD_NUMBER})-${TRAVIS_BRANCH}-git${TRAVIS_COMMIT}
   - export BRANCH=${TRAVIS_BRANCH}
 
