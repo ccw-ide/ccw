@@ -15,8 +15,8 @@ FTP_UPDATESITE_DIR=${FTP_BRANCH_DIR}/${UPDATESITE}
 lftp ftp://${FTP_USER}:${FTP_PASSWORD}@${FTP_HOST} <<EOF
 set ftp:passive-mode true
 mirror -R -e -v ${REPOSITORY_DIR}/ ${FTP_UPDATESITE_DIR}
-mirror -R -e -v ${WORKSPACE}/doc/target/html/ ${FTP_UPDATESITE_DIR}
-mirror -R -e -v ${WORKSPACE}/doc/target/html/ ${FTP_BRANCH_DIR}/doc
+mirror -R -e -v -x target ${WORKSPACE}/doc/target/html/ ${FTP_UPDATESITE_DIR}
+mirror -R -e -v -x target ${WORKSPACE}/doc/target/html/ ${FTP_BRANCH_DIR}/doc
 quit
 EOF
 
