@@ -9,20 +9,13 @@ PRODUCTS_DIR="${TRAVIS_BUILD_DIR}/ccw.product/target/products"
 FTP_BRANCH_DIR=/www/updatesite/branch/${BRANCH}
 FTP_UPDATESITE_DIR=${FTP_BRANCH_DIR}/${UPDATESITE}
 
-## Push the p2 repository for the build $UPDATESITE
-## and also the documentation files
-lftp <<EOF
-set ftp:passive-mode true
-user ${FTP_USER} ${FTP_PASSWORD}
-open ${FTP_HOST}
-
 # put p2 repository in the right branch / versioned subdirecty updatesite
-mirror -R -e -v ${REPOSITORY_DIR}/ ${FTP_UPDATESITE_DIR}
-
 # put documentation at the root of the update site so that it is self-documented
-mirror -R -e -v ${TRAVIS_BUILD_DIR}/doc/target/html/ ${FTP_UPDATESITE_DIR}
-
 # put documentation at the root of the branch site to serve as the up to date travis generated documentation
+lftp ftp://${FTP_USER}:${FTP_PASSWORD}@${FTP_HOST} <<EOF
+set ftp:passive-mode true
+mirror -R -e -v ${REPOSITORY_DIR}/ ${FTP_UPDATESITE_DIR}
+mirror -R -e -v ${TRAVIS_BUILD_DIR}/doc/target/html/ ${FTP_UPDATESITE_DIR}
 mirror -R -e -v ${TRAVIS_BUILD_DIR}/doc/target/html/ ${FTP_BRANCH_DIR}/travis-doc
 quit
 EOF
@@ -84,13 +77,11 @@ EOF
 
 # iterate over the products to push in parallel
 
-lftp <<EOF
+lftp ftp://${FTP_USER}:${FTP_PASSWORD}@${FTP_HOST} <<EOF
 set ftp:passive-mode true
 user ${FTP_USER} ${FTP_PASSWORD}
 open ${FTP_HOST}
-
-# TODO exclude some things ?
-mirror -R -r -e -v ${PRODUCTS_DIR}/ ${FTP_UPDATESITE_DIR}/products
+mirror -R -e -v ${PRODUCTS_DIR}/ ${FTP_UPDATESITE_DIR}/products
 quit
 EOF
 wait
@@ -99,8 +90,6 @@ cd ${PRODUCTS_DIR}
 PRODUCTS="`ls Counterclockwise*.zip`"
 for PRODUCT in ${PRODUCTS}
 do
-# --spider option only checks for file presence, without downloading it
-wget --spider http://updatesite.ccw-ide.org/branch/${UPDATESITE}/products/${PRODUCT}  || ( echo "Problem while pushing CCW product ${PRODUCT} via FTP" ; exit $? )
-echo "Pushed product ${PRODUCT}"
+    # --spider option only checks for file presence, without downloading it
+    wget --spider http://updatesite.ccw-ide.org/branch/${UPDATESITE}/products/${PRODUCT}  || exit $?
 done
-
