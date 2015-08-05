@@ -9,6 +9,9 @@ PRODUCTS_DIR="${WORKSPACE}/ccw.product/target/products"
 FTP_BRANCH_DIR=/www/updatesite/branch/${BRANCH}
 FTP_UPDATESITE_DIR=${FTP_BRANCH_DIR}/${UPDATESITE}
 
+echo "REPOSITORY_DIR:${REPOSITORY_DIR}"
+echo "FTP_UPDATESITE_DIR:${FTP_UPDATESITE_DIR}"
+
 # put p2 repository in the right branch / versioned subdirecty updatesite
 # put documentation at the root of the update site so that it is self-documented
 # put documentation at the root of the branch site to serve as the up to date generated documentation
