@@ -17,8 +17,8 @@ echo "FTP_UPDATESITE_DIR:${FTP_UPDATESITE_DIR}"
 # put documentation at the root of the branch site to serve as the up to date generated documentation
 lftp ftp://${FTP_USER}:${FTP_PASSWORD}@${FTP_HOST} <<EOF
 set ftp:passive-mode true
-mirror -R -e -v ${REPOSITORY_DIR}/ ${FTP_UPDATESITE_DIR}
-mirror -R -e -v -x target ${WORKSPACE}/doc/target/html/ ${FTP_UPDATESITE_DIR}
+mirror -R -v ${REPOSITORY_DIR}/ ${FTP_UPDATESITE_DIR}
+mirror -R -v -x target ${WORKSPACE}/doc/target/html/ ${FTP_UPDATESITE_DIR}
 mirror -R -e -v -x target ${WORKSPACE}/doc/target/html/ ${FTP_BRANCH_DIR}/doc
 quit
 EOF
@@ -97,7 +97,7 @@ lftp ftp://${FTP_USER}:${FTP_PASSWORD}@${FTP_HOST} <<EOF
 set ftp:passive-mode true
 user ${FTP_USER} ${FTP_PASSWORD}
 open ${FTP_HOST}
-mirror -R -e -v ${PRODUCTS_DIR}/ ${FTP_UPDATESITE_DIR}/products
+mirror -R -v ${PRODUCTS_DIR}/ ${FTP_UPDATESITE_DIR}/products
 quit
 EOF
 wait
