@@ -1,69 +1,37 @@
 #!/bin/bash
 
-echo ${FTP_HOST}
-echo ${FTP_USER}
-echo ${FTP_PASSWORD}
-
-FTP_UPDATESITE_ROOT=/www/updatesite/branch
-REPOSITORY_DIR="${WORKSPACE}/ccw.product/target/repository"
 UPDATESITE=${QUALIFIER}
 
+# FTP dirs are prefixed with FTP. Local dirs have no prefix.
+REPOSITORY_DIR="${WORKSPACE}/ccw.product/target/repository"
 PRODUCTS_DIR="${WORKSPACE}/ccw.product/target/products"
 
+FTP_BRANCH_DIR=/www/updatesite/branch/${BRANCH}
+FTP_UPDATESITE_DIR=${FTP_BRANCH_DIR}/${UPDATESITE}
 
-## Push the p2 repository for the build <qualifier>
-## and also the documentation files
-ftp -pn ${FTP_HOST} <<EOF
-quote USER ${FTP_USER}
-quote PASS ${FTP_PASSWORD}
-bin
-prompt off
-lcd ${REPOSITORY_DIR}
-cd ${FTP_UPDATESITE_ROOT}
-mkdir ${BRANCH}
-cd ${BRANCH}
-mkdir ${UPDATESITE}
-cd ${UPDATESITE}
-lcd features
-mkdir features
-cd features
-mput *
-lcd ../binary
-cd ..
-mkdir binary
-cd binary
-mput *
-lcd ../plugins
-cd ..
-mkdir plugins
-cd plugins
-mput *
-lcd ..
-cd ..
-put artifacts.jar
-put content.jar
-lcd ${WORKSPACE}/doc/target/html
-mput * 
-cd ${FTP_UPDATESITE_ROOT}/${BRANCH}
-mkdir doc
-cd doc
-mput *
+# put p2 repository in the right branch / versioned subdirecty updatesite
+# put documentation at the root of the update site so that it is self-documented
+# put documentation at the root of the branch site to serve as the up to date generated documentation
+lftp ftp://${FTP_USER}:${FTP_PASSWORD}@${FTP_HOST} <<EOF
+set ftp:passive-mode true
+mirror -R -e -v ${REPOSITORY_DIR}/ ${FTP_UPDATESITE_DIR}
+mirror -R -e -v ${TRAVIS_BUILD_DIR}/doc/target/html/ ${FTP_UPDATESITE_DIR}
+mirror -R -e -v ${TRAVIS_BUILD_DIR}/doc/target/html/ ${FTP_BRANCH_DIR}/doc
 quit
 EOF
 
-test $? || ( echo "FTP Push for build ${UPDATESITE} failed with error code $?" ; exit $? )
+test $? || exit $?
 
-wget http://updatesite.ccw-ide.org/branch/${BRANCH}/${UPDATESITE}/content.jar || ( echo "Test that FTP Push for build ${UPDATESITE} worked failed: was unable to fetch http://updatesite.ccw-ide.org/branch/${BRANCH}/${UPDATESITE}/content.jar" ; exit 1 )
+wget http://updatesite.ccw-ide.org/branch/${BRANCH}/${UPDATESITE}/content.jar || exit 1
 
-wget http://updatesite.ccw-ide.org/branch/${BRANCH}/${UPDATESITE}/documentation.html || ( echo "Test that FTP Push for build ${UPDATESITE} worked failed: was unable to fetch http://updatesite.ccw-ide.org/branch/${BRANCH}/${UPDATESITE}/documentation.html" ; exit 1 )
+wget http://updatesite.ccw-ide.org/branch/${BRANCH}/${UPDATESITE}/documentation.html || exit 1
 
 ## UPDATE The branch p2 repository by referencing this build's p2 repository
-
 # Create compositeArtifacts.xml 
 cat <<EOF > ${WORKSPACE}/compositeArtifacts.xml
 <?xml version='1.0' encoding='UTF-8'?>
 <?compositeArtifactRepository version='1.0.0'?>
-<repository name='&quot;Counterclockwise Travis CI Last Build - Branch ${BRANCH}&quot;'
+<repository name='&quot;Counterclockwise Jenkins CI Last Build - Branch ${BRANCH}&quot;'
     type='org.eclipse.equinox.internal.p2.artifact.repository.CompositeArtifactRepository' version='1.0.0'>
   <properties size='1'>
     <property name='p2.timestamp' value='1243822502440'/>
@@ -74,13 +42,11 @@ cat <<EOF > ${WORKSPACE}/compositeArtifacts.xml
 </repository>
 EOF
 
-test $? || ( echo "Problem while creating file compositeArtifacts.xml for build ${UPDATESITE}" ; exit $? )
-
 # Create compositeContent.xml
 cat <<EOF > ${WORKSPACE}/compositeContent.xml
 <?xml version='1.0' encoding='UTF-8'?>
 <?compositeMetadataRepository version='1.0.0'?>
-<repository name='&quot;Counterclockwise Travis CI Last Build - Branch ${BRANCH}&quot;'
+<repository name='&quot;Counterclockwise Jenkins CI Last Build - Branch ${BRANCH}&quot;'
     type='org.eclipse.equinox.internal.p2.metadata.repository.CompositeMetadataRepository' version='1.0.0'>
   <properties size='1'>
     <property name='p2.timestamp' value='1243822502499'/>
@@ -91,7 +57,8 @@ cat <<EOF > ${WORKSPACE}/compositeContent.xml
 </repository>
 EOF
 
-test $? || ( echo "Problem while creating file compositeContent.xml for build ${UPDATESITE}" ; exit $? )
+
+test $? || exit $?
 
 # Push branch p2 repository files via FTP
 ftp -pn ${FTP_HOST} <<EOF
@@ -105,8 +72,7 @@ put compositeArtifacts.xml
 put compositeContent.xml
 quit
 EOF
-test $? || ( echo "Problem while updating branch ${BRANCH} repository artifacts for build ${UPDATESITE}" ; exit $? )
-
+test $? || exit $?
 
 [ -d ${PRODUCTS_DIR} ] || ( echo "Skipping ftp publication of CCW products for missing directory ${PRODUCTS_DIR}"; exit 1; )
 
@@ -123,29 +89,20 @@ quit
 EOF
 
 # iterate over the products to push in parallel
+
+lftp ftp://${FTP_USER}:${FTP_PASSWORD}@${FTP_HOST} <<EOF
+set ftp:passive-mode true
+user ${FTP_USER} ${FTP_PASSWORD}
+open ${FTP_HOST}
+mirror -R -e -v ${PRODUCTS_DIR}/ ${FTP_UPDATESITE_DIR}/products
+quit
+EOF
+wait
+
 cd ${PRODUCTS_DIR}
 PRODUCTS="`ls Counterclockwise*.zip`"
 for PRODUCT in ${PRODUCTS}
 do
-# Push CCW products files via FTP
-ftp -pn ${FTP_HOST} <<EOF &
-quote USER ${FTP_USER}
-quote PASS ${FTP_PASSWORD}
-bin
-prompt off
-lcd ${PRODUCTS_DIR}
-cd ${FTP_UPDATESITE_ROOT}/${BRANCH}/${UPDATESITE}/products
-put ${PRODUCT}
-quit
-EOF
+    # --spider option only checks for file presence, without downloading it
+    wget --spider http://updatesite.ccw-ide.org/branch/${UPDATESITE}/products/${PRODUCT}  || exit $?
 done
-
-wait
-
-for PRODUCT in ${PRODUCTS}
-do
-# --spider option only checks for file presence, without downloading it
-wget --spider http://updatesite.ccw-ide.org/branch/${UPDATESITE}/products/${PRODUCT}  || ( echo "Problem while pushing CCW product ${PRODUCT} via FTP" ; exit $? )
-echo "Pushed product ${PRODUCT}"
-done
-

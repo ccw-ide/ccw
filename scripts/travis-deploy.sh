@@ -11,7 +11,7 @@ FTP_UPDATESITE_DIR=${FTP_BRANCH_DIR}/${UPDATESITE}
 
 # put p2 repository in the right branch / versioned subdirecty updatesite
 # put documentation at the root of the update site so that it is self-documented
-# put documentation at the root of the branch site to serve as the up to date travis generated documentation
+# put documentation at the root of the branch site to serve as the up to date generated documentation
 lftp ftp://${FTP_USER}:${FTP_PASSWORD}@${FTP_HOST} <<EOF
 set ftp:passive-mode true
 mirror -R -e -v ${REPOSITORY_DIR}/ ${FTP_UPDATESITE_DIR}

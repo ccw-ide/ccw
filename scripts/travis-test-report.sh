@@ -1,67 +1,37 @@
 #!/bin/bash
 
-FTP_UPDATESITE_ROOT=/www/updatesite/branch
+UPDATESITE=travis${QUALIFIER}
+
+# FTP dirs are prefixed with FTP. Local dirs have no prefix.
 TESTS_DIR="${TRAVIS_BUILD_DIR}/ccw.core.test/target/surefire-reports"
 PAREDIT_TESTS_DIR="${TRAVIS_BUILD_DIR}/paredit.clj/target/test-reports"
 SCREENSHOTS_DIR="${TRAVIS_BUILD_DIR}/ccw.core.test/screenshots"
-UPDATESITE=travis${QUALIFIER}
 ERROR=ERROR-${ECLIPSE_TARGET}-${TRAVIS_JDK_VERSION}
 
-
-# Create infrastructure
-ftp -pn ${FTP_HOST} <<EOF
-quote USER ${FTP_USER}
-quote PASS ${FTP_PASSWORD}
-bin
-prompt off
-cd ${FTP_UPDATESITE_ROOT}
-mkdir ${BRANCH}
-cd ${BRANCH}
-mkdir ${UPDATESITE}
-cd ${UPDATESITE}
-mkdir ${ERROR}
-quit
-EOF
-
+FTP_BRANCH_DIR=/www/updatesite/branch/${BRANCH}
+FTP_UPDATESITE_DIR=${FTP_BRANCH_DIR}/${UPDATESITE}
+FTP_ERROR_DIR=${FTP_UPDATESITE_DIR}/${ERROR}
 
 # Report paredit.clj unit tests
 [ -d ${PAREDIT_TESTS_DIR} ] || echo "Skipping ftp reporting for missing directory ${PAREDIT_TESTS_DIR}"
-[ -d ${PAREDIT_TESTS_DIR} ] && ftp -pn ${FTP_HOST} <<EOF
-quote USER ${FTP_USER}
-quote PASS ${FTP_PASSWORD}
-bin
-prompt off
-cd ${FTP_UPDATESITE_ROOT}/${BRANCH}/${UPDATESITE}/${ERROR}
-mkdir paredit
-cd paredit
-lcd ${PAREDIT_TESTS_DIR}
-mput *
+[ -d ${PAREDIT_TESTS_DIR} ] && lftp ftp://${FTP_USER}:${FTP_PASSWORD}@${FTP_HOST} <<EOF
+set ftp:passive-mode true
+mirror -R -e -v ${PAREDIT_TESTS_DIR}/ ${FTP_ERROR_DIR}/paredit
 quit
 EOF
 
-
 # Report ccw.core.tests integration tests
 [ -d ${TESTS_DIR} ] || echo "Skipping ftp reporting for missing directory ${TESTS_DIR}"
-[ -d ${TESTS_DIR} ] && ftp -pn ${FTP_HOST} <<EOF
-quote USER ${FTP_USER}
-quote PASS ${FTP_PASSWORD}
-bin
-prompt off
-cd ${FTP_UPDATESITE_ROOT}/${BRANCH}/${UPDATESITE}/${ERROR}
-lcd ${TESTS_DIR}
-mput *
+[ -d ${TESTS_DIR} ] && lftp ftp://${FTP_USER}:${FTP_PASSWORD}@${FTP_HOST} <<EOF
+set ftp:passive-mode true
+mirror -R -e -v ${TESTS_DIR}/ ${FTP_ERROR_DIR}
 quit
 EOF
 
 # Report ccw.core.tests integration tests screenshots
 [ -d ${SCREENSHOTS_DIR} ] || echo "Skipping ftp reporting for missing directory ${SCREENSHOTS_DIR}"
-[ -d ${SCREENSHOTS_DIR} ] && ftp -pn ${FTP_HOST} <<EOF
-quote USER ${FTP_USER}
-quote PASS ${FTP_PASSWORD}
-bin
-prompt off
-cd ${FTP_UPDATESITE_ROOT}/${BRANCH}/${UPDATESITE}/${ERROR}
-lcd ${SCREENSHOTS_DIR}
-mput *
+[ -d ${SCREENSHOTS_DIR} ] && lftp ftp://${FTP_USER}:${FTP_PASSWORD}@${FTP_HOST} <<EOF
+set ftp:passive-mode true
+mirror -R -e -v ${SCREENSHOTS_DIR}/ ${FTP_ERROR_DIR}
 quit
 EOF
