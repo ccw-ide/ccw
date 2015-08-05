@@ -80,7 +80,7 @@ test $? || exit $?
 
 lftp ftp://${FTP_USER}:${FTP_PASSWORD}@${FTP_HOST} <<EOF
 set ftp:passive-mode true
-mirror -R -v ${PRODUCTS_DIR}/ ${FTP_UPDATESITE_DIR}/products
+mirror -R -x ccw -v ${PRODUCTS_DIR}/ ${FTP_UPDATESITE_DIR}/products
 quit
 EOF
 
