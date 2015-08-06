@@ -18,8 +18,8 @@ echo "FTP_UPDATESITE_DIR:${FTP_UPDATESITE_DIR}"
 lftp ftp://${FTP_USER}:${FTP_PASSWORD}@${FTP_HOST} <<EOF
 set ftp:passive-mode true
 mirror -R --verbose=3 ${REPOSITORY_DIR}/ ${FTP_UPDATESITE_DIR}
-mirror -R --verbose=3 -I *.html ${WORKSPACE}/doc/target/html/ ${FTP_UPDATESITE_DIR}
-mirror -R --verbose=3 -I *.html ${WORKSPACE}/doc/target/html/ ${FTP_BRANCH_DIR}/doc
+mirror -R --verbose=3 -x target -I *.html ${WORKSPACE}/doc/target/html/ ${FTP_UPDATESITE_DIR}
+mirror -R --verbose=3 -x target -I *.html ${WORKSPACE}/doc/target/html/ ${FTP_BRANCH_DIR}/doc
 quit
 EOF
 
@@ -80,7 +80,7 @@ test $? || exit $?
 
 lftp ftp://${FTP_USER}:${FTP_PASSWORD}@${FTP_HOST} <<EOF
 set ftp:passive-mode true
-mirror -R --verbose=3 -I *.zip ${PRODUCTS_DIR}/ ${FTP_UPDATESITE_DIR}/products
+mirror -R --verbose=3 -x ccw -I *.zip ${PRODUCTS_DIR}/ ${FTP_UPDATESITE_DIR}/products
 quit
 EOF
 
@@ -89,5 +89,5 @@ PRODUCTS="`ls Counterclockwise*.zip`"
 for PRODUCT in ${PRODUCTS}
 do
     # --spider option only checks for file presence, without downloading it
-    wget --spider http://updatesite.ccw-ide.org/branch/${UPDATESITE}/products/${PRODUCT}  || exit $?
+    wget --spider http://updatesite.ccw-ide.org/branch/${BRANCH}/${UPDATESITE}/products/${PRODUCT}  || exit $?
 done
