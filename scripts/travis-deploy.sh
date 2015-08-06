@@ -14,7 +14,7 @@ FTP_UPDATESITE_DIR=${FTP_BRANCH_DIR}/${UPDATESITE}
 # put documentation at the root of the branch site to serve as the up to date generated documentation
 lftp ftp://${FTP_USER}:${FTP_PASSWORD}@${FTP_HOST} <<EOF
 set ftp:passive-mode true
-mirror -R --verbose=3 -x bin ${REPOSITORY_DIR}/ ${FTP_UPDATESITE_DIR}
+mirror -R --verbose=3 ${REPOSITORY_DIR}/ ${FTP_UPDATESITE_DIR}
 mirror -R --verbose=3 -I *.html ${TRAVIS_BUILD_DIR}/doc/target/html/ ${FTP_UPDATESITE_DIR}
 mirror -R --verbose=3 -I *.html ${TRAVIS_BUILD_DIR}/doc/target/html/ ${FTP_BRANCH_DIR}/travis-doc
 quit
