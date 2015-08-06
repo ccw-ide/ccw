@@ -28,7 +28,7 @@
         <class class="ccw.util.GenericExecutableExtension">
            <parameter
                  name="factory"
-                 value="ccw.editors.clojure.nrepl-hyperlink/factory">
+                 value="ccw.console.nrepl-hyperlink/factory">
            </parameter>
         </class>
 		<enablement>
@@ -44,7 +44,7 @@
         <class class="ccw.util.GenericExecutableExtension">
            <parameter
                  name="factory"
-                 value="ccw.editors.clojure.debug-hyperlink/factory">
+                 value="ccw.console.debug-hyperlink/factory">
            </parameter>
         </class>
         <enablement>

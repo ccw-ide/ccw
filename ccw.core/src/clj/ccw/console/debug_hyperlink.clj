@@ -1,4 +1,4 @@
-(ns ccw.editors.clojure.debug-hyperlink
+(ns ccw.console.debug-hyperlink
   "Detect and create hyperlinks in Consoles when a pattern describing a JVM
    listening to some debug port is found.
    The first time the pattern is encountered for the currently attached console,
