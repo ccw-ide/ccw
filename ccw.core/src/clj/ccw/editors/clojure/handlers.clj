@@ -11,7 +11,7 @@
 
 (ns ccw.editors.clojure.handlers
   (:require [paredit.core :as pc]
-            [ccw.editors.clojure.clojure-hyperlink-detector :as hlu] ; hlu as HyperLinkUtil
+            [ccw.editors.clojure.hyperlink :as hlu] ; hlu as HyperLinkUtil
             [ccw.editors.clojure.PareditAutoEditStrategyImpl :as pimpl]) 
   (:use [clojure.core.incubator :only [-?>]])  
   (:import
@@ -163,7 +163,7 @@
 (defn open-declaration [_ event]
   (let [editor (editor event)
         caret-offset (-> editor .getUnSignedSelection .getOffset)]
-    (if-let [[{open :open}] (hlu/detect-hyperlinks caret-offset editor)]
+    (if-let [[{open :open}] (hlu/detect-hyperlinks [caret-offset 0] editor)]
       (open))))
 
 (defn content-assist [_ event]

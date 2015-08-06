@@ -1,29 +1,14 @@
-(ns ccw.editors.clojure.clojure-hyperlink-detector
+(ns ccw.editors.clojure.clojure-hyperlink
   (:require [clojure.zip :as z]
             [clojure.string :as str]
             [paredit.loc-utils :as lu]
             [clojure.tools.nrepl :as repl]
-            [ccw.editors.clojure.editor-support :as ed]
-            [ccw.editors.clojure.hyperlink :as hyperlink])
-  (:use [clojure.core.incubator :only [-?>]])
-  (:import 
-    [org.eclipse.jface.text BadLocationException
-                            IRegion
-                            Region
-                            ITextViewer] 
-    [org.eclipse.jface.text.hyperlink IHyperlink
-                                      IHyperlinkDetector]
-    [ccw.editors.clojure IClojureEditor
-                         ClojureEditorMessages
-                         IHyperlinkConstants
-                         AbstractHyperlinkDetector]
-    [ccw                 ClojureCore]
-    [ccw.repl IConnectionClient]))
-
-(def ID (IHyperlinkConstants/ClojureHyperlinkDetector_ID)) 
-(def TARGET_ID (IHyperlinkConstants/ClojureHyperlinkDetector_TARGET_ID))  
-
-(defn editor [^AbstractHyperlinkDetector this] (.getClassAdapter this IClojureEditor))
+            [ccw.editors.clojure.editor-support :as ed])
+  (:import  [org.eclipse.jface.text BadLocationException] 
+            [ccw.editors.clojure IClojureEditor
+                                 ClojureEditorMessages]
+            [ccw                 ClojureCore]
+            [ccw.repl IConnectionClient]))
 
 (defn find-decl [^String sym ^IClojureEditor editor]
   (let [split (.split sym "/")
@@ -32,7 +17,7 @@
         declaring-ns (.findDeclaringNamespace editor)
         command (String/format "(ccw.debug.serverrepl/find-symbol \"%s\" \"%s\" \"%s\")"
                   (into-array Object [s declaring-ns n]))
-        safeConnection (-?> editor .getCorrespondingREPL .getSafeToolingConnection)]
+        safeConnection (some-> editor .getCorrespondingREPL .getSafeToolingConnection)]
     
     (if-not safeConnection
       (do
@@ -53,21 +38,10 @@
            "ns" ns})))))
 
 (defn detect-hyperlinks
-  [offset ^IClojureEditor editor]
+  [[offset length] ^IClojureEditor editor]
   (let [rloc (-> editor .getParseState ed/getParseTree lu/parsed-root-loc)
         l (lu/loc-for-offset rloc offset)]
     (when-let [{:strs #{ns file line}} (and (= :symbol (-> l z/node :tag)) ; TODO transform :strs -> :keys
                                          (find-decl (lu/loc-text l) editor))]
-      [{:offset (lu/start-offset l) :length (-> l z/node :count)
+      [{:region [(lu/start-offset l) (-> l z/node :count)]
         :open #(ccw.ClojureCore/openInEditor ns file line)}])))
-
-(defn factory [ _ ]
-  (proxy [AbstractHyperlinkDetector]
-         []
-    (detectHyperlinks [textViewer ^IRegion region canShowMultipleHyperlinks?]
-      (when-let [hyperlinks (detect-hyperlinks (.getOffset region) (editor this))] 
-        (into-array IHyperlink (map (fn [{:keys #{offset length open}}] 
-                                      (hyperlink/make 
-                                        (Region. offset length) 
-                                        open))
-                                    hyperlinks))))))

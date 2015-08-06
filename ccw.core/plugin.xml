@@ -1715,7 +1715,8 @@
           name="%clojureHyperlinkDetector"
           targetId="ccw.ui.clojureCode">
       <class class="ccw.util.GenericExecutableExtension">
-         <parameter name="factory" value="ccw.editors.clojure.clojure-hyperlink-detector/factory"/>
+         <parameter name="factory" value="ccw.editors.clojure.hyperlink/factory"/>
+         <parameter name="detect-hyperlinks" value="ccw.editors.clojure.clojure-hyperlink/detect-hyperlinks"/>
       </class>
     </hyperlinkDetector>
     <hyperlinkDetector
@@ -1724,7 +1725,8 @@
           name="%nreplHyperlinkDetectorInJavaEditor"
           targetId="org.eclipse.jdt.ui.javaCode">
       <class class="ccw.util.GenericExecutableExtension">
-         <parameter name="factory" value="ccw.editors.clojure.nrepl-hyperlink-detector/factory"/>
+         <parameter name="factory" value="ccw.editors.clojure.hyperlink/factory"/>
+         <parameter name="detect-hyperlinks" value="ccw.editors.clojure.nrepl-hyperlink/detect-hyperlinks"/>
       </class>
     </hyperlinkDetector>
     <hyperlinkDetector
@@ -1734,10 +1736,8 @@
           targetId="ccw.ui.clojureCode">
        <class
              class="ccw.util.GenericExecutableExtension">
-          <parameter
-                name="factory"
-                value="ccw.editors.clojure.nrepl-hyperlink-detector/factory">
-          </parameter>
+         <parameter name="factory" value="ccw.editors.clojure.hyperlink/factory"/>
+         <parameter name="detect-hyperlinks" value="ccw.editors.clojure.nrepl-hyperlink/detect-hyperlinks"/>
        </class>
     </hyperlinkDetector>
     <hyperlinkDetector
@@ -1747,10 +1747,8 @@
           targetId="org.eclipse.ui.DefaultTextEditor">
        <class
              class="ccw.util.GenericExecutableExtension">
-          <parameter
-                name="factory"
-                value="ccw.editors.clojure.nrepl-hyperlink-detector/factory">
-          </parameter>
+         <parameter name="factory" value="ccw.editors.clojure.hyperlink/factory"/>
+         <parameter name="detect-hyperlinks" value="ccw.editors.clojure.nrepl-hyperlink/detect-hyperlinks"/>
        </class>
     </hyperlinkDetector>
  </extension>
