@@ -25,6 +25,11 @@
   "Return the absolute path (filesystem/OS dependent) of f"
   [f] (and f (.getAbsolutePath f)))
 
+(defn is-relative-path
+  "Return as is if a relative path"
+  [f]
+  (and f (not (.isAbsolute f)) f))
+
 (defn name
   "Return the file name, aka the last part of the path"
   [f] (.getName f))

@@ -465,7 +465,7 @@
             name="%command.navigateToDefinition.name"
             description="%command.navigateToDefinition.description"
             categoryId="org.eclipse.ui.category.navigate"
-            id="ccw.ui.edit.text.clojure.open.declaration">
+            id="ccw.ui.edit.text.clojure.open.hyperlink">
       </command>
 
       <command
@@ -930,7 +930,7 @@
       <key
             sequence="F3"
             contextId="ccw.ui.clojureEditorScope"
-            commandId="ccw.ui.edit.text.clojure.open.declaration"
+            commandId="ccw.ui.edit.text.clojure.open.hyperlink"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
 
       <key
@@ -1169,7 +1169,7 @@
             </command-->
 
             <command
-                  commandId="ccw.ui.edit.text.clojure.open.declaration"
+                  commandId="ccw.ui.edit.text.clojure.open.hyperlink"
                   label="Navigate to definition"
                   style="push">
             </command>
@@ -1284,7 +1284,7 @@
             </command-->
 
             <command
-                  commandId="ccw.ui.edit.text.clojure.open.declaration"
+                  commandId="ccw.ui.edit.text.clojure.open.hyperlink"
                   label="Navigate to definition"
                   style="push">
             </command>
@@ -1715,7 +1715,7 @@
           name="%clojureHyperlinkDetector"
           targetId="ccw.ui.clojureCode">
       <class class="ccw.util.GenericExecutableExtension">
-         <parameter name="factory" value="ccw.editors.clojure.hyperlink/factory"/>
+         <parameter name="factory" value="ccw.api.hyperlink/factory"/>
          <parameter name="detect-hyperlinks" value="ccw.editors.clojure.clojure-hyperlink/detect-hyperlinks"/>
       </class>
     </hyperlinkDetector>
@@ -1725,29 +1725,29 @@
           name="%nreplHyperlinkDetectorInJavaEditor"
           targetId="org.eclipse.jdt.ui.javaCode">
       <class class="ccw.util.GenericExecutableExtension">
-         <parameter name="factory" value="ccw.editors.clojure.hyperlink/factory"/>
+         <parameter name="factory" value="ccw.api.hyperlink/factory"/>
          <parameter name="detect-hyperlinks" value="ccw.editors.clojure.nrepl-hyperlink/detect-hyperlinks"/>
       </class>
     </hyperlinkDetector>
     <hyperlinkDetector
-          activate="true"
+          activate="false"
           id="ccw.nrepl.hyperlinkDetectorInClojureEditor"
           name="%nreplHyperlinkDetectorInClojureEditor"
           targetId="ccw.ui.clojureCode">
        <class
              class="ccw.util.GenericExecutableExtension">
-         <parameter name="factory" value="ccw.editors.clojure.hyperlink/factory"/>
+         <parameter name="factory" value="ccw.api.hyperlink/factory"/>
          <parameter name="detect-hyperlinks" value="ccw.editors.clojure.nrepl-hyperlink/detect-hyperlinks"/>
        </class>
     </hyperlinkDetector>
     <hyperlinkDetector
-          activate="false"
+          activate="true"
           id="ccw.nrepl.hyperlinkDetectorInTextEditor"
           name="%nreplHyperlinkDetectorInTextEditor"
           targetId="org.eclipse.ui.DefaultTextEditor">
        <class
              class="ccw.util.GenericExecutableExtension">
-         <parameter name="factory" value="ccw.editors.clojure.hyperlink/factory"/>
+         <parameter name="factory" value="ccw.api.hyperlink/factory"/>
          <parameter name="detect-hyperlinks" value="ccw.editors.clojure.nrepl-hyperlink/detect-hyperlinks"/>
        </class>
     </hyperlinkDetector>
@@ -2402,7 +2402,7 @@
         </activeWhen>
      </handler>
      <handler
-           commandId="ccw.ui.edit.text.clojure.open.declaration">
+           commandId="ccw.ui.edit.text.clojure.open.hyperlink">
         <class
               class="ccw.util.GenericExecutableExtension">
            <parameter
@@ -2411,7 +2411,7 @@
            </parameter>
            <parameter
                  name="handler"
-                 value="ccw.editors.clojure.handlers/open-declaration">
+                 value="ccw.editors.clojure.handlers/open-hyperlink">
            </parameter>
         </class>
         <enabledWhen>

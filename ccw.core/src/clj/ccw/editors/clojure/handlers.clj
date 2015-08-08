@@ -11,7 +11,7 @@
 
 (ns ccw.editors.clojure.handlers
   (:require [paredit.core :as pc]
-            [ccw.editors.clojure.hyperlink :as hlu] ; hlu as HyperLinkUtil
+            [ccw.api.hyperlink :as hyperlink]
             [ccw.editors.clojure.PareditAutoEditStrategyImpl :as pimpl]) 
   (:use [clojure.core.incubator :only [-?>]])  
   (:import
@@ -160,11 +160,13 @@
       (ignoring-selection-changes editor 
         #(.selectAndReveal editor (.getOffset old) (.getLength old))))))
 
-(defn open-declaration [_ event]
+(defn open-hyperlink [_ event]
   (let [editor (editor event)
         caret-offset (-> editor .getUnSignedSelection .getOffset)]
-    (if-let [[{open :open}] (hlu/detect-hyperlinks [caret-offset 0] editor)]
-      (open))))
+    (let [[{open :open} :as res] (hyperlink/detect-hyperlinks [caret-offset 0] editor)]
+      (println "open:" open)
+      (println "res:" res)
+      (when open (open)))))
 
 (defn content-assist [_ event]
   (when-let [editor (editor event)]

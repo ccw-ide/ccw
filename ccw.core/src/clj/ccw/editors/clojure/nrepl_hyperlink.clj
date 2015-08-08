@@ -1,5 +1,6 @@
 (ns ccw.editors.clojure.nrepl-hyperlink
-  (:require [ccw.core.trace :as t])
+  (:require [ccw.core.trace :as t]
+            [ccw.api.hyperlink :as hyperlink])
   (:import  [org.eclipse.jface.text IDocument]
             [ccw.editors.clojure IClojureEditor]))
 
@@ -28,4 +29,5 @@
     (when-let [[offset length [url host port]] (find-match-for-offset pattern line (- offset line-offset))]
       (t/format :editor "nrepl hyperlink: [:offset :length]: [%s %s]" (+ line-offset offset) length)
       [{:region [(+ line-offset offset) length]
-        :open #(ccw.repl.REPLView/connect url true)}])))
+        :open #(ccw.repl.REPLView/connect url true)
+        :text (format "open %s" url)}])))

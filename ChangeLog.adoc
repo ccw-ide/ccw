@@ -8,6 +8,13 @@ Laurent Petit <laurent dot petit at gmail dot com>
 :toc-title: ChangeLog
 :toclevels: 0
 
+== Counterclockwise 0.33.1-SNAPSHOT
+
+`0.xx.` released on August zz, 2015
+
+=== Editor
+- Thanks to User Plugin `ccw-plugin-hyperlink` which is embedded by default, a new kind of hyperlink has been added: for opening relative or absolute files from literal Strings. Will search relative to the current location, to the java classpath root folders if java project, to the project root, or to the filesystem root. Use `Cmd+Click` or `F3`
+
 == Counterclockwise 0.33.0
 
 `0.33.0` released on August 5, 2015

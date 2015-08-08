@@ -15,7 +15,8 @@
   ccw.eclipse
   (:require [ccw.core.trace :as t]
             [clojure.java.io :as io]
-            [ccw.swt :as swt])
+            [ccw.swt :as swt]
+            [ccw.file :as f])
   (:import [org.eclipse.core.resources IResource
                                        IProject
                                        IProjectDescription
@@ -33,10 +34,12 @@
                                      IProgressMonitor
                                      IStatus
                                      Status]
+           [org.eclipse.ui.ide IDE]
            [org.eclipse.core.runtime.preferences IEclipsePreferences
                                                  InstanceScope]
            [org.eclipse.jdt.core IJavaProject
-                                 JavaCore]
+                                 JavaCore
+                                 IJavaElement]
            [org.eclipse.debug.core ILaunchConfiguration ILaunch]
            [org.eclipse.ui.handlers HandlerUtil]
            [org.eclipse.ui IEditorPart
@@ -87,6 +90,8 @@
   []
   (.getRoot (workspace)))
 
+;; workbench -> windows -> pages -> editors
+
 (defn workbench 
   "Return the Eclipse Workbench" []
   (PlatformUI/getWorkbench))
@@ -122,12 +127,37 @@
   ([] (workbench-active-editor (workbench-active-page)))
   ([^IWorkbenchPage workbench-page] (some-> workbench-page .getActiveEditor)))
 
+(defn page-editors
+  "Return the editor references for a workbench-page"
+  [workbench-page] (some-> workbench-page .getEditorReferences vec))
+
 (defn page-editor-references
   "Return the editor references of the input page, might return nil. The
   0-arity function will try to get the editor references of the Active
   page in the Active window."
   ([] (page-editor-references (workbench-active-page)))
-  ([^IWorkbenchPage workbench-page] (some-> workbench-page .getEditorReferences)))
+  ([^IWorkbenchPage workbench-page] (page-editors workbench-page)))
+
+(defn text-editor
+  "Return theeditor associated to the reference if it's instanciated
+   and it's a text editor. Useful to only work with editors that have
+   been configured and you may want to reconfigure"
+  [e]
+  (if-let [e (.getEditor e false)]
+    (when (instance? org.eclipse.ui.texteditor.AbstractTextEditor e)
+      e)))
+
+(defn open-editors
+  "Return all open editors of the Workbench.
+   pred is an optional predicate for filtering editors"
+  ([] (open-editors identity))
+  ([pred]
+    (into []
+      (for [w (workbench-windows)
+            p (workbench-pages w)
+            e (page-editor-references p)
+            :when (pred e)]
+        e))))
 
 (defn workbench-first-editor
   "Gets the active editor of the first page of the first window in the workbench."
@@ -196,6 +226,9 @@
   IJavaProject
   (resource [this] (project this))
   
+  IJavaElement
+  (resource [je] (resource (path je)))
+
   String
   (resource [filesystem-path] (resource (path filesystem-path)))
   
@@ -233,6 +266,9 @@
   
   IResource
   (path [r] (.getFullPath r))
+  
+  IJavaElement
+  (path [je] (.getPath je))
   
   String
   (path [s] (Path. s))
@@ -288,6 +324,17 @@
       (do
         (CCWPlugin/logError (str "Unable to find " plugin-name " plugin. This is probably a regression."))
         nil))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Java project utility fns
+
+(defn has-path-on-classpath?
+  "is searched-path on the classpath. If yes, then return the Java Element."
+  [java-project searched-path]
+  (when-let [p (path searched-path)]
+    (.findElement java-project p)))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Event Handler utilities
@@ -391,13 +438,85 @@
 
 (defn file-extension [r] (and r (.getFileExtension r)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Utility fns for finding files
+(defn absolute-fs-path
+  "Predicate that returns s if s is an absolute path and the path exists"
+  [s r]
+  (let [f (io/file s)]
+    (when (and (.isAbsolute f)
+               (f/exists? f))
+      [s])))
+
+(defn relative-fs-path
+  "Predicate that returns an absolute path if s is a valid relative path
+   with regard to the iresource r"
+  [s r]
+  (when (some-> s io/file f/is-relative-path)
+    (if-let [f (some-> r .getParent (io/file s) (doto .exists))]
+      (when (.exists f) [(.getAbsolutePath f)]))))
+
+(import 'org.eclipse.core.resources.IFile)
+(import 'org.eclipse.core.resources.IFolder)
+(import 'org.eclipse.jdt.core.JavaCore)
+
+(defn package-root-relative
+  "Get the package relative path of resource in java-project.
+   It is considered that resource is in a source path of the project."
+  [java-project resource]
+  (let [package-ws-path (-> resource .getParent .getFullPath)]
+    (reduce 
+      (fn [_ root]
+        (when-let [r (.getCorrespondingResource root)]
+          (when (.isPrefixOf (.getFullPath r) package-ws-path)
+            (reduced (.makeRelativeTo package-ws-path (.getFullPath r))))))
+      nil
+      (.getPackageFragmentRoots (JavaCore/create (project java-project))))))
+
+(defn java-resource-paths
+  "Predicate that tries to resolve s as a classpath resource, absolute or
+   relative (to resource's parent).
+   It only searches in projects sources, not in jars or classes folders"
+  [s resource]
+  (let [java-project (JavaCore/create (project resource))
+        path (path s)
+        package-path (package-root-relative java-project resource)]
+    (for [root (.getPackageFragmentRoots java-project)
+          :let [r (.getCorrespondingResource root)]
+          :when r
+          :let [root-path (.getFullPath r)
+                path (if (.isAbsolute path)
+                       (-> root-path (.append path))
+                       (-> root-path (.append package-path) (.append path)))
+                search (workspace-resource path)]
+          :when search]
+      (.toOSString (.getLocation search)))))
+
+(defn project-relative-path
+  "Predicate that tries to find s from the project directory if r is not nil."
+  [s r]
+  (when (some-> s io/file f/is-relative-path)
+    (when-let [f (some-> r project (io/file s))]
+     (when (.exists f) [(.getAbsolutePath f)]))))
+  
+(def file-find-strategies
+  "list of strategies to determine if s (a String) represents a file.
+   If so, returns an appropriate object of ccw.eclipse/open-editor.
+   The strategies must return a list because some might find more than
+   on result"
+  [absolute-fs-path
+   relative-fs-path
+   java-resource-paths
+   project-relative-path])
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Utility fns for project manipulation
+
 (defn new-project-desc
   "Initialize a new project description with proj-name for the project name.
    Use as an argument to project-create"
   ([proj-name] (new-project-desc (workspace) proj-name))
   ([w proj-name] (.newProjectDescription w proj-name)))
-
-
 
 (defn validate-name-as-resource-type
   "Delagates to Eclipse the validation of n as a valid resource name
@@ -549,7 +668,40 @@
       true ; attempt to resolve the content type for this file
       )))
 
-;; TODO open-filesystem-file
+(defn open-filesystem-file
+  "Opens a file in Eclipse considering it's a file that may not
+   belong to the workspace.
+   Calls clojure.java.io/file on f first.
+   Return the Editor object (IEditorPart)"
+  ([f] (open-filesystem-file (workbench-active-page) f))
+  ([workbench-page f]
+    (let [file              (io/file f)
+          fs-path           (.getAbsolutePath file)
+          editor-descriptor (IDE/getEditorDescriptor fs-path)]
+      (IDE/openEditor workbench-page (.toURI file) (.getId editor-descriptor) true))))
+
+(defprotocol IEditorOpen
+  (-open-editor [workbench-page o]))
+
+(extend-protocol IEditorOpen
+  String
+  (-open-editor [s workbench-page]
+    (open-filesystem-file workbench-page s))
+  
+  File
+  (-open-editor [f workbench-page]
+    (open-filesystem-file workbench-page f))
+  
+  IResource
+  (-open-editor [r workbench-page]
+    (open-workspace-file workbench-page r)))
+
+(defn open-editor
+  "open an editor for o. Works for o if protocol IEditorOpen extends o
+   (String or File representing an absolute filesystem path ; or an IResource)"
+  ([o] (open-editor (workbench-active-page) o))
+  ([workbench-page o]
+    (-open-editor o workbench-page)))
 
 (defn goto-editor-line
   "Given an Editor object, goto the specified line.

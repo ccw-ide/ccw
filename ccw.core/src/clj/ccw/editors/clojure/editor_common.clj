@@ -207,3 +207,17 @@
                        (send-message safe-connection op-data))
                       (set/rename-keys {:arglists-str :arglists
                                         :resource :file}))))))
+
+(defn string-literal-body
+  "Get the string literal body (without double quotes) for editor
+   and caret at offset.
+   Return a map {:offset offset, :text \"the string literal body\"}"
+  [editor offset]
+  (let [rloc (-> editor .getParseState editor/getParseTree lu/parsed-root-loc)
+        l (lu/loc-for-offset rloc offset)
+        type (lu/loc-tag l)]
+    (when-let [s (and (#{:string :string-body} type) (lu/loc-text l))]
+      (let [l (if (= :string-body type) l (lu/vdown l 1)) ;; go from :string to :string-body
+            text (lu/loc-text l)]
+        {:offset (lu/start-offset l)
+         :text   text}))))

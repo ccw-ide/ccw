@@ -59,18 +59,13 @@
   [java-project]
   (not (nil? (.findPackageFragmentRoot java-project (-> java-project .getProject (.getFolder "classes") .getLocation)))))     
 
-(defn has-path-on-classpath? 
-  [java-project searched-path]
-  (let [p (if (instance? Path searched-path) searched-path (Path. searched-path))]
-    (not (nil? (.findElement java-project p)))))
-    
 (defn has-clojure-contrib-on-classpath?
   [java-project]
-  (has-path-on-classpath? java-project "clojure/contrib"))
+  (e/has-path-on-classpath? java-project "clojure/contrib"))
 
 (defn has-clojure-on-classpath?
   [java-project]
-  (has-path-on-classpath? java-project "clojure/lang"))  
+  (e/has-path-on-classpath? java-project "clojure/lang"))  
 
 (defn- has-classpath-entry?
   [java-project lib-path]
