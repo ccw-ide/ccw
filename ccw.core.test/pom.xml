@@ -16,7 +16,7 @@
   <packaging>eclipse-test-plugin</packaging>
 
   <properties>
-     <uitest.vmparams>-Xmx1024m -XX:MaxPermSize=384m</uitest.vmparams>
+     <uitest.vmparams>-Xmx1536m -XX:MaxPermSize=384m</uitest.vmparams>
   </properties>
 
   <profiles>
