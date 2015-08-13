@@ -15,6 +15,9 @@ Laurent Petit <laurent dot petit at gmail dot com>
 === Editor
 - Thanks to User Plugin `ccw-plugin-hyperlink` which is embedded by default, a new kind of hyperlink has been added: for opening relative or absolute files from literal Strings. Will search relative to the current location, to the java classpath root folders if java project, to the project root, or to the filesystem root. Use `Cmd+Click` or `F3`
 
+=== Keyboard Shortcuts
+- Removed the default binding for the `Show Active REPL View` command since it does not work well with German keyboard (prevents from typing @)
+
 == Counterclockwise 0.33.0
 
 `0.33.0` released on August 5, 2015

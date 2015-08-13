@@ -934,11 +934,6 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
 
       <key
-            sequence="M1+M3+Q R"
-            contextId="org.eclipse.ui.contexts.window"
-            commandId="ccw.ui.repl.showActiveREPL"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-      <key
             commandId="ccw.view.repl.commands.printErrorDetail"
             contextId="ccw.ui.context.repl"
             platform="win32"
