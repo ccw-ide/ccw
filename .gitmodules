@@ -10,3 +10,6 @@
 [submodule "ccw.core/ccw-plugins/ccw-plugin-ansi-repl"]
 	path = ccw.core/ccw-plugins/ccw-plugin-ansi-repl
 	url = https://github.com/ccw-ide/ccw-plugin-ansi-repl.git
+[submodule "ccw.core/ccw-plugins/ccw-plugin-hyperlink"]
+	path = ccw.core/ccw-plugins/ccw-plugin-hyperlink
+	url = https://github.com/ccw-ide/ccw-plugin-hyperlink.git
