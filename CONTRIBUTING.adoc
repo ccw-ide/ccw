@@ -156,7 +156,7 @@ ccw$ script/set-version.sh 0.20.0-SNAPSHOT
     cd ccw.core/ccw-plugins/
     git submodule add https://github.com/ccw-ide/ccw-plugin-xxx.git
 ----
-- Then open `ccw.core/plugin.xml`
+- Then open `ccw.core/plugin.xml` in Eclipse
 ** In the `Runtime` Tab, add `ccw-plugins/ccw-plugin-xxx` to the classpath
 ** In the `Build` Tab, in the `Binary Build` group, ensure that `ccw-plugins/ccw-plugin-xxx` is checked (everything inside `ccw-plugins` should be checked)
 
