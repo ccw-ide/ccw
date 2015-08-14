@@ -50,7 +50,7 @@ import org.hamcrest.Matcher;
  */
 public class BotUtils {
 
-    public static final long TIMEOUT_REPL = 60000;
+    public static final long TIMEOUT_REPL = 150000;
     public static final long TIMEOUT_UPDATE_DEPENDENCIES = 25000;
     public static final long TIMEOUT_FIND_ITEM_IN_PROJECT = 15000;
 

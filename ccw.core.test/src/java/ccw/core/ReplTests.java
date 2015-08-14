@@ -11,7 +11,7 @@
 package ccw.core;
 
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
-import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -29,17 +29,17 @@ public class ReplTests {
         bot = new BotUtils();
     }
 
-    @AfterClass
-    public static void cleanClass() throws Exception {
-        bot.closeRepl()
-           .purgeProject(PROJECT_NAME);
-    }
-
     @Before
     public void beforeTest() {
         bot.openJavaPerspective()
            .createAndWaitForProject(PROJECT_NAME)
            .clickInLeiningenMenuForProject(PROJECT_NAME, MenuLabels.LAUNCH_HEADLESS_REPL);
+    }
+
+    @After
+    public void cleanClass() throws Exception {
+        bot.closeRepl()
+           .purgeProject(PROJECT_NAME);
     }
 
     @Test

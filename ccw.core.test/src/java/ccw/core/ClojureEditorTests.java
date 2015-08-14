@@ -15,7 +15,8 @@ import static org.eclipse.swtbot.swt.finder.SWTBotAssert.assertTextContains;
 
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotEclipseEditor;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
-import org.junit.AfterClass;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,15 +32,19 @@ public class ClojureEditorTests {
 	@BeforeClass
 	public static void setupClass() throws Exception {
 		bot = new BotUtils();
-		bot.openJavaPerspective().createAndWaitForProject(PROJECT_NAME);
 	}
 
-	@AfterClass
-    public static void cleanClass() throws Exception {
+    @Before
+    public void initClass() throws Exception {
+        bot.openJavaPerspective().createAndWaitForProject(PROJECT_NAME);
+    }
+
+    @After
+    public void cleanClass() throws Exception {
         bot.purgeProject(PROJECT_NAME);
     }
 
-	@Test
+    @Test
     public void canOpenEditor() throws Exception {
         bot.doubleClickOnFileInProject(PROJECT_NAME, CORE_CLJ_NAME);
         bot.bot().activeEditor().toTextEditor();
