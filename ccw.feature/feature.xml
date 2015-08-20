@@ -2,7 +2,7 @@
 <feature
       id="ccw.feature"
       label="%featureName"
-      version="0.33.1.qualifier"
+      version="0.34.0.STABLE001"
       provider-name="%providerName"
       plugin="ccw.branding">
 
