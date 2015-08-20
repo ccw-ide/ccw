@@ -45,14 +45,20 @@
    the leiningen process' server socket, call read (blocking), and finally
    shutdown the JVM when an exception is sent or the read returns."
   [port]
-  `(future
-     (let [socket# (java.net.Socket. "127.0.0.1" ~port)
-           in# (.getInputStream socket#)]
-       (try 
-         (.read in#)
-         (finally 
-           (println "Lost parent connection" ~port)
-           (System/exit ~lost-parent-socket-conn-errno))))))
+  ;; we do not use a future because a future can prevent the process to stop
+  ;; since it uses agent threadpool which does not use daemon threads
+  `(doto (Thread.
+           (reify Runnable
+             (run [this]
+               (let [socket# (java.net.Socket. "127.0.0.1" ~port)
+                     in# (.getInputStream socket#)]
+                 (try 
+                   (.read in#)
+                   (finally 
+                     (println "Lost parent connection" ~port)
+                     (System/exit ~lost-parent-socket-conn-errno)))))))
+     (.setDaemon true)
+     .start))
 
 (defmethod leiningen.core.eval/eval-in :subprocess 
   [project form]

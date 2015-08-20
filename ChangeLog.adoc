@@ -18,6 +18,9 @@ Laurent Petit <laurent dot petit at gmail dot com>
 === Keyboard Shortcuts
 - Removed the default binding for the `Show Active REPL View` command since it does not work well with German keyboard (prevents from typing @)
 
+=== Issues
+- When starting arbitrary Leiningen command through `Alt+L L`, there was a possibility that the command hang forever. Fix #840
+
 == Counterclockwise 0.33.0
 
 `0.33.0` released on August 5, 2015
