@@ -36,7 +36,7 @@ public class ClojurePartitioner extends FastPartitioner {
     private void printPartitions(IDocument document) {
 
         ITracer tracer = CCWPlugin.getTracer();
-        if (tracer.isEnabled(TraceOptions.PARTITIONERS)) {
+        if (tracer.isEnabled(TraceOptions.EDITOR_SCANNERS)) {
 
             StringBuffer buffer = new StringBuffer();
 
@@ -60,7 +60,7 @@ public class ClojurePartitioner extends FastPartitioner {
                     e.printStackTrace();
                 }
             }
-            tracer.trace(TraceOptions.PARTITIONERS, buffer);
+            tracer.trace(TraceOptions.EDITOR_SCANNERS, buffer);
         }
     }
 }

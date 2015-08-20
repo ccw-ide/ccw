@@ -84,9 +84,12 @@ public class TraceOptions {
 	/** Clojure Editor related traces */
 	public static final String EDITOR = "/editor";
 
-	/** Clojure Editor, partitioner (within scanners package) traces */
-	public static final String PARTITIONERS = "/editor/scanners/partitioners";
+	/** Clojure Editor, scanners traces */
+	public static final String EDITOR_SCANNERS = "/editor/scanners";
 	
+	/** Clojure Editor, texts package traces */
+    public static final String EDITOR_TEXT = "/editor/text";
+    
 	/** Eclipse project management related traces */
 	public static final String PROJECT = "/project";
 
