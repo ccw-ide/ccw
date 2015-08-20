@@ -20,9 +20,9 @@ import ccw.CCWPlugin;
 import ccw.TraceOptions;
 import ccw.util.ITracer;
 
-public class ClojurePartitioner extends FastPartitioner {
+public class TracingPartitioner extends FastPartitioner {
 
-    public ClojurePartitioner(IPartitionTokenScanner scanner, String[] legalContentTypes) {
+    public TracingPartitioner(IPartitionTokenScanner scanner, String[] legalContentTypes) {
     	super(scanner, legalContentTypes);
     }
     
