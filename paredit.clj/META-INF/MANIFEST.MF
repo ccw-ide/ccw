@@ -5,7 +5,7 @@ Bundle-SymbolicName: paredit.clj;singleton:=true
 Bundle-Version: 0.34.0.STABLE001
 Bundle-ClassPath: .,
  src/
-Bundle-Vendor: Counterclockwise team
+Bundle-Vendor: Counterclockwise
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: paredit
 Eclipse-BundleShape: dir

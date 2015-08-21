@@ -4,7 +4,7 @@ Bundle-Name: Counterclockwise Plugin
 Bundle-SymbolicName: ccw.branding;singleton:=true
 Bundle-Version: 0.34.0.STABLE001
 Bundle-ActivationPolicy: lazy
-Bundle-Vendor: Counterclockwise team
+Bundle-Vendor: Counterclockwise
 Require-Bundle: org.eclipse.help,
  org.eclipse.ui.intro.universal,
  org.eclipse.ui.intro,
