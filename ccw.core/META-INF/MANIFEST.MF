@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Counterclockwise Clojure Plug-in
 Bundle-SymbolicName: ccw.core;singleton:=true
-Bundle-Version: 0.33.1.qualifier
+Bundle-Version: 0.34.1.qualifier
 Bundle-Localization: plugin
 Bundle-Activator: ccw.CCWPlugin
 Require-Bundle: org.eclipse.core.runtime,
@@ -146,7 +146,7 @@ Bundle-ClassPath: .,
  ccw-plugins/ccw-plugin-hyperlink/,
  ccw-plugins/ccw-plugin-ansi-repl/
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Bundle-Vendor: Counterclockwise team
+Bundle-Vendor: Counterclockwise
 Eclipse-BundleShape: dir
 Export-Package: ccw,ccw.builder,ccw.commands,ccw.core,ccw.debug,ccw.ed
  itors.clojure,ccw.editors.outline,ccw.launching,ccw.leiningen,ccw.nat

@@ -73,7 +73,7 @@
                 value="Counterclockwise, the Clojure IDE based on Eclipse"/>
           <property
                 name="aboutText"
-                value="Counterclockwise IDE Version %%VERSION%%&#x0A;&#x0A;Counterclockwise is an Integrated Development Environment helping develop solutions with Clojure.&#x0A;&#x0A;(c) Copyright Counterclockwise Team 2008-2013&#x0A;Visit https://code.google.com/p/counterclockwise/&#x0A;&#x0A;This product includes software developed by the&#x0A;Apache Software Foundation http://www.apache.org/"/>
+                value="Counterclockwise IDE Version %%VERSION%%&#x0A;&#x0A;Counterclockwise is an Integrated Development Environment helping develop solutions with Clojure.&#x0A;&#x0A;(c) Copyright Counterclockwise Team 2008-2015&#x0A;Visit https://code.google.com/p/counterclockwise/&#x0A;&#x0A;This product includes software developed by the&#x0A;Apache Software Foundation http://www.apache.org/"/>
           <!-- Setting cssTheme and applicationCSSResources properties is essential to prevent Exceptions when opening
                Window > Preferences > General > Appearance preference.
                Fix provided thanks to 
