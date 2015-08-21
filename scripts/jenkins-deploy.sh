@@ -19,7 +19,7 @@ lftp ftp://${FTP_USER}:${FTP_PASSWORD}@${FTP_HOST} <<EOF
 set ftp:passive-mode true
 mirror -R --verbose=3 ${REPOSITORY_DIR}/ ${FTP_UPDATESITE_DIR}
 mirror -R --verbose=3 -x target -I *.html ${WORKSPACE}/doc/target/html/ ${FTP_UPDATESITE_DIR}
-mirror -R --verbose=3 -x target -I *.html ${WORKSPACE}/doc/target/html/ ${FTP_BRANCH_DIR}/doc
+mirror -R --verbose=3 -x target -I *.html ${WORKSPACE}/doc/target/html/ ${FTP_BRANCH_DIR}/jenkins-doc
 quit
 EOF
 
@@ -60,19 +60,20 @@ cat <<EOF > ${WORKSPACE}/compositeContent.xml
 </repository>
 EOF
 
-# Push branch p2 repository files via FTP
-ftp -pn ${FTP_HOST} <<EOF
-quote USER ${FTP_USER}
-quote PASS ${FTP_PASSWORD}
-bin
-prompt off
-lcd ${WORKSPACE}
-cd ${FTP_UPDATESITE_ROOT}/${BRANCH}
-put compositeArtifacts.xml
-put compositeContent.xml
-quit
-EOF
-test $? || exit $?
+# don't do this anymore, now travis' the boss again
+## Push branch p2 repository files via FTP
+#ftp -pn ${FTP_HOST} <<EOF
+#quote USER ${FTP_USER}
+#quote PASS ${FTP_PASSWORD}
+#bin
+#prompt off
+#lcd ${WORKSPACE}
+#cd ${FTP_UPDATESITE_ROOT}/${BRANCH}
+#put compositeArtifacts.xml
+#put compositeContent.xml
+#quit
+#EOF
+#test $? || exit $?
 
 [ -d ${PRODUCTS_DIR} ] || exit $?
 

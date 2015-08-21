@@ -6,7 +6,7 @@
 
         <groupId>ccw</groupId>
         <artifactId>ccw.parent</artifactId>
-        <version>0.34.0.STABLE001</version>
+        <version>0.34.1-SNAPSHOT</version>
         <packaging>pom</packaging>
 
         <modules>

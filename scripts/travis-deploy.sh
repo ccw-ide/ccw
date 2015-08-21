@@ -16,7 +16,7 @@ lftp ftp://${FTP_USER}:${FTP_PASSWORD}@${FTP_HOST} <<EOF
 set ftp:passive-mode true
 mirror -R --verbose=3 ${REPOSITORY_DIR}/ ${FTP_UPDATESITE_DIR}
 mirror -R --verbose=3 -x target -I *.html ${TRAVIS_BUILD_DIR}/doc/target/html/ ${FTP_UPDATESITE_DIR}
-mirror -R --verbose=3 -x target -I *.html ${TRAVIS_BUILD_DIR}/doc/target/html/ ${FTP_BRANCH_DIR}/travis-doc
+mirror -R --verbose=3 -x target -I *.html ${TRAVIS_BUILD_DIR}/doc/target/html/ ${FTP_BRANCH_DIR}/doc
 quit
 EOF
 
@@ -57,21 +57,19 @@ cat <<EOF > ${TRAVIS_BUILD_DIR}/compositeContent.xml
 </repository>
 EOF
 
-# DEACTIVATED : Jenkins' the boss atm
 ## Push branch p2 repository files via FTP
-#ftp -pn ${FTP_HOST} <<EOF
-#quote USER ${FTP_USER}
-#quote PASS ${FTP_PASSWORD}
-#bin
-#prompt off
-#lcd ${TRAVIS_BUILD_DIR}
-#cd ${FTP_UPDATESITE_ROOT}/${BRANCH}
-#put compositeArtifacts.xml
-#put compositeContent.xml
-#quit
-#EOF
-#test $? || exit $?
-
+ftp -pn ${FTP_HOST} <<EOF
+quote USER ${FTP_USER}
+quote PASS ${FTP_PASSWORD}
+bin
+prompt off
+lcd ${TRAVIS_BUILD_DIR}
+cd ${FTP_UPDATESITE_ROOT}/${BRANCH}
+put compositeArtifacts.xml
+put compositeContent.xml
+quit
+EOF
+test $? || exit $?
 
 [ -d ${PRODUCTS_DIR} ] || exit $?
 
