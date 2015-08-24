@@ -15,6 +15,7 @@ package ccw.editors.clojure.scanners;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.rules.EndOfLineRule;
 import org.eclipse.jface.text.rules.IPredicateRule;
 import org.eclipse.jface.text.rules.IToken;
@@ -34,6 +35,9 @@ public class ClojurePartitionScanner extends RuleBasedPartitionScanner {
 	public final static String[] CLOJURE_CONTENT_TYPES= 
 		new String[] { CLOJURE_COMMENT, CLOJURE_STRING, CLOJURE_CHAR };
 
+	public final static String[] DEFAULT_CONTENT_TYPES=
+	        new String[] { IDocument.DEFAULT_CONTENT_TYPE };
+	
     public ClojurePartitionScanner() {
         IToken comment = new Token(CLOJURE_COMMENT);
     

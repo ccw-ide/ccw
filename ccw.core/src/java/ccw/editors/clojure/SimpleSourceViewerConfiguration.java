@@ -30,7 +30,9 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
 
 import ccw.CCWPlugin;
+import ccw.editors.clojure.scanners.ClojurePartitionScanner;
 import ccw.editors.clojure.scanners.ClojureTokenScanner;
+import ccw.editors.clojure.text.ClojureTopLevelFormsDamager;
 import ccw.util.Pair;
 
 /**
@@ -84,6 +86,7 @@ public class SimpleSourceViewerConfiguration extends TextSourceViewerConfigurati
         IPresentationDamager d = new ClojureTopLevelFormsDamager(editor); 
         reconciler.setDamager(d, contentType);
         
+        // AR - Each scanner has the Default Repairer at the moment
         for (ITokenScanner scanner : tokenScanners) {
             IPresentationRepairer r = new DefaultDamagerRepairer(scanner);
             reconciler.setRepairer(r, contentType);
@@ -108,7 +111,7 @@ public class SimpleSourceViewerConfiguration extends TextSourceViewerConfigurati
 
     @Override
     public String[] getConfiguredContentTypes(ISourceViewer sourceViewer) {
-        return new String[] { IDocument.DEFAULT_CONTENT_TYPE };
+        return ClojurePartitionScanner.DEFAULT_CONTENT_TYPES;
     }
 
     @Override
