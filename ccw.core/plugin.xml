@@ -1712,6 +1712,12 @@
           class="ccw.preferences.HoverPreferencePage"
           id="ccw.preferences.HoverPreferencePage">
     </page>
+    <page
+          name="%preferencePage.folding.name"
+          category="ccw.preferences.EditorPreferencePage"
+          class="ccw.preferences.FoldingPreferencePage"
+          id="ccw.preferences.FoldingPreferencePage">
+    </page>
  </extension>
  <extension
        point="org.eclipse.debug.core.sourcePathComputers">

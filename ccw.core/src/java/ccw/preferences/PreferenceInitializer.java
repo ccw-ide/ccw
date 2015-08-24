@@ -122,5 +122,8 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 
 	    // Hover pref
 	    store.setDefault(PreferenceConstants.EDITOR_TEXT_HOVER_DESCRIPTORS, DEFAULT_EDITOR_TEXT_HOVER_DESCRIPTORS);
+
+	    // Folding pref
+        store.setDefault(PreferenceConstants.EDITOR_TEXT_FOLDING_DESCRIPTORS, FoldingPreferencePage.DEFAULT_FOLDING_DESCRIPTORS);
 	}
 }

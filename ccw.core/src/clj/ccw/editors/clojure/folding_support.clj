@@ -14,6 +14,7 @@
   (:refer-clojure :exclude [tree-seq read-string])
   (:require [ccw.core.trace :refer [trace]]
             [clojure.edn :as edn :refer [read-string]]
+            [clojure.java.data :refer :all]
             [clojure.pprint :as pp :refer [pprint]]
             [clojure.zip :as z]
             [paredit.core :as p]
@@ -23,25 +24,18 @@
                                  preference!
                                  ccw-combined-prefs]]
             [ccw.swt :as swt :refer [doasync]])
-  (:import ccw.editors.clojure.ClojureEditorMessages
-           ccw.editors.clojure.IClojureEditor
+  (:import org.eclipse.e4.core.contexts.IEclipseContext
+           org.eclipse.core.databinding.observable.list.WritableList
            org.eclipse.jface.text.Position
            org.eclipse.jface.text.source.Annotation
            org.eclipse.jface.text.source.projection.ProjectionAnnotationModel
            org.eclipse.jface.text.source.projection.ProjectionAnnotation
-           ccw.preferences.PreferenceConstants))
-
-(defn- read-descriptors-from-preference!
-  "Load what is in the preferences, returns the descriptors accordingly."
-  []
-  (let [pref PreferenceConstants/EDITOR_TEXT_FOLDING_DESCRIPTORS
-        default (some-> (ccw-combined-prefs) (.getDefaultString pref))]
-    (edn/read-string {:eof ""} (preference pref (or default "")))))
-
-(defn- persist-descriptors!
-  "Persist the input hover desrcriptors for later retrieval."
-  [descriptors]
-  (preference! PreferenceConstants/EDITOR_TEXT_FOLDING_DESCRIPTORS (pr-str descriptors)))
+           ccw.core.StaticStrings
+           ccw.editors.clojure.ClojureEditorMessages
+           ccw.editors.clojure.IClojureEditor
+           ccw.preferences.PreferenceConstants
+           ccw.editors.clojure.folding.FoldingModel
+           ccw.editors.clojure.folding.FoldingDescriptor))
 
 (defn- enabled?
   "Return true if all the descriptors are enabled, false otherwise."
@@ -246,6 +240,36 @@
           multi-line-locs (filter son-of-a-multi-line-loc? loc-seq)] ; TODO - get set from preference
       (into #{} (keep identity (trampoline parse-locs multi-line-locs {} ()))))))
 
+;;;;;;;;;;;;;;;;;;;
+;;; Java Interop ;;
+;;;;;;;;;;;;;;;;;;;
+
+(defmethod to-java [FoldingDescriptor clojure.lang.APersistentMap] [clazz props]
+  (doto (FoldingDescriptor.
+         (name (:id props))
+         (:label props)
+         (:enabled props)
+         (:description props)
+         (:loc-tags props))))
+
+(defmethod from-java FoldingDescriptor [^FoldingDescriptor instance]
+  {:id (keyword (.getId instance))
+   :label (.getLabel instance)
+   :enabled (.isEnabled instance)
+   :description (.getDescription instance)
+   :loc-tags (.getTags instance)})
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Preference helpers ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn- read-descriptors-from-preference!
+  "Load what is in the preferences, returns the descriptors accordingly."
+  []
+  (let [pref PreferenceConstants/EDITOR_TEXT_FOLDING_DESCRIPTORS
+        default (some-> (ccw-combined-prefs) (.getDefaultString pref))]
+    (edn/read-string {:eof ""} (preference pref (or default "")))))
+
 ;;;;;;;;;;;;;;
 ;;; Public ;;;
 ;;;;;;;;;;;;;;
@@ -267,3 +291,19 @@
                             (.markDamagedAndRedraw editor)))]
       (when (instance? Throwable @result-promise)
         (trace :editor/text "Exception caught while updating the editor" @result-promise)))))
+
+(defn init-injections
+  "Sets a new instance of HoverModel in the input context."
+  [^IEclipseContext context]
+  (trace :editor/text (str "Initializing folding injections..."))
+  (.set context StaticStrings/CCW_CONTEXT_VALUE_FOLDINGMODEL
+        (reify
+          FoldingModel
+          (getObservableDescriptors [this]
+            (WritableList.
+             (map #(to-java FoldingDescriptor %1) (read-descriptors-from-preference!))
+             FoldingDescriptor))
+
+          (persistDescriptors [this list]
+            (let [descriptors (map #(from-java %1) list)]
+              (preference! PreferenceConstants/EDITOR_TEXT_FOLDING_DESCRIPTORS (pr-str descriptors)))))))

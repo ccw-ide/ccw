@@ -158,6 +158,14 @@ public class Messages extends NLS {
     public static String HoverPreferencePage_labelColumnTitle;
     public static String HoverPreferencePage_modifierColumnTitle;
 	
+    public static String FoldingPreferencePage_description;
+    public static String FoldingPreferencePage_descriptionColumnTitle;
+    public static String FoldingPreferencePage_labelColumnTitle;
+    public static String FoldingPreferencePage_fold_parens_label;
+    public static String FoldingPreferencePage_fold_parens_description;
+    public static String FoldingPreferencePage_fold_double_apex_label;
+    public static String FoldingPreferencePage_fold_double_apex_description;
+    
     static {
         // initialize resource bundle
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);

@@ -19,7 +19,9 @@
             [paredit.loc-utils :as lu]
             [ccw.editors.clojure.folding-support :refer :all]
             [ccw.editors.clojure.editor-support :as es])
-  (:import org.eclipse.jface.text.Position))
+  (:import org.eclipse.jface.text.Position
+           ccw.editors.clojure.folding.FoldingDescriptor
+           ccw.preferences.FoldingPreferencePage))
 
 (def init-small-state #(es/init-text-buffer nil "(ns org.small.namespace)"))
 (def init-medium-state #(es/init-text-buffer nil "(ns org.medium.namespace) (defn myfun \"Example\" [] (let [bind1 \"Ciao\" bind2 [\\b \\u \\d \\d \\y]] bind3 #{:a 1 :b 2 :c 3} (println bind1 bind2)))"))
@@ -45,8 +47,24 @@
                                                          son-of-a-multi-line-loc?
                                                          next-is-newline?
                                                          parse-locs
-                                                         folding-positions]]
+                                                         folding-positions
+                                                         from-java
+                                                         to-java]]
   (deftest folding-support-tests
+
+    (testing "testing java interop ..."
+      (let [descriptors [{:id :fold-parens :enabled true :loc-tags #{:list}} {:id :fold-double-apices :enabled true :loc-tags #{:string}} {:id :fold-braces :enabled true :loc-tags #{:map :set}}]
+            java-descriptors (map #(to-java FoldingDescriptor %) descriptors)
+            tripped-descriptors (map #(from-java %) java-descriptors)]
+        (is (= (:id descriptors) (:id tripped-descriptors)))
+        (is (= (:enabled descriptors) (:enabled tripped-descriptors)))
+        (is (= (:loc-tags descriptors) (:loc-tags tripped-descriptors))))
+      (let [descriptors (edn/read-string FoldingPreferencePage/DEFAULT_FOLDING_DESCRIPTORS)
+            java-descriptors (map #(to-java FoldingDescriptor %) descriptors)
+            tripped-descriptors (map #(from-java %) java-descriptors)]
+        (is (not (empty? java-descriptors)) "Converted descriptors should not be empty")
+        (is (every? #(instance? FoldingDescriptor %) java-descriptors) "Converted descriptors should all be instances of FoldingDescriptor")
+        (is (= descriptors tripped-descriptors) "Round trip from/to java for the default preference descriptors")))
 
     (testing "testing update-token-map and inc/dec-token-occ..."
       (let [parse-tree (:parse-tree @(init-medium-state))

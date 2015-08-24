@@ -701,6 +701,7 @@ public class CCWPlugin extends AbstractUIPlugin {
 	    IEclipseContext c = EclipseContextFactory.getServiceContext(bundleContext);
 	    
 	    ClojureInvoker.newInvoker(this, "ccw.editors.clojure.hover-support")._("init-injections", c);
+	    ClojureInvoker.newInvoker(this, "ccw.editors.clojure.folding-support")._("init-injections", c);
 	}
 	
     private void cleanInjections() {
