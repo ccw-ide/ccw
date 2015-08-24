@@ -42,6 +42,8 @@ import org.eclipse.swt.widgets.Shell;
 
 import ccw.CCWPlugin;
 import ccw.editors.clojure.scanners.ClojurePartitionScanner;
+import ccw.editors.clojure.text.ClojureCompositeReconcilingStrategy;
+import ccw.editors.clojure.text.ClojureReconciler;
 import ccw.preferences.PreferenceConstants;
 import ccw.util.ClojureInvoker;
 
@@ -53,16 +55,20 @@ public class ClojureSourceViewerConfiguration extends SimpleSourceViewerConfigur
 	private final ClojureInvoker proposalProcessor = ClojureInvoker.newInvoker(
             CCWPlugin.getDefault(),
             "ccw.editors.clojure.clojure-proposal-processor");
-    
+
     ClojureInvoker hoverSupportInvoker = ClojureInvoker.newInvoker(CCWPlugin.getDefault(),
             "ccw.editors.clojure.hover-support");
-    
+
     ClojureInvoker doubleClickStrategy = ClojureInvoker.newInvoker(CCWPlugin.getDefault(),
     		"ccw.editors.clojure.double-click-strategy");
-    
+
+    /** The Clojure editor */
+    private final IClojureEditor clojureEditor;
+
     public ClojureSourceViewerConfiguration(IPreferenceStore preferenceStore,
             IClojureEditor editor) {
         super(preferenceStore, editor);
+        clojureEditor = editor;
     }
 
 	@Override
@@ -126,10 +132,9 @@ public class ClojureSourceViewerConfiguration extends SimpleSourceViewerConfigur
 
 	@Override
 	public IReconciler getReconciler(ISourceViewer sourceViewer) {
-		// cf. http://code.google.com/p/counterclockwise/issues/detail?id=5
-		// Completely disable spellchecking until we can distinguish comments
-		// and code, and spell check based on these partitions
-		return null;
+//	    return null;
+	    ClojureCompositeReconcilingStrategy strategy = new ClojureCompositeReconcilingStrategy(editor);
+	    return new ClojureReconciler(clojureEditor, strategy, false);
 	}
 	
 	@Override
