@@ -72,6 +72,17 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
     };
     
     public static final String DEFAULT_EDITOR_TEXT_HOVER_DESCRIPTORS = "()";
+    public static final String DEFAULT_FOLDING_DESCRIPTORS =
+              "({:id :fold-parens"
+            + " :enabled true"
+            + " :loc-tags #{:list}"
+            + " :label \"" + Messages.FoldingPreferencePage_fold_parens_label + "\""
+            + " :description \"" + Messages.FoldingPreferencePage_fold_parens_description + "\"}"
+            + "{:id :fold-double-apices "
+            + " :enabled true"
+            + " :loc-tags #{:string}"
+            + " :label \"" + Messages.FoldingPreferencePage_fold_double_apex_label + "\""
+            + " :description \"" + Messages.FoldingPreferencePage_fold_double_apex_description + "\"})";
     
 	@Override
 	public void initializeDefaultPreferences() {
@@ -122,5 +133,8 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 
 	    // Hover pref
 	    store.setDefault(PreferenceConstants.EDITOR_TEXT_HOVER_DESCRIPTORS, DEFAULT_EDITOR_TEXT_HOVER_DESCRIPTORS);
+
+	    // Folding pref
+        store.setDefault(PreferenceConstants.EDITOR_FOLDING_DESCRIPTORS, DEFAULT_FOLDING_DESCRIPTORS);
 	}
 }

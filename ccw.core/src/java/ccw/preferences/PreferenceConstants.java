@@ -201,6 +201,11 @@ public class PreferenceConstants {
      */
     public static final String EDITOR_SHOW_TEXT_HOVER_AFFORDANCE= CCW_PREFERENCE_PREFIX + ".show_hover_affordance"; //$NON-NLS-1$
     
+    /**
+     * A named preference that defines the folding descriptors (see editors.clojure.folding-support)
+     */
+    public static final String EDITOR_FOLDING_DESCRIPTORS = CCW_PREFERENCE_PREFIX + ".folding.descriptors"; //$NON-NLS-1$
+
     public static class ColorizableToken {
     	public final @NonNull RGB rgb;
     	public final @Nullable Boolean isBold;

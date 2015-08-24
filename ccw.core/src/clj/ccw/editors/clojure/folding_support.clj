@@ -14,33 +14,26 @@
   (:refer-clojure :exclude [tree-seq read-string])
   (:require [ccw.core.trace :refer [trace]]
             [clojure.edn :as edn :refer [read-string]]
+            [clojure.java.data :refer :all]
             [clojure.zip :as z]
             [paredit.loc-utils :as lu]
             [ccw.editors.clojure.editor-support :as es]
-            [ccw.eclipse :refer [preference
-                                 preference!
-                                 ccw-combined-prefs]]
+            [ccw.eclipse :refer [string-ccw-pref
+                                 preference!]]
             [ccw.swt :as swt :refer [doasync]])
-  (:import ccw.editors.clojure.ClojureEditorMessages
-           ccw.editors.clojure.IClojureEditor
+  (:import org.eclipse.e4.core.contexts.IEclipseContext
+           org.eclipse.core.databinding.observable.list.WritableList
            org.eclipse.jface.text.IRegion
            org.eclipse.jface.text.Position
            org.eclipse.jface.text.source.Annotation
            org.eclipse.jface.text.source.projection.ProjectionAnnotationModel
            org.eclipse.jface.text.source.projection.ProjectionAnnotation
-           ccw.preferences.PreferenceConstants))
-
-(defn- read-descriptors-from-preference!
-  "Load what is in the preferences, returns the descriptors accordingly."
-  []
-  (let [pref PreferenceConstants/EDITOR_TEXT_FOLDING_DESCRIPTORS
-        default (some-> (ccw-combined-prefs) (.getDefaultString pref))]
-    (edn/read-string {:eof ""} (preference pref (or default "")))))
-
-(defn- persist-descriptors!
-  "Persist the input hover desrcriptors for later retrieval."
-  [descriptors]
-  (preference! PreferenceConstants/EDITOR_TEXT_FOLDING_DESCRIPTORS (pr-str descriptors)))
+           ccw.core.StaticStrings
+           ccw.editors.clojure.ClojureEditorMessages
+           ccw.editors.clojure.IClojureEditor
+           ccw.preferences.PreferenceConstants
+           ccw.editors.clojure.folding.FoldingModel
+           ccw.editors.clojure.folding.FoldingDescriptor))
 
 (defn- any-enabled?
   "Return true if at least one descriptor is enabled, false otherwise."
@@ -245,6 +238,39 @@
           multi-line-locs (filter son-of-a-multi-line-loc? loc-seq)] ; TODO - get set from preference
       (into #{} (keep identity (trampoline parse-locs multi-line-locs {} ()))))))
 
+;;;;;;;;;;;;;;;;;;;
+;;; Java Interop ;;
+;;;;;;;;;;;;;;;;;;;
+
+(defmethod to-java [FoldingDescriptor clojure.lang.APersistentMap] [clazz props]
+  (doto (FoldingDescriptor.
+         (name (:id props))
+         (:label props)
+         (:enabled props)
+         (:description props)
+         (:loc-tags props))))
+
+(defmethod from-java FoldingDescriptor [^FoldingDescriptor instance]
+  {:id (keyword (.getId instance))
+   :label (.getLabel instance)
+   :enabled (.isEnabled instance)
+   :description (.getDescription instance)
+   :loc-tags (.getTags instance)})
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Preference helpers ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn- read-descriptors-from-preference!
+  "Load what is in the preferences, returns the descriptors accordingly."
+  []
+  (edn/read-string {:eof ""} (string-ccw-pref PreferenceConstants/EDITOR_FOLDING_DESCRIPTORS)))
+
+(defn- persist-descriptors!
+  "Persist the input descriptors in the preferences."
+  [descriptors]
+  (preference! PreferenceConstants/EDITOR_FOLDING_DESCRIPTORS (pr-str descriptors)))
+
 ;;;;;;;;;;;;;;
 ;;; Public ;;;
 ;;;;;;;;;;;;;;
@@ -254,15 +280,33 @@
   wrapped in a org.eclipse.jface.text.Position) used for folding in the
   input IClojureEditor. The UI part is executed using swt/doasync."
   [^IClojureEditor editor ^IRegion region]
-  (let [descriptors (read-descriptors-from-preference!)
-        positions (folding-positions (.getParseState editor) descriptors)
-        additions (zipmap (repeatedly #(ProjectionAnnotation.)) positions)]
-    (trace :editor/text (str "computed additions: " additions))
-    ;; TODO - AR incrementally handle additions, removals
-    (let [result-promise (swt/doasync
-                          (let [^ProjectionAnnotationModel model (.getProjectionAnnotationModel editor)]
-                            (.removeAllAnnotations model)
-                            (.modifyAnnotations model nil additions nil)
-                            (.markDamagedAndRedraw editor)))]
-      (when (instance? Throwable @result-promise)
-        (trace :editor/text "Exception caught while updating the editor" @result-promise)))))
+  (let [descriptors (read-descriptors-from-preference!)]
+    (if (any-enabled? descriptors)
+      (let [positions (folding-positions (.getParseState editor) descriptors)
+            additions (zipmap (repeatedly #(ProjectionAnnotation.)) positions)] 
+        (trace :editor/text (str "computed additions: " additions)) 
+        ;; TODO - AR incrementally handle additions, removals
+        (let [result-promise (swt/doasync
+                              (when-let [^ProjectionAnnotationModel model (some-> editor (.getProjectionAnnotationModel))]
+                                (.removeAllAnnotations model)
+                                (.modifyAnnotations model nil additions nil)
+                                (.markDamagedAndRedraw editor)))]
+          (when (instance? Throwable @result-promise)
+            (trace :editor/text "Exception caught while updating the editor" @result-promise))))
+      (trace :editor/text (str "Both projection and descriptors were disabled, skipping folding computation")))))
+
+(defn init-injections
+  "Set a new instance of FoldingModel in the input context."
+  [^IEclipseContext context]
+  (trace :editor/text (str "Initializing folding injections..."))
+  (.set context StaticStrings/CCW_CONTEXT_VALUE_FOLDINGMODEL
+        (reify
+          FoldingModel
+          (getObservableDescriptors [this]
+            (WritableList.
+             (map #(to-java FoldingDescriptor %1) (read-descriptors-from-preference!))
+             FoldingDescriptor))
+
+          (persistDescriptors [this list]
+            (let [descriptors (map #(from-java %1) list)]
+              (persist-descriptors! descriptors))))))

@@ -19,7 +19,8 @@ public class StaticStrings {
 	
 	// Context
 	public static final String CCW_CONTEXT_VALUE_HOVERMODEL = "ccw.context.value.hover-model";
-	
+	public static final String CCW_CONTEXT_VALUE_FOLDINGMODEL = "ccw.context.value.folding-model";
+    
 	// Files
 	public final static String CCW_HOVER_CSS = "platform:/plugin/" + CCWPlugin.PLUGIN_ID + "/assets/hover-control-style.css";
 

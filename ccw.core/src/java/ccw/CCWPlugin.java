@@ -33,7 +33,6 @@ import org.eclipse.e4.core.contexts.EclipseContextFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.workbench.UIEvents;
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.ColorRegistry;
@@ -550,17 +549,14 @@ public class CCWPlugin extends AbstractUIPlugin {
 			public void run() {
 		        IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		        if (window != null) {
-		            IWorkbenchPage[] pages = window.getPages();
-		            for (int i = 0; i < pages.length; i++) {
-		            	IWorkbenchPage page = pages[i];
-			            if (page != null) {
-			                for (IViewReference r : page.getViewReferences()) {
-			                    IViewPart v = r.getView(false);
-			                    if (REPLView.class.isInstance(v)) {
-			                        ret.add((REPLView) v);
-			                    }
-			                }
-			            }
+		            IWorkbenchPage page = window.getActivePage();
+		            if (page != null) {
+		                for (IViewReference r : page.getViewReferences()) {
+		                    IViewPart v = r.getView(false);
+		                    if (REPLView.class.isInstance(v)) {
+		                        ret.add((REPLView) v);
+		                    }
+		                }
 		            }
 		        }
 			}
@@ -741,6 +737,7 @@ public class CCWPlugin extends AbstractUIPlugin {
 	    IEclipseContext c = EclipseContextFactory.getServiceContext(bundleContext);
 	    
 	    ClojureInvoker.newInvoker(this, "ccw.editors.clojure.hover-support")._("init-injections", c);
+	    ClojureInvoker.newInvoker(this, "ccw.editors.clojure.folding-support")._("init-injections", c);
 	}
 	
     private void cleanInjections() {
