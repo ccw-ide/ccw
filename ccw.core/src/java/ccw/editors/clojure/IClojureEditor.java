@@ -6,6 +6,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.source.DefaultCharacterPairMatcher;
+import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
@@ -123,4 +124,10 @@ public interface IClojureEditor extends IAdaptable {
 	 * @return The top level sexp.
 	 */
 	@Nullable String getTopLevelSExpression(final int caretOffset);
+	
+	/**
+	 * Get the annotation model for this editor.
+	 * @return Returns the model or null
+	 */
+	@Nullable ProjectionAnnotationModel getProjectionAnnotationModel();
 }

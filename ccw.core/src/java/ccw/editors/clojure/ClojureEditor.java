@@ -28,7 +28,9 @@ import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.source.DefaultCharacterPairMatcher;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
+import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
+import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
 import org.eclipse.jface.text.source.projection.ProjectionSupport;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -206,7 +208,7 @@ public class ClojureEditor extends TextEditor implements IClojureEditor, IReplPr
             fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.warning"); //$NON-NLS-1$
 
             fProjectionSupport.install();
-            
+
             // TODO Add the hovers on the Projection?
 //          fProjectionSupport.setHoverControlCreator(new IInformationControlCreator() {
 //                public IInformationControl createInformationControl(Shell shell) {
@@ -219,8 +221,8 @@ public class ClojureEditor extends TextEditor implements IClojureEditor, IReplPr
 //                }
 //            });
         }
-        
-        viewer.doOperation(ClojureSourceViewer.TOGGLE);
+
+        enableProjections(viewer);
 
 		// ensure decoration support has been created and configured.
 		SourceViewerDecorationSupport sourceViewerDecorationSupport = getSourceViewerDecorationSupport(viewer);
@@ -423,10 +425,6 @@ public class ClojureEditor extends TextEditor implements IClojureEditor, IReplPr
 		return sourceViewer.getDocument();
 	}
 	
-	/**
-	 * Asserts document != null.
-	 * @return
-	 */
 	public int getSourceCaretOffset() {
 		IRegion selection= getSignedSelection();
 		return selection.getOffset() + selection.getLength();
@@ -795,4 +793,20 @@ public class ClojureEditor extends TextEditor implements IClojureEditor, IReplPr
         sourceViewer().initializeViewerColors();
     }
 
+    protected void enableProjections(SourceViewer viewer) {
+        if (viewer instanceof ProjectionViewer && viewer.canDoOperation(ProjectionViewer.TOGGLE)) {
+            viewer.doOperation(ProjectionViewer.TOGGLE);
+        }
+    }
+
+    @Override
+    public @Nullable ProjectionAnnotationModel getProjectionAnnotationModel() {
+        // AR - Workaround
+        // Checks and forces the TOGGLE if no ProjectionAnnotationModel was created
+        ClojureSourceViewer viewer = sourceViewer();
+        if (viewer.getProjectionAnnotationModel() == null) {
+            enableProjections(viewer);
+        }
+        return viewer.getProjectionAnnotationModel();
+    }
 }
