@@ -34,6 +34,7 @@ public class ClojureTests extends ClojureTest {
 		namespaces.add("ccw.extensions-test");
 		namespaces.add("ccw.util-test");
 		namespaces.add("ccw.editors.clojure.hover-support-test");
+		namespaces.add("ccw.editors.clojure.folding-support-test");
 		
 		requireNamespaces(namespaces);
 	}
