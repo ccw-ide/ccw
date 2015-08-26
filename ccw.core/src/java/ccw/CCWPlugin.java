@@ -31,6 +31,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.e4.core.contexts.EclipseContextFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
@@ -58,6 +60,8 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 
 import ccw.core.StaticStrings;
 import ccw.editors.clojure.ClojureEditor;
@@ -132,6 +136,14 @@ public class CCWPlugin extends AbstractUIPlugin {
     public int getREPLServerPort() {
     	startREPLServer();
     	return (Integer) ClojureInvoker.newInvoker(this, "ccw.core.launch")._("ccw-nrepl-port");
+    }
+    
+    public void startEventHandlers() {
+    	ClojureInvoker.newInvoker(this, "ccw.core.event-bus")._("start");
+    }
+    
+    public void startEventSubscription() {
+    	ClojureInvoker.newInvoker(this, "ccw.repl.visible-in-all-perspectives")._("start");
     }
 
     /**
@@ -319,6 +331,8 @@ public class CCWPlugin extends AbstractUIPlugin {
 								if (System.getProperty(StaticStrings.CCW_PROPERTY_NREPL_AUTOSTART) != null) {
 									try {
 										startREPLServer();
+										startEventHandlers();
+										startEventSubscription();
 									} catch (Exception e) {
 										logError("Error while querying for property: " + StaticStrings.CCW_PROPERTY_NREPL_AUTOSTART, e);
 									}
@@ -513,14 +527,17 @@ public class CCWPlugin extends AbstractUIPlugin {
 			public void run() {
 		        IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		        if (window != null) {
-		            IWorkbenchPage page = window.getActivePage();
-		            if (page != null) {
-		                for (IViewReference r : page.getViewReferences()) {
-		                    IViewPart v = r.getView(false);
-		                    if (REPLView.class.isInstance(v)) {
-		                        ret.add((REPLView) v);
-		                    }
-		                }
+		            IWorkbenchPage[] pages = window.getPages();
+		            for (int i = 0; i < pages.length; i++) {
+		            	IWorkbenchPage page = pages[i];
+			            if (page != null) {
+			                for (IViewReference r : page.getViewReferences()) {
+			                    IViewPart v = r.getView(false);
+			                    if (REPLView.class.isInstance(v)) {
+			                        ret.add((REPLView) v);
+			                    }
+			                }
+			            }
 		            }
 		        }
 			}

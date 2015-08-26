@@ -136,7 +136,7 @@ public class REPLView extends ViewPart implements IAdaptable, IReplProvider, Lin
        // no one will create more than 1000 REPLs at a time, right? :-P
        for (int i = 0; i < 1000; i++) add(String.format("%03d", i));
     }};
-    private static String getSecondaryId () {
+    private static String getNextSecondaryId () {
         synchronized (SECONDARY_VIEW_IDS) {
             String id = SECONDARY_VIEW_IDS.iterator().next();
             SECONDARY_VIEW_IDS.remove(id);
@@ -149,6 +149,10 @@ public class REPLView extends ViewPart implements IAdaptable, IReplProvider, Lin
         synchronized (SECONDARY_VIEW_IDS) {
             SECONDARY_VIEW_IDS.add(id);
         }
+    }
+    
+    public String getSecondaryId() {
+    	return secondaryId;
     }
 
     private static final Keyword inputExprLogType = Keyword.intern("in-expr");
@@ -609,7 +613,7 @@ public class REPLView extends ViewPart implements IAdaptable, IReplProvider, Lin
         String secondaryId;
         final REPLView repl = (REPLView)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(
                 VIEW_ID
-                ,secondaryId = getSecondaryId()
+                ,secondaryId = getNextSecondaryId()
                 ,IWorkbenchPage.VIEW_ACTIVATE
                 );
         repl.secondaryId = secondaryId;

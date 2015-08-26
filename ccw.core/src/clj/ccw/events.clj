@@ -1,6 +1,7 @@
 (ns ccw.events
   (:require [ccw.e4.model]
-            [ccw.core.trace :as t]))
+            [ccw.core.trace :as t])
+  (:import [org.osgi.service.event EventHandler]))
 
 (def DATA
   "IEventBroker/DATA"
@@ -31,13 +32,17 @@
 
 (defn unsubscribe
   "event-handler-var is either a var with ::event-handler metadata attached to it,
-   or a true org.osgi.service.event.EventHandler"
+   or a true org.osgi.service.event.EventHandler.
+   If it is not one of those cases, then no unsubscription is done.
+   Returns true if unsubscription don"
   [event-handler-var]
-  (if (var? event-handler-var)
-    (when-let [event-handler (some-> event-handler-var meta ::event-handler)]
-      (alter-meta! event-handler-var dissoc ::event-handler)
-      (.unsubscribe (event-broker) event-handler))
-    (.unsubscribe (event-broker) event-handler-var)))
+  (cond
+    (var? event-handler-var)
+      (when-let [event-handler (some-> event-handler-var meta ::event-handler)]
+        (alter-meta! event-handler-var dissoc ::event-handler)
+        (.unsubscribe (event-broker) event-handler))
+    (instance? EventHandler event-handler-var)
+      (.unsubscribe (event-broker) event-handler-var)))
 
 (defn subscribe
   ([topic event-handler-var] (subscribe topic false event-handler-var))
@@ -45,7 +50,7 @@
     (t/format :events "subscribing to topic %s" (as-topic topic))
     (unsubscribe event-handler-var)
     (let [event-handler
-          (reify org.osgi.service.event.EventHandler
+          (reify EventHandler
             (handleEvent [this event]
               (event-handler-var
                 (topic-as-keyword (.getTopic event))
@@ -59,4 +64,3 @@
         (when (var? event-handler-var)
           (alter-meta! event-handler-var assoc ::event-handler event-handler))
         event-handler))))
-

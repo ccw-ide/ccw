@@ -1603,6 +1603,13 @@
              relationship="stack"
              relative="org.eclipse.ui.views.ContentOutline">
        </view>
+       <view
+             id="ccw.view.repl:*"
+             minimized="false"
+             relationship="stack"
+             relative="org.eclipse.ui.console.ConsoleView"
+             visible="false">
+       </view>
     </perspectiveExtension>
     <perspectiveExtension
           targetID="org.eclipse.pde.ui.PDEPerspective">
@@ -1621,6 +1628,13 @@
              relationship="stack"
              relative="org.eclipse.ui.views.ContentOutline">
        </view>
+       <view
+             id="ccw.view.repl:*"
+             minimized="false"
+             relationship="stack"
+             relative="org.eclipse.ui.console.ConsoleView"
+             visible="false">
+       </view>
     </perspectiveExtension>
     <perspectiveExtension
           targetID="org.eclipse.debug.ui.DebugPerspective">
@@ -1633,6 +1647,13 @@
        <viewShortcut
              id="ccw.view.namespacebrowser">
        </viewShortcut>
+       <view
+             id="ccw.view.repl:*"
+             minimized="false"
+             relationship="stack"
+             relative="org.eclipse.ui.console.ConsoleView"
+             visible="false">
+       </view>
        <view
              id="ccw.view.namespacebrowser"
              minimized="false"
