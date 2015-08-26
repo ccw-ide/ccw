@@ -1572,7 +1572,7 @@
     </view>
     <category
           id="ccw.category.views"
-          name="Clojure Views">
+          name="Clojure">
     </category>
     <view
           allowMultiple="true"
