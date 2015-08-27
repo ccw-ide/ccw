@@ -865,17 +865,19 @@
 
 (defn ^{:author "Andrea Richiardi"}
   add-preference-listener
-  "Adds a listener in order to react to changes in the pref-key preference and executes
-   the given closure if any. Note that this function generates a IPropertyChangeListener
-   every time it is invoked. The version without preference store defaults toccw-combined-prefs."
-  ([pref-key closure]
-    (add-preference-listener (ccw-combined-prefs) pref-key closure))
-  ([^IPreferenceStore pref-store pref-key closure]
+  "Adds a listener in order to react to changes in the pref-key
+  preference and executes (f event) when it does. Note that this
+  function generates a IPropertyChangeListener every time it is
+  invoked. The version without preference store defaults to
+  eclipse/ccw-combined-prefs."
+  ([pref-key f]
+    (add-preference-listener (ccw-combined-prefs) pref-key f))
+  ([^IPreferenceStore pref-store pref-key f]
    (add-property-listener pref-store #(reify
                                        IPropertyChangeListener
                                        (propertyChange [this event]
                                          (when (= (.getProperty event) pref-key)
-                                           (closure)))))))
+                                           (f event)))))))
 
 (def ^{:author "Andrea Richiardi" }
   remove-preference-listener
