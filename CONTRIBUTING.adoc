@@ -19,6 +19,7 @@ try to follow these guidelines when you do so.
 - Open an issue with a descriptive title and a summary in grammatically correct,
   complete sentences.
 - Include any relevant code to the issue summary.
+- Follow the Angular JS commit convention https://gist.github.com/stephenparish/9941e89d80e2bc58a153 . We are little bit liberal with the conventions, take inspiration from the CCW commits history to find a good mesure
 
 == Pull Requests
 
