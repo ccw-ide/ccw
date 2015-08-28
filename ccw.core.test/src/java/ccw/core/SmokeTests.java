@@ -67,4 +67,26 @@ public class SmokeTests {
     public void canShowTestGeneratorEntryInClojureMenu() throws Exception {
         SWTBotAssert.assertVisible(bot.menu("Clojure", MenuLabels.TEST, MenuLabels.TEST_GENERATOR));
     }
+
+    @Test
+    public void canOpenPreferences() throws Exception {
+        bot.openWindowPreferences().bot().shell(PrefStrings.TITLE);
+        bot.OK();
+    }
+
+    @Test
+    public void shouldSelectClojurePreferencePage() throws Exception {
+        bot.selectPreferencePage(PrefStrings.TREE_ENTRY_CLOJURE)
+        .assertPreferencePage(PrefStrings.TREE_ENTRY_CLOJURE)
+        .OK();
+    }
+
+    @Test
+    public void shouldSelectDeepPreferencePages() throws Exception {
+        bot.selectPreferencePage(PrefStrings.TREE_ENTRY_GENERAL,
+                PrefStrings.TREE_ENTRY_GENERAL_EDITORS,
+                PrefStrings.TREE_ENTRY_GENERAL_TEXTEDITORS)
+           .assertPreferencePage(PrefStrings.TREE_ENTRY_GENERAL_TEXTEDITORS)
+           .OK();
+    }
 }

@@ -36,6 +36,7 @@ import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotEditor;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.SWTBot;
+import org.eclipse.swtbot.swt.finder.SWTBotAssert;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
@@ -338,8 +339,8 @@ public class BotUtils {
         return this;
     }
 
-    public BotUtils selectInClojureMenu(String entryLabel) throws Exception {
-        menu("Clojure", entryLabel).click();
+    public BotUtils selectInClojureMenu(String label) throws Exception {
+        menu("Clojure", label).click();
         return this;
     }
 
@@ -478,6 +479,45 @@ public class BotUtils {
 
     public BotUtils focusActiveEditor() {
         editor().active.setFocus();
+        return this;
+    }
+
+    public BotUtils openWindowPreferences() {
+        menu(MenuLabels.WINDOW, MenuLabels.PREFERENCES).click();
+        return this;
+    }
+
+    public BotUtils expandTreeItem(SWTBotTreeItem item) {
+        if (!item.isExpanded()) {
+            item.expand();
+        }
+        return this;
+    }
+
+    /**
+     * Select a page in Window -> Preferences given the name(s).
+     * @param pageName The page name.
+     * @param subPageNames The names of the sub pages.
+     * @return
+     */
+    public BotUtils selectPreferencePage(String pageName, String... subPageNames) {
+        openWindowPreferences();
+        SWTBotShell preferences = bot().shell(PrefStrings.TITLE);
+
+        SWTBotTreeItem pageItem = preferences.bot().tree().getTreeItem(pageName);
+        expandTreeItem(pageItem);
+
+        SWTBotTreeItem subPageItem = pageItem;
+        for (String name : subPageNames) {
+            subPageItem = subPageItem.getNode(name);
+            expandTreeItem(subPageItem);
+        }
+        subPageItem.select();
+        return this;
+    }
+
+    public BotUtils assertPreferencePage(String pageName) {
+        SWTBotAssert.assertText(pageName, bot().clabel());
         return this;
     }
 }
