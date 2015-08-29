@@ -145,6 +145,10 @@ public class CCWPlugin extends AbstractUIPlugin {
     public void startEventSubscription() {
     	ClojureInvoker.newInvoker(this, "ccw.repl.visible-in-all-perspectives")._("start");
     }
+    
+    public void startNamespaces() {
+    	ClojureInvoker.newInvoker(this, "ccw.editors.clojure.code-content-assist")._("start");
+    }
 
     /**
      * Record of a found CCW dependency. Only used at plugin startup to
@@ -333,6 +337,7 @@ public class CCWPlugin extends AbstractUIPlugin {
 										startREPLServer();
 										startEventHandlers();
 										startEventSubscription();
+										startNamespaces();
 									} catch (Exception e) {
 										logError("Error while querying for property: " + StaticStrings.CCW_PROPERTY_NREPL_AUTOSTART, e);
 									}

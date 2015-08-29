@@ -5,9 +5,8 @@
             [clojure.tools.nrepl :as repl]
             [paredit.core   :as pc]
             [paredit.parser :as p]
-            [paredit.loc-utils :as lu]
-            [clojure.zip :as z]
             [ccw.core.doc-utils :as doc]
+            [ccw.api.parse-tree :as parse-tree]
             [ccw.debug.serverrepl :as serverrepl]
             [ccw.core.trace :as trace]
             [ccw.editors.clojure.editor-common :as common :refer (find-var-metadata)])
@@ -28,40 +27,6 @@
                                  IMethod
                                  IType]
            [ccw.editors.clojure IClojureEditor]))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; parse tree manipulation functions
-
-(defn call? 
-  "is element e a function/macro-call?"
-  [e] (= "(" (first (p/code-children e))))
-(defn callee 
-  "the called symbol node (without metadata"
-  [e] (second (p/code-children e)))
-
-(defn parent-call
-  "return the loc for the parent call, or nil"
-  [loc]
-  (let [parents (take-while (comp not nil?) (iterate z/up loc))]
-    (first (filter (comp call? z/node) parents))))
-
-(defn call-context-loc
-  "for viewer, at offset 12, return the loc containing the encapsulating
-   call, or nil"
-  [parse-tree offset]
-  (when (pos? offset)
-    (let [loc (lu/loc-containing-offset 
-                (lu/parsed-root-loc parse-tree)
-                offset)
-          maybe-call-loc (-?> loc parent-call)]
-      (when (-?> maybe-call-loc z/node call?)
-        maybe-call-loc))))
-
-(defn call-symbol
-  "for viewer, at offset 12, return the symbol name if the offset
-   is inside a function/macro call, or nil"
-  [loc]
-  (when loc (-> loc z/node callee p/remove-meta p/sym-name)))
 
 ;; TODO find the prefix via the editor's parse tree !
 (defn prefix-info 
@@ -120,6 +85,7 @@
 (def completion-limit 
   "Maximum number of returned results" 50)
 
+;; TODO remove in favor of as-eclipse-context-information
 (defn context-information
   [context-display-string
    image
@@ -137,6 +103,21 @@
        (getContextInformationPosition [this] position-start))
      {:start position-start
       :stop  position-stop}))
+
+(defn as-eclipse-context-information
+ [{:keys [information-display image display-string context-information-position
+          context-information-position-start context-information-position-stop]}]
+ (with-meta
+     (reify 
+       IContextInformation
+       (getContextDisplayString [this] (or display-string ""))
+       (getImage [this] image)
+       (getInformationDisplayString [this] (or information-display ""))
+       
+       IContextInformationExtension
+       (getContextInformationPosition [this] (or context-information-position context-information-position-start)))
+     {:start context-information-position-start
+      :stop  context-information-position-stop}))
 
 (defn completion-proposal
   [replacement-string
@@ -246,8 +227,8 @@
 
 (defn context-info-data
   "Create a context-information from the data"
-  [callee-name cursor-offset callee-metadata]
-  (when-let [message (common/context-message callee-name callee-metadata)]
+  [callee?-name cursor-offset callee?-metadata]
+  (when-let [message (common/context-message callee?-name callee?-metadata)]
     (context-information
       message
       nil
@@ -329,7 +310,7 @@
                                       (adapt-args (serverrepl/textmate-comparator prefix)
                                         :completion :completion)
                                       (concat repl-suggestions hippie-suggestions))]
-        (for [{:keys [completion match filter type ns]
+        (for [{:keys [completion filter type ns]
                {:keys [arglists name added static 
                        doc line file] 
                 :as metadata} :metadata
@@ -361,20 +342,14 @@
                  (range (int \A) (inc (int \Z)))))
           [\. \- \? \!]))
 
+(defonce context-information-provider (atom (constantly nil)))
+
 (defn compute-context-information
   [^IClojureEditor editor
    text-viewer new-offset]
-  (into-array
-    IContextInformation
-    (when-let [loc (call-context-loc (-> text-viewer .getParseState :parse-tree) new-offset)]
-      (let [call-symbol (call-symbol loc)
-            context-info (context-info-data 
-                           call-symbol 
-                           new-offset 
-                           (find-var-metadata (.findDeclaringNamespace editor) 
-                                              (.getCorrespondingREPL editor)
-                                              call-symbol))]
-        (when context-info [context-info])))))
+  
+  (when-let [ci (@context-information-provider editor text-viewer new-offset)]
+    [(as-eclipse-context-information ci)]))
 
 (defn should-compute-proposals? 
   "There is an edge case in Eclipse, inherited by the ClojurePartitionScanner,
@@ -410,9 +385,10 @@
     
     (computeContextInformation
       [this text-viewer new-offset]
-      (compute-context-information
-        editor
-        text-viewer new-offset))
+      (into-array IContextInformation
+        (compute-context-information
+         editor
+         text-viewer new-offset)))
     
     (getCompletionProposalAutoActivationCharacters
       [this] 
