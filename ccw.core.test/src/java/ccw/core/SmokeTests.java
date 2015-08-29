@@ -71,14 +71,14 @@ public class SmokeTests {
     @Test
     public void canOpenPreferences() throws Exception {
         bot.openWindowPreferences().bot().shell(PrefStrings.TITLE);
-        bot.OK();
+        bot.ok();
     }
 
     @Test
     public void shouldSelectClojurePreferencePage() throws Exception {
         bot.selectPreferencePage(PrefStrings.TREE_ENTRY_CLOJURE)
-        .assertPreferencePage(PrefStrings.TREE_ENTRY_CLOJURE)
-        .OK();
+           .assertPreferencePage(PrefStrings.TREE_ENTRY_CLOJURE)
+           .ok();
     }
 
     @Test
@@ -87,6 +87,6 @@ public class SmokeTests {
                 PrefStrings.TREE_ENTRY_GENERAL_EDITORS,
                 PrefStrings.TREE_ENTRY_GENERAL_TEXTEDITORS)
            .assertPreferencePage(PrefStrings.TREE_ENTRY_GENERAL_TEXTEDITORS)
-           .OK();
+           .ok();
     }
 }

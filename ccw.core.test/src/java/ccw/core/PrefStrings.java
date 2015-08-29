@@ -11,6 +11,7 @@ public class PrefStrings {
 
     // Clojure
     public static final String TREE_ENTRY_CLOJURE = "Clojure";
-    public static final String TREE_ENTRY_CLOJURE_HOVERS = "Hovers";
-    public static final String TREE_ENTRY_CLOJURE_FOLDING = "Folding";
+    public static final String TREE_ENTRY_CLOJURE_EDITOR = "Editor";
+    public static final String TREE_ENTRY_CLOJURE_EDITOR_HOVERS = "Hovers";
+    public static final String TREE_ENTRY_CLOJURE_EDITOR_FOLDING = "Folding";
 }

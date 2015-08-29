@@ -13,10 +13,6 @@ package ccw.core;
 
 import static org.junit.Assert.fail;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
 import org.apache.log4j.Logger;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -25,11 +21,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.source.Annotation;
-import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.widgets.Widget;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
@@ -51,9 +43,9 @@ import org.eclipse.swtbot.swt.finder.widgets.TimeoutException;
 import org.eclipse.ui.IEditorPart;
 import org.hamcrest.Matcher;
 
-import waits.ProjectionAnnotationModelNotEmpty;
+import waits.ResourceInSync;
+import ccw.core.bots.FoldingBot;
 import ccw.editors.clojure.ClojureEditor;
-import ccw.editors.clojure.IClojureEditor;
 
 /**
  * Wrapper utility class for common Counterclockwise UI tests.
@@ -69,7 +61,6 @@ public class BotUtils {
     public static final long TIMEOUT_REPL = 150000;
     public static final long TIMEOUT_UPDATE_DEPENDENCIES = 25000;
     public static final long TIMEOUT_FIND_ITEM_IN_PROJECT = 15000;
-    public static final long TIMEOUT_PROJECT_ANNOTATION_MODEL = 10000;
 
     public static final Matcher<Widget> MATCHER_WIDGET_UPDATE_DEPENDENCIES = WidgetMatcherFactory.withRegex(".*project dependencies.*");
     public static final Matcher<Widget> MATCHER_WIDGET_REPL_LOG = WidgetMatcherFactory.withRegex("^;; Clojure.*");
@@ -238,11 +229,7 @@ public class BotUtils {
 	}
 
 	public BotUtils waitForResource(IResource resource) {
-        boolean isSync = false;
-        while (isSync) {
-            bot.sleep(500);
-            isSync = resource.isSynchronized(IResource.DEPTH_INFINITE);
-        }
+        bot.waitUntil(new ResourceInSync(resource));
         return this;
     }
 
@@ -297,12 +284,34 @@ public class BotUtils {
 		return this;
 	}
 
-	public BotUtils createAndWaitForProject(String projectName) {
-	    return createClojureProject(projectName)
+	public BotUtils createAndWaitForProjectIfNecessary(String projectName) {
+        SWTBotTree packageExplorerTree = bot.viewByTitle("Package Explorer").bot().tree();
+        boolean found = false;
+
+        try {
+            packageExplorerTree.getTreeItem(projectName);
+            found = true;
+        } catch (WidgetNotFoundException e) {
+            Logger.getLogger(this.getClass()).debug("Caught and handled exception: " + e.getMessage());
+        } catch (SWTException e) {
+                Logger.getLogger(this.getClass()).debug("Caught and handled exception: " + e.getMessage());
+        } catch (TimeoutException e) {
+            Logger.getLogger(this.getClass()).debug("Caught and handled exception: " + e.getMessage());
+        }
+
+        if (!found) {
+            return createAndWaitForProject(projectName);
+        } else {
+            return this;
+        }
+    }
+
+    public BotUtils createAndWaitForProject(String projectName) {
+        return createClojureProject(projectName)
                .waitForWorkspace()
                .quietlySendUpdateDependenciesToBackground()
                .waitForProject(projectName);
-	}
+    }
 
     public <T extends Widget> BotUtils sendToBackground(Matcher<T> matcher, long timeout, long delay) {
         bot.waitUntil(Conditions.waitForWidget(matcher), timeout, delay);
@@ -358,18 +367,13 @@ public class BotUtils {
         return this;
     }
 
-    public BotUtils waitForAnnotations() throws Exception {
-        bot.waitUntil(new ProjectionAnnotationModelNotEmpty(editor().clojure), TIMEOUT_PROJECT_ANNOTATION_MODEL);
-        return this;
-    }
-
     public BotUtils closeRepl() throws Exception {
         bot.viewByPartName(NAME_REPLVIEW).close();
         return this;
     }
 
     public BotUtils purgeProject(String projectName) {
-        return deleteProject(projectName).deletingOnDisk().OK().quietlyContinuingIfNotInSync();
+        return deleteProject(projectName).deletingOnDisk().ok().quietlyContinuingIfNotInSync();
     }
 
     public BotUtils deleteProject(String projectName) {
@@ -405,7 +409,7 @@ public class BotUtils {
         return this;
     }
 
-    public BotUtils OK() {
+    public BotUtils ok() {
         bot.button("OK").click();
         return this;
     }
@@ -448,28 +452,9 @@ public class BotUtils {
      * @param text The new text.
      * @return
      */
-    public BotUtils replaceTextOnActiveEditor(String text) {
-        editor().clojure.sourceViewer().getDocument().set(text);
+    public BotUtils replaceTextOnActiveEditor(final String text) {
+        editor().active.toTextEditor().getStyledText().setText(text);
         return this;
-    }
-
-    /**
-     * Given a ClojureEditor, return a map Annotation keys to
-     * Position values, got from its ProjectionAnnotationModel.
-     * @param editor
-     * @return A Map, potentially empty.
-     */
-    public static @NonNull Map<Annotation, Position> getProjectionMap(IClojureEditor editor) {
-        Map<Annotation, Position> m = new HashMap<Annotation, Position>();
-
-        ProjectionAnnotationModel model = editor.getProjectionAnnotationModel();
-        Iterator annotations = model.getAnnotationIterator();
-        while (annotations.hasNext()) {
-            Annotation annotation = (Annotation) annotations.next();
-            Position position = model.getPosition(annotation);
-            m.put(annotation, position);
-        }
-        return m;
     }
 
     public BotUtils saveActiveEditor() {
@@ -479,6 +464,21 @@ public class BotUtils {
 
     public BotUtils focusActiveEditor() {
         editor().active.setFocus();
+        return this;
+    }
+
+    public BotUtils closeActiveEditor() {
+        editor().active.close();
+        return this;
+    }
+
+    /**
+     * Clear and save the current active editor.
+     * @return
+     */
+    public BotUtils clsActiveEditor() {
+        replaceTextOnActiveEditor("");
+        saveActiveEditor();
         return this;
     }
 
@@ -516,8 +516,22 @@ public class BotUtils {
         return this;
     }
 
+    public  BotUtils replaceTextInFile(String projectName, String fileName, String text) throws Exception {
+        doubleClickOnFileInProject(projectName, fileName).replaceTextOnActiveEditor(text).saveActiveEditor();
+        return this;
+    }
+
     public BotUtils assertPreferencePage(String pageName) {
         SWTBotAssert.assertText(pageName, bot().clabel());
         return this;
+    }
+
+    /**
+     * Return the FoldingBot
+     * @return
+     * @throws Exception
+     */
+    public static FoldingBot foldingBot() throws Exception {
+        return new FoldingBot(new BotUtils());
     }
 }
