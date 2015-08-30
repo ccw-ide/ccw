@@ -147,7 +147,9 @@ public class CCWPlugin extends AbstractUIPlugin {
     }
     
     public void startNamespaces() {
-    	ClojureInvoker.newInvoker(this, "ccw.editors.clojure.code-content-assist")._("start");
+//    	ClojureInvoker.newInvoker(this, "ccw.editors.clojure.code-content-assist")._("start");
+    	ClojureInvoker.newInvoker(this, "ccw.editors.clojure.code-context-information")._("start");
+    	ClojureInvoker.newInvoker(this, "ccw.editors.clojure.code-completion-proposal")._("start");
     }
 
     /**

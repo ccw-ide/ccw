@@ -1,7 +1,7 @@
-(ns ccw.editors.clojure.code-content-assist
+(ns ccw.editors.clojure.code-context-information
   (:require [ccw.api.parse-tree :as parse-tree]
             [ccw.editors.clojure.editor-common :as common :refer (find-var-metadata)]
-            [ccw.editors.clojure.clojure-proposal-processor :as cpp])
+            [ccw.api.content-assist :as api])
   #_(:require [ccw.api.content-assist :as c]))
 
 ;(defn namespace-processor-predicate
@@ -50,4 +50,4 @@
         {:information-display message}))))
 
 (defn start []
-  (cpp/register-context-information-provider! {:label "Clojure Code" :provider #'compute-context-information}))
+  (api/register-context-information-provider! {:label "Clojure Code" :provider #'compute-context-information}))
