@@ -47,7 +47,7 @@
   default-display-string :- String
   offset :- s/Int]
  (with-meta
-     (reify 
+     (reify
        IContextInformation
        (getContextDisplayString [this] (or display-string default-display-string ""))
        (getImage [this] image)
@@ -61,9 +61,12 @@
 (s/defn ^:always-validate as-eclipse-completion-proposal
   [{:keys [cursor-position image display-string
            additional-proposal-info-delay display-string-style
+           context-information-delay
            auto-insertable?]
     :or {auto-insertable? true}
-    {:keys [text offset length]} :replacement} :- CompletionProposalMap]
+    {:keys [text offset length]} :replacement} :- CompletionProposalMap
+   label :- String
+   prefix-offset :- s/Int]
   (let [text (or text "")
         display-string (or display-string "")
         cp (CompletionProposal.
@@ -82,7 +85,11 @@
       (getAdditionalProposalInfo [this] @additional-proposal-info-delay)
       (getDisplayString [this] (.getDisplayString cp))
       (getImage [this] (.getImage cp))
-      (getContextInformation [this] nil #_@context-information-delay)
+      (getContextInformation [this] (when-let [cid @context-information-delay]
+                                      (as-eclipse-context-information
+                                        cid
+                                        "" ;; will not be used in this case since there will be no context ambiguity
+                                        (+ offset (count text)))))
       
       ICompletionProposalExtension4
       (isAutoInsertable [this] (boolean auto-insertable?))
@@ -98,18 +105,6 @@
                              "at invalid offset %d for display-string '%s'")
                         i display-string))))
           s)))))
-
-;; TODO remove in favor of ... ?
-(defn context-info-data
-  "Create a context-information from the data"
-  [callee?-name cursor-offset callee?-metadata]
-  (when-let [message (common/context-message callee?-name callee?-metadata)]
-    (context-information
-      message
-      nil
-      message
-      cursor-offset
-      cursor-offset)))
 
 (def activation-characters
   "Characters which will trigger auto-completion"
@@ -137,7 +132,7 @@
   [^IClojureEditor editor, ^ITextViewer text-viewer offset]
   (reduce
     (fn [r {:keys [label provider]}]
-      (concat r (map as-eclipse-completion-proposal (provider editor text-viewer offset))))
+      (concat r (map #(as-eclipse-completion-proposal % label offset) (provider editor text-viewer offset))))
     nil
     @completion-proposal-providers))
 

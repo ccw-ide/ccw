@@ -17,7 +17,7 @@
    :cursor-position s/Int
    (s/optional-key :image) org.eclipse.swt.graphics.Image
    :display-string String
-   ;;:context-information-delay (cs/deref ContextInformationMap)
+   :context-information-delay (cs/deref (s/maybe ContextInformationMap))
    :additional-proposal-info-delay (cs/deref (s/maybe String)) ; or with monitor ...
    :display-string-style [s/Int]
    (s/optional-key :auto-insertable?) s/Bool})

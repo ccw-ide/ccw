@@ -8,8 +8,8 @@
     [ccw.debug.serverrepl :as serverrepl]
     [ccw.core.doc-utils :as doc]
     [ccw.editors.clojure.clojure-proposal-processor :as cpp]
-    [ccw.api.content-assist :as api])
-  #_(:require [ccw.api.content-assist :as c]))
+    [ccw.api.content-assist :as api]
+    [ccw.editors.clojure.code-context-information :refer (compute-context-information)]))
 
 ;(defn namespace-processor-predicate
 ;  "Return true if the current insertion-offset / clojure-editor context
@@ -203,10 +203,7 @@
                                type
                                  (str " - " type))
              :display-string-style filter
-             #_#_:context-information-delay (delay (cpp/context-info-data
-                                                     completion
-                                                     (+ prefix-offset (count completion))
-                                                     @md-ref))
+             :context-information-delay (delay (compute-context-information editor, completion))
              :additional-proposal-info-delay (delay (doc/var-doc-info-html @md-ref))}))))))
 
 (defn start []
