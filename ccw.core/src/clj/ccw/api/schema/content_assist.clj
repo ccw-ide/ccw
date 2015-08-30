@@ -15,13 +15,13 @@
    (s/optional-key :context-information-position-stop) s/Int})
 
 (s/defschema CompletionProposalMap
-  {:replacement {:text String, :offset s/Int, :length s/Int}
-   :cursor-position s/Int
+  {:replacement (s/either String {:text String, :offset s/Int, :length s/Int})
+   (s/optional-key :cursor-position) s/Int
    (s/optional-key :image) org.eclipse.swt.graphics.Image
-   :display-string String
-   :context-information-delay (cs/deref (s/maybe ContextInformationMap))
-   :additional-proposal-info-delay (cs/deref (s/maybe String)) ; or with monitor ...
-   :display-string-style [s/Int]
+   (s/optional-key :display-string) String
+   (s/optional-key :context-information-delay) (cs/deref (s/maybe ContextInformationMap))
+   (s/optional-key :additional-proposal-info-delay) (cs/deref (s/maybe String)) ; or with monitor ...
+   (s/optional-key :display-string-style) [s/Int]
    (s/optional-key :auto-insertable?) s/Bool})
 
 (s/defschema CompletionProposalProviderFn

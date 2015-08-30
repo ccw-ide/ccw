@@ -1,7 +1,8 @@
 (ns ccw.editors.clojure.clojure-proposal-processor
   (:require [paredit.parser :as p]
             [schema.core :as s]
-            [ccw.api.schema.content-assist :refer :all])
+            [ccw.api.schema.content-assist :refer :all]
+            [ccw.api.util.content-assist :refer :all])
   (:import [org.eclipse.jface.viewers StyledString
                                       StyledString$Styler]
            [org.eclipse.jface.text ITextViewer]
@@ -40,11 +41,15 @@
            context-information-delay
            auto-insertable?]
     :or {auto-insertable? true}
-    {:keys [text offset length]} :replacement} :- CompletionProposalMap
+    {:keys [text offset length] :as replacement} :replacement} :- CompletionProposalMap
    label :- String
-   prefix-offset :- s/Int]
-  (let [text (or text "")
-        display-string (or display-string "")
+   prefix-offset :- s/Int
+   cursor-offset :- s/Int]
+  (let [text (or text replacement "")
+        offset (or offset prefix-offset)
+        length (or length (- cursor-offset prefix-offset))
+        display-string (or display-string text "")
+        cursor-position (or cursor-position (count text))
         cp (CompletionProposal.
              text
              offset
@@ -58,10 +63,10 @@
       ICompletionProposal
       (apply [this document] (.apply cp document))
       (getSelection [this document] (.getSelection cp document))
-      (getAdditionalProposalInfo [this] @additional-proposal-info-delay)
+      (getAdditionalProposalInfo [this] (some-> additional-proposal-info-delay deref))
       (getDisplayString [this] (.getDisplayString cp))
       (getImage [this] (.getImage cp))
-      (getContextInformation [this] (when-let [cid @context-information-delay]
+      (getContextInformation [this] (when-let [cid (some-> context-information-delay deref)]
                                       (as-eclipse-context-information
                                         cid
                                         "" ;; will not be used in this case since there will be no context ambiguity
@@ -108,7 +113,13 @@
   [^IClojureEditor editor, ^ITextViewer text-viewer offset]
   (reduce
     (fn [r {:keys [label provider]}]
-      (concat r (map #(as-eclipse-completion-proposal % label offset) (provider editor text-viewer offset))))
+      (concat r (map
+                  #(as-eclipse-completion-proposal
+                     %
+                     label
+                     (compute-prefix-offset (-> text-viewer .getDocument .get) offset)
+                     offset)
+                  (provider editor text-viewer offset))))
     nil
     @completion-proposal-providers))
 

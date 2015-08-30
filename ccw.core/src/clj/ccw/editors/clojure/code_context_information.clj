@@ -10,8 +10,8 @@
                           call-symbol)]
       (when-let [message (common/context-message call-symbol call-metadata)]
         {:information-display message})))
-  ([editor, text-viewer, new-offset]
-    (when-let [loc (parse-tree/call-context-loc (-> text-viewer .getParseState :parse-tree) new-offset)]
+  ([editor, text-viewer, offset]
+    (when-let [loc (parse-tree/call-context-loc (-> text-viewer .getParseState :parse-tree) offset)]
       (let [call-symbol (parse-tree/call-symbol loc)]
         (compute-context-information editor call-symbol)))))
 

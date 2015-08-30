@@ -9,6 +9,7 @@
     [ccw.core.doc-utils :as doc]
     [ccw.editors.clojure.clojure-proposal-processor :as cpp]
     [ccw.api.content-assist :as api]
+    [ccw.api.util.content-assist :as api-util]
     [ccw.editors.clojure.code-context-information :refer (compute-context-information)]))
 
 (def completion-limit 
@@ -131,7 +132,7 @@
 (defn compute-completion-proposals
   "Return the list of java completion objects to the Completion framework."
   [editor, text-viewer, offset]
-  (let [prefix-offset     (api/compute-prefix-offset 
+  (let [prefix-offset     (api-util/compute-prefix-offset 
                             (-> text-viewer .getDocument .get)
                             offset)
         current-namespace (.findDeclaringNamespace editor)
@@ -173,4 +174,4 @@
 
 (defn start []
   (api/register-completion-proposal-provider!
-    {:label "Clojure Code" :provider #'compute-completion-proposals}))
+    {:label "Clojure Code", :provider #'compute-completion-proposals}))
