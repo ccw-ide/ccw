@@ -66,7 +66,7 @@
       .client
       (repl/message message))
     (catch Exception e
-      (ccw.CCWPlugin/logError (str "exception while sending message " message " to connection " (.getUnsafeConnection safe-connection)) e)
+      (ccw.CCWPlugin/logError (str "exception while sending message " message " to connection " safe-connection) e)
       (when (instance? java.net.SocketException e)
         (.connectionLost safe-connection))
       nil)))
