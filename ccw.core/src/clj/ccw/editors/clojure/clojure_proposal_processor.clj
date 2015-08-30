@@ -20,7 +20,8 @@
 
 (s/defn ^:always-validate as-eclipse-context-information
  [{:keys [information-display image display-string context-information-position
-          context-information-position-start context-information-position-stop]} :- ContextInformationMap
+          context-information-position-start context-information-position-stop]
+   :as raw-information-display} :- ContextInformationMap
   default-display-string :- String
   offset :- s/Int]
  (with-meta
@@ -28,7 +29,7 @@
        IContextInformation
        (getContextDisplayString [this] (or display-string default-display-string ""))
        (getImage [this] image)
-       (getInformationDisplayString [this] (or information-display ""))
+       (getInformationDisplayString [this] (or information-display raw-information-display ""))
        
        IContextInformationExtension
        (getContextInformationPosition [this] (or context-information-position context-information-position-start offset)))
@@ -41,11 +42,12 @@
            context-information-delay
            auto-insertable?]
     :or {auto-insertable? true}
-    {:keys [text offset length] :as replacement} :replacement} :- CompletionProposalMap
+    {:keys [text offset length] :as replacement} :replacement
+    :as plain-text} :- CompletionProposalMap
    label :- String
    prefix-offset :- s/Int
    cursor-offset :- s/Int]
-  (let [text (or text replacement "")
+  (let [text (or text replacement plain-text "")
         offset (or offset prefix-offset)
         length (or length (- cursor-offset prefix-offset))
         display-string (or display-string text "")
