@@ -12,6 +12,7 @@
             ContentAssistant
             CompletionProposal
             ICompletionProposal
+            ICompletionProposalExtension4
             ICompletionProposalExtension6
             IContextInformation
             IContextInformationExtension
@@ -57,23 +58,21 @@
      {:start (or context-information-position-start offset)
       :stop  (or context-information-position-stop context-information-position-start offset)}))
 
-(defn completion-proposal
-  [replacement-string
-   replacement-offset
-   replacement-length
-   cursor-position
-   image
-   display-string
-   filter
-   context-information-delay
-   additional-proposal-info-delay]
-  (let [cp (CompletionProposal.
-             (or replacement-string "")
-             replacement-offset
-             replacement-length
+(s/defn ^:always-validate as-eclipse-completion-proposal
+  [{:keys [cursor-position image display-string
+           additional-proposal-info-delay display-string-style
+           auto-insertable?]
+    :or {auto-insertable? true}
+    {:keys [text offset length]} :replacement} :- CompletionProposalMap]
+  (let [text (or text "")
+        display-string (or display-string "")
+        cp (CompletionProposal.
+             text
+             offset
+             length
              cursor-position
              image
-             (or display-string "")
+             display-string
              nil ;; context-information is computed on demand
              nil)] ;; additional-proposal is computed on demand
     (reify 
@@ -83,13 +82,16 @@
       (getAdditionalProposalInfo [this] @additional-proposal-info-delay)
       (getDisplayString [this] (.getDisplayString cp))
       (getImage [this] (.getImage cp))
-      (getContextInformation [this] @context-information-delay)
+      (getContextInformation [this] nil #_@context-information-delay)
+      
+      ICompletionProposalExtension4
+      (isAutoInsertable [this] (boolean auto-insertable?))
       
       ICompletionProposalExtension6
       (getStyledDisplayString [this]
-        (let [s (StyledString. (or display-string ""))]
-          (when (seq filter)
-            (doseq [i (reductions (partial + 1) filter)]
+        (let [s (StyledString. display-string)]
+          (when (seq display-string-style)
+            (doseq [i (reductions (partial + 1) display-string-style)]
               (if (< i (count display-string))
                 (.setStyle s i 1 StyledString/COUNTER_STYLER)
                 (printf (str "ERROR: Completion proposal trying to apply color style"
@@ -126,16 +128,16 @@
   (reduce
     (fn [r {:keys [label provider]}]
       (if-let [ci (provider editor text-viewer offset)]
-        (conj (or r []) (as-eclipse-context-information ci label offset))
+        (conj r (as-eclipse-context-information ci label offset))
         r))
-    nil
+    []
     @context-information-providers))
 
 (defn- compute-completion-proposals
   [^IClojureEditor editor, ^ITextViewer text-viewer offset]
   (reduce
     (fn [r {:keys [label provider]}]
-      (concat r (provider editor text-viewer offset)))
+      (concat r (map as-eclipse-completion-proposal (provider editor text-viewer offset))))
     nil
     @completion-proposal-providers))
 

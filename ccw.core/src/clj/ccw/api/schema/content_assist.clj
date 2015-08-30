@@ -17,8 +17,8 @@
    :cursor-position s/Int
    (s/optional-key :image) org.eclipse.swt.graphics.Image
    :display-string String
-   ;;:context-information ContextInformationMap
-   :additional-proposal-info (cs/reference String) ; or with monitor ...
+   ;;:context-information-delay (cs/deref ContextInformationMap)
+   :additional-proposal-info-delay (cs/deref (s/maybe String)) ; or with monitor ...
    :display-string-style [s/Int]
    (s/optional-key :auto-insertable?) s/Bool})
 
@@ -29,7 +29,7 @@
   {:label String
    :provider (s/either
                CompletionProposalProviderFn
-               (cs/reference CompletionProposalProviderFn))})
+               (cs/deref CompletionProposalProviderFn))})
 
 (s/defschema ContextInformationProviderFn
   "Signature of function that can produce ContextInformation map"
@@ -39,4 +39,4 @@
   {:label    String
    :provider (s/either
                ContextInformationProviderFn
-               (cs/reference ContextInformationProviderFn))})
+               (cs/deref ContextInformationProviderFn))})

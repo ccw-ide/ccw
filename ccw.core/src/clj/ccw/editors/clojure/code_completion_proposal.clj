@@ -195,23 +195,19 @@
                 :as metadata} :metadata
                } suggestions]
           (let [md-ref (delay (find-var-metadata current-namespace repl completion))]
-            (cpp/completion-proposal
-              completion
-              prefix-offset
-              (- offset prefix-offset)
-              (count completion)
-              nil
-              (cond-> completion
-                (and ns (not (.startsWith completion (str ns "/"))))
-                  (str " (" ns ")")
-                type
-                  (str " - " type))
-              filter
-              (delay (cpp/context-info-data
-                       completion
-                       (+ prefix-offset (count completion))
-                       @md-ref))
-              (delay (doc/var-doc-info-html @md-ref)))))))))
+            {:replacement {:text completion, :offset prefix-offset, :length (- offset prefix-offset)}
+             :cursor-position (count completion)
+             :display-string (cond-> completion
+                               (and ns (not (.startsWith completion (str ns "/"))))
+                                 (str " (" ns ")")
+                               type
+                                 (str " - " type))
+             :display-string-style filter
+             #_#_:context-information-delay (delay (cpp/context-info-data
+                                                     completion
+                                                     (+ prefix-offset (count completion))
+                                                     @md-ref))
+             :additional-proposal-info-delay (delay (doc/var-doc-info-html @md-ref))}))))))
 
 (defn start []
   (api/register-completion-proposal-provider!
