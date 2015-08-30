@@ -35,7 +35,7 @@
             (.setStatusLineErrorMessage editor ClojureEditorMessages/Cannot_find_declaration)
             nil)
           {"file" file
-           "line" (Integer/valueOf line)
+           "line" (if (str/blank? line) 0 (Integer/valueOf line))
            "ns" ns
            "sym" sym})))))
 
