@@ -1,5 +1,5 @@
 (ns ccw.editors.clojure.clojure-proposal-processor
-  (:require [clojure.string :as s]
+  (:require [clojure.string :as str]
             [clojure.set :as set]
             [clojure.test :as test]
             [clojure.tools.nrepl :as repl]
@@ -9,7 +9,9 @@
             [ccw.api.parse-tree :as parse-tree]
             [ccw.debug.serverrepl :as serverrepl]
             [ccw.core.trace :as trace]
-            [ccw.editors.clojure.editor-common :as common :refer (find-var-metadata)])
+            [ccw.editors.clojure.editor-common :as common :refer (find-var-metadata)]
+            [schema.core :as s]
+            [ccw.schema.core :as cs])
   (:use [clojure.core.incubator :only [-?>]])
   (:import [org.eclipse.jface.viewers StyledString
                                       StyledString$Styler]
@@ -31,7 +33,7 @@
 ;; TODO find the prefix via the editor's parse tree !
 (defn prefix-info 
   [ns offset ^String prefix]
-  (let [[n1 n2] (s/split prefix #"/")
+  (let [[n1 n2] (str/split prefix #"/")
         [n1 n2] (cond
                   (and (nil? n2)
                        (not (.endsWith prefix "/"))) [n2 n1]
@@ -104,20 +106,30 @@
      {:start position-start
       :stop  position-stop}))
 
-(defn as-eclipse-context-information
+(def ContextInformation
+  {(s/optional-key :information-display) String
+   (s/optional-key :display-string)       String
+   (s/optional-key :image)               org.eclipse.swt.graphics.Image
+   (s/optional-key :context-information-position) s/Int
+   (s/optional-key :context-information-position-start) s/Int
+   (s/optional-key :context-information-position-stop) s/Int})
+
+(s/defn ^:always-validate as-eclipse-context-information
  [{:keys [information-display image display-string context-information-position
-          context-information-position-start context-information-position-stop]}]
+          context-information-position-start context-information-position-stop]} :- ContextInformation
+  default-display-string :- String
+  offset :- s/Int]
  (with-meta
      (reify 
        IContextInformation
-       (getContextDisplayString [this] (or display-string ""))
+       (getContextDisplayString [this] (or display-string default-display-string ""))
        (getImage [this] image)
        (getInformationDisplayString [this] (or information-display ""))
        
        IContextInformationExtension
-       (getContextInformationPosition [this] (or context-information-position context-information-position-start)))
-     {:start context-information-position-start
-      :stop  context-information-position-stop}))
+       (getContextInformationPosition [this] (or context-information-position context-information-position-start offset)))
+     {:start (or context-information-position-start offset)
+      :stop  (or context-information-position-stop context-information-position-start offset)}))
 
 (defn completion-proposal
   [replacement-string
@@ -186,7 +198,7 @@
   [current-namespace prefix repl find-only-public]
   (cond
     (nil? current-namespace) []
-    (s/blank? prefix) []
+    (str/blank? prefix) []
     :else (when repl
             (let [safe-connection (.getSafeToolingConnection repl)
                   code (complete-command current-namespace prefix false)
@@ -203,7 +215,7 @@
   [current-namespace prefix repl find-only-public]
   (cond
     (nil? current-namespace) []
-    (s/blank? prefix) []
+    (str/blank? prefix) []
     :else (when repl
             (let [safe-connection (.getSafeToolingConnection repl)
                   response (first (common/send-message safe-connection
@@ -342,14 +354,37 @@
                  (range (int \A) (inc (int \Z)))))
           [\. \- \? \!]))
 
-(defonce context-information-provider (atom (constantly nil)))
+(defonce ^:private context-information-providers (atom #{}))
+
+;(c/register-content-assist-processor!
+;  {:id               :completions.code
+;   :label            "Clojure Code Content Assist"
+;   :display-strategy :replace ; only strategy available yet. Default content assist will be replaced by this one if :trigger-fn returns true
+;   :trigger-fn       #'find-suggestions
+;   :proposals-fn     (constantly true)
+;   })
+
+(s/defschema ContextInformationProviderFn
+  "Signature of function that can produce ContextInformation map"
+  (s/=>* ContextInformation [[IClojureEditor s/Any s/Int]]))
+
+(s/defschema ContextInformationProvider
+  {:label    String
+   :provider (s/either ContextInformationProviderFn (cs/reference ContextInformationProviderFn))})
+
+(s/defn ^:always-validate register-context-information-provider!
+  [provider :- ContextInformationProvider]
+  (swap! context-information-providers conj provider))
 
 (defn compute-context-information
-  [^IClojureEditor editor
-   text-viewer new-offset]
-  
-  (when-let [ci (@context-information-provider editor text-viewer new-offset)]
-    [(as-eclipse-context-information ci)]))
+  [^IClojureEditor editor, text-viewer, offset]
+  (reduce
+    (fn [r {:keys [label provider]}]
+      (if-let [ci (provider editor text-viewer offset)]
+        (conj (or r []) (as-eclipse-context-information ci label offset))
+        r))
+    nil
+    @context-information-providers))
 
 (defn should-compute-proposals? 
   "There is an edge case in Eclipse, inherited by the ClojurePartitionScanner,
@@ -384,11 +419,12 @@
             text-viewer offset))))
     
     (computeContextInformation
-      [this text-viewer new-offset]
+      [this text-viewer offset]
       (into-array IContextInformation
         (compute-context-information
          editor
-         text-viewer new-offset)))
+         text-viewer
+         offset)))
     
     (getCompletionProposalAutoActivationCharacters
       [this] 
@@ -404,7 +440,7 @@
         #_(concat activation-characters
                 [\newline \space \tab \( \) \{ \} \[ \] \,])))
     
-    (getErrorMessage [this] )
+    (getErrorMessage [this] "This feature works better with a running REPL")
     
     (getContextInformationValidator
       [this]

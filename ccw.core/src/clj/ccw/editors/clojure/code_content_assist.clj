@@ -46,16 +46,8 @@
           call-metadata (find-var-metadata (.findDeclaringNamespace editor) 
                           (.getCorrespondingREPL editor)
                           call-symbol)]
-      (println "I'm the best")
       (when-let [message (common/context-message call-symbol call-metadata)]
-        {:information-display message
-         :image nil
-         :display-string message
-         :context-information-position new-offset
-         :context-information-position-start new-offset
-         :context-information-position-stop new-offset}))))
+        {:information-display message}))))
 
-;; see what we can do ...
-;; README why not an error message saying we need a running repl for the project ...
 (defn start []
-  (reset! cpp/context-information-provider #'compute-context-information))
+  (cpp/register-context-information-provider! {:label "Clojure Code" :provider #'compute-context-information}))
