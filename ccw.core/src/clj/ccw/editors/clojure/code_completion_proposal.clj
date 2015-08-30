@@ -11,41 +11,6 @@
     [ccw.api.content-assist :as api]
     [ccw.editors.clojure.code-context-information :refer (compute-context-information)]))
 
-;(defn namespace-processor-predicate
-;  "Return true if the current insertion-offset / clojure-editor context
-;   is relevant for namespace completion"
-;  [clojure-editor prefix-offset prefix]
-;  true
-;  #_(when-let [loc (some-> clojure-editor .getParseTree p/root-loc (l/loc-for-offset prefix-offset))]
-;     (let [loc (if (= :quote (l/loc-type loc)) (l/loc-parent loc) loc)]
-;       (and (= :list (l/loc-type loc)) (#{"require" "use" "in-ns"} (-> loc l/loc-children (get 1) l/loc-text))))))
-;
-;suggestions:
-;{:keys
-; :completion
-; :match
-; :filter
-; :type
-; :ns
-; :metadata {:arglists name added static doc line file}
-; }
-;
-;(defn find-suggestions
-;  "List all namespaces. This can be a lazy seq, which will or will not be
-;   entirely consumed depending on processor configuration"
-;  [clojure-editor prefix-offset prefix]
-;  [{:replacement "clojure.core"}
-;   {:replacement "clojure.pprint"}])
-;
-;(c/register-content-assist-processor!
-;  {:id               :completions.code
-;   :label            "Clojure Code Content Assist"
-;   :display-strategy :replace ; only strategy available yet. Default content assist will be replaced by this one if :trigger-fn returns true
-;   :trigger-fn       #'find-suggestions
-;   :proposals-fn     (constantly true)
-;   })
-;
-
 (def completion-limit 
   "Maximum number of returned results" 50)
 

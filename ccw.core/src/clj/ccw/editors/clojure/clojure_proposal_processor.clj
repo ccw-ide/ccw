@@ -1,7 +1,5 @@
 (ns ccw.editors.clojure.clojure-proposal-processor
   (:require [paredit.parser :as p]
-            [ccw.core.trace :as trace]
-            [ccw.editors.clojure.editor-common :as common :refer (find-var-metadata)]
             [schema.core :as s]
             [ccw.api.schema.content-assist :refer :all])
   (:import [org.eclipse.jface.viewers StyledString
@@ -17,29 +15,7 @@
             IContextInformation
             IContextInformationExtension
             IContextInformationValidator]
-           [org.eclipse.jdt.core JavaCore
-                                 IMethod
-                                 IType]
            [ccw.editors.clojure IClojureEditor]))
-
-;; TODO remove in favor of as-eclipse-context-information
-(defn context-information
-  [context-display-string
-   image
-   information-display-string
-   position-start
-   position-stop]
-   (with-meta
-     (reify 
-       IContextInformation
-       (getContextDisplayString [this] (or context-display-string ""))
-       (getImage [this] image)
-       (getInformationDisplayString [this] (or information-display-string ""))
-       
-       IContextInformationExtension
-       (getContextInformationPosition [this] position-start))
-     {:start position-start
-      :stop  position-stop}))
 
 (s/defn ^:always-validate as-eclipse-context-information
  [{:keys [information-display image display-string context-information-position

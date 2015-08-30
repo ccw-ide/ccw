@@ -1,4 +1,6 @@
 (ns ccw.api.schema.content-assist
+  "Schemas serving as data API for content assist features.
+   See ccw.api.content-assist"
   (:require
     [schema.core :as s]
     [ccw.schema.core :as cs])
