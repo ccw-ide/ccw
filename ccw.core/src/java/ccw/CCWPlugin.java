@@ -326,7 +326,7 @@ public class CCWPlugin extends AbstractUIPlugin {
 										break;
 									} else {
 										try {
-											Thread.sleep(200);
+											Thread.sleep(50);
 										} catch (InterruptedException e) {
 											logError("Error while trying to Thread.sleep.", e);
 										}
@@ -336,16 +336,32 @@ public class CCWPlugin extends AbstractUIPlugin {
 								// Here, the workbench is initialized
 								if (System.getProperty(StaticStrings.CCW_PROPERTY_NREPL_AUTOSTART) != null) {
 									try {
+										startNamespaces();
 										startREPLServer();
 										startEventHandlers();
 										startEventSubscription();
-										startNamespaces();
 									} catch (Exception e) {
 										logError("Error while querying for property: " + StaticStrings.CCW_PROPERTY_NREPL_AUTOSTART, e);
 									}
 								}
 
 								getNatureAdapter().start();
+								IEventBroker b = getEclipseContext().get(IEventBroker.class);
+								b.subscribe(UIEvents.UILifeCycle.PERSPECTIVE_OPENED, null, new EventHandler() {
+									@Override public void handleEvent(Event event) {
+										System.out.println("Perspective Opened:" + event.getProperty(UIEvents.UILabel.LABEL));
+									}
+								}, false);
+								b.subscribe(UIEvents.Perspective.TOPIC_ALL, null, new EventHandler() {
+									@Override public void handleEvent(Event event) {
+										System.out.println("Perspective event:" + event);
+									}
+								}, false);
+								b.subscribe(UIEvents.UILifeCycle.ACTIVATE, null, new EventHandler() {
+									@Override public void handleEvent(Event event) {
+										System.out.println("MPart Activated:" + event);
+									}
+								}, false);
 							}
 
 						}).start();
