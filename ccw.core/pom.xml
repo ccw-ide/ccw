@@ -24,6 +24,17 @@
 	<!-- These are ignored by Tycho
 	     but will be incorporated into ccw.core/lib/ -->
     <dependencies>
+          <dependency>
+            <groupId>prismatic</groupId>
+            <artifactId>schema</artifactId>
+            <version>0.4.4</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.clojure</groupId>
+                    <artifactId>clojure</artifactId>
+                </exclusion>
+            </exclusions>
+          </dependency>
           <dependency> <!-- for tests only -->
             <groupId>net.mikera</groupId>
             <artifactId>cljunit</artifactId>

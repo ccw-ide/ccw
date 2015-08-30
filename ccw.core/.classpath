@@ -2,6 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src/java"/>
 	<classpathentry kind="src" path="src/clj"/>
+	<classpathentry exported="true" kind="lib" path="lib/schema-jar/"/>
 	<classpathentry exported="true" kind="lib" path="ccw-plugins/ccw-plugin-ansi-repl/"/>
 	<classpathentry exported="true" kind="lib" path="ccw-plugins/ccw-plugin-hyperlink/"/>
 	<classpathentry exported="true" kind="lib" path="ccw-plugins/ccw-plugin-hello-world/"/>

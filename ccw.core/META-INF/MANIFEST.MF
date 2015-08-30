@@ -144,7 +144,8 @@ Bundle-ClassPath: .,
  ccw-plugins/ccw-plugin-manager/,
  ccw-plugins/ccw-plugin-hello-world/,
  ccw-plugins/ccw-plugin-hyperlink/,
- ccw-plugins/ccw-plugin-ansi-repl/
+ ccw-plugins/ccw-plugin-ansi-repl/,
+ lib/schema-jar/
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: Counterclockwise
 Eclipse-BundleShape: dir
