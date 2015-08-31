@@ -489,7 +489,7 @@
                        (-> root-path (.append path))
                        (-> root-path (.append package-path) (.append path)))
                 search (workspace-resource path)]
-          :when search]
+          :when (and search (= IResource/FILE (.getType search)))]
       (.toOSString (.getLocation search)))))
 
 (defn project-relative-path

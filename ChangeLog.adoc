@@ -18,6 +18,8 @@ Laurent Petit <laurent dot petit at gmail dot com>
 === REPL
 - The REPL View is now visible in all Perspectives, not only the perspective where it was opened. Fix #686
 
+=== Issues
+- The `java-resource-paths` file finding strategy was considering folders as correct results which was wrong. Fix #847
 
 == Counterclockwise 0.34.0
 
