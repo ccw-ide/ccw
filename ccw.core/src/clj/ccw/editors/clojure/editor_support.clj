@@ -166,3 +166,9 @@
   Remember that passing nil as message resets the status line."
   [^IClojureEditor part message]
   (swt/doasync (.setStatusLineErrorMessage part message)))
+
+(defn open-clojure-editors
+  "Return all open clojure editors of the Workbench, pred is an optional
+  predicate for filtering them."
+  ([] (open-clojure-editors identity))
+  ([pred] (map (comp #(e/adapter % IClojureEditor) #(.getEditor % true)) (e/open-editor-refs identity))))

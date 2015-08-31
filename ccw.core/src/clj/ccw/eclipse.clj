@@ -140,7 +140,7 @@
   ([^IWorkbenchPage workbench-page] (page-editors workbench-page)))
 
 (defn text-editor
-  "Return theeditor associated to the reference if it's instanciated
+  "Return the editor associated to the reference if it's instantiated
    and it's a text editor. Useful to only work with editors that have
    been configured and you may want to reconfigure"
   [e]
@@ -148,10 +148,10 @@
     (when (instance? org.eclipse.ui.texteditor.AbstractTextEditor e)
       e)))
 
-(defn open-editors
+(defn open-editor-refs
   "Return all open editors of the Workbench.
    pred is an optional predicate for filtering editors"
-  ([] (open-editors identity))
+  ([] (open-editor-refs identity))
   ([pred]
     (into []
       (for [w (workbench-windows)

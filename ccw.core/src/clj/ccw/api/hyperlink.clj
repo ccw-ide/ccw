@@ -127,7 +127,7 @@
   []
   (let [get-source-viewer-configuration (set-method-accessible! org.eclipse.ui.texteditor.AbstractTextEditor "getSourceViewerConfiguration")
         get-source-viewer (set-method-accessible! org.eclipse.ui.texteditor.AbstractTextEditor "getSourceViewer")] 
-  (let [editors (e/open-editors e/text-editor)]
+  (let [editors (e/open-editor-refs e/text-editor)]
     (doseq [e editors
             :let [e                  (e/text-editor e)
                   source-viewer-conf (invoke-method get-source-viewer-configuration e)
