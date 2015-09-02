@@ -19,6 +19,9 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -41,12 +44,15 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPropertyListener;
 import org.eclipse.ui.editors.text.TextEditor;
+import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.StatusLineContributionItem;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import ccw.CCWPlugin;
 import ccw.editors.clojure.ClojureSourceViewer.IStatusLineHandler;
+import ccw.editors.clojure.folding.FoldingActionGroup;
+import ccw.editors.clojure.folding.FoldingMessages;
 import ccw.editors.clojure.scanners.ClojurePartitionScanner;
 import ccw.editors.outline.ClojureOutlinePage;
 import ccw.launching.ClojureLaunchShortcut;
@@ -295,6 +301,19 @@ public class ClojureEditor extends TextEditor implements IClojureEditor, IReplPr
         return getSourceViewer().getSelectionProvider();
     }
 
+    /**
+     * The action group for folding.
+     */
+    private FoldingActionGroup fFoldingGroup;
+
+    /**
+     * Returns the folding action group, or <code>null</code> if there is none.
+     * @return the ActionGroup or null;
+     */
+    protected @Nullable FoldingActionGroup getFoldingActionGroup() {
+        return fFoldingGroup;
+    }
+
 	@Override
 	protected void createActions() {
 		super.createActions();
@@ -362,9 +381,29 @@ public class ClojureEditor extends TextEditor implements IClojureEditor, IReplPr
 		action.setActionDefinitionId(ClojureSourceViewer.STATUS_CATEGORY_STRUCTURAL_EDITION);
 		setAction(ClojureSourceViewer.STATUS_CATEGORY_STRUCTURAL_EDITION, action);
 		
-}
+		fFoldingGroup = new FoldingActionGroup(this, getSourceViewer(), CCWPlugin.getDefault().getPreferenceStore());
+	}
 	
-	
+	/*
+     * @see org.eclipse.ui.texteditor.AbstractTextEditor#rulerContextMenuAboutToShow(org.eclipse.jface.action.IMenuManager)
+     */
+    @Override
+    protected void rulerContextMenuAboutToShow(IMenuManager menu) {
+        super.rulerContextMenuAboutToShow(menu);
+        IMenuManager foldingMenu= new MenuManager(FoldingMessages.getString("Projection_FoldingMenu_name"), "projection"); //$NON-NLS-1$
+        menu.appendToGroup(ITextEditorActionConstants.GROUP_RULERS, foldingMenu);
+
+        IAction action= getAction("FoldingToggle"); //$NON-NLS-1$
+        foldingMenu.add(action);
+        action= getAction("FoldingExpandAll"); //$NON-NLS-1$
+        foldingMenu.add(action);
+        action= getAction("FoldingCollapseAll"); //$NON-NLS-1$
+        foldingMenu.add(action);
+// TODO   action= getAction("FoldingRestore"); //$NON-NLS-1$
+//        foldingMenu.add(action);
+// TODO   action= getAction("FoldingCollapseComments"); //$NON-NLS-1$
+//        foldingMenu.add(action);
+    }
 
 	/**
 	 * Move to beginning of current or preceding defun (beginning-of-defun).

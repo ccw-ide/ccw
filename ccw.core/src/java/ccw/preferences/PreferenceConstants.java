@@ -205,6 +205,7 @@ public class PreferenceConstants {
      * A named preference that defines the folding descriptors (see editors.clojure.folding-support)
      */
     public static final String EDITOR_FOLDING_DESCRIPTORS = CCW_PREFERENCE_PREFIX + ".folding.descriptors"; //$NON-NLS-1$
+    public static final String EDITOR_FOLDING_PROJECTION_ENABLED = CCW_PREFERENCE_PREFIX + ".folding.projection-enabled";
 
     public static class ColorizableToken {
     	public final @NonNull RGB rgb;

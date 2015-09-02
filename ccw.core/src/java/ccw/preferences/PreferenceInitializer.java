@@ -83,6 +83,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
             + " :loc-tags #{:string}"
             + " :label \"" + Messages.FoldingPreferencePage_fold_double_apex_label + "\""
             + " :description \"" + Messages.FoldingPreferencePage_fold_double_apex_description + "\"})";
+    public static final Boolean DEFAULT_PROJECTION_ENABLED = Boolean.TRUE;
     
 	@Override
 	public void initializeDefaultPreferences() {
@@ -136,5 +137,6 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 
 	    // Folding pref
         store.setDefault(PreferenceConstants.EDITOR_FOLDING_DESCRIPTORS, DEFAULT_FOLDING_DESCRIPTORS);
+        store.setDefault(PreferenceConstants.EDITOR_FOLDING_PROJECTION_ENABLED, DEFAULT_PROJECTION_ENABLED);
 	}
 }

@@ -34,6 +34,8 @@ import org.eclipse.ui.texteditor.ITextEditorExtension;
 import org.eclipse.ui.texteditor.RetargetTextEditorAction;
 import org.eclipse.ui.texteditor.StatusLineContributionItem;
 
+import ccw.editors.clojure.folding.FoldingActionGroup;
+
 /**
  * Common base class for action contributors for Clojure editors.
  */
@@ -176,6 +178,13 @@ public class BasicClojureEditorActionContributor extends BasicTextEditorActionCo
 		}
 		
 		showInformationAction.setAction(getAction(textEditor, ITextEditorActionConstants.SHOW_INFORMATION));
+
+        if (part instanceof ClojureEditor) {
+            FoldingActionGroup foldingActions= ((ClojureEditor)part).getFoldingActionGroup();
+            if (foldingActions != null) {
+                foldingActions.updateActionBars();
+            }
+        }
 	}
 	
 	@Override
