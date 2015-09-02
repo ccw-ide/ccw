@@ -53,6 +53,7 @@
            [org.eclipse.jface.preference IPreferenceStore]
            [org.eclipse.core.commands ExecutionEvent]
            [org.eclipse.ui.actions WorkspaceModifyDelegatingOperation]
+           [org.eclipse.core.runtime.jobs Job]
            [java.io File IOException]
            [ccw CCWPlugin]
            [ccw.util PlatformUtil]
@@ -778,6 +779,20 @@
         (catch Exception e
           (CCWPlugin/createErrorStatus (format "Unexpected exception while executing Job %s" name), e))))))
 
+(defn job
+  "Create a Job with name, and delegate run to (f monitor). The method
+  returns a Job instance that, when executed, takes care of returning
+  an IStatus, if returned by f, or Status/OK_STATUS instead."
+  [name f]
+  (proxy [Job] [name]
+    (run [^IProgressMonitor monitor]
+      (try
+        (let [s (f monitor)]
+          (if (instance? IStatus s)
+            s
+            (Status/OK_STATUS)))
+        (catch Exception e
+          (CCWPlugin/createErrorStatus (format "Unexpected exception while executing Job %s" name), e))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Preferences management utilities
