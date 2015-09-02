@@ -17,11 +17,15 @@
             [clojure.java.data :refer :all]
             [clojure.zip :as z]
             [paredit.loc-utils :as lu]
-            [ccw.editors.clojure.editor-support :as es]
-            [ccw.eclipse :refer [string-ccw-pref
-                                 preference!]]
+            [ccw.editors.clojure.editor-support :as es :refer [getParseTree
+                                                               open-clojure-editors]]
+            [ccw.eclipse :as e :refer [boolean-ccw-pref
+                                       string-ccw-pref
+                                       preference!
+                                       job]]
             [ccw.swt :as swt :refer [doasync]])
-  (:import org.eclipse.e4.core.contexts.IEclipseContext
+  (:import org.eclipse.ui.texteditor.AbstractTextEditor
+           org.eclipse.e4.core.contexts.IEclipseContext
            org.eclipse.core.databinding.observable.list.WritableList
            org.eclipse.jface.text.IRegion
            org.eclipse.jface.text.Position
@@ -261,15 +265,45 @@
 ;;; Preference helpers ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- read-descriptors-from-preference!
-  "Load what is in the preferences, returns the descriptors accordingly."
+(defn- read-descriptors-preference!
+  "Load the descriptors from the preferences."
   []
-  (edn/read-string {:eof ""} (string-ccw-pref PreferenceConstants/EDITOR_FOLDING_DESCRIPTORS)))
+  (edn/read-string {:eof ""} (e/string-ccw-pref PreferenceConstants/EDITOR_FOLDING_DESCRIPTORS)))
+
+(defn- read-projection-enabled-preference!
+  "Load whether the projection is enabled from the preferences, returns
+  a Boolean."
+  []
+  (e/boolean-ccw-pref PreferenceConstants/EDITOR_FOLDING_PROJECTION_ENABLED))
 
 (defn- persist-descriptors!
   "Persist the input descriptors in the preferences."
   [descriptors]
-  (preference! PreferenceConstants/EDITOR_FOLDING_DESCRIPTORS (pr-str descriptors)))
+  (e/preference! PreferenceConstants/EDITOR_FOLDING_DESCRIPTORS (pr-str descriptors)))
+
+(defn- toggle-folding-on-editors!
+  "Toggle the folding on all the open editors. The parameter enabled must be
+  a Boolean."
+  [enabled]
+  (when-let [editors (seq (es/open-clojure-editors))]
+    (trace :editor/text (str "Toggling folding on all the open IClojureEditor to " enabled))
+    (doseq [^IClojureEditor e editors]
+      (.enableProjection e enabled))))
+
+(defn- disable-then-enable-folding-on-editors!
+  "Enable and then disable the folding on all the open editors. This
+  solves the issue #799 - Problem with dark editor theme."
+  []
+  (when (read-projection-enabled-preference!)
+    (trace :editor/text (str "Performing workaround for issue #799 on all editors"))
+    (let [off-job (doto (e/job "Switch off folding - Workaround #799"
+                               (fn [_] (swt/dosync (toggle-folding-on-editors! false))))
+                    (.setSystem true))
+          on-job (doto (e/job "Switch on folding - Workaround #799"
+                              (fn [_] (swt/dosync (toggle-folding-on-editors! true))))
+                   (.setSystem true))]
+      (.schedule off-job 250)
+      (.schedule on-job 1500))))
 
 ;;;;;;;;;;;;;;
 ;;; Public ;;;
@@ -279,21 +313,22 @@
   "Update the ProjectionAnnotationModel's positions (offset, length,
   wrapped in a org.eclipse.jface.text.Position) used for folding in the
   input IClojureEditor. The UI part is executed using swt/doasync."
-  [^IClojureEditor editor ^IRegion region]
-  (let [descriptors (read-descriptors-from-preference!)]
-    (if (any-enabled? descriptors)
+  [^IClojureEditor editor]
+  (let [descriptors (read-descriptors-preference!)]
+    (if (and (read-projection-enabled-preference!) (any-enabled? descriptors))
       (let [positions (folding-positions (.getParseState editor) descriptors)
             additions (zipmap (repeatedly #(ProjectionAnnotation.)) positions)] 
         (trace :editor/text (str "computed additions: " additions)) 
         ;; TODO - AR incrementally handle additions, removals
         (let [result-promise (swt/doasync
                               (when-let [^ProjectionAnnotationModel model (some-> editor (.getProjectionAnnotationModel))]
+                                (trace :editor/text "ProjectionAnnotationModel not null, updating annotations...")
                                 (.removeAllAnnotations model)
                                 (.modifyAnnotations model nil additions nil)
                                 (.markDamagedAndRedraw editor)))]
           (when (instance? Throwable @result-promise)
             (trace :editor/text "Exception caught while updating the editor" @result-promise))))
-      (trace :editor/text (str "Both projection and descriptors were disabled, skipping folding computation")))))
+      (trace :editor/text (str "Either projection or descriptors were disabled, skipping folding computation")))))
 
 (defn init-injections
   "Set a new instance of FoldingModel in the input context."
@@ -304,9 +339,26 @@
           FoldingModel
           (getObservableDescriptors [this]
             (WritableList.
-             (map #(to-java FoldingDescriptor %1) (read-descriptors-from-preference!))
+             (map #(to-java FoldingDescriptor %1) (read-descriptors-preference!))
              FoldingDescriptor))
 
           (persistDescriptors [this list]
             (let [descriptors (map #(from-java %1) list)]
               (persist-descriptors! descriptors))))))
+
+(defn any-descriptor-enabled?
+  "Return true if folding is enabled in the preferences, false
+  otherwise."
+  []
+  (any-enabled? (read-descriptors-preference!)))
+
+(defn add-preference-listeners
+  []
+  (let [pref-projection PreferenceConstants/EDITOR_FOLDING_PROJECTION_ENABLED
+        pref-background AbstractTextEditor/PREFERENCE_COLOR_BACKGROUND]
+    (trace :editor/text (str "Registering " pref-projection " and " pref-background " listeners..."))
+    (ccw.eclipse/add-preference-listener pref-projection
+                                         (fn [event] (toggle-folding-on-editors! (.getNewValue event))))
+    ;; AR - fix for issue #799
+    (ccw.eclipse/add-preference-listener pref-background
+                                         (fn [_] (disable-then-enable-folding-on-editors!)))))

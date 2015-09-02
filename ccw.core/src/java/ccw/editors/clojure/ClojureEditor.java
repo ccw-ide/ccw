@@ -28,7 +28,6 @@ import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.source.DefaultCharacterPairMatcher;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
-import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
 import org.eclipse.jface.text.source.projection.ProjectionSupport;
@@ -221,8 +220,6 @@ public class ClojureEditor extends TextEditor implements IClojureEditor, IReplPr
 //                }
 //            });
         }
-
-        enableProjections(viewer);
 
 		// ensure decoration support has been created and configured.
 		SourceViewerDecorationSupport sourceViewerDecorationSupport = getSourceViewerDecorationSupport(viewer);
@@ -793,20 +790,34 @@ public class ClojureEditor extends TextEditor implements IClojureEditor, IReplPr
         sourceViewer().initializeViewerColors();
     }
 
-    protected void enableProjections(SourceViewer viewer) {
-        if (viewer instanceof ProjectionViewer && viewer.canDoOperation(ProjectionViewer.TOGGLE)) {
-            viewer.doOperation(ProjectionViewer.TOGGLE);
+    /* (non-Javadoc)
+     * @see ccw.editors.clojure.IClojureEditor#enableProjection(boolean)
+     */
+    @Override
+    public void enableProjection(boolean enabled) {
+        sourceViewer().enableProjection(enabled);
+    }
+
+    /**
+     * Workaround that toggles again the Projection on the viewer if it is
+     * not already on but the preference commands it so.
+     */
+    private void ensureProjectionState() {
+        // AR - forcing enabling when if preference is on
+        boolean enabled = getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_FOLDING_PROJECTION_ENABLED);
+        if (enabled) {
+            ClojureSourceViewer viewer = sourceViewer();
+            if (!viewer.isProjectionMode() || viewer.getProjectionAnnotationModel() == null) {
+                viewer.enableProjection();
+            }
         }
     }
 
-    @Override
+    /* (non-Javadoc)
+     * @see ccw.editors.clojure.IClojureEditor#getProjectionAnnotationModel()
+     */
     public @Nullable ProjectionAnnotationModel getProjectionAnnotationModel() {
-        // AR - Workaround
-        // Checks and forces the TOGGLE if no ProjectionAnnotationModel was created
-        ClojureSourceViewer viewer = sourceViewer();
-        if (viewer.getProjectionAnnotationModel() == null) {
-            enableProjections(viewer);
-        }
-        return viewer.getProjectionAnnotationModel();
+        ensureProjectionState();
+        return sourceViewer().getProjectionAnnotationModel();
     }
 }

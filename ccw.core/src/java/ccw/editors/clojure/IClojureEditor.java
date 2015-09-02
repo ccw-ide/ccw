@@ -130,4 +130,10 @@ public interface IClojureEditor extends IAdaptable {
 	 * @return Returns the model or null
 	 */
 	@Nullable ProjectionAnnotationModel getProjectionAnnotationModel();
+
+	/**
+	 * Toggle projection (the base of the folding feature) on this IClojureEditor.
+	 * @param enabled if true, it will enable the projection
+	 */
+	void enableProjection(boolean enabled);
 }

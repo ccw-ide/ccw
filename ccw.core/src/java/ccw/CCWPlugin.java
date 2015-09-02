@@ -374,6 +374,10 @@ public class CCWPlugin extends AbstractUIPlugin {
 		invoker._("add-registry-listener");
 		invoker._("add-preference-listener");
 
+		// Adding hover extension listener
+		invoker = ClojureInvoker.newInvoker(this, "ccw.editors.clojure.folding-support");
+		invoker._("add-preference-listeners");
+
 		log("CCWPlugin.start(): EXIT");
 	}
     
