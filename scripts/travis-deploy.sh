@@ -57,18 +57,16 @@ cat <<EOF > ${TRAVIS_BUILD_DIR}/compositeContent.xml
 </repository>
 EOF
 
-## Push branch p2 repository files via FTP
-ftp -pn ${FTP_HOST} <<EOF
-quote USER ${FTP_USER}
-quote PASS ${FTP_PASSWORD}
-bin
-prompt off
+# Push compositeContent.xml and compositeArtifacts.xml
+lftp ftp://${FTP_USER}:${FTP_PASSWORD}@${FTP_HOST} <<EOF
+set ftp:passive-mode true
 lcd ${TRAVIS_BUILD_DIR}
 cd ${FTP_UPDATESITE_ROOT}/${BRANCH}
 put compositeArtifacts.xml
 put compositeContent.xml
 quit
 EOF
+
 test $? || exit $?
 
 [ -d ${PRODUCTS_DIR} ] || exit $?
