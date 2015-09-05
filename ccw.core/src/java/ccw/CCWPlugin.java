@@ -346,22 +346,6 @@ public class CCWPlugin extends AbstractUIPlugin {
 								}
 
 								getNatureAdapter().start();
-								IEventBroker b = getEclipseContext().get(IEventBroker.class);
-								b.subscribe(UIEvents.UILifeCycle.PERSPECTIVE_OPENED, null, new EventHandler() {
-									@Override public void handleEvent(Event event) {
-										System.out.println("Perspective Opened:" + event.getProperty(UIEvents.UILabel.LABEL));
-									}
-								}, false);
-								b.subscribe(UIEvents.Perspective.TOPIC_ALL, null, new EventHandler() {
-									@Override public void handleEvent(Event event) {
-										System.out.println("Perspective event:" + event);
-									}
-								}, false);
-								b.subscribe(UIEvents.UILifeCycle.ACTIVATE, null, new EventHandler() {
-									@Override public void handleEvent(Event event) {
-										System.out.println("MPart Activated:" + event);
-									}
-								}, false);
 							}
 
 						}).start();
