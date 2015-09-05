@@ -61,7 +61,7 @@ EOF
 lftp ftp://${FTP_USER}:${FTP_PASSWORD}@${FTP_HOST} <<EOF
 set ftp:passive-mode true
 lcd ${TRAVIS_BUILD_DIR}
-cd ${FTP_UPDATESITE_ROOT}/${BRANCH}
+cd ${FTP_BRANCH_DIR}
 put compositeArtifacts.xml
 put compositeContent.xml
 quit
