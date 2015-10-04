@@ -35,7 +35,7 @@ General information website: https://github.com/laurentpetit/ccw/wiki/GoogleCode
 
 Documentation website: http://doc.ccw-ide.org/
 
-Issues tracker: https://github.com/laurentpetit/ccw/issues/list
+Issues tracker: https://github.com/laurentpetit/ccw/issues
 
 
 ### Install CCW development environment, build CCW with Maven
