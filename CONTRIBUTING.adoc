@@ -18,7 +18,7 @@ try to follow these guidelines when you do so.
 - Be clear, concise and precise in your description of the problem.
 - Open an issue with a descriptive title and a summary in grammatically correct,
   complete sentences.
-- Include any relevant code to the issue summary.
+- Include any relevant code to the issue summary, try to reproduce the problem using SWTBot (menu:Clojure[Test > Generator...]) and paste its generated code (<<swtbot-tests,see also here>>).
 - Follow the Angular JS commit convention https://gist.github.com/stephenparish/9941e89d80e2bc58a153 . We are little bit liberal with the conventions, take inspiration from the CCW commits history to find a good mesure
 
 == Pull Requests
@@ -39,7 +39,7 @@ You can see the Github Flow page for a visual version of the workflow: https://g
 == Developing within Eclipse
 
 === Prerequisites
- 
+
 - Java 7
 - Maven >= 3.1.1
 ** download from http://mirrors.linsrv.net/apache/maven/maven-3/3.1.1/binaries/apache-maven-3.1.1-bin.zip
@@ -65,8 +65,8 @@ The following launch configuration files automatically install themselves in the
 
 - `Counterclockwise Plugin` for Debugging the Plugin by launching it in the current PDE Target (shortcut for `ccw.core/Counterclockwise Plugin.launch`)
 - `Counterclockwise Product` for Debugging the Standalone Product (shortcut for `ccw.core/Counterclockwise Product.launch`)
-- `Counterclockwise Product Tests` for Launching the JUnit (SWTBot) tests (some tests don't pass in this mode) (shortcut for `ccw.core.test/Counterclockwise Product Tests.launch`)
-
+- `Counterclockwise Product Tests` for Launching the JUnit tests (some tests don't pass in this mode) (shortcut for `ccw.core.test/Counterclockwise Product Tests.launch`)
+- `Counterclockwise SWTBot Tests` for Launching SWTBot tests (shortcut for `ccw.core.test/Counterclockwise SWTBot Tests.launch`)
 
 == From the Command Line
 
@@ -76,7 +76,7 @@ The following launch configuration files automatically install themselves in the
 git clone https://github.com/laurentpetit/ccw
 cd ccw
 
-# Clean + compile + unit test + integration test + build updatesite 
+# Clean + compile + unit test + integration test + build updatesite
 # + build Windows / Linux / OS X standalone products + build documentation:
 mvn clean verify
 
@@ -107,6 +107,14 @@ ccw$ script/set-version.sh 0.20.0-SNAPSHOT
 
 - Add the test namespace in `ccw.core.test/src/clj` using the usual namespace structure for folders
 - Add the namespace to the list of namespaces to be tested in the java file `ccw.core.test/src/java/ccw/core/ClojureTests.java`
+
+[[swtbot-tests]]
+== Adding SWTBot tests
+
+- Open the SWTBot menu (menu:Clojure[Test > Generator...]) and press btn:[Start Recording].
+- Execute the UI action(s) that are necessary to perform the test you have in mind (you will see SWTBot generating code while you proceed).
+- Adapt the test to the existing code. Exploring the `BotUtils` might bring forth some reusable code, see https://wiki.eclipse.org/SWTBot/Generator#Limitations[this doc] for why you need this.
+- Add you code to `ccw.core.test/src/java` and commit using `test`.
 
 == Make CCW depend on a new feature
 
@@ -168,4 +176,4 @@ ccw$ script/set-version.sh 0.20.0-SNAPSHOT
 - https://maven.apache.org/plugins/maven-dependency-plugin/copy-mojo.html : maven `dependency:copy` reference
 - https://maven.apache.org/plugins/maven-dependency-plugin/unpack-dependencies-mojo.html : maven `dependency:unpack-dependencies` reference
 - Working with Git Submodules: https://git-scm.com/book/en/v2/Git-Tools-Submodules
-
+- SWTBot tutorial : http://www.vogella.com/tutorials/SWTBot/article.html
