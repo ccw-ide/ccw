@@ -169,3 +169,26 @@ ccw$ script/set-version.sh 0.20.0-SNAPSHOT
 - https://maven.apache.org/plugins/maven-dependency-plugin/unpack-dependencies-mojo.html : maven `dependency:unpack-dependencies` reference
 - Working with Git Submodules: https://git-scm.com/book/en/v2/Git-Tools-Submodules
 
+== Eclipse development links
+
+== IResource / IFile / IFolder / IProject
+- responding to resource change events - https://www.eclipse.org/articles/Article-Resource-deltas/resource-deltas.html
+- tracking resource changes - http://help.eclipse.org/luna/index.jsp?topic=%2Forg.eclipse.platform.doc.isv%2Fguide%2FresAdv_events.htm
+- how can I be notified of changes to the workspace- https://wiki.eclipse.org/FAQ_How_can_I_be_notified_of_changes_to_the_workspace%3F
+
+=== Problem Markers
+- Mark My Words - https://www.eclipse.org/articles/Article-Mark%20My%20Words/mark-my-words.html old but still good introduction to markers
+- Eclipse Help resource markers - http://help.eclipse.org/mars/index.jsp?topic=%2Forg.eclipse.platform.doc.isv%2Fguide%2FresAdv_markers.htm
+- FAQ How do I create problem markers for my compiler - https://wiki.eclipse.org/FAQ_How_do_I_create_problem_markers_for_my_compiler%3F
+- Suport for displaying markers - http://help.eclipse.org/mars/index.jsp?topic=%2Forg.eclipse.platform.doc.isv%2Fguide%2FwrkAdv_marker_support.htm
+- Custom markers and annotations, the bright side of Eclipse - http://cubussapiens.hu/2011/05/custom-markers-and-annotations-the-bright-side-of-eclipse/
+
+=== SWT StyledText Widget
+- How StyledText works - https://www.eclipse.org/articles/StyledText%201/article1.html
+- Into the deep end of the StyledText widget - https://eclipse.org/articles/StyledText%202/article2.html
+
+=== Quick fixes
+ - How do I implement 'quick fixes' - https://wiki.eclipse.org/FAQ_How_do_I_implement_Quick_Fixes_for_my_own_language%3F
+
+=== Eclipse Launcher Framework
+- We have lift off, the Eclipse launch framework - https://eclipse.org/articles/Article-Launch-Framework/launch.html
