@@ -4,7 +4,7 @@
 
 Counterclockwise is an Eclipse plugin helping developers write Clojure code
 
-[![Build Status](https://jenkins.ccw-ide.org/buildStatus/icon?job=ccw-master)](https://jenkins.ccw-ide.org/job/ccw-master/)
+[![Build Status](https://travis-ci.org/laurentpetit/ccw.svg?branch=master)](https://travis-ci.org/laurentpetit/ccw)
 
 You can support this project committers by donating:
 
