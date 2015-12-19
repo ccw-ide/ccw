@@ -84,7 +84,7 @@ any Eclipse packaging which includes JDT (Java Development Tools) will work:  "E
 Eclipse 3 (Indigo, Eclipse 3.8.x) is no longer supported, but you can still install a version < 0.30 of Counterclockwise
 ====
 
-Counterclockwise is available via the Eclipse Marketplace Client: search for `Counterclockwise`
+Counterclockwise is available via the Eclipse Marketplace Client: search for `Counterclockwise` or `Clojure`
 
 
 You may now want to <<first-project,create your first project>> or <<open-project,open an existing project>>. +

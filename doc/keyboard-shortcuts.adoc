@@ -265,7 +265,7 @@ In addition to the features of the Default Structural Editing mode, this mode do
 
 Note: You'll only feel "at home" in this mode if you know the following commands
 
-==== Reindend line
+==== Reindent line
 Reindent the line properly
 
 [cols="1", options="header"]
