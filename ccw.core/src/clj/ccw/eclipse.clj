@@ -53,6 +53,7 @@
            [org.eclipse.jface.preference IPreferenceStore]
            [org.eclipse.core.commands ExecutionEvent]
            [org.eclipse.ui.actions WorkspaceModifyDelegatingOperation]
+           [org.eclipse.core.runtime.jobs Job]
            [java.io File IOException]
            [ccw CCWPlugin]
            [ccw.util PlatformUtil]
@@ -139,7 +140,7 @@
   ([^IWorkbenchPage workbench-page] (page-editors workbench-page)))
 
 (defn text-editor
-  "Return theeditor associated to the reference if it's instanciated
+  "Return the editor associated to the reference if it's instantiated
    and it's a text editor. Useful to only work with editors that have
    been configured and you may want to reconfigure"
   [e]
@@ -147,10 +148,10 @@
     (when (instance? org.eclipse.ui.texteditor.AbstractTextEditor e)
       e)))
 
-(defn open-editors
+(defn open-editor-refs
   "Return all open editors of the Workbench.
    pred is an optional predicate for filtering editors"
-  ([] (open-editors identity))
+  ([] (open-editor-refs identity))
   ([pred]
     (into []
       (for [w (workbench-windows)
@@ -778,6 +779,20 @@
         (catch Exception e
           (CCWPlugin/createErrorStatus (format "Unexpected exception while executing Job %s" name), e))))))
 
+(defn job
+  "Create a Job with name, and delegate run to (f monitor). The method
+  returns a Job instance that, when executed, takes care of returning
+  an IStatus, if returned by f, or Status/OK_STATUS instead."
+  [name f]
+  (proxy [Job] [name]
+    (run [^IProgressMonitor monitor]
+      (try
+        (let [s (f monitor)]
+          (if (instance? IStatus s)
+            s
+            (Status/OK_STATUS)))
+        (catch Exception e
+          (CCWPlugin/createErrorStatus (format "Unexpected exception while executing Job %s" name), e))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Preferences management utilities
@@ -865,17 +880,19 @@
 
 (defn ^{:author "Andrea Richiardi"}
   add-preference-listener
-  "Adds a listener in order to react to changes in the pref-key preference and executes
-   the given closure if any. Note that this function generates a IPropertyChangeListener
-   every time it is invoked. The version without preference store defaults toccw-combined-prefs."
-  ([pref-key closure]
-    (add-preference-listener (ccw-combined-prefs) pref-key closure))
-  ([^IPreferenceStore pref-store pref-key closure]
+  "Adds a listener in order to react to changes in the pref-key
+  preference and executes (f event) when it does. Note that this
+  function generates a IPropertyChangeListener every time it is
+  invoked. The version without preference store defaults to
+  eclipse/ccw-combined-prefs."
+  ([pref-key f]
+    (add-preference-listener (ccw-combined-prefs) pref-key f))
+  ([^IPreferenceStore pref-store pref-key f]
    (add-property-listener pref-store #(reify
                                        IPropertyChangeListener
                                        (propertyChange [this event]
                                          (when (= (.getProperty event) pref-key)
-                                           (closure)))))))
+                                           (f event)))))))
 
 (def ^{:author "Andrea Richiardi" }
   remove-preference-listener

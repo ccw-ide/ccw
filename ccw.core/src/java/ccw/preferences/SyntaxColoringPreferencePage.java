@@ -71,7 +71,7 @@ import ccw.CCWPlugin;
 import ccw.editors.clojure.ClojureSourceViewer;
 import ccw.editors.clojure.SimpleSourceViewerConfiguration;
 import ccw.editors.clojure.scanners.ClojurePartitionScanner;
-import ccw.editors.clojure.scanners.ClojurePartitioner;
+import ccw.editors.clojure.scanners.TracingPartitioner;
 import ccw.repl.REPLView;
 import ccw.repl.SafeConnection;
 
@@ -796,7 +796,7 @@ public class SyntaxColoringPreferencePage extends PreferencePage implements IWor
         fPreviewViewer.getTextWidget().setFont(font);
         
         IDocument document= new Document(PREVIEW_SOURCE);
-        IDocumentPartitioner partitioner = new ClojurePartitioner(new ClojurePartitionScanner(), 
+        IDocumentPartitioner partitioner = new TracingPartitioner(new ClojurePartitionScanner(),
                 ClojurePartitionScanner.CLOJURE_CONTENT_TYPES);
 
         Map<String, IDocumentPartitioner> m = new HashMap<String, IDocumentPartitioner>();

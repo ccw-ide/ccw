@@ -19,6 +19,9 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -29,6 +32,7 @@ import org.eclipse.jface.text.source.DefaultCharacterPairMatcher;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
+import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
 import org.eclipse.jface.text.source.projection.ProjectionSupport;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -40,12 +44,15 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPropertyListener;
 import org.eclipse.ui.editors.text.TextEditor;
+import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.StatusLineContributionItem;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import ccw.CCWPlugin;
 import ccw.editors.clojure.ClojureSourceViewer.IStatusLineHandler;
+import ccw.editors.clojure.folding.FoldingActionGroup;
+import ccw.editors.clojure.folding.FoldingMessages;
 import ccw.editors.clojure.scanners.ClojurePartitionScanner;
 import ccw.editors.outline.ClojureOutlinePage;
 import ccw.launching.ClojureLaunchShortcut;
@@ -206,7 +213,7 @@ public class ClojureEditor extends TextEditor implements IClojureEditor, IReplPr
             fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.warning"); //$NON-NLS-1$
 
             fProjectionSupport.install();
-            
+
             // TODO Add the hovers on the Projection?
 //          fProjectionSupport.setHoverControlCreator(new IInformationControlCreator() {
 //                public IInformationControl createInformationControl(Shell shell) {
@@ -219,8 +226,6 @@ public class ClojureEditor extends TextEditor implements IClojureEditor, IReplPr
 //                }
 //            });
         }
-        
-        viewer.doOperation(ClojureSourceViewer.TOGGLE);
 
 		// ensure decoration support has been created and configured.
 		SourceViewerDecorationSupport sourceViewerDecorationSupport = getSourceViewerDecorationSupport(viewer);
@@ -296,6 +301,19 @@ public class ClojureEditor extends TextEditor implements IClojureEditor, IReplPr
         return getSourceViewer().getSelectionProvider();
     }
 
+    /**
+     * The action group for folding.
+     */
+    private FoldingActionGroup fFoldingGroup;
+
+    /**
+     * Returns the folding action group, or <code>null</code> if there is none.
+     * @return the ActionGroup or null;
+     */
+    protected @Nullable FoldingActionGroup getFoldingActionGroup() {
+        return fFoldingGroup;
+    }
+
 	@Override
 	protected void createActions() {
 		super.createActions();
@@ -363,9 +381,29 @@ public class ClojureEditor extends TextEditor implements IClojureEditor, IReplPr
 		action.setActionDefinitionId(ClojureSourceViewer.STATUS_CATEGORY_STRUCTURAL_EDITION);
 		setAction(ClojureSourceViewer.STATUS_CATEGORY_STRUCTURAL_EDITION, action);
 		
-}
+		fFoldingGroup = new FoldingActionGroup(this, getSourceViewer(), CCWPlugin.getDefault().getPreferenceStore());
+	}
 	
-	
+	/*
+     * @see org.eclipse.ui.texteditor.AbstractTextEditor#rulerContextMenuAboutToShow(org.eclipse.jface.action.IMenuManager)
+     */
+    @Override
+    protected void rulerContextMenuAboutToShow(IMenuManager menu) {
+        super.rulerContextMenuAboutToShow(menu);
+        IMenuManager foldingMenu= new MenuManager(FoldingMessages.getString("Projection_FoldingMenu_name"), "projection"); //$NON-NLS-1$
+        menu.appendToGroup(ITextEditorActionConstants.GROUP_RULERS, foldingMenu);
+
+        IAction action= getAction("FoldingToggle"); //$NON-NLS-1$
+        foldingMenu.add(action);
+        action= getAction("FoldingExpandAll"); //$NON-NLS-1$
+        foldingMenu.add(action);
+        action= getAction("FoldingCollapseAll"); //$NON-NLS-1$
+        foldingMenu.add(action);
+// TODO   action= getAction("FoldingRestore"); //$NON-NLS-1$
+//        foldingMenu.add(action);
+// TODO   action= getAction("FoldingCollapseComments"); //$NON-NLS-1$
+//        foldingMenu.add(action);
+    }
 
 	/**
 	 * Move to beginning of current or preceding defun (beginning-of-defun).
@@ -423,10 +461,6 @@ public class ClojureEditor extends TextEditor implements IClojureEditor, IReplPr
 		return sourceViewer.getDocument();
 	}
 	
-	/**
-	 * Asserts document != null.
-	 * @return
-	 */
 	public int getSourceCaretOffset() {
 		IRegion selection= getSignedSelection();
 		return selection.getOffset() + selection.getLength();
@@ -795,4 +829,34 @@ public class ClojureEditor extends TextEditor implements IClojureEditor, IReplPr
         sourceViewer().initializeViewerColors();
     }
 
+    /* (non-Javadoc)
+     * @see ccw.editors.clojure.IClojureEditor#enableProjection(boolean)
+     */
+    @Override
+    public void enableProjection(boolean enabled) {
+        sourceViewer().enableProjection(enabled);
+    }
+
+    /**
+     * Workaround that toggles again the Projection on the viewer if it is
+     * not already on but the preference commands it so.
+     */
+    private void ensureProjectionState() {
+        // AR - forcing enabling when if preference is on
+        boolean enabled = getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_FOLDING_PROJECTION_ENABLED);
+        if (enabled) {
+            ClojureSourceViewer viewer = sourceViewer();
+            if (!viewer.isProjectionMode() || viewer.getProjectionAnnotationModel() == null) {
+                viewer.enableProjection();
+            }
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see ccw.editors.clojure.IClojureEditor#getProjectionAnnotationModel()
+     */
+    public @Nullable ProjectionAnnotationModel getProjectionAnnotationModel() {
+        ensureProjectionState();
+        return sourceViewer().getProjectionAnnotationModel();
+    }
 }

@@ -469,11 +469,11 @@
   (let [pref-key PreferenceConstants/EDITOR_TEXT_HOVER_DESCRIPTORS]
     (trace :support/hover (str "Registering " pref-key " listener..."))
     (ccw.eclipse/add-preference-listener pref-key
-                                         #(do
-                                            (trace :support/hover (str "Preference " pref-key " has changed. Resetting hovers..."))
-                                            (swap! (force state-atom) set-state-dirty)
-                                            ;; I need some protection because here i might not have active editor
-                                            (some-> (CCWPlugin/getClojureEditor) reset-default-hover-on-editor!)))))
+                                         (fn [_]
+                                           (trace :support/hover (str "Preference " pref-key " has changed. Resetting hovers..."))
+                                           (swap! (force state-atom) set-state-dirty)
+                                           ;; I need some protection because here i might not have active editor
+                                           (some-> (CCWPlugin/getClojureEditor) reset-default-hover-on-editor!)))))
 
 ;;;;;;;;;;;;;;;;;;;
 ;;; Java Interop ;;

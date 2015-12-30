@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 Laurent Petit.
+ * Copyright (c) 2015 Laurent Petit.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,9 +7,25 @@
  *
  * Contributors: 
  *    Laurent PETIT - initial API and implementation
- *    Thomas Ettinger
+ *    Thomas ETTINGER
+ *    Andrea RICHIARDI - refactored out parts to TokenScannerUtils
  *******************************************************************************/
 package ccw.editors.clojure.scanners;
+
+import static ccw.editors.clojure.scanners.TokenScannerUtils.closeChimeraKeyword;
+import static ccw.editors.clojure.scanners.TokenScannerUtils.closeFnKeyword;
+import static ccw.editors.clojure.scanners.TokenScannerUtils.closeListKeyword;
+import static ccw.editors.clojure.scanners.TokenScannerUtils.metaKeyword;
+import static ccw.editors.clojure.scanners.TokenScannerUtils.nestKeyword;
+import static ccw.editors.clojure.scanners.TokenScannerUtils.openChimeraKeyword;
+import static ccw.editors.clojure.scanners.TokenScannerUtils.openFnKeyword;
+import static ccw.editors.clojure.scanners.TokenScannerUtils.openListKeyword;
+import static ccw.editors.clojure.scanners.TokenScannerUtils.readerLiteralTagKeyword;
+import static ccw.editors.clojure.scanners.TokenScannerUtils.symbolKeyword;
+import static ccw.editors.clojure.scanners.TokenScannerUtils.tokenLengthKeyword;
+import static ccw.editors.clojure.scanners.TokenScannerUtils.tokenTypeKeyword;
+import static ccw.editors.clojure.scanners.TokenScannerUtils.unnestKeyword;
+import static ccw.editors.clojure.scanners.TokenScannerUtils.whitespaceKeyword;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,12 +61,12 @@ public final class ClojureTokenScanner implements ITokenScanner, IPropertyChange
 	private final ClojureInvoker topLevelFormsDamager = ClojureInvoker.newInvoker(
             CCWPlugin.getDefault(),
             "ccw.editors.clojure.ClojureTopLevelFormsDamagerImpl");
-	
+
     private int currentOffset;
     private final Map<Keyword, IToken> parserTokenKeywordToJFaceToken;
     private String text;
     private final IScanContext context;
-    
+
     private final Keyword[] parenLevelPrefKeywords = new Keyword[] {
     		PreferenceConstants.rainbowParenLevel1,
     		PreferenceConstants.rainbowParenLevel2,
@@ -66,27 +82,12 @@ public final class ClojureTokenScanner implements ITokenScanner, IPropertyChange
 
     private IClojureEditor clojureEditor;
     private IPreferenceStore preferenceStore;
-    private TokenScannerUtils utils;
-    
+
     protected static final IToken errorToken = new org.eclipse.jface.text.rules.Token(new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_WHITE), Display.getDefault().getSystemColor(SWT.COLOR_DARK_RED), TextAttribute.UNDERLINE));
     private int currentParenLevel = 0;
 	private ISeq tokenSeq;
 	private Map<?,?> currentToken;
-	private static Keyword symbolKeyword = Keyword.intern("symbol");
-	private static Keyword tokenTypeKeyword = Keyword.intern("token-type");
-	private static Keyword tokenLengthKeyword = Keyword.intern("token-length");
-	private static Keyword nestKeyword = Keyword.intern("nest");
-	private static Keyword unnestKeyword = Keyword.intern("unnest");
-	private static Keyword openListKeyword = Keyword.intern("open-list");
-	private static Keyword openFnKeyword = Keyword.intern("open-fn");
-	private static Keyword openChimeraKeyword = Keyword.intern("open-chimera");
-	private static Keyword closeListKeyword = Keyword.intern("close-list");
-	private static Keyword closeFnKeyword = Keyword.intern("close-fn");
-	private static Keyword closeChimeraKeyword = Keyword.intern("close-chimera");
-	private static Keyword metaKeyword = Keyword.intern("meta");
-	private static Keyword readerLiteralTagKeyword = Keyword.intern("reader-literal");
-	private static Keyword whitespaceKeyword = Keyword.intern("whitespace");
-	
+
     public ClojureTokenScanner(IScanContext context, IPreferenceStore preferenceStore, IClojureEditor clojureEditor) {
         Assert.assertNotNull(clojureEditor);
 
@@ -94,24 +95,23 @@ public final class ClojureTokenScanner implements ITokenScanner, IPropertyChange
         this.preferenceStore = preferenceStore;
         this.clojureEditor = clojureEditor;
         parserTokenKeywordToJFaceToken = new HashMap<Keyword, IToken>();
-        utils = new TokenScannerUtils(this);
-        initClojureTokenTypeToJFaceTokenMap(utils);
+        initClojureTokenTypeToJFaceTokenMap();
     }
 
-	protected void initClojureTokenTypeToJFaceTokenMap(TokenScannerUtils u) {
-		u.addTokenType(Keyword.intern("unexpected"), ClojureTokenScanner.errorToken);
-		u.addTokenType(Keyword.intern("eof"), Token.EOF);
-		u.addTokenType(Keyword.intern("whitespace"), Token.WHITESPACE);
+    protected void initClojureTokenTypeToJFaceTokenMap() {
+        TokenScannerUtils.addTokenType(this, Keyword.intern("unexpected"), ClojureTokenScanner.errorToken);
+        TokenScannerUtils.addTokenType(this, Keyword.intern("eof"), Token.EOF);
+        TokenScannerUtils.addTokenType(this, Keyword.intern("whitespace"), Token.WHITESPACE);
 
-		for (Keyword token: PreferenceConstants.colorizableTokens) {
-			PreferenceConstants.ColorizableToken tokenStyle = PreferenceConstants.getColorizableToken(preferenceStore, token);
-			u.addTokenType(
-					token,
-					StringConverter.asString(tokenStyle.rgb),
-					tokenStyle.isBold,
-					tokenStyle.isItalic);
-		}
-	}
+        for (Keyword token: PreferenceConstants.colorizableTokens) {
+            PreferenceConstants.ColorizableToken tokenStyle = PreferenceConstants.getColorizableToken(preferenceStore, token);
+            TokenScannerUtils.addTokenType(this,
+                    token,
+                    StringConverter.asString(tokenStyle.rgb),
+                    tokenStyle.isBold,
+                    tokenStyle.isItalic);
+        }
+    }
 
     
     public final void addTokenType(Keyword tokenIndex, org.eclipse.jface.text.rules.IToken token) {
@@ -355,7 +355,7 @@ public final class ClojureTokenScanner implements ITokenScanner, IPropertyChange
         Keyword keyword = PreferenceConstants.guessPreferenceKeyword(event.getProperty());
         if (PreferenceConstants.colorizableTokens.contains(keyword)) {
             IToken eclipseToken = parserTokenKeywordToJFaceToken.get(keyword);
-            utils.addTokenType(keyword, adaptToken(eclipseToken, event.getProperty(), event.getNewValue()));
+            TokenScannerUtils.addTokenType(this, keyword, adaptToken(eclipseToken, event.getProperty(), event.getNewValue()));
             clojureEditor.markDamagedAndRedraw();
         }
     }

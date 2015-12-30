@@ -17,7 +17,8 @@
   (:use [paredit.utils :as utils])
   (:import [org.eclipse.jface.text IRegion ITypedRegion DocumentEvent Region
                                    IDocument]
-           [ccw.editors.clojure ClojureTopLevelFormsDamager IClojureEditor])
+           ccw.editors.clojure.text.ClojureTopLevelFormsDamager
+           ccw.editors.clojure.IClojureEditor)
   (:require [ccw.editors.clojure.editor-support :as editor]
             [paredit.parser :as p]
             [ccw.core.trace :as t]))

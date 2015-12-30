@@ -23,7 +23,7 @@ import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 
 import ccw.StorageMarkerAnnotationModel;
 import ccw.editors.clojure.scanners.ClojurePartitionScanner;
-import ccw.editors.clojure.scanners.ClojurePartitioner;
+import ccw.editors.clojure.scanners.TracingPartitioner;
 
 public class ClojureDocumentProvider extends TextFileDocumentProvider {
     
@@ -33,7 +33,7 @@ public class ClojureDocumentProvider extends TextFileDocumentProvider {
      * by this provider in that case).
      */
     public static IDocument configure (IDocument document) {
-        IDocumentPartitioner partitioner = new ClojurePartitioner(new ClojurePartitionScanner(), 
+        IDocumentPartitioner partitioner = new TracingPartitioner(new ClojurePartitionScanner(),
                 ClojurePartitionScanner.CLOJURE_CONTENT_TYPES);
 
         Map<String, IDocumentPartitioner> m = new HashMap<String, IDocumentPartitioner>();

@@ -28,7 +28,7 @@ public class ClojureEditorTests {
 	public static BotUtils bot = null;
 	public static final String PROJECT_NAME = "editor-test";
 	public static final String CORE_CLJ_NAME = "src/editor_test/core.clj";
-	
+
 	@BeforeClass
 	public static void setupClass() throws Exception {
 		bot = new BotUtils();

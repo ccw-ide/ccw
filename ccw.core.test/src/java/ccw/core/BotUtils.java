@@ -21,11 +21,14 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.widgets.Widget;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
+import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotEditor;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.SWTBot;
+import org.eclipse.swtbot.swt.finder.SWTBotAssert;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
@@ -37,7 +40,12 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.eclipse.swtbot.swt.finder.widgets.TimeoutException;
+import org.eclipse.ui.IEditorPart;
 import org.hamcrest.Matcher;
+
+import waits.ResourceInSync;
+import ccw.core.bots.FoldingBot;
+import ccw.editors.clojure.ClojureEditor;
 
 /**
  * Wrapper utility class for common Counterclockwise UI tests.
@@ -221,11 +229,7 @@ public class BotUtils {
 	}
 
 	public BotUtils waitForResource(IResource resource) {
-        boolean isSync = false;
-        while (isSync) {
-            bot.sleep(500);
-            isSync = resource.isSynchronized(IResource.DEPTH_INFINITE);
-        }
+        bot.waitUntil(new ResourceInSync(resource));
         return this;
     }
 
@@ -280,12 +284,34 @@ public class BotUtils {
 		return this;
 	}
 
-	public BotUtils createAndWaitForProject(String projectName) {
-	    return createClojureProject(projectName)
+	public BotUtils createAndWaitForProjectIfNecessary(String projectName) {
+        SWTBotTree packageExplorerTree = bot.viewByTitle("Package Explorer").bot().tree();
+        boolean found = false;
+
+        try {
+            packageExplorerTree.getTreeItem(projectName);
+            found = true;
+        } catch (WidgetNotFoundException e) {
+            Logger.getLogger(this.getClass()).debug("Caught and handled exception: " + e.getMessage());
+        } catch (SWTException e) {
+                Logger.getLogger(this.getClass()).debug("Caught and handled exception: " + e.getMessage());
+        } catch (TimeoutException e) {
+            Logger.getLogger(this.getClass()).debug("Caught and handled exception: " + e.getMessage());
+        }
+
+        if (!found) {
+            return createAndWaitForProject(projectName);
+        } else {
+            return this;
+        }
+    }
+
+    public BotUtils createAndWaitForProject(String projectName) {
+        return createClojureProject(projectName)
                .waitForWorkspace()
                .quietlySendUpdateDependenciesToBackground()
                .waitForProject(projectName);
-	}
+    }
 
     public <T extends Widget> BotUtils sendToBackground(Matcher<T> matcher, long timeout, long delay) {
         bot.waitUntil(Conditions.waitForWidget(matcher), timeout, delay);
@@ -322,8 +348,8 @@ public class BotUtils {
         return this;
     }
 
-    public BotUtils selectInClojureMenu(String entryLabel) throws Exception {
-        menu("Clojure", entryLabel).click();
+    public BotUtils selectInClojureMenu(String label) throws Exception {
+        menu("Clojure", label).click();
         return this;
     }
 
@@ -347,7 +373,7 @@ public class BotUtils {
     }
 
     public BotUtils purgeProject(String projectName) {
-        return deleteProject(projectName).deletingOnDisk().OK().quietlyContinuingIfNotInSync();
+        return deleteProject(projectName).deletingOnDisk().ok().quietlyContinuingIfNotInSync();
     }
 
     public BotUtils deleteProject(String projectName) {
@@ -383,7 +409,7 @@ public class BotUtils {
         return this;
     }
 
-    public BotUtils OK() {
+    public BotUtils ok() {
         bot.button("OK").click();
         return this;
     }
@@ -395,5 +421,117 @@ public class BotUtils {
 
     public SWTWorkbenchBot bot() {
         return bot;
+    }
+
+    public class Editor {
+        public final SWTBotEditor active;
+        public final ClojureEditor clojure;
+        public Editor(SWTBotEditor sbe, ClojureEditor ce) {
+            this.active = sbe;
+            this.clojure = ce;
+        }
+    }
+
+    /**
+     * Return the pair Editor<SWTBotEditor,ClojureEditor>
+     * @return The pair or null;
+     */
+    public @Nullable Editor editor() {
+        SWTBotEditor activeEditor = bot.activeEditor();
+        if (activeEditor != null) {
+            IEditorPart part = activeEditor.getReference().getEditor(true);
+            if (part != null) {
+                return new Editor(activeEditor, (ClojureEditor) part.getAdapter(ClojureEditor.class));
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Replace the whole text in the current active editor with the input.
+     * @param text The new text.
+     * @return
+     */
+    public BotUtils replaceTextOnActiveEditor(final String text) {
+        editor().active.toTextEditor().getStyledText().setText(text);
+        return this;
+    }
+
+    public BotUtils saveActiveEditor() {
+        editor().active.save();
+        return this;
+    }
+
+    public BotUtils focusActiveEditor() {
+        editor().active.setFocus();
+        return this;
+    }
+
+    public BotUtils closeActiveEditor() {
+        editor().active.close();
+        return this;
+    }
+
+    /**
+     * Clear and save the current active editor.
+     * @return
+     */
+    public BotUtils clsActiveEditor() {
+        replaceTextOnActiveEditor("");
+        saveActiveEditor();
+        return this;
+    }
+
+    public BotUtils openWindowPreferences() {
+        menu(MenuLabels.WINDOW, MenuLabels.PREFERENCES).click();
+        return this;
+    }
+
+    public BotUtils expandTreeItem(SWTBotTreeItem item) {
+        if (!item.isExpanded()) {
+            item.expand();
+        }
+        return this;
+    }
+
+    /**
+     * Select a page in Window -> Preferences given the name(s).
+     * @param pageName The page name.
+     * @param subPageNames The names of the sub pages.
+     * @return
+     */
+    public BotUtils selectPreferencePage(String pageName, String... subPageNames) {
+        openWindowPreferences();
+        SWTBotShell preferences = bot().shell(PrefStrings.TITLE);
+
+        SWTBotTreeItem pageItem = preferences.bot().tree().getTreeItem(pageName);
+        expandTreeItem(pageItem);
+
+        SWTBotTreeItem subPageItem = pageItem;
+        for (String name : subPageNames) {
+            subPageItem = subPageItem.getNode(name);
+            expandTreeItem(subPageItem);
+        }
+        subPageItem.select();
+        return this;
+    }
+
+    public  BotUtils replaceTextInFile(String projectName, String fileName, String text) throws Exception {
+        doubleClickOnFileInProject(projectName, fileName).replaceTextOnActiveEditor(text).saveActiveEditor();
+        return this;
+    }
+
+    public BotUtils assertPreferencePage(String pageName) {
+        SWTBotAssert.assertText(pageName, bot().clabel());
+        return this;
+    }
+
+    /**
+     * Return the FoldingBot
+     * @return
+     * @throws Exception
+     */
+    public static FoldingBot foldingBot() throws Exception {
+        return new FoldingBot(new BotUtils());
     }
 }

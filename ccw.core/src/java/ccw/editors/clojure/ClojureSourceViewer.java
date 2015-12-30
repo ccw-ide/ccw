@@ -677,4 +677,13 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements IC
         String form = (String) editorSupport._("top-level-code-form", getParseState(), caretOffset);
         return form;
     }
+
+    @Override
+    public void enableProjection(boolean enabled) {
+        if (isProjectionMode() != enabled) {
+            if (canDoOperation(ProjectionViewer.TOGGLE)) {
+                doOperation(ProjectionViewer.TOGGLE);
+            }
+        }
+    }
 }

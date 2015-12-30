@@ -56,4 +56,8 @@ public class MenuLabels {
     public static final String RESET_PROJECT_CONFIGURATION = "Reset project configuration";
     public static final String REMOVE_LEIN_NATURE = "Remove Leiningen Support";
     public static final String LAUNCH_HEADLESS_REPL = "Launch Headless REPL for the project";
+
+    // Window
+    public static final String WINDOW = "Window";
+    public static final String PREFERENCES = "Preferences";
 }

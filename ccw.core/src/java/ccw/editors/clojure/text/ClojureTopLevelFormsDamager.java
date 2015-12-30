@@ -1,4 +1,4 @@
-package ccw.editors.clojure;
+package ccw.editors.clojure.text;
 
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
@@ -7,6 +7,7 @@ import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.presentation.IPresentationDamager;
 
 import ccw.CCWPlugin;
+import ccw.editors.clojure.IClojureEditor;
 import ccw.util.ClojureInvoker;
 import clojure.lang.Ref;
 
