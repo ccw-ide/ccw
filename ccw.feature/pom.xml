@@ -8,13 +8,13 @@
   <parent>
     <groupId>ccw</groupId>
     <artifactId>ccw.parent</artifactId>
-    <version>0.34.1-SNAPSHOT</version>
+    <version>0.35.0-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
 
   <groupId>ccw</groupId>
   <artifactId>ccw.feature</artifactId>
-  <version>0.34.1-SNAPSHOT</version>
+  <version>0.35.0-SNAPSHOT</version>
   <packaging>eclipse-feature</packaging>
 
 </project>
