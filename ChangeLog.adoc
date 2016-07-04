@@ -10,7 +10,11 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 == Counterclockwise 0.34.1-SNAPSHOT
 
-`0.34.1-SNAPSHOT` released on XXX xx, 2015
+`0.35.0.SNAPSHOT` released on XXX xx, 2016
+
+This is the first Counterclockwise version compatible with Eclipse Neon. 
+
+This version requires a JVM >= 8
 
 === Editor
 - Sometimes Hyperlinking would throw a NumberFormatException. Fix #850

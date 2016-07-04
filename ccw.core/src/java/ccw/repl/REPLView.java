@@ -19,7 +19,9 @@ import java.util.regex.Pattern;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.ILaunch;
@@ -1095,16 +1097,9 @@ public class REPLView extends ViewPart implements IAdaptable, IReplProvider, Lin
      */
     private ImageDescriptor getImageDescriptor(String relativePath) {
             String iconPath = "icons/";
-            try {
-                    CCWPlugin plugin = CCWPlugin.getDefault();
-                    URL installURL = plugin.getDescriptor().getInstallURL();
-                    URL url = new URL(installURL, iconPath + relativePath);
-                    return ImageDescriptor.createFromURL(url);
-            }
-            catch (MalformedURLException e) {
-                    // should not happen
-                    return ImageDescriptor.getMissingImageDescriptor();
-            }
+            CCWPlugin plugin = CCWPlugin.getDefault();
+            URL url = FileLocator.find(plugin.getBundle(), new Path(iconPath + relativePath), null);
+            return ImageDescriptor.createFromURL(url);
     }
 
     private void activate(String contextId) {
