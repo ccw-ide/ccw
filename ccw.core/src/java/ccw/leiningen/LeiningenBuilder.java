@@ -46,7 +46,7 @@ public class LeiningenBuilder extends IncrementalProjectBuilder {
 						throws CoreException {
 					try {
 						IJavaProject javaProject = JavaCore.create(getProject());
-						classpathContainer._(updateProjectDependencies, javaProject);
+						classpathContainer.__(updateProjectDependencies, javaProject);
 						return Status.OK_STATUS;
 					} catch (Exception e) {
 						return CCWPlugin.createErrorStatus("Unexpected exception while trying to update Leiningen Managed Dependencies for project " + getProject().getName(), e);

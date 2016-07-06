@@ -58,10 +58,10 @@ public class Eclipse4ModelProcessor {
 					Bundle bundle = BundleUtils.loadAndGetBundle("ccw.core");
 
 					ClojureInvoker e4Model = ClojureInvoker.newInvoker(bundle, "ccw.e4.model");
-					e4Model._("application!", app);
+					e4Model.__("application!", app);
 
 			    	ClojureInvoker userPlugins = ClojureInvoker.newInvoker(bundle, "ccw.core.user-plugins");
-			    	userPlugins._("start-user-plugins");
+			    	userPlugins.__("start-user-plugins");
 				} catch (CoreException e) {
 					return CCWPlugin.createErrorStatus("Error while loading Counterclockwise User plugins", e);
 				}

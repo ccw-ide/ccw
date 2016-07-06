@@ -296,7 +296,7 @@ public class NamespaceBrowser extends ViewPart implements ISelectionProvider, IS
 
 		@Override
 		public String getToolTipText(Object element) {
-			return (String) docUtils._(VAR_DOC_INFO, element);
+			return (String) docUtils.__(VAR_DOC_INFO, element);
 		}
 
 		@Override

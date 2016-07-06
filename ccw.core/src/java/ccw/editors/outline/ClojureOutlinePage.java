@@ -304,7 +304,7 @@ public class ClojureOutlinePage extends ContentOutlinePage {
 			protected IStatus run(IProgressMonitor monitor) {
 				String string = document.get();
 				try {
-					ClojureOutlinePage.this.forms = (List<List>) outline._("read-forms", string);
+					ClojureOutlinePage.this.forms = (List<List>) outline.__("read-forms", string);
 					setInputInUiThread(ClojureOutlinePage.this.forms);
 					return Status.OK_STATUS;
 				} catch (Exception e) {

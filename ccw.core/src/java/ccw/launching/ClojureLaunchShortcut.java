@@ -46,7 +46,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
@@ -55,13 +54,11 @@ import ccw.ClojureCore;
 import ccw.TraceOptions;
 import ccw.editors.clojure.ClojureEditor;
 import ccw.editors.clojure.LoadFileAction;
-import ccw.launching.ClojureLaunchShortcut.IWithREPLView;
 import ccw.preferences.PreferenceConstants;
 import ccw.repl.REPLView;
 import ccw.util.ClojureInvoker;
 import ccw.util.DisplayUtil;
 import ccw.util.Pair;
-import clojure.lang.IFn;
 import clojure.lang.Keyword;
 
 public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfigurationConstants {
@@ -279,7 +276,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
         
     	clojure.lang.IPersistentMap configMap = 
 				(clojure.lang.IPersistentMap) 
-				leiningenConfiguration._("lein-launch-configuration",
+				leiningenConfiguration.__("lein-launch-configuration",
 			    project,
 			    command);
 		configMap = configMap.assoc(Keyword.intern("type-id"), Keyword.intern("ccw"));
@@ -295,7 +292,7 @@ public class ClojureLaunchShortcut implements ILaunchShortcut, IJavaLaunchConfig
 		configMap = configMap.assoc(Keyword.intern("append-environment-variables"), true);
 		
 		return (ILaunchConfiguration) 
-				launch._("launch-configuration", configMap);
+				launch.__("launch-configuration", configMap);
     }
 
 	private ILaunchConfiguration findLaunchConfiguration(IProject project) throws CoreException {

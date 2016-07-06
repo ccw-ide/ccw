@@ -501,7 +501,7 @@ public final class ClojureCore {
 	}
 	public static String findDeclaringNamespace(Map tree) {
 		try {
-			return (String) staticAnalysis._("find-namespace", tree);
+			return (String) staticAnalysis.__("find-namespace", tree);
 		} catch (Exception e) {
 			CCWPlugin.logError("exception while trying to find declaring namespace for " + tree, e);
 			return null;

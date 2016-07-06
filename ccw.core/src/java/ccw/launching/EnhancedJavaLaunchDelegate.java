@@ -35,7 +35,7 @@ public class EnhancedJavaLaunchDelegate extends JavaLaunchDelegate {
 
 	@Override
 	public String[] getEnvironment(ILaunchConfiguration configuration) throws CoreException {
-		return (String[]) support._("get-environment", this, configuration);
+		return (String[]) support.__("get-environment", this, configuration);
 	}
 	
 	public String[] superGetEnvironment(ILaunchConfiguration configuration) throws CoreException {

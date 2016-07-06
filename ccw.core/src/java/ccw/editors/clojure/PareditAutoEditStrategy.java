@@ -22,12 +22,12 @@ public class PareditAutoEditStrategy implements IAutoEditStrategy {
 	public final Ref state;
 	
 	public PareditAutoEditStrategy(IClojureEditor editor, IPreferenceStore prefs) {
-		state = (Ref) pareditAutoEditSupport._("init", editor, prefs);
+		state = (Ref) pareditAutoEditSupport.__("init", editor, prefs);
 	}
 	
 	public void customizeDocumentCommand(IDocument document,
 			DocumentCommand command) {
-		pareditAutoEditStrategyImpl._("customizeDocumentCommand", 
+		pareditAutoEditStrategyImpl.__("customizeDocumentCommand", 
 				this, document, command);
 	}
 }

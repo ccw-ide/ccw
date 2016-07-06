@@ -1,7 +1,6 @@
 package ccw.repl;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -361,7 +360,7 @@ public class REPLView extends ViewPart implements IAdaptable, IReplProvider, Lin
                 sr.start += start;
                 logPanelStyleCache.setStyleRange(sr);
             }
-            viewHelpers._("log", this, logPanel, s.getText(), inputExprLogType);
+            viewHelpers.__("log", this, logPanel, s.getText(), inputExprLogType);
         } catch (Exception e) {
             // should never happen
             CCWPlugin.logError("Could not copy expression to log", e);
@@ -369,7 +368,7 @@ public class REPLView extends ViewPart implements IAdaptable, IReplProvider, Lin
     }
 
     private String removeTrailingSpaces(String s) {
-    	return (String) str._("trimr", s);
+    	return (String) str.__("trimr", s);
     }
 
     private void evalExpression () {
@@ -415,10 +414,10 @@ public class REPLView extends ViewPart implements IAdaptable, IReplProvider, Lin
         try {
         	if (s.trim().length() > 0) {
                 if (printToLog) {
-                    viewHelpers._("log", this, logPanel, s, inputExprLogType);
+                    viewHelpers.__("log", this, logPanel, s, inputExprLogType);
                 }
                 if (evalExpression == null) {
-                	viewHelpers._("log", this, logPanel, "Invalid REPL", errLogType);
+                	viewHelpers.__("log", this, logPanel, "Invalid REPL", errLogType);
                 } else {
                 	final Object ret = evalExpression.invoke(s, addToHistory);
 
@@ -472,7 +471,7 @@ public class REPLView extends ViewPart implements IAdaptable, IReplProvider, Lin
     }
 
     public void sendInterrupt() {
-        viewHelpers._("log", this, logPanel, ";; Interrupting...", inputExprLogType);
+        viewHelpers.__("log", this, logPanel, ";; Interrupting...", inputExprLogType);
         evalExpression.invoke(PersistentHashMap.create("op", "interrupt"), false);
         // If we were in STDIN mode, switch back to CODE
         inputAreaMode = InputAreaMode.CODE;
@@ -513,7 +512,7 @@ public class REPLView extends ViewPart implements IAdaptable, IReplProvider, Lin
      */
     @Deprecated
 	public void handleResponse (Response resp, String expression) {
-        viewHelpers._("handle-responses", this, logPanel, expression, resp.seq());
+        viewHelpers.__("handle-responses", this, logPanel, expression, resp.seq());
     }
 
     public void closeView () throws Exception {
@@ -558,7 +557,7 @@ public class REPLView extends ViewPart implements IAdaptable, IReplProvider, Lin
     private void prepareView () throws Exception {
     	// 10s timeout for establishing session (somewhat arbitrary atm)
         sessionId = SafeConnection.safeNewSession(interactive, 10000);
-        evalExpression = (IFn) viewHelpers._("configure-repl-view", this, logPanel, interactive.client, sessionId);
+        evalExpression = (IFn) viewHelpers.__("configure-repl-view", this, logPanel, interactive.client, sessionId);
     }
 
     @SuppressWarnings("unchecked")
@@ -1350,7 +1349,7 @@ public class REPLView extends ViewPart implements IAdaptable, IReplProvider, Lin
 					null/*getAnnotationAccess()*/,
 					EditorsPlugin.getDefault().getSharedTextColors()/*getSharedColors()*/
 					);
-			editorSupport._("configureSourceViewerDecorationSupport",
+			editorSupport.__("configureSourceViewerDecorationSupport",
 					fSourceViewerDecorationSupport, viewer);
 		}
 		return fSourceViewerDecorationSupport;
@@ -1364,7 +1363,7 @@ public class REPLView extends ViewPart implements IAdaptable, IReplProvider, Lin
         	releaseSecondaryId(secondaryId);
         }
 
-        fSourceViewerDecorationSupport = (SourceViewerDecorationSupport) editorSupport._("disposeSourceViewerDecorationSupport",
+        fSourceViewerDecorationSupport = (SourceViewerDecorationSupport) editorSupport.__("disposeSourceViewerDecorationSupport",
         		fSourceViewerDecorationSupport);
         try {
             if (interactive != null) interactive.close();

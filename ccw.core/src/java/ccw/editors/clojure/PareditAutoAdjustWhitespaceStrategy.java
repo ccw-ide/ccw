@@ -22,12 +22,12 @@ public class PareditAutoAdjustWhitespaceStrategy implements IAutoEditStrategy {
 	public final Ref state;
 	
 	public PareditAutoAdjustWhitespaceStrategy(IClojureEditor editor, IPreferenceStore prefs) {
-		state = (Ref) pareditAutoEditSupport._("init", editor, prefs);
+		state = (Ref) pareditAutoEditSupport.__("init", editor, prefs);
 	}
 	
 	public void customizeDocumentCommand(IDocument document,
 			DocumentCommand command) {
-		pareditAutoAdjustWhitespacetrategyImpl._("customizeDocumentCommand", 
+		pareditAutoAdjustWhitespacetrategyImpl.__("customizeDocumentCommand", 
 				this, document, command);
 	}
 }

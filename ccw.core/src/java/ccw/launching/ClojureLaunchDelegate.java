@@ -140,7 +140,7 @@ public class ClojureLaunchDelegate extends JavaLaunchDelegate {
 		            		return Status.CANCEL_STATUS;
 		            	} else {
 		            		String url = (String) replURL; 
-		            		coreLaunch._("on-nrepl-server-instanciated", url, LaunchUtils.getProjectName(launch));
+		            		coreLaunch.__("on-nrepl-server-instanciated", url, LaunchUtils.getProjectName(launch));
 		            		
 		                    // only using a latch because getProject().touch can call done() more than once
 		                    final CountDownLatch projectTouchLatch = new CountDownLatch(1);

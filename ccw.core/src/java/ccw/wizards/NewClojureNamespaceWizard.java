@@ -14,9 +14,7 @@ import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -235,7 +233,7 @@ public class NewClojureNamespaceWizard extends BasicNewResourceWizard implements
 	private String extractExtension(List<String> parts) {
 		String extension;
 		final String lastPart = parts.get(parts.size() - 1);
-		if (wizard._("clojure-editor-extensions", lastPart) != null) {
+		if (wizard.__("clojure-editor-extensions", lastPart) != null) {
 			extension = parts.remove(parts.size() - 1);
 		} else {
 			extension = "clj";
@@ -355,7 +353,7 @@ public class NewClojureNamespaceWizard extends BasicNewResourceWizard implements
     }
 
     private String content(String namespace, String extension) {
-    		return (String) wizard._("content", namespace, extension);
+    		return (String) wizard.__("content", namespace, extension);
     }
 
 }

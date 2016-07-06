@@ -39,14 +39,14 @@ final class LeiningenNatureAdderWorkspaceJob extends WorkspaceJob {
 
 			if (hasLeiningenNature(project)) {
 				if (!checkLeiningenProjectConsistency(project)) {
-					leinHandlers._("upgrade-project-build-path", JavaCore.create(project));
+					leinHandlers.__("upgrade-project-build-path", JavaCore.create(project));
 				}
 				return Status.OK_STATUS;
 			}
 
 			if (isCandidateLeiningenProject(project)) {
 				System.out.println("CREATING LEININGEN PROJECT " + project.getName());
-				leinHandlers._("add-leiningen-nature-with-monitor", project, monitor);
+				leinHandlers.__("add-leiningen-nature-with-monitor", project, monitor);
 			}
 			return Status.OK_STATUS;
 		} catch (Exception e) {

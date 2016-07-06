@@ -255,8 +255,8 @@ public final class ClojureTokenScanner implements ITokenScanner, IPropertyChange
     	advanceTokenDuration = 0;
     	getSymbolTypeDuration = 0;
     	text = document.get();
-        tokenSeq = (ISeq) topLevelFormsDamager._("getTokensSeq",
-        		editorSupport._("getParseTree", clojureEditor.getParseState())
+        tokenSeq = (ISeq) topLevelFormsDamager.__("getTokensSeq",
+        		editorSupport.__("getParseTree", clojureEditor.getParseState())
         		, offset, length);
         // STRONG HYPOTHESES HERE (related to the Damager used: offset always corresponds to the start of a top level form
         {

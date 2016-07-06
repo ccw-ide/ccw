@@ -224,7 +224,7 @@ public class ClojureEditor extends TextEditor implements IClojureEditor, IReplPr
 
 		// ensure decoration support has been created and configured.
 		SourceViewerDecorationSupport sourceViewerDecorationSupport = getSourceViewerDecorationSupport(viewer);
-		editorSupport._("configureSourceViewerDecorationSupport", sourceViewerDecorationSupport, viewer);
+		editorSupport.__("configureSourceViewerDecorationSupport", sourceViewerDecorationSupport, viewer);
 		
 		return viewer;
 	}
@@ -260,7 +260,7 @@ public class ClojureEditor extends TextEditor implements IClojureEditor, IReplPr
 	protected void editorSaved() {
 		super.editorSaved();
 		updatePartNameAndDescription();
-		editorSupport._("editor-saved", this);
+		editorSupport.__("editor-saved", this);
 	}
 	
 	/**

@@ -144,7 +144,7 @@ public class LoadFileAction extends Action {
                     "op", "load-file", "file", text,
                     "file-path", sourcePath, "file-name", fileName);
         } else {
-            String loadFileText = (String) nreplHelpers._("load-file-command", text, sourcePath, fileName);
+            String loadFileText = (String) nreplHelpers.__("load-file-command", text, sourcePath, fileName);
             EvaluateTextUtil.evaluateText(repl, ";; Loading file " + filePath, false);
             EvaluateTextUtil.evaluateText(repl, loadFileText, true);
         }

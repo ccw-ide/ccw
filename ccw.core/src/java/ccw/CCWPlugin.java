@@ -126,7 +126,7 @@ public class CCWPlugin extends AbstractUIPlugin {
 
     public void startREPLServer() {
     	try {
-    	    ClojureInvoker.newInvoker(this, "ccw.core.launch")._("ccw-nrepl-start-if-necessary");
+    	    ClojureInvoker.newInvoker(this, "ccw.core.launch").__("ccw-nrepl-start-if-necessary");
     	} catch (Exception e) {
     		CCWPlugin.logError("Could not start plugin-hosted REPL server", e);
     		throw new RuntimeException("Could not start plugin-hosted REPL server", e);
@@ -135,21 +135,21 @@ public class CCWPlugin extends AbstractUIPlugin {
 
     public int getREPLServerPort() {
     	startREPLServer();
-    	return (Integer) ClojureInvoker.newInvoker(this, "ccw.core.launch")._("ccw-nrepl-port");
+    	return (Integer) ClojureInvoker.newInvoker(this, "ccw.core.launch").__("ccw-nrepl-port");
     }
     
     public void startEventHandlers() {
-    	ClojureInvoker.newInvoker(this, "ccw.core.event-bus")._("start");
+    	ClojureInvoker.newInvoker(this, "ccw.core.event-bus").__("start");
     }
     
     public void startEventSubscription() {
-    	ClojureInvoker.newInvoker(this, "ccw.repl.visible-in-all-perspectives")._("start");
+    	ClojureInvoker.newInvoker(this, "ccw.repl.visible-in-all-perspectives").__("start");
     }
     
     public void startNamespaces() {
-//    	ClojureInvoker.newInvoker(this, "ccw.editors.clojure.code-content-assist")._("start");
-    	ClojureInvoker.newInvoker(this, "ccw.editors.clojure.code-context-information")._("start");
-    	ClojureInvoker.newInvoker(this, "ccw.editors.clojure.code-completion-proposal")._("start");
+//    	ClojureInvoker.newInvoker(this, "ccw.editors.clojure.code-content-assist").__("start");
+    	ClojureInvoker.newInvoker(this, "ccw.editors.clojure.code-context-information").__("start");
+    	ClojureInvoker.newInvoker(this, "ccw.editors.clojure.code-completion-proposal").__("start");
     }
 
     /**
@@ -356,8 +356,8 @@ public class CCWPlugin extends AbstractUIPlugin {
 
 		// Adding hover extension listener
 		ClojureInvoker invoker = ClojureInvoker.newInvoker(this, "ccw.editors.clojure.hover-support");
-		invoker._("add-registry-listener");
-		invoker._("add-preference-listener");
+		invoker.__("add-registry-listener");
+		invoker.__("add-preference-listener");
 
 		log("CCWPlugin.start(): EXIT");
 	}
@@ -447,7 +447,7 @@ public class CCWPlugin extends AbstractUIPlugin {
     
     private void stopREPLServer() {
     	try {
-    	    ClojureInvoker.newInvoker(this, "ccw.core.launch")._("ccw-nrepl-stop");
+    	    ClojureInvoker.newInvoker(this, "ccw.core.launch").__("ccw-nrepl-stop");
     	} catch (Exception e) {
     		logError("Error while trying to close ccw internal nrepl server", e);
     	}
@@ -724,7 +724,7 @@ public class CCWPlugin extends AbstractUIPlugin {
 	private void initInjections(BundleContext bundleContext) {
 	    IEclipseContext c = EclipseContextFactory.getServiceContext(bundleContext);
 	    
-	    ClojureInvoker.newInvoker(this, "ccw.editors.clojure.hover-support")._("init-injections", c);
+	    ClojureInvoker.newInvoker(this, "ccw.editors.clojure.hover-support").__("init-injections", c);
 	}
 	
     private void cleanInjections() {

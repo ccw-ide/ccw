@@ -363,9 +363,9 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements IC
     
     private void updateTextBuffer (String finalText, long offset, long length, String text) {
     	boolean firstTime = (parseState == null);
-    	parseState = editorSupport._("updateTextBuffer",parseState, finalText, offset, length, text);
+    	parseState = editorSupport.__("updateTextBuffer",parseState, finalText, offset, length, text);
         if (firstTime) {
-        	editorSupport._("startWatchParseRef", parseState, this);
+        	editorSupport.__("startWatchParseRef", parseState, this);
         }
     }
     
@@ -375,18 +375,18 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements IC
         	String text = getDocument().get();
             updateTextBuffer(text, 0, -1, text);
         }
-        return editorSupport._("getParseState", getDocument().get(), parseState);
+        return editorSupport.__("getParseState", getDocument().get(), parseState);
     }
     
     public boolean isParseTreeBroken() {
-    	return (Boolean) editorSupport._("brokenParseTree?", getParseState());
+    	return (Boolean) editorSupport.__("brokenParseTree?", getParseState());
     }
     
     public Object getPreviousParseTree () {
         if (parseState == null) {
         	return null;
         } else {
-        	return editorSupport._("getPreviousParseTree", parseState);
+        	return editorSupport.__("getPreviousParseTree", parseState);
         }
     }
     
@@ -453,7 +453,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements IC
     }
     
     public String findDeclaringNamespace() {
-		return ClojureCore.findDeclaringNamespace((Map) editorSupport._("getParseTree", getParseState()));
+		return ClojureCore.findDeclaringNamespace((Map) editorSupport.__("getParseTree", getParseState()));
     }
 
     public IJavaProject getAssociatedProject() {
@@ -628,7 +628,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements IC
 	public void doOperation(int operation) {
 		if (operation == TextViewer.PASTE) {
 			if (!getTextWidget().getBlockSelection()) {
-				handlers._("smart-paste", this);
+				handlers.__("smart-paste", this);
 				return;
 			} else {
 				// We're not trying (at least yet) to handle paste inside
@@ -674,7 +674,7 @@ public abstract class ClojureSourceViewer extends ProjectionViewer implements IC
 
     @Override
     public @Nullable String getTopLevelSExpression(int caretOffset) {
-        String form = (String) editorSupport._("top-level-code-form", getParseState(), caretOffset);
+        String form = (String) editorSupport.__("top-level-code-form", getParseState(), caretOffset);
         return form;
     }
 }

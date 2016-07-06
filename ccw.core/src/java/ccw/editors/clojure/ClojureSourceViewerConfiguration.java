@@ -82,13 +82,13 @@ public class ClojureSourceViewerConfiguration extends SimpleSourceViewerConfigur
 
 		assistant.setDocumentPartitioning(ClojurePartitionScanner.CLOJURE_PARTITIONING);
 		assistant.setContentAssistProcessor(
-				(IContentAssistProcessor) proposalProcessor._("make-process", editor, assistant), 
+				(IContentAssistProcessor) proposalProcessor.__("make-process", editor, assistant), 
 				IDocument.DEFAULT_CONTENT_TYPE);
 		//assistant.setContentAssistProcessor(
-		//		(IContentAssistProcessor) proposalProcessor._("make-process", editor, assistant), 
+		//		(IContentAssistProcessor) proposalProcessor.__("make-process", editor, assistant), 
 		//		ClojurePartitionScanner.CLOJURE_COMMENT);
 		//assistant.setContentAssistProcessor(
-		//		(IContentAssistProcessor) proposalProcessor._("make-process", editor, assistant), 
+		//		(IContentAssistProcessor) proposalProcessor.__("make-process", editor, assistant), 
 		//		ClojurePartitionScanner.CLOJURE_STRING);
 
 		assistant.enableAutoActivation(this.fPreferenceStore.getBoolean(PreferenceConstants.EDITOR_CODE_COMPLETION_AUTO_ACTIVATE));
@@ -134,7 +134,7 @@ public class ClojureSourceViewerConfiguration extends SimpleSourceViewerConfigur
 	
 	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
-		return (ITextHover) hoverSupportInvoker._("hover-instance", contentType, stateMask);
+		return (ITextHover) hoverSupportInvoker.__("hover-instance", contentType, stateMask);
 	}
 
 	@Override
@@ -144,7 +144,7 @@ public class ClojureSourceViewerConfiguration extends SimpleSourceViewerConfigur
 
 	@Override
     public int[] getConfiguredTextHoverStateMasks(ISourceViewer sourceViewer, String contentType) {
-	    return (int[])hoverSupportInvoker._("configured-state-masks", sourceViewer, contentType);
+	    return (int[])hoverSupportInvoker.__("configured-state-masks", sourceViewer, contentType);
     }
 
     @Override
@@ -172,7 +172,7 @@ public class ClojureSourceViewerConfiguration extends SimpleSourceViewerConfigur
         InformationPresenter presenter= new InformationPresenter(getInformationControlCreator(sourceViewer));
         presenter.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
 
-        IInformationProvider provider = (IInformationProvider) hoverSupportInvoker._("hover-information-provider");
+        IInformationProvider provider = (IInformationProvider) hoverSupportInvoker.__("hover-information-provider");
         String[] contentTypes= getConfiguredContentTypes(sourceViewer);
         for (int i= 0; i < contentTypes.length; i++) {
             presenter.setInformationProvider(provider, contentTypes[i]);
@@ -188,7 +188,7 @@ public class ClojureSourceViewerConfiguration extends SimpleSourceViewerConfigur
     	final ITextDoubleClickStrategy defaultStrategy = super.getDoubleClickStrategy(sourceViewer, contentType);
     	return new ITextDoubleClickStrategy() {
 			@Override public void doubleClicked(ITextViewer viewer) {
-				doubleClickStrategy._("double-clicked", viewer, defaultStrategy);
+				doubleClickStrategy.__("double-clicked", viewer, defaultStrategy);
 			}
 		};
     }

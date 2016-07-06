@@ -18,17 +18,17 @@ public class ClojureTopLevelFormsDamager implements IPresentationDamager {
 	public final Ref state;
 	
 	public ClojureTopLevelFormsDamager(IClojureEditor editor) {
-		state = (Ref) topLevelFormsDamager._("init", editor);
+		state = (Ref) topLevelFormsDamager.__("init", editor);
 	}
 	
 	public void setDocument(IDocument document) {
-		topLevelFormsDamager._("setDocument", 
+		topLevelFormsDamager.__("setDocument", 
 				this, document);
 	}
 
 	public IRegion getDamageRegion(ITypedRegion partition, DocumentEvent event,
 			boolean documentPartitioningChanged) {
-		return (IRegion) topLevelFormsDamager._("getDamageRegion",
+		return (IRegion) topLevelFormsDamager.__("getDamageRegion",
 				this, partition, event, documentPartitioningChanged);
 	}
 }

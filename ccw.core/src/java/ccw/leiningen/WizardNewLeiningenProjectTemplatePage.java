@@ -38,7 +38,6 @@ import org.eclipse.ui.internal.ide.IIDEHelpContextIds;
 
 import ccw.CCWPlugin;
 import ccw.util.ClojureInvoker;
-import ccw.util.TestUtil;
 
 public final class WizardNewLeiningenProjectTemplatePage extends WizardPage {
 
@@ -391,7 +390,7 @@ public final class WizardNewLeiningenProjectTemplatePage extends WizardPage {
 			return false;
 		}
 
-		String mess = (String) wizard._(checkProjectName, getProjectName());
+		String mess = (String) wizard.__(checkProjectName, getProjectName());
 		if (mess != null) {
 			setErrorMessage(mess);
 			return false;
