@@ -53,7 +53,7 @@
                 </repository>
                 <repository>
                         <id>swtbot</id>
-                        <url>http://download.eclipse.org/technology/swtbot/releases/latest/</url>
+                        <url>http://download.eclipse.org/technology/swtbot/releases/2.3.0/</url>
                         <layout>p2</layout>
                 </repository>
                 <repository>
