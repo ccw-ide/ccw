@@ -2,7 +2,7 @@ sudo: false # trigger new docker infrastructure
 
 language: java
 
-jdk: oraclejdk7
+jdk: oraclejdk8
 
 cache:
   directories:
