@@ -8,9 +8,9 @@ Laurent Petit <laurent dot petit at gmail dot com>
 :toc-title: ChangeLog
 :toclevels: 0
 
-== Counterclockwise 0.35.0-SNAPSHOT
+== Counterclockwise 0.35.0
 
-`0.35.0.SNAPSHOT` released on XXX xx, 2016
+`0.35.0` released on July 09, 2016
 
 This is the first Counterclockwise version compatible with Eclipse Neon. 
 
