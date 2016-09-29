@@ -8,6 +8,19 @@ Laurent Petit <laurent dot petit at gmail dot com>
 :toc-title: ChangeLog
 :toclevels: 0
 
+
+== Counterclockwise 0.35.1-SNAPSHOT
+
+`0.35.1-SNAPSHOT` released on September 30, 2016
+
+This is the first Counterclockwise version compatible with Clojure 1.9.
+
+As a reminder, Counterclockwise now requires a JVM >= 8.
+
+=== REPL
+- Fix the dependency on `ccw.server` by upgrading to version `0.2.1` which fixes the incompatibility with Clojure 1.9 forms destructuring
+
+
 == Counterclockwise 0.35.0
 
 `0.35.0` released on July 09, 2016

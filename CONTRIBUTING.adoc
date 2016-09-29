@@ -135,7 +135,6 @@ ccw$ script/set-version.sh 0.20.0-SNAPSHOT
     git push laurentpetit master --tags
 ----
 - Update the Eclipse Market Place
-- Update Google code's project home page
 - Update http://updatesite.ccw-ide.org/stable and beta (content.xml and artifacts.xml)
 - Update http://doc.ccw-ide.org
 - Update http://standalone.ccw-ide.org
