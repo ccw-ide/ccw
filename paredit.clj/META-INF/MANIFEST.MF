@@ -2,11 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Paredit.clj
 Bundle-SymbolicName: paredit.clj;singleton:=true
-Bundle-Version: 0.35.1.qualifier
+Bundle-Version: 0.35.1.STABLE001
 Bundle-ClassPath: .,
  src/
 Bundle-Vendor: Counterclockwise
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: paredit
 Eclipse-BundleShape: dir
 Bundle-ActivationPolicy: lazy
