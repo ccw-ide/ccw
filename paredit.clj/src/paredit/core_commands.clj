@@ -709,15 +709,17 @@
                 ;   "\n        port))\n        bar")
                 }]
      ["M-S"    :paredit-split-sexp
-               {"(hello  |  world)" "(hello)| (world)",
-                "\"Hello, |world!\"" "\"Hello, \"| \"world!\"",
-                "(hel|lo)" "(hel)| (lo)",
-                "[hello |world]" "[hello]| [world]",
-                "{hello brave |new world}" "{hello brave}| {new world}",
-                "{|}" "{}| {}"
-                "(foo|)" "(foo)| ()"
-                "({|})" "({}| {})"
-                "(defn hello |[world])" "(defn hello)| ([world])"
+               {"(hello  |  world)" "(hello)  |  (world)",
+                "\"Hello, |world!\"" "\"Hello, \"|\"world!\"",
+                "(hel|lo)" "(hel)|(lo)",
+                "[hello |world]" "[hello] |[world]",
+                "{hello brave |new world}" "{hello brave} |{new world}",
+                "{|}" "{}|{}"
+                "(foo|)" "(foo)|()"
+                "({|})" "({}|{})"
+                "(defn hello ;comment\n |[world])" "(defn hello) ;comment\n |([world])"
+                "(|\"\")" "()|(\"\")"
+                "(\"\"|)" "(\"\")|()"
                 }]
      ["M-J"    :paredit-join-sexps
                {"(hello)| (world)" "(hello| world)",

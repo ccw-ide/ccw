@@ -468,28 +468,30 @@
     (if-let [rloc (-?> parse-tree (parsed-root-loc true))]
       (let [[l r] (normalized-selection rloc offset length)
             parent (cond
-                     (= :string (loc-tag l)) l ; stay at the same level, and let the code take the correct open/close puncts, e.g. \" \"
+                     (and (= :string (loc-tag l)) (> offset (start-offset l))) l ; stay at the same level, and let the code take the correct open/close puncts, e.g. \" \"
                      :else (if-let [nl (z/up (if (start-punct? l) (parse-node l) (parse-leave l)))] nl (parse-leave l)))
             open-punct (*tag-opening-brackets* (loc-tag parent))
             close-punct ^String (*tag-closing-brackets* (loc-tag parent))]
         (if-not close-punct
           t
-          (let [replace-text (str close-punct " " open-punct)
-                [replace-offset 
-                 replace-length] (if (and
-                                       (not= :whitespace (loc-tag l))
-                                       (or
-                                         (= :string (loc-tag l))
-                                         (not (and
-                                                (sel-match-normalized? offset length [l r]) 
-                                                (= offset (start-offset (parse-node l)))))))
-                                   [offset 0]
-                                   (let [start (or (some #(when-not (= :whitespace (loc-tag %)) (end-offset %)) (previous-leaves l)) offset)
-                                         end (or (some #(when-not (= :whitespace (loc-tag %)) (start-offset %)) (next-leaves l)) 0)]
-                                     [start (- end start)]))
-                                 new-offset (+ replace-offset (.length close-punct))]
+          (let [[replace-offset replace-length]
+                (if (and
+                      (not= :whitespace (loc-tag l))
+                      (or
+                        (= :string (loc-tag l))
+                        (not (and
+                               (sel-match-normalized? offset length [l r])
+                               (= offset (start-offset (parse-node l)))))))
+                  [offset 0]
+                  (let [start (or (some #(when-not (#{:whitespace :comment} (loc-tag %)) (end-offset %)) (previous-leaves l)) offset)
+                        end (or (some #(when-not (#{:whitespace :comment} (loc-tag %)) (start-offset %)) (next-leaves l)) 0)]
+                    [start (- end start)]))
+                replace-text (str close-punct (subs text replace-offset (+ replace-offset replace-length)) open-punct)
+                new-offset (+ offset (.length close-punct))]
             (-> t (assoc-in [:text] (t/str-replace text replace-offset replace-length replace-text))
               (assoc-in [:offset] new-offset)
+              #_#_(assoc-in [:offset] (+ replace-offset (.length close-punct)))
+              (assoc-in [:length] replace-length)
               (update-in [:modifs] conj {:offset replace-offset :length replace-length :text replace-text})))))
       t))))
 
