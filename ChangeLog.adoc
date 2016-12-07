@@ -11,7 +11,7 @@ Laurent Petit <laurent dot petit at gmail dot com>
 
 == Counterclockwise 0.35.1
 
-`0.35.1` released on September 30, 2016
+`0.35.1` released on December 07, 2016
 
 This is the first Counterclockwise version compatible with Clojure 1.9.
 
