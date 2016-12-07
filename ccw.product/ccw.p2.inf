@@ -5,8 +5,8 @@ addRepository(type:0,location:http${#58}//updatesite.ccw-ide.org/stable/,name:Co
 addRepository(type:1,location:http${#58}//updatesite.ccw-ide.org/stable/,name:Counterclockwise);\
 addRepository(type:0,location:http${#58}//eclipse-color-theme.github.io/update/,name:Eclipse Color Theme);\
 addRepository(type:1,location:http${#58}//eclipse-color-theme.github.io/update/,name:Eclipse Color Theme);\
-addRepository(type:0,location:http${#58}//www.mihai-nita.net/eclipse/,name:Ansi Console);\
-addRepository(type:1,location:http${#58}//www.mihai-nita.net/eclipse/,name:Ansi Console);\
+addRepository(type:0,location:http${#58}//www.nodeclipse.org/updates/,name:Ansi Console);\
+addRepository(type:1,location:http${#58}//www.nodeclipse.org/updates/,name:Ansi Console);\
 addRepository(type:0,location:http${#58}//download.eclipse.org/egit/updates/,name:EGit);\
 addRepository(type:1,location:http${#58}//download.eclipse.org/egit/updates/,name:EGit);\
 addRepository(type:0,location:http${#58}//download.eclipse.org/releases/mars/,name:Eclipse Mars Release);\

@@ -98,7 +98,7 @@
                 </repository-->
                 <repository>
                         <id>ansi-econsole</id>
-                        <url>http://www.mihai-nita.net/eclipse</url>
+                        <url>http://www.nodeclipse.org/updates</url>
                         <layout>p2</layout>
                 </repository>
 
