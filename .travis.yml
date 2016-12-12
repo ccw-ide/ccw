@@ -11,9 +11,9 @@ cache:
 env:
   global:
     - DISPLAY=:99.0
-    - secure: "VK+IqyTFmEf5sv8OYOa6vLqcs0SAjC/ODklIDs0rr1zU/w21mZI2eH1w5YVk\ngwWA1QR7JOxWM6S9ED4NqHymK6QOj85W4FUv0seRv5LGJ1ATAUSzyElP0BXS\n46XsROFj9itTRwZkLdFaGGO14PRAQAznS6XM22uyQO3dg1wB4bQ="
-    - secure: "ngfDTSbLJ9suMJ+hUJws7wKbP184+Poyd09Rc3MEdpD8oq2mW8+XYi1bjmnA\n04bxqQ+hnLCdxjVqaXjp7nMB8pCHxWaraoOyU1uJJxFSNO1y1f2k09eAexA+\nLN4fXIU8HjPLvXz2u8oZITYCWKuCyAIuiFus7N9RZ+Kk/mYE0lg="
-    - secure: "YDLYUZiLuoNCRpdIMxycacPOyJkIw/lfycpEiIfoyuVQCTf0Sig/KZpjDyHj\nlU8gPqwYewp//lTyczuJIFq8IOghO3QejGaqlNGNLOmFPIsfdThMGOYn9IOJ\nkqO4enPLfxjnEAxvcKQDboUrCETjsimCvMccgIZDcvlQ6iFAdzA="
+    - secure: "gRCjuHvfWylJq95mhQxIicMW2m57vQNLX/aJFFP09qWbvczsJHVYkoppIB0DwcyE5iKCGDFC2vd5ZQmSkeDjT76cahF63zG0KO62zsSxDCigrVTWQ4v6ocwiurUJSCyH/QsDdkd7FmH6h+TQ91hz5inIM7M/3eh9/paH5U8ChHQ="
+    - secure: "UzuIHB5aLUM2Q754rbNwX/BwCW4Gmo5JKmEHPRw+lXpSadg/ldUGu+F+pSNpPuq8x8LdhA2bPSfC5HHkkx98lMuZjXFW2l9C5KglJOo3pEEkSuJZCcVbMn+85ODw6YJmdatlHDHZtKyM1cxeU9SPnpb2dqcDCCYD6kBnnmIelv8="
+    - secure: "v9Sl14WtfXsa63NZSt4zvUmiSeHhyV/hrjw+Dtb+RiGmS5xBBFj2aGNVlGs40F/pw+ZVeRSpnjMH6Uu/56uqbnRaYWL2OTHsOXuXUntJuKbUXMV1WT2d6k2i0iLsO9hXz786o2+giBlXP06RjIQh0chQ4AxYllIcXaVTd0W5fIo="
 
 install: true
 
