@@ -1,5 +1,5 @@
 = Counterclockwise Contributors
-Laurent Petit <laurent dot petit at gmail dot com>
+Laurent Petit
 :source-highlighter: coderay
 :experimental:
 :toc: left

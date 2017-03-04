@@ -1,5 +1,5 @@
 = Counterclockwise Contributors Guide
-Laurent Petit <laurent dot petit at gmail dot com>
+Laurent Petit
 :source-highlighter: coderay
 :experimental:
 :toc: left
@@ -7,7 +7,7 @@ Laurent Petit <laurent dot petit at gmail dot com>
 :toclevels: 2
 
 If you discover issues, have ideas for improvements or new features, please report them to the
-https://github.com/laurentpetit/ccw/issues[issue tracker] of the repository or submit a pull request. Please,
+https://github.com/ccw-ide/ccw/issues[issue tracker] of the repository or submit a pull request. Please,
 try to follow these guidelines when you do so.
 
 == Issue reporting
@@ -25,7 +25,7 @@ try to follow these guidelines when you do so.
 
 - Discuss the Pull Request on the mailing list to maximize the chances it will be accepted
 - Read http://gun.io/blog/how-to-github-fork-branch-and-pull-request[how to properly contribute to open source projects on Github]
-- Centralize the collected knowledge in a new issue in the https://github.com/laurentpetit/ccw/issues[issue tracker]. Mention the created issue on the mailing list thread.
+- Centralize the collected knowledge in a new issue in the https://github.com/ccw-ide/ccw/issues[issue tracker]. Mention the created issue on the mailing list thread.
 - Open a https://help.github.com/articles/using-pull-requests[pull request] that relates to *only* one subject with a clear title and description in grammatically correct, complete sentences.
 - Create and Use a topic branch off of the master branch to easily amend the pull request later, if necessary. It is OK to rebase the topic branch on top of the master branch.
 - Respect a 1-1 relation between Topic Branches and Pull Requests.
@@ -53,7 +53,7 @@ You can see the Github Flow page for a visual version of the workflow: https://g
 WARNING: The Git repository contains submodules in `ccw.core/ccw-plugins/`. you must clone with the `--recursive` option
 
 - Clone CCW Repository `with the --recursive option` (this is a submodule option, see references below for more on submodules)
-** https://github.com/laurentpetit/ccw
+** https://github.com/ccw-ide/ccw
 - In Eclipse, import the repository projects (`ccw.aggregator`, `ccw.branding`, `ccw.core`, `ccw.core.test`, `ccw.feature`, `ccw.parent`, `ccw.product`, `doc`, `paredit.clj`)
 - cd into `ccw.core` and invoke `mvn clean verify`
 ** This will install all CCW dependencies in folder `ccw.core/lib/`
@@ -73,7 +73,7 @@ The following launch configuration files automatically install themselves in the
 === Compile / Test / Package
 
 ----
-git clone https://github.com/laurentpetit/ccw
+git clone https://github.com/ccw-ide/ccw
 cd ccw
 
 # Clean + compile + unit test + integration test + build updatesite 
@@ -110,8 +110,8 @@ ccw$ script/set-version.sh 0.20.0-SNAPSHOT
 
 == Make CCW depend on a new feature
 
-- Add the new feature dependency to the product definition in file `ccw.product/ccw.product`. See https://github.com/laurentpetit/ccw/blob/v0.31.1.STABLE001/ccw.product/ccw.product#L270
-- If the new feature is not already provided by the p2 repositories known to the build, you'll need to add its repository to file `ccw.parent/pom.xml`. See https://github.com/laurentpetit/ccw/blob/v0.31.1.STABLE001/ccw.parent/pom.xml#L63
+- Add the new feature dependency to the product definition in file `ccw.product/ccw.product`. See https://github.com/ccw-ide/ccw/blob/v0.31.1.STABLE001/ccw.product/ccw.product#L270
+- If the new feature is not already provided by the p2 repositories known to the build, you'll need to add its repository to file `ccw.parent/pom.xml`. See https://github.com/ccw-ide/ccw/blob/v0.31.1.STABLE001/ccw.parent/pom.xml#L63
 
 
 == Version Release Checklist
@@ -132,7 +132,7 @@ ccw$ script/set-version.sh 0.20.0-SNAPSHOT
 ----
 - Push, let Jenkins build
 ----
-    git push laurentpetit master --tags
+    git push ccw-ide master --tags
 ----
 - Update the Eclipse Market Place
 - Update http://updatesite.ccw-ide.org/stable and beta (content.xml and artifacts.xml)

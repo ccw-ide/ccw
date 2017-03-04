@@ -1,16 +1,8 @@
 # Counterclockwise (aka CCW)
 
-[![Join the chat at https://gitter.im/laurentpetit/ccw](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/laurentpetit/ccw?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
 Counterclockwise is an Eclipse plugin helping developers write Clojure code
 
-[![Build Status](https://travis-ci.org/laurentpetit/ccw.svg?branch=master)](https://travis-ci.org/laurentpetit/ccw)
-
-You can support this project committers by donating:
-
-[![tip for next commit](http://tip4commit.com/projects/872.svg)](http://tip4commit.com/github/laurentpetit/ccw)
-
-
+[![Build Status](https://travis-ci.org/ccw-ide/ccw.svg?branch=master)](https://travis-ci.org/ccw-ide/ccw)
 
 
 ## Install: Standalone version
@@ -24,18 +16,18 @@ See documentation here: http://doc.ccw-ide.org/documentation.html#install-as-sta
 - Beta versions: http://updatesite.ccw-ide.org/beta/
 - Latests build for the master branch: http://updatesite.ccw-ide.org/branch/master/
 
-More about Counterclockwise Software Update Sites: https://github.com/laurentpetit/ccw/wiki/UpdateSites 
+More about Counterclockwise Software Update Sites: https://github.com/ccw-ide/ccw/wiki/UpdateSites 
 
 Or see documentation here: http://doc.ccw-ide.org/documentation.html#install-as-plugin
 
 
 ## Resources
 
-General information website: https://github.com/laurentpetit/ccw/wiki/GoogleCodeHome
+General information website: https://github.com/ccw-ide/ccw/wiki/GoogleCodeHome
 
 Documentation website: http://doc.ccw-ide.org/
 
-Issues tracker: https://github.com/laurentpetit/ccw/issues
+Issues tracker: https://github.com/ccw-ide/ccw/issues
 
 
 ### Install CCW development environment, build CCW with Maven

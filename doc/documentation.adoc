@@ -1,5 +1,5 @@
 = Counterclockwise User Guide
-Laurent Petit <laurent.petit@gmail.com>
+Laurent Petit
 :toc: left
 :toc-title: User Guide
 :toclevels: 2
@@ -491,7 +491,7 @@ Content in `~/.ccw/` folder is processed as such:
 
 The idea behind this layout is that users will share plugins via git repositories, and each plugin can directly be cloned into its own directory inside `~/.ccw/`.
 
-INFO: It is strongly suggested that User Plugins be available as git repositories. It then is natural to follow e.g. github organization for your user plugins inside `~/.ccw/`: create a subfolder per github user/organization and clone respective repositories in respective folders. E.G. clone https://github.com/laurentpetit/ccw-plugin-manager.git inside `~/.ccw/laurentpetit/ccw-plugin-manager/`.
+INFO: It is strongly suggested that User Plugins be available as git repositories. It then is natural to follow e.g. github organization for your user plugins inside `~/.ccw/`: create a subfolder per github user/organization and clone respective repositories in respective folders. E.G. clone https://github.com/ccw-ide/ccw-plugin-manager.git inside `~/.ccw/ccw-ide/ccw-plugin-manager/`.
 
 INFO: a User Plugin is dynamic. To remove it, just delete its folder inside `~/.ccw/`.
 

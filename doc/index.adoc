@@ -1,5 +1,5 @@
 = Counterclockwise Documentation Site
-Laurent Petit <laurent.petit@gmail.com>
+Laurent Petit
 :highlight: highlightjs
 :experimental:
 :icons: font
