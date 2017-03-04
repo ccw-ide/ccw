@@ -1,5 +1,5 @@
 = Keyboard Shortcuts
-Laurent Petit <laurent.petit@gmail.com>
+Laurent Petit
 :sectanchors:
 :sectlinks:
 :source-highlighter: coderay
