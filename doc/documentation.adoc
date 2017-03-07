@@ -1,5 +1,5 @@
 = Counterclockwise User Guide
-Laurent Petit <laurent.petit@gmail.com>
+Laurent Petit
 :toc: left
 :toc-title: User Guide
 :toclevels: 2
@@ -566,6 +566,12 @@ WARNING: the `ccw-plugin-hello-world` subdirectory will only be recognized as a 
 
 
 == Report a problem with Counterclockwise
+
+=== Mailing List
+
+Cannot find answer to your problem in the documentation?
+
+Feel free to ask the dedicated User' Google Group: http://groups.google.com/group/clojuredev-users
 
 === Activate Tracing
 

@@ -37,6 +37,8 @@ Documentation website: http://doc.ccw-ide.org/
 
 Issues tracker: https://github.com/laurentpetit/ccw/issues
 
+Mailing List: http://groups.google.com/group/clojuredev-users
+
 
 ### Install CCW development environment, build CCW with Maven
 

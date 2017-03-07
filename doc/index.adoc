@@ -1,5 +1,5 @@
 = Counterclockwise Documentation Site
-Laurent Petit <laurent.petit@gmail.com>
+Laurent Petit
 :highlight: highlightjs
 :experimental:
 :icons: font
@@ -28,3 +28,6 @@ You have Eclipse and want to install Counterclockwise as an *Eclipse plugin*, Fo
 
 *Want to contribute to the development of Counterclockwise?* Start here for link:CONTRIBUTING.html[Installing an Environment to develop Counterclockwise itself].
 
+== Mailing List
+
+Please contact other Counterclockwise Users and the developers Team on the dedicated Google Group http://groups.google.com/group/clojuredev-users[clojuredev-users]
