@@ -36,7 +36,7 @@ import ccw.TraceOptions;
 import ccw.util.SWTFontUtils;
 
 /**
- * From pull request <a href="https://github.com/laurentpetit/ccw/pull/763">#763</a>:<br/>
+ * From pull request <a href="https://github.com/ccw-ide/ccw/pull/763">#763</a>:<br/>
  * All the <code>pre</code> tags were cut in the hovers.<br/><br/>
  * I then investigated and noticed that the BrowserInformationControl calculates its width in a way that
  * does not consider that <code>pre</code> tags are monospace, therefore bigger.<br/>

@@ -6,11 +6,11 @@
       provider-name="%providerName"
       plugin="ccw.branding">
 
-   <description url="https://github.com/laurentpetit/ccw">
+   <description url="https://github.com/ccw-ide/ccw">
       %description
    </description>
 
-   <copyright url="https://github.com/laurentpetit/ccw">
+   <copyright url="https://github.com/ccw-ide/ccw">
       %copyright
    </copyright>
 

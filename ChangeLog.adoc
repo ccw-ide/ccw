@@ -1,5 +1,5 @@
 = Counterclockwise ChangeLog
-Laurent Petit <laurent dot petit at gmail dot com>
+Laurent Petit
 :sectanchors:
 :sectlinks:
 :source-highlighter: coderay
@@ -143,7 +143,7 @@ Counterclockwise now ships with some User Plugins out of the box. In this releas
 In case you have already checked out a User Plugin in you `~/.ccw/` folder, yours will always take precedence over the one embeded in Counterclockwise (as long as you've kept the same directory name).
 
 - Faster Eclipse Startup: with lots of user plugins installed, CCW used to freeze while the user plugins where launched. They are now launched in the background.
-- The keybinding cleaning function did concurrent modifications of an Eclipse Internal collection. Fix laurentpetit/ccw-plugin-manager#1
+- The keybinding cleaning function did concurrent modifications of an Eclipse Internal collection. Fix ccw-ide/ccw-plugin-manager#1
 - The keybinding cleaning function had a bug which made keybindings seem to erratically work. It has been fixed
 
 
@@ -242,7 +242,7 @@ Examples:
 ----
 
 ==== REPL
-- Added function `ccw.api.repl/show-repl` for bringing to front / optionally giving focus to a (or the last active) REPL. Demonstration of the feature for creating a new command in the [ccw-plugin-repl](https://github.com/laurentpetit/ccw-plugin-repl/) user plugin, in script file `repl-keybindings.clj`.
+- Added function `ccw.api.repl/show-repl` for bringing to front / optionally giving focus to a (or the last active) REPL. Demonstration of the feature for creating a new command in the [ccw-plugin-repl](https://github.com/ccw-ide/ccw-plugin-repl/) user plugin, in script file `repl-keybindings.clj`.
 
 
 == Counterclockwise 0.31.0
@@ -753,7 +753,7 @@ The Build Process now uses http://maven.apache.org[Maven] + http://www.eclipse.o
 
 In a nutshell:
 
-  git clone https://github.com/laurentpetit/ccw
+  git clone https://github.com/ccw-ide/ccw
   cd ccw
   mvn verify
   cd ccw.product/target/products # the products for Windows / Linux / OS X
