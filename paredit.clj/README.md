@@ -4,14 +4,14 @@ paredit in clojure, tailored for clojure
 
 # "coordinates" for build tools 
 
-##maven/ivy:
+## maven/ivy:
         <dependency>
                 <groupId>org.lpetit</groupId>
                 <artifactId>paredit.clj</artifactId>
                 <version>0.19.3</version>
         </dependency>
 
-##lein/cake:
+## lein/cake:
         [org.lpetit/paredit.clj "0.19.3"]
 
 # Dependencies
@@ -21,7 +21,7 @@ paredit in clojure, tailored for clojure
 * Parsley 0.9.2
 
 # Design notes
-##A central multimethod paredit.core/paredit, whose signature is:
+A central multimethod paredit.core/paredit, whose signature is:
 
         ([:paredit-command {:parse-tree parsetree} {:keys [:text :offset :length]})
 
@@ -43,7 +43,7 @@ and which returns:
 ** :length's value is the length of the text to replace
 ** :text's value is the text to insert
 
-##parsetree is a datastructure returned by invoking the function paredit.parser/parse on the source code:
+parsetree is a datastructure returned by invoking the function paredit.parser/parse on the source code:
 
         (paredit.parser/parse "(some source code)\n(foo :bar baz")
 
@@ -51,10 +51,10 @@ The result of paredit.parser/parse is a datastructure following clojure.core/xml
 to list children of a parsetree node. parsetree terminals are always java.lang.Strings.
 
 # Usage example
-##Require the namespace   
+## Require the namespace   
         user=>(require 'paredit.core) ; automatically requires paredit.parser as well
         nil
-##Send the source code to the parser
+## Send the source code to the parser
         user=>(def parse-tree (paredit.parser/parse "(foo bar)"))
         #'user/parse-tree
 ## "raise sexp" example        
