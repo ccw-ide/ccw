@@ -38,7 +38,7 @@ Mailing List: http://groups.google.com/group/clojuredev-users
 
 ## License
 
-Copyright © 2009-2015 Laurent Petit
+Copyright © 2009-2017 Laurent Petit
 
 Distributed under the Eclipse Public License, the same as Clojure.
 
